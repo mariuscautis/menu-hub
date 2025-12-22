@@ -13,6 +13,7 @@ export default function StockManagement() {
   const [filterCategory, setFilterCategory] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState('name') // 'name', 'stock-low', 'stock-high'
+  const [taxCategories, setTaxCategories] = useState([])
 
   // Modal states
   const [showProductModal, setShowProductModal] = useState(false)
@@ -30,7 +31,8 @@ export default function StockManagement() {
     category: 'kitchen',
     base_unit: 'grams',
     input_unit_type: 'kg',
-    units_to_base_multiplier: 1000
+    units_to_base_multiplier: 1000,
+    tax_category_id: ''
   })
 
   // Stock entry form data
@@ -152,10 +154,23 @@ export default function StockManagement() {
 
     setRestaurant(restaurantData)
 
-    // Fetch products
+    // Fetch tax categories
+    const { data: taxCatsData } = await supabase
+      .from('product_tax_categories')
+      .select('*')
+      .eq('restaurant_id', restaurantData.id)
+      .eq('is_active', true)
+      .order('name')
+
+    setTaxCategories(taxCatsData || [])
+
+    // Fetch products with tax category info
     const { data: productsData } = await supabase
       .from('stock_products')
-      .select('*')
+      .select(`
+        *,
+        product_tax_categories(id, name, rate)
+      `)
       .eq('restaurant_id', restaurantData.id)
       .order('name')
 
@@ -220,7 +235,8 @@ export default function StockManagement() {
         category: product.category,
         base_unit: product.base_unit,
         input_unit_type: product.input_unit_type,
-        units_to_base_multiplier: product.units_to_base_multiplier
+        units_to_base_multiplier: product.units_to_base_multiplier,
+        tax_category_id: product.tax_category_id || ''
       })
     } else {
       setEditingProduct(null)
@@ -230,7 +246,8 @@ export default function StockManagement() {
         category: 'kitchen',
         base_unit: 'grams',
         input_unit_type: 'kg',
-        units_to_base_multiplier: 1000
+        units_to_base_multiplier: 1000,
+        tax_category_id: ''
       })
     }
     setShowProductModal(true)
@@ -265,7 +282,8 @@ export default function StockManagement() {
       category: productForm.category,
       base_unit: productForm.base_unit,
       input_unit_type: productForm.input_unit_type,
-      units_to_base_multiplier: parseFloat(productForm.units_to_base_multiplier)
+      units_to_base_multiplier: parseFloat(productForm.units_to_base_multiplier),
+      tax_category_id: productForm.tax_category_id || null
     }
 
     if (editingProduct) {
@@ -664,6 +682,14 @@ export default function StockManagement() {
                       <span>
                         1 {product.input_unit_type} = {product.units_to_base_multiplier} {product.base_unit}
                       </span>
+                      {product.product_tax_categories && (
+                        <>
+                          <span className="text-slate-300">•</span>
+                          <span>
+                            Tax: <strong className="text-purple-600">{product.product_tax_categories.name} ({product.product_tax_categories.rate}%)</strong>
+                          </span>
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -888,6 +914,33 @@ export default function StockManagement() {
                   {['bottles', 'cans', 'units'].includes(productForm.input_unit_type) && (
                     <span className="block mt-1">
                       Example: A standard wine bottle is 750ml, so enter 750
+                    </span>
+                  )}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Product Tax Category (Optional)
+                </label>
+                <select
+                  name="tax_category_id"
+                  value={productForm.tax_category_id}
+                  onChange={handleProductFormChange}
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                >
+                  <option value="">No Tax Category</option>
+                  {taxCategories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name} ({cat.rate}%)
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-slate-500 mt-1">
+                  Assign a tax category for purchase taxes (e.g., Alcohol 20%, Sugary Products 17%)
+                  {taxCategories.length === 0 && (
+                    <span className="block mt-1 text-amber-600">
+                      No tax categories available. Create them in Settings → Product Tax.
                     </span>
                   )}
                 </p>
