@@ -214,6 +214,74 @@ export default function RotaPage() {
     style: getEventStyle(shift)
   }));
 
+  /* -------------------- Calendar Event Handlers -------------------- */
+
+  const handleSelectSlot = (slotInfo) => {
+    // When clicking on an empty slot, create a new shift
+    const newShift = {
+      date: moment(slotInfo.start).format('YYYY-MM-DD'),
+      shift_start: moment(slotInfo.start).format('HH:mm'),
+      shift_end: moment(slotInfo.end).format('HH:mm')
+    };
+    setSelectedShift(newShift);
+    setShowShiftModal(true);
+  };
+
+  const handleSelectEvent = (event) => {
+    // When clicking on an existing shift, edit it
+    setSelectedShift(event.resource);
+    setShowShiftModal(true);
+  };
+
+  const handleEventDrop = async ({ event, start, end }) => {
+    // When dragging a shift to a new time
+    try {
+      const updatedShift = {
+        id: event.resource.id,
+        date: moment(start).format('YYYY-MM-DD'),
+        shift_start: moment(start).format('HH:mm'),
+        shift_end: moment(end).format('HH:mm'),
+        restaurant_id: restaurant.id,
+        staff_id: event.resource.staff_id,
+        role_required: event.resource.role_required,
+        department: event.resource.department,
+        break_duration: event.resource.break_duration,
+        notes: event.resource.notes,
+        status: event.resource.status
+      };
+
+      const response = await fetch('/api/rota/shifts', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedShift)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update shift');
+      }
+
+      fetchShifts();
+    } catch (error) {
+      console.error('Error updating shift:', error);
+      alert(error.message);
+    }
+  };
+
+  const handleEventResize = async ({ event, start, end }) => {
+    // When resizing a shift
+    handleEventDrop({ event, start, end });
+  };
+
+  /* -------------------- Modal Handlers -------------------- */
+
+  const handleSaveShift = () => {
+    fetchShifts();
+  };
+
+  const handleDeleteShift = () => {
+    fetchShifts();
+  };
+
   /* -------------------- Render -------------------- */
 
   if (!restaurant) {
@@ -221,39 +289,170 @@ export default function RotaPage() {
   }
 
   return (
-
-      <div className="min-h-screen bg-gray-50 p-8">
-        <h1 className="text-3xl font-bold mb-6">Staff Rota & Scheduling</h1>
-
-        {/* Calendar */}
-        <div className="bg-white rounded-xl p-6" style={{ height: 700 }}>
-          {loading ? (
-            <div className="flex items-center justify-center h-full">Loading…</div>
-          ) : (
-            <DnDCalendar
-              localizer={localizer}
-              events={events}
-              startAccessor="start"
-              endAccessor="end"
-              selectable
-              resizable
-              view={selectedView}
-              onView={setSelectedView}
-              date={selectedDate}
-              onNavigate={setSelectedDate}
-              draggableAccessor={(e) =>
-                ['draft', 'published'].includes(e.resource.status)
-              }
-              eventPropGetter={(event) => ({
-                style: {
-                  ...event.style,
-                  cursor: isDragging ? 'grabbing' : 'grab'
-                }
-              })}
-            />
-          )}
+    <div className="min-h-screen bg-gray-50 p-8">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-800">Staff Rota & Scheduling</h1>
+          <p className="text-slate-600 mt-1">Manage shifts and staff schedules</p>
+        </div>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setShowTemplatesModal(true)}
+            className="px-5 py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-xl hover:border-[#6262bd] transition-colors font-medium"
+          >
+            📋 Templates
+          </button>
+          <button
+            onClick={() => setShowRequestsModal(true)}
+            className="px-5 py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-xl hover:border-[#6262bd] transition-colors font-medium"
+          >
+            📨 Requests
+          </button>
+          <button
+            onClick={() => setShowCurrentlyWorkingModal(true)}
+            className="px-5 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors font-medium"
+          >
+            👥 Currently Working
+          </button>
+          <button
+            onClick={() => {
+              setSelectedShift(null);
+              setShowShiftModal(true);
+            }}
+            className="px-5 py-2.5 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252a5] transition-colors font-medium"
+          >
+            ➕ Create Shift
+          </button>
         </div>
       </div>
 
+      {/* Filters */}
+      <div className="mb-6 flex gap-3">
+        <select
+          value={filters.department}
+          onChange={(e) => setFilters({ ...filters, department: e.target.value })}
+          className="px-4 py-2 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white"
+        >
+          <option value="">All Departments</option>
+          {departments.map(dept => (
+            <option key={dept} value={dept}>{dept.charAt(0).toUpperCase() + dept.slice(1)}</option>
+          ))}
+        </select>
+
+        <select
+          value={filters.status}
+          onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+          className="px-4 py-2 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white"
+        >
+          <option value="">All Statuses</option>
+          <option value="draft">Draft</option>
+          <option value="published">Published</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+
+        <select
+          value={filters.staff_id}
+          onChange={(e) => setFilters({ ...filters, staff_id: e.target.value })}
+          className="px-4 py-2 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white"
+        >
+          <option value="">All Staff</option>
+          {staff.map(s => (
+            <option key={s.id} value={s.id}>{s.name}</option>
+          ))}
+        </select>
+
+        {(filters.department || filters.status || filters.staff_id) && (
+          <button
+            onClick={() => setFilters({ department: '', status: '', staff_id: '' })}
+            className="px-4 py-2 text-slate-600 hover:text-[#6262bd] font-medium"
+          >
+            Clear Filters
+          </button>
+        )}
+      </div>
+
+      {/* Calendar */}
+      <div className="bg-white rounded-xl p-6 shadow-sm" style={{ height: 700 }}>
+        {loading ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6262bd] mx-auto mb-4"></div>
+              <p className="text-slate-600">Loading shifts...</p>
+            </div>
+          </div>
+        ) : (
+          <DnDCalendar
+            localizer={localizer}
+            events={events}
+            startAccessor="start"
+            endAccessor="end"
+            selectable
+            resizable
+            view={selectedView}
+            onView={setSelectedView}
+            date={selectedDate}
+            onNavigate={setSelectedDate}
+            onSelectSlot={handleSelectSlot}
+            onSelectEvent={handleSelectEvent}
+            onEventDrop={handleEventDrop}
+            onEventResize={handleEventResize}
+            onDragStart={() => setIsDragging(true)}
+            onDragOver={() => setIsDragging(false)}
+            draggableAccessor={(e) =>
+              ['draft', 'published'].includes(e.resource.status)
+            }
+            eventPropGetter={(event) => ({
+              style: {
+                ...event.style,
+                cursor: isDragging ? 'grabbing' : 'grab'
+              }
+            })}
+          />
+        )}
+      </div>
+
+      {/* Modals */}
+      {showShiftModal && (
+        <ShiftModal
+          shift={selectedShift}
+          staff={staff}
+          restaurant={restaurant}
+          departments={departments}
+          onClose={() => {
+            setShowShiftModal(false);
+            setSelectedShift(null);
+          }}
+          onSave={handleSaveShift}
+          onDelete={handleDeleteShift}
+        />
+      )}
+
+      {showRequestsModal && (
+        <RequestsModal
+          restaurant={restaurant}
+          staff={staff}
+          onClose={() => setShowRequestsModal(false)}
+        />
+      )}
+
+      {showTemplatesModal && (
+        <TemplatesModal
+          restaurant={restaurant}
+          staff={staff}
+          departments={departments}
+          onClose={() => setShowTemplatesModal(false)}
+          onApplyTemplate={fetchShifts}
+        />
+      )}
+
+      {showCurrentlyWorkingModal && (
+        <CurrentlyWorkingModal
+          restaurant={restaurant}
+          onClose={() => setShowCurrentlyWorkingModal(false)}
+        />
+      )}
+    </div>
   );
 }
