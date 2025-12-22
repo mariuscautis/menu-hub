@@ -348,6 +348,19 @@ export default function ClockInOut({ staff, restaurant }) {
     return timeString.substring(0, 5);
   };
 
+  const formatDateTime = (isoString) => {
+    if (!isoString) return '';
+    const date = new Date(isoString);
+    return date.toLocaleString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+  };
+
   const calculateDuration = (start, end) => {
     if (!start) return '0h 0m';
     const startTime = new Date(start);
@@ -430,7 +443,7 @@ export default function ClockInOut({ staff, restaurant }) {
               <div>
                 <p className="text-sm font-medium text-green-800">Clocked In</p>
                 <p className="text-lg font-bold text-green-900">
-                  {formatTime(currentAttendance.clock_in)}
+                  {formatDateTime(currentAttendance.clock_in)}
                 </p>
               </div>
               <div className="text-right">
@@ -445,7 +458,7 @@ export default function ClockInOut({ staff, restaurant }) {
               <div className="mt-3 pt-3 border-t border-green-200">
                 <p className="text-sm font-medium text-green-800 mb-1">On Break</p>
                 <p className="text-sm text-green-700">
-                  Started: {formatTime(currentAttendance.break_start)}
+                  Started: {formatDateTime(currentAttendance.break_start)}
                 </p>
                 <p className="text-sm text-green-700">
                   Duration: {calculateDuration(currentAttendance.break_start, null)}
