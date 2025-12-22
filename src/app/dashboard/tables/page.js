@@ -1,0 +1,2432 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { supabase } from '@/lib/supabase'
+import QRCode from 'qrcode'
+import InvoiceClientModal from '@/components/invoices/InvoiceClientModal'
+
+export default function Tables() {
+  const [tables, setTables] = useState([])
+  const [restaurant, setRestaurant] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [showModal, setShowModal] = useState(false)
+  const [showOrderModal, setShowOrderModal] = useState(false)
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const [showOrderDetailsModal, setShowOrderDetailsModal] = useState(false)
+  const [selectedTable, setSelectedTable] = useState(null)
+  const [tableOrderDetails, setTableOrderDetails] = useState([])
+  const [newTableNumber, setNewTableNumber] = useState('')
+  const [menuItems, setMenuItems] = useState([])
+  const [categories, setCategories] = useState([])
+  const [currentOrder, setCurrentOrder] = useState(null)
+  const [orderItems, setOrderItems] = useState([])
+  const [unpaidOrders, setUnpaidOrders] = useState([])
+  const [currentUser, setCurrentUser] = useState(null)
+  const [tableOrderInfo, setTableOrderInfo] = useState({})
+  const [userType, setUserType] = useState(null) // 'owner' or 'staff'
+  const [staffDepartment, setStaffDepartment] = useState(null) // 'kitchen', 'bar', 'universal', or null for owners
+  const [notification, setNotification] = useState(null) // { type: 'success'|'error'|'info', message: string }
+
+  // Reservations state
+  const [todayReservations, setTodayReservations] = useState({})
+  const [showReservationsModal, setShowReservationsModal] = useState(false)
+  const [showCreateReservationModal, setShowCreateReservationModal] = useState(false)
+  const [selectedTableReservations, setSelectedTableReservations] = useState([])
+  const [reservationForm, setReservationForm] = useState({
+    date: new Date().toISOString().split('T')[0],
+    time: '19:00',
+    partySize: 2,
+    customerName: '',
+    customerEmail: '',
+    customerPhone: '',
+    specialRequests: ''
+  })
+
+  // Waiter calls state
+  const [waiterCalls, setWaiterCalls] = useState({})
+
+  // Cancellation modal state
+  const [showCancelModal, setShowCancelModal] = useState(false)
+  const [reservationToCancel, setReservationToCancel] = useState(null)
+  const [cancelReasonType, setCancelReasonType] = useState('no_show')
+  const [customCancelReason, setCustomCancelReason] = useState('')
+
+  // Invoice modal state
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false)
+  const [invoiceTableId, setInvoiceTableId] = useState(null)
+  const [invoiceOrderId, setInvoiceOrderId] = useState(null)
+  const [generatingInvoice, setGeneratingInvoice] = useState(false)
+
+  // Post-payment modal state
+  const [showPostPaymentModal, setShowPostPaymentModal] = useState(false)
+  const [completedOrderIds, setCompletedOrderIds] = useState([])
+
+  // Show notification helper
+  const showNotification = (type, message) => {
+    setNotification({ type, message })
+    setTimeout(() => setNotification(null), 4000) // Auto-dismiss after 4 seconds
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  // Debug: Log when orderItems changes to detect duplicates
+  useEffect(() => {
+    console.log('>>>>> orderItems changed. Count:', orderItems.length)
+    if (orderItems.length > 0) {
+      console.log('>>>>> Current orderItems:', orderItems.map(i => `${i.name} (x${i.quantity})`))
+      const itemIds = orderItems.map(item => item.menu_item_id)
+      const uniqueIds = new Set(itemIds)
+      if (itemIds.length !== uniqueIds.size) {
+        console.error('🚨🚨🚨 DUPLICATE DETECTED IN ORDER ITEMS! 🚨🚨🚨')
+        console.error('Total items:', itemIds.length, 'Unique items:', uniqueIds.size)
+        console.error('Full orderItems array:', orderItems)
+
+        // Show which items are duplicated
+        const duplicates = itemIds.filter((id, index) => itemIds.indexOf(id) !== index)
+        console.error('Duplicated menu_item_ids:', [...new Set(duplicates)])
+      }
+    }
+  }, [orderItems])
+
+  // Real-time subscriptions for live order updates
+  useEffect(() => {
+    if (!restaurant) return
+
+    const restaurantId = restaurant.id
+
+    // Subscribe to order changes to update table badges
+    const ordersChannel = supabase
+      .channel(`orders-realtime-tables-${Date.now()}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'orders',
+          filter: `restaurant_id=eq.${restaurantId}`
+        },
+        (payload) => {
+          console.log('Tables page - Order changed:', payload)
+          // Small delay to ensure database has committed the changes
+          setTimeout(() => {
+            console.log('Tables page - Fetching updated table order info')
+            fetchTableOrderInfo(restaurantId)
+          }, 100)
+        }
+      )
+      .subscribe()
+
+    // Subscribe to order_items changes (when items are added to orders)
+    const orderItemsChannel = supabase
+      .channel(`order-items-realtime-tables-${Date.now()}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'order_items'
+        },
+        (payload) => {
+          console.log('Tables page - Order item added:', payload)
+          // Refetch when new items are added to orders
+          setTimeout(() => {
+            fetchTableOrderInfo(restaurantId)
+          }, 100)
+        }
+      )
+      .subscribe()
+
+    // Subscribe to table changes (status updates, cleaning, etc.)
+    const tablesChannel = supabase
+      .channel(`tables-realtime-${Date.now()}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'tables',
+          filter: `restaurant_id=eq.${restaurantId}`
+        },
+        (payload) => {
+          console.log('Tables page - Table updated:', payload)
+          // Refetch table data when any table is updated (status, cleaning, etc.)
+          setTimeout(() => {
+            fetchData()
+          }, 100)
+        }
+      )
+      .subscribe()
+
+    // Subscribe to reservation changes (for today's reservations indicators)
+    const reservationsChannel = supabase
+      .channel(`reservations-tables-realtime-${Date.now()}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'reservations',
+          filter: `restaurant_id=eq.${restaurantId}`
+        },
+        (payload) => {
+          console.log('Tables page - Reservation changed:', payload)
+          // Refetch today's reservations when any reservation changes
+          setTimeout(() => {
+            console.log('Tables page - Refetching today\'s reservations')
+            fetchTodayReservations(restaurantId)
+          }, 100)
+        }
+      )
+      .subscribe((status) => {
+        console.log('Tables page reservations subscription status:', status)
+      })
+
+    // Subscribe to waiter calls (for real-time waiter call notifications)
+    const waiterCallsChannel = supabase
+      .channel(`waiter-calls-realtime-${Date.now()}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'waiter_calls',
+          filter: `restaurant_id=eq.${restaurantId}`
+        },
+        (payload) => {
+          console.log('Tables page - Waiter call changed:', payload)
+          // Refetch waiter calls
+          setTimeout(() => {
+            fetchWaiterCalls(restaurantId)
+          }, 100)
+        }
+      )
+      .subscribe((status) => {
+        console.log('Tables page waiter calls subscription status:', status)
+      })
+
+    return () => {
+      supabase.removeChannel(ordersChannel)
+      supabase.removeChannel(orderItemsChannel)
+      supabase.removeChannel(tablesChannel)
+      supabase.removeChannel(reservationsChannel)
+      supabase.removeChannel(waiterCallsChannel)
+    }
+  }, [restaurant])
+
+  const fetchData = async () => {
+    let restaurantData = null
+    let userTypeData = null
+    let user = null
+
+    // Check for staff session first (PIN-based login)
+    const staffSessionData = localStorage.getItem('staff_session')
+    if (staffSessionData) {
+      try {
+        const staffSession = JSON.parse(staffSessionData)
+        restaurantData = staffSession.restaurant
+        userTypeData = staffSession.role === 'admin' ? 'owner' : 'staff'
+        setUserType(userTypeData)
+        setStaffDepartment(staffSession.department || 'universal')
+        // Create a pseudo user object for compatibility
+        user = { id: staffSession.id, email: staffSession.email }
+        setCurrentUser(user)
+      } catch (err) {
+        console.error('Error parsing staff session:', err)
+        localStorage.removeItem('staff_session')
+      }
+    }
+
+    // If not staff session, check for owner auth session
+    if (!restaurantData) {
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+      if (!authUser) {
+        setLoading(false)
+        return
+      }
+
+      user = authUser
+      setCurrentUser(user)
+
+      // Check if owner
+      const { data: ownedRestaurant } = await supabase
+        .from('restaurants')
+        .select('*')
+        .eq('owner_id', user.id)
+        .maybeSingle()
+
+      if (ownedRestaurant) {
+        restaurantData = ownedRestaurant
+        userTypeData = 'owner'
+        setUserType(userTypeData)
+        setStaffDepartment(null) // Owners see all
+      } else {
+        // Check if staff by user_id (preferred) or email (fallback)
+        const { data: staffRecords } = await supabase
+          .from('staff')
+          .select('*, restaurants(*)')
+          .or(`user_id.eq.${user.id},email.eq.${user.email}`)
+          .eq('status', 'active')
+
+        const staffRecord = staffRecords && staffRecords.length > 0 ? staffRecords[0] : null
+
+        if (staffRecord && staffRecord.restaurants) {
+          restaurantData = staffRecord.restaurants
+          userTypeData = 'staff'
+          setUserType(userTypeData)
+          setStaffDepartment(staffRecord.department || 'universal')
+        }
+      }
+    }
+
+    if (!restaurantData) {
+      setLoading(false)
+      return
+    }
+
+    setRestaurant(restaurantData)
+
+    const { data: tablesData } = await supabase
+      .from('tables')
+      .select('*')
+      .eq('restaurant_id', restaurantData.id)
+      .order('table_number')
+
+    setTables(tablesData || [])
+
+    // Fetch menu items for order placement (only in-stock items)
+    const { data: items, error: itemsError } = await supabase
+      .rpc('get_available_menu_items', { p_restaurant_id: restaurantData.id })
+
+    const { data: cats, error: catsError } = await supabase
+      .from('menu_categories')
+      .select('*')
+      .eq('restaurant_id', restaurantData.id)
+      .order('sort_order')
+
+    if (itemsError) {
+      console.error('Menu items error:', itemsError)
+      // Fallback to regular query if RPC fails
+      const { data: fallbackItems } = await supabase
+        .from('menu_items')
+        .select('*')
+        .eq('restaurant_id', restaurantData.id)
+        .eq('available', true)
+        .order('sort_order')
+      setMenuItems(fallbackItems || [])
+    } else {
+      console.log('Menu items loaded (in stock only):', items)
+      setMenuItems(items || [])
+    }
+
+    if (catsError) console.error('Categories error:', catsError)
+    console.log('Categories loaded:', cats)
+
+    setCategories(cats || [])
+
+    // Fetch unpaid order info for all tables
+    await fetchTableOrderInfo(restaurantData.id)
+
+    // Fetch today's reservations for all tables
+    await fetchTodayReservations(restaurantData.id)
+
+    // Fetch pending waiter calls for all tables
+    await fetchWaiterCalls(restaurantData.id)
+
+    setLoading(false)
+  }
+
+  const fetchTableOrderInfo = async (restaurantId) => {
+    // Get all unpaid, non-cancelled orders grouped by table
+    const { data: orders } = await supabase
+      .from('orders')
+      .select('table_id, total, status')
+      .eq('restaurant_id', restaurantId)
+      .eq('paid', false)
+      .neq('status', 'cancelled')
+
+    // Group by table and calculate totals
+    const orderInfo = {}
+    orders?.forEach(order => {
+      if (!orderInfo[order.table_id]) {
+        orderInfo[order.table_id] = {
+          count: 0,
+          total: 0
+        }
+      }
+      orderInfo[order.table_id].count += 1
+      orderInfo[order.table_id].total += order.total || 0
+    })
+
+    setTableOrderInfo(orderInfo)
+  }
+
+  const fetchTodayReservations = async (restaurantId) => {
+    const today = new Date().toISOString().split('T')[0]
+
+    // Get all confirmed reservations for today grouped by table
+    const { data: reservations } = await supabase
+      .from('reservations')
+      .select('*, tables(table_number)')
+      .eq('restaurant_id', restaurantId)
+      .eq('reservation_date', today)
+      .eq('status', 'confirmed')
+      .not('table_id', 'is', null)
+      .order('reservation_time')
+
+    // Group by table_id
+    const reservationsByTable = {}
+    reservations?.forEach(reservation => {
+      if (!reservationsByTable[reservation.table_id]) {
+        reservationsByTable[reservation.table_id] = []
+      }
+      reservationsByTable[reservation.table_id].push(reservation)
+    })
+
+    setTodayReservations(reservationsByTable)
+  }
+
+  const fetchWaiterCalls = async (restaurantId) => {
+    console.log('Fetching waiter calls for restaurant:', restaurantId)
+
+    // Get all pending waiter calls grouped by table
+    const { data: calls, error } = await supabase
+      .from('waiter_calls')
+      .select('*')
+      .eq('restaurant_id', restaurantId)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Error fetching waiter calls:', error)
+      return
+    }
+
+    console.log('Waiter calls fetched:', calls)
+
+    // Group by table_id
+    const callsByTable = {}
+    calls?.forEach(call => {
+      if (!callsByTable[call.table_id]) {
+        callsByTable[call.table_id] = []
+      }
+      callsByTable[call.table_id].push(call)
+    })
+
+    console.log('Waiter calls by table:', callsByTable)
+    setWaiterCalls(callsByTable)
+  }
+
+  const acknowledgeWaiterCall = async (callId) => {
+    console.log('Acknowledging waiter call:', callId)
+
+    // Get current staff info
+    let acknowledgedByName = 'Staff'
+    let acknowledgedByStaffId = null
+
+    const staffSessionData = localStorage.getItem('staff_session')
+    if (staffSessionData) {
+      try {
+        const staffSession = JSON.parse(staffSessionData)
+        acknowledgedByName = staffSession.name || staffSession.email || 'Staff'
+        acknowledgedByStaffId = staffSession.id || null
+      } catch (err) {
+        console.error('Error parsing staff session:', err)
+      }
+    } else if (currentUser) {
+      acknowledgedByName = currentUser.email || 'Manager'
+    }
+
+    const { error } = await supabase
+      .from('waiter_calls')
+      .update({
+        status: 'completed',
+        completed_at: new Date().toISOString(),
+        acknowledged_by_name: acknowledgedByName,
+        acknowledged_by_staff_id: acknowledgedByStaffId
+      })
+      .eq('id', callId)
+
+    if (error) {
+      console.error('Failed to acknowledge waiter call:', error)
+      showNotification('error', 'Failed to acknowledge waiter call')
+    } else {
+      console.log('Waiter call acknowledged successfully by:', acknowledgedByName)
+      showNotification('success', 'Waiter call acknowledged')
+      // The real-time subscription should handle the update, but let's trigger a manual refetch just in case
+      if (restaurant) {
+        setTimeout(() => fetchWaiterCalls(restaurant.id), 100)
+      }
+    }
+  }
+
+  const openViewReservationsModal = (table) => {
+    const reservations = todayReservations[table.id] || []
+    setSelectedTableReservations(reservations)
+    setSelectedTable(table)
+    setShowReservationsModal(true)
+  }
+
+  const openCreateReservationModal = (table) => {
+    setSelectedTable(table)
+    setReservationForm({
+      date: new Date().toISOString().split('T')[0],
+      time: '19:00',
+      partySize: 2,
+      customerName: '',
+      customerEmail: '',
+      customerPhone: '',
+      specialRequests: ''
+    })
+    setShowCreateReservationModal(true)
+  }
+
+  const submitReservation = async (e) => {
+    e.preventDefault()
+
+    try {
+      const { data, error } = await supabase
+        .from('reservations')
+        .insert({
+          restaurant_id: restaurant.id,
+          table_id: selectedTable.id,
+          customer_name: reservationForm.customerName,
+          customer_email: reservationForm.customerEmail,
+          customer_phone: reservationForm.customerPhone,
+          party_size: reservationForm.partySize,
+          reservation_date: reservationForm.date,
+          reservation_time: reservationForm.time,
+          special_requests: reservationForm.specialRequests,
+          status: 'confirmed', // Staff-created reservations are auto-confirmed
+          confirmed_by_staff_name: currentUser?.email || 'Staff',
+          confirmed_at: new Date().toISOString()
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+
+      // Send confirmation email to customer (non-blocking)
+      fetch('/api/reservations/send-confirmation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reservationId: data.id,
+          isConfirmation: true
+        })
+      }).catch(err => console.error('Email error:', err))
+
+      setShowCreateReservationModal(false)
+      setSelectedTable(null)
+      showNotification('success', 'Reservation created successfully!')
+
+      // Refresh today's reservations
+      await fetchTodayReservations(restaurant.id)
+    } catch (error) {
+      console.error('Error creating reservation:', error)
+      showNotification('error', 'Failed to create reservation. Please try again.')
+    }
+  }
+
+  const addTable = async (e) => {
+    e.preventDefault()
+    if (!newTableNumber.trim()) return
+
+    const { error } = await supabase.from('tables').insert({
+      restaurant_id: restaurant.id,
+      table_number: newTableNumber.trim()
+    })
+
+    if (!error) {
+      setNewTableNumber('')
+      setShowModal(false)
+      fetchData()
+    }
+  }
+
+  const deleteTable = async (id) => {
+    if (!confirm('Are you sure you want to delete this table?')) return
+
+    await supabase.from('tables').delete().eq('id', id)
+    fetchData()
+  }
+
+  const generateQRCode = async (table) => {
+    const url = `${window.location.origin}/${restaurant.slug}/table/${table.id}`
+
+    try {
+      const qrDataUrl = await QRCode.toDataURL(url, {
+        width: 300,
+        margin: 2,
+        color: {
+          dark: '#6262bd',
+          light: '#ffffff'
+        }
+      })
+      return qrDataUrl
+    } catch (err) {
+      console.error('QR generation error:', err)
+      return null
+    }
+  }
+
+  const downloadQR = async (table) => {
+    const qrDataUrl = await generateQRCode(table)
+    if (!qrDataUrl) return
+
+    const link = document.createElement('a')
+    link.download = `table-${table.table_number}-qr.png`
+    link.href = qrDataUrl
+    link.click()
+  }
+
+  const downloadAllQR = async () => {
+    for (const table of tables) {
+      await downloadQR(table)
+      await new Promise(resolve => setTimeout(resolve, 500))
+    }
+  }
+
+  const openOrderModal = async (table) => {
+    console.log('========== OPENING ORDER MODAL ==========')
+    console.log('Table:', table.table_number)
+
+    // IMPORTANT: Clear state FIRST to prevent duplicates from previous modal opens
+    console.log('STEP 1: Clearing ALL state completely')
+    setOrderItems([])
+    setCurrentOrder(null)
+    setSelectedTable(null)
+
+    // Small delay to ensure React has processed the state clears
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    console.log('STEP 2: Setting selected table')
+    setSelectedTable(table)
+
+    // Check if there's an existing open order for this table that is not completed and not paid
+    console.log('STEP 3: Fetching existing order from database...')
+    const { data: existingOrder } = await supabase
+      .from('orders')
+      .select('*, order_items(*)')
+      .eq('table_id', table.id)
+      .in('status', ['pending', 'preparing'])
+      .is('paid', false)
+      .maybeSingle()
+
+    console.log('STEP 4: Existing order found?', !!existingOrder)
+    if (existingOrder) {
+      console.log('Existing order ID:', existingOrder.id)
+      console.log('Raw order_items from DB:', existingOrder.order_items)
+
+      setCurrentOrder(existingOrder)
+      // Consolidate existing order items (in case there are duplicates in DB)
+      const itemsMap = {}
+      existingOrder.order_items?.forEach(item => {
+        if (itemsMap[item.menu_item_id]) {
+          // If duplicate exists, sum quantities
+          console.warn('DUPLICATE FOUND IN DB:', item.menu_item_id, item.name)
+          itemsMap[item.menu_item_id].quantity += item.quantity
+          itemsMap[item.menu_item_id].existingQuantity += item.quantity
+        } else {
+          // New item
+          itemsMap[item.menu_item_id] = {
+            menu_item_id: item.menu_item_id,
+            name: item.name,
+            price_at_time: item.price_at_time,
+            quantity: item.quantity,
+            isExisting: true,
+            existingQuantity: item.quantity
+          }
+        }
+      })
+      const normalizedItems = Object.values(itemsMap)
+      console.log('STEP 5: Setting orderItems to:', normalizedItems.length, 'items')
+      console.log('Items:', normalizedItems.map(i => `${i.name} x${i.quantity}`))
+      setOrderItems(normalizedItems)
+    } else {
+      console.log('STEP 5: No existing order - confirmed empty orderItems')
+      setCurrentOrder(null)
+      setOrderItems([])
+    }
+
+    console.log('STEP 6: Opening modal')
+    setShowOrderModal(true)
+    console.log('========== MODAL OPEN COMPLETE ==========')
+  }
+
+  const openPaymentModal = async (table) => {
+    setSelectedTable(table)
+
+    // Get all unpaid, non-cancelled orders for this table
+    const { data: orders } = await supabase
+      .from('orders')
+      .select('*, order_items(*)')
+      .eq('table_id', table.id)
+      .is('paid', false)
+      .neq('status', 'cancelled')
+      .order('created_at', { ascending: true })
+
+    setUnpaidOrders(orders || [])
+    setShowPaymentModal(true)
+  }
+
+  const openOrderDetailsModal = async (table) => {
+    setSelectedTable(table)
+
+    // Get all unpaid, non-cancelled orders for this table
+    const { data: orders } = await supabase
+      .from('orders')
+      .select('*, order_items(*)')
+      .eq('table_id', table.id)
+      .is('paid', false)
+      .neq('status', 'cancelled')
+      .order('created_at', { ascending: true })
+
+    setTableOrderDetails(orders || [])
+    setShowOrderDetailsModal(true)
+  }
+
+  const markTableAsCleaned = async (table) => {
+    try {
+      // Call the RPC function to mark table as cleaned
+      // This function has SECURITY DEFINER so it works for staff too
+      const { data, error } = await supabase
+        .rpc('mark_table_cleaned', {
+          p_table_id: table.id,
+          p_payment_completed_at: table.payment_completed_at
+        })
+
+      if (error) throw error
+
+      if (data && !data.success) {
+        throw new Error(data.error || 'Failed to mark table as cleaned')
+      }
+
+      // Refresh table list
+      await fetchData()
+
+      const cleanupTime = data?.cleanup_duration_minutes
+      const message = cleanupTime
+        ? `Table ${table.table_number} marked as cleaned! Cleanup took ${cleanupTime} minutes.`
+        : `Table ${table.table_number} marked as cleaned and ready!`
+
+      showNotification('success', message)
+    } catch (error) {
+      console.error('Error marking table as cleaned:', error)
+      showNotification('error', 'Failed to mark table as cleaned. Please try again.')
+    }
+  }
+
+  const processPayment = async (paymentMethod) => {
+    if (unpaidOrders.length === 0) return
+
+    try {
+      // Get user info for payment tracking
+      let userName = 'Unknown'
+      let userId = null
+
+      // Check if staff session (PIN login)
+      const staffSessionData = localStorage.getItem('staff_session')
+      if (staffSessionData) {
+        const staffSession = JSON.parse(staffSessionData)
+        userName = staffSession.name || staffSession.email || 'Staff'
+        // Don't set userId for staff (they don't have a Supabase Auth user)
+      } else {
+        // Owner/admin with Supabase Auth
+        const { data: userData } = await supabase.auth.getUser()
+        userName = userData.user?.user_metadata?.name || userData.user?.email || 'Unknown'
+        userId = userData.user?.id || null
+      }
+
+      // Get order IDs
+      const orderIds = unpaidOrders.map(order => order.id)
+      const totalAmount = calculateTableTotal()
+
+      // Use RPC function to process payment (bypasses RLS)
+      // This function also marks the table as needs cleaning
+      const { data, error } = await supabase.rpc('process_table_payment', {
+        p_order_ids: orderIds,
+        p_payment_method: paymentMethod,
+        p_staff_name: userName,
+        p_user_id: userId
+      })
+
+      if (error) throw error
+
+      if (data && !data.success) {
+        throw new Error(data.error || 'Failed to process payment')
+      }
+
+      // Close payment modal
+      setShowPaymentModal(false)
+
+      // Store completed order IDs for invoice generation
+      setCompletedOrderIds(orderIds)
+
+      // Refresh table order info and table list
+      await fetchTableOrderInfo(restaurant.id)
+      await fetchData()
+
+      showNotification('success', `Payment of £${totalAmount.toFixed(2)} processed successfully via ${paymentMethod}!`)
+
+      // Show post-payment modal (with invoice option)
+      setShowPostPaymentModal(true)
+    } catch (error) {
+      console.error('Payment error:', error)
+      showNotification('error', 'Failed to process payment. Please try again.')
+    }
+  }
+
+  const calculateTableTotal = () => {
+    return unpaidOrders.reduce((sum, order) => sum + (order.total || 0), 0)
+  }
+
+  const openInvoiceModal = (orderId = null, tableId = null) => {
+    setInvoiceOrderId(orderId)
+    setInvoiceTableId(tableId)
+    setShowInvoiceModal(true)
+  }
+
+  const handleInvoiceGeneration = async ({ clientId, clientData, action }) => {
+    setGeneratingInvoice(true)
+
+    try {
+      let orderId = invoiceOrderId
+
+      // If no specific order ID, find the most recent paid order for this table
+      if (!orderId && invoiceTableId) {
+        const { data: orders, error: ordersError } = await supabase
+          .from('orders')
+          .select('*')
+          .eq('table_id', invoiceTableId)
+          .eq('paid', true)
+          .order('created_at', { ascending: false })
+          .limit(1)
+
+        if (ordersError) throw ordersError
+
+        if (!orders || orders.length === 0) {
+          showNotification('error', 'No paid orders found for this table')
+          setGeneratingInvoice(false)
+          return
+        }
+
+        orderId = orders[0].id
+      }
+
+      if (!orderId) {
+        showNotification('error', 'No order ID specified')
+        setGeneratingInvoice(false)
+        return
+      }
+
+      if (action === 'email') {
+        // Send invoice via email
+        const response = await fetch('/api/invoices/email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orderId: orderId,
+            clientId,
+            clientData
+          })
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+          throw new Error(errorData.error || `Failed to send invoice email (${response.status})`)
+        }
+
+        const result = await response.json()
+
+        // Close modals and show success
+        setShowInvoiceModal(false)
+        setShowPostPaymentModal(false)
+        setInvoiceTableId(null)
+        setInvoiceOrderId(null)
+        setSelectedTable(null)
+        setUnpaidOrders([])
+        setCompletedOrderIds([])
+        showNotification('success', `Invoice emailed successfully to ${clientData.email}!`)
+      } else {
+        // Download invoice as PDF
+        const response = await fetch('/api/invoices/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orderId: orderId,
+            clientId,
+            clientData
+          })
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+          throw new Error(errorData.error || `Failed to generate invoice (${response.status})`)
+        }
+
+        // Download the PDF
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+
+        // Extract filename from content-disposition header if available
+        const contentDisposition = response.headers.get('content-disposition')
+        let filename = 'invoice.pdf'
+        if (contentDisposition) {
+          const filenameMatch = contentDisposition.match(/filename="(.+)"/)
+          if (filenameMatch) {
+            filename = filenameMatch[1]
+          }
+        }
+
+        a.download = filename
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+
+        // Close modals and show success
+        setShowInvoiceModal(false)
+        setShowPostPaymentModal(false)
+        setInvoiceTableId(null)
+        setInvoiceOrderId(null)
+        setSelectedTable(null)
+        setUnpaidOrders([])
+        setCompletedOrderIds([])
+        showNotification('success', 'Invoice generated and downloaded successfully!')
+      }
+    } catch (error) {
+      console.error('Invoice generation error:', error)
+      showNotification('error', error.message || 'Failed to generate invoice')
+    } finally {
+      setGeneratingInvoice(false)
+    }
+  }
+
+  const addItemToOrder = (item) => {
+    console.log('===== ADD ITEM TO ORDER =====')
+    console.log('Item to add:', item.name, 'ID:', item.id)
+
+    setOrderItems(prevItems => {
+      console.log('Current orderItems before add:', prevItems.length)
+      console.log('Current items:', prevItems.map(i => `${i.name} x${i.quantity} (ID: ${i.menu_item_id})`))
+
+      // Check for existing item
+      const existingItemIndex = prevItems.findIndex(oi => oi.menu_item_id === item.id)
+      console.log('Existing item index:', existingItemIndex)
+
+      if (existingItemIndex !== -1) {
+        // Update existing item's quantity
+        console.log('Item already exists, incrementing quantity from', prevItems[existingItemIndex].quantity, 'to', prevItems[existingItemIndex].quantity + 1)
+        const updated = [...prevItems]
+        updated[existingItemIndex] = {
+          ...updated[existingItemIndex],
+          quantity: updated[existingItemIndex].quantity + 1
+        }
+        console.log('After update, total items:', updated.length)
+        return updated
+      } else {
+        // Add new item
+        console.log('Adding new item with quantity 1')
+        const newItem = {
+          menu_item_id: item.id,
+          name: item.name,
+          price_at_time: item.price,
+          quantity: 1,
+          isExisting: false,
+          existingQuantity: 0
+        }
+        const newItems = [...prevItems, newItem]
+        console.log('After add, total items:', newItems.length)
+        return newItems
+      }
+    })
+    console.log('===== ADD ITEM COMPLETE =====')
+  }
+
+  const updateItemQuantity = (menuItemId, newQuantity) => {
+    setOrderItems(prevItems => {
+      const itemIndex = prevItems.findIndex(oi => oi.menu_item_id === menuItemId)
+
+      if (itemIndex === -1) return prevItems
+
+      const item = prevItems[itemIndex]
+
+      // For staff: cannot reduce below existing quantity
+      if (userType === 'staff' && item.isExisting && newQuantity < item.existingQuantity) {
+        showNotification('error', `Staff cannot reduce existing items below ${item.existingQuantity}. Only owners can modify placed items.`)
+        return prevItems
+      }
+
+      // For staff: cannot delete existing items
+      if (userType === 'staff' && item.isExisting && newQuantity === 0) {
+        showNotification('error', 'Staff cannot remove items that were already placed. Only owners can do this.')
+        return prevItems
+      }
+
+      if (newQuantity === 0) {
+        // Remove item
+        return prevItems.filter(oi => oi.menu_item_id !== menuItemId)
+      } else {
+        // Update quantity
+        const updated = [...prevItems]
+        updated[itemIndex] = { ...updated[itemIndex], quantity: newQuantity }
+        return updated
+      }
+    })
+  }
+
+  // Consolidate duplicate items in the array (safety measure)
+  const consolidateOrderItems = (items) => {
+    const consolidated = {}
+    items.forEach(item => {
+      const key = item.menu_item_id
+      if (consolidated[key]) {
+        consolidated[key].quantity += item.quantity
+        // Preserve existing flags - if either is marked as existing, the consolidated one should be too
+        if (item.isExisting) {
+          consolidated[key].isExisting = true
+          consolidated[key].existingQuantity = (consolidated[key].existingQuantity || 0) + (item.existingQuantity || 0)
+        }
+      } else {
+        consolidated[key] = { ...item }
+      }
+    })
+    return Object.values(consolidated)
+  }
+
+  const calculateTotal = () => {
+    const consolidated = consolidateOrderItems(orderItems)
+    return consolidated.reduce((sum, item) => sum + (item.price_at_time * item.quantity), 0)
+  }
+
+  const submitOrder = async () => {
+    if (orderItems.length === 0) return
+
+    // Consolidate items before submitting
+    const consolidatedItems = consolidateOrderItems(orderItems)
+    const total = consolidatedItems.reduce((sum, item) => sum + (item.price_at_time * item.quantity), 0)
+
+    try {
+      if (currentOrder) {
+        // Updating existing order
+        // For staff: prevent reducing quantities from the original order
+        if (userType === 'staff') {
+          const originalItems = currentOrder.order_items || []
+
+          // Check if any item quantity was reduced
+          for (const originalItem of originalItems) {
+            const newItem = consolidatedItems.find(item => item.menu_item_id === originalItem.menu_item_id)
+            if (newItem && newItem.quantity < originalItem.quantity) {
+              showNotification('error', 'Staff cannot reduce item quantities from placed orders. Only owners can do this.')
+              setLoggingIn(false)
+              return
+            }
+          }
+
+          // Check if any item was removed
+          for (const originalItem of originalItems) {
+            const stillExists = consolidatedItems.find(item => item.menu_item_id === originalItem.menu_item_id)
+            if (!stillExists) {
+              showNotification('error', 'Staff cannot remove items from placed orders. Only owners can do this.')
+              setLoggingIn(false)
+              return
+            }
+          }
+        }
+
+        // Update existing order
+        const { error: orderError } = await supabase
+          .from('orders')
+          .update({ total })
+          .eq('id', currentOrder.id)
+
+        if (orderError) throw orderError
+
+        // Delete old order items FIRST (with error checking!)
+        console.log('Deleting old order items for order:', currentOrder.id)
+        const { error: deleteError } = await supabase
+          .from('order_items')
+          .delete()
+          .eq('order_id', currentOrder.id)
+
+        if (deleteError) {
+          console.error('ERROR deleting old order items:', deleteError)
+          throw deleteError
+        }
+        console.log('Old items deleted successfully')
+
+        // Now insert new items
+        const itemsToInsert = consolidatedItems.map(item => ({
+          order_id: currentOrder.id,
+          menu_item_id: item.menu_item_id,
+          quantity: item.quantity,
+          price_at_time: item.price_at_time,
+          name: item.name
+        }))
+
+        console.log('Inserting new order items:', itemsToInsert.length, 'items')
+        const { error: itemsError } = await supabase
+          .from('order_items')
+          .insert(itemsToInsert)
+
+        if (itemsError) {
+          console.error('ERROR inserting new order items:', itemsError)
+          throw itemsError
+        }
+        console.log('New items inserted successfully')
+
+      } else {
+        // Create new order
+        const { data: newOrder, error: orderError } = await supabase
+          .from('orders')
+          .insert({
+            restaurant_id: restaurant.id,
+            table_id: selectedTable.id,
+            status: 'pending',
+            total,
+            paid: false
+          })
+          .select()
+          .single()
+
+        if (orderError) throw orderError
+
+        const itemsToInsert = consolidatedItems.map(item => ({
+          order_id: newOrder.id,
+          menu_item_id: item.menu_item_id,
+          quantity: item.quantity,
+          price_at_time: item.price_at_time,
+          name: item.name
+        }))
+
+        const { error: itemsError } = await supabase
+          .from('order_items')
+          .insert(itemsToInsert)
+
+        if (itemsError) throw itemsError
+      }
+
+      // Close modal and reset
+      setShowOrderModal(false)
+      setSelectedTable(null)
+      setCurrentOrder(null)
+      setOrderItems([])
+
+      // Refresh table order info
+      await fetchTableOrderInfo(restaurant.id)
+
+      showNotification('success', currentOrder ? 'Order updated successfully!' : 'Order placed successfully!')
+    } catch (error) {
+      console.error('Error submitting order:', error)
+      showNotification('error', 'Failed to submit order. Please try again.')
+    }
+  }
+
+  if (loading) {
+    return <div className="text-slate-500">Loading tables...</div>
+  }
+
+  return (
+
+      <div>
+        {/* Notification Toast */}
+      {notification && (
+        <div className="fixed top-4 right-4 z-[100] transition-all duration-300 ease-out animate-in slide-in-from-right">
+          <div className={`rounded-xl shadow-lg p-4 min-w-[300px] max-w-md ${
+            notification.type === 'success'
+              ? 'bg-green-50 border-2 border-green-200'
+              : notification.type === 'error'
+              ? 'bg-red-50 border-2 border-red-200'
+              : 'bg-blue-50 border-2 border-blue-200'
+          }`}>
+            <div className="flex items-start gap-3">
+              {notification.type === 'success' && (
+                <svg className="w-6 h-6 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+              )}
+              {notification.type === 'error' && (
+                <svg className="w-6 h-6 text-red-600 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                </svg>
+              )}
+              {notification.type === 'info' && (
+                <svg className="w-6 h-6 text-blue-600 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                </svg>
+              )}
+              <div className="flex-1">
+                <p className={`text-sm font-medium ${
+                  notification.type === 'success'
+                    ? 'text-green-900'
+                    : notification.type === 'error'
+                    ? 'text-red-900'
+                    : 'text-blue-900'
+                }`}>
+                  {notification.message}
+                </p>
+              </div>
+              <button
+                onClick={() => setNotification(null)}
+                className={`flex-shrink-0 ${
+                  notification.type === 'success'
+                    ? 'text-green-600 hover:text-green-800'
+                    : notification.type === 'error'
+                    ? 'text-red-600 hover:text-red-800'
+                    : 'text-blue-600 hover:text-blue-800'
+                }`}
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">Tables & QR Codes</h1>
+          <p className="text-slate-500">Manage tables and generate QR codes</p>
+        </div>
+        <div className="flex gap-3">
+          {userType === 'owner' && tables.length > 0 && (
+            <button
+              onClick={downloadAllQR}
+              className="border-2 border-slate-200 text-slate-600 px-5 py-2.5 rounded-xl font-medium hover:bg-slate-50 flex items-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+              </svg>
+              Download All QR
+            </button>
+          )}
+          {userType === 'owner' && (
+            <button
+              onClick={() => setShowModal(true)}
+              className="bg-[#6262bd] text-white px-5 py-2.5 rounded-xl font-medium hover:bg-[#5252a3] flex items-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+              </svg>
+              Add Table
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Tables Grid */}
+      {tables.length === 0 ? (
+        <div className="bg-white border-2 border-slate-100 rounded-2xl p-12 text-center">
+          <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M3 5a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm6 0H5v4h4V5zm-6 8a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4zm6 0H5v4h4v-4zm2-8a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2h-4a2 2 0 01-2-2V5zm6 0h-4v4h4V5zm-6 8a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2h-4a2 2 0 01-2-2v-4zm6 0h-4v4h4v-4z"/>
+            </svg>
+          </div>
+          <p className="text-slate-500 mb-4">No tables yet</p>
+          <button
+            onClick={() => setShowModal(true)}
+            className="text-[#6262bd] font-medium hover:underline"
+          >
+            Add your first table
+          </button>
+        </div>
+      ) : (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {tables.map((table) => (
+            <TableCard
+              key={table.id}
+              table={table}
+              orderInfo={tableOrderInfo[table.id]}
+              reservations={todayReservations[table.id]}
+              waiterCalls={waiterCalls[table.id]}
+              userType={userType}
+              onDownload={() => downloadQR(table)}
+              onDelete={() => deleteTable(table.id)}
+              onPlaceOrder={() => openOrderModal(table)}
+              onPayBill={() => openPaymentModal(table)}
+              onViewOrders={() => openOrderDetailsModal(table)}
+              onMarkCleaned={() => markTableAsCleaned(table)}
+              onViewReservations={() => openViewReservationsModal(table)}
+              onCreateReservation={() => openCreateReservationModal(table)}
+              onAcknowledgeWaiterCall={acknowledgeWaiterCall}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Add Table Modal */}
+      {showModal && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowModal(false)}
+        >
+          <div
+            className="bg-white rounded-2xl p-8 w-full max-w-sm"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-xl font-bold text-slate-800 mb-6">Add New Table</h2>
+
+            <form onSubmit={addTable}>
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Table Number/Name
+                </label>
+                <input
+                  type="text"
+                  value={newTableNumber}
+                  onChange={(e) => setNewTableNumber(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  placeholder="e.g. 1, A1, Patio 3"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="flex-1 border-2 border-slate-200 text-slate-600 py-3 rounded-xl font-medium hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 bg-[#6262bd] text-white py-3 rounded-xl font-medium hover:bg-[#5252a3]"
+                >
+                  Add Table
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Place Order Modal */}
+      {showOrderModal && selectedTable && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto"
+          onClick={() => {
+            setShowOrderModal(false)
+            setSelectedTable(null)
+            setCurrentOrder(null)
+            setOrderItems([])
+          }}
+        >
+          <div
+            className="bg-white rounded-2xl p-8 w-full max-w-4xl my-8"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-xl font-bold text-slate-800">
+                  {currentOrder ? 'Update Order' : 'Place Order'} - Table {selectedTable.table_number}
+                </h2>
+                {currentOrder && (
+                  <p className="text-sm text-slate-500">Order #{currentOrder.id.slice(0, 8)}</p>
+                )}
+              </div>
+              <button
+                onClick={() => {
+                  setShowOrderModal(false)
+                  setSelectedTable(null)
+                  setCurrentOrder(null)
+                  setOrderItems([])
+                }}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </button>
+            </div>
+
+            {/* Info banner for staff editing existing orders */}
+            {currentOrder && userType === 'staff' && (
+              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                <div className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                  </svg>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-blue-900">Updating Existing Order</p>
+                    <p className="text-xs text-blue-700 mt-1">
+                      You can add more items or increase quantities, but cannot remove items or reduce quantities. Only restaurant owners can modify placed orders.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="grid lg:grid-cols-3 gap-6">
+              {/* Menu Items */}
+              <div className="lg:col-span-2">
+                <h3 className="font-semibold text-slate-700 mb-4">Menu Items</h3>
+                {menuItems.length === 0 ? (
+                  <div className="bg-slate-50 rounded-xl p-8 text-center">
+                    <p className="text-slate-500">No menu items available</p>
+                    <p className="text-sm text-slate-400 mt-2">Add items in the Menu tab first</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+                    {categories.length > 0 ? (
+                      categories.map(category => {
+                        const categoryItems = menuItems.filter(item => item.category_id === category.id)
+                        if (categoryItems.length === 0) return null
+
+                        return (
+                          <div key={category.id}>
+                            <h4 className="font-medium text-slate-600 mb-2">{category.name}</h4>
+                            <div className="space-y-2">
+                              {categoryItems.map(item => (
+                                <button
+                                  key={item.id}
+                                  onClick={() => addItemToOrder(item)}
+                                  className="w-full flex items-center gap-3 p-3 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors text-left"
+                                >
+                                  {item.image_url && (
+                                    <img
+                                      src={item.image_url}
+                                      alt={item.name}
+                                      className="w-16 h-16 rounded-lg object-cover"
+                                    />
+                                  )}
+                                  <div className="flex-1">
+                                    <p className="font-medium text-slate-800">{item.name}</p>
+                                    {item.description && (
+                                      <p className="text-sm text-slate-500">{item.description}</p>
+                                    )}
+                                    {!item.available && (
+                                      <span className="text-xs text-red-500">Unavailable</span>
+                                    )}
+                                  </div>
+                                  <span className="font-semibold text-[#6262bd] ml-2">£{item.price.toFixed(2)}</span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )
+                      })
+                    ) : (
+                      // Show all items without categories if no categories exist
+                      <div className="space-y-2">
+                        {menuItems.map(item => (
+                          <button
+                            key={item.id}
+                            onClick={() => addItemToOrder(item)}
+                            className="w-full flex items-center gap-3 p-3 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors text-left"
+                          >
+                            {item.image_url && (
+                              <img
+                                src={item.image_url}
+                                alt={item.name}
+                                className="w-16 h-16 rounded-lg object-cover"
+                              />
+                            )}
+                            <div className="flex-1">
+                              <p className="font-medium text-slate-800">{item.name}</p>
+                              {item.description && (
+                                <p className="text-sm text-slate-500">{item.description}</p>
+                              )}
+                              {!item.available && (
+                                <span className="text-xs text-red-500">Unavailable</span>
+                              )}
+                            </div>
+                            <span className="font-semibold text-[#6262bd] ml-2">£{item.price.toFixed(2)}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Order Summary */}
+              <div>
+                <h3 className="font-semibold text-slate-700 mb-4">Order Summary</h3>
+                {orderItems.length === 0 ? (
+                  <div className="bg-slate-50 rounded-xl p-6 text-center">
+                    <p className="text-slate-500">No items added yet</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="bg-slate-50 rounded-xl p-4 mb-4 max-h-64 overflow-y-auto">
+                      {orderItems.map((item) => {
+                        const newQuantity = item.isExisting ? item.quantity - item.existingQuantity : item.quantity
+                        const hasNewItems = newQuantity > 0
+
+                        return (
+                          <div key={item.menu_item_id} className={`mb-3 last:mb-0 rounded-lg p-2 ${item.isExisting ? 'bg-blue-50/50 border border-blue-200' : ''}`}>
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1">
+                                <p className="font-medium text-slate-800 text-sm">{item.quantity}x {item.name}</p>
+                                <p className="text-xs text-slate-500">£{item.price_at_time.toFixed(2)} each</p>
+
+                                {/* Show breakdown if item has both existing and new quantities */}
+                                {item.isExisting && hasNewItems && (
+                                  <p className="text-xs text-blue-600 mt-1">
+                                    {item.existingQuantity} existing + {newQuantity} new
+                                  </p>
+                                )}
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                {userType === 'owner' || !currentOrder ? (
+                                  // Owners can always modify, staff can only modify NEW orders
+                                  <>
+                                    <button
+                                      onClick={(e) => {
+                                        e.preventDefault()
+                                        e.stopPropagation()
+                                        updateItemQuantity(item.menu_item_id, item.quantity - 1)
+                                      }}
+                                      className="w-6 h-6 rounded bg-slate-200 hover:bg-slate-300 flex items-center justify-center transition-colors"
+                                    >
+                                      -
+                                    </button>
+                                    <span className="w-8 text-center font-medium">{item.quantity}</span>
+                                    <button
+                                      onClick={(e) => {
+                                        e.preventDefault()
+                                        e.stopPropagation()
+                                        updateItemQuantity(item.menu_item_id, item.quantity + 1)
+                                      }}
+                                      className="w-6 h-6 rounded bg-slate-200 hover:bg-slate-300 flex items-center justify-center transition-colors"
+                                    >
+                                      +
+                                    </button>
+                                  </>
+                                ) : (
+                                  // Staff editing existing order: restricted controls
+                                  <>
+                                    <button
+                                      onClick={(e) => {
+                                        e.preventDefault()
+                                        e.stopPropagation()
+                                        updateItemQuantity(item.menu_item_id, item.quantity - 1)
+                                      }}
+                                      disabled={item.isExisting && item.quantity <= item.existingQuantity}
+                                      className={`w-6 h-6 rounded flex items-center justify-center transition-colors ${
+                                        item.isExisting && item.quantity <= item.existingQuantity
+                                          ? 'bg-slate-100 text-slate-300 cursor-not-allowed'
+                                          : 'bg-slate-200 hover:bg-slate-300'
+                                      }`}
+                                      title={item.isExisting && item.quantity <= item.existingQuantity ? 'Cannot reduce existing items' : ''}
+                                    >
+                                      -
+                                    </button>
+                                    <span className="w-8 text-center font-medium">{item.quantity}</span>
+                                    <button
+                                      onClick={(e) => {
+                                        e.preventDefault()
+                                        e.stopPropagation()
+                                        updateItemQuantity(item.menu_item_id, item.quantity + 1)
+                                      }}
+                                      className="w-6 h-6 rounded bg-green-600 hover:bg-green-700 text-white flex items-center justify-center text-lg transition-colors"
+                                    >
+                                      +
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+
+                    <div className="bg-[#6262bd]/10 rounded-xl p-4 mb-4">
+                      <div className="flex justify-between items-center">
+                        <span className="font-semibold text-slate-700">Total</span>
+                        <span className="text-xl font-bold text-[#6262bd]">£{calculateTotal().toFixed(2)}</span>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={submitOrder}
+                      className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3]"
+                    >
+                      {currentOrder ? 'Update Order' : 'Place Order'}
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Payment Modal */}
+      {showPaymentModal && selectedTable && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-md">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-slate-800">
+                Pay Bill - Table {selectedTable.table_number}
+              </h2>
+              <button
+                onClick={() => {
+                  setShowPaymentModal(false)
+                  setSelectedTable(null)
+                  setUnpaidOrders([])
+                }}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </button>
+            </div>
+
+            {unpaidOrders.length === 0 ? (
+              <div className="bg-slate-50 rounded-xl p-8 text-center mb-6">
+                <p className="text-slate-500">No unpaid orders for this table</p>
+              </div>
+            ) : (
+              <>
+                {/* Order Summary */}
+                <div className="mb-6">
+                  <h3 className="font-semibold text-slate-700 mb-3">Orders Summary</h3>
+                  <div className="bg-slate-50 rounded-xl p-4 space-y-3 max-h-64 overflow-y-auto">
+                    {unpaidOrders.map((order, index) => (
+                      <div key={order.id} className="border-b border-slate-200 pb-3 last:border-0 last:pb-0">
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="text-sm font-medium text-slate-600">Order #{index + 1}</span>
+                          <span className="text-sm font-semibold text-[#6262bd]">£{order.total?.toFixed(2)}</span>
+                        </div>
+                        <div className="text-xs text-slate-500 space-y-1">
+                          {order.order_items?.map((item, idx) => (
+                            <div key={idx}>
+                              {item.quantity}x {item.name}
+                            </div>
+                          ))}
+                        </div>
+                        <div className="text-xs text-slate-400 mt-1">
+                          Status: <span className="capitalize">{order.status}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Total */}
+                <div className="bg-[#6262bd]/10 rounded-xl p-4 mb-6">
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold text-slate-700">Total to Pay</span>
+                    <span className="text-2xl font-bold text-[#6262bd]">£{calculateTableTotal().toFixed(2)}</span>
+                  </div>
+                </div>
+
+                {/* Payment Methods */}
+                <div className="space-y-3">
+                  <button
+                    onClick={() => processPayment('cash')}
+                    className="w-full bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
+                    </svg>
+                    Pay with Cash
+                  </button>
+                  <button
+                    onClick={() => processPayment('card')}
+                    className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+                    </svg>
+                    Pay with Card
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Order Details Modal */}
+      {showOrderDetailsModal && selectedTable && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-slate-800">
+                Table {selectedTable.table_number} - Order Details
+              </h2>
+              <button
+                onClick={() => {
+                  setShowOrderDetailsModal(false)
+                  setSelectedTable(null)
+                  setTableOrderDetails([])
+                }}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </button>
+            </div>
+
+            {tableOrderDetails.length === 0 ? (
+              <div className="bg-slate-50 rounded-xl p-8 text-center">
+                <p className="text-slate-500">No orders for this table</p>
+              </div>
+            ) : (
+              <>
+                {/* All Orders */}
+                <div className="space-y-4 mb-6">
+                  {tableOrderDetails.map((order, index) => (
+                    <div key={order.id} className="bg-slate-50 rounded-xl p-4">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h3 className="font-semibold text-slate-700">Order #{index + 1}</h3>
+                          <p className="text-xs text-slate-500">
+                            {new Date(order.created_at).toLocaleTimeString()} •
+                            <span className="capitalize ml-1">{order.status}</span>
+                          </p>
+                        </div>
+                        <span className="font-semibold text-[#6262bd]">£{order.total?.toFixed(2)}</span>
+                      </div>
+
+                      {/* Order Items */}
+                      <div className="space-y-2">
+                        {order.order_items?.map((item, idx) => (
+                          <div key={idx} className="flex justify-between text-sm">
+                            <span className="text-slate-700">
+                              {item.quantity}x {item.name}
+                            </span>
+                            <span className="text-slate-600">
+                              £{(item.price_at_time * item.quantity).toFixed(2)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Grand Total */}
+                <div className="bg-[#6262bd]/10 rounded-xl p-4">
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold text-slate-700">Total Unpaid</span>
+                    <span className="text-2xl font-bold text-[#6262bd]">
+                      £{tableOrderDetails.reduce((sum, order) => sum + (order.total || 0), 0).toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* View Reservations Modal */}
+      {showReservationsModal && selectedTable && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => {
+            setShowReservationsModal(false)
+            setSelectedTable(null)
+            setSelectedTableReservations([])
+          }}
+        >
+          <div
+            className="bg-white rounded-2xl p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-slate-800">
+                Table {selectedTable.table_number} - Today's Reservations
+              </h2>
+              <button
+                onClick={() => {
+                  setShowReservationsModal(false)
+                  setSelectedTable(null)
+                  setSelectedTableReservations([])
+                }}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </button>
+            </div>
+
+            {selectedTableReservations.length === 0 ? (
+              <div className="bg-slate-50 rounded-xl p-8 text-center">
+                <p className="text-slate-500">No confirmed reservations for today</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {selectedTableReservations.map((reservation) => (
+                  <div key={reservation.id} className="bg-white border-2 border-slate-200 rounded-xl p-5">
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="font-bold text-slate-800">{reservation.customer_name}</h3>
+                          <span className={`px-2 py-0.5 rounded-md text-xs font-semibold ${
+                            reservation.status === 'completed'
+                              ? 'bg-blue-100 text-blue-700'
+                              : reservation.status === 'cancelled'
+                              ? 'bg-red-100 text-red-700'
+                              : 'bg-green-100 text-green-700'
+                          }`}>
+                            {reservation.status === 'completed' ? 'Completed' : reservation.status === 'cancelled' ? 'Cancelled' : 'Confirmed'}
+                          </span>
+                        </div>
+                        <div className="space-y-1 text-sm text-slate-600">
+                          <p><strong>Email:</strong> {reservation.customer_email}</p>
+                          {reservation.customer_phone && (
+                            <p><strong>Phone:</strong> {reservation.customer_phone}</p>
+                          )}
+                          <p><strong>Party Size:</strong> {reservation.party_size} guests</p>
+                        </div>
+                      </div>
+                      <div className="text-right ml-4">
+                        <p className="font-bold text-lg text-[#6262bd]">{reservation.reservation_time.substring(0, 5)}</p>
+                      </div>
+                    </div>
+
+                    {reservation.special_requests && (
+                      <div className="mt-3 mb-3 pt-3 border-t border-slate-200">
+                        <p className="text-xs text-slate-500 uppercase font-semibold mb-1">Special Requests</p>
+                        <p className="text-sm text-slate-700">{reservation.special_requests}</p>
+                      </div>
+                    )}
+
+                    {/* Staff Actions Metadata */}
+                    {(reservation.confirmed_by_staff_name || reservation.status === 'cancelled') && (
+                      <div className="mt-3 pt-3 border-t border-slate-200 text-xs space-y-1">
+                        {reservation.confirmed_by_staff_name && reservation.status !== 'cancelled' && (
+                          <div className="flex items-center gap-1.5 text-green-700">
+                            <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            </svg>
+                            <span>Confirmed by <strong>{reservation.confirmed_by_staff_name}</strong></span>
+                          </div>
+                        )}
+                        {reservation.status === 'cancelled' && reservation.cancellation_reason && (
+                          <div className="flex items-center gap-1.5 text-red-600">
+                            <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/>
+                            </svg>
+                            <span>Cancelled: {reservation.cancellation_reason}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    {reservation.status === 'confirmed' && (
+                      <div className="mt-4 flex gap-2">
+                        <button
+                          onClick={async () => {
+                            if (confirm(`Mark ${reservation.customer_name} as arrived?`)) {
+                              try {
+                                const { error } = await supabase
+                                  .from('reservations')
+                                  .update({
+                                    status: 'completed',
+                                    updated_at: new Date().toISOString()
+                                  })
+                                  .eq('id', reservation.id)
+
+                                if (error) throw error
+
+                                showNotification('success', 'Guest confirmed as arrived!')
+                                fetchTodayReservations(restaurant.id)
+
+                                // Refresh modal reservations
+                                const updatedReservations = selectedTableReservations.map(r =>
+                                  r.id === reservation.id ? { ...r, status: 'completed' } : r
+                                )
+                                setSelectedTableReservations(updatedReservations)
+                              } catch (error) {
+                                console.error('Error confirming guest:', error)
+                                showNotification('error', 'Failed to confirm guest arrival')
+                              }
+                            }
+                          }}
+                          className="flex-1 bg-blue-600 text-white px-4 py-2.5 rounded-xl font-medium hover:bg-blue-700 text-sm flex items-center justify-center gap-2"
+                        >
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                          </svg>
+                          Confirm Guest
+                        </button>
+                        <button
+                          onClick={() => {
+                            setReservationToCancel(reservation)
+                            setCancelReasonType('no_show')
+                            setCustomCancelReason('')
+                            setShowCancelModal(true)
+                          }}
+                          className="flex-1 bg-red-600 text-white px-4 py-2.5 rounded-xl font-medium hover:bg-red-700 text-sm flex items-center justify-center gap-2"
+                        >
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/>
+                          </svg>
+                          Cancel Booking
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Create Reservation Modal */}
+      {showCreateReservationModal && selectedTable && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => {
+            setShowCreateReservationModal(false)
+            setSelectedTable(null)
+          }}
+        >
+          <div
+            className="bg-white rounded-2xl p-8 w-full max-w-md"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-xl font-bold text-slate-800 mb-6">
+              Create Reservation - Table {selectedTable.table_number}
+            </h2>
+
+            <form onSubmit={submitReservation} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Date
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    value={reservationForm.date}
+                    onChange={(e) => setReservationForm({ ...reservationForm, date: e.target.value })}
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Time
+                  </label>
+                  <input
+                    type="time"
+                    required
+                    value={reservationForm.time}
+                    onChange={(e) => setReservationForm({ ...reservationForm, time: e.target.value })}
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Party Size
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="1"
+                  max="50"
+                  value={reservationForm.partySize}
+                  onChange={(e) => setReservationForm({ ...reservationForm, partySize: parseInt(e.target.value) })}
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Customer Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={reservationForm.customerName}
+                  onChange={(e) => setReservationForm({ ...reservationForm, customerName: e.target.value })}
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  placeholder="John Doe"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={reservationForm.customerEmail}
+                  onChange={(e) => setReservationForm({ ...reservationForm, customerEmail: e.target.value })}
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  placeholder="john@example.com"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Phone (Optional)
+                </label>
+                <input
+                  type="tel"
+                  value={reservationForm.customerPhone}
+                  onChange={(e) => setReservationForm({ ...reservationForm, customerPhone: e.target.value })}
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  placeholder="+44 123 456 7890"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Special Requests (Optional)
+                </label>
+                <textarea
+                  value={reservationForm.specialRequests}
+                  onChange={(e) => setReservationForm({ ...reservationForm, specialRequests: e.target.value })}
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 resize-none"
+                  rows="3"
+                  placeholder="Any dietary restrictions or special requests..."
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCreateReservationModal(false)
+                    setSelectedTable(null)
+                  }}
+                  className="flex-1 border-2 border-slate-200 text-slate-600 py-3 rounded-xl font-medium hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 bg-[#6262bd] text-white py-3 rounded-xl font-medium hover:bg-[#5252a3]"
+                >
+                  Create Reservation
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Cancellation Modal */}
+      {showCancelModal && reservationToCancel && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4"
+          onClick={() => {
+            setShowCancelModal(false)
+            setReservationToCancel(null)
+            setCancelReasonType('no_show')
+            setCustomCancelReason('')
+          }}
+        >
+          <div
+            className="bg-white rounded-2xl p-8 w-full max-w-md"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-slate-800">
+                Cancel Booking
+              </h2>
+              <button
+                onClick={() => {
+                  setShowCancelModal(false)
+                  setReservationToCancel(null)
+                  setCancelReasonType('no_show')
+                  setCustomCancelReason('')
+                }}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </button>
+            </div>
+
+            <div className="mb-6">
+              <p className="text-slate-700 mb-2">
+                <strong>Customer:</strong> {reservationToCancel.customer_name}
+              </p>
+              <p className="text-slate-700 mb-4">
+                <strong>Time:</strong> {reservationToCancel.reservation_time.substring(0, 5)} | <strong>Party:</strong> {reservationToCancel.party_size} guests
+              </p>
+
+              <label className="block text-sm font-medium text-slate-700 mb-3">
+                Cancellation Reason
+              </label>
+
+              <div className="space-y-3">
+                {/* No show option */}
+                <label className="flex items-start p-3 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-[#6262bd] transition-colors">
+                  <input
+                    type="radio"
+                    name="cancelReason"
+                    value="no_show"
+                    checked={cancelReasonType === 'no_show'}
+                    onChange={(e) => setCancelReasonType(e.target.value)}
+                    className="mt-1 mr-3"
+                  />
+                  <div>
+                    <div className="font-medium text-slate-800">No show</div>
+                    <div className="text-sm text-slate-500">Guest did not arrive</div>
+                  </div>
+                </label>
+
+                {/* Customer request option */}
+                <label className="flex items-start p-3 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-[#6262bd] transition-colors">
+                  <input
+                    type="radio"
+                    name="cancelReason"
+                    value="customer_request"
+                    checked={cancelReasonType === 'customer_request'}
+                    onChange={(e) => setCancelReasonType(e.target.value)}
+                    className="mt-1 mr-3"
+                  />
+                  <div>
+                    <div className="font-medium text-slate-800">Customer request</div>
+                    <div className="text-sm text-slate-500">Customer requested cancellation</div>
+                  </div>
+                </label>
+
+                {/* Other option */}
+                <label className="flex items-start p-3 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-[#6262bd] transition-colors">
+                  <input
+                    type="radio"
+                    name="cancelReason"
+                    value="other"
+                    checked={cancelReasonType === 'other'}
+                    onChange={(e) => setCancelReasonType(e.target.value)}
+                    className="mt-1 mr-3"
+                  />
+                  <div className="flex-1">
+                    <div className="font-medium text-slate-800 mb-2">Other</div>
+                    {cancelReasonType === 'other' && (
+                      <textarea
+                        value={customCancelReason}
+                        onChange={(e) => setCustomCancelReason(e.target.value)}
+                        placeholder="Please provide a reason..."
+                        className="w-full px-3 py-2 border-2 border-slate-200 rounded-lg focus:outline-none focus:border-[#6262bd] text-slate-700 text-sm"
+                        rows="3"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    )}
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowCancelModal(false)
+                  setReservationToCancel(null)
+                  setCancelReasonType('no_show')
+                  setCustomCancelReason('')
+                }}
+                className="flex-1 px-4 py-3 border-2 border-slate-200 rounded-xl font-medium text-slate-700 hover:bg-slate-50"
+              >
+                Keep Booking
+              </button>
+              <button
+                onClick={async () => {
+                  // Validate "other" option requires custom reason
+                  if (cancelReasonType === 'other' && !customCancelReason.trim()) {
+                    showNotification('error', 'Please provide a reason')
+                    return
+                  }
+
+                  try {
+                    // Get current user info
+                    const staffSessionData = localStorage.getItem('staff_session')
+                    let staffName = 'Staff'
+                    if (staffSessionData) {
+                      const staffSession = JSON.parse(staffSessionData)
+                      staffName = staffSession.name || staffSession.email
+                    }
+
+                    // Determine the reason text
+                    let reasonText = ''
+                    if (cancelReasonType === 'no_show') {
+                      reasonText = 'No show'
+                    } else if (cancelReasonType === 'customer_request') {
+                      reasonText = 'Customer request'
+                    } else if (cancelReasonType === 'other') {
+                      reasonText = customCancelReason.trim()
+                    }
+
+                    const { error } = await supabase
+                      .from('reservations')
+                      .update({
+                        status: 'cancelled',
+                        cancelled_at: new Date().toISOString(),
+                        cancellation_reason: `Cancelled by ${staffName}: ${reasonText}`,
+                        updated_at: new Date().toISOString()
+                      })
+                      .eq('id', reservationToCancel.id)
+
+                    if (error) throw error
+
+                    // Send cancellation email to customer
+                    try {
+                      await fetch('/api/reservations/send-cancellation-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ reservationId: reservationToCancel.id })
+                      })
+                      console.log('Cancellation email sent to customer')
+                    } catch (emailError) {
+                      console.error('Failed to send cancellation email:', emailError)
+                      // Don't fail the cancellation if email fails
+                    }
+
+                    showNotification('success', 'Booking cancelled successfully')
+                    fetchTodayReservations(restaurant.id)
+
+                    // Refresh modal reservations
+                    const updatedReservations = selectedTableReservations.map(r =>
+                      r.id === reservationToCancel.id
+                        ? { ...r, status: 'cancelled', cancellation_reason: `Cancelled by ${staffName}: ${reasonText}` }
+                        : r
+                    )
+                    setSelectedTableReservations(updatedReservations)
+
+                    // Close modal
+                    setShowCancelModal(false)
+                    setReservationToCancel(null)
+                    setCancelReasonType('no_show')
+                    setCustomCancelReason('')
+                  } catch (error) {
+                    console.error('Error cancelling booking:', error)
+                    showNotification('error', 'Failed to cancel booking')
+                  }
+                }}
+                className="flex-1 bg-red-600 text-white px-4 py-3 rounded-xl font-medium hover:bg-red-700"
+              >
+                Cancel Booking
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Post-Payment Modal */}
+      {showPostPaymentModal && restaurant?.invoice_settings?.enabled && staffDepartment !== 'kitchen' && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => {
+            setShowPostPaymentModal(false)
+            setSelectedTable(null)
+            setUnpaidOrders([])
+            setCompletedOrderIds([])
+          }}
+        >
+          <div
+            className="bg-white rounded-2xl p-8 w-full max-w-md"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-slate-800 mb-2">Payment Successful!</h2>
+              <p className="text-slate-600">Would you like to generate an invoice for this order?</p>
+            </div>
+
+            <div className="space-y-3">
+              <button
+                onClick={() => {
+                  // Use the first completed order ID
+                  const orderId = completedOrderIds[0]
+                  openInvoiceModal(orderId)
+                }}
+                className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] transition-all flex items-center justify-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                </svg>
+                Generate Invoice
+              </button>
+              <button
+                onClick={() => {
+                  setShowPostPaymentModal(false)
+                  setSelectedTable(null)
+                  setUnpaidOrders([])
+                  setCompletedOrderIds([])
+                }}
+                className="w-full border-2 border-slate-200 text-slate-700 py-3 rounded-xl font-semibold hover:bg-slate-50 transition-all"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Invoice Client Modal */}
+      {showInvoiceModal && restaurant && (
+        <InvoiceClientModal
+          restaurant={restaurant}
+          onSubmit={handleInvoiceGeneration}
+          onClose={() => {
+            setShowInvoiceModal(false)
+            setInvoiceTableId(null)
+            setInvoiceOrderId(null)
+          }}
+          isGenerating={generatingInvoice}
+        />
+      )}
+    </div>
+  )
+}
+
+function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDownload, onDelete, onPlaceOrder, onPayBill, onViewOrders, onMarkCleaned, onViewReservations, onCreateReservation, onAcknowledgeWaiterCall }) {
+  const hasOpenOrders = orderInfo && orderInfo.count > 0
+  const needsCleaning = table.status === 'needs_cleaning'
+  const hasReservationsToday = reservations && reservations.length > 0
+  const hasWaiterCall = waiterCalls && waiterCalls.length > 0
+
+  return (
+    <div className={`bg-white border-2 rounded-2xl p-6 text-center hover:border-[#6262bd]/30 transition-colors relative ${
+      needsCleaning ? 'border-red-300 bg-red-50/30' :
+      hasOpenOrders ? 'border-amber-300 bg-amber-50/30' : 'border-slate-100'
+    }`}>
+      {/* Waiter Call Indicator Badge (top center) */}
+      {hasWaiterCall && (
+        <button
+          onClick={() => onAcknowledgeWaiterCall(waiterCalls[0].id)}
+          className="absolute -top-3 left-1/2 -translate-x-1/2 bg-orange-500 text-white rounded-full px-3 py-1.5 text-xs font-bold shadow-lg hover:bg-orange-600 transition-all cursor-pointer flex items-center gap-1 animate-pulse"
+          title="Customer requesting waiter - click to acknowledge"
+        >
+          <span className="text-base">👋</span>
+          <span>WAITER NEEDED</span>
+        </button>
+      )}
+
+      {/* Reservation Indicator Badge (top left) */}
+      {hasReservationsToday && (
+        <button
+          onClick={onViewReservations}
+          className="absolute -top-3 -left-3 bg-[#6262bd] text-white rounded-full px-3 py-1.5 text-xs font-bold shadow-lg hover:bg-[#5252a3] transition-colors cursor-pointer flex items-center gap-1"
+          title="Click to view today's reservations"
+        >
+          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"/>
+          </svg>
+          {reservations.length}
+        </button>
+      )}
+
+      {/* Status Badges (top right) */}
+      {needsCleaning && (
+        <button
+          onClick={onViewOrders}
+          className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full px-3 py-1.5 text-xs font-bold shadow-lg uppercase tracking-wide hover:bg-red-600 transition-colors cursor-pointer"
+          title="Table needs cleaning"
+        >
+          NEEDS CLEANING
+        </button>
+      )}
+      {hasOpenOrders && !needsCleaning && (
+        <button
+          onClick={onViewOrders}
+          className="absolute -top-3 -right-3 bg-amber-500 text-white rounded-full px-3 py-1.5 text-xs font-bold shadow-lg uppercase tracking-wide hover:bg-amber-600 transition-colors cursor-pointer"
+          title="Click to view order details"
+        >
+          OPEN
+        </button>
+      )}
+
+      {/* Table Icon */}
+      <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 ${
+        needsCleaning ? 'bg-red-100' :
+        hasOpenOrders ? 'bg-amber-100' : 'bg-[#6262bd]/10'
+      }`}>
+        <svg className={`w-10 h-10 ${
+          needsCleaning ? 'text-red-600' :
+          hasOpenOrders ? 'text-amber-600' : 'text-[#6262bd]'
+        }`} fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2H7z"/>
+          <circle cx="12" cy="12" r="1.5"/>
+        </svg>
+      </div>
+
+      <h3 className="text-lg font-bold text-slate-800 mb-2">Table {table.table_number}</h3>
+
+      {/* Order Total */}
+      {hasOpenOrders && (
+        <div className="mb-4">
+          <p className="text-sm text-amber-700 font-semibold">
+            Unpaid: £{orderInfo.total.toFixed(2)}
+          </p>
+        </div>
+      )}
+
+      <div className="space-y-2">
+        {needsCleaning ? (
+          <button
+            onClick={onMarkCleaned}
+            className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 text-sm flex items-center justify-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+            Mark as Cleaned
+          </button>
+        ) : (
+          <>
+            <button
+              onClick={onPlaceOrder}
+              className="w-full bg-[#6262bd] text-white py-2.5 rounded-xl font-medium hover:bg-[#5252a3] text-sm"
+            >
+              {hasOpenOrders ? 'Update Order' : 'Place Order'}
+            </button>
+            <button
+              onClick={onPayBill}
+              className="w-full bg-green-600 text-white py-2.5 rounded-xl font-medium hover:bg-green-700 text-sm"
+            >
+              Pay Bill
+            </button>
+            <button
+              onClick={onCreateReservation}
+              className="w-full border-2 border-[#6262bd] text-[#6262bd] py-2.5 rounded-xl font-medium hover:bg-[#6262bd]/5 text-sm flex items-center justify-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM12 13h5v5h-5z"/>
+              </svg>
+              New Reservation
+            </button>
+          </>
+        )}
+        {userType === 'owner' && (
+          <>
+            <button
+              onClick={onDownload}
+              className="w-full border-2 border-slate-200 text-slate-600 py-2.5 rounded-xl font-medium hover:bg-slate-50 text-sm"
+            >
+              Download QR
+            </button>
+            <button
+              onClick={onDelete}
+              className="w-full p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 text-sm font-medium"
+            >
+              Delete Table
+            </button>
+          </>
+        )}
+      </div>
+      </div>
+
+  )
+}
