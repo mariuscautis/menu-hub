@@ -16,6 +16,8 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
   });
 
   const [availableStaff, setAvailableStaff] = useState([]);
+  const [unavailableStaff, setUnavailableStaff] = useState([]);
+  const [showUnavailable, setShowUnavailable] = useState(false);
   const [loadingAvailable, setLoadingAvailable] = useState(false);
   const [conflictError, setConflictError] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -36,20 +38,95 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
     }
   }, [shift]);
 
-  // Fetch available staff when shift details change
-  // TODO: Implement available staff API endpoint
-  // useEffect(() => {
-  //   if (formData.date && formData.shift_start && formData.shift_end) {
-  //     fetchAvailableStaff();
-  //   }
-  // }, [formData.date, formData.shift_start, formData.shift_end, formData.role_required, formData.department]);
+  // Fetch available staff when date changes
+  useEffect(() => {
+    if (formData.date && staff && staff.length > 0 && restaurant) {
+      checkStaffAvailability();
+    } else {
+      setAvailableStaff(staff || []);
+      setUnavailableStaff([]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.date, staff, restaurant]);
 
-  // const fetchAvailableStaff = async () => {
-  //   if (!restaurant) return;
-  //   setLoadingAvailable(true);
-  //   // API endpoint not yet implemented
-  //   setLoadingAvailable(false);
-  // };
+  const checkStaffAvailability = async () => {
+    if (!restaurant || !formData.date) return;
+
+    setLoadingAvailable(true);
+
+    try {
+      // Fetch approved time-off requests that overlap with this date
+      const response = await fetch(`/api/rota/requests?restaurant_id=${restaurant.id}&status=approved&request_type=time_off`);
+      const result = await response.json();
+
+      if (result.requests) {
+        const unavailableStaffIds = new Set();
+
+        // Check which staff members have approved time-off on this date
+        result.requests.forEach(request => {
+          const shiftDate = new Date(formData.date);
+          const dateFrom = new Date(request.date_from);
+          const dateTo = new Date(request.date_to);
+
+          // Check if shift date falls within time-off period
+          if (shiftDate >= dateFrom && shiftDate <= dateTo) {
+            unavailableStaffIds.add(request.staff_id);
+          }
+        });
+
+        // Separate staff into available and unavailable
+        const available = [];
+        const unavailable = [];
+
+        staff.forEach(s => {
+          if (unavailableStaffIds.has(s.id)) {
+            // Find the time-off request for this staff member
+            const timeOffRequest = result.requests.find(r =>
+              r.staff_id === s.id &&
+              new Date(formData.date) >= new Date(r.date_from) &&
+              new Date(formData.date) <= new Date(r.date_to)
+            );
+            unavailable.push({
+              ...s,
+              unavailableReason: timeOffRequest ? getUnavailableReason(timeOffRequest) : 'On time off'
+            });
+          } else {
+            available.push(s);
+          }
+        });
+
+        setAvailableStaff(available);
+        setUnavailableStaff(unavailable);
+      }
+    } catch (error) {
+      console.error('Error checking staff availability:', error);
+      // If error, show all staff as available
+      setAvailableStaff(staff || []);
+      setUnavailableStaff([]);
+    }
+
+    setLoadingAvailable(false);
+  };
+
+  const getUnavailableReason = (request) => {
+    const leaveTypeLabels = {
+      annual_holiday: 'On holiday',
+      sick_self_cert: 'On sick leave',
+      sick_medical_cert: 'On sick leave',
+      unpaid: 'On unpaid leave',
+      compassionate: 'On compassionate leave',
+      other: 'On time off'
+    };
+
+    const label = leaveTypeLabels[request.leave_type] || 'On time off';
+    const dateFrom = new Date(request.date_from).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    const dateTo = new Date(request.date_to).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+
+    if (request.date_from === request.date_to) {
+      return `${label} (${dateFrom})`;
+    }
+    return `${label} (${dateFrom} - ${dateTo})`;
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -267,9 +344,20 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
 
             {/* Staff Assignment */}
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Assign Staff
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-slate-700">
+                  Assign Staff
+                </label>
+                {unavailableStaff.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowUnavailable(!showUnavailable)}
+                    className="text-xs text-slate-600 hover:text-[#6262bd] font-medium transition-colors"
+                  >
+                    {showUnavailable ? 'Hide' : 'Show'} unavailable ({unavailableStaff.length})
+                  </button>
+                )}
+              </div>
               <select
                 name="staff_id"
                 value={formData.staff_id}
@@ -277,19 +365,48 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
                 className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd]"
               >
                 <option value="">Leave Unfilled</option>
-                {staff && staff.length > 0 ? (
-                  staff.map(s => (
-                    <option key={s.id} value={s.id}>
-                      {s.name} - {s.role}
-                    </option>
-                  ))
+
+                {/* Available Staff */}
+                {availableStaff && availableStaff.length > 0 ? (
+                  <>
+                    <optgroup label="✅ Available Staff">
+                      {availableStaff.map(s => (
+                        <option key={s.id} value={s.id}>
+                          {s.name} - {s.role}
+                        </option>
+                      ))}
+                    </optgroup>
+                  </>
+                ) : loadingAvailable ? (
+                  <option disabled>Loading availability...</option>
                 ) : (
-                  <option disabled>No staff available</option>
+                  <option disabled>No available staff</option>
+                )}
+
+                {/* Unavailable Staff (if toggle is on) */}
+                {showUnavailable && unavailableStaff.length > 0 && (
+                  <optgroup label="❌ Unavailable (On Time Off)">
+                    {unavailableStaff.map(s => (
+                      <option key={s.id} value={s.id} disabled>
+                        {s.name} - {s.unavailableReason}
+                      </option>
+                    ))}
+                  </optgroup>
                 )}
               </select>
-              <p className="text-xs text-slate-500 mt-2">
-                Select a staff member to assign to this shift
-              </p>
+              <div className="mt-2 space-y-1">
+                <p className="text-xs text-slate-500">
+                  {loadingAvailable ? (
+                    'Checking staff availability...'
+                  ) : availableStaff.length === 0 && unavailableStaff.length > 0 ? (
+                    '⚠️ All staff are unavailable on this date'
+                  ) : unavailableStaff.length > 0 ? (
+                    `${availableStaff.length} available, ${unavailableStaff.length} on time off`
+                  ) : (
+                    'Select a staff member to assign to this shift'
+                  )}
+                </p>
+              </div>
             </div>
 
             {/* Status */}
