@@ -15,7 +15,7 @@ const supabaseAdmin = createClient(
 
 export async function POST(request) {
   try {
-    const { restaurantId, email, name, role, pin_code, department } = await request.json()
+    const { restaurantId, email, name, role, pin_code, department, annual_holiday_days, holiday_year_start } = await request.json()
 
     // Validate required fields
     if (!email || !pin_code || !restaurantId) {
@@ -83,6 +83,24 @@ export async function POST(request) {
         { error: 'Failed to add staff member' },
         { status: 500 }
       )
+    }
+
+    // Create leave entitlement if holiday days are provided
+    if (annual_holiday_days && holiday_year_start) {
+      const { error: entitlementError } = await supabaseAdmin
+        .from('staff_leave_entitlements')
+        .insert({
+          restaurant_id: restaurantId,
+          staff_id: staffData.id,
+          annual_holiday_days: parseFloat(annual_holiday_days),
+          holiday_year_start: holiday_year_start
+        })
+
+      if (entitlementError) {
+        console.error('Leave entitlement creation error:', entitlementError)
+        // Don't fail the whole operation, just log the error
+        // The staff member was created successfully
+      }
     }
 
     return NextResponse.json({

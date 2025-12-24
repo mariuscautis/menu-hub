@@ -18,7 +18,9 @@ export default function Staff() {
     name: '',
     role: 'staff',
     pin_code: '',
-    department: ''
+    department: '',
+    annual_holiday_days: 28.0,
+    holiday_year_start: new Date().toISOString().split('T')[0]
   })
   const [passwordData, setPasswordData] = useState({
     newPassword: ''
@@ -87,7 +89,13 @@ export default function Staff() {
 
     const { data: staffData } = await supabase
       .from('staff')
-      .select('*')
+      .select(`
+        *,
+        staff_leave_entitlements (
+          annual_holiday_days,
+          holiday_year_start
+        )
+      `)
       .eq('restaurant_id', restaurantData.id)
       .order('created_at', { ascending: false })
 
@@ -128,14 +136,24 @@ export default function Staff() {
           name: formData.name,
           role: formData.role,
           pin_code: formData.pin_code,
-          department: formData.department
+          department: formData.department,
+          annual_holiday_days: parseFloat(formData.annual_holiday_days),
+          holiday_year_start: formData.holiday_year_start
         })
       })
       const data = await response.json()
       if (!response.ok) {
         throw new Error(data.error || 'Failed to add staff')
       }
-      setFormData({ email: '', name: '', role: 'staff', pin_code: '', department: departments[0] || '' })
+      setFormData({
+        email: '',
+        name: '',
+        role: 'staff',
+        pin_code: '',
+        department: departments[0] || '',
+        annual_holiday_days: 28.0,
+        holiday_year_start: new Date().toISOString().split('T')[0]
+      })
       setShowModal(false)
       fetchData()
     } catch (err) {
@@ -187,12 +205,15 @@ export default function Staff() {
 
   const openEditModal = (member) => {
     setSelectedStaff(member)
+    const entitlement = member.staff_leave_entitlements?.[0]
     setFormData({
       email: member.email,
       name: member.name,
       role: member.role,
       pin_code: member.pin_code,
-      department: member.department
+      department: member.department,
+      annual_holiday_days: entitlement?.annual_holiday_days || 28.0,
+      holiday_year_start: entitlement?.holiday_year_start || new Date().toISOString().split('T')[0]
     })
     setIsEditing(true)
     setShowModal(true)
@@ -202,7 +223,8 @@ export default function Staff() {
     e.preventDefault()
     setError(null)
     try {
-      const { error } = await supabase
+      // Update staff details
+      const { error: staffError } = await supabase
         .from('staff')
         .update({
           name: formData.name,
@@ -211,11 +233,51 @@ export default function Staff() {
           department: formData.department
         })
         .eq('id', selectedStaff.id)
-      if (error) throw error
+      if (staffError) throw staffError
+
+      // Update or create leave entitlement
+      const { data: existingEntitlement } = await supabase
+        .from('staff_leave_entitlements')
+        .select('id')
+        .eq('staff_id', selectedStaff.id)
+        .maybeSingle()
+
+      if (existingEntitlement) {
+        // Update existing entitlement
+        const { error: entitlementError } = await supabase
+          .from('staff_leave_entitlements')
+          .update({
+            annual_holiday_days: parseFloat(formData.annual_holiday_days),
+            holiday_year_start: formData.holiday_year_start,
+            updated_at: new Date().toISOString()
+          })
+          .eq('staff_id', selectedStaff.id)
+        if (entitlementError) throw entitlementError
+      } else {
+        // Create new entitlement
+        const { error: entitlementError } = await supabase
+          .from('staff_leave_entitlements')
+          .insert({
+            restaurant_id: restaurant.id,
+            staff_id: selectedStaff.id,
+            annual_holiday_days: parseFloat(formData.annual_holiday_days),
+            holiday_year_start: formData.holiday_year_start
+          })
+        if (entitlementError) throw entitlementError
+      }
+
       setShowModal(false)
       setIsEditing(false)
       setSelectedStaff(null)
-      setFormData({ email: '', name: '', role: 'staff', pin_code: '', department: departments[0] || '' })
+      setFormData({
+        email: '',
+        name: '',
+        role: 'staff',
+        pin_code: '',
+        department: departments[0] || '',
+        annual_holiday_days: 28.0,
+        holiday_year_start: new Date().toISOString().split('T')[0]
+      })
       fetchData()
     } catch (err) {
       setError(err.message)
@@ -426,7 +488,7 @@ export default function Staff() {
           }}
         >
           <div
-            className="bg-white rounded-2xl p-8 w-full max-w-md"
+            className="bg-white rounded-2xl p-8 w-full max-w-md max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold text-slate-800 mb-6">
@@ -532,6 +594,48 @@ export default function Staff() {
                   <p className="text-slate-400 text-sm mt-2">
                     Manage departments in Settings → Departments
                   </p>
+                </div>
+
+                {/* Holiday Entitlement Section */}
+                <div className="pt-4 border-t-2 border-slate-100">
+                  <h3 className="text-sm font-semibold text-slate-700 mb-4">Holiday Entitlement</h3>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Annual Holiday Days
+                      </label>
+                      <input
+                        type="number"
+                        name="annual_holiday_days"
+                        value={formData.annual_holiday_days}
+                        onChange={handleChange}
+                        step="0.5"
+                        min="0"
+                        max="365"
+                        className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                      />
+                      <p className="text-slate-400 text-sm mt-2">
+                        UK statutory minimum is 28 days (including bank holidays). Pro-rata calculation will be applied automatically based on the start date.
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Holiday Year Start Date
+                      </label>
+                      <input
+                        type="date"
+                        name="holiday_year_start"
+                        value={formData.holiday_year_start}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                      />
+                      <p className="text-slate-400 text-sm mt-2">
+                        Usually the staff member's hire date or start date
+                      </p>
+                    </div>
+                  </div>
                 </div>
                 <div className="flex gap-3 pt-4">
                   <button

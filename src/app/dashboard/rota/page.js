@@ -40,6 +40,7 @@ export default function RotaPage() {
   const [showRequestsModal, setShowRequestsModal] = useState(false);
   const [showTemplatesModal, setShowTemplatesModal] = useState(false);
   const [showCurrentlyWorkingModal, setShowCurrentlyWorkingModal] = useState(false);
+  const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
 
   /* -------------------- Fetch Restaurant -------------------- */
 
@@ -125,12 +126,30 @@ export default function RotaPage() {
     setLoading(false);
   }, [restaurant, selectedDate, selectedView, filters]);
 
+  const fetchPendingRequestsCount = useCallback(async () => {
+    if (!restaurant) return;
+
+    try {
+      const { count, error } = await supabase
+        .from('shift_requests')
+        .select('*', { count: 'exact', head: true })
+        .eq('restaurant_id', restaurant.id)
+        .eq('status', 'pending');
+
+      if (error) throw error;
+      setPendingRequestsCount(count || 0);
+    } catch (error) {
+      console.error('Error fetching pending requests count:', error);
+    }
+  }, [restaurant]);
+
   useEffect(() => {
     if (!restaurant) return;
     fetchDepartments();
     fetchStaff();
     fetchShifts();
-  }, [restaurant, fetchDepartments, fetchStaff, fetchShifts]);
+    fetchPendingRequestsCount();
+  }, [restaurant, fetchDepartments, fetchStaff, fetchShifts, fetchPendingRequestsCount]);
 
   /* -------------------- Realtime -------------------- */
 
@@ -144,10 +163,15 @@ export default function RotaPage() {
         { event: '*', schema: 'public', table: 'shifts', filter: `restaurant_id=eq.${restaurant.id}` },
         fetchShifts
       )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'shift_requests', filter: `restaurant_id=eq.${restaurant.id}` },
+        fetchPendingRequestsCount
+      )
       .subscribe();
 
     return () => channel.unsubscribe();
-  }, [restaurant, fetchShifts]);
+  }, [restaurant, fetchShifts, fetchPendingRequestsCount]);
 
   /* -------------------- Helpers -------------------- */
 
@@ -305,9 +329,14 @@ export default function RotaPage() {
           </button>
           <button
             onClick={() => setShowRequestsModal(true)}
-            className="px-5 py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-xl hover:border-[#6262bd] transition-colors font-medium"
+            className="relative px-5 py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-xl hover:border-[#6262bd] transition-colors font-medium"
           >
             📨 Requests
+            {pendingRequestsCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center animate-pulse">
+                {pendingRequestsCount > 9 ? '9+' : pendingRequestsCount}
+              </span>
+            )}
           </button>
           <button
             onClick={() => setShowCurrentlyWorkingModal(true)}
@@ -434,6 +463,7 @@ export default function RotaPage() {
           restaurant={restaurant}
           staff={staff}
           onClose={() => setShowRequestsModal(false)}
+          onRequestUpdated={fetchPendingRequestsCount}
         />
       )}
 

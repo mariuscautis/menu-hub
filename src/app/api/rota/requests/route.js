@@ -48,10 +48,6 @@ export async function GET(request) {
           date,
           shift_start,
           shift_end
-        ),
-        approver:approved_by (
-          id,
-          name
         )
       `)
       .eq('restaurant_id', restaurantId);
@@ -96,7 +92,10 @@ export async function POST(request) {
       reason,
       shift_id,
       swap_with_staff_id,
-      swap_shift_id
+      swap_shift_id,
+      leave_type,
+      days_requested,
+      medical_certificate_provided
     } = body;
 
     // Validation
@@ -177,6 +176,9 @@ export async function POST(request) {
         shift_id,
         swap_with_staff_id,
         swap_shift_id,
+        leave_type,
+        days_requested,
+        medical_certificate_provided,
         status: 'pending'
       })
       .select(`
@@ -227,17 +229,21 @@ export async function PUT(request) {
       id,
       status,
       approved_by,
-      rejection_reason
+      rejection_reason,
+      date_from,
+      date_to,
+      reason,
+      leave_type
     } = body;
 
-    if (!id || !status) {
+    if (!id) {
       return NextResponse.json(
-        { error: 'Request ID and status are required' },
+        { error: 'Request ID is required' },
         { status: 400 }
       );
     }
 
-    if (!['pending', 'approved', 'rejected', 'cancelled'].includes(status)) {
+    if (status && !['pending', 'approved', 'rejected', 'cancelled'].includes(status)) {
       return NextResponse.json(
         { error: 'Invalid status' },
         { status: 400 }
@@ -276,9 +282,16 @@ export async function PUT(request) {
 
     // Build update object
     const updateData = {
-      status,
       updated_at: new Date().toISOString()
     };
+
+    // Add optional fields if provided
+    if (status) updateData.status = status;
+    if (date_from) updateData.date_from = date_from;
+    if (date_to) updateData.date_to = date_to;
+    if (reason !== undefined) updateData.reason = reason;
+    if (leave_type) updateData.leave_type = leave_type;
+    if (rejection_reason !== undefined) updateData.rejection_reason = rejection_reason;
 
     if (status === 'approved') {
       updateData.approved_by = approved_by;
@@ -341,51 +354,72 @@ export async function PUT(request) {
           date,
           shift_start,
           shift_end
-        ),
-        approver:approved_by (
-          id,
-          name
         )
       `)
       .single();
 
-    if (error) throw error;
-
-    // Create notifications when request is approved or rejected
-    if (status === 'approved') {
-      const requestTypeLabel = existingRequest.request_type === 'time_off' ? 'time-off' :
-                                existingRequest.request_type === 'swap' ? 'shift swap' :
-                                'shift cover';
-
-      await supabase.from('notifications').insert({
-        user_id: existingRequest.staff_id,
-        type: 'request_approved',
-        title: 'Request approved',
-        message: `Your ${requestTypeLabel} request has been approved`,
-        metadata: {
-          request_id: shiftRequest.id,
-          request_type: existingRequest.request_type,
-          approved_by
-        },
-        read: false
+    if (error) {
+      console.error('Database error updating shift request:', {
+        error,
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        existingRequest
       });
-    } else if (status === 'rejected') {
-      const requestTypeLabel = existingRequest.request_type === 'time_off' ? 'time-off' :
-                                existingRequest.request_type === 'swap' ? 'shift swap' :
-                                'shift cover';
+      throw error;
+    }
 
-      await supabase.from('notifications').insert({
-        user_id: existingRequest.staff_id,
-        type: 'request_rejected',
-        title: 'Request declined',
-        message: `Your ${requestTypeLabel} request was declined${rejection_reason ? ': ' + rejection_reason : ''}`,
-        metadata: {
-          request_id: shiftRequest.id,
-          request_type: existingRequest.request_type,
-          rejection_reason
-        },
-        read: false
-      });
+    // Create notifications when request is approved or rejected (non-blocking)
+    try {
+      // Get the staff member's user_id if they have an auth account
+      const { data: staffMember } = await supabase
+        .from('staff')
+        .select('user_id')
+        .eq('id', existingRequest.staff_id)
+        .single();
+
+      // Only create notification if staff has a user_id (auth account)
+      if (staffMember?.user_id) {
+        if (status === 'approved') {
+          const requestTypeLabel = existingRequest.request_type === 'time_off' ? 'time-off' :
+                                    existingRequest.request_type === 'swap' ? 'shift swap' :
+                                    'shift cover';
+
+          await supabase.from('notifications').insert({
+            user_id: staffMember.user_id,
+            type: 'request_approved',
+            title: 'Request approved',
+            message: `Your ${requestTypeLabel} request has been approved`,
+            metadata: {
+              request_id: shiftRequest.id,
+              request_type: existingRequest.request_type,
+              approved_by
+            },
+            read: false
+          });
+        } else if (status === 'rejected') {
+          const requestTypeLabel = existingRequest.request_type === 'time_off' ? 'time-off' :
+                                    existingRequest.request_type === 'swap' ? 'shift swap' :
+                                    'shift cover';
+
+          await supabase.from('notifications').insert({
+            user_id: staffMember.user_id,
+            type: 'request_rejected',
+            title: 'Request declined',
+            message: `Your ${requestTypeLabel} request was declined${rejection_reason ? ': ' + rejection_reason : ''}`,
+            metadata: {
+              request_id: shiftRequest.id,
+              request_type: existingRequest.request_type,
+              rejection_reason
+            },
+            read: false
+          });
+        }
+      }
+    } catch (notificationError) {
+      // Log notification error but don't fail the request
+      console.error('Failed to create notification:', notificationError);
     }
 
     return NextResponse.json({ request: shiftRequest });

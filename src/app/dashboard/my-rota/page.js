@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import ClockInOut from './ClockInOut';
 import WorkHistory from './WorkHistory';
+import TimeOffRequestModal from './TimeOffRequestModal';
+import RequestHistory from './RequestHistory';
 
 export default function MyRotaPage() {
   const [restaurant, setRestaurant] = useState(null);
@@ -13,6 +15,7 @@ export default function MyRotaPage() {
   const [selectedPeriod, setSelectedPeriod] = useState('week'); // 'week', 'month'
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [requestType, setRequestType] = useState('time_off');
+  const [leaveBalance, setLeaveBalance] = useState(null);
 
   useEffect(() => {
     // Check for staff session (PIN login)
@@ -74,11 +77,30 @@ export default function MyRotaPage() {
     setLoading(false);
   }, [restaurant, staff, selectedPeriod]);
 
+  const fetchLeaveBalance = useCallback(async () => {
+    if (!restaurant || !staff) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('staff_leave_balances')
+        .select('*')
+        .eq('staff_id', staff.id)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      setLeaveBalance(data);
+    } catch (error) {
+      console.error('Error fetching leave balance:', error);
+    }
+  }, [restaurant, staff]);
+
   useEffect(() => {
     if (restaurant && staff) {
       fetchShifts();
+      fetchLeaveBalance();
     }
-  }, [restaurant, staff, fetchShifts]);
+  }, [restaurant, staff, fetchShifts, fetchLeaveBalance]);
 
   // Real-time updates
   useEffect(() => {
@@ -94,12 +116,28 @@ export default function MyRotaPage() {
       }, () => {
         fetchShifts();
       })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'shift_requests',
+        filter: `staff_id=eq.${staff.id}`
+      }, () => {
+        fetchLeaveBalance(); // Refresh balance when requests change
+      })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'staff_leave_entitlements',
+        filter: `staff_id=eq.${staff.id}`
+      }, () => {
+        fetchLeaveBalance(); // Refresh balance when entitlements change
+      })
       .subscribe();
 
     return () => {
       shiftsChannel.unsubscribe();
     };
-  }, [restaurant, staff, fetchShifts]);
+  }, [restaurant, staff, fetchShifts, fetchLeaveBalance]);
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-GB', {
@@ -132,6 +170,34 @@ export default function MyRotaPage() {
     }, 0).toFixed(1);
   };
 
+  const handleTimeOffSubmit = async (requestData) => {
+    try {
+      const response = await fetch('/api/rota/requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          restaurant_id: restaurant.id,
+          staff_id: staff.id,
+          request_type: 'time_off',
+          ...requestData
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to submit request');
+      }
+
+      alert('Time off request submitted successfully! You will be notified when it is reviewed.');
+      setShowRequestModal(false);
+      fetchLeaveBalance(); // Refresh balance to show pending days
+    } catch (error) {
+      console.error('Error submitting request:', error);
+      throw error; // Re-throw so modal can show error
+    }
+  };
+
   const groupShiftsByDate = () => {
     const grouped = {};
     shifts.forEach(shift => {
@@ -162,7 +228,7 @@ export default function MyRotaPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
           <p className="text-sm text-slate-600 mb-1">Upcoming Shifts</p>
           <p className="text-3xl font-bold text-[#6262bd]">{shifts.length}</p>
@@ -177,6 +243,17 @@ export default function MyRotaPage() {
             {shifts.length > 0 ? formatDate(shifts[0].date) : 'None'}
           </p>
         </div>
+        <div className="bg-white border-2 border-green-100 rounded-2xl p-6">
+          <p className="text-sm text-green-600 mb-1">Holiday Days Left</p>
+          <p className="text-3xl font-bold text-green-700">
+            {leaveBalance ? (leaveBalance.holiday_days_remaining - leaveBalance.holiday_days_pending).toFixed(1) : '—'}
+          </p>
+          {leaveBalance && leaveBalance.holiday_days_pending > 0 && (
+            <p className="text-xs text-amber-600 mt-1">
+              ({leaveBalance.holiday_days_pending.toFixed(1)} pending)
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Clock In/Out Widget */}
@@ -187,6 +264,11 @@ export default function MyRotaPage() {
       {/* Work History */}
       <div className="mb-8">
         <WorkHistory staff={staff} restaurant={restaurant} />
+      </div>
+
+      {/* Request History */}
+      <div className="mb-8">
+        <RequestHistory staff={staff} restaurant={restaurant} />
       </div>
 
       {/* Upcoming Shifts Section Header */}
@@ -308,14 +390,23 @@ export default function MyRotaPage() {
         </div>
       )}
 
-      {/* Request Modal - Placeholder */}
-      {showRequestModal && (
+      {/* Time Off Request Modal */}
+      {showRequestModal && requestType === 'time_off' && (
+        <TimeOffRequestModal
+          staff={staff}
+          restaurant={restaurant}
+          leaveBalance={leaveBalance}
+          onClose={() => setShowRequestModal(false)}
+          onSubmit={handleTimeOffSubmit}
+        />
+      )}
+
+      {/* Shift Swap Modal - Placeholder for now */}
+      {showRequestModal && requestType === 'swap' && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full">
-            <h3 className="text-xl font-bold mb-4">
-              {requestType === 'time_off' ? 'Request Time Off' : 'Request Shift Swap'}
-            </h3>
-            <p className="text-slate-600 mb-6">Request functionality coming soon</p>
+            <h3 className="text-xl font-bold mb-4">Request Shift Swap</h3>
+            <p className="text-slate-600 mb-6">Shift swap functionality coming soon</p>
             <button
               onClick={() => setShowRequestModal(false)}
               className="w-full px-6 py-3 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252a5] transition-colors font-medium"
