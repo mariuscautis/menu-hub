@@ -14,6 +14,7 @@ import RequestsModal from './RequestsModal';
 import TemplatesModal from './TemplatesModal';
 import CurrentlyWorkingModal from './CurrentlyWorkingModal';
 import MobileRotaView from './MobileRotaView';
+import StaffAvailabilityCalendar from './StaffAvailabilityCalendar';
 
 const localizer = momentLocalizer(moment);
 const DnDCalendar = withDragAndDrop(Calendar);
@@ -403,7 +404,7 @@ export default function RotaPage() {
       </div>
 
       {/* Calendar */}
-      <div className="bg-white rounded-xl p-6 shadow-sm" style={{ height: 700 }}>
+      <div className="bg-white rounded-xl p-6 shadow-sm mb-8" style={{ height: 700 }}>
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
@@ -441,6 +442,12 @@ export default function RotaPage() {
           />
         )}
       </div>
+
+      {/* Staff Availability Calendar */}
+      <StaffAvailabilityCalendar
+        staff={staff}
+        restaurant={restaurant}
+      />
 
       {/* Modals */}
       {showShiftModal && (
