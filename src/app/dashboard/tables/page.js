@@ -341,7 +341,7 @@ export default function Tables() {
     // Get all unpaid, non-cancelled orders grouped by table
     const { data: orders } = await supabase
       .from('orders')
-      .select('table_id, total, status')
+      .select('table_id, total, status, delivered_at')
       .eq('restaurant_id', restaurantId)
       .eq('paid', false)
       .neq('status', 'cancelled')
@@ -352,11 +352,16 @@ export default function Tables() {
       if (!orderInfo[order.table_id]) {
         orderInfo[order.table_id] = {
           count: 0,
-          total: 0
+          total: 0,
+          hasReadyOrders: false
         }
       }
       orderInfo[order.table_id].count += 1
       orderInfo[order.table_id].total += order.total || 0
+      // Track if any order is ready AND not yet delivered
+      if (order.status === 'ready' && !order.delivered_at) {
+        orderInfo[order.table_id].hasReadyOrders = true
+      }
     })
 
     setTableOrderInfo(orderInfo)
@@ -715,6 +720,45 @@ export default function Tables() {
     } catch (error) {
       console.error('Error marking table as cleaned:', error)
       showNotification('error', 'Failed to mark table as cleaned. Please try again.')
+    }
+  }
+
+  const markOrderDelivered = async (table) => {
+    try {
+      // Get all 'ready' orders for this table
+      const { data: readyOrders, error: fetchError } = await supabase
+        .from('orders')
+        .select('id')
+        .eq('table_id', table.id)
+        .eq('status', 'ready')
+        .is('paid', false)
+        .is('delivered_at', null)
+
+      if (fetchError) throw fetchError
+
+      if (!readyOrders || readyOrders.length === 0) {
+        showNotification('info', 'No ready orders to deliver')
+        return
+      }
+
+      // Mark all ready orders as delivered
+      const { error: updateError } = await supabase
+        .from('orders')
+        .update({
+          delivered_at: new Date().toISOString()
+        })
+        .in('id', readyOrders.map(o => o.id))
+
+      if (updateError) throw updateError
+
+      // Refresh table order info
+      await fetchTableOrderInfo(restaurant.id)
+
+      const count = readyOrders.length
+      showNotification('success', `${count} order${count > 1 ? 's' : ''} marked as delivered to Table ${table.table_number}!`)
+    } catch (error) {
+      console.error('Error marking order as delivered:', error)
+      showNotification('error', 'Failed to mark order as delivered. Please try again.')
     }
   }
 
@@ -1252,6 +1296,7 @@ export default function Tables() {
               onPayBill={() => openPaymentModal(table)}
               onViewOrders={() => openOrderDetailsModal(table)}
               onMarkCleaned={() => markTableAsCleaned(table)}
+              onMarkDelivered={() => markOrderDelivered(table)}
               onViewReservations={() => openViewReservationsModal(table)}
               onCreateReservation={() => openCreateReservationModal(table)}
               onAcknowledgeWaiterCall={acknowledgeWaiterCall}
@@ -2291,11 +2336,12 @@ export default function Tables() {
   )
 }
 
-function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDownload, onDelete, onPlaceOrder, onPayBill, onViewOrders, onMarkCleaned, onViewReservations, onCreateReservation, onAcknowledgeWaiterCall }) {
+function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDownload, onDelete, onPlaceOrder, onPayBill, onViewOrders, onMarkCleaned, onMarkDelivered, onViewReservations, onCreateReservation, onAcknowledgeWaiterCall }) {
   const hasOpenOrders = orderInfo && orderInfo.count > 0
   const needsCleaning = table.status === 'needs_cleaning'
   const hasReservationsToday = reservations && reservations.length > 0
   const hasWaiterCall = waiterCalls && waiterCalls.length > 0
+  const hasReadyOrders = orderInfo && orderInfo.hasReadyOrders
 
   return (
     <div className={`bg-white border-2 rounded-2xl p-6 text-center hover:border-[#6262bd]/30 transition-colors relative ${
@@ -2311,6 +2357,20 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
         >
           <span className="text-base">👋</span>
           <span>WAITER NEEDED</span>
+        </button>
+      )}
+
+      {/* Order Ready Indicator Badge (bottom center) */}
+      {hasReadyOrders && !needsCleaning && (
+        <button
+          onClick={onMarkDelivered}
+          className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-green-500 text-white rounded-full px-4 py-2 text-xs font-bold shadow-lg hover:bg-green-600 transition-all cursor-pointer flex items-center gap-2 animate-pulse"
+          title="Order is ready - click to mark as delivered to table"
+        >
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+          </svg>
+          <span>ORDER READY!</span>
         </button>
       )}
 
