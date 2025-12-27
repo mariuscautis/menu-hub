@@ -245,12 +245,16 @@ export default function DashboardLayout({ children }) {
     if (!restaurant) return
 
     const fetchPendingOrdersCount = async () => {
-      // Count order items that haven't been started (preparing_started_at is null)
+      // Count distinct orders that have at least one item not started yet
+      // Filter by department if staff member has specific department
       const { data, error } = await supabase
         .from('order_items')
         .select(`
           id,
           preparing_started_at,
+          menu_items!inner (
+            department
+          ),
           orders!inner (
             id,
             restaurant_id,
@@ -265,7 +269,18 @@ export default function DashboardLayout({ children }) {
         .is('preparing_started_at', null)
 
       if (!error && data) {
-        setPendingOrdersCount(data.length)
+        // Filter by staff department if applicable
+        let filteredData = data
+
+        if (userType === 'staff' && staffDepartment && staffDepartment !== 'universal') {
+          filteredData = data.filter(item =>
+            item.menu_items?.department === staffDepartment
+          )
+        }
+
+        // Count unique order IDs (not individual items)
+        const uniqueOrders = new Set(filteredData.map(item => item.orders.id))
+        setPendingOrdersCount(uniqueOrders.size)
       }
     }
 
