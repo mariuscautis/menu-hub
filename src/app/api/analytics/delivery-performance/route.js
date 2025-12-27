@@ -12,64 +12,67 @@ export async function GET(request) {
     const restaurantId = searchParams.get('restaurant_id')
     const startDate = searchParams.get('start_date')
     const endDate = searchParams.get('end_date')
+    const department = searchParams.get('department') // Optional: filter by department/category
 
     if (!restaurantId) {
       return NextResponse.json({ error: 'Restaurant ID is required' }, { status: 400 })
     }
 
-    // Build base query
+    // Query order items with delivery data using the new view
     let query = supabase
-      .from('orders')
-      .select(`
-        id,
-        created_at,
-        marked_ready_at,
-        delivered_at,
-        total,
-        table_id,
-        tables (table_number)
-      `)
+      .from('order_item_delivery_analytics')
+      .select('*')
       .eq('restaurant_id', restaurantId)
-      .neq('status', 'cancelled')
       .not('delivered_at', 'is', null)
 
     // Add date filters if provided
     if (startDate) {
-      query = query.gte('created_at', startDate)
+      query = query.gte('order_time', startDate)
     }
     if (endDate) {
-      query = query.lte('created_at', endDate)
+      query = query.lte('order_time', endDate)
     }
 
-    const { data: orders, error } = await query.order('created_at', { ascending: false })
+    // Add department filter if provided
+    if (department) {
+      query = query.eq('item_category', department)
+    }
+
+    const { data: items, error } = await query.order('order_time', { ascending: false })
 
     if (error) throw error
 
-    // Calculate metrics
+    // Calculate metrics from item-level data
     const deliveryTimes = []
     const preparationTimes = []
     const waiterResponseTimes = []
+    const departmentStats = {}
 
-    orders.forEach(order => {
-      const createdAt = new Date(order.created_at)
-      const markedReadyAt = order.marked_ready_at ? new Date(order.marked_ready_at) : null
-      const deliveredAt = order.delivered_at ? new Date(order.delivered_at) : null
+    items.forEach(item => {
+      if (item.total_delivery_minutes) {
+        deliveryTimes.push(item.total_delivery_minutes)
+      }
+      if (item.preparation_minutes) {
+        preparationTimes.push(item.preparation_minutes)
+      }
+      if (item.waiter_response_minutes) {
+        waiterResponseTimes.push(item.waiter_response_minutes)
+      }
 
-      if (deliveredAt) {
-        // Total delivery time (order placed to delivered)
-        const deliveryMinutes = (deliveredAt - createdAt) / (1000 * 60)
-        deliveryTimes.push(deliveryMinutes)
-
-        if (markedReadyAt) {
-          // Preparation time (order placed to ready)
-          const prepMinutes = (markedReadyAt - createdAt) / (1000 * 60)
-          preparationTimes.push(prepMinutes)
-
-          // Waiter response time (ready to delivered)
-          const waiterMinutes = (deliveredAt - markedReadyAt) / (1000 * 60)
-          waiterResponseTimes.push(waiterMinutes)
+      // Track per-department statistics
+      const dept = item.item_category || 'other'
+      if (!departmentStats[dept]) {
+        departmentStats[dept] = {
+          itemCount: 0,
+          deliveryTimes: [],
+          preparationTimes: [],
+          waiterResponseTimes: []
         }
       }
+      departmentStats[dept].itemCount += item.quantity
+      if (item.total_delivery_minutes) departmentStats[dept].deliveryTimes.push(item.total_delivery_minutes)
+      if (item.preparation_minutes) departmentStats[dept].preparationTimes.push(item.preparation_minutes)
+      if (item.waiter_response_minutes) departmentStats[dept].waiterResponseTimes.push(item.waiter_response_minutes)
     })
 
     // Helper function to calculate average
@@ -83,8 +86,58 @@ export async function GET(request) {
       return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2
     }
 
+    // Calculate department-level analytics
+    const departmentAnalytics = {}
+    Object.keys(departmentStats).forEach(dept => {
+      const stats = departmentStats[dept]
+      departmentAnalytics[dept] = {
+        itemCount: stats.itemCount,
+        averageDeliveryTime: Math.round(avg(stats.deliveryTimes) * 10) / 10,
+        averagePreparationTime: Math.round(avg(stats.preparationTimes) * 10) / 10,
+        averageWaiterResponseTime: Math.round(avg(stats.waiterResponseTimes) * 10) / 10
+      }
+    })
+
+    // Group items by order for "recent orders" display
+    const orderMap = {}
+    items.forEach(item => {
+      if (!orderMap[item.order_id]) {
+        orderMap[item.order_id] = {
+          orderId: item.order_id,
+          tableNumber: item.table_number || 'N/A',
+          orderTime: item.order_time,
+          items: [],
+          avgDeliveryMinutes: 0,
+          avgPreparationMinutes: 0,
+          avgWaiterResponseMinutes: 0
+        }
+      }
+      orderMap[item.order_id].items.push({
+        name: item.item_name,
+        category: item.item_category,
+        quantity: item.quantity,
+        deliveryMinutes: item.total_delivery_minutes,
+        preparationMinutes: item.preparation_minutes,
+        waiterResponseMinutes: item.waiter_response_minutes
+      })
+    })
+
+    // Calculate average times per order
+    const recentOrders = Object.values(orderMap).slice(0, 10).map(order => {
+      const deliveries = order.items.map(i => i.deliveryMinutes).filter(Boolean)
+      const preps = order.items.map(i => i.preparationMinutes).filter(Boolean)
+      const waiter = order.items.map(i => i.waiterResponseMinutes).filter(Boolean)
+
+      return {
+        ...order,
+        avgDeliveryMinutes: Math.round(avg(deliveries) * 10) / 10,
+        avgPreparationMinutes: Math.round(avg(preps) * 10) / 10,
+        avgWaiterResponseMinutes: Math.round(avg(waiter) * 10) / 10
+      }
+    })
+
     const analytics = {
-      totalOrders: orders.length,
+      totalItems: items.length,
       averageDeliveryTime: Math.round(avg(deliveryTimes) * 10) / 10,
       medianDeliveryTime: Math.round(median(deliveryTimes) * 10) / 10,
       averagePreparationTime: Math.round(avg(preparationTimes) * 10) / 10,
@@ -93,21 +146,8 @@ export async function GET(request) {
       medianWaiterResponseTime: Math.round(median(waiterResponseTimes) * 10) / 10,
       fastestDelivery: deliveryTimes.length > 0 ? Math.round(Math.min(...deliveryTimes) * 10) / 10 : 0,
       slowestDelivery: deliveryTimes.length > 0 ? Math.round(Math.max(...deliveryTimes) * 10) / 10 : 0,
-      recentOrders: orders.slice(0, 10).map(order => {
-        const createdAt = new Date(order.created_at)
-        const markedReadyAt = order.marked_ready_at ? new Date(order.marked_ready_at) : null
-        const deliveredAt = order.delivered_at ? new Date(order.delivered_at) : null
-
-        return {
-          id: order.id,
-          tableNumber: order.tables?.table_number || 'N/A',
-          total: order.total,
-          orderTime: order.created_at,
-          deliveryMinutes: deliveredAt ? Math.round((deliveredAt - createdAt) / (1000 * 60) * 10) / 10 : null,
-          preparationMinutes: markedReadyAt ? Math.round((markedReadyAt - createdAt) / (1000 * 60) * 10) / 10 : null,
-          waiterResponseMinutes: (markedReadyAt && deliveredAt) ? Math.round((deliveredAt - markedReadyAt) / (1000 * 60) * 10) / 10 : null
-        }
-      })
+      departmentAnalytics,
+      recentOrders
     }
 
     return NextResponse.json(analytics)

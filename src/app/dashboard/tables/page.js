@@ -225,8 +225,13 @@ export default function Tables() {
     if (staffSessionData) {
       try {
         const staffSession = JSON.parse(staffSessionData)
+        console.log('🔍 Staff session found:', {
+          role: staffSession.role,
+          email: staffSession.email
+        })
         restaurantData = staffSession.restaurant
         userTypeData = staffSession.role === 'admin' ? 'owner' : 'staff'
+        console.log('🔍 Setting userType to:', userTypeData, '(based on role:', staffSession.role, ')')
         setUserType(userTypeData)
         setStaffDepartment(staffSession.department || 'universal')
         // Create a pseudo user object for compatibility
@@ -635,16 +640,34 @@ export default function Tables() {
     setSelectedTable(table)
 
     // Check if there's an existing open order for this table that is not completed and not paid
+    // Get the most recent unpaid order (there might be multiple)
     console.log('STEP 3: Fetching existing order from database...')
-    const { data: existingOrder } = await supabase
+    console.log('Looking for orders with table_id:', table.id)
+    const { data: existingOrders, error: fetchError } = await supabase
       .from('orders')
       .select('*, order_items(*)')
       .eq('table_id', table.id)
-      .in('status', ['pending', 'preparing'])
+      .in('status', ['pending', 'preparing', 'ready'])
       .is('paid', false)
-      .maybeSingle()
+      .order('created_at', { ascending: false })
+      .limit(1)
 
+    if (fetchError) {
+      console.error('Error fetching existing order:', fetchError)
+    }
+
+    const existingOrder = existingOrders && existingOrders.length > 0 ? existingOrders[0] : null
     console.log('STEP 4: Existing order found?', !!existingOrder)
+    if (!existingOrder) {
+      // Debug: Let's see ALL orders for this table to understand why
+      const { data: allOrders } = await supabase
+        .from('orders')
+        .select('id, status, paid, created_at')
+        .eq('table_id', table.id)
+        .order('created_at', { ascending: false })
+        .limit(5)
+      console.log('All recent orders for this table:', allOrders)
+    }
     if (existingOrder) {
       console.log('Existing order ID:', existingOrder.id)
       console.log('Raw order_items from DB:', existingOrder.order_items)
@@ -1049,6 +1072,7 @@ export default function Tables() {
       if (itemIndex === -1) return prevItems
 
       const item = prevItems[itemIndex]
+
 
       // For staff: cannot reduce below existing quantity
       if (userType === 'staff' && item.isExisting && newQuantity < item.existingQuantity) {
@@ -1572,6 +1596,18 @@ export default function Tables() {
                               </div>
 
                               <div className="flex items-center gap-2">
+                                {(() => {
+                                  // Debug: Only log once per render
+                                  if (orderItems.indexOf(item) === 0) {
+                                    console.log('🔍 Modal Controls Debug:', {
+                                      userType,
+                                      currentOrder: !!currentOrder,
+                                      condition: userType === 'owner' || !currentOrder,
+                                      willShowOwnerControls: userType === 'owner' || !currentOrder
+                                    })
+                                  }
+                                  return null
+                                })()}
                                 {userType === 'owner' || !currentOrder ? (
                                   // Owners can always modify, staff can only modify NEW orders
                                   <>
