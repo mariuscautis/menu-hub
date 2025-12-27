@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import NotificationBell from '@/components/NotificationBell'
+import ThemeToggle from '@/components/ThemeToggle'
 
 export default function DashboardLayout({ children }) {
   const pathname = usePathname()
@@ -671,10 +672,10 @@ export default function DashboardLayout({ children }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
-        <div className="text-slate-500 mb-4">Loading...</div>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-6">
+        <div className="text-slate-500 dark:text-slate-400 mb-4">Loading...</div>
         {debug && (
-          <pre className="bg-yellow-100 p-4 rounded text-xs max-w-2xl overflow-auto whitespace-pre-wrap">
+          <pre className="bg-yellow-100 dark:bg-yellow-900 dark:text-yellow-100 p-4 rounded text-xs max-w-2xl overflow-auto whitespace-pre-wrap">
             {debug}
           </pre>
         )}
@@ -687,15 +688,15 @@ export default function DashboardLayout({ children }) {
   const departmentLabel = getDepartmentLabel()
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
-  
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex">
+
 
       {/* Sidebar */}
-      <aside className={`w-64 bg-white border-r-2 border-slate-100 flex flex-col`}>
-        <div className="p-6 border-b-2 border-slate-100">
+      <aside className={`w-64 bg-white dark:bg-slate-900 border-r-2 border-slate-100 dark:border-slate-800 flex flex-col`}>
+        <div className="p-6 border-b-2 border-slate-100 dark:border-slate-800">
           <div className="flex items-center space-x-2">
             {restaurant?.logo_url ? (
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden bg-slate-50">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800">
                 <img
                   src={restaurant.logo_url}
                   alt={restaurant.name}
@@ -703,11 +704,11 @@ export default function DashboardLayout({ children }) {
                 />
               </div>
             ) : (
-              <div className="w-9 h-9 bg-[#6262bd] rounded-xl flex items-center justify-center">
+              <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center">
                 <span className="text-white font-bold text-lg">M</span>
               </div>
             )}
-            <span className="text-xl font-bold text-slate-700">
+            <span className="text-xl font-bold text-slate-700 dark:text-slate-200">
               {restaurant?.name || 'Menu Hub'}
             </span>
           </div>
@@ -727,8 +728,8 @@ export default function DashboardLayout({ children }) {
                       }))}
                       className={`flex items-center justify-between px-4 py-3 rounded-xl font-medium transition-colors cursor-pointer ${
                         pathname.startsWith(item.href)
-                          ? 'bg-[#6262bd]/10 text-[#6262bd]'
-                          : 'text-slate-600 hover:bg-slate-100'
+                          ? 'bg-primary/10 text-primary dark:bg-primary/20'
+                          : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                       }`}
                     >
                       <div className="flex items-center space-x-3">
@@ -757,8 +758,8 @@ export default function DashboardLayout({ children }) {
                               href={child.href}
                               className={`flex items-center space-x-3 px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                                 pathname === child.href
-                                  ? 'bg-[#6262bd]/10 text-[#6262bd]'
-                                  : 'text-slate-600 hover:bg-slate-100'
+                                  ? 'bg-primary/10 text-primary dark:bg-primary/20'
+                                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                               }`}
                             >
                               {child.icon}
@@ -775,8 +776,8 @@ export default function DashboardLayout({ children }) {
                     href={item.href}
                     className={`flex items-center justify-between px-4 py-3 rounded-xl font-medium transition-colors ${
                       pathname === item.href
-                        ? 'bg-[#6262bd]/10 text-[#6262bd]'
-                        : 'text-slate-600 hover:bg-slate-100'
+                        ? 'bg-primary/10 text-primary dark:bg-primary/20'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                     }`}
                   >
                     <div className="flex items-center space-x-3">
@@ -785,7 +786,7 @@ export default function DashboardLayout({ children }) {
                     </div>
                     {item.badge && (
                       <span className={`text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center ${
-                        item.label === 'Orders' ? 'bg-[#6262bd]' : 'bg-red-500'
+                        item.label === 'Orders' ? 'bg-primary' : 'bg-red-500'
                       }`}>
                         {item.badge}
                       </span>
@@ -796,10 +797,10 @@ export default function DashboardLayout({ children }) {
             ))}
 
             {isPlatformAdmin && (
-              <li className="pt-4 mt-4 border-t border-slate-100">
+              <li className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800">
                 <Link
                   href="/admin"
-                  className="flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-amber-600 hover:bg-amber-50 transition-colors"
+                  className="flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-amber-600 dark:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950 transition-colors"
                 >
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
@@ -811,12 +812,12 @@ export default function DashboardLayout({ children }) {
           </ul>
         </nav>
 
-        <div className="p-4 border-t-2 border-slate-100">
+        <div className="p-4 border-t-2 border-slate-100 dark:border-slate-800">
           <div className="px-4 py-3 mb-3">
             <div className="flex items-start justify-between mb-2">
               <div className="flex-1">
-                <p className="text-sm font-medium text-slate-700 truncate">{restaurant?.name}</p>
-                <p className="text-xs text-slate-400 truncate">{userEmail}</p>
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">{restaurant?.name}</p>
+                <p className="text-xs text-slate-400 dark:text-slate-500 truncate">{userEmail}</p>
               </div>
               <NotificationBell />
             </div>
@@ -833,10 +834,13 @@ export default function DashboardLayout({ children }) {
               )}
             </div>
           </div>
+          <div className="mb-2">
+            <ThemeToggle />
+          </div>
           {(userType === 'staff' || userType === 'staff-admin') ? (
             <button
               onClick={handleLogout}
-              className="w-full bg-red-500 text-white px-4 py-4 rounded-xl font-bold hover:bg-red-600 transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-red-500 dark:bg-red-600 text-white px-4 py-4 rounded-xl font-bold hover:bg-red-600 dark:hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
             >
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
@@ -846,7 +850,7 @@ export default function DashboardLayout({ children }) {
           ) : (
             <button
               onClick={handleLogout}
-              className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-100 font-medium"
+              className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
