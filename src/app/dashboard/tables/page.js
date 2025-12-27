@@ -118,19 +118,19 @@ export default function Tables() {
       )
       .subscribe()
 
-    // Subscribe to order_items changes (when items are added to orders)
+    // Subscribe to order_items changes (when items are added or updated)
     const orderItemsChannel = supabase
       .channel(`order-items-realtime-tables-${Date.now()}`)
       .on(
         'postgres_changes',
         {
-          event: 'INSERT',
+          event: '*', // Changed from 'INSERT' to '*' to catch UPDATE events too
           schema: 'public',
           table: 'order_items'
         },
         (payload) => {
-          console.log('Tables page - Order item added:', payload)
-          // Refetch when new items are added to orders
+          console.log('Tables page - Order item changed:', payload)
+          // Refetch when items are added or updated (marked ready, delivered, etc.)
           setTimeout(() => {
             fetchTableOrderInfo(restaurantId)
           }, 100)
@@ -338,10 +338,24 @@ export default function Tables() {
   }
 
   const fetchTableOrderInfo = async (restaurantId) => {
-    // Get all unpaid, non-cancelled orders grouped by table
+    // Get all unpaid, non-cancelled orders with their items
     const { data: orders } = await supabase
       .from('orders')
-      .select('table_id, total, status, delivered_at')
+      .select(`
+        id,
+        table_id,
+        total,
+        status,
+        delivered_at,
+        order_items (
+          id,
+          marked_ready_at,
+          delivered_at,
+          menu_items (
+            department
+          )
+        )
+      `)
       .eq('restaurant_id', restaurantId)
       .eq('paid', false)
       .neq('status', 'cancelled')
@@ -353,14 +367,25 @@ export default function Tables() {
         orderInfo[order.table_id] = {
           count: 0,
           total: 0,
-          hasReadyOrders: false
+          readyDepartments: [] // Array of departments with ready items
         }
       }
       orderInfo[order.table_id].count += 1
       orderInfo[order.table_id].total += order.total || 0
-      // Track if any order is ready AND not yet delivered
-      if (order.status === 'ready' && !order.delivered_at) {
-        orderInfo[order.table_id].hasReadyOrders = true
+
+      // Track which departments have ready items that aren't delivered yet
+      // Check items regardless of order status
+      if (order.order_items) {
+        order.order_items.forEach(item => {
+          // Item is ready if marked_ready_at is set and delivered_at is null
+          if (item.marked_ready_at && !item.delivered_at) {
+            const department = item.menu_items?.department || 'kitchen'
+            // Add to readyDepartments if not already there
+            if (!orderInfo[order.table_id].readyDepartments.includes(department)) {
+              orderInfo[order.table_id].readyDepartments.push(department)
+            }
+          }
+        })
       }
     })
 
@@ -723,42 +748,68 @@ export default function Tables() {
     }
   }
 
-  const markOrderDelivered = async (table) => {
+  const markOrderDelivered = async (table, department) => {
     try {
-      // Get all 'ready' orders for this table
-      const { data: readyOrders, error: fetchError } = await supabase
+      // Get all unpaid orders for this table with their items
+      const { data: orders, error: fetchError } = await supabase
         .from('orders')
-        .select('id')
+        .select(`
+          id,
+          order_items (
+            id,
+            marked_ready_at,
+            delivered_at,
+            menu_items (
+              department,
+              name
+            )
+          )
+        `)
         .eq('table_id', table.id)
-        .eq('status', 'ready')
         .is('paid', false)
-        .is('delivered_at', null)
 
       if (fetchError) throw fetchError
 
-      if (!readyOrders || readyOrders.length === 0) {
-        showNotification('info', 'No ready orders to deliver')
+      if (!orders || orders.length === 0) {
+        showNotification('info', 'No orders to deliver')
         return
       }
 
-      // Mark all ready orders as delivered
+      // Find all items from the specified department that are ready but not delivered
+      const itemsToDeliver = []
+      orders.forEach(order => {
+        order.order_items?.forEach(item => {
+          const itemDepartment = item.menu_items?.department || 'kitchen'
+          // Match items from this department that are ready but not delivered
+          if (itemDepartment === department && item.marked_ready_at && !item.delivered_at) {
+            itemsToDeliver.push(item.id)
+          }
+        })
+      })
+
+      if (itemsToDeliver.length === 0) {
+        showNotification('info', `No ready ${department} items to deliver`)
+        return
+      }
+
+      // Mark items as delivered
       const { error: updateError } = await supabase
-        .from('orders')
+        .from('order_items')
         .update({
           delivered_at: new Date().toISOString()
         })
-        .in('id', readyOrders.map(o => o.id))
+        .in('id', itemsToDeliver)
 
       if (updateError) throw updateError
 
       // Refresh table order info
       await fetchTableOrderInfo(restaurant.id)
 
-      const count = readyOrders.length
-      showNotification('success', `${count} order${count > 1 ? 's' : ''} marked as delivered to Table ${table.table_number}!`)
+      const departmentLabel = department.charAt(0).toUpperCase() + department.slice(1)
+      showNotification('success', `${itemsToDeliver.length} ${departmentLabel} item${itemsToDeliver.length > 1 ? 's' : ''} delivered to Table ${table.table_number}!`)
     } catch (error) {
-      console.error('Error marking order as delivered:', error)
-      showNotification('error', 'Failed to mark order as delivered. Please try again.')
+      console.error('Error marking items as delivered:', error)
+      showNotification('error', 'Failed to mark items as delivered. Please try again.')
     }
   }
 
@@ -1296,7 +1347,7 @@ export default function Tables() {
               onPayBill={() => openPaymentModal(table)}
               onViewOrders={() => openOrderDetailsModal(table)}
               onMarkCleaned={() => markTableAsCleaned(table)}
-              onMarkDelivered={() => markOrderDelivered(table)}
+              onMarkDelivered={(department) => markOrderDelivered(table, department)}
               onViewReservations={() => openViewReservationsModal(table)}
               onCreateReservation={() => openCreateReservationModal(table)}
               onAcknowledgeWaiterCall={acknowledgeWaiterCall}
@@ -2341,7 +2392,30 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
   const needsCleaning = table.status === 'needs_cleaning'
   const hasReservationsToday = reservations && reservations.length > 0
   const hasWaiterCall = waiterCalls && waiterCalls.length > 0
-  const hasReadyOrders = orderInfo && orderInfo.hasReadyOrders
+  const readyDepartments = orderInfo?.readyDepartments || []
+
+  // Department colors
+  const getDepartmentColor = (dept) => {
+    const colors = {
+      kitchen: 'bg-green-500 hover:bg-green-600',
+      bar: 'bg-blue-500 hover:bg-blue-600',
+      food: 'bg-green-500 hover:bg-green-600',
+      drinks: 'bg-blue-500 hover:bg-blue-600',
+      other: 'bg-purple-500 hover:bg-purple-600'
+    }
+    return colors[dept] || colors.other
+  }
+
+  const getDepartmentLabel = (dept) => {
+    const labels = {
+      kitchen: 'KITCHEN',
+      bar: 'BAR',
+      food: 'FOOD',
+      drinks: 'DRINKS',
+      other: 'OTHER'
+    }
+    return labels[dept] || dept.toUpperCase()
+  }
 
   return (
     <div className={`bg-white border-2 rounded-2xl p-6 text-center hover:border-[#6262bd]/30 transition-colors relative ${
@@ -2360,18 +2434,23 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
         </button>
       )}
 
-      {/* Order Ready Indicator Badge (bottom center) */}
-      {hasReadyOrders && !needsCleaning && (
-        <button
-          onClick={onMarkDelivered}
-          className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-green-500 text-white rounded-full px-4 py-2 text-xs font-bold shadow-lg hover:bg-green-600 transition-all cursor-pointer flex items-center gap-2 animate-pulse"
-          title="Order is ready - click to mark as delivered to table"
-        >
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-          </svg>
-          <span>ORDER READY!</span>
-        </button>
+      {/* Department-Specific Order Ready Badges (bottom center) */}
+      {readyDepartments.length > 0 && !needsCleaning && (
+        <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+          {readyDepartments.map((dept, idx) => (
+            <button
+              key={dept}
+              onClick={() => onMarkDelivered(dept)}
+              className={`${getDepartmentColor(dept)} text-white rounded-full px-3 py-1.5 text-xs font-bold shadow-lg transition-all cursor-pointer flex items-center gap-1.5 animate-pulse`}
+              title={`${getDepartmentLabel(dept)} items ready - click to mark as delivered`}
+            >
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              <span>{getDepartmentLabel(dept)} READY!</span>
+            </button>
+          ))}
+        </div>
       )}
 
       {/* Reservation Indicator Badge (top left) */}

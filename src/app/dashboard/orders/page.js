@@ -146,10 +146,24 @@ export default function Orders() {
       .select(`
         *,
         tables (table_number),
-        order_items (*)
+        order_items (
+          *,
+          preparing_started_at,
+          marked_ready_at,
+          delivered_at
+        )
       `)
       .eq('restaurant_id', restaurantId)
       .order('created_at', { ascending: false })
+
+    console.log('📦 Fetched orders:', data?.length)
+    if (data && data.length > 0) {
+      console.log('📦 First order items:', data[0].order_items?.map(i => ({
+        id: i.id,
+        preparing_started_at: i.preparing_started_at,
+        marked_ready_at: i.marked_ready_at
+      })))
+    }
 
     setOrders(data || [])
   }
@@ -163,6 +177,174 @@ export default function Orders() {
     // Immediately refetch orders to update UI
     if (restaurant) {
       fetchOrders(restaurant.id)
+    }
+  }
+
+  // Mark department as preparing
+  const startPreparingDepartment = async (orderId, department) => {
+    try {
+      // Get order items for this department
+      const { data: order, error: fetchError } = await supabase
+        .from('orders')
+        .select(`
+          id,
+          status,
+          order_items (
+            id,
+            menu_item_id,
+            preparing_started_at
+          )
+        `)
+        .eq('id', orderId)
+        .single()
+
+      if (fetchError) throw fetchError
+
+      // Filter items by department
+      const itemsToStart = order.order_items.filter(item => {
+        const menuItem = menuItems.find(mi => mi.id === item.menu_item_id)
+        return menuItem?.department === department && !item.preparing_started_at
+      })
+
+      if (itemsToStart.length === 0) {
+        showNotification('info', `No ${department} items to start preparing`)
+        return
+      }
+
+      // Update preparing_started_at for these items
+      console.log('Updating order_items with IDs:', itemsToStart.map(item => item.id))
+      const updatePayload = { preparing_started_at: new Date().toISOString() }
+      console.log('Update payload:', updatePayload)
+
+      // Try updating WITHOUT .select() to see if that's the issue
+      const { error: updateError, count } = await supabase
+        .from('order_items')
+        .update(updatePayload)
+        .in('id', itemsToStart.map(item => item.id))
+
+      console.log('Update result - error:', updateError)
+      console.log('Update result - count:', count)
+
+      if (updateError) {
+        console.error('UPDATE ERROR DETAILS:', JSON.stringify(updateError, null, 2))
+        throw updateError
+      }
+
+      // Verify the update worked by fetching the item directly
+      const { data: verifyData, error: verifyError } = await supabase
+        .from('order_items')
+        .select('id, preparing_started_at')
+        .in('id', itemsToStart.map(item => item.id))
+
+      console.log('Verification SELECT - data:', verifyData)
+      console.log('Verification SELECT - error:', verifyError)
+
+      if (!verifyData || verifyData.length === 0) {
+        console.error('VERIFICATION FAILED - Cannot read back updated rows')
+        throw new Error('Update may have succeeded but cannot verify - SELECT policy issue')
+      }
+
+      // Update order status to 'preparing' if still pending
+      if (order.status === 'pending') {
+        await supabase
+          .from('orders')
+          .update({ status: 'preparing' })
+          .eq('id', orderId)
+      }
+
+      // Refresh orders
+      if (restaurant) {
+        await fetchOrders(restaurant.id)
+      }
+
+      const deptLabel = department.charAt(0).toUpperCase() + department.slice(1)
+      showNotification('success', `${deptLabel} started preparing!`)
+    } catch (error) {
+      console.error('Error starting department preparation:', error)
+      showNotification('error', 'Failed to start preparing')
+    }
+  }
+
+  // Mark items as ready for a specific department
+  const markDepartmentReady = async (orderId, department) => {
+    try {
+      // First, get all order items for this order
+      const { data: order, error: fetchError } = await supabase
+        .from('orders')
+        .select(`
+          id,
+          status,
+          order_items (
+            id,
+            menu_item_id,
+            marked_ready_at
+          )
+        `)
+        .eq('id', orderId)
+        .single()
+
+      if (fetchError) throw fetchError
+
+      // Filter items by department
+      const itemsToMark = order.order_items.filter(item => {
+        const menuItem = menuItems.find(mi => mi.id === item.menu_item_id)
+        return menuItem?.department === department && !item.marked_ready_at
+      })
+
+      console.log(`🔍 Mark ${department} ready - Total items in order:`, order.order_items.length)
+      console.log(`🔍 Items filtered for ${department}:`, itemsToMark.length)
+      console.log(`🔍 Item IDs to mark ready:`, itemsToMark.map(i => i.id))
+
+      if (itemsToMark.length === 0) {
+        showNotification('info', `No ${department} items to mark as ready`)
+        return
+      }
+
+      // Update marked_ready_at for these items
+      const updatePayload = { marked_ready_at: new Date().toISOString() }
+      console.log('🔍 Updating with payload:', updatePayload)
+      console.log('🔍 Using item IDs:', itemsToMark.map(item => item.id))
+
+      const { error: updateError, count } = await supabase
+        .from('order_items')
+        .update(updatePayload)
+        .in('id', itemsToMark.map(item => item.id))
+
+      console.log('🔍 Mark ready UPDATE - error:', updateError)
+      console.log('🔍 Mark ready UPDATE - count:', count)
+
+      if (updateError) throw updateError
+
+      // Check if ALL items are now marked ready
+      // If so, update order status to 'ready'
+      const { data: allItems, error: checkError } = await supabase
+        .from('order_items')
+        .select('id, marked_ready_at')
+        .eq('order_id', orderId)
+
+      if (!checkError && allItems) {
+        const allReady = allItems.every(item => item.marked_ready_at !== null)
+        console.log('🔍 All items ready check:', allReady, `(${allItems.filter(i => i.marked_ready_at).length}/${allItems.length})`)
+
+        if (allReady && order.status !== 'ready') {
+          console.log('🔍 All items ready - updating order status to ready')
+          await supabase
+            .from('orders')
+            .update({ status: 'ready' })
+            .eq('id', orderId)
+        }
+      }
+
+      // Refresh orders
+      if (restaurant) {
+        await fetchOrders(restaurant.id)
+      }
+
+      const deptLabel = department.charAt(0).toUpperCase() + department.slice(1)
+      showNotification('success', `${deptLabel} items marked as ready!`)
+    } catch (error) {
+      console.error('Error marking department ready:', error)
+      showNotification('error', 'Failed to mark items as ready')
     }
   }
 
@@ -375,6 +557,14 @@ export default function Orders() {
         <div className="space-y-4">
           {filteredOrders.map((order) => {
             const filteredItems = filterOrderItems(order.order_items)
+
+            // Debug: Log what filteredItems contains
+            console.log(`📋 Order ${order.id.slice(0, 8)} filteredItems:`, filteredItems.map(i => ({
+              name: i.name,
+              preparing_started_at: i.preparing_started_at,
+              marked_ready_at: i.marked_ready_at
+            })))
+
             // Skip orders with no relevant items for this department
             if (filteredItems.length === 0 && staffDepartment && staffDepartment !== 'universal' && userType !== 'owner') {
               return null
@@ -467,31 +657,93 @@ export default function Orders() {
 
               {/* Action Buttons */}
               {!order.paid && (
-                <div className="flex gap-3">
-                  {order.status === 'pending' && (
-                  <button
-                    onClick={() => updateOrderStatus(order.id, 'preparing')}
-                    className="bg-[#6262bd] text-white px-4 py-2 rounded-xl font-medium hover:bg-[#5252a3]"
-                  >
-                    Start Preparing
-                  </button>
-                )}
-                {order.status === 'preparing' && (
-                  <button
-                    onClick={() => updateOrderStatus(order.id, 'ready')}
-                    className="bg-green-600 text-white px-4 py-2 rounded-xl font-medium hover:bg-green-700"
-                  >
-                    Mark Ready
-                  </button>
-                )}
-                {order.status === 'ready' && (
-                  <button
-                    onClick={() => updateOrderStatus(order.id, 'completed')}
-                    className="bg-slate-600 text-white px-4 py-2 rounded-xl font-medium hover:bg-slate-700"
-                  >
-                    Complete Order
-                  </button>
-                )}
+                <div className="flex flex-col gap-3">
+                  {/* Group items by department for all statuses */}
+                  {(() => {
+                    const deptGroups = {}
+                    filteredItems.forEach(item => {
+                      const dept = getItemDepartment(item.menu_item_id)
+                      if (!deptGroups[dept]) {
+                        deptGroups[dept] = {
+                          items: [],
+                          hasStartedPreparing: false,
+                          hasMarkedReady: false
+                        }
+                      }
+                      deptGroups[dept].items.push(item)
+
+                      // Check if any item in this department has started preparing
+                      if (item.preparing_started_at) {
+                        deptGroups[dept].hasStartedPreparing = true
+                      }
+
+                      // Check if any item in this department is marked ready
+                      if (item.marked_ready_at) {
+                        deptGroups[dept].hasMarkedReady = true
+                      }
+                    })
+
+                    // Debug logging
+                    console.log('🔍 Order', order.id.slice(0, 8), 'status:', order.status)
+                    console.log('🔍 Dept groups:', Object.keys(deptGroups).map(dept => ({
+                      dept,
+                      hasStarted: deptGroups[dept].hasStartedPreparing,
+                      hasReady: deptGroups[dept].hasMarkedReady,
+                      items: deptGroups[dept].items.map(i => ({
+                        name: i.name,
+                        preparing_started_at: i.preparing_started_at,
+                        marked_ready_at: i.marked_ready_at
+                      }))
+                    })))
+
+                    const buttons = []
+
+                    // For each department, show appropriate button
+                    Object.keys(deptGroups).forEach(dept => {
+                      const deptData = deptGroups[dept]
+                      const deptLabel = dept.charAt(0).toUpperCase() + dept.slice(1)
+                      const deptIcon = dept === 'bar' ? '🍸' : '🍳'
+
+                      // Pending order: Show "Start Preparing" for each department
+                      if (order.status === 'pending' || (order.status === 'preparing' && !deptData.hasStartedPreparing)) {
+                        buttons.push(
+                          <button
+                            key={`start-${dept}`}
+                            onClick={() => startPreparingDepartment(order.id, dept)}
+                            className="bg-[#6262bd] text-white px-4 py-2 rounded-xl font-medium hover:bg-[#5252a3] flex items-center justify-center gap-2"
+                          >
+                            <span>{deptIcon}</span>
+                            <span>Start Preparing {deptLabel}</span>
+                          </button>
+                        )
+                      }
+                      // Department has started but not marked ready: Show "Mark Ready"
+                      else if ((order.status === 'preparing' || order.status === 'ready') && deptData.hasStartedPreparing && !deptData.hasMarkedReady) {
+                        const deptColor = dept === 'bar' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'
+                        buttons.push(
+                          <button
+                            key={`ready-${dept}`}
+                            onClick={() => markDepartmentReady(order.id, dept)}
+                            className={`${deptColor} text-white px-4 py-2 rounded-xl font-medium flex items-center justify-center gap-2`}
+                          >
+                            <span>{deptIcon}</span>
+                            <span>Mark {deptLabel} Ready</span>
+                          </button>
+                        )
+                      }
+                    })
+
+                    return <div className="space-y-2">{buttons}</div>
+                  })()}
+
+                  {order.status === 'ready' && (
+                    <button
+                      onClick={() => updateOrderStatus(order.id, 'completed')}
+                      className="bg-slate-600 text-white px-4 py-2 rounded-xl font-medium hover:bg-slate-700"
+                    >
+                      Complete Order
+                    </button>
+                  )}
                   {userType === 'owner' && ['pending', 'preparing'].includes(order.status) && (
                     <button
                       onClick={() => confirmCancelOrder(order)}

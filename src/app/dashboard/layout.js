@@ -21,6 +21,7 @@ export default function DashboardLayout({ children }) {
     analytics: true // Analytics menu starts expanded
   })
   const [pendingReservationsCount, setPendingReservationsCount] = useState(0)
+  const [pendingOrdersCount, setPendingOrdersCount] = useState(0)
 
   // Helper function to fetch department permissions
   const fetchDepartmentPermissions = async (restaurantId, department) => {
@@ -239,6 +240,63 @@ export default function DashboardLayout({ children }) {
     }
   }, [restaurant, staffDepartment])
 
+  // Real-time pending orders count
+  useEffect(() => {
+    if (!restaurant) return
+
+    const fetchPendingOrdersCount = async () => {
+      // Count order items that haven't been started (preparing_started_at is null)
+      const { data, error } = await supabase
+        .from('order_items')
+        .select(`
+          id,
+          preparing_started_at,
+          orders!inner (
+            id,
+            restaurant_id,
+            paid,
+            status
+          )
+        `)
+        .eq('orders.restaurant_id', restaurant.id)
+        .eq('orders.paid', false)
+        .neq('orders.status', 'cancelled')
+        .neq('orders.status', 'completed')
+        .is('preparing_started_at', null)
+
+      if (!error && data) {
+        setPendingOrdersCount(data.length)
+      }
+    }
+
+    // Initial fetch
+    fetchPendingOrdersCount()
+
+    // Set up real-time subscription for order_items changes
+    const channel = supabase
+      .channel(`orders-badge-realtime-${Date.now()}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'order_items'
+      }, () => {
+        fetchPendingOrdersCount()
+      })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'orders',
+        filter: `restaurant_id=eq.${restaurant.id}`
+      }, () => {
+        fetchPendingOrdersCount()
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [restaurant])
+
   const handleLogout = async () => {
     // Check if staff session exists to redirect to restaurant-specific login
     const staffSessionData = localStorage.getItem('staff_session')
@@ -294,6 +352,7 @@ export default function DashboardLayout({ children }) {
       items.push({
         href: '/dashboard/orders',
         label: 'Orders',
+        badge: pendingOrdersCount > 0 ? pendingOrdersCount : null,
         icon: (
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l4.59-4.58L18 11l-6 6z"/>
@@ -710,7 +769,9 @@ export default function DashboardLayout({ children }) {
                       <span>{item.label}</span>
                     </div>
                     {item.badge && (
-                      <span className="bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                      <span className={`text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center ${
+                        item.label === 'Orders' ? 'bg-[#6262bd]' : 'bg-red-500'
+                      }`}>
                         {item.badge}
                       </span>
                     )}
