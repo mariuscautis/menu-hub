@@ -390,6 +390,19 @@ export default function DashboardLayout({ children }) {
       })
     }
 
+    // Floor Plan - Only for owners and admins
+    if (userType === 'owner' || userType === 'staff-admin') {
+      items.push({
+        href: '/dashboard/floor-plan',
+        label: 'Floor Plan',
+        icon: (
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M19 2H9c-1.1 0-2 .9-2 2v5.5h2V4h10v16h-5v2h5c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM2 10v11c0 1.1.9 2 2 2h9c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2zm11 11H4v-2h9v2zm0-3.5H4v-2h9v2zM13 14H4v-2h9v2zm0-3.5H4V9h9v1.5z"/>
+          </svg>
+        )
+      })
+    }
+
     // Reservations - Check 'reservations' permission
     if (hasPermission('reservations')) {
       items.push({
