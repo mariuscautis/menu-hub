@@ -521,19 +521,6 @@ export default function DashboardLayout({ children }) {
       })
     }
 
-    // My Availability - Check 'my_availability' permission (for staff only)
-    if ((userType === 'staff' || userType === 'staff-admin') && hasPermission('my_availability')) {
-      items.push({
-        href: '/dashboard/my-availability',
-        label: 'My Availability',
-        icon: (
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm4.2 14.2L11 13V7h1.5v5.2l4.5 2.7-.8 1.3z"/>
-          </svg>
-        )
-      })
-    }
-
     if (userType === 'owner' || userType === 'staff-admin') {
 
       items.push({

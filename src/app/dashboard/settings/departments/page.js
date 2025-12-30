@@ -12,7 +12,6 @@ const AVAILABLE_PERMISSIONS = [
   { id: 'report_loss', label: 'Report Loss', description: 'Report stock losses' },
   { id: 'floor_plan', label: 'Floor Plan', description: 'View floor plan and place table orders' },
   { id: 'my_rota', label: 'My Rota', description: 'View own work schedule' },
-  { id: 'my_availability', label: 'My Availability', description: 'Manage own availability' },
 ];
 export default function DepartmentsSettingsPage() {
   const [restaurant, setRestaurant] = useState(null);
@@ -54,7 +53,7 @@ export default function DepartmentsSettingsPage() {
         setDepartments([
           { name: 'kitchen', permissions: ['orders_kitchen'], isNew: true },
           { name: 'bar', permissions: ['orders_bar', 'tables', 'reservations', 'report_loss'], isNew: true },
-          { name: 'universal', permissions: ['overview', 'orders_kitchen', 'orders_bar', 'tables', 'reservations', 'report_loss', 'my_rota', 'my_availability'], isNew: true }
+          { name: 'universal', permissions: ['overview', 'orders_kitchen', 'orders_bar', 'tables', 'reservations', 'report_loss', 'my_rota'], isNew: true }
         ]);
       }
     }
