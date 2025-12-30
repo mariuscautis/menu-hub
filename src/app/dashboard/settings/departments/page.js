@@ -10,6 +10,7 @@ const AVAILABLE_PERMISSIONS = [
   { id: 'tables', label: 'Tables & QR', description: 'Manage tables and QR codes' },
   { id: 'reservations', label: 'Reservations', description: 'Manage reservations' },
   { id: 'report_loss', label: 'Report Loss', description: 'Report stock losses' },
+  { id: 'floor_plan', label: 'Floor Plan', description: 'View floor plan and place table orders' },
   { id: 'my_rota', label: 'My Rota', description: 'View own work schedule' },
   { id: 'my_availability', label: 'My Availability', description: 'Manage own availability' },
 ];

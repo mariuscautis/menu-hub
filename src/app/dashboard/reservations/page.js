@@ -225,19 +225,26 @@ export default function Reservations() {
     setModalLoading(true)
 
     try {
-      const { error } = await supabase
-        .from('reservations')
-        .update({
-          status: 'confirmed',
-          table_id: selectedTable,
-          confirmed_by_staff_name: userInfo.name,
-          confirmed_by_user_id: userInfo.id,
-          confirmed_at: new Date().toISOString()
-        })
-        .eq('id', selectedReservation.id)
+      // Check if this is a PIN-based staff login (no real auth user)
+      const staffSessionData = localStorage.getItem('staff_session')
+      const isPinBasedLogin = !!staffSessionData
+
+      // Use RPC function to bypass RLS restrictions for staff
+      const { data, error } = await supabase.rpc('confirm_reservation', {
+        p_reservation_id: selectedReservation.id,
+        p_table_id: selectedTable,
+        p_confirmed_by_staff_name: userInfo.name,
+        // Pass null for PIN-based logins to avoid foreign key constraint violation
+        p_confirmed_by_user_id: isPinBasedLogin ? null : userInfo.id
+      })
 
       if (error) throw error
 
+      if (data && !data.success) {
+        throw new Error(data.error || 'Failed to confirm reservation')
+      }
+
+      // Send confirmation email
       fetch('/api/reservations/send-confirmation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -248,8 +255,10 @@ export default function Reservations() {
       setShowConfirmModal(false)
       setSelectedReservation(null)
       setSelectedTable('')
-    } catch {
-      showNotification('error', 'Failed to confirm reservation')
+      fetchReservations(restaurant.id)
+    } catch (error) {
+      console.error('Error confirming reservation:', error)
+      showNotification('error', error.message || 'Failed to confirm reservation')
     } finally {
       setModalLoading(false)
     }
@@ -270,22 +279,32 @@ export default function Reservations() {
     setModalLoading(true)
 
     try {
-      await supabase
-        .from('reservations')
-        .update({
-          status: 'denied',
-          denied_reason: denyReason,
-          denied_at: new Date().toISOString(),
-          denied_by_staff_name: userInfo.name
-        })
-        .eq('id', selectedReservation.id)
+      // Check if this is a PIN-based staff login (no real auth user)
+      const staffSessionData = localStorage.getItem('staff_session')
+      const isPinBasedLogin = !!staffSessionData
+
+      // Use RPC function to bypass RLS restrictions for staff
+      const { data, error } = await supabase.rpc('deny_reservation', {
+        p_reservation_id: selectedReservation.id,
+        p_denial_reason: denyReason,
+        p_denied_by_staff_name: userInfo.name,
+        // Pass null for PIN-based logins to avoid foreign key constraint violation
+        p_denied_by_user_id: isPinBasedLogin ? null : userInfo.id
+      })
+
+      if (error) throw error
+
+      if (data && !data.success) {
+        throw new Error(data.error || 'Failed to deny reservation')
+      }
 
       showNotification('success', 'Reservation denied')
       setShowDenyModal(false)
       setDenyReason('')
       fetchReservations(restaurant.id)
-    } catch {
-      showNotification('error', 'Failed to deny reservation')
+    } catch (error) {
+      console.error('Error denying reservation:', error)
+      showNotification('error', error.message || 'Failed to deny reservation')
     } finally {
       setModalLoading(false)
     }
