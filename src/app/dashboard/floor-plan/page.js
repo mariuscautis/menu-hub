@@ -12,13 +12,17 @@ function DraggableTable({ table, isSelected, onClick }) {
     data: { type: 'table', table }
   })
 
+  // Calculate position with transform applied
+  const x = (table.x_position || 0) + (transform?.x || 0)
+  const y = (table.y_position || 0) + (transform?.y || 0)
+
   const style = {
     position: 'absolute',
-    left: table.x_position || 0,
-    top: table.y_position || 0,
+    left: x,
+    top: y,
     width: table.width || 80,
     height: table.height || 80,
-    transform: CSS.Translate.toString(transform),
+    transform: 'translate(0, 0)', // Override DnD transform
     zIndex: isDragging ? 1000 : isSelected ? 100 : 10,
     opacity: isDragging ? 0.5 : 1,
     cursor: isDragging ? 'grabbing' : 'grab',
@@ -57,16 +61,18 @@ function DecorativeElement({ element, isSelected, onClick }) {
     data: { type: 'element', element }
   })
 
+  // Calculate position with transform applied
+  const x = (element.x_position || 0) + (transform?.x || 0)
+  const y = (element.y_position || 0) + (transform?.y || 0)
   const rotation = element.rotation || 0
-  const combinedTransform = `${CSS.Translate.toString(transform)} rotate(${rotation}deg)`
 
   const style = {
     position: 'absolute',
-    left: element.x_position,
-    top: element.y_position,
+    left: x,
+    top: y,
     width: element.width,
     height: element.height,
-    transform: combinedTransform,
+    transform: `rotate(${rotation}deg)`, // Only apply rotation, not drag transform
     zIndex: element.z_index || 0,
     opacity: isDragging ? 0.5 : 0.8,
     cursor: isDragging ? 'grabbing' : 'grab',
@@ -75,17 +81,17 @@ function DecorativeElement({ element, isSelected, onClick }) {
 
   const getElementIcon = () => {
     switch (element.element_type) {
-      case 'wall': return '🧱'
-      case 'door': return '🚪'
-      case 'window': return '🪟'
-      case 'plant': return '🌿'
-      case 'counter': return '▭'
-      case 'bar': return '🍺'
-      case 'entrance': return '⬇️'
-      case 'exit': return '⬆️'
-      case 'stairs': return '🪜'
-      case 'restroom': return '🚻'
-      default: return '📦'
+      case 'wall': return '▮'
+      case 'door': return '⌂'
+      case 'window': return '◫'
+      case 'plant': return '☘'
+      case 'counter': return '▬'
+      case 'bar': return '🍷'
+      case 'entrance': return '⬇'
+      case 'exit': return '⬆'
+      case 'stairs': return '⚏'
+      case 'restroom': return '♿'
+      default: return '◻'
     }
   }
 
@@ -123,6 +129,15 @@ export default function FloorPlanPage() {
   const [saving, setSaving] = useState(false)
   const [availableTables, setAvailableTables] = useState([])
   const [showAddTableModal, setShowAddTableModal] = useState(false)
+  const [showFloorModal, setShowFloorModal] = useState(false)
+  const [editingFloor, setEditingFloor] = useState(null)
+  const [floorForm, setFloorForm] = useState({
+    name: '',
+    level: 0,
+    width: 1200,
+    height: 800,
+    background_color: '#ffffff'
+  })
 
   // Canvas settings
   const canvasWidth = currentFloor?.width || 1200
@@ -410,6 +425,173 @@ export default function FloorPlanPage() {
       .eq('id', selectedItem.id)
   }
 
+  const openCreateFloorModal = () => {
+    setEditingFloor(null)
+    // Find the next available level number
+    const existingLevels = floors.map(f => f.level).sort((a, b) => a - b)
+    let nextLevel = 0
+    for (let i = 0; i <= existingLevels.length; i++) {
+      if (!existingLevels.includes(i)) {
+        nextLevel = i
+        break
+      }
+    }
+    setFloorForm({
+      name: `Floor ${floors.length + 1}`,
+      level: nextLevel,
+      width: 1200,
+      height: 800,
+      background_color: '#ffffff'
+    })
+    setShowFloorModal(true)
+  }
+
+  const openEditFloorModal = (floor) => {
+    setEditingFloor(floor)
+    setFloorForm({
+      name: floor.name,
+      level: floor.level,
+      width: floor.width,
+      height: floor.height,
+      background_color: floor.background_color
+    })
+    setShowFloorModal(true)
+  }
+
+  const saveFloor = async () => {
+    if (!floorForm.name.trim()) {
+      alert('Please enter a floor name')
+      return
+    }
+
+    if (!restaurant) return
+
+    // Check for level conflicts when creating or editing
+    const levelConflict = floors.find(f =>
+      f.level === floorForm.level &&
+      (!editingFloor || f.id !== editingFloor.id)
+    )
+
+    if (levelConflict) {
+      alert(`Level ${floorForm.level} is already used by "${levelConflict.name}". Please choose a different level number.`)
+      return
+    }
+
+    try {
+      if (editingFloor) {
+        // Update existing floor
+        const { error } = await supabase
+          .from('floors')
+          .update({
+            name: floorForm.name,
+            level: floorForm.level,
+            width: floorForm.width,
+            height: floorForm.height,
+            background_color: floorForm.background_color
+          })
+          .eq('id', editingFloor.id)
+
+        if (error) throw error
+
+        // Update local state
+        const updatedFloors = floors.map(f =>
+          f.id === editingFloor.id
+            ? { ...f, ...floorForm }
+            : f
+        ).sort((a, b) => a.level - b.level)
+        setFloors(updatedFloors)
+
+        // Update current floor if it's the one being edited
+        if (currentFloor?.id === editingFloor.id) {
+          setCurrentFloor({ ...currentFloor, ...floorForm })
+        }
+      } else {
+        // Create new floor
+        const { data, error } = await supabase
+          .from('floors')
+          .insert([{
+            restaurant_id: restaurant.id,
+            name: floorForm.name,
+            level: floorForm.level,
+            width: floorForm.width,
+            height: floorForm.height,
+            background_color: floorForm.background_color
+          }])
+          .select()
+          .single()
+
+        if (error) throw error
+
+        // Add to local state
+        const updatedFloors = [...floors, data].sort((a, b) => a.level - b.level)
+        setFloors(updatedFloors)
+
+        // Switch to the new floor
+        setCurrentFloor(data)
+        await loadFloorData(data.id, restaurant.id)
+      }
+
+      setShowFloorModal(false)
+    } catch (error) {
+      console.error('Error saving floor:', error)
+
+      // Provide user-friendly error messages
+      if (error.message.includes('duplicate key')) {
+        alert('This floor level is already in use. Please choose a different level number.')
+      } else {
+        alert('Failed to save floor: ' + error.message)
+      }
+    }
+  }
+
+  const deleteFloor = async (floor) => {
+    if (floors.length <= 1) {
+      alert('You must have at least one floor')
+      return
+    }
+
+    const confirmDelete = window.confirm(
+      `Delete ${floor.name}? All tables and elements on this floor will be removed from it.`
+    )
+
+    if (!confirmDelete) return
+
+    try {
+      // Remove all tables from this floor (don't delete them, just unassign)
+      await supabase
+        .from('tables')
+        .update({ floor_id: null })
+        .eq('floor_id', floor.id)
+
+      // Delete all floor elements
+      await supabase
+        .from('floor_elements')
+        .delete()
+        .eq('floor_id', floor.id)
+
+      // Delete the floor
+      const { error } = await supabase
+        .from('floors')
+        .delete()
+        .eq('id', floor.id)
+
+      if (error) throw error
+
+      // Update local state
+      const updatedFloors = floors.filter(f => f.id !== floor.id)
+      setFloors(updatedFloors)
+
+      // Switch to another floor if we deleted the current one
+      if (currentFloor?.id === floor.id && updatedFloors.length > 0) {
+        setCurrentFloor(updatedFloors[0])
+        await loadFloorData(updatedFloors[0].id, restaurant.id)
+      }
+    } catch (error) {
+      console.error('Error deleting floor:', error)
+      alert('Failed to delete floor: ' + error.message)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -450,6 +632,18 @@ export default function FloorPlanPage() {
                 <option key={floor.id} value={floor.id}>{floor.name}</option>
               ))}
             </select>
+            <button
+              onClick={() => openEditFloorModal(currentFloor)}
+              className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-medium transition-colors"
+            >
+              Edit Floor
+            </button>
+            <button
+              onClick={openCreateFloorModal}
+              className="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-xl font-medium transition-colors"
+            >
+              + New Floor
+            </button>
           </div>
         </div>
       </div>
@@ -477,49 +671,49 @@ export default function FloorPlanPage() {
               onClick={() => addDecorativeElement('wall')}
               className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm"
             >
-              🧱 Wall
+              ▮ Wall
             </button>
             <button
               onClick={() => addDecorativeElement('door')}
               className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm"
             >
-              🚪 Door
+              ⌂ Door
             </button>
             <button
               onClick={() => addDecorativeElement('plant')}
               className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm"
             >
-              🌿 Plant
+              ☘ Plant
             </button>
             <button
               onClick={() => addDecorativeElement('counter')}
               className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm"
             >
-              ▭ Counter
+              ▬ Counter
             </button>
             <button
               onClick={() => addDecorativeElement('bar')}
               className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm"
             >
-              🍺 Bar
+              🍷 Bar
             </button>
             <button
               onClick={() => addDecorativeElement('entrance')}
               className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm"
             >
-              ⬇️ Entrance
+              ⬇ Entrance
             </button>
             <button
               onClick={() => addDecorativeElement('stairs')}
               className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm"
             >
-              🪜 Stairs
+              ⚏ Stairs
             </button>
             <button
               onClick={() => addDecorativeElement('restroom')}
               className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm"
             >
-              🚻 Restroom
+              ♿ Restroom
             </button>
           </div>
 
@@ -733,6 +927,124 @@ export default function FloorPlanPage() {
             >
               Cancel
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Floor Management Modal */}
+      {showFloorModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowFloorModal(false)}>
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 max-w-lg w-full mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-4">
+              {editingFloor ? 'Edit Floor' : 'Create New Floor'}
+            </h2>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  Floor Name
+                </label>
+                <input
+                  type="text"
+                  value={floorForm.name}
+                  onChange={(e) => setFloorForm({ ...floorForm, name: e.target.value })}
+                  placeholder="e.g., Ground Floor, First Floor, Terrace"
+                  className="w-full px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:border-primary"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  Level (for sorting)
+                </label>
+                <input
+                  type="number"
+                  value={floorForm.level}
+                  onChange={(e) => setFloorForm({ ...floorForm, level: parseInt(e.target.value) || 0 })}
+                  className="w-full px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:border-primary"
+                />
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  Lower numbers appear first in the list
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    Width (px)
+                  </label>
+                  <input
+                    type="number"
+                    value={floorForm.width}
+                    onChange={(e) => setFloorForm({ ...floorForm, width: parseInt(e.target.value) || 1200 })}
+                    min="400"
+                    max="3000"
+                    className="w-full px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:border-primary"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    Height (px)
+                  </label>
+                  <input
+                    type="number"
+                    value={floorForm.height}
+                    onChange={(e) => setFloorForm({ ...floorForm, height: parseInt(e.target.value) || 800 })}
+                    min="400"
+                    max="3000"
+                    className="w-full px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:border-primary"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  Background Color
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="color"
+                    value={floorForm.background_color}
+                    onChange={(e) => setFloorForm({ ...floorForm, background_color: e.target.value })}
+                    className="w-20 h-10 rounded-xl cursor-pointer border-2 border-slate-200 dark:border-slate-700"
+                  />
+                  <input
+                    type="text"
+                    value={floorForm.background_color}
+                    onChange={(e) => setFloorForm({ ...floorForm, background_color: e.target.value })}
+                    placeholder="#ffffff"
+                    className="flex-1 px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:border-primary"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-2 mt-6">
+              {editingFloor && (
+                <button
+                  onClick={() => {
+                    setShowFloorModal(false)
+                    deleteFloor(editingFloor)
+                  }}
+                  className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium transition-colors"
+                >
+                  Delete Floor
+                </button>
+              )}
+              <button
+                onClick={() => setShowFloorModal(false)}
+                className="flex-1 px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 rounded-xl font-medium transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={saveFloor}
+                className="flex-1 px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-xl font-medium transition-colors"
+              >
+                {editingFloor ? 'Save Changes' : 'Create Floor'}
+              </button>
+            </div>
           </div>
         </div>
       )}
