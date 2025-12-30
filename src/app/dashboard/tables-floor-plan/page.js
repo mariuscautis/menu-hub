@@ -153,16 +153,17 @@ function FloorPlanElement({ element }) {
 
   const getElementIcon = () => {
     switch (element.element_type) {
-      case 'wall': return '🧱'
-      case 'door': return '🚪'
-      case 'window': return '🪟'
-      case 'plant': return '🌿'
-      case 'counter': return '🍽️'
-      case 'bar': return '🍺'
-      case 'entrance': return '🚶'
-      case 'stairs': return '🪜'
-      case 'restroom': return '🚻'
-      default: return '⬜'
+      case 'wall': return '▮'
+      case 'door': return '⌂'
+      case 'window': return '◫'
+      case 'plant': return '☘'
+      case 'counter': return '▬'
+      case 'bar': return '🍷'
+      case 'entrance': return '⬇'
+      case 'exit': return '⬆'
+      case 'stairs': return '⚏'
+      case 'restroom': return '♿'
+      default: return '◻'
     }
   }
 
@@ -1136,30 +1137,13 @@ export default function StaffFloorPlanPage() {
   return (
     <div className="flex flex-col h-screen bg-slate-50 dark:bg-slate-950">
       {/* Header */}
-      <div className="bg-white dark:bg-slate-900 border-b-2 border-slate-100 dark:border-slate-800 p-4">
-        <div className="flex items-center justify-between">
+      <div className="bg-white dark:bg-slate-900 border-b-2 border-slate-100 dark:border-slate-800">
+        <div className="flex items-center justify-between px-4 pt-4 pb-2">
           <div>
             <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200">Floor Plan</h1>
             <p className="text-sm text-slate-600 dark:text-slate-400">{restaurant?.name}</p>
           </div>
-          <div className="flex items-center gap-3">
-            {floors.length > 1 && (
-              <select
-                value={currentFloor?.id || ''}
-                onChange={(e) => {
-                  const floor = floors.find(f => f.id === e.target.value)
-                  setCurrentFloor(floor)
-                  loadFloorData(floor.id, restaurant.id)
-                  setSelectedTable(null)
-                }}
-                className="px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300"
-              >
-                {floors.map(floor => (
-                  <option key={floor.id} value={floor.id}>{floor.name}</option>
-                ))}
-              </select>
-            )}
-            <div className="flex items-center gap-2 text-sm">
+          <div className="flex items-center gap-2 text-sm">
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-green-500 rounded"></div>
                 <span className="text-slate-600 dark:text-slate-400">Available</span>
@@ -1169,8 +1153,30 @@ export default function StaffFloorPlanPage() {
                 <span className="text-slate-600 dark:text-slate-400">Has Orders</span>
               </div>
             </div>
-          </div>
         </div>
+
+        {/* Floor Tabs */}
+        {floors.length > 1 && (
+          <div className="px-4 flex gap-2 overflow-x-auto pb-0">
+            {floors.map(floor => (
+              <button
+                key={floor.id}
+                onClick={() => {
+                  setCurrentFloor(floor)
+                  loadFloorData(floor.id, restaurant.id)
+                  setSelectedTable(null)
+                }}
+                className={`px-6 py-3 font-medium text-sm whitespace-nowrap transition-all border-b-2 ${
+                  currentFloor?.id === floor.id
+                    ? 'text-primary border-primary bg-primary/5'
+                    : 'text-slate-600 dark:text-slate-400 border-transparent hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'
+                }`}
+              >
+                {floor.name}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="flex flex-1 overflow-hidden">
