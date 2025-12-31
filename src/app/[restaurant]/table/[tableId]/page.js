@@ -18,6 +18,7 @@ export default function CustomerMenu({ params }) {
   const [orderNotes, setOrderNotes] = useState('')
   const [callingWaiter, setCallingWaiter] = useState(false)
   const [waiterCalled, setWaiterCalled] = useState(false)
+  const [expandedCategories, setExpandedCategories] = useState({})
 
   useEffect(() => {
     fetchData()
@@ -306,6 +307,13 @@ export default function CustomerMenu({ params }) {
     groupedItems.push({ id: 'uncategorized', name: 'Other', items: uncategorized })
   }
 
+  const toggleCategory = (categoryId) => {
+    setExpandedCategories(prev => ({
+      ...prev,
+      [categoryId]: !prev[categoryId]
+    }))
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -400,79 +408,112 @@ export default function CustomerMenu({ params }) {
 
       {/* Menu */}
       <div className="max-w-lg mx-auto px-4 py-6">
-        {groupedItems.map((category) => (
-          <div key={category.id || 'menu'} className="mb-8">
-            <h2 className="text-lg font-bold text-slate-800 mb-4">{category.name}</h2>
-            <div className="space-y-3">
-              {category.items.map((item) => {
-                const cartItem = cart.find(c => c.id === item.id)
-                const availableServings = getAvailableServings(item)
-                const showLimitedStock = availableServings < 999 && availableServings <= 5
-                return (
-                  <div key={item.id} className="bg-white border-2 border-slate-100 rounded-2xl p-4">
-                    <div className="flex justify-between gap-4">
-                      {item.image_url && (
-                        <img
-                          src={item.image_url}
-                          alt={item.name}
-                          className="w-20 h-20 rounded-xl object-cover"
-                        />
-                      )}
-                      <div className="flex-1 pr-4">
-                        <h3 className="font-semibold text-slate-800">{item.name}</h3>
-                        {item.description && (
-                          <p className="text-slate-500 text-sm mt-1">{item.description}</p>
-                        )}
-                        <div className="flex items-center gap-2 mt-2">
-                          <p className="text-[#6262bd] font-bold">£{item.price.toFixed(2)}</p>
-                          {showLimitedStock && (
-                            <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full font-medium">
-                              Only {availableServings} left
-                            </span>
+        {groupedItems.map((category) => {
+          const categoryId = category.id || 'menu'
+          const isExpanded = expandedCategories[categoryId] ?? false
+
+          return (
+            <div key={categoryId} className="mb-6">
+              {/* Category Header - Clickable */}
+              <button
+                onClick={() => toggleCategory(categoryId)}
+                className="w-full flex items-center justify-between bg-white border-2 border-slate-100 rounded-xl px-5 py-4 mb-3 hover:bg-slate-50 transition-colors active:scale-[0.99]"
+              >
+                <h2 className="text-lg font-bold text-slate-800">{category.name}</h2>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-slate-500 font-medium">
+                    {category.items.length} {category.items.length === 1 ? 'item' : 'items'}
+                  </span>
+                  <svg
+                    className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+                  </svg>
+                </div>
+              </button>
+
+              {/* Category Items - Collapsible with slide animation */}
+              <div
+                className="overflow-hidden transition-all duration-300 ease-in-out"
+                style={{
+                  maxHeight: isExpanded ? `${category.items.length * 200}px` : '0px',
+                  opacity: isExpanded ? 1 : 0
+                }}
+              >
+                <div className="space-y-3">
+                  {category.items.map((item) => {
+                    const cartItem = cart.find(c => c.id === item.id)
+                    const availableServings = getAvailableServings(item)
+                    const showLimitedStock = availableServings < 999 && availableServings <= 5
+                    return (
+                      <div key={item.id} className="bg-white border-2 border-slate-100 rounded-2xl p-4">
+                        <div className="flex justify-between gap-4">
+                          {item.image_url && (
+                            <img
+                              src={item.image_url}
+                              alt={item.name}
+                              className="w-20 h-20 rounded-xl object-cover"
+                            />
                           )}
+                          <div className="flex-1 pr-4">
+                            <h3 className="font-semibold text-slate-800">{item.name}</h3>
+                            {item.description && (
+                              <p className="text-slate-500 text-sm mt-1">{item.description}</p>
+                            )}
+                            <div className="flex items-center gap-2 mt-2">
+                              <p className="text-[#6262bd] font-bold">£{item.price.toFixed(2)}</p>
+                              {showLimitedStock && (
+                                <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full font-medium">
+                                  Only {availableServings} left
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center">
+                            {cartItem ? (
+                              <div className="flex items-center gap-3">
+                                <button
+                                  onClick={() => removeFromCart(item.id)}
+                                  className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-slate-200"
+                                >
+                                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M19 13H5v-2h14v2z"/>
+                                  </svg>
+                                </button>
+                                <span className="font-semibold text-slate-800 w-6 text-center">
+                                  {cartItem.quantity}
+                                </span>
+                                <button
+                                  onClick={() => addToCart(item)}
+                                  className="w-8 h-8 rounded-full bg-[#6262bd] text-white flex items-center justify-center hover:bg-[#5252a3]"
+                                >
+                                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                                  </svg>
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => addToCart(item)}
+                                className="w-10 h-10 rounded-full bg-[#6262bd] text-white flex items-center justify-center hover:bg-[#5252a3]"
+                              >
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                                </svg>
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
-                      <div className="flex items-center">
-                        {cartItem ? (
-                          <div className="flex items-center gap-3">
-                            <button
-                              onClick={() => removeFromCart(item.id)}
-                              className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-slate-200"
-                            >
-                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M19 13H5v-2h14v2z"/>
-                              </svg>
-                            </button>
-                            <span className="font-semibold text-slate-800 w-6 text-center">
-                              {cartItem.quantity}
-                            </span>
-                            <button
-                              onClick={() => addToCart(item)}
-                              className="w-8 h-8 rounded-full bg-[#6262bd] text-white flex items-center justify-center hover:bg-[#5252a3]"
-                            >
-                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-                              </svg>
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => addToCart(item)}
-                            className="w-10 h-10 rounded-full bg-[#6262bd] text-white flex items-center justify-center hover:bg-[#5252a3]"
-                          >
-                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-                            </svg>
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
+                    )
+                  })}
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       {/* Cart Button */}

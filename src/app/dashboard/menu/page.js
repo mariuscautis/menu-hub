@@ -132,6 +132,8 @@ export default function Menu() {
     const { data: cats } = await supabase
       .from('menu_categories')
       .select('*')
+      .eq('restaurant_id', restaurantData.id)
+      .order('sort_order')
     // Fetch stock products for recipe management with cost data
     const { data: products } = await supabase
       .from('stock_products')
