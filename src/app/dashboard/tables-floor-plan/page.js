@@ -1,17 +1,18 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import InvoiceClientModal from '@/components/invoices/InvoiceClientModal'
 
 // Read-only Table Component for Staff
-function FloorPlanTable({ table, orderInfo, reservations, onClick, onMarkCleaned, onMarkDelivered, onViewReservations }) {
+function FloorPlanTable({ table, orderInfo, reservations, waiterCalls, onClick, onMarkCleaned, onMarkDelivered, onViewReservations }) {
   // Show badge if there are orders with unpaid amounts
   // Hide only when total is explicitly 0 (not undefined/null)
   const hasOpenOrders = orderInfo && orderInfo.count > 0 && (orderInfo.total === undefined || orderInfo.total === null || orderInfo.total > 0)
   const needsCleaning = table.status === 'needs_cleaning'
   const hasReservationsToday = reservations && reservations.length > 0
+  const hasWaiterCall = waiterCalls && waiterCalls.length > 0
   const readyDepartments = orderInfo?.readyDepartments || []
 
   const shapeClass = table.shape === 'circle'
@@ -75,14 +76,49 @@ function FloorPlanTable({ table, orderInfo, reservations, onClick, onMarkCleaned
         </span>
       )}
 
-      {/* Reservation Indicator Badge (top left) */}
+      {/* Waiter Call Badge (top left) */}
+      {hasWaiterCall && (
+        <span
+          onClick={async (e) => {
+            e.stopPropagation()
+            // Acknowledge the waiter call
+            const call = waiterCalls[0]
+            if (call) {
+              console.log('🔵 TABLES FLOOR PLAN - Attempting to acknowledge waiter call:', call.id, 'Current status:', call.status)
+
+              const { data, error } = await supabase
+                .from('waiter_calls')
+                .update({
+                  status: 'acknowledged',
+                  acknowledged_at: new Date().toISOString()
+                })
+                .eq('id', call.id)
+                .select()
+
+              if (!error) {
+                console.log('🔵 TABLES FLOOR PLAN - Waiter call acknowledged successfully:', call.id, data)
+              } else {
+                console.error('🔵 TABLES FLOOR PLAN - Error acknowledging waiter call:', error)
+              }
+            } else {
+              console.log('🔵 TABLES FLOOR PLAN - No waiter call found to acknowledge')
+            }
+          }}
+          className="absolute -top-3 -left-3 bg-orange-500 text-white rounded-full w-7 h-7 flex items-center justify-center text-base font-bold animate-pulse shadow-lg z-20 cursor-pointer hover:bg-orange-600 transition-colors"
+          title="Click to acknowledge - customer will be notified"
+        >
+          👋
+        </span>
+      )}
+
+      {/* Reservation Indicator Badge (top left, shift right if waiter call exists) */}
       {hasReservationsToday && (
         <span
           onClick={(e) => {
             e.stopPropagation()
             onViewReservations(table)
           }}
-          className="absolute -top-2 -left-2 bg-[#6262bd] text-white rounded-full px-2 py-0.5 text-[7px] font-bold shadow-lg hover:bg-[#5252a3] transition-colors z-10 cursor-pointer flex items-center gap-0.5"
+          className={`absolute -top-2 ${hasWaiterCall ? 'left-4' : '-left-2'} bg-[#6262bd] text-white rounded-full px-2 py-0.5 text-[7px] font-bold shadow-lg hover:bg-[#5252a3] transition-colors z-10 cursor-pointer flex items-center gap-0.5`}
           title="Click to view today's reservations"
         >
           <svg className="w-2 h-2" fill="currentColor" viewBox="0 0 24 24">
@@ -198,6 +234,8 @@ export default function StaffFloorPlanPage() {
   const [selectedTable, setSelectedTable] = useState(null)
   const [tableOrderInfo, setTableOrderInfo] = useState({})
   const [todayReservations, setTodayReservations] = useState({})
+  const [waiterCalls, setWaiterCalls] = useState({})
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [showReservationsModal, setShowReservationsModal] = useState(false)
   const [selectedTableReservations, setSelectedTableReservations] = useState([])
   const [showCreateReservationModal, setShowCreateReservationModal] = useState(false)
@@ -273,6 +311,16 @@ export default function StaffFloorPlanPage() {
     fetchData()
   }, [])
 
+  // Refresh floor data when refresh trigger changes
+  useEffect(() => {
+    if (!restaurant || !currentFloor) return
+
+    console.log('🔵 TABLES FLOOR PLAN - Refresh trigger fired:', refreshTrigger)
+    loadFloorData(currentFloor.id, restaurant.id)
+    fetchTableOrderInfo(restaurant.id)
+    fetchWaiterCalls(restaurant.id)
+  }, [restaurant, currentFloor, refreshTrigger])
+
   // Real-time subscriptions for live updates
   useEffect(() => {
     if (!restaurant || !currentFloor) return
@@ -291,9 +339,8 @@ export default function StaffFloorPlanPage() {
           filter: `restaurant_id=eq.${restaurantId}`
         },
         (payload) => {
-          console.log('Floor Plan - Table change detected:', payload)
-          // Reload floor data to get updated table statuses
-          loadFloorData(currentFloor.id, restaurantId)
+          console.log('🔵 TABLES FLOOR PLAN - Table change detected:', payload)
+          setRefreshTrigger(prev => prev + 1)
         }
       )
       .subscribe()
@@ -310,10 +357,8 @@ export default function StaffFloorPlanPage() {
           filter: `restaurant_id=eq.${restaurantId}`
         },
         (payload) => {
-          console.log('Floor Plan - Order changed:', payload)
-          setTimeout(() => {
-            loadFloorData(currentFloor.id, restaurantId)
-          }, 100)
+          console.log('🔵 TABLES FLOOR PLAN - Order changed:', payload)
+          setRefreshTrigger(prev => prev + 1)
         }
       )
       .subscribe()
@@ -329,10 +374,8 @@ export default function StaffFloorPlanPage() {
           table: 'order_items'
         },
         (payload) => {
-          console.log('Floor Plan - Order item changed:', payload)
-          setTimeout(() => {
-            loadFloorData(currentFloor.id, restaurantId)
-          }, 100)
+          console.log('🔵 TABLES FLOOR PLAN - Order item changed:', payload)
+          setRefreshTrigger(prev => prev + 1)
         }
       )
       .subscribe()
@@ -349,10 +392,26 @@ export default function StaffFloorPlanPage() {
           filter: `restaurant_id=eq.${restaurantId}`
         },
         (payload) => {
-          console.log('Floor Plan - Split bill changed:', payload)
-          setTimeout(() => {
-            loadFloorData(currentFloor.id, restaurantId)
-          }, 100)
+          console.log('🔵 TABLES FLOOR PLAN - Split bill changed:', payload)
+          setRefreshTrigger(prev => prev + 1)
+        }
+      )
+      .subscribe()
+
+    // Subscribe to waiter calls
+    const waiterCallsChannel = supabase
+      .channel(`floor-plan-waiter-calls-realtime-${Date.now()}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'waiter_calls',
+          filter: `restaurant_id=eq.${restaurantId}`
+        },
+        (payload) => {
+          console.log('🔵 TABLES FLOOR PLAN - Waiter call changed:', payload)
+          setRefreshTrigger(prev => prev + 1)
         }
       )
       .subscribe()
@@ -362,6 +421,7 @@ export default function StaffFloorPlanPage() {
       supabase.removeChannel(ordersChannel)
       supabase.removeChannel(orderItemsChannel)
       supabase.removeChannel(splitBillsChannel)
+      supabase.removeChannel(waiterCallsChannel)
     }
   }, [restaurant, currentFloor])
 
@@ -563,6 +623,36 @@ export default function StaffFloorPlanPage() {
     })
 
     setTodayReservations(reservationsByTable)
+  }
+
+  const fetchWaiterCalls = async (restaurantId) => {
+    console.log('🔵 TABLES FLOOR PLAN - Fetching waiter calls for restaurant:', restaurantId)
+
+    const { data: calls, error } = await supabase
+      .from('waiter_calls')
+      .select('*')
+      .eq('restaurant_id', restaurantId)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('🔵 TABLES FLOOR PLAN - Error fetching waiter calls:', error)
+      return
+    }
+
+    console.log('🔵 TABLES FLOOR PLAN - Fetched waiter calls:', calls)
+
+    // Group by table_id
+    const callsByTable = {}
+    calls?.forEach(call => {
+      if (!callsByTable[call.table_id]) {
+        callsByTable[call.table_id] = []
+      }
+      callsByTable[call.table_id].push(call)
+    })
+
+    console.log('🔵 TABLES FLOOR PLAN - Setting waiter calls state:', callsByTable)
+    setWaiterCalls(callsByTable)
   }
 
   const handleViewReservations = (table) => {
@@ -1599,6 +1689,7 @@ export default function StaffFloorPlanPage() {
                 table={table}
                 orderInfo={tableOrderInfo[table.id]}
                 reservations={todayReservations[table.id]}
+                waiterCalls={waiterCalls[table.id]}
                 onClick={() => handleTableClick(table)}
                 onMarkCleaned={handleMarkCleaned}
                 onMarkDelivered={handleMarkDelivered}

@@ -117,12 +117,14 @@ export default function Tables() {
           console.log('Tables page - Order changed:', payload)
           // Small delay to ensure database has committed the changes
           setTimeout(() => {
-            console.log('Tables page - Fetching updated table order info')
+            console.log('Tables page - Fetching updated table order info after order change')
             fetchTableOrderInfo(restaurantId)
           }, 100)
         }
       )
-      .subscribe()
+      .subscribe((status) => {
+        console.log('Tables page orders subscription status:', status)
+      })
 
     // Subscribe to order_items changes (when items are added or updated)
     const orderItemsChannel = supabase
@@ -138,11 +140,14 @@ export default function Tables() {
           console.log('Tables page - Order item changed:', payload)
           // Refetch when items are added or updated (marked ready, delivered, etc.)
           setTimeout(() => {
+            console.log('Tables page - Fetching updated table order info after order item change')
             fetchTableOrderInfo(restaurantId)
           }, 100)
         }
       )
-      .subscribe()
+      .subscribe((status) => {
+        console.log('Tables page order_items subscription status:', status)
+      })
 
     // Subscribe to table changes (status updates, cleaning, etc.)
     const tablesChannel = supabase
@@ -235,6 +240,13 @@ export default function Tables() {
         console.log('Tables page split bills subscription status:', status)
       })
 
+    // Polling fallback: Refresh order info every 15 seconds as a safety net
+    // This ensures table indicators update even if real-time subscriptions fail
+    const pollingInterval = setInterval(() => {
+      console.log('Tables page - Polling fallback: refreshing table order info')
+      fetchTableOrderInfo(restaurantId)
+    }, 15000) // 15 seconds
+
     return () => {
       supabase.removeChannel(ordersChannel)
       supabase.removeChannel(orderItemsChannel)
@@ -242,6 +254,7 @@ export default function Tables() {
       supabase.removeChannel(reservationsChannel)
       supabase.removeChannel(waiterCallsChannel)
       supabase.removeChannel(splitBillsChannel)
+      clearInterval(pollingInterval)
     }
   }, [restaurant])
 
@@ -424,7 +437,19 @@ export default function Tables() {
         }
       }
       orderInfo[order.table_id].count += 1
-      orderInfo[order.table_id].total += order.total || 0
+
+      // Calculate total from order items instead of using stored total
+      // This handles cases where order.total might be 0 but items exist
+      let orderTotal = 0
+      if (order.order_items && order.order_items.length > 0) {
+        orderTotal = order.order_items.reduce((sum, item) => {
+          return sum + (item.quantity * item.price_at_time)
+        }, 0)
+      } else {
+        // Fallback to stored total if no items found
+        orderTotal = order.total || 0
+      }
+      orderInfo[order.table_id].total += orderTotal
 
       // Track which departments have ready items that aren't delivered yet
       // Check items regardless of order status
@@ -3005,9 +3030,9 @@ export default function Tables() {
 }
 
 function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDownload, onDelete, onPlaceOrder, onPayBill, onSplitBill, onViewOrders, onMarkCleaned, onMarkDelivered, onViewReservations, onCreateReservation, onAcknowledgeWaiterCall }) {
-  // Show badge if there are orders with unpaid amounts
-  // Hide only when total is explicitly 0 (not undefined/null)
-  const hasOpenOrders = orderInfo && orderInfo.count > 0 && (orderInfo.total === undefined || orderInfo.total === null || orderInfo.total > 0)
+  // Show badge if there are any unpaid orders (count > 0)
+  // This handles both cases: orders with totals and orders where total might be 0 but items exist
+  const hasOpenOrders = orderInfo && orderInfo.count > 0
   const needsCleaning = table.status === 'needs_cleaning'
 
   // Debug logging

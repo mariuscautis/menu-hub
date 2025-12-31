@@ -44,7 +44,7 @@ function DraggableTable({ table, isSelected, onClick }) {
         isSelected
           ? 'border-primary shadow-lg'
           : 'border-slate-300 dark:border-slate-400'
-      } flex flex-col items-center justify-center transition-all hover:shadow-md select-none`}
+      } flex flex-col items-center justify-center transition-all hover:shadow-md select-none relative`}
     >
       <div className="text-center p-2 pointer-events-none">
         <div className="font-bold text-slate-800 dark:text-slate-200">T{table.table_number}</div>
@@ -235,8 +235,12 @@ export default function FloorPlanPage() {
         .order('table_number')
 
       setAvailableTables(unassignedTables || [])
+
+      // Trigger initial fetch of operational status
+      setRefreshTrigger(prev => prev + 1)
     }
   }
+
 
   const handleDragEnd = async (event) => {
     const { active, delta } = event
