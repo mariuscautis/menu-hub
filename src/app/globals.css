@@ -13,6 +13,7 @@
     --color-primary: 124 124 229;
     --color-primary-hover: 144 144 239;
     --color-primary-light: 98 98 189;
+    color-scheme: dark;
   }
 
   /* Global dark mode color overrides - Direct CSS rules */
@@ -144,4 +145,110 @@
   .animate-zoom-in {
     animation: zoom-in 0.3s ease-out;
   }
+}
+
+/* React Big Calendar Dark Mode Overrides */
+.dark .rbc-calendar {
+  color: rgb(226 232 240); /* slate-200 */
+}
+
+.dark .rbc-header {
+  background-color: rgb(30 41 59); /* slate-800 */
+  color: rgb(203 213 225); /* slate-300 */
+  border-color: rgb(30 41 59) !important; /* slate-800 - subtle borders */
+}
+
+.dark .rbc-time-view {
+  background-color: rgb(15 23 42); /* slate-900 */
+  border-color: rgb(30 41 59) !important; /* slate-800 - subtle borders */
+}
+
+.dark .rbc-time-header {
+  background-color: rgb(15 23 42); /* slate-900 */
+}
+
+.dark .rbc-time-content {
+  border-color: rgb(30 41 59) !important; /* slate-800 - subtle borders */
+}
+
+.dark .rbc-time-slot {
+  border-color: rgba(30, 41, 59, 0.5) !important; /* slate-800 with 50% opacity - very subtle */
+}
+
+.dark .rbc-timeslot-group {
+  border-color: rgba(30, 41, 59, 0.5) !important; /* slate-800 with 50% opacity - very subtle */
+}
+
+.dark .rbc-day-slot {
+  background-color: rgb(15 23 42); /* slate-900 */
+}
+
+.dark .rbc-today {
+  background-color: rgb(30 41 59); /* slate-800 */
+}
+
+.dark .rbc-time-gutter {
+  color: rgb(148 163 184); /* slate-400 */
+  background-color: rgb(15 23 42); /* slate-900 */
+}
+
+.dark .rbc-label {
+  color: rgb(148 163 184); /* slate-400 */
+}
+
+.dark .rbc-allday-cell {
+  background-color: rgb(30 41 59); /* slate-800 */
+  border-color: rgb(30 41 59) !important; /* slate-800 - subtle borders */
+}
+
+.dark .rbc-date-cell {
+  color: rgb(226 232 240); /* slate-200 */
+}
+
+.dark .rbc-off-range {
+  color: rgb(100 116 139); /* slate-500 */
+}
+
+.dark .rbc-off-range-bg {
+  background-color: rgb(2 6 23); /* slate-950 */
+}
+
+.dark .rbc-month-view {
+  background-color: rgb(15 23 42); /* slate-900 */
+  border-color: rgb(30 41 59) !important; /* slate-800 - subtle borders */
+}
+
+.dark .rbc-month-row {
+  border-color: rgba(30, 41, 59, 0.5) !important; /* slate-800 with 50% opacity - very subtle */
+}
+
+.dark .rbc-day-bg {
+  background-color: rgb(15 23 42); /* slate-900 */
+  border-color: rgba(30, 41, 59, 0.5) !important; /* slate-800 with 50% opacity - very subtle */
+}
+
+.dark .rbc-day-bg:hover {
+  background-color: rgb(30 41 59); /* slate-800 */
+}
+
+.dark .rbc-toolbar {
+  color: rgb(226 232 240); /* slate-200 */
+}
+
+.dark .rbc-toolbar button {
+  color: rgb(203 213 225); /* slate-300 */
+  border-color: rgb(51 65 85); /* slate-700 */
+  background-color: rgb(30 41 59); /* slate-800 */
+}
+
+.dark .rbc-toolbar button:hover,
+.dark .rbc-toolbar button:active,
+.dark .rbc-toolbar button.rbc-active {
+  background-color: rgb(51 65 85); /* slate-700 */
+  color: rgb(226 232 240); /* slate-200 */
+  border-color: rgb(71 85 105); /* slate-600 */
+}
+
+.dark .rbc-current-time-indicator {
+  background-color: rgb(239 68 68); /* red-500 */
 }

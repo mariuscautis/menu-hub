@@ -40,10 +40,10 @@ function DraggableTable({ table, isSelected, onClick }) {
       style={style}
       {...listeners}
       {...attributes}
-      className={`${shapeClass} bg-white dark:bg-slate-800 border-2 ${
+      className={`${shapeClass} bg-white dark:bg-slate-700 border-2 ${
         isSelected
           ? 'border-primary shadow-lg'
-          : 'border-slate-300 dark:border-slate-600'
+          : 'border-slate-300 dark:border-slate-400'
       } flex flex-col items-center justify-center transition-all hover:shadow-md select-none`}
     >
       <div className="text-center p-2 pointer-events-none">
@@ -104,12 +104,12 @@ function DecorativeElement({ element, isSelected, onClick }) {
       className={`rounded-lg border-2 ${
         isSelected
           ? 'border-amber-500 shadow-lg'
-          : 'border-slate-400 dark:border-slate-600'
-      } flex items-center justify-center text-3xl transition-all hover:shadow-md select-none`}
+          : 'border-slate-400 dark:border-slate-500'
+      } flex items-center justify-center text-3xl transition-all hover:shadow-md select-none text-slate-700 dark:text-slate-200`}
     >
       <span className="pointer-events-none">{getElementIcon()}</span>
       {element.label && (
-        <span className="text-xs absolute bottom-0 left-0 right-0 bg-black/50 text-white text-center py-0.5 pointer-events-none">
+        <span className="text-xs absolute bottom-0 left-0 right-0 bg-black/50 dark:bg-black/70 text-white text-center py-0.5 pointer-events-none">
           {element.label}
         </span>
       )}
@@ -142,6 +142,27 @@ export default function FloorPlanPage() {
   // Canvas settings
   const canvasWidth = currentFloor?.width || 1200
   const canvasHeight = currentFloor?.height || 800
+
+  // Detect dark mode for canvas background
+  const [isDarkMode, setIsDarkMode] = useState(false)
+
+  useEffect(() => {
+    // Check if dark mode is active
+    const checkDarkMode = () => {
+      setIsDarkMode(document.documentElement.classList.contains('dark'))
+    }
+
+    checkDarkMode()
+
+    // Watch for dark mode changes
+    const observer = new MutationObserver(checkDarkMode)
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    })
+
+    return () => observer.disconnect()
+  }, [])
 
   // Configure drag sensors - require 5px movement to start dragging
   const sensors = useSensors(
@@ -860,15 +881,17 @@ export default function FloorPlanPage() {
                 width: canvasWidth,
                 height: canvasHeight,
                 position: 'relative',
-                backgroundColor: currentFloor?.background_color || '#ffffff',
+                backgroundColor: isDarkMode ? '#1e293b' : (currentFloor?.background_color || '#ffffff'),
               }}
               className="mx-auto shadow-2xl border-2 border-slate-300 dark:border-slate-700 rounded-lg"
             >
               {/* Grid background */}
               <div
-                className="absolute inset-0 opacity-10 dark:opacity-5"
+                className="absolute inset-0 opacity-10 dark:opacity-20"
                 style={{
-                  backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)',
+                  backgroundImage: isDarkMode
+                    ? 'linear-gradient(#64748b 1px, transparent 1px), linear-gradient(90deg, #64748b 1px, transparent 1px)'
+                    : 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)',
                   backgroundSize: '50px 50px'
                 }}
               />

@@ -265,8 +265,8 @@ export default function DepartmentsSettingsPage() {
         ))}
       </div>
       {/* Add New Department */}
-      <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
-        <h3 className="text-lg font-bold text-slate-800 mb-3">Add New Department</h3>
+      <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
+        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-3">Add New Department</h3>
         <div className="flex gap-3">
           <input
             type="text"
@@ -278,7 +278,7 @@ export default function DepartmentsSettingsPage() {
               }
             }}
             placeholder="e.g., cleaning, delivery, front desk"
-            className="flex-1 px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd]"
+            className="flex-1 px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
           />
           <button
             onClick={handleAddDepartment}
@@ -287,7 +287,7 @@ export default function DepartmentsSettingsPage() {
             Add Department
           </button>
         </div>
-        <p className="text-xs text-slate-500 mt-2">
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
           New departments will start with basic permissions (Kitchen Orders, Bar Orders, and My Rota). You can customize them above.
         </p>
       </div>

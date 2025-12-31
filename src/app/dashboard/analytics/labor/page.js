@@ -445,42 +445,42 @@ export default function LaborAnalyticsPage() {
 
           {/* Daily Breakdown */}
           {analytics.dailyBreakdown.length > 0 && (
-            <div className="mb-8 bg-white border-2 border-slate-100 rounded-2xl p-6">
-              <h2 className="text-xl font-bold text-slate-800 mb-6">Daily Breakdown</h2>
+            <div className="mb-8 bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6">
+              <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-6">Daily Breakdown</h2>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b-2 border-slate-100">
-                      <th className="text-left py-3 px-4 text-sm font-medium text-slate-700">Date</th>
-                      <th className="text-right py-3 px-4 text-sm font-medium text-slate-700">Shifts</th>
-                      <th className="text-right py-3 px-4 text-sm font-medium text-slate-700">Hours</th>
-                      <th className="text-right py-3 px-4 text-sm font-medium text-slate-700">Cost</th>
+                    <tr className="border-b-2 border-slate-100 dark:border-slate-700">
+                      <th className="text-left py-3 px-4 text-sm font-medium text-slate-700 dark:text-slate-300">Date</th>
+                      <th className="text-right py-3 px-4 text-sm font-medium text-slate-700 dark:text-slate-300">Shifts</th>
+                      <th className="text-right py-3 px-4 text-sm font-medium text-slate-700 dark:text-slate-300">Hours</th>
+                      <th className="text-right py-3 px-4 text-sm font-medium text-slate-700 dark:text-slate-300">Cost</th>
                     </tr>
                   </thead>
                   <tbody>
                     {analytics.dailyBreakdown.map(day => (
-                      <tr key={day.date} className="border-b border-slate-50 hover:bg-slate-50">
-                        <td className="py-3 px-4 text-sm text-slate-800">{formatDate(day.date)}</td>
-                        <td className="py-3 px-4 text-sm text-slate-600 text-right">{day.shifts}</td>
-                        <td className="py-3 px-4 text-sm text-slate-600 text-right">
+                      <tr key={day.date} className="border-b border-slate-50 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800">
+                        <td className="py-3 px-4 text-sm text-slate-800 dark:text-slate-200">{formatDate(day.date)}</td>
+                        <td className="py-3 px-4 text-sm text-slate-600 dark:text-slate-400 text-right">{day.shifts}</td>
+                        <td className="py-3 px-4 text-sm text-slate-600 dark:text-slate-400 text-right">
                           {formatHours(day.hours)}
                         </td>
-                        <td className="py-3 px-4 text-sm font-medium text-[#6262bd] text-right">
+                        <td className="py-3 px-4 text-sm font-medium text-[#6262bd] dark:text-[#8b8bdb] text-right">
                           {formatCurrency(day.cost)}
                         </td>
                       </tr>
                     ))}
                   </tbody>
                   <tfoot>
-                    <tr className="border-t-2 border-slate-200 font-bold">
-                      <td className="py-3 px-4 text-sm text-slate-800">Total</td>
-                      <td className="py-3 px-4 text-sm text-slate-800 text-right">
+                    <tr className="border-t-2 border-slate-200 dark:border-slate-700 font-bold">
+                      <td className="py-3 px-4 text-sm text-slate-800 dark:text-slate-200">Total</td>
+                      <td className="py-3 px-4 text-sm text-slate-800 dark:text-slate-200 text-right">
                         {analytics.dailyBreakdown.reduce((sum, day) => sum + day.shifts, 0)}
                       </td>
-                      <td className="py-3 px-4 text-sm text-slate-800 text-right">
+                      <td className="py-3 px-4 text-sm text-slate-800 dark:text-slate-200 text-right">
                         {formatHours(analytics.dailyBreakdown.reduce((sum, day) => sum + day.hours, 0))}
                       </td>
-                      <td className="py-3 px-4 text-sm text-[#6262bd] text-right">
+                      <td className="py-3 px-4 text-sm text-[#6262bd] dark:text-[#8b8bdb] text-right">
                         {formatCurrency(analytics.dailyBreakdown.reduce((sum, day) => sum + day.cost, 0))}
                       </td>
                     </tr>

@@ -314,23 +314,23 @@ export default function RotaPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-8">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800">Staff Rota & Scheduling</h1>
-          <p className="text-slate-600 mt-1">Manage shifts and staff schedules</p>
+          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-200">Staff Rota & Scheduling</h1>
+          <p className="text-slate-600 dark:text-slate-400 mt-1">Manage shifts and staff schedules</p>
         </div>
         <div className="flex gap-3">
           <button
             onClick={() => setShowTemplatesModal(true)}
-            className="px-5 py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-xl hover:border-[#6262bd] transition-colors font-medium"
+            className="px-5 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl hover:border-[#6262bd] transition-colors font-medium"
           >
             📋 Templates
           </button>
           <button
             onClick={() => setShowRequestsModal(true)}
-            className="relative px-5 py-2.5 bg-white border-2 border-slate-200 text-slate-700 rounded-xl hover:border-[#6262bd] transition-colors font-medium"
+            className="relative px-5 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl hover:border-[#6262bd] transition-colors font-medium"
           >
             📨 Requests
             {pendingRequestsCount > 0 && (
@@ -362,7 +362,7 @@ export default function RotaPage() {
         <select
           value={filters.department}
           onChange={(e) => setFilters({ ...filters, department: e.target.value })}
-          className="px-4 py-2 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white"
+          className="px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
         >
           <option value="">All Departments</option>
           {departments.map(dept => (
@@ -373,7 +373,7 @@ export default function RotaPage() {
         <select
           value={filters.status}
           onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-          className="px-4 py-2 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white"
+          className="px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
         >
           <option value="">All Statuses</option>
           <option value="draft">Draft</option>
@@ -385,7 +385,7 @@ export default function RotaPage() {
         <select
           value={filters.staff_id}
           onChange={(e) => setFilters({ ...filters, staff_id: e.target.value })}
-          className="px-4 py-2 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white"
+          className="px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
         >
           <option value="">All Staff</option>
           {staff.map(s => (
@@ -396,7 +396,7 @@ export default function RotaPage() {
         {(filters.department || filters.status || filters.staff_id) && (
           <button
             onClick={() => setFilters({ department: '', status: '', staff_id: '' })}
-            className="px-4 py-2 text-slate-600 hover:text-[#6262bd] font-medium"
+            className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-[#6262bd] font-medium"
           >
             Clear Filters
           </button>
@@ -404,12 +404,12 @@ export default function RotaPage() {
       </div>
 
       {/* Calendar */}
-      <div className="bg-white rounded-xl p-6 shadow-sm mb-8" style={{ height: 700 }}>
+      <div className="bg-white dark:bg-slate-900 rounded-xl p-6 shadow-sm mb-8" style={{ height: 700 }}>
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6262bd] mx-auto mb-4"></div>
-              <p className="text-slate-600">Loading shifts...</p>
+              <p className="text-slate-600 dark:text-slate-400">Loading shifts...</p>
             </div>
           </div>
         ) : (

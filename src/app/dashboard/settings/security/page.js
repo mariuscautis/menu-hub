@@ -154,7 +154,7 @@ export default function Security() {
 
           {/* Staff Login Password */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
               Staff Login Password
             </label>
             <div className="flex gap-2">
@@ -164,12 +164,12 @@ export default function Security() {
                   value={staffLoginPassword}
                   onChange={(e) => setStaffLoginPassword(e.target.value)}
                   placeholder="Enter password (min 6 characters)"
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] font-mono"
+                  className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] font-mono bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
                 >
                   {showPassword ? (
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">

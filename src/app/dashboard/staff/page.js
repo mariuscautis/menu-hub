@@ -358,9 +358,9 @@ export default function Staff() {
       </div>
 
       {/* Info Box */}
-      <div className="bg-[#6262bd]/5 border-2 border-[#6262bd]/20 rounded-2xl p-6 mb-8">
-        <h3 className="font-semibold text-slate-700 mb-2">Staff Roles</h3>
-        <ul className="text-slate-600 text-sm space-y-1">
+      <div className="bg-[#6262bd]/5 dark:bg-[#6262bd]/10 border-2 border-[#6262bd]/20 dark:border-[#6262bd]/30 rounded-2xl p-6 mb-8">
+        <h3 className="font-semibold text-slate-700 dark:text-slate-300 mb-2">Staff Roles</h3>
+        <ul className="text-slate-600 dark:text-slate-400 text-sm space-y-1">
           <li><strong>Admin:</strong> Full access - can manage menu, tables, orders, and staff</li>
           <li><strong>Staff:</strong> Orders only - can view and update order status</li>
         </ul>
@@ -368,13 +368,13 @@ export default function Staff() {
 
       {/* Staff List */}
       {staff.length === 0 ? (
-        <div className="bg-white border-2 border-slate-100 rounded-2xl p-12 text-center">
-          <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-12 text-center">
+          <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
             </svg>
           </div>
-          <p className="text-slate-500 mb-4">No staff members yet</p>
+          <p className="text-slate-500 dark:text-slate-400 mb-4">No staff members yet</p>
           <button
             onClick={() => setShowModal(true)}
             className="text-[#6262bd] font-medium hover:underline"
@@ -383,23 +383,23 @@ export default function Staff() {
           </button>
         </div>
       ) : (
-        <div className="bg-white border-2 border-slate-100 rounded-2xl overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden">
           <table className="w-full">
-            <thead className="bg-slate-50 border-b-2 border-slate-100">
+            <thead className="bg-slate-50 dark:bg-slate-800 border-b-2 border-slate-100 dark:border-slate-700">
               <tr>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Name</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Role</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Department</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">PIN Code</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Status</th>
-                <th className="text-right px-6 py-4 text-sm font-semibold text-slate-600">Actions</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Name</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Role</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Department</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">PIN Code</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Status</th>
+                <th className="text-right px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Actions</th>
               </tr>
             </thead>
             <tbody>
               {staff.map((member) => (
-                <tr key={member.id} className="border-b border-slate-100 last:border-0">
+                <tr key={member.id} className="border-b border-slate-100 dark:border-slate-800 last:border-0">
                   <td className="px-6 py-4">
-                    <p className="font-medium text-slate-800">{member.name || '-'}</p>
+                    <p className="font-medium text-slate-800 dark:text-slate-200">{member.name || '-'}</p>
                     <p className="text-xs text-slate-400">{member.email}</p>
                   </td>
                   <td className="px-6 py-4">
@@ -414,10 +414,10 @@ export default function Staff() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-lg font-bold text-[#6262bd]">{member.pin_code || '---'}</span>
+                      <span className="font-mono text-lg font-bold text-[#6262bd] dark:text-[#8b8bdb]">{member.pin_code || '---'}</span>
                       <button
                         onClick={() => openPinModal(member)}
-                        className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs font-medium hover:bg-slate-200"
+                        className="px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-xs font-medium hover:bg-slate-200 dark:hover:bg-slate-600"
                       >
                         Change
                       </button>
@@ -488,21 +488,21 @@ export default function Staff() {
           }}
         >
           <div
-            className="bg-white rounded-2xl p-8 w-full max-w-md max-h-[90vh] overflow-y-auto"
+            className="bg-white dark:bg-slate-900 rounded-2xl p-8 w-full max-w-md max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold text-slate-800 mb-6">
+            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-6">
               {isEditing ? 'Edit Staff Member' : 'Add Staff Member'}
             </h2>
             {error && (
-              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+              <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-600 dark:text-red-400 text-sm">
                 {error}
               </div>
             )}
             <form onSubmit={isEditing ? editStaff : addStaff}>
               <div className="space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                     Name
                   </label>
                   <input
@@ -510,12 +510,12 @@ export default function Staff() {
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                    className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                     placeholder="John Smith"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                     Email Address
                   </label>
                   <input
@@ -524,12 +524,12 @@ export default function Staff() {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                    className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                     placeholder="staff@restaurant.com"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                     PIN Code (3 digits)
                   </label>
                   <div className="flex gap-2">
@@ -542,14 +542,14 @@ export default function Staff() {
                       disabled={isEditing}
                       maxLength={3}
                       pattern="[0-9]{3}"
-                      className="flex-1 px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 font-mono text-lg disabled:bg-slate-50 disabled:text-slate-400"
+                      className="flex-1 px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 font-mono text-lg disabled:bg-slate-50 dark:disabled:bg-slate-700 disabled:text-slate-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                       placeholder="123"
                     />
                     {!isEditing && (
                       <button
                         type="button"
                         onClick={generatePinCode}
-                        className="px-4 py-3 border-2 border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 font-medium text-sm whitespace-nowrap"
+                        className="px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 font-medium text-sm whitespace-nowrap bg-white dark:bg-slate-800"
                       >
                         Generate
                       </button>
@@ -562,28 +562,28 @@ export default function Staff() {
                   </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                     Role
                   </label>
                   <select
                     name="role"
                     value={formData.role}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                    className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800"
                   >
                     <option value="staff">Staff (Orders only)</option>
                     <option value="admin">Admin (Full access)</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                     Department
                   </label>
                   <select
                     name="department"
                     value={formData.department}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                    className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800"
                   >
                     {departments.map(dept => (
                       <option key={dept} value={dept}>
@@ -673,16 +673,16 @@ export default function Staff() {
           }}
         >
           <div
-            className="bg-white rounded-2xl p-8 w-full max-w-md"
+            className="bg-white dark:bg-slate-900 rounded-2xl p-8 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold text-slate-800 mb-6">
+            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-6">
               Change PIN for {selectedStaff.name || selectedStaff.email}
             </h2>
             <form onSubmit={updatePinCode}>
               <div className="space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                     New PIN Code
                   </label>
                   <input
@@ -691,7 +691,7 @@ export default function Staff() {
                     onChange={(e) => setPasswordData({ newPassword: e.target.value })}
                     maxLength={3}
                     pattern="[0-9]{3}"
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 font-mono text-2xl text-center"
+                    className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 font-mono text-2xl text-center placeholder:text-slate-400 dark:placeholder:text-slate-500"
                     placeholder="123"
                   />
                   <p className="text-slate-400 text-sm mt-2">

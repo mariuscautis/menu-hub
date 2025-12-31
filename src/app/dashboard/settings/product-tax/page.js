@@ -426,14 +426,14 @@ export default function ProductTaxSettings() {
             </div>
           )}
           {/* Add New Category */}
-          <div className="border-t-2 border-slate-100 pt-6">
-            <h3 className="text-sm font-medium text-slate-700 mb-3">Add New Tax Category</h3>
+          <div className="border-t-2 border-slate-100 dark:border-slate-800 pt-6">
+            <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">Add New Tax Category</h3>
             <div className="flex items-center gap-3">
               <input
                 type="text"
                 value={newCategory.name}
                 onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-                className="flex-1 px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd]"
+                className="flex-1 px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 placeholder="e.g., Base Products, Alcohol, Sugary Products"
               />
               <input
@@ -443,10 +443,10 @@ export default function ProductTaxSettings() {
                 step="0.01"
                 min="0"
                 max="100"
-                className="w-32 px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd]"
+                className="w-32 px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 placeholder="10.00"
               />
-              <span className="text-slate-600 font-medium">%</span>
+              <span className="text-slate-600 dark:text-slate-400 font-medium">%</span>
               <button
                 onClick={handleAddCategory}
                 disabled={saving || !newCategory.name || !newCategory.rate}

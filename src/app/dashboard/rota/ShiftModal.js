@@ -216,14 +216,14 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl p-8 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-slate-800">
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">
             {shift?.id ? 'Edit Shift' : 'Create New Shift'}
           </h2>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 text-2xl font-bold"
+            className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 text-2xl font-bold"
           >
             ×
           </button>
@@ -239,7 +239,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Date */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 Date *
               </label>
               <input
@@ -248,13 +248,13 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
                 value={formData.date}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd]"
+                className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200"
               />
             </div>
 
             {/* Role Required */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 Role Required *
               </label>
               <input
@@ -264,13 +264,13 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
                 onChange={handleChange}
                 placeholder="e.g., Server, Chef, Bartender"
                 required
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd]"
+                className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
             </div>
 
             {/* Shift Start */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 Start Time *
               </label>
               <input
@@ -279,13 +279,13 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
                 value={formData.shift_start}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd]"
+                className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200"
               />
             </div>
 
             {/* Shift End */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 End Time *
               </label>
               <input
@@ -294,20 +294,20 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
                 value={formData.shift_end}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd]"
+                className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200"
               />
             </div>
 
             {/* Department */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 Department
               </label>
               <select
                 name="department"
                 value={formData.department}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd]"
+                className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200"
               >
                 <option value="">Select Department</option>
                 {departments && departments.length > 0 ? (
@@ -328,7 +328,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
 
             {/* Break Duration */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 Break Duration (minutes)
               </label>
               <input
@@ -338,21 +338,21 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
                 onChange={handleChange}
                 min="0"
                 max="180"
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd]"
+                className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200"
               />
             </div>
 
             {/* Staff Assignment */}
             <div className="md:col-span-2">
               <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-medium text-slate-700">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                   Assign Staff
                 </label>
                 {unavailableStaff.length > 0 && (
                   <button
                     type="button"
                     onClick={() => setShowUnavailable(!showUnavailable)}
-                    className="text-xs text-slate-600 hover:text-[#6262bd] font-medium transition-colors"
+                    className="text-xs text-slate-600 dark:text-slate-400 hover:text-[#6262bd] font-medium transition-colors"
                   >
                     {showUnavailable ? 'Hide' : 'Show'} unavailable ({unavailableStaff.length})
                   </button>
@@ -362,7 +362,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
                 name="staff_id"
                 value={formData.staff_id}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd]"
+                className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200"
               >
                 <option value="">Leave Unfilled</option>
 
@@ -395,7 +395,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
                 )}
               </select>
               <div className="mt-2 space-y-1">
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   {loadingAvailable ? (
                     'Checking staff availability...'
                   ) : availableStaff.length === 0 && unavailableStaff.length > 0 ? (
@@ -411,14 +411,14 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
 
             {/* Status */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 Status
               </label>
               <select
                 name="status"
                 value={formData.status}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd]"
+                className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200"
               >
                 <option value="draft">Draft</option>
                 <option value="published">Published</option>
@@ -429,7 +429,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
 
             {/* Notes */}
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 Notes
               </label>
               <textarea
@@ -438,7 +438,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
                 onChange={handleChange}
                 rows="3"
                 placeholder="Optional notes about this shift..."
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] resize-none"
+                className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] resize-none bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
             </div>
           </div>
@@ -461,7 +461,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
               <button
                 type="button"
                 onClick={onClose}
-                className="px-6 py-3 border-2 border-slate-200 text-slate-700 rounded-xl hover:border-[#6262bd] transition-colors font-medium"
+                className="px-6 py-3 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl hover:border-[#6262bd] transition-colors font-medium"
               >
                 Cancel
               </button>

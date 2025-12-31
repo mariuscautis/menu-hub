@@ -128,11 +128,11 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl p-6 shadow-sm">
+      <div className="bg-white dark:bg-slate-900 rounded-xl p-6 shadow-sm">
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6262bd] mx-auto mb-3"></div>
-            <p className="text-slate-600 text-sm">Loading availability...</p>
+            <p className="text-slate-600 dark:text-slate-400 text-sm">Loading availability...</p>
           </div>
         </div>
       </div>
@@ -140,13 +140,13 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="bg-slate-50 border-b-2 border-slate-200 px-6 py-4">
+      <div className="bg-slate-50 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700 px-6 py-4">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-xl font-bold text-slate-800">Staff Availability</h2>
-            <p className="text-sm text-slate-600 mt-1">
+            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">Staff Availability</h2>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
               View time-off and availability across your team
             </p>
           </div>
@@ -198,8 +198,8 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
             </button>
 
             {/* Date Range Label */}
-            <div className="ml-4 px-4 py-2 bg-white border-2 border-slate-200 rounded-lg">
-              <span className="text-sm font-semibold text-slate-800">
+            <div className="ml-4 px-4 py-2 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-lg">
+              <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
                 {getDateRangeLabel()}
               </span>
             </div>
@@ -215,7 +215,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
               placeholder="Search staff by name or role..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-sm"
+              className="w-full px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-sm bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
             />
           </div>
 
@@ -224,7 +224,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
             <select
               value={departmentFilter}
               onChange={(e) => setDepartmentFilter(e.target.value)}
-              className="px-4 py-2 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white text-sm"
+              className="px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-sm text-slate-700 dark:text-slate-200"
             >
               <option value="">All Departments</option>
               {departments.map(dept => (
@@ -240,7 +240,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className="px-4 py-2 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white text-sm"
+              className="px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-sm text-slate-700 dark:text-slate-200"
             >
               <option value="">All Roles</option>
               {roles.map(role => (
@@ -259,7 +259,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
                 setDepartmentFilter('');
                 setRoleFilter('');
               }}
-              className="px-4 py-2 text-slate-600 hover:text-[#6262bd] font-medium text-sm transition-colors"
+              className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-[#6262bd] font-medium text-sm transition-colors"
             >
               Clear
             </button>
@@ -270,8 +270,8 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
       {/* Calendar Grid */}
       <div>
         {/* Date Headers */}
-        <div className="flex border-b-2 border-slate-200 bg-slate-50 sticky top-0 z-10">
-          <div className="w-48 flex-shrink-0 px-4 py-3 font-semibold text-slate-700 border-r-2 border-slate-200 bg-slate-50">
+        <div className="flex border-b-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 sticky top-0 z-10">
+          <div className="w-48 flex-shrink-0 px-4 py-3 font-semibold text-slate-700 dark:text-slate-300 border-r-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
             Staff Member
           </div>
           <div className="flex flex-1">
@@ -282,18 +282,18 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
                 return (
                   <div
                     key={idx}
-                    className={`flex-1 min-w-[80px] px-1 py-3 text-center border-r border-slate-200 ${
-                      isToday ? 'bg-blue-50' : isWeekend ? 'bg-slate-100' : ''
+                    className={`flex-1 min-w-[80px] px-1 py-3 text-center border-r border-slate-200 dark:border-slate-700 ${
+                      isToday ? 'bg-blue-50 dark:bg-blue-900/30' : isWeekend ? 'bg-slate-100 dark:bg-slate-700' : ''
                     }`}
                   >
-                    <div className={`text-xs font-medium ${isToday ? 'text-blue-700' : 'text-slate-600'}`}>
+                    <div className={`text-xs font-medium ${isToday ? 'text-blue-700 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400'}`}>
                       {date.format('ddd')}
                     </div>
-                    <div className={`text-sm font-bold ${isToday ? 'text-blue-700' : 'text-slate-800'}`}>
+                    <div className={`text-sm font-bold ${isToday ? 'text-blue-700 dark:text-blue-300' : 'text-slate-800 dark:text-slate-200'}`}>
                       {date.format('D')}
                     </div>
                     {isToday && (
-                      <div className="text-xs text-blue-600 font-medium">Today</div>
+                      <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">Today</div>
                     )}
                   </div>
                 );
@@ -304,15 +304,15 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
 
         {/* Staff Rows */}
         {filteredStaff && filteredStaff.length > 0 ? (
-          <div className="divide-y divide-slate-200">
+          <div className="divide-y divide-slate-200 dark:divide-slate-700">
             {filteredStaff.map((staffMember) => (
-              <div key={staffMember.id} className="flex hover:bg-slate-50 transition-colors">
+              <div key={staffMember.id} className="flex hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                 {/* Staff Name */}
-                <div className="w-48 flex-shrink-0 px-4 py-4 border-r-2 border-slate-200">
-                  <div className="font-semibold text-slate-800">{staffMember.name}</div>
-                  <div className="text-xs text-slate-500">{staffMember.role}</div>
+                <div className="w-48 flex-shrink-0 px-4 py-4 border-r-2 border-slate-200 dark:border-slate-700">
+                  <div className="font-semibold text-slate-800 dark:text-slate-200">{staffMember.name}</div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400">{staffMember.role}</div>
                   {staffMember.department && (
-                    <div className="text-xs text-slate-400 mt-1">{staffMember.department}</div>
+                    <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">{staffMember.department}</div>
                   )}
                 </div>
 
@@ -366,11 +366,11 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
                       return (
                         <div
                           key={idx}
-                          className={`flex-1 min-w-[80px] px-1 py-4 border-r border-slate-200 ${
-                            isToday ? 'bg-blue-50/30' : isWeekend ? 'bg-slate-50' : ''
+                          className={`flex-1 min-w-[80px] px-1 py-4 border-r border-slate-200 dark:border-slate-700 ${
+                            isToday ? 'bg-blue-50/30 dark:bg-blue-900/20' : isWeekend ? 'bg-slate-50 dark:bg-slate-800' : ''
                           }`}
                         >
-                          <div className="h-full bg-green-50 border border-green-200 rounded-lg"></div>
+                          <div className="h-full bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-lg"></div>
                         </div>
                       );
                     })}
@@ -380,7 +380,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 text-slate-500">
+          <div className="text-center py-12 text-slate-500 dark:text-slate-400">
             <p className="text-lg mb-2">No staff members found</p>
             {(searchTerm || departmentFilter || roleFilter) && (
               <p className="text-sm">Try adjusting your filters</p>
@@ -391,9 +391,9 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
 
       {/* Summary */}
       {staff && staff.length > 0 && (
-        <div className="bg-slate-50 border-t-2 border-slate-200 px-6 py-4">
+        <div className="bg-slate-50 dark:bg-slate-800 border-t-2 border-slate-200 dark:border-slate-700 px-6 py-4">
           <div className="flex items-center justify-between text-sm">
-            <div className="text-slate-600">
+            <div className="text-slate-600 dark:text-slate-400">
               Showing {filteredStaff.length} of {staff.length} staff member{staff.length !== 1 ? 's' : ''} • {dateRange.length} days
               {(searchTerm || departmentFilter || roleFilter) && filteredStaff.length !== staff.length && (
                 <span className="ml-2 text-[#6262bd] font-medium">

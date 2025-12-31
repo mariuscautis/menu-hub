@@ -21,10 +21,10 @@ function FloorPlanTable({ table, orderInfo, reservations, onClick, onMarkCleaned
     : 'rounded-xl'
 
   const statusColor = needsCleaning
-    ? 'bg-red-100 dark:bg-red-900/30 border-red-400 dark:border-red-600'
+    ? 'bg-red-100 dark:bg-red-900/30 border-red-400 dark:border-red-500'
     : hasOpenOrders
-      ? 'bg-amber-100 dark:bg-amber-900/30 border-amber-400 dark:border-amber-600'
-      : 'bg-green-100 dark:bg-green-900/30 border-green-500 dark:border-green-600'
+      ? 'bg-amber-100 dark:bg-amber-900/30 border-amber-400 dark:border-amber-500'
+      : 'bg-green-100 dark:bg-green-900/30 border-green-500 dark:border-green-500'
 
   const getDepartmentColor = (dept) => {
     const colors = {
@@ -172,11 +172,11 @@ function FloorPlanElement({ element }) {
   return (
     <div
       style={style}
-      className="rounded-lg border-2 border-slate-400 dark:border-slate-600 flex items-center justify-center text-3xl select-none"
+      className="rounded-lg border-2 border-slate-400 dark:border-slate-500 flex items-center justify-center text-3xl select-none text-slate-700 dark:text-slate-200"
     >
       <span>{getElementIcon()}</span>
       {element.label && (
-        <span className="text-xs absolute bottom-0 left-0 right-0 bg-black/50 text-white text-center py-0.5">
+        <span className="text-xs absolute bottom-0 left-0 right-0 bg-black/50 dark:bg-black/70 text-white text-center py-0.5">
           {element.label}
         </span>
       )}
@@ -247,6 +247,27 @@ export default function StaffFloorPlanPage() {
   // Canvas settings
   const canvasWidth = currentFloor?.width || 1200
   const canvasHeight = currentFloor?.height || 800
+
+  // Detect dark mode for canvas background
+  const [isDarkMode, setIsDarkMode] = useState(false)
+
+  useEffect(() => {
+    // Check if dark mode is active
+    const checkDarkMode = () => {
+      setIsDarkMode(document.documentElement.classList.contains('dark'))
+    }
+
+    checkDarkMode()
+
+    // Watch for dark mode changes
+    const observer = new MutationObserver(checkDarkMode)
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    })
+
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     fetchData()
@@ -1562,7 +1583,7 @@ export default function StaffFloorPlanPage() {
               width: canvasWidth,
               height: canvasHeight,
               position: 'relative',
-              backgroundColor: currentFloor?.background_color || '#ffffff',
+              backgroundColor: isDarkMode ? '#1e293b' : (currentFloor?.background_color || '#ffffff'),
             }}
             className="mx-auto shadow-2xl rounded-2xl border-4 border-slate-200 dark:border-slate-700"
           >
