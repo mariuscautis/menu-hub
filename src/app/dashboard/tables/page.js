@@ -61,6 +61,12 @@ export default function Tables() {
   const [showPostPaymentModal, setShowPostPaymentModal] = useState(false)
   const [completedOrderIds, setCompletedOrderIds] = useState([])
 
+  // Split bill state
+  const [showSplitBillModal, setShowSplitBillModal] = useState(false)
+  const [splitBills, setSplitBills] = useState([])
+  const [availableItems, setAvailableItems] = useState([])
+  const [splitBillTableId, setSplitBillTableId] = useState(null)
+
   // Show notification helper
   const showNotification = (type, message) => {
     setNotification({ type, message })
@@ -724,6 +730,62 @@ export default function Tables() {
     setShowPaymentModal(true)
   }
 
+  const openSplitBillModal = async (table) => {
+    setSelectedTable(table)
+    setSplitBillTableId(table.id)
+
+    // Get all unpaid, non-cancelled orders for this table
+    const { data: orders } = await supabase
+      .from('orders')
+      .select('*, order_items(*)')
+      .eq('table_id', table.id)
+      .is('paid', false)
+      .neq('status', 'cancelled')
+      .order('created_at', { ascending: true })
+
+    // Get existing paid split bills for this table to know what's already been paid
+    const { data: existingSplitBills } = await supabase
+      .from('split_bills')
+      .select('*, split_bill_items(*)')
+      .eq('table_id', table.id)
+      .eq('payment_status', 'completed')
+
+    // Create a map of order_item_id -> total quantity already paid
+    const paidQuantities = {}
+    existingSplitBills?.forEach(splitBill => {
+      splitBill.split_bill_items?.forEach(item => {
+        if (!paidQuantities[item.order_item_id]) {
+          paidQuantities[item.order_item_id] = 0
+        }
+        paidQuantities[item.order_item_id] += item.quantity
+      })
+    })
+
+    // Flatten all order items into a single list with orderId reference
+    // Subtract already paid quantities from available quantities
+    const items = []
+    orders?.forEach(order => {
+      order.order_items?.forEach(item => {
+        const alreadyPaid = paidQuantities[item.id] || 0
+        const remainingQuantity = item.quantity - alreadyPaid
+
+        if (remainingQuantity > 0) {
+          items.push({
+            id: item.id,
+            name: item.name,
+            quantity: remainingQuantity,
+            price: item.price_at_time,
+            orderId: order.id
+          })
+        }
+      })
+    })
+
+    setAvailableItems(items)
+    setSplitBills([]) // Reset split bills
+    setShowSplitBillModal(true)
+  }
+
   const openOrderDetailsModal = async (table) => {
     setSelectedTable(table)
 
@@ -898,6 +960,105 @@ export default function Tables() {
 
   const calculateTableTotal = () => {
     return unpaidOrders.reduce((sum, order) => sum + (order.total || 0), 0)
+  }
+
+  const processSplitBillPayment = async (bill, paymentMethod) => {
+    if (!bill || bill.items.length === 0) {
+      showNotification('error', 'No items in this bill')
+      return
+    }
+
+    try {
+      let userName = 'Unknown'
+      let userId = null
+
+      // Check if staff session (PIN login)
+      const staffSessionData = localStorage.getItem('staff_session')
+      if (staffSessionData) {
+        const staffSession = JSON.parse(staffSessionData)
+        userName = staffSession.name || staffSession.email || 'Staff'
+      } else {
+        const { data: userData } = await supabase.auth.getUser()
+        userName = userData.user?.user_metadata?.name || userData.user?.email || 'Unknown'
+        userId = userData.user?.id || null
+      }
+
+      // Prepare split bill items for RPC function
+      const splitBillItems = bill.items.map(item => ({
+        order_item_id: item.id,
+        quantity: item.quantity,
+        price: item.price,
+        item_total: item.total
+      }))
+
+      // Use RPC function to process split bill payment (bypasses RLS for PIN-based staff logins)
+      const { data: rpcResult, error: rpcError } = await supabase.rpc('process_split_bill_payment', {
+        p_restaurant_id: restaurant.id,
+        p_table_id: splitBillTableId,
+        p_split_name: bill.name,
+        p_total_amount: bill.total,
+        p_payment_method: paymentMethod,
+        p_paid_by: userName,
+        p_split_bill_items: splitBillItems,
+        p_paid_by_user_id: userId
+      })
+
+      if (rpcError) throw rpcError
+      if (rpcResult && !rpcResult.success) throw new Error(rpcResult.error)
+
+      // Mark this bill as paid in the state and get updated bills
+      let updatedSplitBills = []
+      setSplitBills(prev => {
+        updatedSplitBills = prev.map(b => b.id === bill.id ? { ...b, paid: true, paymentMethod, tableId: splitBillTableId } : b)
+        return updatedSplitBills
+      })
+
+      showNotification('success', `${bill.name} paid successfully: £${bill.total.toFixed(2)} via ${paymentMethod}`)
+
+      // Check if all original items have been paid
+      const remainingQuantity = availableItems.reduce((sum, item) => sum + item.quantity, 0)
+      const unpaidBillsWithItems = updatedSplitBills.filter(b => !b.paid && b.items.length > 0)
+      const allItemsPaid = remainingQuantity === 0 && unpaidBillsWithItems.length === 0
+
+      if (allItemsPaid) {
+        // All items have been paid across all split bills - complete the order
+        const allOrderIds = [...new Set(
+          availableItems.map(item => item.orderId).filter(Boolean)
+        )]
+
+        const { error: updateError } = await supabase.rpc('process_table_payment', {
+          p_order_ids: allOrderIds,
+          p_payment_method: 'split',
+          p_staff_name: userName,
+          p_user_id: userId
+        })
+
+        if (updateError) {
+          console.error('Error marking orders as paid:', updateError)
+        } else {
+          // Update table status to needs_cleaning
+          const { error: tableUpdateError } = await supabase
+            .from('tables')
+            .update({ status: 'needs_cleaning' })
+            .eq('id', splitBillTableId)
+
+          if (tableUpdateError) {
+            console.error('Error updating table status:', tableUpdateError)
+          }
+
+          setCompletedOrderIds(allOrderIds)
+
+          // Refresh data
+          await fetchTableOrderInfo(restaurant.id)
+          await fetchData()
+
+          showNotification('success', 'All bills paid! Table marked for cleaning.')
+        }
+      }
+    } catch (error) {
+      console.error('Split bill payment error:', error)
+      showNotification('error', 'Failed to process split bill payment. Please try again.')
+    }
   }
 
   const openInvoiceModal = (orderId = null, tableId = null) => {
@@ -1369,6 +1530,7 @@ export default function Tables() {
               onDelete={() => deleteTable(table.id)}
               onPlaceOrder={() => openOrderModal(table)}
               onPayBill={() => openPaymentModal(table)}
+              onSplitBill={() => openSplitBillModal(table)}
               onViewOrders={() => openOrderDetailsModal(table)}
               onMarkCleaned={() => markTableAsCleaned(table)}
               onMarkDelivered={(department) => markOrderDelivered(table, department)}
@@ -1777,6 +1939,321 @@ export default function Tables() {
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Split Bill Modal */}
+      {showSplitBillModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-slate-800">
+                Split Bill - Table {selectedTable?.table_number}
+              </h2>
+              <button
+                onClick={() => {
+                  setShowSplitBillModal(false)
+                  setSplitBills([])
+                  setAvailableItems([])
+                  setSplitBillTableId(null)
+                }}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left Side: Available Items */}
+              <div>
+                <div className="bg-slate-50 rounded-xl p-4 mb-4">
+                  <h3 className="font-bold text-slate-800 mb-2">Available Items</h3>
+                  <p className="text-sm text-slate-600">Click on items to assign them to a bill</p>
+                </div>
+
+                <div className="space-y-2">
+                  {availableItems.filter(item => item.quantity > 0).map((item) => (
+                    <div key={item.id} className="bg-white border-2 border-slate-200 rounded-xl p-4 transition-all">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-slate-800">{item.name}</h4>
+                          <p className="text-sm text-slate-600">
+                            {item.quantity} available × £{item.price.toFixed(2)}
+                          </p>
+                        </div>
+                        <span className="font-bold text-slate-800">£{(item.quantity * item.price).toFixed(2)}</span>
+                      </div>
+
+                      {/* Bill Assignment Buttons - Only show unpaid bills */}
+                      <div className="space-y-2">
+                        {splitBills.filter(b => !b.paid).map((bill) => (
+                          <div key={bill.id} className="flex items-center gap-2">
+                            <button
+                              onClick={() => {
+                                if (item.quantity <= 0) return
+
+                                // Decrease available quantity
+                                setAvailableItems(prev =>
+                                  prev.map(i => i.id === item.id ? { ...i, quantity: i.quantity - 1 } : i)
+                                )
+
+                                // Add 1 quantity to bill
+                                setSplitBills(prev =>
+                                  prev.map(b => {
+                                    if (b.id === bill.id) {
+                                      const existingItem = b.items.find(i => i.id === item.id)
+                                      if (existingItem) {
+                                        return {
+                                          ...b,
+                                          items: b.items.map(i =>
+                                            i.id === item.id
+                                              ? { ...i, quantity: i.quantity + 1, total: (i.quantity + 1) * i.price }
+                                              : i
+                                          ),
+                                          total: b.total + item.price
+                                        }
+                                      } else {
+                                        return {
+                                          ...b,
+                                          items: [...b.items, { ...item, quantity: 1, total: item.price }],
+                                          total: b.total + item.price
+                                        }
+                                      }
+                                    }
+                                    return b
+                                  })
+                                )
+                              }}
+                              disabled={item.quantity <= 0}
+                              className="flex-1 px-3 py-2 bg-[#6262bd] text-white text-sm rounded-lg hover:bg-[#5252a3] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            >
+                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                              </svg>
+                              Add to {bill.name}
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+
+                  {availableItems.filter(item => item.quantity > 0).length === 0 && (
+                    <div className="text-center py-8 text-slate-500">
+                      All items have been assigned to bills
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right Side: Split Bills */}
+              <div>
+                {/* Paid Bills */}
+                {splitBills.filter(b => b.paid).length > 0 && (
+                  <div className="mb-6">
+                    <h3 className="font-bold text-slate-800 mb-3">Paid Bills</h3>
+                    <div className="space-y-2">
+                      {splitBills.filter(b => b.paid).map((bill) => (
+                        <div key={bill.id} className="flex justify-between items-center bg-green-50 border border-green-200 rounded-lg p-3">
+                          <div className="flex items-center gap-3">
+                            <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                            </svg>
+                            <span className="font-semibold text-slate-800">{bill.name}</span>
+                            <span className="text-slate-600">£{bill.total.toFixed(2)}</span>
+                          </div>
+                          <button
+                            onClick={() => {
+                              setInvoiceOrderId(null)
+                              setInvoiceTableId(bill.tableId || selectedTable?.id || null)
+                              setShowInvoiceModal(true)
+                            }}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium flex items-center gap-2"
+                          >
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                            </svg>
+                            Invoice
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Unpaid Bills */}
+                <div className="space-y-4">
+                  {splitBills.filter(b => !b.paid).map((bill) => (
+                    <div key={bill.id} className="bg-white border-2 border-[#6262bd]/30 rounded-xl p-4">
+                      <div className="flex justify-between items-center mb-3">
+                        <h4 className="font-bold text-lg text-slate-800">{bill.name}</h4>
+                        {splitBills.filter(b => !b.paid).length > 1 && (
+                          <button
+                            onClick={() => {
+                              // Return all quantities to available
+                              const billItems = bill.items
+                              setAvailableItems(prev =>
+                                prev.map(i => {
+                                  const billItem = billItems.find(bi => bi.id === i.id)
+                                  return billItem ? { ...i, quantity: i.quantity + billItem.quantity } : i
+                                })
+                              )
+                              setSplitBills(prev => prev.filter(b => b.id !== bill.id))
+                            }}
+                            className="text-red-600 hover:text-red-700 text-sm"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+
+                      {bill.items.length > 0 ? (
+                        <>
+                          <div className="space-y-2 mb-3">
+                            {bill.items.map((item) => (
+                              <div key={item.id} className="flex justify-between items-center text-sm bg-slate-50 rounded-lg p-2">
+                                <div className="flex-1">
+                                  <div className="font-medium text-slate-800">{item.name}</div>
+                                  <div className="text-xs text-slate-600">
+                                    {item.quantity} × £{item.price.toFixed(2)}
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="font-semibold text-slate-800">£{item.total.toFixed(2)}</span>
+                                  <button
+                                    onClick={() => {
+                                      // Return 1 quantity back to available
+                                      setAvailableItems(prev =>
+                                        prev.map(i => i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i)
+                                      )
+
+                                      // Decrease quantity in bill
+                                      setSplitBills(prev =>
+                                        prev.map(b => {
+                                          if (b.id === bill.id) {
+                                            const updatedItems = b.items.map(i =>
+                                              i.id === item.id && i.quantity > 1
+                                                ? { ...i, quantity: i.quantity - 1, total: (i.quantity - 1) * i.price }
+                                                : i
+                                            ).filter(i => i.id !== item.id || i.quantity > 0)
+
+                                            return {
+                                              ...b,
+                                              items: updatedItems,
+                                              total: b.total - item.price
+                                            }
+                                          }
+                                          return b
+                                        })
+                                      )
+                                    }}
+                                    className="text-red-500 hover:text-red-600"
+                                  >
+                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                      <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                    </svg>
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="border-t-2 border-slate-200 pt-3">
+                            <div className="flex justify-between items-center mb-3">
+                              <span className="font-bold text-slate-700">Total</span>
+                              <span className="text-xl font-bold text-[#6262bd]">£{bill.total.toFixed(2)}</span>
+                            </div>
+
+                            {/* Payment buttons */}
+                            <div className="space-y-2">
+                              <button
+                                onClick={() => processSplitBillPayment(bill, 'cash')}
+                                className="w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 flex items-center justify-center gap-2 text-sm"
+                              >
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
+                                </svg>
+                                Pay £{bill.total.toFixed(2)} Cash
+                              </button>
+                              <button
+                                onClick={() => processSplitBillPayment(bill, 'card')}
+                                className="w-full bg-[#6262bd] text-white py-2 rounded-lg font-semibold hover:bg-[#5252a3] flex items-center justify-center gap-2 text-sm"
+                              >
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+                                </svg>
+                                Pay £{bill.total.toFixed(2)} Card
+                              </button>
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-center py-6 text-slate-400 text-sm">
+                          No items assigned to this bill yet
+                        </div>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Add Another Bill Button */}
+                  {splitBills.length === 0 && (
+                    <button
+                      onClick={() => {
+                        setSplitBills([{ id: 1, name: 'Bill 1', items: [], total: 0 }])
+                      }}
+                      className="w-full px-4 py-3 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252a3] transition-colors flex items-center justify-center gap-2 font-medium"
+                    >
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                      </svg>
+                      Create First Bill
+                    </button>
+                  )}
+                  {splitBills.some(b => b.paid) && availableItems.some(item => item.quantity > 0) && (
+                    <button
+                      onClick={() => {
+                        const newBillId = Math.max(...splitBills.map(b => b.id), 0) + 1
+                        setSplitBills([...splitBills, {
+                          id: newBillId,
+                          name: `Bill ${newBillId}`,
+                          items: [],
+                          total: 0
+                        }])
+                      }}
+                      className="w-full px-4 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors flex items-center justify-center gap-2 font-medium"
+                    >
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                      </svg>
+                      Add Another Bill
+                    </button>
+                  )}
+                </div>
+
+                {/* Summary */}
+                <div className="mt-4 bg-[#6262bd]/10 rounded-xl p-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-semibold text-slate-700">Original Total</span>
+                    <span className="font-bold text-slate-800">£{calculateTableTotal().toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-semibold text-slate-700">Assigned to Bills</span>
+                    <span className="font-bold text-[#6262bd]">
+                      £{splitBills.reduce((sum, b) => sum + b.total, 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold text-slate-700">Remaining</span>
+                    <span className="font-bold text-orange-600">
+                      £{(calculateTableTotal() - splitBills.reduce((sum, b) => sum + b.total, 0)).toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -2423,7 +2900,7 @@ export default function Tables() {
   )
 }
 
-function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDownload, onDelete, onPlaceOrder, onPayBill, onViewOrders, onMarkCleaned, onMarkDelivered, onViewReservations, onCreateReservation, onAcknowledgeWaiterCall }) {
+function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDownload, onDelete, onPlaceOrder, onPayBill, onSplitBill, onViewOrders, onMarkCleaned, onMarkDelivered, onViewReservations, onCreateReservation, onAcknowledgeWaiterCall }) {
   const hasOpenOrders = orderInfo && orderInfo.count > 0
   const needsCleaning = table.status === 'needs_cleaning'
   const hasReservationsToday = reservations && reservations.length > 0
@@ -2572,6 +3049,15 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
               className="w-full bg-green-600 text-white py-2.5 rounded-xl font-medium hover:bg-green-700 text-sm"
             >
               Pay Bill
+            </button>
+            <button
+              onClick={onSplitBill}
+              className="w-full bg-orange-600 text-white py-2.5 rounded-xl font-medium hover:bg-orange-700 text-sm flex items-center justify-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
+              </svg>
+              Split Bill
             </button>
             <button
               onClick={onCreateReservation}

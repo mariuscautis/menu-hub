@@ -250,6 +250,34 @@ export default function StaffFloorPlanPage() {
     fetchData()
   }, [])
 
+  // Real-time subscription for table updates
+  useEffect(() => {
+    if (!restaurant || !currentFloor) return
+
+    // Subscribe to table changes for real-time updates
+    const tablesChannel = supabase
+      .channel('floor-plan-tables-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'tables',
+          filter: `restaurant_id=eq.${restaurant.id}`
+        },
+        (payload) => {
+          console.log('Table change detected:', payload)
+          // Reload floor data to get updated table statuses
+          loadFloorData(currentFloor.id, restaurant.id)
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(tablesChannel)
+    }
+  }, [restaurant, currentFloor])
+
   // No longer need automatic invoice opening - using manual "Create Invoice" buttons instead
 
   const showNotificationMessage = (type, message) => {
@@ -2016,19 +2044,46 @@ export default function StaffFloorPlanPage() {
                   </div>
 
                   <button
-                    onClick={() => {
-                      // Prepare items from unpaid orders
-                      const items = unpaidOrders.flatMap(order =>
-                        order.order_items?.map(item => ({
-                          id: item.id,
-                          orderId: order.id,
-                          name: item.name,
-                          quantity: item.quantity,
-                          price: item.price_at_time || item.price || 0,
-                          total: item.quantity * (item.price_at_time || item.price || 0),
-                          assignedToBill: null
-                        })) || []
-                      )
+                    onClick={async () => {
+                      // Get existing paid split bills for this table to know what's already been paid
+                      const { data: existingSplitBills } = await supabase
+                        .from('split_bills')
+                        .select('*, split_bill_items(*)')
+                        .eq('table_id', selectedTable.id)
+                        .eq('payment_status', 'completed')
+
+                      // Create a map of order_item_id -> total quantity already paid
+                      const paidQuantities = {}
+                      existingSplitBills?.forEach(splitBill => {
+                        splitBill.split_bill_items?.forEach(item => {
+                          if (!paidQuantities[item.order_item_id]) {
+                            paidQuantities[item.order_item_id] = 0
+                          }
+                          paidQuantities[item.order_item_id] += item.quantity
+                        })
+                      })
+
+                      // Prepare items from unpaid orders, subtracting already paid quantities
+                      const items = []
+                      unpaidOrders.forEach(order => {
+                        order.order_items?.forEach(item => {
+                          const alreadyPaid = paidQuantities[item.id] || 0
+                          const remainingQuantity = item.quantity - alreadyPaid
+
+                          if (remainingQuantity > 0) {
+                            items.push({
+                              id: item.id,
+                              orderId: order.id,
+                              name: item.name,
+                              quantity: remainingQuantity,
+                              price: item.price_at_time || item.price || 0,
+                              total: remainingQuantity * (item.price_at_time || item.price || 0),
+                              assignedToBill: null
+                            })
+                          }
+                        })
+                      })
+
                       setAvailableItems(items)
                       setSplitBills([{ id: 1, name: 'Bill 1', items: [], total: 0 }])
                       setSplitBillTableId(selectedTable?.id || null) // Store table ID for this split bill session
