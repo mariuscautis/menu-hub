@@ -212,6 +212,9 @@ export default function StaffFloorPlanPage() {
     specialRequests: ''
   })
   const [currentUser, setCurrentUser] = useState(null)
+  const [showTimeSlotModal, setShowTimeSlotModal] = useState(false)
+  const [availableTimeSlots, setAvailableTimeSlots] = useState([])
+  const [loadingTimeSlots, setLoadingTimeSlots] = useState(false)
 
   // Payment and invoice state
   const [showPaymentModal, setShowPaymentModal] = useState(false)
@@ -947,19 +950,85 @@ export default function StaffFloorPlanPage() {
     }
   }
 
+  const generateTimeSlots = async (selectedDate) => {
+    setLoadingTimeSlots(true)
+    const slots = []
+
+    // Generate time slots from 9:00 to 23:00 in 30-minute intervals
+    for (let hour = 9; hour < 23; hour++) {
+      for (let minute of [0, 30]) {
+        const timeString = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
+        slots.push(timeString)
+      }
+    }
+
+    // Fetch existing reservations for this date and table
+    try {
+      const { data: existingReservations, error: fetchError } = await supabase
+        .from('reservations')
+        .select('reservation_time, customer_name, status')
+        .eq('restaurant_id', restaurant.id)
+        .eq('table_id', selectedTable.id)
+        .eq('reservation_date', selectedDate)
+        .in('status', ['pending', 'confirmed'])
+
+      if (fetchError) {
+        console.error('Error fetching reservations:', fetchError)
+      }
+
+      console.log('Existing reservations for date', selectedDate, ':', existingReservations)
+
+      const bookedTimes = new Set(existingReservations?.map(r => {
+        // Database returns time in "HH:MM:SS" format, but we need "HH:MM"
+        const timeStr = r.reservation_time
+        // Remove seconds if present (09:00:00 -> 09:00)
+        const normalizedTime = timeStr.substring(0, 5)
+        console.log('Booked time from DB:', timeStr, '-> normalized:', normalizedTime, 'for customer:', r.customer_name)
+        return normalizedTime
+      }) || [])
+
+      console.log('Booked times set:', Array.from(bookedTimes))
+
+      // Mark slots as available or booked
+      const slotsWithAvailability = slots.map(slot => ({
+        time: slot,
+        isBooked: bookedTimes.has(slot)
+      }))
+
+      setAvailableTimeSlots(slotsWithAvailability)
+    } catch (error) {
+      console.error('Error fetching reservations:', error)
+      setAvailableTimeSlots(slots.map(slot => ({ time: slot, isBooked: false })))
+    } finally {
+      setLoadingTimeSlots(false)
+    }
+  }
+
   const handleCreateReservation = () => {
     if (selectedTable) {
+      const today = new Date().toISOString().split('T')[0]
       setReservationForm({
-        date: new Date().toISOString().split('T')[0],
-        time: '19:00',
+        date: today,
+        time: '',
         partySize: 2,
         customerName: '',
         customerEmail: '',
         customerPhone: '',
         specialRequests: ''
       })
+      generateTimeSlots(today)
       setShowCreateReservationModal(true)
     }
+  }
+
+  const handleDateChange = (newDate) => {
+    setReservationForm({ ...reservationForm, date: newDate, time: '' })
+    generateTimeSlots(newDate)
+  }
+
+  const handleTimeSelect = (time) => {
+    setReservationForm({ ...reservationForm, time })
+    setShowTimeSlotModal(false)
   }
 
   const submitReservation = async (e) => {
@@ -985,10 +1054,17 @@ export default function StaffFloorPlanPage() {
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        // Check if it's a trigger error (double booking)
+        const errorMessage = error.message || error.hint || 'Failed to create reservation'
+        throw new Error(errorMessage)
+      }
 
       // Refresh today's reservations to update the badge
       await fetchTodayReservations(restaurant.id)
+
+      // Refresh time slots to show newly booked slot
+      await generateTimeSlots(reservationForm.date)
 
       // Send confirmation email to customer (non-blocking)
       fetch('/api/reservations/send-confirmation', {
@@ -1005,7 +1081,9 @@ export default function StaffFloorPlanPage() {
       alert('Reservation created successfully!')
     } catch (error) {
       console.error('Error creating reservation:', error)
-      alert('Failed to create reservation. Please try again.')
+      // Display the actual error message from the database trigger
+      const displayMessage = error.message || 'Failed to create reservation. Please try again.'
+      alert(displayMessage)
     }
   }
 
@@ -1487,7 +1565,7 @@ export default function StaffFloorPlanPage() {
                     type="date"
                     required
                     value={reservationForm.date}
-                    onChange={(e) => setReservationForm({ ...reservationForm, date: e.target.value })}
+                    onChange={(e) => handleDateChange(e.target.value)}
                     className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 dark:bg-slate-700"
                   />
                 </div>
@@ -1495,13 +1573,13 @@ export default function StaffFloorPlanPage() {
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                     Time
                   </label>
-                  <input
-                    type="time"
-                    required
-                    value={reservationForm.time}
-                    onChange={(e) => setReservationForm({ ...reservationForm, time: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 dark:bg-slate-700"
-                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowTimeSlotModal(true)}
+                    className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 dark:bg-slate-700 text-left hover:border-[#6262bd] transition-colors"
+                  >
+                    {reservationForm.time || 'Select time...'}
+                  </button>
                 </div>
               </div>
 
@@ -1593,6 +1671,81 @@ export default function StaffFloorPlanPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Time Slot Picker Modal */}
+      {showTimeSlotModal && (
+        <div
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60] p-4"
+          onClick={() => setShowTimeSlotModal(false)}
+        >
+          <div
+            className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">
+                Select Time Slot
+              </h2>
+              <button
+                onClick={() => setShowTimeSlotModal(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+              >
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </button>
+            </div>
+
+            {loadingTimeSlots ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6262bd]"></div>
+              </div>
+            ) : (
+              <>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                  Table {selectedTable?.table_number} - {new Date(reservationForm.date).toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                </p>
+
+                <div className="grid grid-cols-4 gap-3">
+                  {availableTimeSlots.map((slot) => (
+                    <button
+                      key={slot.time}
+                      type="button"
+                      onClick={() => !slot.isBooked && handleTimeSelect(slot.time)}
+                      disabled={slot.isBooked}
+                      className={`py-3 px-4 rounded-xl font-medium transition-all ${
+                        slot.isBooked
+                          ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 border-2 border-red-200 dark:border-red-800 cursor-not-allowed line-through'
+                          : reservationForm.time === slot.time
+                          ? 'bg-[#6262bd] text-white border-2 border-[#6262bd]'
+                          : 'border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:border-[#6262bd] hover:bg-[#6262bd]/10 dark:hover:bg-[#6262bd]/20'
+                      }`}
+                    >
+                      {slot.time}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
+                  <div className="flex items-start gap-3">
+                    <svg className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                    </svg>
+                    <div className="text-sm text-blue-800 dark:text-blue-300">
+                      <p className="font-semibold mb-1">Time Slot Information</p>
+                      <ul className="space-y-1 text-xs">
+                        <li>• <span className="line-through text-red-600 dark:text-red-400">Red slots</span> are already booked</li>
+                        <li>• Available slots are shown in white</li>
+                        <li>• Each reservation lasts 2 hours by default</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
