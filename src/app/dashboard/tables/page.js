@@ -212,12 +212,36 @@ export default function Tables() {
         console.log('Tables page waiter calls subscription status:', status)
       })
 
+    // Subscribe to split bills (for real-time split bill payment updates)
+    const splitBillsChannel = supabase
+      .channel(`split-bills-realtime-${Date.now()}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'split_bills',
+          filter: `restaurant_id=eq.${restaurantId}`
+        },
+        (payload) => {
+          console.log('Tables page - Split bill changed:', payload)
+          // Refetch table order info when split bills change
+          setTimeout(() => {
+            fetchTableOrderInfo(restaurantId)
+          }, 100)
+        }
+      )
+      .subscribe((status) => {
+        console.log('Tables page split bills subscription status:', status)
+      })
+
     return () => {
       supabase.removeChannel(ordersChannel)
       supabase.removeChannel(orderItemsChannel)
       supabase.removeChannel(tablesChannel)
       supabase.removeChannel(reservationsChannel)
       supabase.removeChannel(waiterCallsChannel)
+      supabase.removeChannel(splitBillsChannel)
     }
   }, [restaurant])
 
@@ -360,6 +384,8 @@ export default function Tables() {
         delivered_at,
         order_items (
           id,
+          quantity,
+          price_at_time,
           marked_ready_at,
           delivered_at,
           menu_items (
@@ -370,6 +396,22 @@ export default function Tables() {
       .eq('restaurant_id', restaurantId)
       .eq('paid', false)
       .neq('status', 'cancelled')
+
+    // Get all completed split bills to calculate amounts already paid
+    const { data: splitBills } = await supabase
+      .from('split_bills')
+      .select('table_id, total_amount, payment_status')
+      .eq('restaurant_id', restaurantId)
+      .eq('payment_status', 'completed')
+
+    // Calculate total paid via split bills per table
+    const splitBillTotalsByTable = {}
+    splitBills?.forEach(bill => {
+      if (!splitBillTotalsByTable[bill.table_id]) {
+        splitBillTotalsByTable[bill.table_id] = 0
+      }
+      splitBillTotalsByTable[bill.table_id] += parseFloat(bill.total_amount) || 0
+    })
 
     // Group by table and calculate totals
     const orderInfo = {}
@@ -400,6 +442,18 @@ export default function Tables() {
       }
     })
 
+    // Subtract split bill amounts from totals
+    Object.keys(splitBillTotalsByTable).forEach(tableId => {
+      if (orderInfo[tableId]) {
+        orderInfo[tableId].total -= splitBillTotalsByTable[tableId]
+        // Ensure total doesn't go negative (should be 0 if fully paid via split bills)
+        if (orderInfo[tableId].total < 0) {
+          orderInfo[tableId].total = 0
+        }
+      }
+    })
+
+    console.log('fetchTableOrderInfo result:', orderInfo)
     setTableOrderInfo(orderInfo)
   }
 
@@ -726,7 +780,54 @@ export default function Tables() {
       .neq('status', 'cancelled')
       .order('created_at', { ascending: true })
 
-    setUnpaidOrders(orders || [])
+    // Get existing paid split bills for this table to know what's already been paid
+    const { data: existingSplitBills } = await supabase
+      .from('split_bills')
+      .select('*, split_bill_items(*)')
+      .eq('table_id', table.id)
+      .eq('payment_status', 'completed')
+
+    // Create a map of order_item_id -> total quantity already paid
+    const paidQuantities = {}
+    existingSplitBills?.forEach(splitBill => {
+      splitBill.split_bill_items?.forEach(item => {
+        if (!paidQuantities[item.order_item_id]) {
+          paidQuantities[item.order_item_id] = 0
+        }
+        paidQuantities[item.order_item_id] += item.quantity
+      })
+    })
+
+    // Filter out fully paid items and adjust quantities for partially paid items
+    const filteredOrders = orders?.map(order => {
+      const filteredItems = order.order_items?.map(item => {
+        const alreadyPaid = paidQuantities[item.id] || 0
+        const remainingQuantity = item.quantity - alreadyPaid
+
+        if (remainingQuantity <= 0) {
+          return null // Item fully paid via split bills
+        }
+
+        // Return item with adjusted quantity
+        return {
+          ...item,
+          quantity: remainingQuantity
+        }
+      }).filter(item => item !== null) // Remove null entries
+
+      // Recalculate order total based on remaining items
+      const newTotal = filteredItems?.reduce((sum, item) => {
+        return sum + (item.quantity * item.price_at_time)
+      }, 0) || 0
+
+      return {
+        ...order,
+        order_items: filteredItems,
+        total: newTotal
+      }
+    }).filter(order => order.order_items && order.order_items.length > 0) // Remove orders with no remaining items
+
+    setUnpaidOrders(filteredOrders || [])
     setShowPaymentModal(true)
   }
 
@@ -1014,6 +1115,9 @@ export default function Tables() {
       })
 
       showNotification('success', `${bill.name} paid successfully: £${bill.total.toFixed(2)} via ${paymentMethod}`)
+
+      // Refresh table order info immediately after each split bill payment
+      await fetchTableOrderInfo(restaurant.id)
 
       // Check if all original items have been paid
       const remainingQuantity = availableItems.reduce((sum, item) => sum + item.quantity, 0)
@@ -2901,8 +3005,15 @@ export default function Tables() {
 }
 
 function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDownload, onDelete, onPlaceOrder, onPayBill, onSplitBill, onViewOrders, onMarkCleaned, onMarkDelivered, onViewReservations, onCreateReservation, onAcknowledgeWaiterCall }) {
-  const hasOpenOrders = orderInfo && orderInfo.count > 0
+  // Show badge if there are orders with unpaid amounts
+  // Hide only when total is explicitly 0 (not undefined/null)
+  const hasOpenOrders = orderInfo && orderInfo.count > 0 && (orderInfo.total === undefined || orderInfo.total === null || orderInfo.total > 0)
   const needsCleaning = table.status === 'needs_cleaning'
+
+  // Debug logging
+  if (orderInfo) {
+    console.log(`Table ${table.table_number} orderInfo:`, orderInfo, 'hasOpenOrders:', hasOpenOrders, 'total:', orderInfo.total, 'count:', orderInfo.count)
+  }
   const hasReservationsToday = reservations && reservations.length > 0
   const hasWaiterCall = waiterCalls && waiterCalls.length > 0
   const readyDepartments = orderInfo?.readyDepartments || []

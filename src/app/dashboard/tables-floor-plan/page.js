@@ -7,7 +7,9 @@ import InvoiceClientModal from '@/components/invoices/InvoiceClientModal'
 
 // Read-only Table Component for Staff
 function FloorPlanTable({ table, orderInfo, reservations, onClick, onMarkCleaned, onMarkDelivered, onViewReservations }) {
-  const hasOpenOrders = orderInfo && orderInfo.count > 0
+  // Show badge if there are orders with unpaid amounts
+  // Hide only when total is explicitly 0 (not undefined/null)
+  const hasOpenOrders = orderInfo && orderInfo.count > 0 && (orderInfo.total === undefined || orderInfo.total === null || orderInfo.total > 0)
   const needsCleaning = table.status === 'needs_cleaning'
   const hasReservationsToday = reservations && reservations.length > 0
   const readyDepartments = orderInfo?.readyDepartments || []
@@ -250,9 +252,11 @@ export default function StaffFloorPlanPage() {
     fetchData()
   }, [])
 
-  // Real-time subscription for table updates
+  // Real-time subscriptions for live updates
   useEffect(() => {
     if (!restaurant || !currentFloor) return
+
+    const restaurantId = restaurant.id
 
     // Subscribe to table changes for real-time updates
     const tablesChannel = supabase
@@ -263,18 +267,80 @@ export default function StaffFloorPlanPage() {
           event: '*',
           schema: 'public',
           table: 'tables',
-          filter: `restaurant_id=eq.${restaurant.id}`
+          filter: `restaurant_id=eq.${restaurantId}`
         },
         (payload) => {
-          console.log('Table change detected:', payload)
+          console.log('Floor Plan - Table change detected:', payload)
           // Reload floor data to get updated table statuses
-          loadFloorData(currentFloor.id, restaurant.id)
+          loadFloorData(currentFloor.id, restaurantId)
+        }
+      )
+      .subscribe()
+
+    // Subscribe to order changes
+    const ordersChannel = supabase
+      .channel(`floor-plan-orders-realtime-${Date.now()}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'orders',
+          filter: `restaurant_id=eq.${restaurantId}`
+        },
+        (payload) => {
+          console.log('Floor Plan - Order changed:', payload)
+          setTimeout(() => {
+            loadFloorData(currentFloor.id, restaurantId)
+          }, 100)
+        }
+      )
+      .subscribe()
+
+    // Subscribe to order_items changes
+    const orderItemsChannel = supabase
+      .channel(`floor-plan-order-items-realtime-${Date.now()}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'order_items'
+        },
+        (payload) => {
+          console.log('Floor Plan - Order item changed:', payload)
+          setTimeout(() => {
+            loadFloorData(currentFloor.id, restaurantId)
+          }, 100)
+        }
+      )
+      .subscribe()
+
+    // Subscribe to split bills changes
+    const splitBillsChannel = supabase
+      .channel(`floor-plan-split-bills-realtime-${Date.now()}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'split_bills',
+          filter: `restaurant_id=eq.${restaurantId}`
+        },
+        (payload) => {
+          console.log('Floor Plan - Split bill changed:', payload)
+          setTimeout(() => {
+            loadFloorData(currentFloor.id, restaurantId)
+          }, 100)
         }
       )
       .subscribe()
 
     return () => {
       supabase.removeChannel(tablesChannel)
+      supabase.removeChannel(ordersChannel)
+      supabase.removeChannel(orderItemsChannel)
+      supabase.removeChannel(splitBillsChannel)
     }
   }, [restaurant, currentFloor])
 
@@ -394,6 +460,22 @@ export default function StaffFloorPlanPage() {
       .eq('paid', false)
       .neq('status', 'cancelled')
 
+    // Get all completed split bills to calculate amounts already paid
+    const { data: splitBills } = await supabase
+      .from('split_bills')
+      .select('table_id, total_amount, payment_status')
+      .eq('restaurant_id', restaurantId)
+      .eq('payment_status', 'completed')
+
+    // Calculate total paid via split bills per table
+    const splitBillTotalsByTable = {}
+    splitBills?.forEach(bill => {
+      if (!splitBillTotalsByTable[bill.table_id]) {
+        splitBillTotalsByTable[bill.table_id] = 0
+      }
+      splitBillTotalsByTable[bill.table_id] += parseFloat(bill.total_amount) || 0
+    })
+
     // Group by table and calculate ready departments
     const orderInfo = {}
     orders?.forEach(order => {
@@ -419,6 +501,17 @@ export default function StaffFloorPlanPage() {
             }
           }
         })
+      }
+    })
+
+    // Subtract split bill amounts from totals
+    Object.keys(splitBillTotalsByTable).forEach(tableId => {
+      if (orderInfo[tableId]) {
+        orderInfo[tableId].total -= splitBillTotalsByTable[tableId]
+        // Ensure total doesn't go negative (should be 0 if fully paid via split bills)
+        if (orderInfo[tableId].total < 0) {
+          orderInfo[tableId].total = 0
+        }
       }
     })
 
@@ -962,6 +1055,9 @@ export default function StaffFloorPlanPage() {
       // Items with quantity 0 won't show in the UI
 
       showNotificationMessage('success', `${bill.name} paid successfully: £${bill.total.toFixed(2)} via ${paymentMethod}`)
+
+      // Refresh floor data immediately after each split bill payment
+      await loadFloorData(currentFloor.id, restaurant.id)
 
       // Check if all original items have been paid (all items have 0 quantity available and no unpaid split bills)
       const remainingQuantity = availableItems.reduce((sum, item) => sum + item.quantity, 0)
