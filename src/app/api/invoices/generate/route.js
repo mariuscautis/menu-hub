@@ -20,7 +20,7 @@ const supabaseAdmin = createClient(
 
 export async function POST(request) {
   try {
-    const { orderId, clientId, clientData } = await request.json();
+    const { orderId, clientId, clientData, splitBillData } = await request.json();
 
     console.log('Generating invoice for order:', orderId);
 
@@ -34,6 +34,21 @@ export async function POST(request) {
     if (orderError || !order) {
       console.error('Order not found:', orderError);
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+    }
+
+    // If split bill data is provided, filter order items to only include those in the split bill
+    if (splitBillData && splitBillData.items) {
+      const splitBillItemIds = new Set(splitBillData.items.map(item => item.id));
+      order.order_items = order.order_items.filter(item => splitBillItemIds.has(item.id));
+
+      // Update quantities for split items
+      order.order_items = order.order_items.map(orderItem => {
+        const splitItem = splitBillData.items.find(item => item.id === orderItem.id);
+        if (splitItem && splitItem.quantity !== orderItem.quantity) {
+          return { ...orderItem, quantity: splitItem.quantity };
+        }
+        return orderItem;
+      });
     }
 
     // Fetch FRESH restaurant data to get current tax rate (order.restaurants might be stale)
