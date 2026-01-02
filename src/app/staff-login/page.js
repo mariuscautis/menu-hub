@@ -35,7 +35,7 @@ export default function StaffLogin() {
           restaurants(*)
         `)
         .eq('email', formData.email.toLowerCase().trim())
-        .eq('pin', formData.pin)
+        .eq('pin_code', formData.pin)
         .eq('status', 'active')
         .maybeSingle()
 

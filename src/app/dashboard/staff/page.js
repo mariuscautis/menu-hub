@@ -203,42 +203,36 @@ export default function Staff() {
       return
     }
 
-    if (!confirm(`Send magic link to ${staffMember.name} (${staffMember.email})?`)) {
+    if (!confirm(`Send magic link email to ${staffMember.name} (${staffMember.email})?`)) {
       return
     }
 
     try {
-      // Generate a secure token
-      const token = Array.from(crypto.getRandomValues(new Uint8Array(32)))
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('')
-
-      const expiresAt = new Date()
-      expiresAt.setDate(expiresAt.getDate() + 7) // Valid for 7 days
-
-      // Store token in database
-      const { error } = await supabase
-        .from('staff_magic_links')
-        .insert({
+      // Send magic link via API
+      const response = await fetch('/api/staff/send-magic-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           staff_id: staffMember.id,
-          token: token,
-          expires_at: expiresAt.toISOString(),
-          used: false
+          restaurant_id: restaurant.id
         })
+      })
 
-      if (error) throw error
+      const data = await response.json()
 
-      // Generate the magic link URL
-      const baseUrl = window.location.origin
-      const magicLink = `${baseUrl}/staff-magic-login?token=${token}`
-
-      // Copy to clipboard
-      await navigator.clipboard.writeText(magicLink)
-
-      alert(`Magic link copied to clipboard!\n\nSend this link to ${staffMember.name}:\n\n${magicLink}\n\nThis link is valid for 7 days.`)
+      if (!response.ok) {
+        // If email sending failed but we have a magic link, show it for manual sending
+        if (data.magic_link) {
+          alert(`Could not send email automatically.\n\nPlease manually send this link to ${staffMember.name} (${staffMember.email}):\n\n${data.magic_link}\n\nThis link is valid for 7 days.`)
+        } else {
+          throw new Error(data.error || 'Failed to send magic link')
+        }
+      } else {
+        alert(`Magic link email sent successfully to ${staffMember.name} (${staffMember.email})!\n\nThe link is valid for 7 days.`)
+      }
     } catch (error) {
-      console.error('Error generating magic link:', error)
-      alert('Failed to generate magic link. Please try again.')
+      console.error('Error sending magic link:', error)
+      alert('Failed to send magic link. Please try again.')
     }
   }
 

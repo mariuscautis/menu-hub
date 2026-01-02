@@ -37,6 +37,8 @@ export default function StaffDashboard() {
 
   const fetchData = async (staffId) => {
     try {
+      console.log('Fetching data for staff_id:', staffId)
+
       // Fetch shifts for this staff member
       const { data: shiftsData } = await supabase
         .from('shifts')
@@ -48,12 +50,28 @@ export default function StaffDashboard() {
 
       setShifts(shiftsData || [])
 
-      // Fetch time-off requests
-      const { data: timeOffData } = await supabase
-        .from('staff_time_off')
+      // Fetch time-off requests from shift_requests table
+      const { data: timeOffData, error: timeOffError } = await supabase
+        .from('shift_requests')
         .select('*')
         .eq('staff_id', staffId)
+        .eq('request_type', 'time_off')
         .order('created_at', { ascending: false })
+
+      if (timeOffError) {
+        console.error('Error fetching time-off requests:', timeOffError)
+      } else {
+        console.log('Fetched time-off requests:', timeOffData)
+        console.log('Query params - staff_id:', staffId, 'request_type: time_off')
+      }
+
+      // Also fetch ALL shift_requests for this staff to debug
+      const { data: allRequests } = await supabase
+        .from('shift_requests')
+        .select('*')
+        .eq('staff_id', staffId)
+
+      console.log('All shift_requests for this staff:', allRequests)
 
       setTimeOffRequests(timeOffData || [])
       setLoading(false)
@@ -79,29 +97,76 @@ export default function StaffDashboard() {
   const handleTimeOffSubmit = async (e) => {
     e.preventDefault()
 
-    try {
-      const { error } = await supabase
-        .from('staff_time_off')
-        .insert({
-          staff_id: staffSession.staff_id,
-          restaurant_id: staffSession.restaurant_id,
-          start_date: timeOffForm.start_date,
-          end_date: timeOffForm.end_date,
-          reason: timeOffForm.reason,
-          status: 'pending'
-        })
+    // Validate dates
+    if (new Date(timeOffForm.start_date) > new Date(timeOffForm.end_date)) {
+      alert('End date must be on or after start date.')
+      return
+    }
 
-      if (error) throw error
+    const workingDays = calculateWorkingDays(timeOffForm.start_date, timeOffForm.end_date)
+
+    if (workingDays === 0) {
+      alert('Your selected dates only include weekends. Please select dates that include working days.')
+      return
+    }
+
+    try {
+      const requestBody = {
+        restaurant_id: staffSession.restaurant_id,
+        staff_id: staffSession.staff_id,
+        request_type: 'time_off',
+        date_from: timeOffForm.start_date,
+        date_to: timeOffForm.end_date,
+        reason: timeOffForm.reason,
+        leave_type: 'annual_holiday',
+        days_requested: workingDays
+      }
+
+      console.log('Submitting time-off request:', requestBody)
+
+      const response = await fetch('/api/rota/requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+      })
+
+      const data = await response.json()
+      console.log('API Response:', response.status, data)
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to submit time-off request')
+      }
 
       // Refresh data
       fetchData(staffSession.staff_id)
       setShowTimeOffModal(false)
       setTimeOffForm({ start_date: '', end_date: '', reason: '' })
-      alert('Time-off request submitted successfully!')
+      alert(`Time-off request submitted successfully!\n\nRequesting ${workingDays} working day${workingDays > 1 ? 's' : ''} off.`)
     } catch (error) {
       console.error('Error submitting time-off request:', error)
-      alert('Failed to submit time-off request. Please try again.')
+      alert(error.message || 'Failed to submit time-off request. Please try again.')
     }
+  }
+
+  const calculateWorkingDays = (startDate, endDate) => {
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+
+    if (start > end) return 0
+
+    let count = 0
+    const currentDate = new Date(start)
+
+    while (currentDate <= end) {
+      const dayOfWeek = currentDate.getDay()
+      // Count Monday (1) through Friday (5)
+      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+        count++
+      }
+      currentDate.setDate(currentDate.getDate() + 1)
+    }
+
+    return count
   }
 
   // Format shifts for calendar
@@ -226,14 +291,20 @@ export default function StaffDashboard() {
                   key={request.id}
                   className="border-2 border-slate-100 rounded-xl p-4 flex justify-between items-center"
                 >
-                  <div>
+                  <div className="flex-1">
                     <p className="font-semibold text-slate-800">
-                      {moment(request.start_date).format('MMM D, YYYY')} - {moment(request.end_date).format('MMM D, YYYY')}
+                      {moment(request.date_from).format('MMM D, YYYY')} - {moment(request.date_to).format('MMM D, YYYY')}
                     </p>
-                    <p className="text-sm text-slate-500 mt-1">{request.reason}</p>
+                    <p className="text-sm text-slate-500 mt-1">{request.reason || 'No reason provided'}</p>
                     <p className="text-xs text-slate-400 mt-1">
                       Requested on {moment(request.created_at).format('MMM D, YYYY')}
+                      {request.days_requested && ` • ${request.days_requested} day${request.days_requested > 1 ? 's' : ''}`}
                     </p>
+                    {request.status === 'rejected' && request.rejection_reason && (
+                      <p className="text-xs text-red-600 mt-2 font-medium">
+                        Rejection reason: {request.rejection_reason}
+                      </p>
+                    )}
                   </div>
                   <span className={`px-3 py-1 text-sm rounded-full font-medium ${getStatusBadge(request.status)}`}>
                     {request.status.charAt(0).toUpperCase() + request.status.slice(1)}

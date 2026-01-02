@@ -101,7 +101,9 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
     const result = await response.json();
 
     if (result.requests) {
-      setRequests(result.requests);
+      // Filter out time_off requests - they're managed in the dedicated Time-Off Requests page
+      const filteredRequests = result.requests.filter(req => req.request_type !== 'time_off');
+      setRequests(filteredRequests);
     }
 
     setLoading(false);

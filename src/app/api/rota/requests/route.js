@@ -145,23 +145,8 @@ export async function POST(request) {
       );
     }
 
-    // Check for overlapping time-off requests
-    if (request_type === 'time_off') {
-      const { data: existing } = await supabase
-        .from('shift_requests')
-        .select('id')
-        .eq('staff_id', staff_id)
-        .eq('request_type', 'time_off')
-        .in('status', ['pending', 'approved'])
-        .or(`date_from.lte.${date_to},date_to.gte.${date_from}`);
-
-      if (existing && existing.length > 0) {
-        return NextResponse.json(
-          { error: 'Overlapping time-off request already exists' },
-          { status: 409 }
-        );
-      }
-    }
+    // Note: We allow multiple time-off requests to enable advance planning
+    // Staff can submit multiple requests for different periods throughout the year
 
     // Create request
     const { data: shiftRequest, error } = await supabase
@@ -210,6 +195,39 @@ export async function POST(request) {
       .single();
 
     if (error) throw error;
+
+    // Create notification for restaurant owner/manager (non-blocking)
+    try {
+      // Get restaurant owner
+      const { data: restaurant } = await supabase
+        .from('restaurants')
+        .select('owner_id')
+        .eq('id', restaurant_id)
+        .single();
+
+      if (restaurant?.owner_id) {
+        const requestTypeLabel = request_type === 'time_off' ? 'time-off' :
+                                  request_type === 'swap' ? 'shift swap' :
+                                  'shift cover';
+
+        await supabase.from('notifications').insert({
+          user_id: restaurant.owner_id,
+          type: 'new_request',
+          title: 'New staff request',
+          message: `${shiftRequest.staff.name} submitted a ${requestTypeLabel} request`,
+          metadata: {
+            request_id: shiftRequest.id,
+            request_type: request_type,
+            staff_id: staff_id,
+            staff_name: shiftRequest.staff.name
+          },
+          read: false
+        });
+      }
+    } catch (notificationError) {
+      // Log notification error but don't fail the request
+      console.error('Failed to create notification:', notificationError);
+    }
 
     return NextResponse.json({ request: shiftRequest }, { status: 201 });
   } catch (error) {
