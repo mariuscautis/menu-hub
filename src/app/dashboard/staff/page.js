@@ -197,6 +197,51 @@ export default function Staff() {
     fetchData()
   }
 
+  const sendMagicLink = async (staffMember) => {
+    if (!staffMember.email) {
+      alert('This staff member doesn\'t have an email address.')
+      return
+    }
+
+    if (!confirm(`Send magic link to ${staffMember.name} (${staffMember.email})?`)) {
+      return
+    }
+
+    try {
+      // Generate a secure token
+      const token = Array.from(crypto.getRandomValues(new Uint8Array(32)))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('')
+
+      const expiresAt = new Date()
+      expiresAt.setDate(expiresAt.getDate() + 7) // Valid for 7 days
+
+      // Store token in database
+      const { error } = await supabase
+        .from('staff_magic_links')
+        .insert({
+          staff_id: staffMember.id,
+          token: token,
+          expires_at: expiresAt.toISOString(),
+          used: false
+        })
+
+      if (error) throw error
+
+      // Generate the magic link URL
+      const baseUrl = window.location.origin
+      const magicLink = `${baseUrl}/staff-magic-login?token=${token}`
+
+      // Copy to clipboard
+      await navigator.clipboard.writeText(magicLink)
+
+      alert(`Magic link copied to clipboard!\n\nSend this link to ${staffMember.name}:\n\n${magicLink}\n\nThis link is valid for 7 days.`)
+    } catch (error) {
+      console.error('Error generating magic link:', error)
+      alert('Failed to generate magic link. Please try again.')
+    }
+  }
+
   const deleteStaff = async (id, name) => {
     if (!confirm(`Remove ${name || 'this staff member'}?`)) return
     await supabase.from('staff').delete().eq('id', id)
@@ -430,6 +475,16 @@ export default function Staff() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex justify-end gap-2">
+                      <button
+                        onClick={() => sendMagicLink(member)}
+                        className="px-3 py-1.5 bg-purple-50 text-purple-600 rounded-lg text-sm font-medium hover:bg-purple-100"
+                        title="Generate and copy magic link for staff login"
+                      >
+                        <svg className="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+                        </svg>
+                        Link
+                      </button>
                       <button
                         onClick={() => openEditModal(member)}
                         className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-100"
