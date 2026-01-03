@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { Calendar, momentLocalizer } from 'react-big-calendar'
 import moment from 'moment'
+import PWAInstallButton from '@/components/PWAInstallButton'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 
 const localizer = momentLocalizer(moment)
@@ -268,8 +269,11 @@ export default function StaffDashboard() {
           </div>
         </div>
 
+        {/* PWA Install Section */}
+        <PWAInstallButton />
+
         {/* Time Off Requests */}
-        <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
+        <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mt-8">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold text-slate-800">Time-Off Requests</h2>
             <button

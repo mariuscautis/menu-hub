@@ -208,8 +208,69 @@ export default function Security() {
         </div>
       </div>
 
-      {/* PWA Install Section */}
-      <PWAInstallButton />
+      {/* PWA Install Sections */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        {/* Manager/Owner App */}
+        <div>
+          <div className="bg-gradient-to-r from-[#6262bd] to-[#8b5cf6] text-white rounded-t-2xl p-4">
+            <h3 className="font-bold text-lg">Manager App</h3>
+            <p className="text-sm opacity-90">Full dashboard access for restaurant management</p>
+          </div>
+          <PWAInstallButton />
+        </div>
+
+        {/* Staff App */}
+        <div>
+          <div className="bg-gradient-to-r from-[#8b5cf6] to-[#a78bfa] text-white rounded-t-2xl p-4">
+            <h3 className="font-bold text-lg">Staff App</h3>
+            <p className="text-sm opacity-90">View rotas, request time off, and manage shifts</p>
+          </div>
+          <div className="bg-white border-2 border-slate-100 border-t-0 rounded-b-2xl p-6">
+            <div className="space-y-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <div className="flex items-start gap-3">
+                  <svg className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                  </svg>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-blue-900 mb-2">Share with Staff</h4>
+                    <p className="text-sm text-blue-800 mb-3">
+                      Staff members should visit the staff dashboard to install their dedicated app:
+                    </p>
+                    <div className="bg-white border border-blue-300 rounded-lg p-3 font-mono text-sm break-all">
+                      {typeof window !== 'undefined' ? window.location.origin : ''}/staff-dashboard
+                    </div>
+                    <p className="text-xs text-blue-700 mt-3">
+                      After logging in with the staff password, they can install the app from their dashboard.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex items-start gap-2 p-3 bg-slate-50 rounded-xl">
+                  <svg className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                  <div>
+                    <h5 className="font-semibold text-slate-700 text-sm">View Rota</h5>
+                    <p className="text-xs text-slate-500">See weekly schedule</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 p-3 bg-slate-50 rounded-xl">
+                  <svg className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M13 7h-2v4H7v2h4v4h2v-4h4v-2h-4V7zm-1-5C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                  </svg>
+                  <div>
+                    <h5 className="font-semibold text-slate-700 text-sm">Time Off</h5>
+                    <p className="text-xs text-slate-500">Request holidays</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Info Box */}
       <div className="bg-blue-50 border-2 border-blue-100 rounded-2xl p-6 mt-6">
