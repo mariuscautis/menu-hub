@@ -9,18 +9,21 @@ import ModernMinimalTemplate from '@/components/invoices/templates/ModernMinimal
 import BoldColorfulTemplate from '@/components/invoices/templates/BoldColorfulTemplate';
 import CompactDetailedTemplate from '@/components/invoices/templates/CompactDetailedTemplate';
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
     }
-  }
-);
+  )
+};
 
 export async function POST(request) {
+  const supabaseAdmin = getSupabaseAdmin()
   try {
     const { orderId, clientId, clientData, splitBillData } = await request.json();
 

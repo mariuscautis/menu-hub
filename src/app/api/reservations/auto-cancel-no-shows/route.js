@@ -3,18 +3,21 @@ export const runtime = 'edge';
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
     }
-  }
-)
+  )
+}
 
 export async function POST(request) {
+  const supabaseAdmin = getSupabaseAdmin()
   try {
     // Get current datetime
     const now = new Date()
@@ -111,6 +114,7 @@ export async function POST(request) {
 
 // GET endpoint for cron jobs or external services
 export async function GET(request) {
+  const supabaseAdmin = getSupabaseAdmin()
   // Verify authorization (simple secret check)
   const authHeader = request.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET || 'your-secret-key-here'
