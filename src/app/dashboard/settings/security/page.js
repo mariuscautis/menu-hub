@@ -39,8 +39,8 @@ export default function Security() {
 
   // Generate QR code for staff login
   useEffect(() => {
-    if (typeof window !== 'undefined' && canvasRef.current) {
-      const staffLoginUrl = `${window.location.origin}/staff-login`
+    if (typeof window !== 'undefined' && canvasRef.current && restaurant) {
+      const staffLoginUrl = `${window.location.origin}/r/${restaurant.slug}/auth/staff-login`
       setQrCodeUrl(staffLoginUrl)
 
       QRCode.toCanvas(canvasRef.current, staffLoginUrl, {
@@ -54,7 +54,7 @@ export default function Security() {
         if (error) console.error('QR Code generation error:', error)
       })
     }
-  }, [])
+  }, [restaurant])
 
   const copyStaffLink = () => {
     if (qrCodeUrl) {
