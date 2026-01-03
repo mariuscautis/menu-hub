@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import NotificationBell from '@/components/NotificationBell'
 import ThemeToggle from '@/components/ThemeToggle'
+import OfflineIndicator from '@/components/OfflineIndicator'
 
 export default function DashboardLayout({ children }) {
   const pathname = usePathname()
@@ -908,6 +909,9 @@ export default function DashboardLayout({ children }) {
       <main className={`flex-1 p-8 ${debug ? 'mt-10' : ''}`}>
         {children}
       </main>
+
+      {/* Offline Indicator */}
+      <OfflineIndicator />
     </div>
   )
 }

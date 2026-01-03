@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import PWAInstallButton from '@/components/PWAInstallButton'
 
 export default function Security() {
   const [restaurant, setRestaurant] = useState(null)
@@ -207,8 +208,11 @@ export default function Security() {
         </div>
       </div>
 
+      {/* PWA Install Section */}
+      <PWAInstallButton />
+
       {/* Info Box */}
-      <div className="bg-blue-50 border-2 border-blue-100 rounded-2xl p-6">
+      <div className="bg-blue-50 border-2 border-blue-100 rounded-2xl p-6 mt-6">
         <div className="flex gap-3">
           <svg className="w-6 h-6 text-blue-600 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
