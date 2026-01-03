@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import PWAInstallButton from '@/components/PWAInstallButton'
+import QRCode from 'qrcode'
 
 export default function Security() {
   const [restaurant, setRestaurant] = useState(null)
@@ -11,6 +12,9 @@ export default function Security() {
   const [message, setMessage] = useState(null)
   const [showPassword, setShowPassword] = useState(false)
   const [staffLoginPassword, setStaffLoginPassword] = useState('')
+  const [qrCodeUrl, setQrCodeUrl] = useState('')
+  const [copied, setCopied] = useState(false)
+  const canvasRef = useRef(null)
 
   useEffect(() => {
     const fetchRestaurant = async () => {
@@ -32,6 +36,33 @@ export default function Security() {
     }
     fetchRestaurant()
   }, [])
+
+  // Generate QR code for staff login
+  useEffect(() => {
+    if (typeof window !== 'undefined' && canvasRef.current) {
+      const staffLoginUrl = `${window.location.origin}/staff-login`
+      setQrCodeUrl(staffLoginUrl)
+
+      QRCode.toCanvas(canvasRef.current, staffLoginUrl, {
+        width: 200,
+        margin: 2,
+        color: {
+          dark: '#6262bd',
+          light: '#ffffff'
+        }
+      }, (error) => {
+        if (error) console.error('QR Code generation error:', error)
+      })
+    }
+  }, [])
+
+  const copyStaffLink = () => {
+    if (qrCodeUrl) {
+      navigator.clipboard.writeText(qrCodeUrl)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
 
   const generatePassword = () => {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'
@@ -223,47 +254,69 @@ export default function Security() {
         <div>
           <div className="bg-gradient-to-r from-[#8b5cf6] to-[#a78bfa] text-white rounded-t-2xl p-4">
             <h3 className="font-bold text-lg">Staff App</h3>
-            <p className="text-sm opacity-90">View rotas, request time off, and manage shifts</p>
+            <p className="text-sm opacity-90">Share with your team to install their app</p>
           </div>
           <div className="bg-white border-2 border-slate-100 border-t-0 rounded-b-2xl p-6">
             <div className="space-y-4">
+              {/* QR Code Section */}
+              <div className="flex flex-col items-center p-4 bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl">
+                <p className="text-sm font-semibold text-slate-700 mb-3">Scan to Install Staff App</p>
+                <div className="bg-white p-3 rounded-lg shadow-sm">
+                  <canvas ref={canvasRef} />
+                </div>
+                <p className="text-xs text-slate-500 mt-3 text-center">Staff can scan this QR code to access the login page</p>
+              </div>
+
+              {/* Link Section */}
               <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                 <div className="flex items-start gap-3">
                   <svg className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                    <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
                   </svg>
                   <div className="flex-1">
-                    <h4 className="font-semibold text-blue-900 mb-2">Share with Staff</h4>
-                    <p className="text-sm text-blue-800 mb-3">
-                      Staff members should visit the staff dashboard to install their dedicated app:
-                    </p>
-                    <div className="bg-white border border-blue-300 rounded-lg p-3 font-mono text-sm break-all">
-                      {typeof window !== 'undefined' ? window.location.origin : ''}/staff-dashboard
+                    <h4 className="font-semibold text-blue-900 mb-2">Or Share This Link</h4>
+                    <div className="flex gap-2">
+                      <div className="flex-1 bg-white border border-blue-300 rounded-lg p-3 font-mono text-xs break-all">
+                        {qrCodeUrl || 'Loading...'}
+                      </div>
+                      <button
+                        onClick={copyStaffLink}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm font-medium"
+                      >
+                        {copied ? '✓ Copied!' : 'Copy'}
+                      </button>
                     </div>
                     <p className="text-xs text-blue-700 mt-3">
-                      After logging in with the staff password, they can install the app from their dashboard.
+                      Staff will login with the password you set above, then install the app.
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex items-start gap-2 p-3 bg-slate-50 rounded-xl">
-                  <svg className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+              {/* Features Grid */}
+              <div className="grid grid-cols-3 gap-2">
+                <div className="flex flex-col items-center gap-2 p-3 bg-slate-50 rounded-xl text-center">
+                  <svg className="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
+                  </svg>
+                  <div>
+                    <h5 className="font-semibold text-slate-700 text-xs">View Rota</h5>
+                  </div>
+                </div>
+                <div className="flex flex-col items-center gap-2 p-3 bg-slate-50 rounded-xl text-center">
+                  <svg className="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z"/>
+                  </svg>
+                  <div>
+                    <h5 className="font-semibold text-slate-700 text-xs">Time Off</h5>
+                  </div>
+                </div>
+                <div className="flex flex-col items-center gap-2 p-3 bg-slate-50 rounded-xl text-center">
+                  <svg className="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                   </svg>
                   <div>
-                    <h5 className="font-semibold text-slate-700 text-sm">View Rota</h5>
-                    <p className="text-xs text-slate-500">See weekly schedule</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 p-3 bg-slate-50 rounded-xl">
-                  <svg className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M13 7h-2v4H7v2h4v4h2v-4h4v-2h-4V7zm-1-5C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
-                  </svg>
-                  <div>
-                    <h5 className="font-semibold text-slate-700 text-sm">Time Off</h5>
-                    <p className="text-xs text-slate-500">Request holidays</p>
+                    <h5 className="font-semibold text-slate-700 text-xs">Availability</h5>
                   </div>
                 </div>
               </div>
