@@ -2,7 +2,7 @@
   "name": "Menu Hub - Staff",
   "short_name": "Menu Hub Staff",
   "description": "Access your rota, shifts, and time-off requests",
-  "start_url": "/staff-dashboard",
+  "start_url": "/staff-login",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#8b5cf6",
