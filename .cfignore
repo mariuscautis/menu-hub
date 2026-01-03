@@ -1,0 +1,7 @@
+# Cloudflare Pages ignore file
+# Exclude large cache files from deployment
+
+.next/cache
+node_modules
+.git
+*.log
