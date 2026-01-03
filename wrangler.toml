@@ -3,9 +3,6 @@ compatibility_flags = ["nodejs_compat"]
 compatibility_date = "2025-01-03"
 pages_build_output_dir = ".vercel/output/static"
 
-[build]
-command = "npm run pages:build"
-
 [env.production]
 compatibility_flags = ["nodejs_compat"]
 
