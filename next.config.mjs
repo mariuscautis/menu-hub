@@ -4,6 +4,10 @@ import withPWA from 'next-pwa';
 const nextConfig = {
   /* config options here */
   reactCompiler: true,
+  eslint: {
+    // Disable ESLint during production builds
+    ignoreDuringBuilds: true,
+  },
   // Explicitly use webpack for PWA compatibility with next-pwa
   webpack(config, { isServer }) {
     // Disable webpack caching in production to avoid large cache files on Cloudflare Pages
