@@ -1,6 +1,7 @@
+export const runtime = 'edge';
+
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import crypto from 'crypto';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -60,8 +61,10 @@ export async function POST(request) {
       );
     }
 
-    // Generate magic link token (using Node.js crypto)
-    const token = crypto.randomBytes(32).toString('hex');
+    // Generate magic link token (using Web Crypto API)
+    const array = new Uint8Array(32);
+    crypto.getRandomValues(array);
+    const token = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
 
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // Valid for 7 days

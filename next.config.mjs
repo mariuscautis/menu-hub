@@ -3,10 +3,12 @@ import withPWA from 'next-pwa';
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   /* config options here */
-  reactCompiler: true,
   eslint: {
     // Disable ESLint during production builds
     ignoreDuringBuilds: true,
+  },
+  images: {
+    unoptimized: true,
   },
   // Explicitly use webpack for PWA compatibility with next-pwa
   webpack(config, { isServer }) {
@@ -16,7 +18,6 @@ const nextConfig = {
     }
     return config;
   },
-  turbopack: {}, // Acknowledge Turbopack but use webpack for builds
 };
 
 const pwaConfig = withPWA({
