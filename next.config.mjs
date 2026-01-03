@@ -5,7 +5,11 @@ const nextConfig = {
   /* config options here */
   reactCompiler: true,
   // Explicitly use webpack for PWA compatibility with next-pwa
-  webpack(config) {
+  webpack(config, { isServer }) {
+    // Disable webpack caching in production to avoid large cache files on Cloudflare Pages
+    if (process.env.NODE_ENV === 'production') {
+      config.cache = false;
+    }
     return config;
   },
   turbopack: {}, // Acknowledge Turbopack but use webpack for builds
