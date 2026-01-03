@@ -3,13 +3,17 @@ export const runtime = 'edge';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+// Lazy initialization of Supabase client to avoid build-time errors
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  )
+};
 
 // GET - Fetch various analytics data
 export async function GET(request) {
+  const supabase = getSupabase()
   try {
     const { searchParams } = new URL(request.url);
     const restaurantId = searchParams.get('restaurant_id');

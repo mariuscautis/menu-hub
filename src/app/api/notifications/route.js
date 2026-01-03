@@ -3,19 +3,23 @@ export const runtime = 'edge';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
+// Lazy initialization of Supabase client to avoid build-time errors
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
     }
-  }
-);
+  )
+}
 
 // GET - Fetch notifications for a user
 export async function GET(request) {
+  const supabase = getSupabase()
   try {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('user_id');
@@ -43,6 +47,7 @@ export async function GET(request) {
 
 // POST - Create a new notification
 export async function POST(request) {
+  const supabase = getSupabase()
   try {
     const body = await request.json();
     const { user_id, type, title, message, metadata } = body;
@@ -78,6 +83,7 @@ export async function POST(request) {
 
 // PUT - Update notification (mark as read)
 export async function PUT(request) {
+  const supabase = getSupabase()
   try {
     const body = await request.json();
     const { id, ids, user_id, read } = body;
@@ -126,6 +132,7 @@ export async function PUT(request) {
 
 // DELETE - Delete notification
 export async function DELETE(request) {
+  const supabase = getSupabase()
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');

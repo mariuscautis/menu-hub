@@ -3,13 +3,17 @@ export const runtime = 'edge';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+// Lazy initialization of Supabase client to avoid build-time errors
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  )
+};
 
 // GET - Fetch attendance records with filtering
 export async function GET(request) {
+  const supabase = getSupabase()
   try {
     const { searchParams } = new URL(request.url);
     const restaurantId = searchParams.get('restaurant_id');
@@ -132,6 +136,7 @@ export async function GET(request) {
 
 // POST - Clock in/out or create attendance record
 export async function POST(request) {
+  const supabase = getSupabase()
   try {
     const body = await request.json();
     const {
@@ -357,6 +362,7 @@ export async function POST(request) {
 
 // PUT - Update attendance record (manual corrections)
 export async function PUT(request) {
+  const supabase = getSupabase()
   try {
     const body = await request.json();
     const {
@@ -497,6 +503,7 @@ export async function PUT(request) {
 
 // DELETE - Delete attendance record
 export async function DELETE(request) {
+  const supabase = getSupabase()
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
