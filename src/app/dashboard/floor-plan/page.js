@@ -235,9 +235,6 @@ export default function FloorPlanPage() {
         .order('table_number')
 
       setAvailableTables(unassignedTables || [])
-
-      // Trigger initial fetch of operational status
-      setRefreshTrigger(prev => prev + 1)
     }
   }
 
