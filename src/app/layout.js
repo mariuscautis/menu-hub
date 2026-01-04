@@ -5,18 +5,19 @@ export const metadata = {
   title: 'Menu Hub - QR Menu & Ordering for Restaurants',
   description: 'Let your customers scan, browse your menu, and order directly from their table.',
   manifest: '/manifest.json',
-  themeColor: '#6262bd',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
     title: 'Menu Hub'
-  },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false
   }
+}
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: '#6262bd'
 }
 
 export default function RootLayout({ children }) {
