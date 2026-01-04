@@ -95,6 +95,23 @@
     color: rgb(156 163 175) !important; /* gray-400 */
   }
 
+  /* Blue text colors - lighter shades for dark mode readability */
+  .dark .text-blue-600 {
+    color: rgb(147 197 253) !important; /* blue-300 */
+  }
+
+  .dark .text-blue-700 {
+    color: rgb(147 197 253) !important; /* blue-300 */
+  }
+
+  .dark .text-blue-800 {
+    color: rgb(147 197 253) !important; /* blue-300 */
+  }
+
+  .dark .text-blue-900 {
+    color: rgb(147 197 253) !important; /* blue-300 */
+  }
+
   /* Border colors */
   .dark .border-slate-200 {
     border-color: rgb(51 65 85) !important; /* slate-700 */
