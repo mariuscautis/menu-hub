@@ -450,27 +450,6 @@ export default function FloorPlanPage() {
       .eq('id', selectedItem.id)
   }
 
-  const openCreateFloorModal = () => {
-    setEditingFloor(null)
-    // Find the next available level number
-    const existingLevels = floors.map(f => f.level).sort((a, b) => a - b)
-    let nextLevel = 0
-    for (let i = 0; i <= existingLevels.length; i++) {
-      if (!existingLevels.includes(i)) {
-        nextLevel = i
-        break
-      }
-    }
-    setFloorForm({
-      name: `Floor ${floors.length + 1}`,
-      level: nextLevel,
-      width: 1200,
-      height: 800,
-      background_color: '#ffffff'
-    })
-    setShowFloorModal(true)
-  }
-
   const openEditFloorModal = (floor) => {
     setEditingFloor(floor)
     setFloorForm({
@@ -617,6 +596,27 @@ export default function FloorPlanPage() {
     }
   }
 
+  const openCreateFloorModal = () => {
+    setEditingFloor(null)
+    // Find the next available level number
+    const existingLevels = floors.map(f => f.level).sort((a, b) => a - b)
+    let nextLevel = 0
+    for (let i = 0; i <= existingLevels.length; i++) {
+      if (!existingLevels.includes(i)) {
+        nextLevel = i
+        break
+      }
+    }
+    setFloorForm({
+      name: `Floor ${floors.length + 1}`,
+      level: nextLevel,
+      width: 1200,
+      height: 800,
+      background_color: '#ffffff'
+    })
+    setShowFloorModal(true)
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -627,23 +627,143 @@ export default function FloorPlanPage() {
 
   if (!currentFloor) {
     return (
-      <div className="p-8 max-w-2xl">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-4">Floor Plan Designer</h1>
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
-          <p className="text-slate-700 dark:text-slate-300 mb-4">
-            No floors found for your restaurant. Create your first floor to start designing your floor plan.
-          </p>
-          <button
-            onClick={openCreateFloorModal}
-            className="px-6 py-3 bg-primary hover:bg-primary-hover text-white rounded-xl font-medium transition-colors"
-          >
-            + Create First Floor
-          </button>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-4">
-            Note: If you see a database error, the floor plan tables may not be set up yet. Contact your administrator to run the ADD_FLOOR_PLAN_TABLES.sql migration.
-          </p>
+      <>
+        <div className="p-8 max-w-2xl">
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-4">Floor Plan Designer</h1>
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+            <p className="text-slate-700 dark:text-slate-300 mb-4">
+              No floors found for your restaurant. Create your first floor to start designing your floor plan.
+            </p>
+            <button
+              onClick={openCreateFloorModal}
+              className="px-6 py-3 bg-primary hover:bg-primary-hover text-white rounded-xl font-medium transition-colors"
+            >
+              + Create First Floor
+            </button>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-4">
+              Note: If you see a database error, the floor plan tables may not be set up yet. Contact your administrator to run the ADD_FLOOR_PLAN_TABLES.sql migration.
+            </p>
+          </div>
         </div>
-      </div>
+
+        {/* Floor Management Modal - available even in empty state */}
+        {showFloorModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowFloorModal(false)}>
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 max-w-lg w-full mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+              <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-4">
+                {editingFloor ? 'Edit Floor' : 'Create New Floor'}
+              </h2>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    Floor Name
+                  </label>
+                  <input
+                    type="text"
+                    value={floorForm.name}
+                    onChange={(e) => setFloorForm({ ...floorForm, name: e.target.value })}
+                    placeholder="e.g., Ground Floor, First Floor, Terrace"
+                    className="w-full px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:border-primary"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    Level (for sorting)
+                  </label>
+                  <input
+                    type="number"
+                    value={floorForm.level}
+                    onChange={(e) => setFloorForm({ ...floorForm, level: parseInt(e.target.value) || 0 })}
+                    className="w-full px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:border-primary"
+                  />
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Lower numbers appear first in the list
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                      Width (px)
+                    </label>
+                    <input
+                      type="number"
+                      value={floorForm.width}
+                      onChange={(e) => setFloorForm({ ...floorForm, width: parseInt(e.target.value) || 1200 })}
+                      min="400"
+                      max="3000"
+                      className="w-full px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:border-primary"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                      Height (px)
+                    </label>
+                    <input
+                      type="number"
+                      value={floorForm.height}
+                      onChange={(e) => setFloorForm({ ...floorForm, height: parseInt(e.target.value) || 800 })}
+                      min="400"
+                      max="3000"
+                      className="w-full px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:border-primary"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    Background Color
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="color"
+                      value={floorForm.background_color}
+                      onChange={(e) => setFloorForm({ ...floorForm, background_color: e.target.value })}
+                      className="w-20 h-10 rounded-xl cursor-pointer border-2 border-slate-200 dark:border-slate-700"
+                    />
+                    <input
+                      type="text"
+                      value={floorForm.background_color}
+                      onChange={(e) => setFloorForm({ ...floorForm, background_color: e.target.value })}
+                      placeholder="#ffffff"
+                      className="flex-1 px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:border-primary"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-2 mt-6">
+                {editingFloor && (
+                  <button
+                    onClick={() => {
+                      setShowFloorModal(false)
+                      deleteFloor(editingFloor)
+                    }}
+                    className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium transition-colors"
+                  >
+                    Delete Floor
+                  </button>
+                )}
+                <button
+                  onClick={() => setShowFloorModal(false)}
+                  className="flex-1 px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 rounded-xl font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={saveFloor}
+                  className="flex-1 px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-xl font-medium transition-colors"
+                >
+                  {editingFloor ? 'Save Changes' : 'Create Floor'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </>
     )
   }
 
