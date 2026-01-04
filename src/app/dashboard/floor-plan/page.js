@@ -627,9 +627,22 @@ export default function FloorPlanPage() {
 
   if (!currentFloor) {
     return (
-      <div className="p-8">
+      <div className="p-8 max-w-2xl">
         <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-4">Floor Plan Designer</h1>
-        <p className="text-slate-600 dark:text-slate-400 mb-4">No floors found. Run the database migration first.</p>
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+          <p className="text-slate-700 dark:text-slate-300 mb-4">
+            No floors found for your restaurant. Create your first floor to start designing your floor plan.
+          </p>
+          <button
+            onClick={openCreateFloorModal}
+            className="px-6 py-3 bg-primary hover:bg-primary-hover text-white rounded-xl font-medium transition-colors"
+          >
+            + Create First Floor
+          </button>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-4">
+            Note: If you see a database error, the floor plan tables may not be set up yet. Contact your administrator to run the ADD_FLOOR_PLAN_TABLES.sql migration.
+          </p>
+        </div>
       </div>
     )
   }
