@@ -14,6 +14,7 @@ export default function Register() {
     restaurantName: '',
     email: '',
     password: '',
+    confirmPassword: '',
     phone: ''
   })
 
@@ -34,6 +35,13 @@ export default function Register() {
     e.preventDefault()
     setLoading(true)
     setError(null)
+
+    // Validate passwords match
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match')
+      setLoading(false)
+      return
+    }
 
     try {
       const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -200,6 +208,22 @@ export default function Register() {
                     minLength={6}
                     className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                     placeholder="Min. 6 characters"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Confirm Password
+                  </label>
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    required
+                    minLength={6}
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                    placeholder="Re-enter your password"
                   />
                 </div>
 
