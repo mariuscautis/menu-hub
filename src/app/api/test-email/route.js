@@ -1,5 +1,7 @@
 import { sendEmail, sendWelcomeEmail } from '@/lib/services/email'
 
+export const runtime = 'edge'
+
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url)

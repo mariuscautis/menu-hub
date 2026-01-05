@@ -1,4 +1,6 @@
 // Debug route to check Brevo configuration
+export const runtime = 'edge'
+
 export async function GET(request) {
   return Response.json({
     apiKeyPresent: !!process.env.BREVO_API_KEY,
