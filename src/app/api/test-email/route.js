@@ -1,4 +1,4 @@
-import { sendEmail, sendWelcomeEmail } from '@/lib/services/email'
+import { sendEmail, sendWelcomeEmail } from '@/lib/services/email-edge'
 
 export const runtime = 'edge'
 
