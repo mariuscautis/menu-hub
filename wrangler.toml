@@ -4,6 +4,7 @@ compatibility_date = "2025-01-03"
 pages_build_output_dir = ".vercel/output/static"
 
 [vars]
+BREVO_API_KEY = "placeholder-will-be-overridden-by-secret"
 EMAIL_FROM = "noreply@venoapp.com"
 EMAIL_FROM_NAME = "Menu Hub"
 NEXT_PUBLIC_SUPABASE_URL = "https://rfquwezkkdyvjftveilf.supabase.co"
@@ -13,6 +14,7 @@ NEXT_PUBLIC_BASE_URL = "https://www.venoapp.com"
 compatibility_flags = ["nodejs_compat"]
 
 [env.production.vars]
+BREVO_API_KEY = "placeholder-will-be-overridden-by-secret"
 EMAIL_FROM = "noreply@venoapp.com"
 EMAIL_FROM_NAME = "Menu Hub"
 NEXT_PUBLIC_SUPABASE_URL = "https://rfquwezkkdyvjftveilf.supabase.co"
@@ -22,6 +24,7 @@ NEXT_PUBLIC_BASE_URL = "https://www.venoapp.com"
 compatibility_flags = ["nodejs_compat"]
 
 [env.preview.vars]
+BREVO_API_KEY = "placeholder-will-be-overridden-by-secret"
 EMAIL_FROM = "noreply@venoapp.com"
 EMAIL_FROM_NAME = "Menu Hub"
 NEXT_PUBLIC_SUPABASE_URL = "https://rfquwezkkdyvjftveilf.supabase.co"
