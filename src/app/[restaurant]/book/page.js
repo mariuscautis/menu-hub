@@ -254,7 +254,7 @@ export default function BookReservation({ params }) {
             You'll receive a confirmation email at <strong>{customerEmail}</strong> once the restaurant approves your request.
           </p>
           <button
-            onClick={() => router.push(`/${slug}/table/1`)}
+            onClick={() => router.push(`/${slug}/menu`)}
             className="bg-[#6262bd] text-white px-6 py-3 rounded-xl font-medium hover:bg-[#5252a3]"
           >
             View Menu
