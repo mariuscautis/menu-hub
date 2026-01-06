@@ -248,7 +248,10 @@ export default function Reservations() {
       fetch('/api/reservations/send-confirmation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reservationId: selectedReservation.id })
+        body: JSON.stringify({
+          reservationId: selectedReservation.id,
+          isConfirmation: true
+        })
       }).catch(console.error)
 
       showNotification('success', 'Reservation confirmed successfully')
