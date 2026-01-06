@@ -229,25 +229,22 @@ export default function Reservations() {
       const staffSessionData = localStorage.getItem('staff_session')
       const isPinBasedLogin = !!staffSessionData
 
-      // Use RPC function to bypass RLS restrictions for staff
-      const { data, error } = await supabase.rpc('confirm_reservation', {
-        p_reservation_id: selectedReservation.id,
-        p_table_id: selectedTable,
-        p_confirmed_by_staff_name: userInfo.name,
-        // Pass null for PIN-based logins to avoid foreign key constraint violation
-        p_confirmed_by_user_id: isPinBasedLogin ? null : userInfo.id
+      // Call API route to confirm reservation (uses admin Supabase client)
+      const response = await fetch('/api/reservations/confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reservationId: selectedReservation.id,
+          tableId: selectedTable,
+          confirmedByStaffName: userInfo.name,
+          confirmedByUserId: isPinBasedLogin ? null : userInfo.id
+        })
       })
 
-      if (error) {
-        // Show user-friendly error message
-        const errorMessage = error.message || 'Failed to confirm reservation'
-        showNotification('error', errorMessage)
-        setModalLoading(false)
-        return
-      }
+      const result = await response.json()
 
-      if (data && !data.success) {
-        showNotification('error', data.error || 'Failed to confirm reservation')
+      if (!result.success) {
+        showNotification('error', result.error || 'Failed to confirm reservation')
         setModalLoading(false)
         return
       }
