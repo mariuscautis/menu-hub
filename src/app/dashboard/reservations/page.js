@@ -252,7 +252,17 @@ export default function Reservations() {
           reservationId: selectedReservation.id,
           isConfirmation: true
         })
-      }).catch(console.error)
+      })
+        .then(res => res.json())
+        .then(result => {
+          console.log('Confirmation email API response:', result)
+          if (!result.success) {
+            console.error('Failed to send confirmation email:', result)
+          }
+        })
+        .catch(err => {
+          console.error('Error calling confirmation email API:', err)
+        })
 
       showNotification('success', 'Reservation confirmed successfully')
       setShowConfirmModal(false)

@@ -22,6 +22,8 @@ export async function POST(request) {
   try {
     const { reservationId, isConfirmation } = await request.json()
 
+    console.log('Send confirmation email request:', { reservationId, isConfirmation })
+
     // Fetch reservation details
     const { data: reservation, error: fetchError } = await supabaseAdmin
       .from('reservations')
@@ -34,8 +36,15 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Reservation not found' }, { status: 404 })
     }
 
+    console.log('Reservation found:', {
+      id: reservation.id,
+      email: reservation.customer_email,
+      isConfirmation
+    })
+
     // Generate cancellation URL
-    const cancelUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/${reservation.restaurants.slug}/reservation/cancel/${reservation.cancellation_token}`
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://www.venoapp.com'
+    const cancelUrl = `${baseUrl}/${reservation.restaurants.slug}/reservation/cancel/${reservation.cancellation_token}`
 
     // Email subject and body
     const subject = isConfirmation
@@ -46,12 +55,16 @@ export async function POST(request) {
       ? generateConfirmationEmail(reservation, cancelUrl)
       : generatePendingEmail(reservation, cancelUrl)
 
+    console.log('Sending email:', { to: reservation.customer_email, subject })
+
     // Send email using Brevo
-    await sendBrevoEmail({
+    const emailResult = await sendBrevoEmail({
       to: reservation.customer_email,
       subject,
       htmlContent
     })
+
+    console.log('Email send result:', emailResult)
 
     // Mark email as sent
     await supabaseAdmin
@@ -59,11 +72,15 @@ export async function POST(request) {
       .update({ confirmation_email_sent: true })
       .eq('id', reservationId)
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, emailResult })
 
   } catch (error) {
     console.error('Email sending error:', error)
-    return NextResponse.json({ error: 'Failed to send email' }, { status: 500 })
+    return NextResponse.json({
+      error: 'Failed to send email',
+      details: error.message,
+      stack: error.stack
+    }, { status: 500 })
   }
 }
 
