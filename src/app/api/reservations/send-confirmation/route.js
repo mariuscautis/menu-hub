@@ -2,6 +2,7 @@ export const runtime = 'edge';
 
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { sendEmail as sendBrevoEmail } from '@/lib/services/email-edge'
 
 function getSupabaseAdmin() {
   return createClient(
@@ -41,15 +42,15 @@ export async function POST(request) {
       ? `Reservation Confirmed at ${reservation.restaurants.name}`
       : `Reservation Request Received - ${reservation.restaurants.name}`
 
-    const htmlBody = isConfirmation
+    const htmlContent = isConfirmation
       ? generateConfirmationEmail(reservation, cancelUrl)
       : generatePendingEmail(reservation, cancelUrl)
 
-    // Send email using Resend
-    await sendEmail({
+    // Send email using Brevo
+    await sendBrevoEmail({
       to: reservation.customer_email,
       subject,
-      html: htmlBody
+      htmlContent
     })
 
     // Mark email as sent
@@ -281,186 +282,4 @@ function generatePendingEmail(reservation, cancelUrl) {
     </body>
     </html>
   `
-}
-
-async function sendEmail({ to, subject, html }) {
-  const emailProvider = process.env.EMAIL_PROVIDER || 'resend' // 'resend' or 'aws-ses'
-
-  // Check if any email service is configured
-  if (emailProvider === 'resend' && !process.env.RESEND_API_KEY) {
-    console.warn('RESEND_API_KEY not configured. Email would be sent to:', to)
-    console.log('Subject:', subject)
-    return { success: true, note: 'Email service not configured' }
-  }
-
-  if (emailProvider === 'aws-ses' && (!process.env.AWS_SES_ACCESS_KEY_ID || !process.env.AWS_SES_SECRET_ACCESS_KEY)) {
-    console.warn('AWS SES not configured. Email would be sent to:', to)
-    console.log('Subject:', subject)
-    return { success: true, note: 'Email service not configured' }
-  }
-
-  try {
-    if (emailProvider === 'aws-ses') {
-      return await sendEmailViaSES({ to, subject, html })
-    } else {
-      return await sendEmailViaResend({ to, subject, html })
-    }
-  } catch (error) {
-    console.error('Email service error:', error)
-    throw error
-  }
-}
-
-async function sendEmailViaResend({ to, subject, html }) {
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      from: process.env.EMAIL_FROM || 'onboarding@resend.dev',
-      to,
-      subject,
-      html
-    })
-  })
-
-  if (!response.ok) {
-    const error = await response.text()
-    throw new Error(`Resend API error: ${error}`)
-  }
-
-  const result = await response.json()
-  console.log('Email sent via Resend:', result.id)
-  return result
-}
-
-async function sendEmailViaSES({ to, subject, html }) {
-  const AWS_SES_REGION = process.env.AWS_SES_REGION || 'us-east-1'
-  const AWS_SES_ACCESS_KEY_ID = process.env.AWS_SES_ACCESS_KEY_ID
-  const AWS_SES_SECRET_ACCESS_KEY = process.env.AWS_SES_SECRET_ACCESS_KEY
-  const EMAIL_FROM = process.env.EMAIL_FROM || 'noreply@yourdomain.com'
-
-  // Create AWS SES v2 API request
-  const endpoint = `https://email.${AWS_SES_REGION}.amazonaws.com/v2/email/outbound-emails`
-
-  const message = {
-    Content: {
-      Simple: {
-        Subject: { Data: subject },
-        Body: { Html: { Data: html } }
-      }
-    },
-    Destination: {
-      ToAddresses: [to]
-    },
-    FromEmailAddress: EMAIL_FROM
-  }
-
-  // Sign request with AWS Signature V4
-  const date = new Date().toISOString().replace(/[:-]|\.\d{3}/g, '')
-  const dateStamp = date.slice(0, 8)
-
-  const body = JSON.stringify(message)
-
-  // Create canonical request
-  const payloadHash = await sha256(body)
-  const canonicalRequest = [
-    'POST',
-    '/v2/email/outbound-emails',
-    '',
-    `host:email.${AWS_SES_REGION}.amazonaws.com`,
-    'x-amz-date:' + date,
-    '',
-    'host;x-amz-date',
-    payloadHash
-  ].join('\n')
-
-  // Create string to sign
-  const algorithm = 'AWS4-HMAC-SHA256'
-  const credentialScope = `${dateStamp}/${AWS_SES_REGION}/ses/aws4_request`
-  const canonicalRequestHash = await sha256(canonicalRequest)
-  const stringToSign = [
-    algorithm,
-    date,
-    credentialScope,
-    canonicalRequestHash
-  ].join('\n')
-
-  // Calculate signature
-  const signingKey = await getSignatureKey(
-    AWS_SES_SECRET_ACCESS_KEY,
-    dateStamp,
-    AWS_SES_REGION,
-    'ses'
-  )
-  const signature = await hmac(signingKey, stringToSign)
-
-  // Create authorization header
-  const authorizationHeader = `${algorithm} Credential=${AWS_SES_ACCESS_KEY_ID}/${credentialScope}, SignedHeaders=host;x-amz-date, Signature=${signature}`
-
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      'Authorization': authorizationHeader,
-      'Content-Type': 'application/json',
-      'Host': `email.${AWS_SES_REGION}.amazonaws.com`,
-      'X-Amz-Date': date
-    },
-    body
-  })
-
-  if (!response.ok) {
-    const error = await response.text()
-    throw new Error(`AWS SES API error: ${error}`)
-  }
-
-  const result = await response.json()
-  console.log('Email sent via AWS SES:', result.MessageId)
-  return result
-}
-
-// AWS Signature V4 helper functions
-async function sha256(message) {
-  const msgBuffer = new TextEncoder().encode(message)
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
-}
-
-async function hmac(key, message) {
-  const keyBuffer = typeof key === 'string' ? new TextEncoder().encode(key) : key
-  const msgBuffer = new TextEncoder().encode(message)
-  const cryptoKey = await crypto.subtle.importKey(
-    'raw',
-    keyBuffer,
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign']
-  )
-  const signature = await crypto.subtle.sign('HMAC', cryptoKey, msgBuffer)
-  const signatureArray = Array.from(new Uint8Array(signature))
-  return signatureArray.map(b => b.toString(16).padStart(2, '0')).join('')
-}
-
-async function getSignatureKey(key, dateStamp, regionName, serviceName) {
-  const kDate = await hmacBinary('AWS4' + key, dateStamp)
-  const kRegion = await hmacBinary(kDate, regionName)
-  const kService = await hmacBinary(kRegion, serviceName)
-  return await hmacBinary(kService, 'aws4_request')
-}
-
-async function hmacBinary(key, message) {
-  const keyBuffer = typeof key === 'string' ? new TextEncoder().encode(key) : key
-  const msgBuffer = new TextEncoder().encode(message)
-  const cryptoKey = await crypto.subtle.importKey(
-    'raw',
-    keyBuffer,
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign']
-  )
-  const signature = await crypto.subtle.sign('HMAC', cryptoKey, msgBuffer)
-  return new Uint8Array(signature)
 }
