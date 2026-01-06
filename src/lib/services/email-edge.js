@@ -1,10 +1,12 @@
 /**
- * Edge-compatible Email Service using Brevo API
- * Works with Cloudflare Pages Edge Runtime
+ * Edge-compatible Email Service using Cloudflare Worker Proxy
+ * The worker securely stores the Brevo API key
  */
 
+const WORKER_URL = 'https://email-proxy.marius-cautis.workers.dev'
+
 /**
- * Send a transactional email using Brevo REST API
+ * Send a transactional email via the Cloudflare Worker proxy
  * @param {Object} options - Email options
  * @param {string|string[]} options.to - Recipient email(s)
  * @param {string} options.subject - Email subject
@@ -25,39 +27,29 @@ export async function sendEmail({
   replyTo
 }) {
   try {
-    // Prepare recipient list
-    const recipients = Array.isArray(to)
-      ? to.map(email => ({ email }))
-      : [{ email: to }]
-
     // Prepare request body
     const body = {
-      sender: {
-        email: from,
-        name: fromName
-      },
-      to: recipients,
-      subject: subject,
-      htmlContent: htmlContent
+      to,
+      subject,
+      htmlContent,
+      from,
+      fromName
     }
 
-    // Add plain text version if provided
+    // Add optional fields
     if (textContent) {
       body.textContent = textContent
     }
 
-    // Add reply-to if provided
     if (replyTo) {
-      body.replyTo = { email: replyTo }
+      body.replyTo = replyTo
     }
 
-    // Send the email via Brevo API
-    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    // Call the Cloudflare Worker proxy
+    const response = await fetch(WORKER_URL, {
       method: 'POST',
       headers: {
-        'accept': 'application/json',
-        'api-key': process.env.BREVO_API_KEY,
-        'content-type': 'application/json'
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(body)
     })
@@ -65,22 +57,22 @@ export async function sendEmail({
     const data = await response.json()
 
     if (!response.ok) {
-      console.error('Failed to send email:', data)
+      console.error('Failed to send email via worker:', data)
       return {
         success: false,
-        error: data.message || 'Failed to send email'
+        error: data.error || 'Failed to send email'
       }
     }
 
     console.log('Email sent successfully:', {
       messageId: data.messageId,
-      to: recipients.map(r => r.email).join(', ')
+      to: Array.isArray(to) ? to.join(', ') : to
     })
 
     return {
       success: true,
       messageId: data.messageId,
-      response: data
+      response: data.response
     }
   } catch (error) {
     console.error('Failed to send email:', error)

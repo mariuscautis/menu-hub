@@ -1,0 +1,10 @@
+name = "email-proxy"
+main = "email-proxy.js"
+compatibility_date = "2025-01-03"
+
+# The BREVO_API_KEY will be added as a secret via CLI
+# It will NOT be in this file or in git
+
+[vars]
+EMAIL_FROM = "noreply@venoapp.com"
+EMAIL_FROM_NAME = "Menu Hub"
