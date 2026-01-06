@@ -684,7 +684,7 @@ export default function Reservations() {
       {/* Confirm Modal */}
       {showConfirmModal && selectedReservation && (
         <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4"
           onClick={() => {
             setShowConfirmModal(false)
             setSelectedReservation(null)
@@ -692,7 +692,7 @@ export default function Reservations() {
           }}
         >
           <div
-            className="bg-white rounded-2xl p-8 w-full max-w-md"
+            className="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold text-slate-800 mb-6">Confirm Reservation</h2>
@@ -750,14 +750,14 @@ export default function Reservations() {
       {/* Deny Modal */}
       {showDenyModal && selectedReservation && (
         <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4"
           onClick={() => {
             setShowDenyModal(false)
             setDenyReason('')
           }}
         >
           <div
-            className="bg-white rounded-2xl p-8 w-full max-w-md"
+            className="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold text-slate-800 mb-6">Deny Reservation</h2>
