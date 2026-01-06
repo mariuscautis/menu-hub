@@ -189,7 +189,10 @@ export default function BookReservation({ params }) {
       fetch('/api/reservations/send-confirmation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reservationId: data.id })
+        body: JSON.stringify({
+          reservationId: data.id,
+          isConfirmation: false  // This is a pending reservation email
+        })
       }).catch(err => console.error('Email error:', err))
 
       setBookingSuccess(true)
