@@ -238,10 +238,18 @@ export default function Reservations() {
         p_confirmed_by_user_id: isPinBasedLogin ? null : userInfo.id
       })
 
-      if (error) throw error
+      if (error) {
+        // Show user-friendly error message
+        const errorMessage = error.message || 'Failed to confirm reservation'
+        showNotification('error', errorMessage)
+        setModalLoading(false)
+        return
+      }
 
       if (data && !data.success) {
-        throw new Error(data.error || 'Failed to confirm reservation')
+        showNotification('error', data.error || 'Failed to confirm reservation')
+        setModalLoading(false)
+        return
       }
 
       // Send confirmation email
