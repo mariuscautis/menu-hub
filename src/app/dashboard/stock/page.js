@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useTranslations } from '@/lib/i18n/LanguageContext'
 
 export default function StockManagement() {
+  const t = useTranslations('stock')
   const [products, setProducts] = useState([])
   const [entries, setEntries] = useState([])
   const [restaurant, setRestaurant] = useState(null)
@@ -450,15 +452,15 @@ export default function StockManagement() {
   }
 
   if (loading) {
-    return <div className="text-slate-500">Loading stock management...</div>
+    return <div className="text-slate-500">{t('loading')}</div>
   }
 
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Stock Management</h1>
-          <p className="text-slate-500">Track inventory for bar and kitchen</p>
+          <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
+          <p className="text-slate-500">{t('subtitle')}</p>
         </div>
         <div className="flex gap-3">
           <button
@@ -468,7 +470,7 @@ export default function StockManagement() {
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
             </svg>
-            Add Stock
+            {t('addStock')}
           </button>
           <button
             onClick={() => openProductModal()}
@@ -477,7 +479,7 @@ export default function StockManagement() {
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
             </svg>
-            New Product
+            {t('newProduct')}
           </button>
         </div>
       </div>
@@ -492,7 +494,7 @@ export default function StockManagement() {
               : 'text-slate-500 hover:text-slate-700'
           }`}
         >
-          Products ({products.length})
+          {t('products')} ({products.length})
         </button>
         <button
           onClick={() => setActiveTab('history')}
@@ -502,7 +504,7 @@ export default function StockManagement() {
               : 'text-slate-500 hover:text-slate-700'
           }`}
         >
-          History ({entries.length})
+          {t('history')} ({entries.length})
         </button>
       </div>
 
@@ -512,19 +514,19 @@ export default function StockManagement() {
           {/* Stats Cards */}
           <div className="grid grid-cols-4 gap-4 mb-6">
             <div className="bg-white border-2 border-slate-100 rounded-xl p-4">
-              <p className="text-slate-500 text-sm font-medium mb-1">Total Products</p>
+              <p className="text-slate-500 text-sm font-medium mb-1">{t('totalProducts')}</p>
               <p className="text-2xl font-bold text-[#6262bd]">{stats.totalProducts}</p>
             </div>
             <div className="bg-white border-2 border-slate-100 rounded-xl p-4">
-              <p className="text-slate-500 text-sm font-medium mb-1">Low Stock Items</p>
+              <p className="text-slate-500 text-sm font-medium mb-1">{t('lowStockItems')}</p>
               <p className="text-2xl font-bold text-amber-600">{stats.lowStock}</p>
             </div>
             <div className="bg-white border-2 border-slate-100 rounded-xl p-4">
-              <p className="text-slate-500 text-sm font-medium mb-1">Kitchen Items</p>
+              <p className="text-slate-500 text-sm font-medium mb-1">{t('kitchenItems')}</p>
               <p className="text-2xl font-bold text-green-600">{stats.kitchenItems}</p>
             </div>
             <div className="bg-white border-2 border-slate-100 rounded-xl p-4">
-              <p className="text-slate-500 text-sm font-medium mb-1">Bar Items</p>
+              <p className="text-slate-500 text-sm font-medium mb-1">{t('barItems')}</p>
               <p className="text-2xl font-bold text-orange-600">{stats.barItems}</p>
             </div>
           </div>
@@ -539,7 +541,7 @@ export default function StockManagement() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search products by name or brand..."
+                placeholder={t('searchPlaceholder')}
                 className="w-full pl-12 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
               />
               {searchQuery && (
@@ -558,9 +560,9 @@ export default function StockManagement() {
               onChange={(e) => setSortBy(e.target.value)}
               className="px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 bg-white"
             >
-              <option value="name">Sort: A-Z</option>
-              <option value="stock-low">Sort: Low Stock</option>
-              <option value="stock-high">Sort: High Stock</option>
+              <option value="name">{t('sortAZ')}</option>
+              <option value="stock-low">{t('sortLowStock')}</option>
+              <option value="stock-high">{t('sortHighStock')}</option>
             </select>
           </div>
 
@@ -574,7 +576,7 @@ export default function StockManagement() {
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              All
+              {t('all')}
             </button>
             <button
               onClick={() => setFilterCategory('kitchen')}
@@ -584,7 +586,7 @@ export default function StockManagement() {
                   : 'bg-green-100 text-green-700 hover:bg-green-200'
               }`}
             >
-              🍳 Kitchen
+              🍳 {t('kitchen')}
             </button>
             <button
               onClick={() => setFilterCategory('bar')}
@@ -594,15 +596,17 @@ export default function StockManagement() {
                   : 'bg-orange-100 text-orange-700 hover:bg-orange-200'
               }`}
             >
-              🍸 Bar
+              🍸 {t('bar')}
             </button>
           </div>
 
           {/* Results Count */}
           {(searchQuery || filterCategory !== 'all') && products.length > 0 && (
-            <div className="mb-4 text-sm text-slate-600">
-              Showing <strong>{filteredProducts.length}</strong> of <strong>{products.length}</strong> products
-            </div>
+            <div className="mb-4 text-sm text-slate-600" dangerouslySetInnerHTML={{
+              __html: t('showingProducts')
+                .replace('{filtered}', filteredProducts.length)
+                .replace('{total}', products.length)
+            }} />
           )}
 
           {/* Products List */}
@@ -619,9 +623,9 @@ export default function StockManagement() {
               </div>
               {searchQuery || filterCategory !== 'all' ? (
                 <>
-                  <p className="text-slate-500 mb-2">No products found</p>
+                  <p className="text-slate-500 mb-2">{t('noProductsFound')}</p>
                   <p className="text-sm text-slate-400 mb-4">
-                    Try adjusting your search or filters
+                    {t('tryAdjusting')}
                   </p>
                   <button
                     onClick={() => {
@@ -630,17 +634,17 @@ export default function StockManagement() {
                     }}
                     className="text-[#6262bd] font-medium hover:underline"
                   >
-                    Clear filters
+                    {t('clearFilters')}
                   </button>
                 </>
               ) : (
                 <>
-                  <p className="text-slate-500 mb-4">No products yet</p>
+                  <p className="text-slate-500 mb-4">{t('noProductsYet')}</p>
                   <button
                     onClick={() => openProductModal()}
                     className="text-[#6262bd] font-medium hover:underline"
                   >
-                    Add your first product
+                    {t('addFirstProduct')}
                   </button>
                 </>
               )}
@@ -667,16 +671,16 @@ export default function StockManagement() {
                           ? 'bg-orange-100 text-orange-700'
                           : 'bg-green-100 text-green-700'
                       }`}>
-                        {product.category === 'bar' ? '🍸 Bar' : '🍳 Kitchen'}
+                        {product.category === 'bar' ? `🍸 ${t('bar')}` : `🍳 ${t('kitchen')}`}
                       </span>
                     </div>
                     <div className="flex items-center gap-4 text-sm text-slate-600">
                       <span>
-                        Current Stock: <strong className="text-[#6262bd]">{formatStock(product.current_stock, product.base_unit)}</strong>
+                        {t('currentStock')}: <strong className="text-[#6262bd]">{formatStock(product.current_stock, product.base_unit)}</strong>
                       </span>
                       <span className="text-slate-300">•</span>
                       <span>
-                        Input Unit: <strong>{getUnitLabel(product.input_unit_type)}</strong>
+                        {t('inputUnit')}: <strong>{getUnitLabel(product.input_unit_type)}</strong>
                       </span>
                       <span className="text-slate-300">•</span>
                       <span>
@@ -686,7 +690,7 @@ export default function StockManagement() {
                         <>
                           <span className="text-slate-300">•</span>
                           <span>
-                            Tax: <strong className="text-purple-600">{product.product_tax_categories.name} ({product.product_tax_categories.rate}%)</strong>
+                            {t('tax')}: <strong className="text-purple-600">{product.product_tax_categories.name} ({product.product_tax_categories.rate}%)</strong>
                           </span>
                         </>
                       )}
@@ -698,7 +702,7 @@ export default function StockManagement() {
                       onClick={() => openStockModal(product)}
                       className="px-4 py-2 bg-green-50 text-green-600 rounded-xl font-medium hover:bg-green-100"
                     >
-                      + Add Stock
+                      {t('addStockButton')}
                     </button>
                     <button
                       onClick={() => openProductModal(product)}
@@ -729,7 +733,7 @@ export default function StockManagement() {
         <div>
           {entries.length === 0 ? (
             <div className="bg-white border-2 border-slate-100 rounded-2xl p-12 text-center">
-              <p className="text-slate-500">No stock entries yet</p>
+              <p className="text-slate-500">{t('noStockEntries')}</p>
             </div>
           ) : (
             <div className="bg-white border-2 border-slate-100 rounded-2xl overflow-hidden">
@@ -737,11 +741,11 @@ export default function StockManagement() {
                 <table className="w-full">
                   <thead className="bg-slate-50 border-b-2 border-slate-100">
                     <tr>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Date</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Product</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Quantity</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Added By</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Notes</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">{t('date')}</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">{t('product')}</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">{t('quantity')}</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">{t('addedBy')}</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">{t('notes')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -793,14 +797,14 @@ export default function StockManagement() {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold text-slate-800 mb-6">
-              {editingProduct ? 'Edit Product' : 'New Product'}
+              {editingProduct ? t('editProduct') : t('newProduct')}
             </h2>
 
             <form onSubmit={handleProductSubmit} className="space-y-5">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Product Name *
+                    {t('productName')} *
                   </label>
                   <input
                     type="text"
@@ -809,13 +813,13 @@ export default function StockManagement() {
                     onChange={handleProductFormChange}
                     required
                     className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
-                    placeholder="All-Purpose Flour"
+                    placeholder={t('productNamePlaceholder')}
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Brand (Optional)
+                    {t('brand')}
                   </label>
                   <input
                     type="text"
@@ -823,14 +827,14 @@ export default function StockManagement() {
                     value={productForm.brand}
                     onChange={handleProductFormChange}
                     className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
-                    placeholder="King Arthur"
+                    placeholder={t('brandPlaceholder')}
                   />
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Category *
+                  {t('category')} *
                 </label>
                 <select
                   name="category"
@@ -839,15 +843,15 @@ export default function StockManagement() {
                   required
                   className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                 >
-                  <option value="kitchen">🍳 Kitchen</option>
-                  <option value="bar">🍸 Bar</option>
+                  <option value="kitchen">🍳 {t('kitchen')}</option>
+                  <option value="bar">🍸 {t('bar')}</option>
                 </select>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Base Storage Unit *
+                    {t('baseStorageUnit')} *
                   </label>
                   <select
                     name="base_unit"
@@ -856,17 +860,17 @@ export default function StockManagement() {
                     required
                     className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                   >
-                    <option value="grams">Grams (for solids)</option>
-                    <option value="ml">Milliliters (for liquids)</option>
+                    <option value="grams">{t('gramsForSolids')}</option>
+                    <option value="ml">{t('mlForLiquids')}</option>
                   </select>
                   <p className="text-xs text-slate-500 mt-1">
-                    How this item will be stored in the system
+                    {t('baseUnitHelp')}
                   </p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Input Unit Type *
+                    {t('inputUnitType')} *
                   </label>
                   <select
                     name="input_unit_type"
@@ -875,29 +879,29 @@ export default function StockManagement() {
                     required
                     className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                   >
-                    <optgroup label="Weight">
-                      <option value="kg">Kilograms (kg)</option>
-                      <option value="grams">Grams (g)</option>
+                    <optgroup label={t('weight')}>
+                      <option value="kg">{t('kilograms')}</option>
+                      <option value="grams">{t('grams')}</option>
                     </optgroup>
-                    <optgroup label="Volume">
-                      <option value="liters">Liters (L)</option>
-                      <option value="ml">Milliliters (ml)</option>
+                    <optgroup label={t('volume')}>
+                      <option value="liters">{t('liters')}</option>
+                      <option value="ml">{t('milliliters')}</option>
                     </optgroup>
-                    <optgroup label="Counted Items">
-                      <option value="bottles">Bottles</option>
-                      <option value="cans">Cans</option>
-                      <option value="units">Units (pieces)</option>
+                    <optgroup label={t('countedItems')}>
+                      <option value="bottles">{t('bottles')}</option>
+                      <option value="cans">{t('cans')}</option>
+                      <option value="units">{t('units')}</option>
                     </optgroup>
                   </select>
                   <p className="text-xs text-slate-500 mt-1">
-                    How you'll add this item
+                    {t('inputUnitHelp')}
                   </p>
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Conversion Factor *
+                  {t('conversionFactor')} *
                 </label>
                 <input
                   type="number"
@@ -910,10 +914,10 @@ export default function StockManagement() {
                   className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                 />
                 <p className="text-xs text-slate-500 mt-1">
-                  1 {productForm.input_unit_type} = {productForm.units_to_base_multiplier} {productForm.base_unit}
+                  {t('conversionHelp').replace('{inputUnit}', productForm.input_unit_type).replace('{multiplier}', productForm.units_to_base_multiplier).replace('{baseUnit}', productForm.base_unit)}
                   {['bottles', 'cans', 'units'].includes(productForm.input_unit_type) && (
                     <span className="block mt-1">
-                      Example: A standard wine bottle is 750ml, so enter 750
+                      {t('conversionExample')}
                     </span>
                   )}
                 </p>
@@ -921,7 +925,7 @@ export default function StockManagement() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Product Tax Category (Optional)
+                  {t('productTaxCategory')}
                 </label>
                 <select
                   name="tax_category_id"
@@ -929,7 +933,7 @@ export default function StockManagement() {
                   onChange={handleProductFormChange}
                   className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                 >
-                  <option value="">No Tax Category</option>
+                  <option value="">{t('noTaxCategory')}</option>
                   {taxCategories.map((cat) => (
                     <option key={cat.id} value={cat.id}>
                       {cat.name} ({cat.rate}%)
@@ -937,10 +941,10 @@ export default function StockManagement() {
                   ))}
                 </select>
                 <p className="text-xs text-slate-500 mt-1">
-                  Assign a tax category for purchase taxes (e.g., Alcohol 20%, Sugary Products 17%)
+                  {t('taxCategoryHelp')}
                   {taxCategories.length === 0 && (
                     <span className="block mt-1 text-amber-600">
-                      No tax categories available. Create them in Settings → Product Tax.
+                      {t('noTaxCategoriesAvailable')}
                     </span>
                   )}
                 </p>
@@ -952,13 +956,13 @@ export default function StockManagement() {
                   onClick={() => setShowProductModal(false)}
                   className="flex-1 border-2 border-slate-200 text-slate-600 py-3 rounded-xl font-medium hover:bg-slate-50"
                 >
-                  Cancel
+                  {t('cancel')}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 bg-[#6262bd] text-white py-3 rounded-xl font-medium hover:bg-[#5252a3]"
                 >
-                  {editingProduct ? 'Save Changes' : 'Create Product'}
+                  {editingProduct ? t('saveChanges') : t('createProduct')}
                 </button>
               </div>
             </form>
@@ -976,12 +980,12 @@ export default function StockManagement() {
             className="bg-white rounded-2xl p-8 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold text-slate-800 mb-6">Add Stock</h2>
+            <h2 className="text-xl font-bold text-slate-800 mb-6">{t('addStock')}</h2>
 
             <form onSubmit={handleStockSubmit} className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Select Product *
+                  {t('selectProduct')} *
                 </label>
                 <div className="relative stock-dropdown-container">
                   {/* Combo Bar Input */}
@@ -1011,7 +1015,7 @@ export default function StockManagement() {
                       setShowStockDropdown(true)
                       setStockProductSearch('')
                     }}
-                    placeholder="Search or select product..."
+                    placeholder={t('searchOrSelectProduct')}
                     className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                     required
                   />
@@ -1045,7 +1049,7 @@ export default function StockManagement() {
                           ))
                         ) : (
                           <div className="px-4 py-2 text-slate-400 text-sm">
-                            No products found
+                            {t('noProductsFound')}
                           </div>
                         )
                       })()}
@@ -1059,7 +1063,7 @@ export default function StockManagement() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Quantity *
+                        {t('quantity')} *
                       </label>
                       <div className="relative">
                         <input
@@ -1080,7 +1084,7 @@ export default function StockManagement() {
 
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Purchase Price *
+                        {t('purchasePrice')} *
                       </label>
                       <div className="relative">
                         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-medium">
@@ -1103,24 +1107,24 @@ export default function StockManagement() {
                   {stockForm.quantity && stockForm.purchase_price && (
                     <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                       <p className="text-sm text-slate-700 mb-1">
-                        <strong>Total stock:</strong> {(parseFloat(stockForm.quantity) * products.find(p => p.id === stockForm.product_id)?.units_to_base_multiplier).toFixed(2)} {products.find(p => p.id === stockForm.product_id)?.base_unit}
+                        <strong>{t('totalStock')}:</strong> {(parseFloat(stockForm.quantity) * products.find(p => p.id === stockForm.product_id)?.units_to_base_multiplier).toFixed(2)} {products.find(p => p.id === stockForm.product_id)?.base_unit}
                       </p>
                       <p className="text-sm text-slate-700">
-                        <strong>Cost per {products.find(p => p.id === stockForm.product_id)?.base_unit}:</strong> £{(parseFloat(stockForm.purchase_price) / (parseFloat(stockForm.quantity) * products.find(p => p.id === stockForm.product_id)?.units_to_base_multiplier)).toFixed(4)}
+                        <strong>{t('costPerUnit').replace('{unit}', products.find(p => p.id === stockForm.product_id)?.base_unit)}:</strong> £{(parseFloat(stockForm.purchase_price) / (parseFloat(stockForm.quantity) * products.find(p => p.id === stockForm.product_id)?.units_to_base_multiplier)).toFixed(4)}
                       </p>
                     </div>
                   )}
 
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Notes (Optional)
+                      {t('notesOptional')}
                     </label>
                     <textarea
                       value={stockForm.notes}
                       onChange={(e) => setStockForm({ ...stockForm, notes: e.target.value })}
                       rows={3}
                       className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 resize-none"
-                      placeholder="Supplier, invoice number, etc."
+                      placeholder={t('notesPlaceholder')}
                     />
                   </div>
                 </>
@@ -1132,14 +1136,14 @@ export default function StockManagement() {
                   onClick={() => setShowStockModal(false)}
                   className="flex-1 border-2 border-slate-200 text-slate-600 py-3 rounded-xl font-medium hover:bg-slate-50"
                 >
-                  Cancel
+                  {t('cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={!stockForm.product_id}
                   className="flex-1 bg-green-600 text-white py-3 rounded-xl font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Add Stock
+                  {t('addStock')}
                 </button>
               </div>
             </form>

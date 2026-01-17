@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import TemplateSelector from '@/components/invoices/TemplateSelector'
+import { useTranslations } from '@/lib/i18n/LanguageContext'
 
 export default function TaxInvoicing() {
+  const t = useTranslations('taxInvoicing')
   const [restaurant, setRestaurant] = useState(null)
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState(null)
@@ -81,9 +83,9 @@ export default function TaxInvoicing() {
       .eq('id', restaurant.id)
 
     if (error) {
-      setMessage({ type: 'error', text: 'Failed to update invoice settings' })
+      setMessage({ type: 'error', text: t('errorMessage') })
     } else {
-      setMessage({ type: 'success', text: 'Invoice settings updated successfully!' })
+      setMessage({ type: 'success', text: t('successMessage') })
       setRestaurant({ ...restaurant, invoice_settings: invoiceSettings })
     }
     setSavingInvoiceSettings(false)
@@ -92,7 +94,7 @@ export default function TaxInvoicing() {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="text-slate-500">Loading...</div>
+        <div className="text-slate-500">{t('loading')}</div>
       </div>
     )
   }
@@ -101,7 +103,7 @@ export default function TaxInvoicing() {
     return (
       <div className="p-8">
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-600">
-          Only restaurant owners can access settings.
+          {t('accessError')}
         </div>
       </div>
     )
@@ -110,8 +112,8 @@ export default function TaxInvoicing() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800">Tax & Invoicing</h1>
-        <p className="text-slate-500">Configure invoice generation for corporate clients and tax purposes</p>
+        <h1 className="text-2xl font-bold text-slate-800">{t('pageTitle')}</h1>
+        <p className="text-slate-500">{t('pageSubtitle')}</p>
       </div>
 
       {message && (
@@ -129,9 +131,9 @@ export default function TaxInvoicing() {
         <div className="mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold text-slate-700 mb-2">Invoice Settings</h2>
+              <h2 className="text-lg font-bold text-slate-700 mb-2">{t('sectionTitle')}</h2>
               <p className="text-sm text-slate-500">
-                Configure invoice generation for corporate clients and tax purposes.
+                {t('sectionDescription')}
               </p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
@@ -143,7 +145,7 @@ export default function TaxInvoicing() {
               />
               <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#6262bd]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#6262bd]"></div>
               <span className="ml-3 text-sm font-medium text-slate-700">
-                {invoiceSettings.enabled ? 'Enabled' : 'Disabled'}
+                {invoiceSettings.enabled ? t('enabled') : t('disabled')}
               </span>
             </label>
           </div>
@@ -161,37 +163,37 @@ export default function TaxInvoicing() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  VAT Number
+                  {t('vatNumber')}
                 </label>
                 <input
                   type="text"
                   value={invoiceSettings.vat_number}
                   onChange={(e) => setInvoiceSettings({ ...invoiceSettings, vat_number: e.target.value })}
-                  placeholder="GB123456789"
+                  placeholder={t('vatNumberPlaceholder')}
                   className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Tax ID
+                  {t('taxId')}
                 </label>
                 <input
                   type="text"
                   value={invoiceSettings.tax_id}
                   onChange={(e) => setInvoiceSettings({ ...invoiceSettings, tax_id: e.target.value })}
-                  placeholder="123-45-6789"
+                  placeholder={t('taxIdPlaceholder')}
                   className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Company Registration
+                  {t('companyRegistration')}
                 </label>
                 <input
                   type="text"
                   value={invoiceSettings.company_registration}
                   onChange={(e) => setInvoiceSettings({ ...invoiceSettings, company_registration: e.target.value })}
-                  placeholder="12345678"
+                  placeholder={t('companyRegistrationPlaceholder')}
                   className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                 />
               </div>
@@ -201,29 +203,29 @@ export default function TaxInvoicing() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Invoice Prefix
+                  {t('invoicePrefix')}
                 </label>
                 <input
                   type="text"
                   value={invoiceSettings.invoice_prefix}
                   onChange={(e) => setInvoiceSettings({ ...invoiceSettings, invoice_prefix: e.target.value })}
-                  placeholder="INV"
+                  placeholder={t('invoicePrefixPlaceholder')}
                   className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Invoice Format
+                  {t('invoiceFormat')}
                 </label>
                 <input
                   type="text"
                   value={invoiceSettings.invoice_format}
                   onChange={(e) => setInvoiceSettings({ ...invoiceSettings, invoice_format: e.target.value })}
-                  placeholder="{PREFIX}-{YEAR}-{NUMBER}"
+                  placeholder={t('invoiceFormatPlaceholder')}
                   className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                 />
                 <p className="text-xs text-slate-500 mt-1">
-                  Use {'{PREFIX}'}, {'{YEAR}'}, {'{NUMBER}'} as placeholders
+                  {t('invoiceFormatHelp')}
                 </p>
               </div>
             </div>
@@ -232,7 +234,7 @@ export default function TaxInvoicing() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Currency
+                  {t('currency')}
                 </label>
                 <select
                   value={invoiceSettings.currency}
@@ -250,18 +252,19 @@ export default function TaxInvoicing() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Locale (Date Format)
+                  {t('locale')}
                 </label>
                 <select
                   value={invoiceSettings.locale}
                   onChange={(e) => setInvoiceSettings({ ...invoiceSettings, locale: e.target.value })}
                   className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                 >
-                  <option value="en-GB">en-GB (DD/MM/YYYY)</option>
-                  <option value="en-US">en-US (MM/DD/YYYY)</option>
-                  <option value="de-DE">de-DE (DD.MM.YYYY)</option>
-                  <option value="fr-FR">fr-FR (DD/MM/YYYY)</option>
-                  <option value="ro-RO">ro-RO (DD.MM.YYYY)</option>
+                  <option value="en-GB">English (DD/MM/YYYY)</option>
+                  <option value="en-US">English US (MM/DD/YYYY)</option>
+                  <option value="ro-RO">Română (DD.MM.YYYY)</option>
+                  <option value="es-ES">Español (DD/MM/YYYY)</option>
+                  <option value="fr-FR">Français (DD/MM/YYYY)</option>
+                  <option value="it-IT">Italiano (DD/MM/YYYY)</option>
                 </select>
               </div>
             </div>
@@ -269,17 +272,17 @@ export default function TaxInvoicing() {
             {/* Footer Text */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                Invoice Footer Text
+                {t('footerText')}
               </label>
               <textarea
                 value={invoiceSettings.footer_text}
                 onChange={(e) => setInvoiceSettings({ ...invoiceSettings, footer_text: e.target.value })}
-                placeholder="Thank you for your business! Payment terms: Net 30 days."
+                placeholder={t('footerTextPlaceholder')}
                 rows={3}
                 className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
               />
               <p className="text-xs text-slate-500 mt-1">
-                This text will appear at the bottom of every invoice
+                {t('footerTextHelp')}
               </p>
             </div>
 
@@ -293,8 +296,8 @@ export default function TaxInvoicing() {
                   className="w-5 h-5 rounded border-slate-300 text-[#6262bd] focus:ring-[#6262bd]"
                 />
                 <div>
-                  <div className="text-sm font-medium text-slate-700">Reset invoice numbers yearly</div>
-                  <div className="text-xs text-slate-500">Start numbering from 1 each year</div>
+                  <div className="text-sm font-medium text-slate-700">{t('resetYearlyTitle')}</div>
+                  <div className="text-xs text-slate-500">{t('resetYearlyDescription')}</div>
                 </div>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
@@ -305,8 +308,8 @@ export default function TaxInvoicing() {
                   className="w-5 h-5 rounded border-slate-300 text-[#6262bd] focus:ring-[#6262bd]"
                 />
                 <div>
-                  <div className="text-sm font-medium text-slate-700">Require sequential numbering</div>
-                  <div className="text-xs text-slate-500">Ensure invoices are numbered in order</div>
+                  <div className="text-sm font-medium text-slate-700">{t('requireSequentialTitle')}</div>
+                  <div className="text-xs text-slate-500">{t('requireSequentialDescription')}</div>
                 </div>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
@@ -317,8 +320,8 @@ export default function TaxInvoicing() {
                   className="w-5 h-5 rounded border-slate-300 text-[#6262bd] focus:ring-[#6262bd]"
                 />
                 <div>
-                  <div className="text-sm font-medium text-slate-700">Require customer VAT number</div>
-                  <div className="text-xs text-slate-500">Make VAT number mandatory for invoices</div>
+                  <div className="text-sm font-medium text-slate-700">{t('requireCustomerVatTitle')}</div>
+                  <div className="text-xs text-slate-500">{t('requireCustomerVatDescription')}</div>
                 </div>
               </label>
             </div>
@@ -330,7 +333,7 @@ export default function TaxInvoicing() {
                 disabled={savingInvoiceSettings}
                 className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
-                {savingInvoiceSettings ? 'Saving...' : 'Save Invoice Settings'}
+                {savingInvoiceSettings ? t('saving') : t('saveButton')}
               </button>
             </div>
           </div>

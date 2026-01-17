@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useTranslations } from '@/lib/i18n/LanguageContext'
+
 export default function ReportLoss() {
+  const t = useTranslations('reportLoss')
   const [restaurant, setRestaurant] = useState(null)
   const [menuItems, setMenuItems] = useState([])
   const [loading, setLoading] = useState(true)
@@ -20,14 +23,14 @@ export default function ReportLoss() {
     notes: ''
   })
   const reasons = [
-    { value: 'expired', label: 'Expired' },
-    { value: 'spoiled', label: 'Spoiled' },
-    { value: 'cross_contamination', label: 'Cross-contamination Risk' },
-    { value: 'damaged_delivery', label: 'Damaged in Delivery' },
-    { value: 'burned_overcooked', label: 'Burned/Overcooked' },
-    { value: 'dropped_fallen', label: 'Dropped/Fallen' },
-    { value: 'quality_failure', label: 'Quality Failure' },
-    { value: 'customer_complaint', label: 'Customer Complaint Remake' }
+    { value: 'expired', label: t('reasonExpired') },
+    { value: 'spoiled', label: t('reasonSpoiled') },
+    { value: 'cross_contamination', label: t('reasonCrossContamination') },
+    { value: 'damaged_delivery', label: t('reasonDamagedDelivery') },
+    { value: 'burned_overcooked', label: t('reasonBurnedOvercooked') },
+    { value: 'dropped_fallen', label: t('reasonDroppedFallen') },
+    { value: 'quality_failure', label: t('reasonQualityFailure') },
+    { value: 'customer_complaint', label: t('reasonCustomerComplaint') }
   ]
   useEffect(() => {
     fetchData()
@@ -132,7 +135,7 @@ export default function ReportLoss() {
     try {
       const selectedItem = menuItems.find(item => item.id === formData.menu_item_id)
       if (!selectedItem) {
-        setMessage({ type: 'error', text: 'Please select a menu item' })
+        setMessage({ type: 'error', text: t('selectMenuItem') })
         setSubmitting(false)
         return
       }
@@ -154,8 +157,8 @@ export default function ReportLoss() {
       const result = await response.json()
       if (result.success) {
         const successText = hasRecipe
-          ? `Loss recorded successfully! ${formData.quantity} ${selectedItem.name} marked for removal. Stock has been updated.`
-          : `Loss recorded successfully! ${formData.quantity} ${selectedItem.name} marked for removal. (No recipe defined - stock not auto-deducted)`
+          ? t('successWithRecipe').replace('{quantity}', formData.quantity).replace('{itemName}', selectedItem.name)
+          : t('successWithoutRecipe').replace('{quantity}', formData.quantity).replace('{itemName}', selectedItem.name)
         setMessage({
           type: 'success',
           text: successText
@@ -168,11 +171,11 @@ export default function ReportLoss() {
           notes: ''
         })
       } else {
-        setMessage({ type: 'error', text: result.error || 'Failed to record loss' })
+        setMessage({ type: 'error', text: result.error || t('errorGeneric') })
       }
     } catch (error) {
       console.error('Error submitting loss:', error)
-      setMessage({ type: 'error', text: 'An error occurred. Please try again.' })
+      setMessage({ type: 'error', text: t('errorOccurred') })
     }
     setSubmitting(false)
   }
@@ -181,26 +184,26 @@ export default function ReportLoss() {
     setFormData({ ...formData, [name]: value })
   }
   if (loading) {
-    return <div className="text-slate-500">Loading...</div>
+    return <div className="text-slate-500">{t('loading')}</div>
   }
   if (!restaurant) {
-    return <div className="text-red-600">No restaurant found</div>
+    return <div className="text-red-600">{t('noRestaurant')}</div>
   }
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800">Report Stock Loss</h1>
-        <p className="text-slate-500">Mark items for removal and track losses</p>
+        <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
+        <p className="text-slate-500">{t('subtitle')}</p>
         {staffDepartment && (
           <p className="text-sm text-slate-600 mt-1">
-            Department: <span className={`font-semibold ${
+            {t('department')}: <span className={`font-semibold ${
               staffDepartment === 'bar' ? 'text-orange-600' :
               staffDepartment === 'kitchen' ? 'text-green-600' :
               'text-[#6262bd]'
             }`}>
-              {staffDepartment === 'bar' ? '🍸 Bar' :
-               staffDepartment === 'kitchen' ? '🍳 Kitchen' :
-               '🌐 Universal'}
+              {staffDepartment === 'bar' ? `🍸 ${t('bar')}` :
+               staffDepartment === 'kitchen' ? `🍳 ${t('kitchen')}` :
+               `🌐 ${t('universal')}`}
             </span>
           </p>
         )}
@@ -219,7 +222,7 @@ export default function ReportLoss() {
           {/* Menu Item Selection - Searchable Combo Box */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Menu Item *
+              {t('menuItemLabel')} {t('menuItemRequired')}
             </label>
             <div className="relative menu-dropdown-container">
               {/* Combo Bar Input */}
@@ -248,7 +251,7 @@ export default function ReportLoss() {
                 onFocus={() => {
                   setMenuItemSearch('')
                 }}
-                placeholder="Search or select menu item..."
+                placeholder={t('menuItemPlaceholder')}
                 className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                 required
               />
@@ -279,7 +282,7 @@ export default function ReportLoss() {
                             </span>
                             {!hasRecipe && (
                               <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded">
-                                ⚠️ No recipe
+                                {t('noRecipeBadge')}
                               </span>
                             )}
                           </div>
@@ -287,7 +290,7 @@ export default function ReportLoss() {
                       })
                     ) : (
                       <div className="px-4 py-2 text-slate-400 text-sm">
-                        No menu items found
+                        {t('noItemsFound')}
                       </div>
                     )
                   })()}
@@ -295,13 +298,13 @@ export default function ReportLoss() {
               )}
             </div>
             <p className="text-xs text-slate-500 mt-1">
-              Items with ingredients linked will have stock auto-deducted. Items marked "⚠️ No recipe" need ingredients added in Menu management.
+              {t('helpTextRecipe')}
             </p>
           </div>
           {/* Quantity with +/- Buttons */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Quantity *
+              {t('quantityLabel')} {t('quantityRequired')}
             </label>
             <div className="flex items-center gap-3">
               <button
@@ -328,13 +331,13 @@ export default function ReportLoss() {
               </button>
             </div>
             <p className="text-xs text-slate-500 mt-1">
-              Number of items/servings to remove
+              {t('quantityHelp')}
             </p>
           </div>
           {/* Reason */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Reason for Removal *
+              {t('reasonLabel')} {t('reasonRequired')}
             </label>
             <select
               name="reason"
@@ -343,7 +346,7 @@ export default function ReportLoss() {
               required
               className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
             >
-              <option value="">Select a reason...</option>
+              <option value="">{t('reasonPlaceholder')}</option>
               {reasons.map((reason) => (
                 <option key={reason.value} value={reason.value}>
                   {reason.label}
@@ -354,7 +357,7 @@ export default function ReportLoss() {
           {/* Notes */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Notes (Optional)
+              {t('notesLabel')}
             </label>
             <textarea
               name="notes"
@@ -362,7 +365,7 @@ export default function ReportLoss() {
               onChange={handleChange}
               rows={3}
               className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 resize-none"
-              placeholder="Additional details about this loss..."
+              placeholder={t('notesPlaceholder')}
             />
           </div>
           {/* Submit Button */}
@@ -371,7 +374,7 @@ export default function ReportLoss() {
             disabled={submitting}
             className="w-full bg-red-600 text-white py-3 rounded-xl font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
-            {submitting ? 'Recording Loss...' : 'Report Loss & Update Stock'}
+            {submitting ? t('submitting') : t('submitButton')}
           </button>
         </form>
         {/* Info Box */}
@@ -381,19 +384,18 @@ export default function ReportLoss() {
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
             </svg>
             <div>
-              <h3 className="font-bold text-blue-900 mb-2">How Stock Loss Reporting Works</h3>
+              <h3 className="font-bold text-blue-900 mb-2">{t('infoTitle')}</h3>
             <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
-              <li>Select any menu item that needs to be marked for removal</li>
-              <li>Items with ingredients linked: Stock is automatically deducted</li>
-              <li>Items without ingredients: Loss is logged but stock must be adjusted manually</li>
-              <li>All losses are tracked with your name, timestamp, and reason</li>
-              <li>View all losses in Analytics → Losses</li>
+              <li>{t('infoBullet1')}</li>
+              <li>{t('infoBullet2')}</li>
+              <li>{t('infoBullet3')}</li>
+              <li>{t('infoBullet4')}</li>
+              <li>{t('infoBullet5')}</li>
             </ul>
             <div className="mt-3 p-3 bg-blue-100 rounded-lg">
-              <p className="text-xs text-blue-900 font-medium">💡 Tip for single items (e.g., Coca Cola 330ml):</p>
+              <p className="text-xs text-blue-900 font-medium">{t('tipTitle')}</p>
               <p className="text-xs text-blue-800 mt-1">
-                Add a single ingredient linking to the stock product with the serving size.
-                This allows automatic stock deduction even for non-recipe items.
+                {t('tipText')}
               </p>
             </div>
             </div>

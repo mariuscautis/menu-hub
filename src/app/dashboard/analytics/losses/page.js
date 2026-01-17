@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useTranslations } from '@/lib/i18n/LanguageContext'
 export default function LossesAnalytics() {
+  const t = useTranslations('lossesAnalytics')
   const [restaurant, setRestaurant] = useState(null)
   const [loading, setLoading] = useState(true)
   const [lossesData, setLossesData] = useState(null)
@@ -88,14 +90,14 @@ export default function LossesAnalytics() {
   }
   const getReasonLabel = (reason) => {
     const labels = {
-      expired: 'Expired',
-      spoiled: 'Spoiled',
-      cross_contamination: 'Cross-contamination',
-      damaged_delivery: 'Damaged in Delivery',
-      burned_overcooked: 'Burned/Overcooked',
-      dropped_fallen: 'Dropped/Fallen',
-      quality_failure: 'Quality Failure',
-      customer_complaint: 'Customer Complaint Remake'
+      expired: t('reasonExpired'),
+      spoiled: t('reasonSpoiled'),
+      cross_contamination: t('reasonCrossContamination'),
+      damaged_delivery: t('reasonDamagedDelivery'),
+      burned_overcooked: t('reasonBurnedOvercooked'),
+      dropped_fallen: t('reasonDroppedFallen'),
+      quality_failure: t('reasonQualityFailure'),
+      customer_complaint: t('reasonCustomerComplaint')
     }
     return labels[reason] || reason
   }
@@ -113,23 +115,23 @@ export default function LossesAnalytics() {
     return colors[reason] || 'bg-slate-100 text-slate-700'
   }
   if (loading) {
-    return <div className="text-slate-500">Loading...</div>
+    return <div className="text-slate-500">{t('loading')}</div>
   }
   if (!restaurant) {
-    return <div className="text-red-600">No restaurant found</div>
+    return <div className="text-red-600">{t('noRestaurant')}</div>
   }
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200">Stock Losses</h1>
-        <p className="text-slate-500 dark:text-slate-400">Track items marked for removal and analyze loss patterns</p>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200">{t('title')}</h1>
+        <p className="text-slate-500 dark:text-slate-400">{t('subtitle')}</p>
       </div>
       {/* Filters */}
       <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
-        <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-4">Filters</h2>
+        <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-4">{t('filters')}</h2>
         <div className="grid grid-cols-5 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Start Date</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('startDate')}</label>
             <input
               type="date"
               value={startDate}
@@ -138,7 +140,7 @@ export default function LossesAnalytics() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">End Date</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('endDate')}</label>
             <input
               type="date"
               value={endDate}
@@ -147,43 +149,43 @@ export default function LossesAnalytics() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Department</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('department')}</label>
             <select
               value={departmentFilter}
               onChange={(e) => setDepartmentFilter(e.target.value)}
               className="w-full px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
             >
-              <option value="all">All Departments</option>
-              <option value="bar">Bar</option>
-              <option value="kitchen">Kitchen</option>
+              <option value="all">{t('allDepartments')}</option>
+              <option value="bar">{t('bar')}</option>
+              <option value="kitchen">{t('kitchen')}</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Reason</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('reason')}</label>
             <select
               value={reasonFilter}
               onChange={(e) => setReasonFilter(e.target.value)}
               className="w-full px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
             >
-              <option value="all">All Reasons</option>
-              <option value="expired">Expired</option>
-              <option value="spoiled">Spoiled</option>
-              <option value="cross_contamination">Cross-contamination</option>
-              <option value="damaged_delivery">Damaged in Delivery</option>
-              <option value="burned_overcooked">Burned/Overcooked</option>
-              <option value="dropped_fallen">Dropped/Fallen</option>
-              <option value="quality_failure">Quality Failure</option>
-              <option value="customer_complaint">Customer Complaint</option>
+              <option value="all">{t('allReasons')}</option>
+              <option value="expired">{t('reasonExpired')}</option>
+              <option value="spoiled">{t('reasonSpoiled')}</option>
+              <option value="cross_contamination">{t('reasonCrossContamination')}</option>
+              <option value="damaged_delivery">{t('reasonDamagedDelivery')}</option>
+              <option value="burned_overcooked">{t('reasonBurnedOvercooked')}</option>
+              <option value="dropped_fallen">{t('reasonDroppedFallen')}</option>
+              <option value="quality_failure">{t('reasonQualityFailure')}</option>
+              <option value="customer_complaint">{t('reasonCustomerComplaint')}</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Staff Member</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('staffMember')}</label>
             <select
               value={staffFilter}
               onChange={(e) => setStaffFilter(e.target.value)}
               className="w-full px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
             >
-              <option value="all">All Staff</option>
+              <option value="all">{t('allStaff')}</option>
               {lossesData && (() => {
                 // Get unique staff members from all losses data
                 const uniqueStaff = [...new Set(lossesData.data.map(loss =>
@@ -204,38 +206,38 @@ export default function LossesAnalytics() {
           {/* Summary Stats */}
           <div className="grid grid-cols-4 gap-4 mb-6">
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-xl p-4">
-              <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">Total Loss Records</p>
+              <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">{t('totalLossRecords')}</p>
               <p className="text-2xl font-bold text-[#6262bd]">{lossesData.summary.total_loss_records}</p>
             </div>
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-xl p-4">
-              <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">Total Items Lost</p>
+              <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">{t('totalItemsLost')}</p>
               <p className="text-2xl font-bold text-red-600">{lossesData.summary.total_items_lost}</p>
             </div>
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-xl p-4">
-              <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">Bar Losses</p>
+              <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">{t('barLosses')}</p>
               <p className="text-2xl font-bold text-orange-600">
                 {lossesData.summary.by_department?.bar?.items || 0}
               </p>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Cost: £{lossesData.summary.by_department?.bar?.restaurant_cost?.toFixed(2) || '0.00'} •
-                Revenue: £{lossesData.summary.by_department?.bar?.selling_cost?.toFixed(2) || '0.00'}
+                {t('cost')}: £{lossesData.summary.by_department?.bar?.restaurant_cost?.toFixed(2) || '0.00'} •
+                {t('revenue')}: £{lossesData.summary.by_department?.bar?.selling_cost?.toFixed(2) || '0.00'}
               </p>
             </div>
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-xl p-4">
-              <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">Kitchen Losses</p>
+              <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">{t('kitchenLosses')}</p>
               <p className="text-2xl font-bold text-green-600">
                 {lossesData.summary.by_department?.kitchen?.items || 0}
               </p>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Cost: £{lossesData.summary.by_department?.kitchen?.restaurant_cost?.toFixed(2) || '0.00'} •
-                Revenue: £{lossesData.summary.by_department?.kitchen?.selling_cost?.toFixed(2) || '0.00'}
+                {t('cost')}: £{lossesData.summary.by_department?.kitchen?.restaurant_cost?.toFixed(2) || '0.00'} •
+                {t('revenue')}: £{lossesData.summary.by_department?.kitchen?.selling_cost?.toFixed(2) || '0.00'}
               </p>
             </div>
           </div>
           {/* Top Loss Items */}
           {lossesData.summary.top_loss_items.length > 0 && (
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
-              <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-4">Top Loss Items (by lost revenue)</h2>
+              <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-4">{t('topLossItems')}</h2>
               <div className="space-y-2">
                 {lossesData.summary.top_loss_items.map((item, index) => (
                   <div key={index} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
@@ -244,7 +246,7 @@ export default function LossesAnalytics() {
                       <div>
                         <p className="font-semibold text-slate-800 dark:text-slate-200">{item.name}</p>
                         <p className="text-sm text-slate-500 dark:text-slate-400">
-                          {item.count} loss record{item.count > 1 ? 's' : ''} • {item.items} items
+                          {item.count} {t('lossRecords').replace('{plural}', item.count > 1 ? 's' : '')} • {item.items} {t('items')}
                         </p>
                       </div>
                       <span className={`px-2 py-1 text-xs rounded-full font-medium ${
@@ -252,14 +254,14 @@ export default function LossesAnalytics() {
                           ? 'bg-orange-100 text-orange-700'
                           : 'bg-green-100 text-green-700'
                       }`}>
-                        {item.department === 'bar' ? '🍸 Bar' : '🍳 Kitchen'}
+                        {item.department === 'bar' ? `🍸 ${t('bar')}` : `🍳 ${t('kitchen')}`}
                       </span>
                     </div>
                     <div className="text-right">
                       <p className="text-xl font-bold text-red-600">£{item.selling_cost?.toFixed(2) || '0.00'}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">lost revenue</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{t('lostRevenue')}</p>
                       <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-                        Cost: £{item.restaurant_cost?.toFixed(2) || '0.00'}
+                        {t('cost')}: £{item.restaurant_cost?.toFixed(2) || '0.00'}
                       </p>
                     </div>
                   </div>
@@ -269,25 +271,25 @@ export default function LossesAnalytics() {
           )}
           {/* Loss Records Table */}
           <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6">
-            <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-4">Loss Records</h2>
+            <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-4">{t('lossRecordsTable')}</h2>
             {lossesData.data.length === 0 ? (
               <div className="text-center py-12 text-slate-400">
-                <p>No loss records found for the selected period</p>
+                <p>{t('noRecordsFound')}</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b-2 border-slate-100 dark:border-slate-700">
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Date & Time</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Item</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Qty</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Restaurant Cost</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Selling Cost</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Reason</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Dept</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Staff</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Notes</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('dateTime')}</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('item')}</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('qty')}</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('restaurantCost')}</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('sellingCost')}</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('reason')}</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('dept')}</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('staff')}</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('notes')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -343,14 +345,14 @@ export default function LossesAnalytics() {
                                 setShowNotesModal(true)
                               }}
                               className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 transition-colors"
-                              title="View note"
+                              title={t('viewNote')}
                             >
                               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
                               </svg>
                             </button>
                           ) : (
-                            <div className="inline-flex items-center justify-center w-8 h-8 text-slate-300" title="No notes">
+                            <div className="inline-flex items-center justify-center w-8 h-8 text-slate-300" title={t('noNotes')}>
                               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24">
                                 <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
                               </svg>
@@ -363,7 +365,7 @@ export default function LossesAnalytics() {
                   <tfoot>
                     <tr className="border-t-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
                       <td className="py-4 px-4 text-sm font-bold text-slate-700 dark:text-slate-200" colSpan="2">
-                        TOTAL
+                        {t('total')}
                       </td>
                       <td className="py-4 px-4">
                         <span className="font-bold text-red-600">
@@ -404,7 +406,7 @@ export default function LossesAnalytics() {
           >
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200">Loss Note</h3>
+                <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200">{t('lossNote')}</h3>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{selectedNote.item}</p>
                 <p className="text-xs text-slate-400 dark:text-slate-500">
                   {new Date(selectedNote.date).toLocaleString('en-GB', {
@@ -438,7 +440,7 @@ export default function LossesAnalytics() {
               }}
               className="mt-4 w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252ad] transition-colors"
             >
-              Close
+              {t('close')}
             </button>
           </div>
         </div>

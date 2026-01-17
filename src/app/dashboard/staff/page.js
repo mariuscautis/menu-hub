@@ -2,8 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useTranslations } from '@/lib/i18n/LanguageContext'
 
 export default function Staff() {
+  const t = useTranslations('staff')
+  const tc = useTranslations('common')
   const [staff, setStaff] = useState([])
   const [restaurant, setRestaurant] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -118,11 +121,11 @@ export default function Staff() {
     setError(null)
 
     if (!restaurant) {
-      setError('No restaurant found')
+      setError(t('noRestaurant'))
       return
     }
     if (!formData.pin_code || formData.pin_code.length !== 3) {
-      setError('PIN code must be exactly 3 digits')
+      setError(t('pinCodeRequired'))
       return
     }
 
@@ -182,10 +185,10 @@ export default function Staff() {
       setPasswordData({ newPassword: '' })
       setShowPasswordModal(false)
       setSelectedStaff(null)
-      alert('PIN code updated successfully!')
+      alert(t('pinUpdatedSuccess'))
       fetchData()
     } catch (err) {
-      alert('Failed to update PIN code')
+      alert(t('pinUpdateFailed'))
     }
   }
 
@@ -199,11 +202,11 @@ export default function Staff() {
 
   const sendMagicLink = async (staffMember) => {
     if (!staffMember.email) {
-      alert('This staff member doesn\'t have an email address.')
+      alert(t('noEmail'))
       return
     }
 
-    if (!confirm(`Send magic link email to ${staffMember.name} (${staffMember.email})?`)) {
+    if (!confirm(t('sendMagicLinkConfirm').replace('{name}', staffMember.name).replace('{email}', staffMember.email))) {
       return
     }
 
@@ -223,21 +226,21 @@ export default function Staff() {
       if (!response.ok) {
         // If email sending failed but we have a magic link, show it for manual sending
         if (data.magic_link) {
-          alert(`Could not send email automatically.\n\nPlease manually send this link to ${staffMember.name} (${staffMember.email}):\n\n${data.magic_link}\n\nThis link is valid for 7 days.`)
+          alert(t('magicLinkManualSend').replace('{name}', staffMember.name).replace('{email}', staffMember.email).replace('{link}', data.magic_link))
         } else {
           throw new Error(data.error || 'Failed to send magic link')
         }
       } else {
-        alert(`Magic link email sent successfully to ${staffMember.name} (${staffMember.email})!\n\nThe link is valid for 7 days.`)
+        alert(t('magicLinkSentSuccess').replace('{name}', staffMember.name).replace('{email}', staffMember.email))
       }
     } catch (error) {
       console.error('Error sending magic link:', error)
-      alert('Failed to send magic link. Please try again.')
+      alert(t('magicLinkFailed'))
     }
   }
 
   const deleteStaff = async (id, name) => {
-    if (!confirm(`Remove ${name || 'this staff member'}?`)) return
+    if (!confirm(t('removeStaffConfirm').replace('{name}', name || 'this staff member'))) return
     await supabase.from('staff').delete().eq('id', id)
     fetchData()
   }
@@ -371,19 +374,19 @@ export default function Staff() {
   }
 
   if (loading) {
-    return <div className="text-slate-500">Loading staff...</div>
+    return <div className="text-slate-500">{t('loadingStaff')}</div>
   }
 
   if (!restaurant) {
-    return <div className="text-slate-500">You don't have permission to manage staff.</div>
+    return <div className="text-slate-500">{t('noPermission')}</div>
   }
 
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Staff</h1>
-          <p className="text-slate-500">Manage staff for {restaurant.name}</p>
+          <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
+          <p className="text-slate-500">{t('subtitle').replace('{restaurantName}', restaurant.name)}</p>
         </div>
         <button
           onClick={() => setShowModal(true)}
@@ -392,16 +395,16 @@ export default function Staff() {
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
           </svg>
-          Add Staff
+          {t('addStaff')}
         </button>
       </div>
 
       {/* Info Box */}
       <div className="bg-[#6262bd]/5 dark:bg-[#6262bd]/10 border-2 border-[#6262bd]/20 dark:border-[#6262bd]/30 rounded-2xl p-6 mb-8">
-        <h3 className="font-semibold text-slate-700 dark:text-slate-300 mb-2">Staff Roles</h3>
+        <h3 className="font-semibold text-slate-700 dark:text-slate-300 mb-2">{t('staffRolesTitle')}</h3>
         <ul className="text-slate-600 dark:text-slate-400 text-sm space-y-1">
-          <li><strong>Admin:</strong> Full access - can manage menu, tables, orders, and staff</li>
-          <li><strong>Staff:</strong> Orders only - can view and update order status</li>
+          <li><strong>{t('adminRole')}</strong> {t('adminRoleDesc')}</li>
+          <li><strong>{t('staffRole')}</strong> {t('staffRoleDesc')}</li>
         </ul>
       </div>
 
@@ -413,12 +416,12 @@ export default function Staff() {
               <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
             </svg>
           </div>
-          <p className="text-slate-500 dark:text-slate-400 mb-4">No staff members yet</p>
+          <p className="text-slate-500 dark:text-slate-400 mb-4">{t('noStaffMembers')}</p>
           <button
             onClick={() => setShowModal(true)}
             className="text-[#6262bd] font-medium hover:underline"
           >
-            Add your first staff member
+            {t('addFirstStaffMember')}
           </button>
         </div>
       ) : (
@@ -426,12 +429,12 @@ export default function Staff() {
           <table className="w-full">
             <thead className="bg-slate-50 dark:bg-slate-800 border-b-2 border-slate-100 dark:border-slate-700">
               <tr>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Name</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Role</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Department</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">PIN Code</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Status</th>
-                <th className="text-right px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">Actions</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('name')}</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('role')}</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('department')}</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('pinCode')}</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('status.label')}</th>
+                <th className="text-right px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -458,13 +461,13 @@ export default function Staff() {
                         onClick={() => openPinModal(member)}
                         className="px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-xs font-medium hover:bg-slate-200 dark:hover:bg-slate-600"
                       >
-                        Change
+                        {t('change')}
                       </button>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <span className={`px-3 py-1 rounded-full text-sm font-medium capitalize ${getStatusBadge(member.status)}`}>
-                      {member.status}
+                      {t(`status.${member.status}`)}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -477,20 +480,20 @@ export default function Staff() {
                         <svg className="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
                         </svg>
-                        Link
+                        {t('link')}
                       </button>
                       <button
                         onClick={() => openEditModal(member)}
                         className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-100"
                       >
-                        Edit
+                        {t('edit')}
                       </button>
                       {member.status === 'pending' && (
                         <button
                           onClick={() => updateStaffStatus(member.id, 'active')}
                           className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200"
                         >
-                          Activate
+                          {t('activate')}
                         </button>
                       )}
                       {member.status === 'active' && (
@@ -498,7 +501,7 @@ export default function Staff() {
                           onClick={() => updateStaffStatus(member.id, 'inactive')}
                           className="px-3 py-1.5 bg-amber-100 text-amber-700 rounded-lg text-sm font-medium hover:bg-amber-200"
                         >
-                          Deactivate
+                          {t('deactivate')}
                         </button>
                       )}
                       {member.status === 'inactive' && (
@@ -506,14 +509,14 @@ export default function Staff() {
                           onClick={() => updateStaffStatus(member.id, 'active')}
                           className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200"
                         >
-                          Reactivate
+                          {t('reactivate')}
                         </button>
                       )}
                       <button
                         onClick={() => deleteStaff(member.id, member.name)}
                         className="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100"
                       >
-                        Remove
+                        {t('remove')}
                       </button>
                     </div>
                   </td>
@@ -541,7 +544,7 @@ export default function Staff() {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-6">
-              {isEditing ? 'Edit Staff Member' : 'Add Staff Member'}
+              {isEditing ? t('editStaffMember') : t('addStaffMember')}
             </h2>
             {error && (
               <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-600 dark:text-red-400 text-sm">
@@ -552,7 +555,7 @@ export default function Staff() {
               <div className="space-y-5">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Name
+                    {t('nameLabel')}
                   </label>
                   <input
                     type="text"
@@ -560,12 +563,12 @@ export default function Staff() {
                     value={formData.name}
                     onChange={handleChange}
                     className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 placeholder:text-slate-400 dark:placeholder:text-slate-500"
-                    placeholder="John Smith"
+                    placeholder={t('namePlaceholder')}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Email Address
+                    {t('emailLabel')}
                   </label>
                   <input
                     type="email"
@@ -574,12 +577,12 @@ export default function Staff() {
                     onChange={handleChange}
                     required
                     className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 placeholder:text-slate-400 dark:placeholder:text-slate-500"
-                    placeholder="staff@restaurant.com"
+                    placeholder={t('emailPlaceholder')}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    PIN Code (3 digits)
+                    {t('pinCodeLabel')}
                   </label>
                   <div className="flex gap-2">
                     <input
@@ -592,7 +595,7 @@ export default function Staff() {
                       maxLength={3}
                       pattern="[0-9]{3}"
                       className="flex-1 px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 font-mono text-lg disabled:bg-slate-50 dark:disabled:bg-slate-700 disabled:text-slate-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
-                      placeholder="123"
+                      placeholder={t('pinCodePlaceholder')}
                     />
                     {!isEditing && (
                       <button
@@ -600,19 +603,17 @@ export default function Staff() {
                         onClick={generatePinCode}
                         className="px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 font-medium text-sm whitespace-nowrap bg-white dark:bg-slate-800"
                       >
-                        Generate
+                        {t('generate')}
                       </button>
                     )}
                   </div>
                   <p className="text-slate-400 text-sm mt-2">
-                    {isEditing
-                      ? 'Use the "Change" button in the table to update the PIN code'
-                      : 'Staff will use this PIN to log in quickly'}
+                    {isEditing ? t('pinHintEdit') : t('pinHintAdd')}
                   </p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Role
+                    {t('roleLabel')}
                   </label>
                   <select
                     name="role"
@@ -620,13 +621,13 @@ export default function Staff() {
                     onChange={handleChange}
                     className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800"
                   >
-                    <option value="staff">Staff (Orders only)</option>
-                    <option value="admin">Admin (Full access)</option>
+                    <option value="staff">{t('roleStaff')}</option>
+                    <option value="admin">{t('roleAdmin')}</option>
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Department
+                    {t('departmentLabel')}
                   </label>
                   <select
                     name="department"
@@ -641,18 +642,18 @@ export default function Staff() {
                     ))}
                   </select>
                   <p className="text-slate-400 text-sm mt-2">
-                    Manage departments in Settings → Departments
+                    {t('departmentHint')}
                   </p>
                 </div>
 
                 {/* Holiday Entitlement Section */}
                 <div className="pt-4 border-t-2 border-slate-100">
-                  <h3 className="text-sm font-semibold text-slate-700 mb-4">Holiday Entitlement</h3>
+                  <h3 className="text-sm font-semibold text-slate-700 mb-4">{t('holidayEntitlementTitle')}</h3>
 
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Annual Holiday Days
+                        {t('annualHolidayDays')}
                       </label>
                       <input
                         type="number"
@@ -665,13 +666,13 @@ export default function Staff() {
                         className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                       />
                       <p className="text-slate-400 text-sm mt-2">
-                        UK statutory minimum is 28 days (including bank holidays). Pro-rata calculation will be applied automatically based on the start date.
+                        {t('annualHolidayDaysHint')}
                       </p>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Holiday Year Start Date
+                        {t('holidayYearStartDate')}
                       </label>
                       <input
                         type="date"
@@ -681,7 +682,7 @@ export default function Staff() {
                         className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                       />
                       <p className="text-slate-400 text-sm mt-2">
-                        Usually the staff member's hire date or start date
+                        {t('holidayYearStartDateHint')}
                       </p>
                     </div>
                   </div>
@@ -696,13 +697,13 @@ export default function Staff() {
                     }}
                     className="flex-1 border-2 border-slate-200 text-slate-600 py-3 rounded-xl font-medium hover:bg-slate-50"
                   >
-                    Cancel
+                    {t('cancel')}
                   </button>
                   <button
                     type="submit"
                     className="flex-1 bg-[#6262bd] text-white py-3 rounded-xl font-medium hover:bg-[#5252a3]"
                   >
-                    {isEditing ? 'Update Staff' : 'Add Staff'}
+                    {isEditing ? t('updateStaff') : t('addStaffButton')}
                   </button>
                 </div>
               </div>
@@ -726,13 +727,13 @@ export default function Staff() {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-6">
-              Change PIN for {selectedStaff.name || selectedStaff.email}
+              {t('changePinTitle').replace('{name}', selectedStaff.name || selectedStaff.email)}
             </h2>
             <form onSubmit={updatePinCode}>
               <div className="space-y-5">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    New PIN Code
+                    {t('newPinCode')}
                   </label>
                   <input
                     type="text"
@@ -741,10 +742,10 @@ export default function Staff() {
                     maxLength={3}
                     pattern="[0-9]{3}"
                     className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 font-mono text-2xl text-center placeholder:text-slate-400 dark:placeholder:text-slate-500"
-                    placeholder="123"
+                    placeholder={t('newPinPlaceholder')}
                   />
                   <p className="text-slate-400 text-sm mt-2">
-                    Share this new PIN with the staff member
+                    {t('sharePinHint')}
                   </p>
                 </div>
                 <div className="flex gap-3 pt-4">
@@ -757,13 +758,13 @@ export default function Staff() {
                     }}
                     className="flex-1 border-2 border-slate-200 text-slate-600 py-3 rounded-xl font-medium hover:bg-slate-50"
                   >
-                    Cancel
+                    {t('cancel')}
                   </button>
                   <button
                     type="submit"
                     className="flex-1 bg-[#6262bd] text-white py-3 rounded-xl font-medium hover:bg-[#5252a3]"
                   >
-                    Update PIN
+                    {t('updatePin')}
                   </button>
                 </div>
               </div>

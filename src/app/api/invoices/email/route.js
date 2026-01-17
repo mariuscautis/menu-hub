@@ -1,13 +1,44 @@
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
-import { renderToBuffer } from '@react-pdf/renderer';
+import { renderToBuffer, Font } from '@react-pdf/renderer';
 import InvoiceTemplate from '@/components/invoices/InvoiceTemplate';
 import ClassicTemplate from '@/components/invoices/templates/ClassicTemplate';
 import ModernMinimalTemplate from '@/components/invoices/templates/ModernMinimalTemplate';
 import BoldColorfulTemplate from '@/components/invoices/templates/BoldColorfulTemplate';
 import CompactDetailedTemplate from '@/components/invoices/templates/CompactDetailedTemplate';
+
+// Register Roboto font for Unicode/diacritics support
+Font.register({
+  family: 'Roboto',
+  fonts: [
+    {
+      src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-regular-webfont.ttf',
+      fontWeight: 'normal',
+    },
+    {
+      src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-bold-webfont.ttf',
+      fontWeight: 'bold',
+    },
+  ],
+});
+
+// Import translation messages
+import enMessages from '../../../../../messages/en.json';
+import roMessages from '../../../../../messages/ro.json';
+import esMessages from '../../../../../messages/es.json';
+import frMessages from '../../../../../messages/fr.json';
+import itMessages from '../../../../../messages/it.json';
+
+// Translation messages for PDF invoices
+const invoicePdfMessages = {
+  en: enMessages.invoicePdf,
+  ro: roMessages.invoicePdf,
+  es: esMessages.invoicePdf,
+  fr: frMessages.invoicePdf,
+  it: itMessages.invoicePdf
+};
 
 function getSupabaseAdmin() {
   return createClient(
@@ -227,6 +258,12 @@ export async function POST(request) {
     const selectedTemplate = restaurant.invoice_settings?.template || 'classic';
     console.log('Using template:', selectedTemplate);
 
+    // Get language from locale (e.g., 'en-GB' -> 'en', 'ro-RO' -> 'ro')
+    const locale = restaurant.invoice_settings?.locale || 'en-GB';
+    const lang = locale.split('-')[0];
+    const t = invoicePdfMessages[lang] || invoicePdfMessages.en;
+    console.log('Using language:', lang);
+
     // Map template ID to component
     const templateComponents = {
       'classic': ClassicTemplate,
@@ -238,7 +275,7 @@ export async function POST(request) {
     const TemplateComponent = templateComponents[selectedTemplate] || ClassicTemplate;
 
     const pdfBuffer = await renderToBuffer(
-      <TemplateComponent invoice={invoice} restaurant={restaurant} />
+      <TemplateComponent invoice={invoice} restaurant={restaurant} t={t} />
     );
 
     console.log('PDF generated successfully');

@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import QRCode from 'qrcode'
 import InvoiceClientModal from '@/components/invoices/InvoiceClientModal'
+import { useTranslations } from '@/lib/i18n/LanguageContext'
 
 export default function Tables() {
+  const t = useTranslations('tables')
   const [tables, setTables] = useState([])
   const [restaurant, setRestaurant] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -570,10 +572,10 @@ export default function Tables() {
 
     if (error) {
       console.error('Failed to acknowledge waiter call:', error)
-      showNotification('error', 'Failed to acknowledge waiter call')
+      showNotification('error', t('notifications.waiterCallFailed'))
     } else {
       console.log('Waiter call acknowledged successfully by:', acknowledgedByName)
-      showNotification('success', 'Waiter call acknowledged')
+      showNotification('success', t('notifications.waiterCallAcknowledged'))
       // The real-time subscription should handle the update, but let's trigger a manual refetch just in case
       if (restaurant) {
         setTimeout(() => fetchWaiterCalls(restaurant.id), 100)
@@ -639,13 +641,13 @@ export default function Tables() {
 
       setShowCreateReservationModal(false)
       setSelectedTable(null)
-      showNotification('success', 'Reservation created successfully!')
+      showNotification('success', t('notifications.reservationCreated'))
 
       // Refresh today's reservations
       await fetchTodayReservations(restaurant.id)
     } catch (error) {
       console.error('Error creating reservation:', error)
-      showNotification('error', 'Failed to create reservation. Please try again.')
+      showNotification('error', t('notifications.reservationFailed'))
     }
   }
 
@@ -666,7 +668,7 @@ export default function Tables() {
   }
 
   const deleteTable = async (id) => {
-    if (!confirm('Are you sure you want to delete this table?')) return
+    if (!confirm(t('deleteTableConfirm'))) return
 
     await supabase.from('tables').delete().eq('id', id)
     fetchData()
@@ -949,13 +951,13 @@ export default function Tables() {
 
       const cleanupTime = data?.cleanup_duration_minutes
       const message = cleanupTime
-        ? `Table ${table.table_number} marked as cleaned! Cleanup took ${cleanupTime} minutes.`
-        : `Table ${table.table_number} marked as cleaned and ready!`
+        ? t('tableCleanedWithTime').replace('{tableNumber}', table.table_number).replace('{minutes}', cleanupTime)
+        : t('tableCleanedReady').replace('{tableNumber}', table.table_number)
 
       showNotification('success', message)
     } catch (error) {
       console.error('Error marking table as cleaned:', error)
-      showNotification('error', 'Failed to mark table as cleaned. Please try again.')
+      showNotification('error', t('notifications.tableCleanedFailed'))
     }
   }
 
@@ -982,7 +984,7 @@ export default function Tables() {
       if (fetchError) throw fetchError
 
       if (!orders || orders.length === 0) {
-        showNotification('info', 'No orders to deliver')
+        showNotification('info', t('notifications.noOrdersToDeliver'))
         return
       }
 
@@ -1020,7 +1022,7 @@ export default function Tables() {
       showNotification('success', `${itemsToDeliver.length} ${departmentLabel} item${itemsToDeliver.length > 1 ? 's' : ''} delivered to Table ${table.table_number}!`)
     } catch (error) {
       console.error('Error marking items as delivered:', error)
-      showNotification('error', 'Failed to mark items as delivered. Please try again.')
+      showNotification('error', t('notifications.itemsDeliveredFailed'))
     }
   }
 
@@ -1080,7 +1082,7 @@ export default function Tables() {
       setShowPostPaymentModal(true)
     } catch (error) {
       console.error('Payment error:', error)
-      showNotification('error', 'Failed to process payment. Please try again.')
+      showNotification('error', t('notifications.paymentFailed'))
     }
   }
 
@@ -1090,7 +1092,7 @@ export default function Tables() {
 
   const processSplitBillPayment = async (bill, paymentMethod) => {
     if (!bill || bill.items.length === 0) {
-      showNotification('error', 'No items in this bill')
+      showNotification('error', t('notifications.noItemsInBill'))
       return
     }
 
@@ -1181,12 +1183,12 @@ export default function Tables() {
           await fetchTableOrderInfo(restaurant.id)
           await fetchData()
 
-          showNotification('success', 'All bills paid! Table marked for cleaning.')
+          showNotification('success', t('notifications.allBillsPaid'))
         }
       }
     } catch (error) {
       console.error('Split bill payment error:', error)
-      showNotification('error', 'Failed to process split bill payment. Please try again.')
+      showNotification('error', t('notifications.splitBillPaymentFailed'))
     }
   }
 
@@ -1215,7 +1217,7 @@ export default function Tables() {
         if (ordersError) throw ordersError
 
         if (!orders || orders.length === 0) {
-          showNotification('error', 'No paid orders found for this table')
+          showNotification('error', t('notifications.noPaidOrders'))
           setGeneratingInvoice(false)
           return
         }
@@ -1224,7 +1226,7 @@ export default function Tables() {
       }
 
       if (!orderId) {
-        showNotification('error', 'No order ID specified')
+        showNotification('error', t('notifications.noOrderId'))
         setGeneratingInvoice(false)
         return
       }
@@ -1304,11 +1306,11 @@ export default function Tables() {
         setSelectedTable(null)
         setUnpaidOrders([])
         setCompletedOrderIds([])
-        showNotification('success', 'Invoice generated and downloaded successfully!')
+        showNotification('success', t('notifications.invoiceGenerated'))
       }
     } catch (error) {
       console.error('Invoice generation error:', error)
-      showNotification('error', error.message || 'Failed to generate invoice')
+      showNotification('error', error.message || t('notifications.invoiceFailed'))
     } finally {
       setGeneratingInvoice(false)
     }
@@ -1366,13 +1368,13 @@ export default function Tables() {
 
       // For staff: cannot reduce below existing quantity
       if (userType === 'staff' && item.isExisting && newQuantity < item.existingQuantity) {
-        showNotification('error', `Staff cannot reduce existing items below ${item.existingQuantity}. Only owners can modify placed items.`)
+        showNotification('error', t('notifications.staffCannotReduceItems').replace('{quantity}', item.existingQuantity))
         return prevItems
       }
 
       // For staff: cannot delete existing items
       if (userType === 'staff' && item.isExisting && newQuantity === 0) {
-        showNotification('error', 'Staff cannot remove items that were already placed. Only owners can do this.')
+        showNotification('error', t('notifications.staffCannotRemoveItems'))
         return prevItems
       }
 
@@ -1430,7 +1432,7 @@ export default function Tables() {
           for (const originalItem of originalItems) {
             const newItem = consolidatedItems.find(item => item.menu_item_id === originalItem.menu_item_id)
             if (newItem && newItem.quantity < originalItem.quantity) {
-              showNotification('error', 'Staff cannot reduce item quantities from placed orders. Only owners can do this.')
+              showNotification('error', t('notifications.staffCannotReduceQuantities'))
               setLoggingIn(false)
               return
             }
@@ -1440,7 +1442,7 @@ export default function Tables() {
           for (const originalItem of originalItems) {
             const stillExists = consolidatedItems.find(item => item.menu_item_id === originalItem.menu_item_id)
             if (!stillExists) {
-              showNotification('error', 'Staff cannot remove items from placed orders. Only owners can do this.')
+              showNotification('error', t('notifications.staffCannotRemoveFromOrders'))
               setLoggingIn(false)
               return
             }
@@ -1528,15 +1530,15 @@ export default function Tables() {
       // Refresh table order info
       await fetchTableOrderInfo(restaurant.id)
 
-      showNotification('success', currentOrder ? 'Order updated successfully!' : 'Order placed successfully!')
+      showNotification('success', currentOrder ? t('notifications.orderUpdated') : t('notifications.orderPlaced'))
     } catch (error) {
       console.error('Error submitting order:', error)
-      showNotification('error', 'Failed to submit order. Please try again.')
+      showNotification('error', t('notifications.orderFailed'))
     }
   }
 
   if (loading) {
-    return <div className="text-slate-500">Loading tables...</div>
+    return <div className="text-slate-500">{t('loading')}</div>
   }
 
   return (
@@ -1600,8 +1602,8 @@ export default function Tables() {
 
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Tables & QR Codes</h1>
-          <p className="text-slate-500">Manage tables and generate QR codes</p>
+          <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
+          <p className="text-slate-500">{t('subtitle')}</p>
         </div>
         <div className="flex gap-3">
           {userType === 'owner' && tables.length > 0 && (
@@ -1612,7 +1614,7 @@ export default function Tables() {
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
               </svg>
-              Download All QR
+              {t('downloadAllQR')}
             </button>
           )}
           {userType === 'owner' && (
@@ -1623,7 +1625,7 @@ export default function Tables() {
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
               </svg>
-              Add Table
+              {t('addTable')}
             </button>
           )}
         </div>
@@ -1637,12 +1639,12 @@ export default function Tables() {
               <path d="M3 5a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm6 0H5v4h4V5zm-6 8a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4zm6 0H5v4h4v-4zm2-8a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2h-4a2 2 0 01-2-2V5zm6 0h-4v4h4V5zm-6 8a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2h-4a2 2 0 01-2-2v-4zm6 0h-4v4h4v-4z"/>
             </svg>
           </div>
-          <p className="text-slate-500 mb-4">No tables yet</p>
+          <p className="text-slate-500 mb-4">{t('noTablesYet')}</p>
           <button
             onClick={() => setShowModal(true)}
             className="text-[#6262bd] font-medium hover:underline"
           >
-            Add your first table
+            {t('addFirstTable')}
           </button>
         </div>
       ) : (
@@ -1681,12 +1683,12 @@ export default function Tables() {
             className="bg-white rounded-2xl p-8 w-full max-w-sm"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold text-slate-800 mb-6">Add New Table</h2>
+            <h2 className="text-xl font-bold text-slate-800 mb-6">{t('addNewTable')}</h2>
 
             <form onSubmit={addTable}>
               <div className="mb-6">
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Table Number/Name
+                  {t('tableNumberName')}
                 </label>
                 <input
                   type="text"
@@ -1694,7 +1696,7 @@ export default function Tables() {
                   onChange={(e) => setNewTableNumber(e.target.value)}
                   required
                   className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
-                  placeholder="e.g. 1, A1, Patio 3"
+                  placeholder={t('tableNumberPlaceholder')}
                 />
               </div>
 
@@ -1704,13 +1706,13 @@ export default function Tables() {
                   onClick={() => setShowModal(false)}
                   className="flex-1 border-2 border-slate-200 text-slate-600 py-3 rounded-xl font-medium hover:bg-slate-50"
                 >
-                  Cancel
+                  {t('cancel')}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 bg-[#6262bd] text-white py-3 rounded-xl font-medium hover:bg-[#5252a3]"
                 >
-                  Add Table
+                  {t('addTable')}
                 </button>
               </div>
             </form>
@@ -1765,9 +1767,9 @@ export default function Tables() {
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                   </svg>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-blue-900">Updating Existing Order</p>
+                    <p className="text-sm font-medium text-blue-900">{t('orderModal.updatingExistingOrder')}</p>
                     <p className="text-xs text-blue-700 mt-1">
-                      You can add more items or increase quantities, but cannot remove items or reduce quantities. Only restaurant owners can modify placed orders.
+                      {t('orderModal.staffEditingInfo')}
                     </p>
                   </div>
                 </div>
@@ -1777,11 +1779,11 @@ export default function Tables() {
             <div className="grid lg:grid-cols-3 gap-6">
               {/* Menu Items */}
               <div className="lg:col-span-2">
-                <h3 className="font-semibold text-slate-700 mb-4">Menu Items</h3>
+                <h3 className="font-semibold text-slate-700 mb-4">{t('orderModal.menuItems')}</h3>
                 {menuItems.length === 0 ? (
                   <div className="bg-slate-50 rounded-xl p-8 text-center">
-                    <p className="text-slate-500">No menu items available</p>
-                    <p className="text-sm text-slate-400 mt-2">Add items in the Menu tab first</p>
+                    <p className="text-slate-500">{t('orderModal.noMenuItems')}</p>
+                    <p className="text-sm text-slate-400 mt-2">{t('orderModal.addItemsFirst')}</p>
                   </div>
                 ) : (
                   <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
@@ -1813,7 +1815,7 @@ export default function Tables() {
                                       <p className="text-sm text-slate-500">{item.description}</p>
                                     )}
                                     {!item.available && (
-                                      <span className="text-xs text-red-500">Unavailable</span>
+                                      <span className="text-xs text-red-500">{t('orderModal.unavailable')}</span>
                                     )}
                                   </div>
                                   <span className="font-semibold text-[#6262bd] ml-2">£{item.price.toFixed(2)}</span>
@@ -1845,7 +1847,7 @@ export default function Tables() {
                                 <p className="text-sm text-slate-500">{item.description}</p>
                               )}
                               {!item.available && (
-                                <span className="text-xs text-red-500">Unavailable</span>
+                                <span className="text-xs text-red-500">{t('orderModal.unavailable')}</span>
                               )}
                             </div>
                             <span className="font-semibold text-[#6262bd] ml-2">£{item.price.toFixed(2)}</span>
@@ -1859,10 +1861,10 @@ export default function Tables() {
 
               {/* Order Summary */}
               <div>
-                <h3 className="font-semibold text-slate-700 mb-4">Order Summary</h3>
+                <h3 className="font-semibold text-slate-700 mb-4">{t('orderModal.orderSummary')}</h3>
                 {orderItems.length === 0 ? (
                   <div className="bg-slate-50 rounded-xl p-6 text-center">
-                    <p className="text-slate-500">No items added yet</p>
+                    <p className="text-slate-500">{t('orderModal.noItemsAdded')}</p>
                   </div>
                 ) : (
                   <>
@@ -1881,7 +1883,7 @@ export default function Tables() {
                                 {/* Show breakdown if item has both existing and new quantities */}
                                 {item.isExisting && hasNewItems && (
                                   <p className="text-xs text-blue-600 mt-1">
-                                    {item.existingQuantity} existing + {newQuantity} new
+                                    {t('orderModal.quantityBreakdown').replace('{existing}', item.existingQuantity).replace('{new}', newQuantity)}
                                   </p>
                                 )}
                               </div>
@@ -1939,7 +1941,7 @@ export default function Tables() {
                                           ? 'bg-slate-100 text-slate-300 cursor-not-allowed'
                                           : 'bg-slate-200 hover:bg-slate-300'
                                       }`}
-                                      title={item.isExisting && item.quantity <= item.existingQuantity ? 'Cannot reduce existing items' : ''}
+                                      title={item.isExisting && item.quantity <= item.existingQuantity ? t('orderModal.cannotReduceExisting') : ''}
                                     >
                                       -
                                     </button>
@@ -1965,7 +1967,7 @@ export default function Tables() {
 
                     <div className="bg-[#6262bd]/10 rounded-xl p-4 mb-4">
                       <div className="flex justify-between items-center">
-                        <span className="font-semibold text-slate-700">Total</span>
+                        <span className="font-semibold text-slate-700">{t('orderModal.total')}</span>
                         <span className="text-xl font-bold text-[#6262bd]">£{calculateTotal().toFixed(2)}</span>
                       </div>
                     </div>
@@ -1974,7 +1976,7 @@ export default function Tables() {
                       onClick={submitOrder}
                       className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3]"
                     >
-                      {currentOrder ? 'Update Order' : 'Place Order'}
+                      {currentOrder ? t('orderModal.updateOrder') : t('orderModal.placeOrder')}
                     </button>
                   </>
                 )}
@@ -1990,7 +1992,7 @@ export default function Tables() {
           <div className="bg-white rounded-2xl p-8 w-full max-w-md">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold text-slate-800">
-                Pay Bill - Table {selectedTable.table_number}
+                {t('paymentModal.title').replace('{tableNumber}', selectedTable.table_number)}
               </h2>
               <button
                 onClick={() => {
@@ -2008,18 +2010,18 @@ export default function Tables() {
 
             {unpaidOrders.length === 0 ? (
               <div className="bg-slate-50 rounded-xl p-8 text-center mb-6">
-                <p className="text-slate-500">No unpaid orders for this table</p>
+                <p className="text-slate-500">{t('paymentModal.noUnpaidOrders')}</p>
               </div>
             ) : (
               <>
                 {/* Order Summary */}
                 <div className="mb-6">
-                  <h3 className="font-semibold text-slate-700 mb-3">Orders Summary</h3>
+                  <h3 className="font-semibold text-slate-700 mb-3">{t('paymentModal.ordersSummary')}</h3>
                   <div className="bg-slate-50 rounded-xl p-4 space-y-3 max-h-64 overflow-y-auto">
                     {unpaidOrders.map((order, index) => (
                       <div key={order.id} className="border-b border-slate-200 pb-3 last:border-0 last:pb-0">
                         <div className="flex justify-between items-start mb-2">
-                          <span className="text-sm font-medium text-slate-600">Order #{index + 1}</span>
+                          <span className="text-sm font-medium text-slate-600">{t('paymentModal.orderNumber').replace('{number}', index + 1)}</span>
                           <span className="text-sm font-semibold text-[#6262bd]">£{order.total?.toFixed(2)}</span>
                         </div>
                         <div className="text-xs text-slate-500 space-y-1">
@@ -2030,7 +2032,7 @@ export default function Tables() {
                           ))}
                         </div>
                         <div className="text-xs text-slate-400 mt-1">
-                          Status: <span className="capitalize">{order.status}</span>
+                          {t('paymentModal.status')}: <span className="capitalize">{order.status}</span>
                         </div>
                       </div>
                     ))}
@@ -2040,7 +2042,7 @@ export default function Tables() {
                 {/* Total */}
                 <div className="bg-[#6262bd]/10 rounded-xl p-4 mb-6">
                   <div className="flex justify-between items-center">
-                    <span className="font-semibold text-slate-700">Total to Pay</span>
+                    <span className="font-semibold text-slate-700">{t('paymentModal.totalToPay')}</span>
                     <span className="text-2xl font-bold text-[#6262bd]">£{calculateTableTotal().toFixed(2)}</span>
                   </div>
                 </div>
@@ -2054,7 +2056,7 @@ export default function Tables() {
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
                     </svg>
-                    Pay with Cash
+                    {t('paymentModal.payWithCash')}
                   </button>
                   <button
                     onClick={() => processPayment('card')}
@@ -2063,7 +2065,7 @@ export default function Tables() {
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
                     </svg>
-                    Pay with Card
+                    {t('paymentModal.payWithCard')}
                   </button>
                 </div>
               </>
@@ -2078,7 +2080,7 @@ export default function Tables() {
           <div className="bg-white rounded-2xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-slate-800">
-                Split Bill - Table {selectedTable?.table_number}
+                {t('splitBillModal.title').replace('{tableNumber}', selectedTable?.table_number)}
               </h2>
               <button
                 onClick={() => {
@@ -2099,8 +2101,8 @@ export default function Tables() {
               {/* Left Side: Available Items */}
               <div>
                 <div className="bg-slate-50 rounded-xl p-4 mb-4">
-                  <h3 className="font-bold text-slate-800 mb-2">Available Items</h3>
-                  <p className="text-sm text-slate-600">Click on items to assign them to a bill</p>
+                  <h3 className="font-bold text-slate-800 mb-2">{t('splitBillModal.availableItems')}</h3>
+                  <p className="text-sm text-slate-600">{t('splitBillModal.clickToAssign')}</p>
                 </div>
 
                 <div className="space-y-2">
@@ -2110,7 +2112,7 @@ export default function Tables() {
                         <div className="flex-1">
                           <h4 className="font-semibold text-slate-800">{item.name}</h4>
                           <p className="text-sm text-slate-600">
-                            {item.quantity} available × £{item.price.toFixed(2)}
+                            {t('splitBillModal.quantityAvailable').replace('{quantity}', item.quantity).replace('{price}', item.price.toFixed(2))}
                           </p>
                         </div>
                         <span className="font-bold text-slate-800">£{(item.quantity * item.price).toFixed(2)}</span>
@@ -2162,7 +2164,7 @@ export default function Tables() {
                               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
                               </svg>
-                              Add to {bill.name}
+                              {t('splitBillModal.addToBill').replace('{billName}', bill.name)}
                             </button>
                           </div>
                         ))}
@@ -2172,7 +2174,7 @@ export default function Tables() {
 
                   {availableItems.filter(item => item.quantity > 0).length === 0 && (
                     <div className="text-center py-8 text-slate-500">
-                      All items have been assigned to bills
+                      {t('splitBillModal.allItemsAssigned')}
                     </div>
                   )}
                 </div>
@@ -2183,7 +2185,7 @@ export default function Tables() {
                 {/* Paid Bills */}
                 {splitBills.filter(b => b.paid).length > 0 && (
                   <div className="mb-6">
-                    <h3 className="font-bold text-slate-800 mb-3">Paid Bills</h3>
+                    <h3 className="font-bold text-slate-800 mb-3">{t('splitBillModal.paidBills')}</h3>
                     <div className="space-y-2">
                       {splitBills.filter(b => b.paid).map((bill) => (
                         <div key={bill.id} className="flex justify-between items-center bg-green-50 border border-green-200 rounded-lg p-3">
@@ -2205,7 +2207,7 @@ export default function Tables() {
                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                               <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
                             </svg>
-                            Invoice
+                            {t('splitBillModal.invoice')}
                           </button>
                         </div>
                       ))}
@@ -2292,7 +2294,7 @@ export default function Tables() {
 
                           <div className="border-t-2 border-slate-200 pt-3">
                             <div className="flex justify-between items-center mb-3">
-                              <span className="font-bold text-slate-700">Total</span>
+                              <span className="font-bold text-slate-700">{t('splitBillModal.total')}</span>
                               <span className="text-xl font-bold text-[#6262bd]">£{bill.total.toFixed(2)}</span>
                             </div>
 
@@ -2305,7 +2307,7 @@ export default function Tables() {
                                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
                                 </svg>
-                                Pay £{bill.total.toFixed(2)} Cash
+                                {t('splitBillModal.payCash').replace('{amount}', bill.total.toFixed(2))}
                               </button>
                               <button
                                 onClick={() => processSplitBillPayment(bill, 'card')}
@@ -2314,14 +2316,14 @@ export default function Tables() {
                                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                   <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
                                 </svg>
-                                Pay £{bill.total.toFixed(2)} Card
+                                {t('splitBillModal.payCard').replace('{amount}', bill.total.toFixed(2))}
                               </button>
                             </div>
                           </div>
                         </>
                       ) : (
                         <div className="text-center py-6 text-slate-400 text-sm">
-                          No items assigned to this bill yet
+                          {t('splitBillModal.noItemsInBill')}
                         </div>
                       )}
                     </div>
@@ -2331,14 +2333,14 @@ export default function Tables() {
                   {splitBills.length === 0 && (
                     <button
                       onClick={() => {
-                        setSplitBills([{ id: 1, name: 'Bill 1', items: [], total: 0 }])
+                        setSplitBills([{ id: 1, name: t('splitBillModal.billNumber').replace('{number}', '1'), items: [], total: 0 }])
                       }}
                       className="w-full px-4 py-3 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252a3] transition-colors flex items-center justify-center gap-2 font-medium"
                     >
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
                       </svg>
-                      Create First Bill
+                      {t('splitBillModal.createFirstBill')}
                     </button>
                   )}
                   {splitBills.some(b => b.paid) && availableItems.some(item => item.quantity > 0) && (
@@ -2347,7 +2349,7 @@ export default function Tables() {
                         const newBillId = Math.max(...splitBills.map(b => b.id), 0) + 1
                         setSplitBills([...splitBills, {
                           id: newBillId,
-                          name: `Bill ${newBillId}`,
+                          name: t('splitBillModal.billNumber').replace('{number}', newBillId),
                           items: [],
                           total: 0
                         }])
@@ -2357,7 +2359,7 @@ export default function Tables() {
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
                       </svg>
-                      Add Another Bill
+                      {t('splitBillModal.addAnotherBill')}
                     </button>
                   )}
                 </div>
@@ -2365,17 +2367,17 @@ export default function Tables() {
                 {/* Summary */}
                 <div className="mt-4 bg-[#6262bd]/10 rounded-xl p-4">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="font-semibold text-slate-700">Original Total</span>
+                    <span className="font-semibold text-slate-700">{t('splitBillModal.originalTotal')}</span>
                     <span className="font-bold text-slate-800">£{calculateTableTotal().toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between items-center mb-2">
-                    <span className="font-semibold text-slate-700">Assigned to Bills</span>
+                    <span className="font-semibold text-slate-700">{t('splitBillModal.assignedToBills')}</span>
                     <span className="font-bold text-[#6262bd]">
                       £{splitBills.reduce((sum, b) => sum + b.total, 0).toFixed(2)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="font-semibold text-slate-700">Remaining</span>
+                    <span className="font-semibold text-slate-700">{t('splitBillModal.remaining')}</span>
                     <span className="font-bold text-orange-600">
                       £{(calculateTableTotal() - splitBills.reduce((sum, b) => sum + b.total, 0)).toFixed(2)}
                     </span>
@@ -3030,6 +3032,8 @@ export default function Tables() {
 }
 
 function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDownload, onDelete, onPlaceOrder, onPayBill, onSplitBill, onViewOrders, onMarkCleaned, onMarkDelivered, onViewReservations, onCreateReservation, onAcknowledgeWaiterCall }) {
+  const t = useTranslations('tables')
+
   // Show badge if there are any unpaid orders (count > 0)
   // This handles both cases: orders with totals and orders where total might be 0 but items exist
   const hasOpenOrders = orderInfo && orderInfo.count > 0
@@ -3121,9 +3125,9 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
         <button
           onClick={onViewOrders}
           className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full px-3 py-1.5 text-xs font-bold shadow-lg uppercase tracking-wide hover:bg-red-600 transition-colors cursor-pointer"
-          title="Table needs cleaning"
+          title={t('needsCleaningTooltip')}
         >
-          NEEDS CLEANING
+          {t('needsCleaning')}
         </button>
       )}
       {hasOpenOrders && !needsCleaning && (
@@ -3170,7 +3174,7 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
             </svg>
-            Mark as Cleaned
+            {t('markAsCleaned')}
           </button>
         ) : (
           <>
@@ -3178,13 +3182,13 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
               onClick={onPlaceOrder}
               className="w-full bg-[#6262bd] text-white py-2.5 rounded-xl font-medium hover:bg-[#5252a3] text-sm"
             >
-              {hasOpenOrders ? 'Update Order' : 'Place Order'}
+              {hasOpenOrders ? t('updateOrder') : t('placeOrder')}
             </button>
             <button
               onClick={onPayBill}
               className="w-full bg-green-600 text-white py-2.5 rounded-xl font-medium hover:bg-green-700 text-sm"
             >
-              Pay Bill
+              {t('payBill')}
             </button>
             <button
               onClick={onSplitBill}
@@ -3193,7 +3197,7 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
               </svg>
-              Split Bill
+              {t('splitBill')}
             </button>
             <button
               onClick={onCreateReservation}
@@ -3202,7 +3206,7 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM12 13h5v5h-5z"/>
               </svg>
-              New Reservation
+              {t('newReservation')}
             </button>
           </>
         )}
@@ -3212,13 +3216,13 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
               onClick={onDownload}
               className="w-full border-2 border-slate-200 text-slate-600 py-2.5 rounded-xl font-medium hover:bg-slate-50 text-sm"
             >
-              Download QR
+              {t('downloadQR')}
             </button>
             <button
               onClick={onDelete}
               className="w-full p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 text-sm font-medium"
             >
-              Delete Table
+              {t('deleteTable')}
             </button>
           </>
         )}

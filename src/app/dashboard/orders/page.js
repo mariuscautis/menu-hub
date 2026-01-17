@@ -3,8 +3,11 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import InvoiceClientModal from '@/components/invoices/InvoiceClientModal'
+import { useTranslations } from '@/lib/i18n/LanguageContext'
 
 export default function Orders() {
+  const t = useTranslations('orders')
+  const tc = useTranslations('common')
   const [orders, setOrders] = useState([])
   const [restaurant, setRestaurant] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -207,7 +210,7 @@ export default function Orders() {
       })
 
       if (itemsToStart.length === 0) {
-        showNotification('info', `No ${department} items to start preparing`)
+        showNotification('info', t('noItemsToStart').replace('{department}', t(department)))
         return
       }
 
@@ -257,11 +260,10 @@ export default function Orders() {
         await fetchOrders(restaurant.id)
       }
 
-      const deptLabel = department.charAt(0).toUpperCase() + department.slice(1)
-      showNotification('success', `${deptLabel} started preparing!`)
+      showNotification('success', t('startedPreparing').replace('{department}', t(department)))
     } catch (error) {
       console.error('Error starting department preparation:', error)
-      showNotification('error', 'Failed to start preparing')
+      showNotification('error', t('failedToStart'))
     }
   }
 
@@ -296,7 +298,7 @@ export default function Orders() {
       console.log(`🔍 Item IDs to mark ready:`, itemsToMark.map(i => i.id))
 
       if (itemsToMark.length === 0) {
-        showNotification('info', `No ${department} items to mark as ready`)
+        showNotification('info', t('noItemsToMark').replace('{department}', t(department)))
         return
       }
 
@@ -340,11 +342,10 @@ export default function Orders() {
         await fetchOrders(restaurant.id)
       }
 
-      const deptLabel = department.charAt(0).toUpperCase() + department.slice(1)
-      showNotification('success', `${deptLabel} items marked as ready!`)
+      showNotification('success', t('markedReady').replace('{department}', t(department)))
     } catch (error) {
       console.error('Error marking department ready:', error)
-      showNotification('error', 'Failed to mark items as ready')
+      showNotification('error', t('failedToMark'))
     }
   }
 
@@ -399,7 +400,7 @@ export default function Orders() {
         // Close modal
         setShowInvoiceModal(false)
         setInvoiceOrderId(null)
-        showNotification('success', `Invoice emailed successfully to ${clientData.email}!`)
+        showNotification('success', t('invoiceEmailSuccess').replace('{email}', clientData.email))
       } else {
         // Download invoice as PDF
         const response = await fetch('/api/invoices/generate', {
@@ -439,11 +440,11 @@ export default function Orders() {
         // Close modal
         setShowInvoiceModal(false)
         setInvoiceOrderId(null)
-        showNotification('success', 'Invoice generated and downloaded successfully!')
+        showNotification('success', t('invoiceDownloadSuccess'))
       }
     } catch (error) {
       console.error('Invoice generation error:', error)
-      showNotification('error', error.message || 'Failed to generate invoice')
+      showNotification('error', error.message || t('invoiceError'))
     } finally {
       setGeneratingInvoice(false)
     }
@@ -512,15 +513,15 @@ export default function Orders() {
   }
 
   if (loading) {
-    return <div className="text-slate-500">Loading orders...</div>
+    return <div className="text-slate-500">{t('loadingOrders')}</div>
   }
 
   return (
       <div>
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-slate-800">Orders</h1>
-            <p className="text-slate-500">Manage incoming orders in real-time</p>
+            <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
+            <p className="text-slate-500">{t('subtitle')}</p>
           </div>
         </div>
 
@@ -530,13 +531,13 @@ export default function Orders() {
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`px-4 py-2 rounded-xl font-medium capitalize ${
+            className={`px-4 py-2 rounded-xl font-medium ${
               filter === f
                 ? 'bg-[#6262bd] text-white'
                 : 'bg-white border-2 border-slate-200 text-slate-600 hover:border-slate-300'
             }`}
           >
-            {f}
+            {t(f)}
           </button>
         ))}
       </div>
@@ -550,7 +551,7 @@ export default function Orders() {
             </svg>
           </div>
           <p className="text-slate-500">
-            {filter === 'active' ? 'There are currently no active orders.' : `No ${filter} orders`}
+            {filter === 'active' ? t('noActiveOrders') : t('noOrders').replace('{filter}', t(filter))}
           </p>
         </div>
       ) : (
@@ -576,14 +577,14 @@ export default function Orders() {
                 <div>
                   <div className="flex items-center gap-3 mb-1">
                     <h3 className="text-lg font-bold text-slate-800">
-                      Table {order.tables?.table_number || 'N/A'}
+                      {t('table')} {order.tables?.table_number || 'N/A'}
                     </h3>
                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
-                      {order.status}
+                      {t(`status.${order.status}`)}
                     </span>
                   </div>
                   <p className="text-slate-500 text-sm">
-                    Order #{order.id.slice(0, 8)} • {formatTime(order.created_at)}
+                    {t('orderNumber')}{order.id.slice(0, 8)} • {formatTime(order.created_at)}
                   </p>
                 </div>
                 <p className="text-xl font-bold text-slate-800">£{order.total?.toFixed(2)}</p>
@@ -617,7 +618,7 @@ export default function Orders() {
 
               {order.notes && (
                 <div className="mb-4 p-3 bg-amber-50 rounded-xl">
-                  <p className="text-sm text-amber-700"><strong>Note:</strong> {order.notes}</p>
+                  <p className="text-sm text-amber-700"><strong>{t('note')}:</strong> {order.notes}</p>
                 </div>
               )}
 
@@ -629,13 +630,13 @@ export default function Orders() {
                       <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
                       </svg>
-                      <p className="text-sm font-semibold text-green-700">PAID</p>
+                      <p className="text-sm font-semibold text-green-700">{t('paid')}</p>
                     </div>
                     <div className="text-xs text-green-600 space-y-0.5">
-                      <p>Method: <span className="font-medium capitalize">{order.payment_method}</span></p>
-                      <p>Processed by: <span className="font-medium">{order.payment_taken_by_name || 'Staff'}</span></p>
+                      <p>{t('paymentMethod')}: <span className="font-medium capitalize">{order.payment_method}</span></p>
+                      <p>{t('processedBy')}: <span className="font-medium">{order.payment_taken_by_name || 'Staff'}</span></p>
                       {order.payment_taken_at && (
-                        <p>Time: {new Date(order.payment_taken_at).toLocaleString()}</p>
+                        <p>{t('paymentTime')}: {new Date(order.payment_taken_at).toLocaleString()}</p>
                       )}
                     </div>
                   </div>
@@ -649,7 +650,7 @@ export default function Orders() {
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
                       </svg>
-                      Generate Invoice
+                      {t('generateInvoice')}
                     </button>
                   )}
                 </div>
@@ -713,7 +714,7 @@ export default function Orders() {
                             className="bg-[#6262bd] text-white px-4 py-2 rounded-xl font-medium hover:bg-[#5252a3] flex items-center justify-center gap-2"
                           >
                             <span>{deptIcon}</span>
-                            <span>Start Preparing {deptLabel}</span>
+                            <span>{t('startPreparing').replace('{department}', t(dept))}</span>
                           </button>
                         )
                       }
@@ -727,7 +728,7 @@ export default function Orders() {
                             className={`${deptColor} text-white px-4 py-2 rounded-xl font-medium flex items-center justify-center gap-2`}
                           >
                             <span>{deptIcon}</span>
-                            <span>Mark {deptLabel} Ready</span>
+                            <span>{t('markReady').replace('{department}', t(dept))}</span>
                           </button>
                         )
                       }
@@ -741,7 +742,7 @@ export default function Orders() {
                       onClick={() => updateOrderStatus(order.id, 'completed')}
                       className="bg-slate-600 text-white px-4 py-2 rounded-xl font-medium hover:bg-slate-700"
                     >
-                      Complete Order
+                      {t('completeOrder')}
                     </button>
                   )}
                   {userType === 'owner' && ['pending', 'preparing'].includes(order.status) && (
@@ -749,7 +750,7 @@ export default function Orders() {
                       onClick={() => confirmCancelOrder(order)}
                       className="border-2 border-red-200 text-red-600 px-4 py-2 rounded-xl font-medium hover:bg-red-50"
                     >
-                      Cancel
+                      {t('cancel')}
                     </button>
                   )}
                 </div>
@@ -773,10 +774,9 @@ export default function Orders() {
             className="bg-white rounded-2xl p-8 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold text-slate-800 mb-4">Cancel Order?</h2>
+            <h2 className="text-xl font-bold text-slate-800 mb-4">{t('cancelOrderTitle')}</h2>
             <p className="text-slate-600 mb-6">
-              Are you sure you want to cancel order from Table {orderToCancel.tables?.table_number}?
-              This action cannot be undone.
+              {t('cancelOrderMessage').replace('{tableNumber}', orderToCancel.tables?.table_number)}
             </p>
             <div className="flex gap-3">
               <button
@@ -786,13 +786,13 @@ export default function Orders() {
                 }}
                 className="flex-1 border-2 border-slate-200 text-slate-600 py-3 rounded-xl font-medium hover:bg-slate-50"
               >
-                No, Keep Order
+                {t('noKeepOrder')}
               </button>
               <button
                 onClick={cancelOrder}
                 className="flex-1 bg-red-600 text-white py-3 rounded-xl font-medium hover:bg-red-700"
               >
-                Yes, Cancel Order
+                {t('yesCancelOrder')}
               </button>
             </div>
           </div>

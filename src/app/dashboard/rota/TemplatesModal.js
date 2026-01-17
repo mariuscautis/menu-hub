@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useTranslations } from '@/lib/i18n/LanguageContext';
 
 export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemplate }) {
+  const t = useTranslations('rota.templatesModal');
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
@@ -77,7 +79,7 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
 
   const handleAddShift = () => {
     if (!newShift.role_required) {
-      alert('Please enter a role');
+      alert(t('enterRole'));
       return;
     }
 
@@ -98,12 +100,12 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
 
   const handleSaveTemplate = async () => {
     if (!templateName.trim()) {
-      setMessage({ type: 'error', text: 'Please enter a template name' });
+      setMessage({ type: 'error', text: t('enterTemplateName') });
       return;
     }
 
     if (templateShifts.length === 0) {
-      setMessage({ type: 'error', text: 'Please add at least one shift to the template' });
+      setMessage({ type: 'error', text: t('addAtLeastOneShift') });
       return;
     }
 
@@ -121,13 +123,13 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
       if (error) {
         // Handle duplicate name error
         if (error.code === '23505' && error.message.includes('unique_template_name')) {
-          setMessage({ type: 'error', text: `A template named "${templateName}" already exists. Please use a different name.` });
+          setMessage({ type: 'error', text: t('templateNameExists').replace('{name}', templateName) });
           return;
         }
         throw error;
       }
 
-      setMessage({ type: 'success', text: 'Template saved successfully' });
+      setMessage({ type: 'success', text: t('templateSavedSuccess') });
       setTimeout(() => {
         setMessage(null);
         setViewMode('list');
@@ -136,12 +138,12 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
       }, 2000);
     } catch (error) {
       console.error('Error saving template:', error);
-      setMessage({ type: 'error', text: error.message || 'Failed to save template' });
+      setMessage({ type: 'error', text: error.message || t('failedToSaveTemplate') });
     }
   };
 
   const handleDeleteTemplate = async (templateId) => {
-    if (!confirm('Are you sure you want to delete this template?')) return;
+    if (!confirm(t('confirmDelete'))) return;
 
     try {
       const { error } = await supabase
@@ -151,7 +153,7 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
 
       if (error) throw error;
 
-      setMessage({ type: 'success', text: 'Template deleted successfully' });
+      setMessage({ type: 'success', text: t('templateDeletedSuccess') });
       setTimeout(() => setMessage(null), 2000);
     } catch (error) {
       console.error('Error deleting template:', error);
@@ -161,11 +163,16 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
 
   const handleApplyTemplate = async () => {
     if (!selectedTemplate || !applyStartDate) {
-      alert('Please select a template and start date');
+      alert(t('selectTemplateAndDate'));
       return;
     }
 
-    if (!confirm(`Apply "${selectedTemplate.name}" template for ${applyWeeks} week(s) starting ${applyStartDate}?`)) {
+    const confirmMsg = t('confirmApply')
+      .replace('{name}', selectedTemplate.name)
+      .replace('{weeks}', applyWeeks)
+      .replace('{date}', applyStartDate);
+
+    if (!confirm(confirmMsg)) {
       return;
     }
 
@@ -201,7 +208,7 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
 
       if (error) throw error;
 
-      setMessage({ type: 'success', text: `Created ${shiftsToCreate.length} shifts from template` });
+      setMessage({ type: 'success', text: t('createdShiftsSuccess').replace('{count}', shiftsToCreate.length) });
 
       // Notify parent component to refresh
       if (onApplyTemplate) {
@@ -232,7 +239,7 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
   };
 
   const getDayLabel = (day) => {
-    return day.charAt(0).toUpperCase() + day.slice(1);
+    return t(`days.${day}`);
   };
 
   return (
@@ -242,7 +249,7 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-slate-800">Shift Templates</h2>
+          <h2 className="text-2xl font-bold text-slate-800">{t('title')}</h2>
           <button
             onClick={onClose}
             className="text-slate-400 hover:text-slate-600 text-2xl font-bold"
@@ -273,7 +280,7 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
-            Templates
+            {t('tabTemplates')}
           </button>
           <button
             onClick={() => setViewMode('create')}
@@ -283,7 +290,7 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
-            Create New
+            {t('tabCreateNew')}
           </button>
           {selectedTemplate && (
             <button
@@ -294,7 +301,7 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
                   : 'text-slate-500 hover:text-slate-700'
               }`}
             >
-              Apply Template
+              {t('tabApplyTemplate')}
             </button>
           )}
         </div>
@@ -305,16 +312,16 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
             {loading ? (
               <div className="text-center py-12">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6262bd] mx-auto mb-4"></div>
-                <p className="text-slate-600">Loading templates...</p>
+                <p className="text-slate-600">{t('loadingTemplates')}</p>
               </div>
             ) : templates.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-slate-600 mb-4">No templates created yet</p>
+                <p className="text-slate-600 mb-4">{t('noTemplatesYet')}</p>
                 <button
                   onClick={() => setViewMode('create')}
                   className="px-6 py-3 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252a5] transition-colors font-medium"
                 >
-                  Create Your First Template
+                  {t('createFirstTemplate')}
                 </button>
               </div>
             ) : (
@@ -328,7 +335,7 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
                       <div>
                         <h3 className="text-lg font-bold text-slate-800">{template.name}</h3>
                         <p className="text-sm text-slate-600">
-                          {template.shifts?.length || 0} shift{template.shifts?.length !== 1 ? 's' : ''} per week
+                          {template.shifts?.length || 0} {template.shifts?.length !== 1 ? t('shiftsPerWeek') : t('shift')}
                         </p>
                       </div>
                       <div className="flex gap-2">
@@ -339,13 +346,13 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
                           }}
                           className="px-4 py-2 bg-[#6262bd] text-white rounded-lg hover:bg-[#5252a5] transition-colors text-sm font-medium"
                         >
-                          Apply
+                          {t('apply')}
                         </button>
                         <button
                           onClick={() => handleDeleteTemplate(template.id)}
                           className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
                         >
-                          Delete
+                          {t('delete')}
                         </button>
                       </div>
                     </div>
@@ -376,52 +383,52 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
           <div>
             <div className="mb-6">
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                Template Name *
+                {t('templateNameRequired')}
               </label>
               <input
                 type="text"
                 value={templateName}
                 onChange={(e) => setTemplateName(e.target.value)}
-                placeholder="e.g., Standard Week, Weekend Schedule"
+                placeholder={t('templateNamePlaceholder')}
                 className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd]"
               />
             </div>
 
             <div className="mb-6">
-              <h3 className="text-lg font-bold text-slate-800 mb-4">Add Shifts to Template</h3>
+              <h3 className="text-lg font-bold text-slate-800 mb-4">{t('addShiftsToTemplate')}</h3>
 
               <div className="bg-slate-50 rounded-xl p-6 mb-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Day of Week</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">{t('dayOfWeek')}</label>
                     <select
                       value={newShift.day_of_week}
                       onChange={(e) => setNewShift({ ...newShift, day_of_week: e.target.value })}
                       className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd]"
                     >
-                      <option value="monday">Monday</option>
-                      <option value="tuesday">Tuesday</option>
-                      <option value="wednesday">Wednesday</option>
-                      <option value="thursday">Thursday</option>
-                      <option value="friday">Friday</option>
-                      <option value="saturday">Saturday</option>
-                      <option value="sunday">Sunday</option>
+                      <option value="monday">{t('days.monday')}</option>
+                      <option value="tuesday">{t('days.tuesday')}</option>
+                      <option value="wednesday">{t('days.wednesday')}</option>
+                      <option value="thursday">{t('days.thursday')}</option>
+                      <option value="friday">{t('days.friday')}</option>
+                      <option value="saturday">{t('days.saturday')}</option>
+                      <option value="sunday">{t('days.sunday')}</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Role Required</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">{t('roleRequired')}</label>
                     <input
                       type="text"
                       value={newShift.role_required}
                       onChange={(e) => setNewShift({ ...newShift, role_required: e.target.value })}
-                      placeholder="e.g., Server, Chef"
+                      placeholder={t('roleRequiredPlaceholder')}
                       className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Start Time</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">{t('startTime')}</label>
                     <input
                       type="time"
                       value={newShift.shift_start}
@@ -431,7 +438,7 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">End Time</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">{t('endTime')}</label>
                     <input
                       type="time"
                       value={newShift.shift_end}
@@ -441,21 +448,21 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Department</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">{t('department')}</label>
                     <select
                       value={newShift.department}
                       onChange={(e) => setNewShift({ ...newShift, department: e.target.value })}
                       className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd]"
                     >
-                      <option value="">None</option>
-                      <option value="kitchen">Kitchen</option>
-                      <option value="bar">Bar</option>
-                      <option value="universal">Universal</option>
+                      <option value="">{t('none')}</option>
+                      <option value="kitchen">{t('kitchen')}</option>
+                      <option value="bar">{t('bar')}</option>
+                      <option value="universal">{t('universal')}</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Break (minutes)</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">{t('break')}</label>
                     <input
                       type="number"
                       value={newShift.break_duration}
@@ -471,14 +478,14 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
                   onClick={handleAddShift}
                   className="w-full px-6 py-3 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252a5] transition-colors font-medium"
                 >
-                  + Add Shift to Template
+                  {t('addShiftToTemplate')}
                 </button>
               </div>
 
               {/* Template Shifts List */}
               {templateShifts.length > 0 && (
                 <div className="space-y-2">
-                  <h4 className="font-medium text-slate-700 mb-2">Shifts in Template ({templateShifts.length})</h4>
+                  <h4 className="font-medium text-slate-700 mb-2">{t('shiftsInTemplate')} ({templateShifts.length})</h4>
                   {templateShifts.map((shift, index) => (
                     <div
                       key={index}
@@ -495,7 +502,7 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
                         onClick={() => handleRemoveShift(index)}
                         className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
                       >
-                        Remove
+                        {t('remove')}
                       </button>
                     </div>
                   ))}
@@ -508,13 +515,13 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
                 onClick={() => setViewMode('list')}
                 className="px-6 py-3 border-2 border-slate-200 text-slate-700 rounded-xl hover:border-[#6262bd] transition-colors font-medium"
               >
-                Cancel
+                {t('cancel')}
               </button>
               <button
                 onClick={handleSaveTemplate}
                 className="px-6 py-3 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252a5] transition-colors font-medium"
               >
-                Save Template
+                {t('saveTemplate')}
               </button>
             </div>
           </div>
@@ -523,17 +530,17 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
         {/* Apply Template View */}
         {viewMode === 'apply' && selectedTemplate && (
           <div>
-            <h3 className="text-lg font-bold text-slate-800 mb-4">Apply: {selectedTemplate.name}</h3>
+            <h3 className="text-lg font-bold text-slate-800 mb-4">{t('applyTitle')} {selectedTemplate.name}</h3>
 
             <div className="bg-slate-50 rounded-xl p-6 mb-6">
               <p className="text-sm text-slate-600 mb-4">
-                This template contains {selectedTemplate.shifts?.length || 0} shifts per week
+                {t('templateContains')} {selectedTemplate.shifts?.length || 0} {t('shiftsPerWeekText')}
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Start Date (Monday) *
+                    {t('startDateLabel')}
                   </label>
                   <input
                     type="date"
@@ -542,13 +549,13 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
                     className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd]"
                   />
                   <p className="text-xs text-slate-500 mt-2">
-                    Select the Monday of the first week
+                    {t('startDateHelper')}
                   </p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Number of Weeks
+                    {t('numberOfWeeks')}
                   </label>
                   <input
                     type="number"
@@ -559,7 +566,7 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
                     className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd]"
                   />
                   <p className="text-xs text-slate-500 mt-2">
-                    Apply template for multiple weeks (max 12)
+                    {t('numberOfWeeksHelper')}
                   </p>
                 </div>
               </div>
@@ -567,8 +574,7 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
 
             <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 mb-6">
               <p className="text-sm text-blue-800">
-                <strong>Note:</strong> This will create {(selectedTemplate.shifts?.length || 0) * applyWeeks} shifts
-                as drafts. You can edit or delete them before publishing.
+                <strong>{t('noteLabel')}</strong> {t('noteText').replace('{count}', (selectedTemplate.shifts?.length || 0) * applyWeeks)}
               </p>
             </div>
 
@@ -577,13 +583,13 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
                 onClick={() => setViewMode('list')}
                 className="px-6 py-3 border-2 border-slate-200 text-slate-700 rounded-xl hover:border-[#6262bd] transition-colors font-medium"
               >
-                Cancel
+                {t('cancel')}
               </button>
               <button
                 onClick={handleApplyTemplate}
                 className="px-6 py-3 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252a5] transition-colors font-medium"
               >
-                Apply Template
+                {t('applyTemplate')}
               </button>
             </div>
           </div>

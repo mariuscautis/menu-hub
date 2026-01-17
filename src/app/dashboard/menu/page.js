@@ -2,7 +2,11 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useTranslations } from '@/lib/i18n/LanguageContext'
+
 export default function Menu() {
+  const t = useTranslations('menu')
+  const tc = useTranslations('common')
   const [menuItems, setMenuItems] = useState([])
   const [categories, setCategories] = useState([])
   const [stockProducts, setStockProducts] = useState([])
@@ -380,7 +384,7 @@ export default function Menu() {
     closeModal()
   }
   const deleteItem = async (id) => {
-    if (!confirm('Are you sure you want to delete this item?')) return
+    if (!confirm(t('deleteConfirm'))) return
     // Find the item to get its image URL
     const item = menuItems.find(i => i.id === id)
     // Delete image from storage if it exists
@@ -403,7 +407,7 @@ export default function Menu() {
   }
   const getStockStatus = (item) => {
   if (!item.menu_item_ingredients || item.menu_item_ingredients.length === 0) {
-    return { status: 'no_recipe', message: 'No recipe', color: 'slate' }
+    return { status: 'no_recipe', message: t('noRecipe'), color: 'slate' }
   } // ✅ MISSING BRACE
 
     let minServings = Infinity
@@ -418,11 +422,11 @@ export default function Menu() {
       }
     }
     if (hasOutOfStock || minServings === 0) {
-      return { status: 'out_of_stock', message: 'Out of stock', color: 'red', servings: 0 }
+      return { status: 'out_of_stock', message: t('outOfStock'), color: 'red', servings: 0 }
     } else if (minServings < 5) {
-      return { status: 'low_stock', message: `Low stock (${minServings} left)`, color: 'amber', servings: minServings }
+      return { status: 'low_stock', message: t('lowStock').replace('{servings}', minServings), color: 'amber', servings: minServings }
     }
-    return { status: 'in_stock', message: `${minServings} available`, color: 'green', servings: minServings }
+    return { status: 'in_stock', message: t('stockAvailable').replace('{servings}', minServings), color: 'green', servings: minServings }
   }
   const formatStockAmount = (amount, unit) => {
     if (amount >= 1000 && unit === 'grams') {
@@ -480,14 +484,14 @@ export default function Menu() {
     bar: menuItems.filter(i => i.department === 'bar').length
   }
   if (loading) {
-    return <div className="text-slate-500">Loading menu...</div>
+    return <div className="text-slate-500">{t('loadingMenu')}</div>
   }
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Menu</h1>
-          <p className="text-slate-500">Manage your menu items and recipes</p>
+          <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
+          <p className="text-slate-500">{t('subtitle')}</p>
         </div>
         <button
           onClick={() => openModal()}
@@ -496,25 +500,25 @@ export default function Menu() {
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
           </svg>
-          Add Item
+          {t('addItem')}
         </button>
       </div>
       {/* Stats Cards */}
       <div className="grid grid-cols-4 gap-4 mb-6">
         <div className="bg-white border-2 border-slate-100 rounded-xl p-4">
-          <p className="text-slate-500 text-sm font-medium mb-1">Total Items</p>
+          <p className="text-slate-500 text-sm font-medium mb-1">{t('totalItems')}</p>
           <p className="text-2xl font-bold text-[#6262bd]">{stats.total}</p>
         </div>
         <div className="bg-white border-2 border-slate-100 rounded-xl p-4">
-          <p className="text-slate-500 text-sm font-medium mb-1">Available</p>
+          <p className="text-slate-500 text-sm font-medium mb-1">{t('available')}</p>
           <p className="text-2xl font-bold text-green-600">{stats.available}</p>
         </div>
         <div className="bg-white border-2 border-slate-100 rounded-xl p-4">
-          <p className="text-slate-500 text-sm font-medium mb-1">With Recipes</p>
+          <p className="text-slate-500 text-sm font-medium mb-1">{t('withRecipes')}</p>
           <p className="text-2xl font-bold text-blue-600">{stats.withRecipes}</p>
         </div>
         <div className="bg-white border-2 border-slate-100 rounded-xl p-4">
-          <p className="text-slate-500 text-sm font-medium mb-1">Out of Stock</p>
+          <p className="text-slate-500 text-sm font-medium mb-1">{t('outOfStock')}</p>
           <p className="text-2xl font-bold text-red-600">{stats.outOfStock}</p>
         </div>
       </div>
@@ -528,7 +532,7 @@ export default function Menu() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search menu items by name or description..."
+            placeholder={t('searchPlaceholder')}
             className="w-full pl-12 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
           />
           {searchQuery && (
@@ -547,10 +551,10 @@ export default function Menu() {
           onChange={(e) => setSortBy(e.target.value)}
           className="px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 bg-white"
         >
-          <option value="name">Sort: A-Z</option>
-          <option value="price-low">Sort: Price (Low)</option>
-          <option value="price-high">Sort: Price (High)</option>
-          <option value="stock">Sort: Stock Status</option>
+          <option value="name">{t('sortAZ')}</option>
+          <option value="price-low">{t('sortPriceLow')}</option>
+          <option value="price-high">{t('sortPriceHigh')}</option>
+          <option value="stock">{t('sortStock')}</option>
         </select>
       </div>
       {/* Filter Buttons */}
@@ -563,7 +567,7 @@ export default function Menu() {
               : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
           }`}
         >
-          All
+          {t('all')}
         </button>
         <button
           onClick={() => setFilterDepartment('kitchen')}
@@ -573,7 +577,7 @@ export default function Menu() {
               : 'bg-green-100 text-green-700 hover:bg-green-200'
           }`}
         >
-          🍳 Kitchen
+          🍳 {t('kitchen')}
         </button>
         <button
           onClick={() => setFilterDepartment('bar')}
@@ -583,7 +587,7 @@ export default function Menu() {
               : 'bg-orange-100 text-orange-700 hover:bg-orange-200'
           }`}
         >
-          🍸 Bar
+          🍸 {t('bar')}
         </button>
         <div className="w-px bg-slate-200 mx-2"></div>
         <button
@@ -594,7 +598,7 @@ export default function Menu() {
               : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
           }`}
         >
-          All Status
+          {t('allStatus')}
         </button>
         <button
           onClick={() => setFilterAvailability('available')}
@@ -604,7 +608,7 @@ export default function Menu() {
               : 'bg-green-100 text-green-700 hover:bg-green-200'
           }`}
         >
-          Available
+          {t('available')}
         </button>
         <button
           onClick={() => setFilterAvailability('unavailable')}
@@ -614,13 +618,13 @@ export default function Menu() {
               : 'bg-red-100 text-red-700 hover:bg-red-200'
           }`}
         >
-          Unavailable
+          {t('unavailable')}
         </button>
       </div>
       {/* Results Count */}
       {(searchQuery || filterDepartment !== 'all' || filterAvailability !== 'all') && menuItems.length > 0 && (
         <div className="mb-4 text-sm text-slate-600">
-          Showing <strong>{filteredMenuItems.length}</strong> of <strong>{menuItems.length}</strong> items
+          {t('showing')} <strong>{filteredMenuItems.length}</strong> {t('of')} <strong>{menuItems.length}</strong> {t('items')}
         </div>
       )}
       {/* Menu Items */}
@@ -637,9 +641,9 @@ export default function Menu() {
           </div>
           {searchQuery || filterDepartment !== 'all' || filterAvailability !== 'all' ? (
             <>
-              <p className="text-slate-500 mb-2">No items found</p>
+              <p className="text-slate-500 mb-2">{t('noItemsFound')}</p>
               <p className="text-sm text-slate-400 mb-4">
-                Try adjusting your search or filters
+                {t('adjustFilters')}
               </p>
               <button
                 onClick={() => {
@@ -649,17 +653,17 @@ export default function Menu() {
                 }}
                 className="text-[#6262bd] font-medium hover:underline"
               >
-                Clear all filters
+                {t('clearAllFilters')}
               </button>
             </>
           ) : (
             <>
-              <p className="text-slate-500 mb-4">No menu items yet</p>
+              <p className="text-slate-500 mb-4">{t('noMenuItems')}</p>
               <button
                 onClick={() => openModal()}
                 className="text-[#6262bd] font-medium hover:underline"
               >
-                Add your first item
+                {t('addFirstItem')}
               </button>
             </>
           )}
@@ -690,7 +694,7 @@ export default function Menu() {
                       </h3>
                       {!item.available && (
                         <span className="px-2 py-1 bg-slate-200 text-slate-500 text-xs rounded-full font-medium">
-                          Unavailable
+                          {t('unavailable')}
                         </span>
                       )}
                       {item.menu_categories?.name && (
@@ -723,7 +727,7 @@ export default function Menu() {
                     {/* Recipe Display */}
                     {item.menu_item_ingredients && item.menu_item_ingredients.length > 0 && (
                       <div className="mt-2 mb-2">
-                        <p className="text-xs font-medium text-slate-600 mb-1">Recipe:</p>
+                        <p className="text-xs font-medium text-slate-600 mb-1">{t('recipe')}:</p>
                         <div className="flex flex-wrap gap-2">
                           {item.menu_item_ingredients.map((ing, idx) => {
                             const product = ing.stock_products
@@ -749,7 +753,7 @@ export default function Menu() {
                       <p className="text-lg font-bold text-[#6262bd]">£{item.price?.toFixed(2)}</p>
                       {item.dynamic_pricing_enabled && (
                         <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full font-medium" title={`Base cost: £${item.base_cost?.toFixed(2)} + ${item.profit_margin_percentage}% margin`}>
-                          Auto Priced
+                          {t('autoPriced')}
                         </span>
                       )}
                     </div>
@@ -762,7 +766,7 @@ export default function Menu() {
                           ? 'bg-green-100 text-green-600 hover:bg-green-200'
                           : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
                       }`}
-                      title={item.available ? 'Mark unavailable' : 'Mark available'}
+                      title={item.available ? t('markUnavailable') : t('markAvailable')}
                     >
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                         {item.available ? (
@@ -806,13 +810,13 @@ export default function Menu() {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold text-slate-800 mb-6">
-              {editingItem ? 'Edit Item' : 'Add New Item'}
+              {editingItem ? t('editItem') : t('addNewItem')}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Item Name
+                    {t('itemName')}
                   </label>
                   <input
                     type="text"
@@ -826,9 +830,9 @@ export default function Menu() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Price (£)
+                    {t('price')}
                     {formData.dynamic_pricing_enabled && (
-                      <span className="text-xs text-purple-600 ml-2">(Auto-calculated)</span>
+                      <span className="text-xs text-purple-600 ml-2">{t('autoCalculated')}</span>
                     )}
                   </label>
                   <input
@@ -851,7 +855,7 @@ export default function Menu() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Description
+                  {t('description')}
                 </label>
                 <textarea
                   name="description"
@@ -864,7 +868,7 @@ export default function Menu() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Item Image
+                  {t('itemImage')}
                 </label>
                 {imagePreview && (
                   <div className="mb-3">
@@ -885,7 +889,7 @@ export default function Menu() {
               {categories.length > 0 && (
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Category
+                    {t('category')}
                   </label>
                   <select
                     name="category_id"
@@ -893,7 +897,7 @@ export default function Menu() {
                     onChange={handleChange}
                     className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                   >
-                    <option value="">No category</option>
+                    <option value="">{t('noCategory')}</option>
                     {categories.map((cat) => (
                       <option key={cat.id} value={cat.id}>{cat.name}</option>
                     ))}
@@ -902,7 +906,7 @@ export default function Menu() {
               )}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Department
+                  {t('department')}
                 </label>
                 <select
                   name="department"
@@ -910,8 +914,8 @@ export default function Menu() {
                   onChange={handleChange}
                   className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                 >
-                  <option value="kitchen">Kitchen</option>
-                  <option value="bar">Bar</option>
+                  <option value="kitchen">{t('kitchen')}</option>
+                  <option value="bar">{t('bar')}</option>
                 </select>
               </div>
               <div className="flex items-center gap-3">
@@ -923,15 +927,15 @@ export default function Menu() {
                   className="w-5 h-5 rounded border-slate-300 text-[#6262bd] focus:ring-[#6262bd]"
                 />
                 <label className="text-sm font-medium text-slate-700">
-                  Available for ordering
+                  {t('availableForOrdering')}
                 </label>
               </div>
               {/* Dynamic Pricing Section */}
               <div className="border-t-2 border-slate-100 pt-5">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h3 className="text-lg font-semibold text-slate-800">Dynamic Pricing</h3>
-                    <p className="text-sm text-slate-500">Automatically calculate price based on cost and margin</p>
+                    <h3 className="text-lg font-semibold text-slate-800">{t('dynamicPricing')}</h3>
+                    <p className="text-sm text-slate-500">{t('dynamicPricingDesc')}</p>
                   </div>
                   <div className="flex items-center gap-3">
                     <input
@@ -942,7 +946,7 @@ export default function Menu() {
                       className="w-5 h-5 rounded border-slate-300 text-[#6262bd] focus:ring-[#6262bd]"
                     />
                     <label className="text-sm font-medium text-slate-700">
-                      Enable
+                      {t('enable')}
                     </label>
                   </div>
                 </div>
@@ -953,8 +957,8 @@ export default function Menu() {
                       <div className="bg-white border-2 border-slate-200 rounded-xl p-4">
                         <div className="flex items-center justify-between mb-2">
                           <div>
-                            <p className="text-sm font-medium text-slate-700">Base Cost (Auto-calculated)</p>
-                            <p className="text-xs text-slate-500">Based on recipe ingredient costs</p>
+                            <p className="text-sm font-medium text-slate-700">{t('baseCostAuto')}</p>
+                            <p className="text-xs text-slate-500">{t('baseCostDesc')}</p>
                           </div>
                           <div className="text-right">
                             <p className="text-2xl font-bold text-slate-800">
@@ -964,7 +968,7 @@ export default function Menu() {
                         </div>
                         {/* Ingredient Breakdown */}
                         <div className="mt-3 pt-3 border-t border-slate-200">
-                          <p className="text-xs font-medium text-slate-600 mb-2">Ingredient Costs:</p>
+                          <p className="text-xs font-medium text-slate-600 mb-2">{t('ingredientCosts')}</p>
                           <div className="space-y-1">
                             {recipeIngredients.map((ingredient, idx) => {
                               const product = stockProducts.find(p => p.id === ingredient.stock_product_id)
@@ -982,9 +986,9 @@ export default function Menu() {
                       </div>
                     ) : (
                       <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-4">
-                        <p className="text-sm font-medium text-amber-700 mb-1">No Recipe Added</p>
+                        <p className="text-sm font-medium text-amber-700 mb-1">{t('noRecipeAdded')}</p>
                         <p className="text-xs text-amber-600">
-                          Add recipe ingredients below to automatically calculate the base cost for dynamic pricing.
+                          {t('noRecipeDesc')}
                         </p>
                       </div>
                     )}
@@ -992,7 +996,7 @@ export default function Menu() {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-slate-700 mb-2">
-                          Profit Margin (%)
+                          {t('profitMargin')}
                         </label>
                         <input
                           type="number"
@@ -1006,12 +1010,12 @@ export default function Menu() {
                           placeholder="150"
                         />
                         <p className="text-xs text-slate-500 mt-1">
-                          E.g., 150% = £2.50 cost → £6.25 price
+                          {t('profitMarginExample')}
                         </p>
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-slate-700 mb-2">
-                          Price Rounding
+                          {t('priceRounding')}
                         </label>
                         <select
                           name="price_rounding_mode"
@@ -1019,12 +1023,12 @@ export default function Menu() {
                           onChange={handleChange}
                           className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                         >
-                          <option value="none">No Rounding</option>
-                          <option value="half">Round to £0.50</option>
-                          <option value="whole">Round to £1.00</option>
+                          <option value="none">{t('noRounding')}</option>
+                          <option value="half">{t('roundHalf')}</option>
+                          <option value="whole">{t('roundWhole')}</option>
                         </select>
                         <p className="text-xs text-slate-500 mt-1">
-                          Make prices customer-friendly
+                          {t('makeCustomerFriendly')}
                         </p>
                       </div>
                     </div>
@@ -1033,13 +1037,13 @@ export default function Menu() {
                       <div className="bg-white border-2 border-blue-200 rounded-xl p-4">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-sm font-medium text-slate-600 mb-1">Calculated Selling Price</p>
+                            <p className="text-sm font-medium text-slate-600 mb-1">{t('calculatedPrice')}</p>
                             <p className="text-xs text-slate-500">
                               £{calculateBaseCost().toFixed(2)} + ({formData.profit_margin_percentage}% margin)
                             </p>
                             {formData.price_rounding_mode !== 'none' && (
                               <p className="text-xs text-slate-400 mt-1">
-                                Before rounding: £{calculateDynamicPriceBeforeRounding().toFixed(2)}
+                                {t('beforeRounding').replace('{price}', calculateDynamicPriceBeforeRounding().toFixed(2))}
                               </p>
                             )}
                           </div>
@@ -1049,7 +1053,7 @@ export default function Menu() {
                             </p>
                             {formData.price_rounding_mode !== 'none' && (
                               <p className="text-xs text-green-600 font-medium mt-1">
-                                {formData.price_rounding_mode === 'whole' ? 'Rounded to nearest £1' : 'Rounded to nearest £0.50'}
+                                {formData.price_rounding_mode === 'whole' ? t('roundedWhole') : t('roundedHalf')}
                               </p>
                             )}
                           </div>
@@ -1057,9 +1061,9 @@ export default function Menu() {
                       </div>
                     )}
                     <div className="bg-blue-100 border-2 border-blue-200 rounded-xl p-3">
-                      <p className="text-xs text-blue-700 font-medium mb-1">How it works:</p>
+                      <p className="text-xs text-blue-700 font-medium mb-1">{t('howItWorks')}</p>
                       <p className="text-xs text-blue-600">
-                        The base cost is automatically calculated from your recipe ingredients&apos; purchase prices.
+                        {t('pricingFormula')}
                         <br />
                         Selling Price = Base Cost + (Base Cost × Profit Margin %)
                         <br />
@@ -1073,15 +1077,15 @@ export default function Menu() {
               <div className="border-t-2 border-slate-100 pt-5">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h3 className="text-lg font-semibold text-slate-800">Add Product Content/Recipe</h3>
-                    <p className="text-sm text-slate-500">Link this item to stock ingredients</p>
+                    <h3 className="text-lg font-semibold text-slate-800">{t('addProductRecipe')}</h3>
+                    <p className="text-sm text-slate-500">{t('linkToStock')}</p>
                   </div>
                   <button
                     type="button"
                     onClick={() => setShowRecipeSection(!showRecipeSection)}
                     className="text-[#6262bd] font-medium hover:underline"
                   >
-                    {showRecipeSection ? 'Hide' : 'Add Content'}
+                    {showRecipeSection ? t('hide') : t('addContent')}
                   </button>
                 </div>
                 {showRecipeSection && (
@@ -1117,7 +1121,7 @@ export default function Menu() {
                                 setIngredientSearches({ ...ingredientSearches, [index]: '' })
                                 setShowDropdowns({ ...showDropdowns, [index]: true })
                               }}
-                              placeholder="Search or select ingredient..."
+                              placeholder={t('searchIngredient')}
                               className="w-full px-4 py-2 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                             />
                             {/* Dropdown List */}
@@ -1139,7 +1143,7 @@ export default function Menu() {
                                   ))
                                 ) : (
                                   <div className="px-4 py-2 text-slate-400 text-sm">
-                                    No ingredients found
+                                    {t('noIngredientsFound')}
                                   </div>
                                 )}
                               </div>
@@ -1159,7 +1163,7 @@ export default function Menu() {
                               required
                               step="0.01"
                               min="0.01"
-                              placeholder="Amount"
+                              placeholder={t('amount')}
                               className="w-full px-4 py-2 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                             />
                           </div>
@@ -1180,11 +1184,11 @@ export default function Menu() {
                       onClick={addIngredient}
                       className="w-full px-4 py-2 border-2 border-dashed border-slate-300 rounded-xl text-slate-600 hover:border-[#6262bd] hover:text-[#6262bd] font-medium"
                     >
-                      + Add Ingredient
+                      {t('addIngredient')}
                     </button>
                     {stockProducts.length === 0 && (
                       <p className="text-sm text-amber-600 bg-amber-50 p-3 rounded-xl">
-                        No stock products available. Please add stock products first in the Stock section.
+                        {t('noStockProducts')}
                       </p>
                     )}
                   </div>
@@ -1197,14 +1201,14 @@ export default function Menu() {
                   disabled={uploading}
                   className="flex-1 border-2 border-slate-200 text-slate-600 py-3 rounded-xl font-medium hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Cancel
+                  {tc('close')}
                 </button>
                 <button
                   type="submit"
                   disabled={uploading}
                   className="flex-1 bg-[#6262bd] text-white py-3 rounded-xl font-medium hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {uploading ? 'Saving...' : (editingItem ? 'Save Changes' : 'Add Item')}
+                  {uploading ? t('saving') : (editingItem ? t('saveChanges') : t('addItem'))}
                 </button>
               </div>
             </form>

@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from '@/lib/i18n/LanguageContext';
 
 export default function ShiftModal({ shift, staff, restaurant, departments = [], onClose, onSave, onDelete }) {
+  const t = useTranslations('rota.shiftModal');
   const [formData, setFormData] = useState({
     date: '',
     shift_start: '',
@@ -110,15 +112,15 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
 
   const getUnavailableReason = (request) => {
     const leaveTypeLabels = {
-      annual_holiday: 'On holiday',
-      sick_self_cert: 'On sick leave',
-      sick_medical_cert: 'On sick leave',
-      unpaid: 'On unpaid leave',
-      compassionate: 'On compassionate leave',
-      other: 'On time off'
+      annual_holiday: t('unavailableReasons.onHoliday'),
+      sick_self_cert: t('unavailableReasons.onSickLeave'),
+      sick_medical_cert: t('unavailableReasons.onSickLeave'),
+      unpaid: t('unavailableReasons.onUnpaidLeave'),
+      compassionate: t('unavailableReasons.onCompassionateLeave'),
+      other: t('unavailableReasons.onTimeOff')
     };
 
-    const label = leaveTypeLabels[request.leave_type] || 'On time off';
+    const label = leaveTypeLabels[request.leave_type] || t('unavailableReasons.onTimeOff');
     const dateFrom = new Date(request.date_from).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
     const dateTo = new Date(request.date_to).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 
@@ -140,7 +142,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
     setConflictError(null);
 
     if (!restaurant) {
-      alert('Restaurant data not found');
+      alert(t('restaurantNotFound'));
       setSaving(false);
       return;
     }
@@ -195,7 +197,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
   const handleDeleteClick = async () => {
     if (!shift?.id) return;
 
-    if (!confirm('Are you sure you want to delete this shift?')) return;
+    if (!confirm(t('confirmDelete'))) return;
 
     try {
       const response = await fetch(`/api/rota/shifts?id=${shift.id}`, {
@@ -219,7 +221,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
       <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">
-            {shift?.id ? 'Edit Shift' : 'Create New Shift'}
+            {shift?.id ? t('titleEdit') : t('titleCreate')}
           </h2>
           <button
             onClick={onClose}
@@ -231,7 +233,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
 
         {conflictError && (
           <div className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-xl text-red-700">
-            <strong>Conflict:</strong> {conflictError}
+            <strong>{t('conflictLabel')}</strong> {conflictError}
           </div>
         )}
 
@@ -240,7 +242,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
             {/* Date */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Date *
+                {t('date')} *
               </label>
               <input
                 type="date"
@@ -255,14 +257,14 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
             {/* Role Required */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Role Required *
+                {t('roleRequired')} *
               </label>
               <input
                 type="text"
                 name="role_required"
                 value={formData.role_required}
                 onChange={handleChange}
-                placeholder="e.g., Server, Chef, Bartender"
+                placeholder={t('roleRequiredPlaceholder')}
                 required
                 className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
@@ -271,7 +273,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
             {/* Shift Start */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Start Time *
+                {t('startTime')} *
               </label>
               <input
                 type="time"
@@ -286,7 +288,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
             {/* Shift End */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                End Time *
+                {t('endTime')} *
               </label>
               <input
                 type="time"
@@ -301,7 +303,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
             {/* Department */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Department
+                {t('department')}
               </label>
               <select
                 name="department"
@@ -309,7 +311,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
                 onChange={handleChange}
                 className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200"
               >
-                <option value="">Select Department</option>
+                <option value="">{t('selectDepartment')}</option>
                 {departments && departments.length > 0 ? (
                   departments.map(dept => (
                     <option key={dept} value={dept}>
@@ -318,9 +320,9 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
                   ))
                 ) : (
                   <>
-                    <option value="kitchen">Kitchen</option>
-                    <option value="bar">Bar</option>
-                    <option value="universal">Universal</option>
+                    <option value="kitchen">{t('departmentKitchen')}</option>
+                    <option value="bar">{t('departmentBar')}</option>
+                    <option value="universal">{t('departmentUniversal')}</option>
                   </>
                 )}
               </select>
@@ -329,7 +331,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
             {/* Break Duration */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Break Duration (minutes)
+                {t('breakDuration')}
               </label>
               <input
                 type="number"
@@ -346,7 +348,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
             <div className="md:col-span-2">
               <div className="flex items-center justify-between mb-2">
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Assign Staff
+                  {t('assignStaff')}
                 </label>
                 {unavailableStaff.length > 0 && (
                   <button
@@ -354,7 +356,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
                     onClick={() => setShowUnavailable(!showUnavailable)}
                     className="text-xs text-slate-600 dark:text-slate-400 hover:text-[#6262bd] font-medium transition-colors"
                   >
-                    {showUnavailable ? 'Hide' : 'Show'} unavailable ({unavailableStaff.length})
+                    {showUnavailable ? t('hideUnavailable') : t('showUnavailable')} ({unavailableStaff.length})
                   </button>
                 )}
               </div>
@@ -364,12 +366,12 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
                 onChange={handleChange}
                 className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200"
               >
-                <option value="">Leave Unfilled</option>
+                <option value="">{t('leaveUnfilled')}</option>
 
                 {/* Available Staff */}
                 {availableStaff && availableStaff.length > 0 ? (
                   <>
-                    <optgroup label="✅ Available Staff">
+                    <optgroup label={t('availableStaff')}>
                       {availableStaff.map(s => (
                         <option key={s.id} value={s.id}>
                           {s.name} - {s.role}
@@ -378,14 +380,14 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
                     </optgroup>
                   </>
                 ) : loadingAvailable ? (
-                  <option disabled>Loading availability...</option>
+                  <option disabled>{t('loadingAvailability')}</option>
                 ) : (
-                  <option disabled>No available staff</option>
+                  <option disabled>{t('noAvailableStaff')}</option>
                 )}
 
                 {/* Unavailable Staff (if toggle is on) */}
                 {showUnavailable && unavailableStaff.length > 0 && (
-                  <optgroup label="❌ Unavailable (On Time Off)">
+                  <optgroup label={t('unavailableOnTimeOff')}>
                     {unavailableStaff.map(s => (
                       <option key={s.id} value={s.id} disabled>
                         {s.name} - {s.unavailableReason}
@@ -397,13 +399,13 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
               <div className="mt-2 space-y-1">
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   {loadingAvailable ? (
-                    'Checking staff availability...'
+                    t('checkingAvailability')
                   ) : availableStaff.length === 0 && unavailableStaff.length > 0 ? (
-                    '⚠️ All staff are unavailable on this date'
+                    t('allStaffUnavailable')
                   ) : unavailableStaff.length > 0 ? (
-                    `${availableStaff.length} available, ${unavailableStaff.length} on time off`
+                    t('staffAvailabilitySummary').replace('{available}', availableStaff.length).replace('{unavailable}', unavailableStaff.length)
                   ) : (
-                    'Select a staff member to assign to this shift'
+                    t('selectStaffHint')
                   )}
                 </p>
               </div>
@@ -412,7 +414,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
             {/* Status */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Status
+                {t('status')}
               </label>
               <select
                 name="status"
@@ -420,24 +422,24 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
                 onChange={handleChange}
                 className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200"
               >
-                <option value="draft">Draft</option>
-                <option value="published">Published</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
+                <option value="draft">{t('statusDraft')}</option>
+                <option value="published">{t('statusPublished')}</option>
+                <option value="completed">{t('statusCompleted')}</option>
+                <option value="cancelled">{t('statusCancelled')}</option>
               </select>
             </div>
 
             {/* Notes */}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Notes
+                {t('notes')}
               </label>
               <textarea
                 name="notes"
                 value={formData.notes}
                 onChange={handleChange}
                 rows="3"
-                placeholder="Optional notes about this shift..."
+                placeholder={t('notesPlaceholder')}
                 className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] resize-none bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
             </div>
@@ -452,7 +454,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
                   onClick={handleDeleteClick}
                   className="px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-medium"
                 >
-                  Delete Shift
+                  {t('deleteShift')}
                 </button>
               )}
             </div>
@@ -463,7 +465,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
                 onClick={onClose}
                 className="px-6 py-3 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl hover:border-[#6262bd] transition-colors font-medium"
               >
-                Cancel
+                {t('cancel')}
               </button>
 
               <button
@@ -471,7 +473,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
                 disabled={saving}
                 className="px-6 py-3 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252a5] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {saving ? 'Saving...' : shift?.id ? 'Update Shift' : 'Create Shift'}
+                {saving ? t('saving') : shift?.id ? t('updateShift') : t('createShift')}
               </button>
             </div>
           </div>

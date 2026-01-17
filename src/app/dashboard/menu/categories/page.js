@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useTranslations } from '@/lib/i18n/LanguageContext'
 
 export default function MenuCategories() {
+  const t = useTranslations('menuCategories')
   const [categories, setCategories] = useState([])
   const [restaurant, setRestaurant] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -133,11 +135,11 @@ export default function MenuCategories() {
     const itemCount = category?.menu_items?.[0]?.count || 0
 
     if (itemCount > 0) {
-      if (!confirm(`This category has ${itemCount} menu item(s). Deleting it will remove the category assignment from these items. Continue?`)) {
+      if (!confirm(t('confirmDeleteWithItems').replace('{count}', itemCount))) {
         return
       }
     } else {
-      if (!confirm('Are you sure you want to delete this category?')) {
+      if (!confirm(t('confirmDelete'))) {
         return
       }
     }
@@ -151,15 +153,15 @@ export default function MenuCategories() {
   }
 
   if (loading) {
-    return <div className="text-slate-500 dark:text-slate-400">Loading categories...</div>
+    return <div className="text-slate-500 dark:text-slate-400">{t('loading')}</div>
   }
 
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200">Menu Categories</h1>
-          <p className="text-slate-500 dark:text-slate-400">Organize your menu items into categories</p>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200">{t('title')}</h1>
+          <p className="text-slate-500 dark:text-slate-400">{t('subtitle')}</p>
         </div>
         <button
           onClick={() => openModal()}
@@ -168,7 +170,7 @@ export default function MenuCategories() {
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
           </svg>
-          Add Category
+          {t('addCategory')}
         </button>
       </div>
 
@@ -180,12 +182,12 @@ export default function MenuCategories() {
               <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
             </svg>
           </div>
-          <p className="text-slate-500 dark:text-slate-400 mb-4">No categories yet</p>
+          <p className="text-slate-500 dark:text-slate-400 mb-4">{t('noCategories')}</p>
           <button
             onClick={() => openModal()}
             className="text-[#6262bd] font-medium hover:underline"
           >
-            Create your first category
+            {t('createFirst')}
           </button>
         </div>
       ) : (
@@ -204,14 +206,14 @@ export default function MenuCategories() {
                         {category.name}
                       </h3>
                       <span className="px-2 py-1 bg-[#6262bd]/10 text-[#6262bd] text-xs rounded-full font-medium">
-                        {itemCount} {itemCount === 1 ? 'item' : 'items'}
+                        {itemCount} {itemCount === 1 ? t('item') : t('items')}
                       </span>
                     </div>
                     {category.description && (
                       <p className="text-slate-500 dark:text-slate-400 text-sm mb-2">{category.description}</p>
                     )}
                     <p className="text-xs text-slate-400 dark:text-slate-500">
-                      Sort order: {category.sort_order}
+                      {t('sortOrder').replace('{order}', category.sort_order)}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -250,12 +252,12 @@ export default function MenuCategories() {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-6">
-              {editingCategory ? 'Edit Category' : 'Add New Category'}
+              {editingCategory ? t('editCategory') : t('addNewCategory')}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Category Name
+                  {t('categoryName')}
                 </label>
                 <input
                   type="text"
@@ -264,13 +266,13 @@ export default function MenuCategories() {
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200"
-                  placeholder="e.g., Appetizers, Mains, Desserts"
+                  placeholder={t('categoryNamePlaceholder')}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Description (Optional)
+                  {t('description')}
                 </label>
                 <textarea
                   name="description"
@@ -278,13 +280,13 @@ export default function MenuCategories() {
                   onChange={handleChange}
                   rows={3}
                   className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 resize-none"
-                  placeholder="Brief description of this category..."
+                  placeholder={t('descriptionPlaceholder')}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Sort Order
+                  {t('sortOrderLabel')}
                 </label>
                 <input
                   type="number"
@@ -293,10 +295,10 @@ export default function MenuCategories() {
                   onChange={handleChange}
                   min="0"
                   className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200"
-                  placeholder="0"
+                  placeholder={t('sortOrderPlaceholder')}
                 />
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  Lower numbers appear first on the menu
+                  {t('sortOrderHint')}
                 </p>
               </div>
 
@@ -306,13 +308,13 @@ export default function MenuCategories() {
                   onClick={closeModal}
                   className="flex-1 border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 py-3 rounded-xl font-medium hover:bg-slate-50 dark:hover:bg-slate-700"
                 >
-                  Cancel
+                  {t('cancel')}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 bg-[#6262bd] text-white py-3 rounded-xl font-medium hover:bg-[#5252a3]"
                 >
-                  {editingCategory ? 'Save Changes' : 'Add Category'}
+                  {editingCategory ? t('saveChanges') : t('addCategoryButton')}
                 </button>
               </div>
             </form>

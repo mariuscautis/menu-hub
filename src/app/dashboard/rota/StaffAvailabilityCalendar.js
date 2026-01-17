@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import moment from 'moment';
+import { useTranslations } from '@/lib/i18n/LanguageContext';
 
 export default function StaffAvailabilityCalendar({ staff, restaurant }) {
+  const t = useTranslations('rota.availability');
   const [timeOffRequests, setTimeOffRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -98,12 +100,12 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
 
   const getLeaveTypeColor = (leaveType) => {
     const colors = {
-      annual_holiday: { bg: 'bg-blue-500', text: 'Holiday' },
-      sick_self_cert: { bg: 'bg-orange-500', text: 'Sick' },
-      sick_medical_cert: { bg: 'bg-red-500', text: 'Sick' },
-      unpaid: { bg: 'bg-gray-500', text: 'Unpaid' },
-      compassionate: { bg: 'bg-purple-500', text: 'Compassionate' },
-      other: { bg: 'bg-slate-500', text: 'Time Off' }
+      annual_holiday: { bg: 'bg-blue-500', text: t('leaveTypes.holiday') },
+      sick_self_cert: { bg: 'bg-orange-500', text: t('leaveTypes.sick') },
+      sick_medical_cert: { bg: 'bg-red-500', text: t('leaveTypes.sick') },
+      unpaid: { bg: 'bg-gray-500', text: t('leaveTypes.unpaid') },
+      compassionate: { bg: 'bg-purple-500', text: t('leaveTypes.compassionate') },
+      other: { bg: 'bg-slate-500', text: t('leaveTypes.timeOff') }
     };
     return colors[leaveType] || colors.other;
   };
@@ -132,7 +134,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6262bd] mx-auto mb-3"></div>
-            <p className="text-slate-600 dark:text-slate-400 text-sm">Loading availability...</p>
+            <p className="text-slate-600 dark:text-slate-400 text-sm">{t('loading')}</p>
           </div>
         </div>
       </div>
@@ -145,27 +147,27 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
       <div className="bg-slate-50 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700 px-6 py-4">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">Staff Availability</h2>
+            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">{t('title')}</h2>
             <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-              View time-off and availability across your team
+              {t('subtitle')}
             </p>
           </div>
           <div className="flex gap-4 text-xs">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded bg-blue-500"></div>
-              <span className="text-slate-600">Holiday</span>
+              <span className="text-slate-600">{t('legendHoliday')}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded bg-orange-500"></div>
-              <span className="text-slate-600">Sick</span>
+              <span className="text-slate-600">{t('legendSick')}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded bg-gray-500"></div>
-              <span className="text-slate-600">Other</span>
+              <span className="text-slate-600">{t('legendOther')}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded bg-green-50 border-2 border-green-200"></div>
-              <span className="text-slate-600">Available</span>
+              <span className="text-slate-600">{t('legendAvailable')}</span>
             </div>
           </div>
         </div>
@@ -178,7 +180,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
               onClick={handlePrevious}
               className="px-3 py-2 border-2 border-slate-200 rounded-lg hover:border-[#6262bd] hover:bg-[#6262bd] hover:text-white transition-colors text-slate-700 font-medium"
             >
-              ← Prev
+              {t('prevButton')}
             </button>
 
             {/* Today Button */}
@@ -186,7 +188,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
               onClick={handleToday}
               className="px-4 py-2 border-2 border-slate-200 rounded-lg hover:border-[#6262bd] hover:bg-[#6262bd] hover:text-white transition-colors text-slate-700 font-medium"
             >
-              Today
+              {t('todayButton')}
             </button>
 
             {/* Next Button */}
@@ -194,7 +196,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
               onClick={handleNext}
               className="px-3 py-2 border-2 border-slate-200 rounded-lg hover:border-[#6262bd] hover:bg-[#6262bd] hover:text-white transition-colors text-slate-700 font-medium"
             >
-              Next →
+              {t('nextButton')}
             </button>
 
             {/* Date Range Label */}
@@ -212,7 +214,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
           <div className="flex-1">
             <input
               type="text"
-              placeholder="Search staff by name or role..."
+              placeholder={t('searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-sm bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
@@ -226,7 +228,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
               onChange={(e) => setDepartmentFilter(e.target.value)}
               className="px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-sm text-slate-700 dark:text-slate-200"
             >
-              <option value="">All Departments</option>
+              <option value="">{t('allDepartments')}</option>
               {departments.map(dept => (
                 <option key={dept} value={dept}>
                   {dept.charAt(0).toUpperCase() + dept.slice(1)}
@@ -242,7 +244,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
               onChange={(e) => setRoleFilter(e.target.value)}
               className="px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-sm text-slate-700 dark:text-slate-200"
             >
-              <option value="">All Roles</option>
+              <option value="">{t('allRoles')}</option>
               {roles.map(role => (
                 <option key={role} value={role}>
                   {role}
@@ -261,7 +263,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
               }}
               className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-[#6262bd] font-medium text-sm transition-colors"
             >
-              Clear
+              {t('clearButton')}
             </button>
           )}
         </div>
@@ -272,7 +274,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
         {/* Date Headers */}
         <div className="flex border-b-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 sticky top-0 z-10">
           <div className="w-48 flex-shrink-0 px-4 py-3 font-semibold text-slate-700 dark:text-slate-300 border-r-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
-            Staff Member
+            {t('staffMember')}
           </div>
           <div className="flex flex-1">
             <div className="flex flex-1">
@@ -293,7 +295,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
                       {date.format('D')}
                     </div>
                     {isToday && (
-                      <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">Today</div>
+                      <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">{t('todayLabel')}</div>
                     )}
                   </div>
                 );
@@ -381,9 +383,9 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
           </div>
         ) : (
           <div className="text-center py-12 text-slate-500 dark:text-slate-400">
-            <p className="text-lg mb-2">No staff members found</p>
+            <p className="text-lg mb-2">{t('noStaffFound')}</p>
             {(searchTerm || departmentFilter || roleFilter) && (
-              <p className="text-sm">Try adjusting your filters</p>
+              <p className="text-sm">{t('tryAdjustingFilters')}</p>
             )}
           </div>
         )}
@@ -394,15 +396,20 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
         <div className="bg-slate-50 dark:bg-slate-800 border-t-2 border-slate-200 dark:border-slate-700 px-6 py-4">
           <div className="flex items-center justify-between text-sm">
             <div className="text-slate-600 dark:text-slate-400">
-              Showing {filteredStaff.length} of {staff.length} staff member{staff.length !== 1 ? 's' : ''} • {dateRange.length} days
+              {t('showingStaff')
+                .replace('{filtered}', filteredStaff.length)
+                .replace('{total}', staff.length)
+                .replace('{plural}', staff.length !== 1 ? 's' : '')} • {t('days').replace('{count}', dateRange.length)}
               {(searchTerm || departmentFilter || roleFilter) && filteredStaff.length !== staff.length && (
                 <span className="ml-2 text-[#6262bd] font-medium">
-                  (filtered)
+                  {t('filtered')}
                 </span>
               )}
             </div>
             <div className="text-slate-600">
-              {timeOffRequests.length} approved time-off request{timeOffRequests.length !== 1 ? 's' : ''} in this period
+              {t('timeOffRequests')
+                .replace('{count}', timeOffRequests.length)
+                .replace('{plural}', timeOffRequests.length !== 1 ? 's' : '')}
             </div>
           </div>
         </div>

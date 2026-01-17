@@ -4,7 +4,7 @@ const styles = StyleSheet.create({
   page: {
     padding: 30,
     fontSize: 8,
-    fontFamily: 'Helvetica',
+    fontFamily: 'Roboto',
     color: '#1f2937',
   },
   header: {
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const CompactDetailedTemplate = ({ invoice, restaurant }) => {
+const CompactDetailedTemplate = ({ invoice, restaurant, t }) => {
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-GB', {
@@ -222,27 +222,27 @@ const CompactDetailedTemplate = ({ invoice, restaurant }) => {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerContent}>
-            <Text style={styles.title}>INVOICE</Text>
+            <Text style={styles.title}>{t.invoice}</Text>
             <View style={styles.invoiceInfo}>
             <View style={styles.infoGroup}>
               <View style={styles.infoItem}>
-                <Text style={styles.infoLabel}>No:</Text>
+                <Text style={styles.infoLabel}>{t.no}</Text>
                 <Text>{invoice.invoice_number}</Text>
               </View>
               <View style={styles.infoItem}>
-                <Text style={styles.infoLabel}>Date:</Text>
+                <Text style={styles.infoLabel}>{t.date}</Text>
                 <Text>{formatDate(invoice.invoice_date)}</Text>
               </View>
               {invoice.due_date && (
                 <View style={styles.infoItem}>
-                  <Text style={styles.infoLabel}>Due:</Text>
+                  <Text style={styles.infoLabel}>{t.dueDate}</Text>
                   <Text>{formatDate(invoice.due_date)}</Text>
                 </View>
               )}
             </View>
             {invoice.payment_status === 'paid' && (
               <View style={styles.infoItem}>
-                <Text style={{ color: '#059669', fontWeight: 'bold' }}>PAID</Text>
+                <Text style={{ color: '#059669', fontWeight: 'bold' }}>{t.paid}</Text>
               </View>
             )}
             </View>
@@ -256,7 +256,7 @@ const CompactDetailedTemplate = ({ invoice, restaurant }) => {
         <View style={styles.twoColumn}>
           {/* From (Business) */}
           <View style={styles.column}>
-            <Text style={styles.sectionTitle}>From</Text>
+            <Text style={styles.sectionTitle}>{t.from}</Text>
             <View style={styles.addressBlock}>
               <Text style={styles.addressName}>{invoice.business_name}</Text>
               {invoice.business_address && <Text>{invoice.business_address}</Text>}
@@ -264,15 +264,15 @@ const CompactDetailedTemplate = ({ invoice, restaurant }) => {
                 <Text>{invoice.business_city}{invoice.business_postal_code && `, ${invoice.business_postal_code}`}</Text>
               )}
               {invoice.business_country && <Text>{invoice.business_country}</Text>}
-              {invoice.business_phone && <Text>T: {invoice.business_phone}</Text>}
-              {invoice.business_email && <Text>E: {invoice.business_email}</Text>}
+              {invoice.business_phone && <Text>{t.tel} {invoice.business_phone}</Text>}
+              {invoice.business_email && <Text>{t.email} {invoice.business_email}</Text>}
               {invoice.business_vat_number && (
                 <Text style={{ marginTop: 4, fontSize: 7, fontWeight: 'bold' }}>
-                  VAT: {invoice.business_vat_number}
+                  {t.vat} {invoice.business_vat_number}
                 </Text>
               )}
               {invoice.business_tax_id && (
-                <Text style={{ fontSize: 7, fontWeight: 'bold' }}>Tax ID: {invoice.business_tax_id}</Text>
+                <Text style={{ fontSize: 7, fontWeight: 'bold' }}>{t.taxId} {invoice.business_tax_id}</Text>
               )}
             </View>
           </View>
@@ -280,7 +280,7 @@ const CompactDetailedTemplate = ({ invoice, restaurant }) => {
           {/* To (Customer) */}
           {invoice.customer_name && (
             <View style={styles.column}>
-              <Text style={styles.sectionTitle}>Bill To</Text>
+              <Text style={styles.sectionTitle}>{t.billTo}</Text>
               <View style={styles.addressBlock}>
                 <Text style={styles.addressName}>{invoice.customer_name}</Text>
                 {invoice.customer_company && (
@@ -291,10 +291,10 @@ const CompactDetailedTemplate = ({ invoice, restaurant }) => {
                   <Text>{invoice.customer_city}{invoice.customer_postal_code && `, ${invoice.customer_postal_code}`}</Text>
                 )}
                 {invoice.customer_country && <Text>{invoice.customer_country}</Text>}
-                {invoice.customer_email && <Text>E: {invoice.customer_email}</Text>}
+                {invoice.customer_email && <Text>{t.email} {invoice.customer_email}</Text>}
                 {invoice.customer_vat_number && (
                   <Text style={{ marginTop: 4, fontSize: 7, fontWeight: 'bold' }}>
-                    VAT: {invoice.customer_vat_number}
+                    {t.vat} {invoice.customer_vat_number}
                   </Text>
                 )}
               </View>
@@ -305,10 +305,10 @@ const CompactDetailedTemplate = ({ invoice, restaurant }) => {
         {/* Items Table */}
         <View style={styles.table}>
           <View style={styles.tableHeader}>
-            <Text style={styles.col1}>DESCRIPTION</Text>
-            <Text style={styles.col2}>QTY</Text>
-            <Text style={styles.col3}>UNIT PRICE</Text>
-            <Text style={styles.col4}>TOTAL</Text>
+            <Text style={styles.col1}>{t.description}</Text>
+            <Text style={styles.col2}>{t.qty}</Text>
+            <Text style={styles.col3}>{t.unitPrice}</Text>
+            <Text style={styles.col4}>{t.total}</Text>
           </View>
           {invoice.items.map((item, index) => (
             <View key={index} style={index % 2 === 0 ? styles.tableRow : styles.tableRowAlt}>
@@ -337,19 +337,19 @@ const CompactDetailedTemplate = ({ invoice, restaurant }) => {
               <View style={styles.metadata}>
                 {invoice.table_number && (
                   <View style={styles.metadataRow}>
-                    <Text style={styles.metadataLabel}>Table:</Text>
+                    <Text style={styles.metadataLabel}>{t.table}</Text>
                     <Text style={styles.metadataValue}>{invoice.table_number}</Text>
                   </View>
                 )}
                 {invoice.payment_method && (
                   <View style={styles.metadataRow}>
-                    <Text style={styles.metadataLabel}>Payment:</Text>
+                    <Text style={styles.metadataLabel}>{t.payment}</Text>
                     <Text style={styles.metadataValue}>{invoice.payment_method}</Text>
                   </View>
                 )}
                 {invoice.paid_at && (
                   <View style={styles.metadataRow}>
-                    <Text style={styles.metadataLabel}>Paid On:</Text>
+                    <Text style={styles.metadataLabel}>{t.paidOn}</Text>
                     <Text style={styles.metadataValue}>{formatDate(invoice.paid_at)}</Text>
                   </View>
                 )}
@@ -358,7 +358,7 @@ const CompactDetailedTemplate = ({ invoice, restaurant }) => {
 
             {invoice.notes && (
               <View style={{ marginTop: 10 }}>
-                <Text style={styles.sectionTitle}>Notes</Text>
+                <Text style={styles.sectionTitle}>{t.notes}</Text>
                 <Text style={{ fontSize: 7, color: '#6b7280', lineHeight: 1.4 }}>{invoice.notes}</Text>
               </View>
             )}
@@ -367,7 +367,7 @@ const CompactDetailedTemplate = ({ invoice, restaurant }) => {
           {/* Right side - Totals */}
           <View style={styles.totalsBox}>
             <View style={styles.totalRow}>
-              <Text>Subtotal:</Text>
+              <Text>{t.subtotal}</Text>
               <Text>{formatCurrency(invoice.subtotal)} {invoice.currency}</Text>
             </View>
             <View style={styles.totalRow}>
@@ -375,7 +375,7 @@ const CompactDetailedTemplate = ({ invoice, restaurant }) => {
               <Text>{formatCurrency(invoice.total_tax)} {invoice.currency}</Text>
             </View>
             <View style={styles.grandTotalRow}>
-              <Text>TOTAL:</Text>
+              <Text>{t.grandTotal}</Text>
               <Text>{formatCurrency(invoice.total)} {invoice.currency}</Text>
             </View>
           </View>

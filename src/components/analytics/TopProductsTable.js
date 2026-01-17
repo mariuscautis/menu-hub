@@ -1,10 +1,13 @@
 'use client'
 
+import { useTranslations } from '@/lib/i18n/LanguageContext'
+
 export default function TopProductsTable({ data }) {
+  const t = useTranslations('analytics')
   if (!data || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 bg-slate-50 dark:bg-slate-800 rounded-xl">
-        <p className="text-slate-400">No data available</p>
+        <p className="text-slate-400">{t('noData')}</p>
       </div>
     )
   }
@@ -14,12 +17,12 @@ export default function TopProductsTable({ data }) {
       <table className="w-full">
         <thead>
           <tr className="border-b-2 border-slate-200 dark:border-slate-700">
-            <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">Rank</th>
-            <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">Product</th>
-            <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">Department</th>
-            <th className="text-right py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">Qty Sold</th>
-            <th className="text-right py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">Revenue</th>
-            <th className="text-right py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">Profit</th>
+            <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">{t('rank')}</th>
+            <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">{t('product')}</th>
+            <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">{t('department')}</th>
+            <th className="text-right py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">{t('qtySold')}</th>
+            <th className="text-right py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">{t('revenue')}</th>
+            <th className="text-right py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">{t('profit')}</th>
           </tr>
         </thead>
         <tbody>
@@ -42,7 +45,7 @@ export default function TopProductsTable({ data }) {
                     ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
                     : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                 }`}>
-                  {item.department === 'bar' ? '🍸 Bar' : '🍳 Kitchen'}
+                  {item.department === 'bar' ? `🍸 ${t('bar')}` : `🍳 ${t('kitchen')}`}
                 </span>
               </td>
               <td className="py-3 px-4 text-sm text-slate-700 dark:text-slate-300 text-right font-semibold">{item.quantity_sold}</td>

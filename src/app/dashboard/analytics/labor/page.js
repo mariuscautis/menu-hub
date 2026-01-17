@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useTranslations } from '@/lib/i18n/LanguageContext';
 
 export default function LaborAnalyticsPage() {
+  const t = useTranslations('laborAnalytics');
   const [restaurant, setRestaurant] = useState(null);
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState('week'); // 'week', 'month', 'custom'
@@ -302,7 +304,7 @@ export default function LaborAnalyticsPage() {
   if (!restaurant) {
     return (
       <div className="min-h-screen bg-gray-50 p-8">
-        <p>Loading restaurant data...</p>
+        <p>{t('loadingRestaurant')}</p>
       </div>
     );
   }
@@ -311,8 +313,8 @@ export default function LaborAnalyticsPage() {
     <div className="min-h-screen bg-gray-50 p-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">Labor Analytics</h1>
-        <p className="text-slate-600">Track labor costs, hours worked, and staff performance</p>
+        <h1 className="text-3xl font-bold text-slate-800 mb-2">{t('title')}</h1>
+        <p className="text-slate-600">{t('subtitle')}</p>
       </div>
 
       {/* Date Range Selector */}
@@ -327,7 +329,7 @@ export default function LaborAnalyticsPage() {
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
-              Last 7 Days
+              {t('last7Days')}
             </button>
             <button
               onClick={() => setDateRange('month')}
@@ -337,7 +339,7 @@ export default function LaborAnalyticsPage() {
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
-              Last 30 Days
+              {t('last30Days')}
             </button>
             <button
               onClick={() => setDateRange('custom')}
@@ -347,14 +349,14 @@ export default function LaborAnalyticsPage() {
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
-              Custom Range
+              {t('customRange')}
             </button>
           </div>
 
           {dateRange === 'custom' && (
             <div className="flex gap-3 items-center">
               <div>
-                <label className="block text-xs text-slate-600 mb-1">From</label>
+                <label className="block text-xs text-slate-600 mb-1">{t('from')}</label>
                 <input
                   type="date"
                   value={customDateFrom}
@@ -363,7 +365,7 @@ export default function LaborAnalyticsPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs text-slate-600 mb-1">To</label>
+                <label className="block text-xs text-slate-600 mb-1">{t('to')}</label>
                 <input
                   type="date"
                   value={customDateTo}
@@ -379,43 +381,43 @@ export default function LaborAnalyticsPage() {
       {loading ? (
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6262bd] mx-auto mb-4"></div>
-          <p className="text-slate-600">Loading analytics...</p>
+          <p className="text-slate-600">{t('loadingAnalytics')}</p>
         </div>
       ) : (
         <>
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-              <p className="text-sm text-slate-600 mb-1">Total Labor Cost</p>
+              <p className="text-sm text-slate-600 mb-1">{t('totalLaborCost')}</p>
               <p className="text-3xl font-bold text-[#6262bd]">{formatCurrency(analytics.totalCost)}</p>
               <p className="text-xs text-slate-500 mt-2">
-                {formatCurrency(analytics.costPerHour)}/hour average
+                {formatCurrency(analytics.costPerHour)}{t('hourAverage')}
               </p>
             </div>
 
             <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-              <p className="text-sm text-slate-600 mb-1">Hours Worked</p>
+              <p className="text-sm text-slate-600 mb-1">{t('hoursWorked')}</p>
               <p className="text-3xl font-bold text-slate-800">{formatHours(analytics.actualHours)}</p>
               <p className="text-xs text-slate-500 mt-2">
-                Scheduled: {formatHours(analytics.scheduledHours)}
+                {t('scheduled')} {formatHours(analytics.scheduledHours)}
               </p>
             </div>
 
             <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-              <p className="text-sm text-slate-600 mb-1">Active Staff</p>
+              <p className="text-sm text-slate-600 mb-1">{t('activeStaff')}</p>
               <p className="text-3xl font-bold text-slate-800">{analytics.staffCount}</p>
               <p className="text-xs text-slate-500 mt-2">
-                {formatHours(analytics.avgHoursPerStaff)} average per staff
+                {formatHours(analytics.avgHoursPerStaff)} {t('averagePerStaff')}
               </p>
             </div>
 
             <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-              <p className="text-sm text-slate-600 mb-1">Overtime Hours</p>
+              <p className="text-sm text-slate-600 mb-1">{t('overtimeHours')}</p>
               <p className="text-3xl font-bold text-orange-600">{formatHours(analytics.overtimeHours)}</p>
               <p className="text-xs text-slate-500 mt-2">
                 {analytics.actualHours > 0
-                  ? `${((analytics.overtimeHours / analytics.actualHours) * 100).toFixed(1)}% of total`
-                  : '0% of total'
+                  ? `${((analytics.overtimeHours / analytics.actualHours) * 100).toFixed(1)}${t('percentOfTotal')}`
+                  : `0${t('percentOfTotal')}`
                 }
               </p>
             </div>
@@ -424,7 +426,7 @@ export default function LaborAnalyticsPage() {
           {/* Department Breakdown */}
           {analytics.departmentBreakdown.length > 0 && (
             <div className="mb-8 bg-white border-2 border-slate-100 rounded-2xl p-6">
-              <h2 className="text-xl font-bold text-slate-800 mb-6">Department Breakdown</h2>
+              <h2 className="text-xl font-bold text-slate-800 mb-6">{t('departmentBreakdown')}</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {analytics.departmentBreakdown.map(dept => (
                   <div key={dept.department} className="p-4 bg-slate-50 rounded-xl">
@@ -446,15 +448,15 @@ export default function LaborAnalyticsPage() {
           {/* Daily Breakdown */}
           {analytics.dailyBreakdown.length > 0 && (
             <div className="mb-8 bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6">
-              <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-6">Daily Breakdown</h2>
+              <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-6">{t('dailyBreakdown')}</h2>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b-2 border-slate-100 dark:border-slate-700">
-                      <th className="text-left py-3 px-4 text-sm font-medium text-slate-700 dark:text-slate-300">Date</th>
-                      <th className="text-right py-3 px-4 text-sm font-medium text-slate-700 dark:text-slate-300">Shifts</th>
-                      <th className="text-right py-3 px-4 text-sm font-medium text-slate-700 dark:text-slate-300">Hours</th>
-                      <th className="text-right py-3 px-4 text-sm font-medium text-slate-700 dark:text-slate-300">Cost</th>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-slate-700 dark:text-slate-300">{t('date')}</th>
+                      <th className="text-right py-3 px-4 text-sm font-medium text-slate-700 dark:text-slate-300">{t('shifts')}</th>
+                      <th className="text-right py-3 px-4 text-sm font-medium text-slate-700 dark:text-slate-300">{t('hours')}</th>
+                      <th className="text-right py-3 px-4 text-sm font-medium text-slate-700 dark:text-slate-300">{t('cost')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -473,7 +475,7 @@ export default function LaborAnalyticsPage() {
                   </tbody>
                   <tfoot>
                     <tr className="border-t-2 border-slate-200 dark:border-slate-700 font-bold">
-                      <td className="py-3 px-4 text-sm text-slate-800 dark:text-slate-200">Total</td>
+                      <td className="py-3 px-4 text-sm text-slate-800 dark:text-slate-200">{t('total')}</td>
                       <td className="py-3 px-4 text-sm text-slate-800 dark:text-slate-200 text-right">
                         {analytics.dailyBreakdown.reduce((sum, day) => sum + day.shifts, 0)}
                       </td>
@@ -493,7 +495,7 @@ export default function LaborAnalyticsPage() {
           {/* Staff Performance */}
           {analytics.staffPerformance.length > 0 && (
             <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-              <h2 className="text-xl font-bold text-slate-800 mb-6">Top Performing Staff</h2>
+              <h2 className="text-xl font-bold text-slate-800 mb-6">{t('topPerformingStaff')}</h2>
               <div className="space-y-3">
                 {analytics.staffPerformance.map((staff, index) => (
                   <div
@@ -511,7 +513,7 @@ export default function LaborAnalyticsPage() {
                     </div>
                     <div className="text-right">
                       <p className="font-bold text-[#6262bd]">{formatHours(staff.hours)}</p>
-                      <p className="text-sm text-slate-600">{staff.shifts} shifts</p>
+                      <p className="text-sm text-slate-600">{staff.shifts} {t('shiftsLabel')}</p>
                       <p className="text-xs text-slate-500">{formatCurrency(staff.cost)}</p>
                     </div>
                   </div>
@@ -523,9 +525,9 @@ export default function LaborAnalyticsPage() {
           {/* No Data State */}
           {analytics.dailyBreakdown.length === 0 && (
             <div className="bg-white border-2 border-slate-100 rounded-2xl p-12 text-center">
-              <p className="text-slate-600 mb-2">No labor data found for the selected period</p>
+              <p className="text-slate-600 mb-2">{t('noDataTitle')}</p>
               <p className="text-sm text-slate-500">
-                Make sure staff are clocking in and out for their shifts
+                {t('noDataMessage')}
               </p>
             </div>
           )}

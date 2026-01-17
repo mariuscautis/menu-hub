@@ -2,8 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useTranslations } from '@/lib/i18n/LanguageContext';
 
 export default function RequestsModal({ onClose, onRequestUpdated }) {
+  const t = useTranslations('rota.requestsModal');
+  const tCommon = useTranslations('common');
+
   const [restaurant, setRestaurant] = useState(null);
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -130,7 +134,7 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
 
       fetchRequests();
       if (onRequestUpdated) onRequestUpdated(); // Notify parent to update count
-      alert('Request approved successfully');
+      alert(t('requestApprovedSuccess'));
     } catch (error) {
       console.error('Error approving request:', error);
       alert(error.message);
@@ -139,7 +143,7 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
 
   const handleReject = async (request) => {
     if (!rejectionReason.trim()) {
-      alert('Please provide a rejection reason');
+      alert(t('provideRejectionReason'));
       return;
     }
 
@@ -162,7 +166,7 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
       setRejectionReason('');
       fetchRequests();
       if (onRequestUpdated) onRequestUpdated(); // Notify parent to update count
-      alert('Request rejected');
+      alert(t('requestRejected'));
     } catch (error) {
       console.error('Error rejecting request:', error);
       alert(error.message);
@@ -223,7 +227,7 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
       });
       fetchRequests();
       if (onRequestUpdated) onRequestUpdated();
-      alert('Request updated successfully');
+      alert(t('requestUpdatedSuccess'));
     } catch (error) {
       console.error('Error updating request:', error);
       alert(error.message);
@@ -245,15 +249,9 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
       cover: 'bg-orange-100 text-orange-800'
     };
 
-    const labels = {
-      time_off: 'Time Off',
-      swap: 'Shift Swap',
-      cover: 'Cover Request'
-    };
-
     return (
       <span className={`px-3 py-1 rounded-full text-xs font-medium ${badges[type] || 'bg-gray-100 text-gray-800'}`}>
-        {labels[type] || type}
+        {t(`requestType.${type}`)}
       </span>
     );
   };
@@ -270,18 +268,18 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
       other: 'bg-slate-100 text-slate-800'
     };
 
-    const labels = {
-      annual_holiday: '🏖️ Annual Holiday',
-      sick_self_cert: '🤒 Sick (Self-Cert)',
-      sick_medical_cert: '🏥 Sick (Medical Cert)',
-      unpaid: '💰 Unpaid',
-      compassionate: '🕊️ Compassionate',
-      other: 'Other'
+    const emojis = {
+      annual_holiday: '🏖️ ',
+      sick_self_cert: '🤒 ',
+      sick_medical_cert: '🏥 ',
+      unpaid: '💰 ',
+      compassionate: '🕊️ ',
+      other: ''
     };
 
     return (
       <span className={`px-3 py-1 rounded-full text-xs font-medium ${badges[leaveType] || 'bg-gray-100 text-gray-800'}`}>
-        {labels[leaveType] || leaveType}
+        {emojis[leaveType]}{t(`leaveType.${leaveType}`)}
       </span>
     );
   };
@@ -296,7 +294,7 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
 
     return (
       <span className={`px-3 py-1 rounded-full text-xs font-medium ${badges[status] || 'bg-gray-100 text-gray-800'}`}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
+        {t(`status.${status}`)}
       </span>
     );
   };
@@ -308,7 +306,7 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-slate-800">Staff Requests</h2>
+          <h2 className="text-2xl font-bold text-slate-800">{t('title')}</h2>
           <button
             onClick={onClose}
             className="text-slate-400 hover:text-slate-600 text-2xl font-bold"
@@ -327,7 +325,7 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
-            Pending
+            {t('filterPending')}
           </button>
           <button
             onClick={() => setFilter('approved')}
@@ -337,7 +335,7 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
-            Approved
+            {t('filterApproved')}
           </button>
           <button
             onClick={() => setFilter('rejected')}
@@ -347,7 +345,7 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
-            Rejected
+            {t('filterRejected')}
           </button>
           <button
             onClick={() => setFilter('all')}
@@ -357,7 +355,7 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
-            All
+            {t('filterAll')}
           </button>
         </div>
 
@@ -365,11 +363,11 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
         {loading ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6262bd] mx-auto mb-4"></div>
-            <p className="text-slate-600">Loading requests...</p>
+            <p className="text-slate-600">{t('loadingRequests')}</p>
           </div>
         ) : requests.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-slate-600">No requests found</p>
+            <p className="text-slate-600">{t('noRequestsFound')}</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -389,10 +387,10 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
                       {getStatusBadge(request.status)}
                     </div>
                     <p className="text-sm text-slate-500">
-                      {request.staff?.role} • Submitted {formatDate(request.created_at)}
+                      {request.staff?.role} • {t('submitted')} {formatDate(request.created_at)}
                       {request.days_requested && (
                         <span className="ml-2 font-medium text-[#6262bd]">
-                          • {request.days_requested} working {request.days_requested === 1 ? 'day' : 'days'}
+                          • {request.days_requested} {t(request.days_requested === 1 ? 'workingDay' : 'workingDays')}
                         </span>
                       )}
                     </p>
@@ -405,13 +403,13 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
                           onClick={() => handleApprove(request)}
                           className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
                         >
-                          Approve
+                          {t('approve')}
                         </button>
                         <button
                           onClick={() => setSelectedRequest(request)}
                           className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
                         >
-                          Reject
+                          {t('reject')}
                         </button>
                       </>
                     )}
@@ -419,7 +417,7 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
                       onClick={() => handleEdit(request)}
                       className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                     >
-                      ✏️ Edit
+                      {t('edit')}
                     </button>
                   </div>
                 </div>
@@ -428,13 +426,13 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
                 <div className="bg-slate-50 rounded-lg p-4">
                   {request.request_type === 'time_off' && (
                     <div>
-                      <p className="text-sm font-medium text-slate-700 mb-2">Time Off Request:</p>
+                      <p className="text-sm font-medium text-slate-700 mb-2">{t('timeOffRequestLabel')}</p>
                       <p className="text-sm text-slate-600">
-                        From: {formatDate(request.date_from)} to {formatDate(request.date_to)}
+                        {t('from')}: {formatDate(request.date_from)} {t('to')} {formatDate(request.date_to)}
                       </p>
                       {request.reason && (
                         <p className="text-sm text-slate-600 mt-2">
-                          Reason: {request.reason}
+                          {t('reason')}: {request.reason}
                         </p>
                       )}
                     </div>
@@ -442,13 +440,13 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
 
                   {request.request_type === 'swap' && request.shift && (
                     <div>
-                      <p className="text-sm font-medium text-slate-700 mb-2">Shift Swap Request:</p>
+                      <p className="text-sm font-medium text-slate-700 mb-2">{t('shiftSwapRequestLabel')}</p>
                       <p className="text-sm text-slate-600">
-                        Wants to swap: {formatDate(request.shift.date)} {request.shift.shift_start} - {request.shift.shift_end}
+                        {t('wantsToSwap')}: {formatDate(request.shift.date)} {request.shift.shift_start} - {request.shift.shift_end}
                       </p>
                       {request.swap_with_staff && (
                         <p className="text-sm text-slate-600 mt-1">
-                          With: {request.swap_with_staff.name}
+                          {t('with')}: {request.swap_with_staff.name}
                         </p>
                       )}
                     </div>
@@ -456,13 +454,13 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
 
                   {request.request_type === 'cover' && request.shift && (
                     <div>
-                      <p className="text-sm font-medium text-slate-700 mb-2">Cover Request:</p>
+                      <p className="text-sm font-medium text-slate-700 mb-2">{t('coverRequestLabel')}</p>
                       <p className="text-sm text-slate-600">
-                        Needs cover for: {formatDate(request.shift.date)} {request.shift.shift_start} - {request.shift.shift_end}
+                        {t('needsCoverFor')}: {formatDate(request.shift.date)} {request.shift.shift_start} - {request.shift.shift_end}
                       </p>
                       {request.reason && (
                         <p className="text-sm text-slate-600 mt-2">
-                          Reason: {request.reason}
+                          {t('reason')}: {request.reason}
                         </p>
                       )}
                     </div>
@@ -470,13 +468,13 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
 
                   {request.status === 'approved' && request.approver && (
                     <p className="text-sm text-green-600 mt-3">
-                      Approved by {request.approver.name} on {formatDate(request.approved_at)}
+                      {t('approvedBy').replace('{approver}', request.approver.name).replace('{date}', formatDate(request.approved_at))}
                     </p>
                   )}
 
                   {request.status === 'rejected' && request.rejection_reason && (
                     <p className="text-sm text-red-600 mt-3">
-                      Rejected: {request.rejection_reason}
+                      {t('rejectedLabel')}: {request.rejection_reason}
                     </p>
                   )}
                 </div>
@@ -489,15 +487,15 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
         {selectedRequest && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60 p-4">
             <div className="bg-white rounded-xl p-6 max-w-md w-full">
-              <h3 className="text-lg font-bold mb-4">Reject Request</h3>
+              <h3 className="text-lg font-bold mb-4">{t('rejectRequestTitle')}</h3>
               <p className="text-sm text-slate-600 mb-4">
-                Please provide a reason for rejecting this request:
+                {t('provideRejectionReasonPrompt')}
               </p>
               <textarea
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
                 rows="4"
-                placeholder="Enter rejection reason..."
+                placeholder={t('rejectionReasonPlaceholder')}
                 className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] resize-none mb-4"
               />
               <div className="flex gap-3 justify-end">
@@ -508,13 +506,13 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
                   }}
                   className="px-4 py-2 border-2 border-slate-200 rounded-lg text-slate-700"
                 >
-                  Cancel
+                  {tCommon('cancel')}
                 </button>
                 <button
                   onClick={() => handleReject(selectedRequest)}
                   className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
                 >
-                  Reject Request
+                  {t('rejectRequestButton')}
                 </button>
               </div>
             </div>
@@ -525,20 +523,20 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
         {editingRequest && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60 p-4">
             <div className="bg-white rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <h3 className="text-xl font-bold mb-4">Edit Request</h3>
+              <h3 className="text-xl font-bold mb-4">{t('editRequestTitle')}</h3>
 
               <div className="space-y-4">
                 {/* Staff Info */}
                 <div className="bg-slate-50 border-2 border-slate-200 rounded-lg p-4">
-                  <p className="text-sm font-medium text-slate-700">Staff: <span className="font-bold">{editingRequest.staff?.name}</span></p>
-                  <p className="text-sm text-slate-600">Role: {editingRequest.staff?.role}</p>
+                  <p className="text-sm font-medium text-slate-700">{t('staff')}: <span className="font-bold">{editingRequest.staff?.name}</span></p>
+                  <p className="text-sm text-slate-600">{t('role')}: {editingRequest.staff?.role}</p>
                 </div>
 
                 {/* Date Range */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Start Date
+                      {t('startDate')}
                     </label>
                     <input
                       type="date"
@@ -550,7 +548,7 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                      End Date
+                      {t('endDate')}
                     </label>
                     <input
                       type="date"
@@ -565,7 +563,7 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
                 {/* Leave Type */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Leave Type
+                    {t('leaveTypeLabel')}
                   </label>
                   <select
                     name="leave_type"
@@ -573,20 +571,20 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
                     onChange={handleEditFormChange}
                     className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd]"
                   >
-                    <option value="">Select type</option>
-                    <option value="annual_holiday">Annual Holiday</option>
-                    <option value="sick_self_cert">Sick Leave - Self Certified</option>
-                    <option value="sick_medical_cert">Sick Leave - Medical Certificate</option>
-                    <option value="unpaid">Unpaid Leave</option>
-                    <option value="compassionate">Compassionate Leave</option>
-                    <option value="other">Other</option>
+                    <option value="">{t('selectType')}</option>
+                    <option value="annual_holiday">{t('leaveType.annualHoliday')}</option>
+                    <option value="sick_self_cert">{t('leaveType.sickSelfCert')}</option>
+                    <option value="sick_medical_cert">{t('leaveType.sickMedicalCert')}</option>
+                    <option value="unpaid">{t('leaveType.unpaid')}</option>
+                    <option value="compassionate">{t('leaveType.compassionate')}</option>
+                    <option value="other">{t('leaveType.other')}</option>
                   </select>
                 </div>
 
                 {/* Status */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Status
+                    {t('statusLabel')}
                   </label>
                   <select
                     name="status"
@@ -594,24 +592,24 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
                     onChange={handleEditFormChange}
                     className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd]"
                   >
-                    <option value="pending">Pending</option>
-                    <option value="approved">Approved</option>
-                    <option value="rejected">Rejected</option>
-                    <option value="cancelled">Cancelled</option>
+                    <option value="pending">{t('status.pending')}</option>
+                    <option value="approved">{t('status.approved')}</option>
+                    <option value="rejected">{t('status.rejected')}</option>
+                    <option value="cancelled">{t('status.cancelled')}</option>
                   </select>
                 </div>
 
                 {/* Reason */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Reason
+                    {t('reasonLabel')}
                   </label>
                   <textarea
                     name="reason"
                     value={editForm.reason}
                     onChange={handleEditFormChange}
                     rows="3"
-                    placeholder="Request reason..."
+                    placeholder={t('reasonPlaceholder')}
                     className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] resize-none"
                   />
                 </div>
@@ -620,14 +618,14 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
                 {editForm.status === 'rejected' && (
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Rejection Reason
+                      {t('rejectionReasonLabel')}
                     </label>
                     <textarea
                       name="rejection_reason"
                       value={editForm.rejection_reason}
                       onChange={handleEditFormChange}
                       rows="3"
-                      placeholder="Why was this request rejected..."
+                      placeholder={t('rejectionReasonEditPlaceholder')}
                       className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] resize-none"
                     />
                   </div>
@@ -649,13 +647,13 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
                     }}
                     className="px-6 py-3 border-2 border-slate-200 rounded-xl text-slate-700 font-medium hover:border-[#6262bd]"
                   >
-                    Cancel
+                    {tCommon('cancel')}
                   </button>
                   <button
                     onClick={handleSaveEdit}
                     className="px-6 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700"
                   >
-                    Save Changes
+                    {t('saveChanges')}
                   </button>
                 </div>
               </div>

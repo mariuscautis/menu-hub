@@ -1,13 +1,18 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import moment from 'moment';
+import 'moment/locale/ro';
+import 'moment/locale/es';
+import 'moment/locale/fr';
+import 'moment/locale/it';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 
 import { supabase } from '@/lib/supabase';
+import { useTranslations, useLanguage } from '@/lib/i18n/LanguageContext';
 
 import ShiftModal from './ShiftModal';
 import RequestsModal from './RequestsModal';
@@ -16,10 +21,29 @@ import CurrentlyWorkingModal from './CurrentlyWorkingModal';
 import MobileRotaView from './MobileRotaView';
 import StaffAvailabilityCalendar from './StaffAvailabilityCalendar';
 
-const localizer = momentLocalizer(moment);
 const DnDCalendar = withDragAndDrop(Calendar);
 
 export default function RotaPage() {
+  const t = useTranslations('rota');
+  const { locale } = useLanguage();
+
+  // Set moment locale and create localizer based on current language
+  const localizer = useMemo(() => {
+    moment.locale(locale);
+    return momentLocalizer(moment);
+  }, [locale]);
+
+  // Custom calendar messages for toolbar buttons
+  const messages = useMemo(() => ({
+    today: t('calendar.today'),
+    previous: t('calendar.previous'),
+    next: t('calendar.next'),
+    month: t('calendar.month'),
+    week: t('calendar.week'),
+    day: t('calendar.day'),
+    agenda: t('calendar.agenda')
+  }), [t]);
+
   const [restaurant, setRestaurant] = useState(null);
   const [shifts, setShifts] = useState([]);
   const [staff, setStaff] = useState([]);
@@ -232,7 +256,7 @@ export default function RotaPage() {
 
   const events = shifts.map(shift => ({
     id: shift.id,
-    title: shift.staff?.name || `${shift.role_required} (Unfilled)`,
+    title: shift.staff?.name || t('unfilled').replace('{role}', shift.role_required),
     start: new Date(`${shift.date}T${shift.shift_start}`),
     end: new Date(`${shift.date}T${shift.shift_end}`),
     resource: shift,
@@ -288,7 +312,7 @@ export default function RotaPage() {
       fetchShifts();
     } catch (error) {
       console.error('Error updating shift:', error);
-      alert(error.message);
+      alert(t('failedToUpdate'));
     }
   };
 
@@ -310,7 +334,7 @@ export default function RotaPage() {
   /* -------------------- Render -------------------- */
 
   if (!restaurant) {
-    return <div className="p-8">Loading restaurant...</div>;
+    return <div className="p-8">{t('loadingRestaurant')}</div>;
   }
 
   return (
@@ -318,21 +342,21 @@ export default function RotaPage() {
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-200">Staff Rota & Scheduling</h1>
-          <p className="text-slate-600 dark:text-slate-400 mt-1">Manage shifts and staff schedules</p>
+          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-200">{t('title')}</h1>
+          <p className="text-slate-600 dark:text-slate-400 mt-1">{t('subtitle')}</p>
         </div>
         <div className="flex gap-3">
           <button
             onClick={() => setShowTemplatesModal(true)}
             className="px-5 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl hover:border-[#6262bd] transition-colors font-medium"
           >
-            📋 Templates
+            📋 {t('templates')}
           </button>
           <button
             onClick={() => setShowRequestsModal(true)}
             className="relative px-5 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl hover:border-[#6262bd] transition-colors font-medium"
           >
-            📨 Requests
+            📨 {t('requests')}
             {pendingRequestsCount > 0 && (
               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center animate-pulse">
                 {pendingRequestsCount > 9 ? '9+' : pendingRequestsCount}
@@ -343,7 +367,7 @@ export default function RotaPage() {
             onClick={() => setShowCurrentlyWorkingModal(true)}
             className="px-5 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors font-medium"
           >
-            👥 Currently Working
+            👥 {t('currentlyWorking')}
           </button>
           <button
             onClick={() => {
@@ -352,7 +376,7 @@ export default function RotaPage() {
             }}
             className="px-5 py-2.5 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252a5] transition-colors font-medium"
           >
-            ➕ Create Shift
+            ➕ {t('createShift')}
           </button>
         </div>
       </div>
@@ -364,7 +388,7 @@ export default function RotaPage() {
           onChange={(e) => setFilters({ ...filters, department: e.target.value })}
           className="px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
         >
-          <option value="">All Departments</option>
+          <option value="">{t('allDepartments')}</option>
           {departments.map(dept => (
             <option key={dept} value={dept}>{dept.charAt(0).toUpperCase() + dept.slice(1)}</option>
           ))}
@@ -375,11 +399,11 @@ export default function RotaPage() {
           onChange={(e) => setFilters({ ...filters, status: e.target.value })}
           className="px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
         >
-          <option value="">All Statuses</option>
-          <option value="draft">Draft</option>
-          <option value="published">Published</option>
-          <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
+          <option value="">{t('allStatuses')}</option>
+          <option value="draft">{t('status.draft')}</option>
+          <option value="published">{t('status.published')}</option>
+          <option value="completed">{t('status.completed')}</option>
+          <option value="cancelled">{t('status.cancelled')}</option>
         </select>
 
         <select
@@ -387,7 +411,7 @@ export default function RotaPage() {
           onChange={(e) => setFilters({ ...filters, staff_id: e.target.value })}
           className="px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
         >
-          <option value="">All Staff</option>
+          <option value="">{t('allStaff')}</option>
           {staff.map(s => (
             <option key={s.id} value={s.id}>{s.name}</option>
           ))}
@@ -398,7 +422,7 @@ export default function RotaPage() {
             onClick={() => setFilters({ department: '', status: '', staff_id: '' })}
             className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-[#6262bd] font-medium"
           >
-            Clear Filters
+            {t('clearFilters')}
           </button>
         )}
       </div>
@@ -409,7 +433,7 @@ export default function RotaPage() {
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6262bd] mx-auto mb-4"></div>
-              <p className="text-slate-600 dark:text-slate-400">Loading shifts...</p>
+              <p className="text-slate-600 dark:text-slate-400">{t('loadingShifts')}</p>
             </div>
           </div>
         ) : (
@@ -439,6 +463,7 @@ export default function RotaPage() {
                 cursor: isDragging ? 'grabbing' : 'grab'
               }
             })}
+            messages={messages}
           />
         )}
       </div>

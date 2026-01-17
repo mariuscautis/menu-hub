@@ -7,6 +7,8 @@ import { supabase } from '@/lib/supabase'
 import NotificationBell from '@/components/NotificationBell'
 import ThemeToggle from '@/components/ThemeToggle'
 import OfflineIndicator from '@/components/OfflineIndicator'
+import { LanguageProvider } from '@/lib/i18n/LanguageContext'
+import LanguageSelector from '@/components/LanguageSelector'
 
 export default function DashboardLayout({ children }) {
   const pathname = usePathname()
@@ -732,7 +734,8 @@ export default function DashboardLayout({ children }) {
   const departmentLabel = getDepartmentLabel()
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex">
+    <LanguageProvider>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex">
 
 
       {/* Sidebar */}
@@ -881,6 +884,9 @@ export default function DashboardLayout({ children }) {
           <div className="mb-2">
             <ThemeToggle />
           </div>
+          <div className="mb-2">
+            <LanguageSelector className="w-full" />
+          </div>
           {(userType === 'staff' || userType === 'staff-admin') ? (
             <button
               onClick={handleLogout}
@@ -912,6 +918,7 @@ export default function DashboardLayout({ children }) {
 
       {/* Offline Indicator */}
       <OfflineIndicator />
-    </div>
+      </div>
+    </LanguageProvider>
   )
 }

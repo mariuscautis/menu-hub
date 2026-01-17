@@ -2,8 +2,11 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useTranslations } from '@/lib/i18n/LanguageContext'
 
 export default function Reservations() {
+  const t = useTranslations('reservations')
+  const tc = useTranslations('common')
   const [restaurant, setRestaurant] = useState(null)
   const [reservations, setReservations] = useState([])
   const [tables, setTables] = useState([])
@@ -218,7 +221,7 @@ export default function Reservations() {
 
   const confirmReservation = async () => {
     if (!selectedTable) {
-      showNotification('error', 'Please select a table')
+      showNotification('error', t('pleaseSelectTable'))
       return
     }
 
@@ -244,7 +247,7 @@ export default function Reservations() {
       const result = await response.json()
 
       if (!result.success) {
-        showNotification('error', result.error || 'Failed to confirm reservation')
+        showNotification('error', result.error || t('failedToConfirm'))
         setModalLoading(false)
         return
       }
@@ -269,14 +272,14 @@ export default function Reservations() {
           console.error('Error calling confirmation email API:', err)
         })
 
-      showNotification('success', 'Reservation confirmed successfully')
+      showNotification('success', t('reservationConfirmedSuccess'))
       setShowConfirmModal(false)
       setSelectedReservation(null)
       setSelectedTable('')
       fetchReservations(restaurant.id)
     } catch (error) {
       console.error('Error confirming reservation:', error)
-      showNotification('error', error.message || 'Failed to confirm reservation')
+      showNotification('error', error.message || t('failedToConfirm'))
     } finally {
       setModalLoading(false)
     }
@@ -290,7 +293,7 @@ export default function Reservations() {
 
   const denyReservation = async () => {
     if (!denyReason.trim()) {
-      showNotification('error', 'Please provide a reason')
+      showNotification('error', t('pleaseProvideReason'))
       return
     }
 
@@ -313,16 +316,16 @@ export default function Reservations() {
       if (error) throw error
 
       if (data && !data.success) {
-        throw new Error(data.error || 'Failed to deny reservation')
+        throw new Error(data.error || t('failedToDeny'))
       }
 
-      showNotification('success', 'Reservation denied')
+      showNotification('success', t('reservationDenied'))
       setShowDenyModal(false)
       setDenyReason('')
       fetchReservations(restaurant.id)
     } catch (error) {
       console.error('Error denying reservation:', error)
-      showNotification('error', error.message || 'Failed to deny reservation')
+      showNotification('error', error.message || t('failedToDeny'))
     } finally {
       setModalLoading(false)
     }
@@ -385,10 +388,18 @@ export default function Reservations() {
     }
   }
   const getStatusLabel = (status) => {
-    return status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ')
+    const statusMap = {
+      'pending': t('pending'),
+      'confirmed': t('confirmed'),
+      'completed': t('completed'),
+      'denied': t('denied'),
+      'cancelled': t('cancelled'),
+      'no_show': t('noShow')
+    }
+    return statusMap[status] || status
   }
   if (loading) {
-    return <div className="text-slate-500">Loading...</div>
+    return <div className="text-slate-500">{tc('loading')}</div>
   }
   if (!restaurant) {
     return <div className="text-red-600">No restaurant found</div>
@@ -398,8 +409,8 @@ export default function Reservations() {
     <div>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800 mb-2">Reservations</h1>
-        <p className="text-slate-500">Manage customer reservations</p>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-2">{t('title')}</h1>
+        <p className="text-slate-500 dark:text-slate-400">{t('subtitle')}</p>
       </div>
       {/* Notification */}
       {notification && (
@@ -432,10 +443,10 @@ export default function Reservations() {
           className={`px-6 py-3 rounded-xl font-medium transition-colors ${
             timeScope === 'upcoming'
               ? 'bg-[#6262bd] text-white'
-              : 'bg-white border-2 border-slate-200 text-slate-600 hover:border-slate-300'
+              : 'bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300'
           }`}
         >
-          Upcoming Reservations
+          {t('upcomingReservations')}
         </button>
         <button
           onClick={() => {
@@ -445,83 +456,83 @@ export default function Reservations() {
           className={`px-6 py-3 rounded-xl font-medium transition-colors ${
             timeScope === 'past'
               ? 'bg-[#6262bd] text-white'
-              : 'bg-white border-2 border-slate-200 text-slate-600 hover:border-slate-300'
+              : 'bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300'
           }`}
         >
-          Past Reservations
+          {t('pastReservations')}
         </button>
       </div>
       {/* Filters */}
-      <div className="mb-6 bg-white border-2 border-slate-100 rounded-2xl p-6">
+      <div className="mb-6 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl p-6">
         <div className="grid md:grid-cols-3 gap-4">
           {/* Date Filter */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Date Range</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('dateRange')}</label>
             <select
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
-              className="w-full px-4 py-2.5 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+              className="w-full px-4 py-2.5 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
             >
-              <option value="all">All Dates</option>
-              <option value="today">Today</option>
-              <option value="tomorrow">Tomorrow</option>
-              <option value="week">{timeScope === 'upcoming' ? 'Next 7 Days' : 'Last 7 Days'}</option>
-              <option value="month">{timeScope === 'upcoming' ? 'Next 30 Days' : 'Last 30 Days'}</option>
-              <option value="custom">Custom Range</option>
+              <option value="all">{t('allDates')}</option>
+              <option value="today">{t('today')}</option>
+              <option value="tomorrow">{t('tomorrow')}</option>
+              <option value="week">{timeScope === 'upcoming' ? t('next7Days') : t('last7Days')}</option>
+              <option value="month">{timeScope === 'upcoming' ? t('next30Days') : t('last30Days')}</option>
+              <option value="custom">{t('customRange')}</option>
             </select>
           </div>
           {/* Status Filter */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Status</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('status')}</label>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-4 py-2.5 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+              className="w-full px-4 py-2.5 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
             >
-              <option value="all">All Statuses</option>
-              <option value="pending">Pending</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="completed">Completed</option>
-              <option value="denied">Denied</option>
-              <option value="cancelled">Cancelled</option>
-              <option value="no_show">No Show</option>
+              <option value="all">{t('allStatuses')}</option>
+              <option value="pending">{t('pending')}</option>
+              <option value="confirmed">{t('confirmed')}</option>
+              <option value="completed">{t('completed')}</option>
+              <option value="denied">{t('denied')}</option>
+              <option value="cancelled">{t('cancelled')}</option>
+              <option value="no_show">{t('noShow')}</option>
             </select>
           </div>
           {/* Stats */}
           <div className="flex items-end gap-2">
-            <div className="bg-amber-50 border-2 border-amber-200 px-4 py-2 rounded-xl flex-1">
-              <div className="text-2xl font-bold text-amber-700">
+            <div className="bg-amber-50 dark:bg-amber-900/30 border-2 border-amber-200 dark:border-amber-800 px-4 py-2 rounded-xl flex-1">
+              <div className="text-2xl font-bold text-amber-700 dark:text-amber-400">
                 {reservations.filter(r => r.status === 'pending').length}
               </div>
-              <div className="text-xs text-amber-600">Pending</div>
+              <div className="text-xs text-amber-600 dark:text-amber-500">{t('pending')}</div>
             </div>
-            <div className="bg-green-50 border-2 border-green-200 px-4 py-2 rounded-xl flex-1">
-              <div className="text-2xl font-bold text-green-700">
+            <div className="bg-green-50 dark:bg-green-900/30 border-2 border-green-200 dark:border-green-800 px-4 py-2 rounded-xl flex-1">
+              <div className="text-2xl font-bold text-green-700 dark:text-green-400">
                 {reservations.filter(r => r.status === 'confirmed').length}
               </div>
-              <div className="text-xs text-green-600">Confirmed</div>
+              <div className="text-xs text-green-600 dark:text-green-500">{t('confirmed')}</div>
             </div>
           </div>
         </div>
         {/* Custom Date Range */}
         {dateFilter === 'custom' && (
-          <div className="grid md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-slate-200">
+          <div className="grid md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Start Date</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('startDate')}</label>
               <input
                 type="date"
                 value={customDateRange.start}
                 onChange={(e) => setCustomDateRange({ ...customDateRange, start: e.target.value })}
-                className="w-full px-4 py-2.5 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                className="w-full px-4 py-2.5 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">End Date</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('endDate')}</label>
               <input
                 type="date"
                 value={customDateRange.end}
                 onChange={(e) => setCustomDateRange({ ...customDateRange, end: e.target.value })}
-                className="w-full px-4 py-2.5 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                className="w-full px-4 py-2.5 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
               />
             </div>
           </div>
@@ -529,14 +540,14 @@ export default function Reservations() {
       </div>
       {/* Reservations Grid */}
       {filteredReservations.length === 0 ? (
-        <div className="bg-white border-2 border-slate-100 rounded-2xl p-12 text-center">
-          <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
+        <div className="bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl p-12 text-center">
+          <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-slate-400 dark:text-slate-500" fill="currentColor" viewBox="0 0 24 24">
               <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"/>
             </svg>
           </div>
-          <p className="text-slate-600 font-medium mb-1">No reservations found</p>
-          <p className="text-slate-500 text-sm">Try adjusting your filters</p>
+          <p className="text-slate-600 dark:text-slate-300 font-medium mb-1">{t('noReservationsFound')}</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">{t('adjustFilters')}</p>
         </div>
       ) : (
         <div className="grid gap-4">
@@ -561,50 +572,50 @@ export default function Reservations() {
                         <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"/>
                       </svg>
                       <div>
-                        <div className="text-xs text-slate-500">Date</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">{t('date')}</div>
                         <div className="font-medium">{new Date(reservation.reservation_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 text-slate-700">
+                    <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
                       <svg className="w-5 h-5 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
                       </svg>
                       <div>
-                        <div className="text-xs text-slate-500">Time</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">{t('time')}</div>
                         <div className="font-medium">{reservation.reservation_time.substring(0, 5)}</div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 text-slate-700">
+                    <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
                       <svg className="w-5 h-5 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
                       </svg>
                       <div>
-                        <div className="text-xs text-slate-500">Party Size</div>
-                        <div className="font-medium">{reservation.party_size} {reservation.party_size === 1 ? 'guest' : 'guests'}</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">{t('partySize')}</div>
+                        <div className="font-medium">{reservation.party_size} {reservation.party_size === 1 ? t('guest') : t('guests')}</div>
                       </div>
                     </div>
                     {reservation.table_id && (
-                      <div className="flex items-center gap-2 text-slate-700">
+                      <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
                         <svg className="w-5 h-5 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M20 7h-5V4c0-1.1-.9-2-2-2h-2c-1.1 0-2 .9-2 2v3H4c-1.1 0-2 .9-2 2v11h20V9c0-1.1-.9-2-2-2zM11 4h2v5h-2V4zm9 14H4v-2h16v2z"/>
                         </svg>
                         <div>
-                          <div className="text-xs text-slate-500">Table</div>
+                          <div className="text-xs text-slate-500 dark:text-slate-400">{t('table')}</div>
                           <div className="font-medium">#{reservation.tables?.table_number}</div>
                         </div>
                       </div>
                     )}
                   </div>
                   {/* Contact Info */}
-                  <div className="text-sm text-slate-600 space-y-1">
-                    <div><strong>Email:</strong> {reservation.customer_email}</div>
+                  <div className="text-sm text-slate-600 dark:text-slate-400 space-y-1">
+                    <div><strong>{t('email')}:</strong> {reservation.customer_email}</div>
                     {reservation.customer_phone && (
-                      <div><strong>Phone:</strong> {reservation.customer_phone}</div>
+                      <div><strong>{t('phone')}:</strong> {reservation.customer_phone}</div>
                     )}
                     {reservation.special_requests && (
-                      <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                        <strong className="text-blue-900">Special Requests:</strong>
-                        <p className="text-blue-800 mt-1">{reservation.special_requests}</p>
+                      <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+                        <strong className="text-blue-900 dark:text-blue-400">{t('specialRequests')}:</strong>
+                        <p className="text-blue-800 dark:text-blue-300 mt-1">{reservation.special_requests}</p>
                       </div>
                     )}
                   </div>
@@ -616,13 +627,13 @@ export default function Reservations() {
                     onClick={() => openConfirmModal(reservation)}
                     className="bg-green-600 text-white px-5 py-2.5 rounded-xl font-medium hover:bg-green-700 text-sm whitespace-nowrap"
                   >
-                    Confirm
+                    {t('confirm')}
                   </button>
                   <button
                     onClick={() => openDenyModal(reservation)}
                     className="bg-red-600 text-white px-5 py-2.5 rounded-xl font-medium hover:bg-red-700 text-sm whitespace-nowrap"
                   >
-                    Deny
+                    {t('deny')}
                   </button>
                 </div>
               )}
@@ -631,43 +642,43 @@ export default function Reservations() {
 
               {/* Metadata Footer */}
               {(reservation.confirmed_by_staff_name || reservation.denied_by_staff_name || reservation.cancellation_reason) && (
-                <div className="pt-4 border-t border-slate-200">
+                <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
                   {reservation.confirmed_by_staff_name && (
-                    <div className="flex items-center gap-2 text-sm text-green-700">
+                    <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                       </svg>
                       <span>
-                        <strong>Confirmed by</strong> {reservation.confirmed_by_staff_name}
+                        <strong>{t('confirmedBy')}</strong> {reservation.confirmed_by_staff_name}
                         {reservation.confirmed_at && ` on ${new Date(reservation.confirmed_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}`}
                       </span>
                     </div>
                   )}
                   {reservation.denied_by_staff_name && (
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm text-red-700">
+                      <div className="flex items-center gap-2 text-sm text-red-700 dark:text-red-400">
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/>
                         </svg>
                         <span>
-                          <strong>Denied by</strong> {reservation.denied_by_staff_name}
+                          <strong>{t('deniedBy')}</strong> {reservation.denied_by_staff_name}
                           {reservation.denied_at && ` on ${new Date(reservation.denied_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}`}
                         </span>
                       </div>
                       {reservation.denied_reason && (
-                        <div className="text-sm text-red-600 pl-6">
-                          <strong>Reason:</strong> {reservation.denied_reason}
+                        <div className="text-sm text-red-600 dark:text-red-400 pl-6">
+                          <strong>{t('reason')}:</strong> {reservation.denied_reason}
                         </div>
                       )}
                     </div>
                   )}
                   {reservation.status === 'cancelled' && reservation.cancellation_reason && (
-                    <div className="flex items-center gap-2 text-sm text-slate-600">
+                    <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/>
                       </svg>
                       <span>
-                        <strong>Cancelled:</strong> {reservation.cancellation_reason}
+                        <strong>{t('cancelledLabel')}:</strong> {reservation.cancellation_reason}
                         {reservation.cancelled_at && ` on ${new Date(reservation.cancelled_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}`}
                       </span>
                     </div>
@@ -689,33 +700,33 @@ export default function Reservations() {
           }}
         >
           <div
-            className="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl"
+            className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold text-slate-800 mb-6">Confirm Reservation</h2>
-            <div className="mb-6 p-4 bg-slate-50 rounded-xl">
-              <p className="text-sm text-slate-600 mb-1">
-                <strong>{selectedReservation.customer_name}</strong> - {selectedReservation.party_size} guests
+            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-6">{t('confirmReservation')}</h2>
+            <div className="mb-6 p-4 bg-slate-50 dark:bg-slate-700 rounded-xl">
+              <p className="text-sm text-slate-600 dark:text-slate-300 mb-1">
+                <strong>{selectedReservation.customer_name}</strong> - {selectedReservation.party_size} {selectedReservation.party_size === 1 ? t('guest') : t('guests')}
               </p>
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-slate-600 dark:text-slate-300">
                 {new Date(selectedReservation.reservation_date).toLocaleDateString()} at {selectedReservation.reservation_time.substring(0, 5)}
               </p>
             </div>
             <div className="mb-6">
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Assign Table *
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                {t('assignTable')} *
               </label>
               {availableTables.length === 0 ? (
-                <p className="text-red-600 text-sm">No available tables at this time</p>
+                <p className="text-red-600 dark:text-red-400 text-sm">{t('noAvailableTables')}</p>
               ) : (
                 <select
                   value={selectedTable}
                   onChange={(e) => setSelectedTable(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                 >
                   {availableTables.map((table) => (
                     <option key={table.id} value={table.id}>
-                      Table {table.table_number}
+                      {t('table')} {table.table_number}
                     </option>
                   ))}
                 </select>
@@ -729,16 +740,16 @@ export default function Reservations() {
                   setSelectedReservation(null)
                   setSelectedTable('')
                 }}
-                className="flex-1 border-2 border-slate-200 text-slate-600 py-3 rounded-xl font-medium hover:bg-slate-50"
+                className="flex-1 border-2 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 py-3 rounded-xl font-medium hover:bg-slate-50 dark:hover:bg-slate-700"
               >
-                Cancel
+                {t('cancel')}
               </button>
               <button
                 onClick={confirmReservation}
                 disabled={modalLoading || !selectedTable}
                 className="flex-1 bg-green-600 text-white py-3 rounded-xl font-medium hover:bg-green-700 disabled:opacity-50"
               >
-                {modalLoading ? 'Confirming...' : 'Confirm Reservation'}
+                {modalLoading ? t('confirming') : t('confirmReservation')}
               </button>
             </div>
           </div>
@@ -754,20 +765,20 @@ export default function Reservations() {
           }}
         >
           <div
-            className="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl"
+            className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold text-slate-800 mb-6">Deny Reservation</h2>
+            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-6">{t('denyReservation')}</h2>
             <div className="mb-6">
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Reason for Denying *
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                {t('reasonForDenying')} *
               </label>
               <textarea
                 value={denyReason}
                 onChange={(e) => setDenyReason(e.target.value)}
                 rows={3}
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 resize-none"
-                placeholder="e.g., Fully booked, Restaurant closed that day..."
+                className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 resize-none"
+                placeholder={t('reasonPlaceholder')}
               />
             </div>
             <div className="flex gap-3">
@@ -777,16 +788,16 @@ export default function Reservations() {
                   setShowDenyModal(false)
                   setDenyReason('')
                 }}
-                className="flex-1 border-2 border-slate-200 text-slate-600 py-3 rounded-xl font-medium hover:bg-slate-50"
+                className="flex-1 border-2 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 py-3 rounded-xl font-medium hover:bg-slate-50 dark:hover:bg-slate-700"
               >
-                Cancel
+                {t('cancel')}
               </button>
               <button
                 onClick={denyReservation}
                 disabled={modalLoading || !denyReason.trim()}
                 className="flex-1 bg-red-600 text-white py-3 rounded-xl font-medium hover:bg-red-700 disabled:opacity-50"
               >
-                {modalLoading ? 'Denying...' : 'Deny Reservation'}
+                {modalLoading ? t('denying') : t('denyReservation')}
               </button>
             </div>
           </div>

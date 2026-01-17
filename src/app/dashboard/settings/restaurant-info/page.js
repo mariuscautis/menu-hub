@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useTranslations } from '@/lib/i18n/LanguageContext'
+
 export default function RestaurantInfo() {
+  const t = useTranslations('restaurantInfo')
   const [restaurant, setRestaurant] = useState(null)
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState(null)
@@ -55,11 +58,11 @@ export default function RestaurantInfo() {
       if (uploadError) {
         console.error('Upload error:', uploadError)
         if (uploadError.message.includes('not found')) {
-          setMessage({ type: 'error', text: 'Storage bucket not found. Please create the "restaurant-logos" bucket in Supabase Storage first.' })
+          setMessage({ type: 'error', text: t('storageBucketNotFound') })
         } else if (uploadError.message.includes('policy')) {
-          setMessage({ type: 'error', text: 'Permission denied. Please set up storage policies.' })
+          setMessage({ type: 'error', text: t('permissionDenied') })
         } else {
-          setMessage({ type: 'error', text: `Failed to upload logo: ${uploadError.message}` })
+          setMessage({ type: 'error', text: `${t('failedUploadLogo')}: ${uploadError.message}` })
         }
         setUploadingLogo(false)
         return
@@ -74,29 +77,29 @@ export default function RestaurantInfo() {
         .update({ logo_url: publicUrl })
         .eq('id', restaurant.id)
       if (updateError) {
-        setMessage({ type: 'error', text: 'Failed to update logo' })
+        setMessage({ type: 'error', text: t('failedUpdateLogo') })
       } else {
-        setMessage({ type: 'success', text: 'Logo updated successfully!' })
+        setMessage({ type: 'success', text: t('logoUpdatedSuccess') })
         setRestaurant({ ...restaurant, logo_url: publicUrl })
         setLogoFile(null)
       }
     } catch (error) {
       console.error('Error uploading logo:', error)
-      setMessage({ type: 'error', text: 'Failed to upload logo' })
+      setMessage({ type: 'error', text: t('failedUploadLogo') })
     }
     setUploadingLogo(false)
   }
   const handleRemoveLogo = async () => {
-    if (!confirm('Are you sure you want to remove the logo?')) return
+    if (!confirm(t('confirmRemoveLogo'))) return
     // Update restaurant record to remove logo
     const { error } = await supabase
       .from('restaurants')
       .update({ logo_url: null })
       .eq('id', restaurant.id)
     if (error) {
-      setMessage({ type: 'error', text: 'Failed to remove logo' })
+      setMessage({ type: 'error', text: t('failedRemoveLogo') })
     } else {
-      setMessage({ type: 'success', text: 'Logo removed successfully!' })
+      setMessage({ type: 'success', text: t('logoRemovedSuccess') })
       setRestaurant({ ...restaurant, logo_url: null })
       setLogoPreview(null)
       setLogoFile(null)
@@ -109,9 +112,9 @@ export default function RestaurantInfo() {
       .update({ phone: restaurantPhone || null })
       .eq('id', restaurant.id)
     if (error) {
-      setMessage({ type: 'error', text: 'Failed to update phone number' })
+      setMessage({ type: 'error', text: t('failedUpdatePhone') })
     } else {
-      setMessage({ type: 'success', text: 'Phone number updated successfully!' })
+      setMessage({ type: 'success', text: t('phoneUpdatedSuccess') })
       setRestaurant({ ...restaurant, phone: restaurantPhone })
     }
     setSavingPhone(false)
@@ -119,7 +122,7 @@ export default function RestaurantInfo() {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="text-slate-500">Loading...</div>
+        <div className="text-slate-500">{t('loading')}</div>
       </div>
     )
   }
@@ -127,7 +130,7 @@ export default function RestaurantInfo() {
     return (
       <div className="p-8">
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-600">
-          Only restaurant owners can access settings.
+          {t('accessError')}
         </div>
       </div>
     )
@@ -135,8 +138,8 @@ export default function RestaurantInfo() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800">Restaurant Information</h1>
-        <p className="text-slate-500">Manage your restaurant's basic information and branding</p>
+        <h1 className="text-2xl font-bold text-slate-800">{t('pageTitle')}</h1>
+        <p className="text-slate-500">{t('pageSubtitle')}</p>
       </div>
       {message && (
         <div className={`mb-6 p-4 rounded-xl border ${
@@ -150,15 +153,15 @@ export default function RestaurantInfo() {
       {/* Restaurant Information Section */}
       <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
         <div className="mb-6">
-          <h2 className="text-lg font-bold text-slate-700 mb-2">Restaurant Information</h2>
+          <h2 className="text-lg font-bold text-slate-700 mb-2">{t('sectionTitle')}</h2>
           <p className="text-sm text-slate-500">
-            Contact information for your restaurant. This will be used in customer communications.
+            {t('sectionDescription')}
           </p>
         </div>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Restaurant Name
+              {t('restaurantNameLabel')}
             </label>
             <input
               type="text"
@@ -167,22 +170,22 @@ export default function RestaurantInfo() {
               className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl bg-slate-50 text-slate-500 cursor-not-allowed"
             />
             <p className="text-xs text-slate-500 mt-2">
-              Restaurant name cannot be changed from settings.
+              {t('nameCannotChange')}
             </p>
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Restaurant Phone Number
+              {t('restaurantPhoneLabel')}
             </label>
             <input
               type="tel"
               value={restaurantPhone}
               onChange={(e) => setRestaurantPhone(e.target.value)}
-              placeholder="+1 (555) 123-4567"
+              placeholder={t('phonePlaceholder')}
               className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
             />
             <p className="text-xs text-slate-500 mt-2">
-              This phone number will be included in cancellation emails so customers can contact you if there's an error.
+              {t('phoneHelpText')}
             </p>
           </div>
           {/* Save Button */}
@@ -192,7 +195,7 @@ export default function RestaurantInfo() {
               disabled={savingPhone}
               className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
-              {savingPhone ? 'Saving...' : 'Save Restaurant Information'}
+              {savingPhone ? t('saving') : t('saveButton')}
             </button>
           </div>
         </div>
@@ -200,9 +203,9 @@ export default function RestaurantInfo() {
       {/* Restaurant Logo Section */}
       <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
         <div className="mb-6">
-          <h2 className="text-lg font-bold text-slate-700 mb-2">Restaurant Logo</h2>
+          <h2 className="text-lg font-bold text-slate-700 mb-2">{t('logoSectionTitle')}</h2>
           <p className="text-sm text-slate-500">
-            Upload your restaurant logo to personalize your dashboard. This logo will be visible to you and all your staff members.
+            {t('logoSectionDescription')}
           </p>
         </div>
         <div className="space-y-4">
@@ -217,13 +220,13 @@ export default function RestaurantInfo() {
                 />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-slate-700 mb-2">Current Logo</p>
+                <p className="text-sm font-medium text-slate-700 mb-2">{t('currentLogo')}</p>
                 <button
                   onClick={handleRemoveLogo}
                   disabled={uploadingLogo}
                   className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl font-medium transition-colors disabled:opacity-50"
                 >
-                  Remove Logo
+                  {t('removeLogo')}
                 </button>
               </div>
             </div>
@@ -231,7 +234,7 @@ export default function RestaurantInfo() {
           {/* Logo Upload */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              {logoPreview ? 'Change Logo' : 'Upload Logo'}
+              {logoPreview ? t('changeLogo') : t('uploadLogo')}
             </label>
             <input
               type="file"
@@ -241,7 +244,7 @@ export default function RestaurantInfo() {
               className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#6262bd] file:text-white hover:file:bg-[#5252a3] file:cursor-pointer disabled:opacity-50"
             />
             <p className="text-xs text-slate-500 mt-2">
-              Recommended: Square image, at least 200x200px. PNG or JPG format.
+              {t('logoHelpText')}
             </p>
           </div>
           {/* Upload Button */}
@@ -252,7 +255,7 @@ export default function RestaurantInfo() {
                 disabled={uploadingLogo}
                 className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
-                {uploadingLogo ? 'Uploading...' : 'Upload Logo'}
+                {uploadingLogo ? t('uploading') : t('uploadLogoButton')}
               </button>
             </div>
           )}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useTranslations } from '@/lib/i18n/LanguageContext'
 import RevenueChart from '@/components/analytics/RevenueChart'
 import PeakHoursChart from '@/components/analytics/PeakHoursChart'
 import CategoryPieChart from '@/components/analytics/CategoryPieChart'
@@ -11,6 +12,7 @@ import DateRangeSelector from '@/components/analytics/DateRangeSelector'
 import ExportButton from '@/components/analytics/ExportButton'
 
 export default function AnalyticsPage() {
+  const t = useTranslations('analytics')
   const [loading, setLoading] = useState(true)
   const [restaurant, setRestaurant] = useState(null)
   const [dateRange, setDateRange] = useState({
@@ -146,7 +148,7 @@ export default function AnalyticsPage() {
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6262bd] mx-auto mb-4"></div>
-          <p className="text-slate-600">Loading analytics...</p>
+          <p className="text-slate-600">{t('loading')}</p>
         </div>
       </div>
     )
@@ -155,7 +157,7 @@ export default function AnalyticsPage() {
   if (!restaurant) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <p className="text-slate-600">No restaurant found for your account.</p>
+        <p className="text-slate-600">{t('noRestaurant')}</p>
       </div>
     )
   }
@@ -165,8 +167,8 @@ export default function AnalyticsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Analytics Dashboard</h1>
-          <p className="text-slate-500">Insights and performance metrics for {restaurant.name}</p>
+          <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
+          <p className="text-slate-500">{t('subtitle').replace('{restaurantName}', restaurant.name)}</p>
         </div>
         <ExportButton
           overview={overview}
@@ -182,7 +184,7 @@ export default function AnalyticsPage() {
           <DateRangeSelector onRangeChange={handleDateRangeChange} />
         </div>
         <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-          <h3 className="text-sm font-semibold text-slate-700 mb-3">Group By</h3>
+          <h3 className="text-sm font-semibold text-slate-700 mb-3">{t('groupByLabel')}</h3>
           <div className="flex flex-col gap-2">
             {['day', 'week', 'month'].map((option) => (
               <button
@@ -194,7 +196,7 @@ export default function AnalyticsPage() {
                     : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
                 }`}
               >
-                {option.charAt(0).toUpperCase() + option.slice(1)}
+                {t(option)}
               </button>
             ))}
           </div>
@@ -205,28 +207,28 @@ export default function AnalyticsPage() {
       {overview && (
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-            <p className="text-slate-500 text-sm font-medium mb-1">Total Revenue</p>
+            <p className="text-slate-500 text-sm font-medium mb-1">{t('totalRevenue')}</p>
             <p className="text-3xl font-bold text-[#6262bd]">
               ${parseFloat(overview.total_revenue || 0).toFixed(2)}
             </p>
           </div>
           <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-            <p className="text-slate-500 text-sm font-medium mb-1">Total Orders</p>
+            <p className="text-slate-500 text-sm font-medium mb-1">{t('totalOrders')}</p>
             <p className="text-3xl font-bold text-slate-700">{overview.total_orders || 0}</p>
           </div>
           <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-            <p className="text-slate-500 text-sm font-medium mb-1">Avg Order Value</p>
+            <p className="text-slate-500 text-sm font-medium mb-1">{t('avgOrderValue')}</p>
             <p className="text-3xl font-bold text-slate-700">
               ${parseFloat(overview.average_order_value || 0).toFixed(2)}
             </p>
           </div>
           <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-            <p className="text-slate-500 text-sm font-medium mb-1">Total Profit</p>
+            <p className="text-slate-500 text-sm font-medium mb-1">{t('totalProfit')}</p>
             <p className="text-3xl font-bold text-green-600">
               ${parseFloat(overview.total_profit || 0).toFixed(2)}
             </p>
             <p className="text-xs text-slate-500 mt-1">
-              {parseFloat(overview.profit_margin_percent || 0).toFixed(1)}% margin
+              {t('margin').replace('{percent}', parseFloat(overview.profit_margin_percent || 0).toFixed(1))}
             </p>
           </div>
         </div>
@@ -234,34 +236,34 @@ export default function AnalyticsPage() {
 
       {/* Revenue Trends Chart */}
       <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-        <h2 className="text-lg font-bold text-slate-700 mb-4">Revenue & Profit Trends</h2>
+        <h2 className="text-lg font-bold text-slate-700 mb-4">{t('revenueProfitTrends')}</h2>
         <RevenueChart data={salesTrends} groupBy={groupBy} />
       </div>
 
       {/* Peak Hours & Category Breakdown */}
       <div className="grid lg:grid-cols-2 gap-6">
         <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-          <h2 className="text-lg font-bold text-slate-700 mb-4">Peak Hours Analysis</h2>
+          <h2 className="text-lg font-bold text-slate-700 mb-4">{t('peakHoursAnalysis')}</h2>
           <PeakHoursChart data={peakHours} />
         </div>
         <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
-          <h2 className="text-lg font-bold text-slate-700 mb-4">Revenue by Department</h2>
+          <h2 className="text-lg font-bold text-slate-700 mb-4">{t('revenueByDepartment')}</h2>
           <CategoryPieChart data={departmentBreakdown} />
         </div>
       </div>
 
       {/* Product Profitability Chart */}
       <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
-        <h2 className="text-lg font-bold text-slate-700 mb-4">Product Profitability Analysis</h2>
+        <h2 className="text-lg font-bold text-slate-700 mb-4">{t('productProfitabilityAnalysis')}</h2>
         <p className="text-sm text-slate-500 mb-4">
-          Compare revenue, cost, and profit for your top products
+          {t('productProfitabilityDesc')}
         </p>
         <ProductProfitabilityChart data={productProfitability} />
       </div>
 
       {/* Top Products Table */}
       <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
-        <h2 className="text-lg font-bold text-slate-700 mb-4">Top Selling Products</h2>
+        <h2 className="text-lg font-bold text-slate-700 mb-4">{t('topSellingProducts')}</h2>
         <TopProductsTable data={topProducts} />
       </div>
     </div>

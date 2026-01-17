@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useTranslations } from '@/lib/i18n/LanguageContext'
 
 export default function InvoiceClientModal({ restaurant, onSubmit, onClose, isGenerating = false }) {
+  const t = useTranslations('invoices')
   const [mode, setMode] = useState(null) // null, 'existing', 'new', 'action'
   const [searchQuery, setSearchQuery] = useState('')
   const [clients, setClients] = useState([])
@@ -157,7 +159,7 @@ export default function InvoiceClientModal({ restaurant, onSubmit, onClose, isGe
         {/* Header */}
         <div className="sticky top-0 bg-white dark:bg-slate-800 border-b-2 border-slate-100 dark:border-slate-700 p-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Generate Invoice</h2>
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{t('generateInvoice')}</h2>
             <button
               onClick={onClose}
               className="text-slate-400 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
@@ -174,7 +176,7 @@ export default function InvoiceClientModal({ restaurant, onSubmit, onClose, isGe
           {mode === null && (
             <div className="space-y-4">
               <p className="text-slate-600 dark:text-slate-300 mb-6">
-                Choose whether to invoice an existing client or create a new one:
+                {t('chooseClient')}
               </p>
 
               <button
@@ -188,8 +190,8 @@ export default function InvoiceClientModal({ restaurant, onSubmit, onClose, isGe
                     </svg>
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg">Existing Client</h3>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Search and select from previous clients</p>
+                    <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg">{t('existingClient')}</h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">{t('existingClientDesc')}</p>
                   </div>
                 </div>
               </button>
@@ -205,8 +207,8 @@ export default function InvoiceClientModal({ restaurant, onSubmit, onClose, isGe
                     </svg>
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg">New Client</h3>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Enter details for a first-time client</p>
+                    <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg">{t('newClient')}</h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">{t('newClientDesc')}</p>
                   </div>
                 </div>
               </button>
@@ -223,18 +225,18 @@ export default function InvoiceClientModal({ restaurant, onSubmit, onClose, isGe
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
                 </svg>
-                Back
+                {t('back')}
               </button>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Search Clients
+                  {t('searchClients')}
                 </label>
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search by name, company, or email..."
+                  placeholder={t('searchPlaceholder')}
                   className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-xl focus:outline-none focus:border-[#6262bd]"
                   autoFocus
                 />
@@ -244,7 +246,7 @@ export default function InvoiceClientModal({ restaurant, onSubmit, onClose, isGe
               <div className="space-y-2 max-h-[400px] overflow-y-auto">
                 {filteredClients.length === 0 ? (
                   <div className="text-center py-8 text-slate-500 dark:text-slate-400">
-                    {searchQuery ? 'No clients found' : 'No clients yet'}
+                    {searchQuery ? t('noClientsFound') : t('noClientsYet')}
                   </div>
                 ) : (
                   filteredClients.map((client) => (
@@ -285,14 +287,14 @@ export default function InvoiceClientModal({ restaurant, onSubmit, onClose, isGe
                   disabled={isGenerating}
                   className="flex-1 px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Cancel
+                  {t('cancel')}
                 </button>
                 <button
                   onClick={handleExistingClientSubmit}
                   disabled={!selectedClient || isGenerating}
                   className="flex-1 bg-[#6262bd] text-white px-4 py-3 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isGenerating ? 'Generating Invoice...' : 'Generate Invoice'}
+                  {isGenerating ? t('generatingInvoice') : t('generateInvoice')}
                 </button>
               </div>
             </div>
@@ -308,13 +310,13 @@ export default function InvoiceClientModal({ restaurant, onSubmit, onClose, isGe
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
                 </svg>
-                Back
+                {t('back')}
               </button>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Client Name *
+                    {t('clientName')} *
                   </label>
                   <input
                     type="text"
@@ -322,20 +324,20 @@ export default function InvoiceClientModal({ restaurant, onSubmit, onClose, isGe
                     value={newClientForm.name}
                     onChange={(e) => setNewClientForm({ ...newClientForm, name: e.target.value })}
                     className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-xl focus:outline-none focus:border-[#6262bd]"
-                    placeholder="John Doe"
+                    placeholder={t('clientNamePlaceholder')}
                   />
                 </div>
 
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Company Name
+                    {t('companyName')}
                   </label>
                   <input
                     type="text"
                     value={newClientForm.company}
                     onChange={(e) => setNewClientForm({ ...newClientForm, company: e.target.value })}
                     className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-xl focus:outline-none focus:border-[#6262bd]"
-                    placeholder="Acme Corp"
+                    placeholder={t('companyNamePlaceholder')}
                   />
                 </div>
 
@@ -348,7 +350,7 @@ export default function InvoiceClientModal({ restaurant, onSubmit, onClose, isGe
                     value={newClientForm.email}
                     onChange={(e) => setNewClientForm({ ...newClientForm, email: e.target.value })}
                     className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-xl focus:outline-none focus:border-[#6262bd]"
-                    placeholder="john@example.com"
+                    placeholder={t('emailPlaceholder')}
                   />
                 </div>
 
@@ -361,7 +363,7 @@ export default function InvoiceClientModal({ restaurant, onSubmit, onClose, isGe
                     value={newClientForm.phone}
                     onChange={(e) => setNewClientForm({ ...newClientForm, phone: e.target.value })}
                     className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-xl focus:outline-none focus:border-[#6262bd]"
-                    placeholder="+1 234 567 8900"
+                    placeholder={t('phonePlaceholder')}
                   />
                 </div>
 
@@ -374,7 +376,7 @@ export default function InvoiceClientModal({ restaurant, onSubmit, onClose, isGe
                     value={newClientForm.address}
                     onChange={(e) => setNewClientForm({ ...newClientForm, address: e.target.value })}
                     className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-xl focus:outline-none focus:border-[#6262bd]"
-                    placeholder="123 Main St"
+                    placeholder={t('addressPlaceholder')}
                   />
                 </div>
 
@@ -387,7 +389,7 @@ export default function InvoiceClientModal({ restaurant, onSubmit, onClose, isGe
                     value={newClientForm.city}
                     onChange={(e) => setNewClientForm({ ...newClientForm, city: e.target.value })}
                     className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-xl focus:outline-none focus:border-[#6262bd]"
-                    placeholder="London"
+                    placeholder={t('cityPlaceholder')}
                   />
                 </div>
 
@@ -400,7 +402,7 @@ export default function InvoiceClientModal({ restaurant, onSubmit, onClose, isGe
                     value={newClientForm.postal_code}
                     onChange={(e) => setNewClientForm({ ...newClientForm, postal_code: e.target.value })}
                     className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-xl focus:outline-none focus:border-[#6262bd]"
-                    placeholder="SW1A 1AA"
+                    placeholder={t('postalCodePlaceholder')}
                   />
                 </div>
 
@@ -413,7 +415,7 @@ export default function InvoiceClientModal({ restaurant, onSubmit, onClose, isGe
                     value={newClientForm.country}
                     onChange={(e) => setNewClientForm({ ...newClientForm, country: e.target.value })}
                     className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-xl focus:outline-none focus:border-[#6262bd]"
-                    placeholder="United Kingdom"
+                    placeholder={t('countryPlaceholder')}
                   />
                 </div>
 
@@ -426,7 +428,7 @@ export default function InvoiceClientModal({ restaurant, onSubmit, onClose, isGe
                     value={newClientForm.vat_number}
                     onChange={(e) => setNewClientForm({ ...newClientForm, vat_number: e.target.value })}
                     className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-xl focus:outline-none focus:border-[#6262bd]"
-                    placeholder="GB123456789"
+                    placeholder={t('vatNumberPlaceholder')}
                   />
                 </div>
 
@@ -439,7 +441,7 @@ export default function InvoiceClientModal({ restaurant, onSubmit, onClose, isGe
                     value={newClientForm.tax_id}
                     onChange={(e) => setNewClientForm({ ...newClientForm, tax_id: e.target.value })}
                     className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-xl focus:outline-none focus:border-[#6262bd]"
-                    placeholder="12-3456789"
+                    placeholder={t('taxIdPlaceholder')}
                   />
                 </div>
               </div>
@@ -451,14 +453,14 @@ export default function InvoiceClientModal({ restaurant, onSubmit, onClose, isGe
                   disabled={loading || isGenerating}
                   className="flex-1 px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Cancel
+                  {t('cancel')}
                 </button>
                 <button
                   onClick={handleNewClientSubmit}
                   disabled={loading || isGenerating || !newClientForm.name.trim()}
                   className="flex-1 bg-green-600 text-white px-4 py-3 rounded-xl font-semibold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? 'Creating Client...' : isGenerating ? 'Generating Invoice...' : 'Create & Generate Invoice'}
+                  {loading ? t('creatingClient') : isGenerating ? t('generatingInvoice') : t('createAndGenerateInvoice')}
                 </button>
               </div>
             </div>
@@ -473,7 +475,7 @@ export default function InvoiceClientModal({ restaurant, onSubmit, onClose, isGe
                     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">Client Selected</h3>
+                <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">{t('clientSelected')}</h3>
                 <p className="text-slate-600 dark:text-slate-300">
                   {clientDataForInvoice.clientData.name}
                   {clientDataForInvoice.clientData.company && ` - ${clientDataForInvoice.clientData.company}`}
@@ -481,7 +483,7 @@ export default function InvoiceClientModal({ restaurant, onSubmit, onClose, isGe
               </div>
 
               <p className="text-slate-600 dark:text-slate-300 mb-4 text-center">
-                How would you like to deliver the invoice?
+                {t('howToDeliver')}
               </p>
 
               <div className="space-y-3">
@@ -502,11 +504,11 @@ export default function InvoiceClientModal({ restaurant, onSubmit, onClose, isGe
                       </svg>
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg">Email Invoice</h3>
+                      <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg">{t('emailInvoice')}</h3>
                       <p className="text-sm text-slate-500 dark:text-slate-400">
                         {clientDataForInvoice.clientData.email
-                          ? `Send PDF to ${clientDataForInvoice.clientData.email}`
-                          : 'No email address provided'}
+                          ? t('emailInvoiceTo').replace('{email}', clientDataForInvoice.clientData.email)
+                          : t('noEmailProvided')}
                       </p>
                     </div>
                   </div>
@@ -529,8 +531,8 @@ export default function InvoiceClientModal({ restaurant, onSubmit, onClose, isGe
                       </svg>
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg">Download Invoice</h3>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">Download PDF to your device</p>
+                      <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg">{t('downloadInvoice')}</h3>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">{t('downloadInvoiceDesc')}</p>
                     </div>
                   </div>
                 </button>
@@ -541,7 +543,7 @@ export default function InvoiceClientModal({ restaurant, onSubmit, onClose, isGe
                 disabled={isGenerating}
                 className="w-full mt-4 px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Cancel
+                {t('cancel')}
               </button>
             </div>
           )}

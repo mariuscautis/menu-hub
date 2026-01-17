@@ -1,19 +1,21 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from '@/lib/i18n/LanguageContext'
 
 export default function DateRangeSelector({ onRangeChange }) {
+  const t = useTranslations('analytics')
   const [selectedRange, setSelectedRange] = useState('30d')
   const [customStart, setCustomStart] = useState('')
   const [customEnd, setCustomEnd] = useState('')
   const [showCustom, setShowCustom] = useState(false)
 
   const quickRanges = [
-    { value: 'today', label: 'Today' },
-    { value: '7d', label: 'Last 7 Days' },
-    { value: '30d', label: 'Last 30 Days' },
-    { value: '90d', label: 'Last 90 Days' },
-    { value: 'custom', label: 'Custom Range' }
+    { value: 'today', label: t('today') },
+    { value: '7d', label: t('last7Days') },
+    { value: '30d', label: t('last30Days') },
+    { value: '90d', label: t('last90Days') },
+    { value: 'custom', label: t('customRange') }
   ]
 
   const handleQuickRangeChange = (range) => {
@@ -54,7 +56,7 @@ export default function DateRangeSelector({ onRangeChange }) {
 
   return (
     <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-      <h3 className="text-sm font-semibold text-slate-700 mb-3">Date Range</h3>
+      <h3 className="text-sm font-semibold text-slate-700 mb-3">{t('dateRange')}</h3>
 
       <div className="flex flex-wrap gap-2 mb-4">
         {quickRanges.map((range) => (
@@ -75,7 +77,7 @@ export default function DateRangeSelector({ onRangeChange }) {
       {showCustom && (
         <div className="space-y-3 pt-3 border-t border-slate-200">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Start Date</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">{t('startDate')}</label>
             <input
               type="date"
               value={customStart}
@@ -84,7 +86,7 @@ export default function DateRangeSelector({ onRangeChange }) {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">End Date</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">{t('endDate')}</label>
             <input
               type="date"
               value={customEnd}
@@ -97,7 +99,7 @@ export default function DateRangeSelector({ onRangeChange }) {
             disabled={!customStart || !customEnd}
             className="w-full px-4 py-2 bg-[#6262bd] text-white rounded-lg font-medium hover:bg-[#5252a3] disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors"
           >
-            Apply Custom Range
+            {t('applyCustomRange')}
           </button>
         </div>
       )}

@@ -2,18 +2,22 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-// Define all available permissions with descriptions
-const AVAILABLE_PERMISSIONS = [
-  { id: 'overview', label: 'Dashboard Overview', description: 'View main dashboard' },
-  { id: 'orders_kitchen', label: 'Kitchen Orders', description: 'View and manage kitchen orders' },
-  { id: 'orders_bar', label: 'Bar Orders', description: 'View and manage bar orders' },
-  { id: 'tables', label: 'Tables & QR', description: 'Manage tables and QR codes' },
-  { id: 'reservations', label: 'Reservations', description: 'Manage reservations' },
-  { id: 'report_loss', label: 'Report Loss', description: 'Report stock losses' },
-  { id: 'floor_plan', label: 'Floor Plan', description: 'View floor plan and place table orders' },
-  { id: 'my_rota', label: 'My Rota', description: 'View own work schedule' },
-];
+import { useTranslations } from '@/lib/i18n/LanguageContext';
+
 export default function DepartmentsSettingsPage() {
+  const t = useTranslations('departmentsSettings');
+
+  // Define all available permissions with descriptions
+  const AVAILABLE_PERMISSIONS = [
+    { id: 'overview', label: t('permissions.overview'), description: t('permissions.overviewDesc') },
+    { id: 'orders_kitchen', label: t('permissions.ordersKitchen'), description: t('permissions.ordersKitchenDesc') },
+    { id: 'orders_bar', label: t('permissions.ordersBar'), description: t('permissions.ordersBarDesc') },
+    { id: 'reservations', label: t('permissions.reservations'), description: t('permissions.reservationsDesc') },
+    { id: 'menu', label: t('permissions.menu'), description: t('permissions.menuDesc') },
+    { id: 'staff', label: t('permissions.staff'), description: t('permissions.staffDesc') },
+    { id: 'rota', label: t('permissions.rota'), description: t('permissions.rotaDesc') },
+    { id: 'settings', label: t('permissions.settings'), description: t('permissions.settingsDesc') },
+  ];
   const [restaurant, setRestaurant] = useState(null);
   const [departments, setDepartments] = useState([]);
   const [newDepartmentName, setNewDepartmentName] = useState('');
@@ -62,7 +66,7 @@ export default function DepartmentsSettingsPage() {
   const handleAddDepartment = () => {
     const trimmed = newDepartmentName.trim().toLowerCase();
     if (!trimmed) {
-      setMessage({ type: 'error', text: 'Please enter a department name' });
+      setMessage({ type: 'error', text: t('departmentNameLabel') + ' is required' });
       return;
     }
     if (departments.some(d => d.name === trimmed)) {
@@ -71,7 +75,7 @@ export default function DepartmentsSettingsPage() {
     }
     setDepartments([...departments, {
       name: trimmed,
-      permissions: ['orders_kitchen', 'orders_bar', 'my_rota'], // Default permissions for new departments
+      permissions: ['orders_kitchen', 'orders_bar', 'rota'], // Default permissions for new departments
       isNew: true
     }]);
     setNewDepartmentName('');
@@ -82,7 +86,9 @@ export default function DepartmentsSettingsPage() {
       setMessage({ type: 'error', text: 'You must have at least one department' });
       return;
     }
-    setDepartments(departments.filter(d => d.name !== deptName));
+    if (confirm(t('confirmRemove').replace('{department}', deptName))) {
+      setDepartments(departments.filter(d => d.name !== deptName));
+    }
   };
   const handleTogglePermission = (deptName, permissionId) => {
     setDepartments(departments.map(dept => {
@@ -143,13 +149,13 @@ export default function DepartmentsSettingsPage() {
         .update({ departments: departmentNames })
         .eq('id', restaurant.id);
       if (updateError) throw updateError;
-      setMessage({ type: 'success', text: 'Department permissions saved successfully!' });
+      setMessage({ type: 'success', text: t('savedSuccess') });
       setTimeout(() => setMessage(null), 3000);
       // Refresh data to get IDs
       fetchData();
     } catch (error) {
       console.error('Error saving department permissions:', error);
-      setMessage({ type: 'error', text: error.message || 'Failed to save department permissions' });
+      setMessage({ type: 'error', text: error.message || t('errorSaving') });
     }
     setSaving(false);
   };
@@ -158,6 +164,7 @@ export default function DepartmentsSettingsPage() {
       <div className="min-h-screen bg-gray-50 p-8">
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6262bd] mx-auto"></div>
+          <p className="text-slate-500 mt-4">{t('loading')}</p>
         </div>
       </div>
     );
@@ -175,8 +182,8 @@ export default function DepartmentsSettingsPage() {
     <div className="min-h-screen bg-gray-50 p-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">Departments & Permissions</h1>
-        <p className="text-slate-600">Manage departments and control what sections each department can access</p>
+        <h1 className="text-3xl font-bold text-slate-800 mb-2">{t('title')}</h1>
+        <p className="text-slate-600">{t('subtitle')}</p>
       </div>
       {/* Message */}
       {message && (
@@ -208,21 +215,21 @@ export default function DepartmentsSettingsPage() {
                   onClick={() => handleSelectAll(dept.name)}
                   className="px-3 py-1 text-sm text-[#6262bd] hover:bg-[#6262bd]/10 rounded-lg transition-colors"
                 >
-                  Select All
+                  {t('selectAll')}
                 </button>
                 <button
                   onClick={() => handleDeselectAll(dept.name)}
                   className="px-3 py-1 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
                 >
-                  Deselect All
+                  {t('deselectAll')}
                 </button>
                 <button
                   onClick={() => handleRemoveDepartment(dept.name)}
                   className="px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                   disabled={departments.length <= 1}
-                  title={departments.length <= 1 ? 'Cannot remove last department' : 'Remove department'}
+                  title={departments.length <= 1 ? 'Cannot remove last department' : t('remove')}
                 >
-                  Remove
+                  {t('remove')}
                 </button>
               </div>
             </div>
@@ -266,7 +273,7 @@ export default function DepartmentsSettingsPage() {
       </div>
       {/* Add New Department */}
       <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
-        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-3">Add New Department</h3>
+        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-3">{t('addNewDepartment')}</h3>
         <div className="flex gap-3">
           <input
             type="text"
@@ -277,39 +284,32 @@ export default function DepartmentsSettingsPage() {
                 handleAddDepartment();
               }
             }}
-            placeholder="e.g., cleaning, delivery, front desk"
+            placeholder={t('departmentNamePlaceholder')}
             className="flex-1 px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
           />
           <button
             onClick={handleAddDepartment}
             className="px-6 py-3 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252a5] transition-colors font-medium"
           >
-            Add Department
+            {t('addDepartment')}
           </button>
         </div>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-          New departments will start with basic permissions (Kitchen Orders, Bar Orders, and My Rota). You can customize them above.
-        </p>
       </div>
       {/* Info Boxes */}
       <div className="space-y-4 mb-6">
         <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
           <p className="text-sm text-blue-800">
-            <strong>How it works:</strong> When staff members log in, they will only see menu items that their department has access to.
-            For example, kitchen staff might only see "Kitchen Orders", while bar staff can see "Bar Orders", "Tables", and "Reservations".
-            Orders are now split by department - kitchen staff only see kitchen orders, and bar staff only see bar orders.
+            <strong>{t('infoBox1Title')}:</strong> {t('infoBox1Text')}
           </p>
         </div>
         <div className="p-4 bg-purple-50 border border-purple-200 rounded-xl">
           <p className="text-sm text-purple-800">
-            <strong>Owner & Admin Access:</strong> Restaurant owners and admin staff always have full access to all features,
-            regardless of department permissions. Department permissions only apply to regular staff members.
+            <strong>{t('infoBox2Title')}:</strong> {t('infoBox2Text')}
           </p>
         </div>
         <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
           <p className="text-sm text-yellow-800">
-            <strong>Important:</strong> Existing staff members will immediately be affected by permission changes.
-            Make sure to test permissions after saving to ensure staff have the access they need.
+            <strong>{t('infoBox3Title')}:</strong> {t('infoBox3Text')}
           </p>
         </div>
       </div>
@@ -320,7 +320,7 @@ export default function DepartmentsSettingsPage() {
           disabled={saving}
           className="px-8 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {saving ? 'Saving...' : 'Save All Changes'}
+          {saving ? t('saving') : t('saveAllChanges')}
         </button>
       </div>
     </div>

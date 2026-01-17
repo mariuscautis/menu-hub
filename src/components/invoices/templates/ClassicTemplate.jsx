@@ -4,7 +4,7 @@ const styles = StyleSheet.create({
   page: {
     padding: 40,
     fontSize: 10,
-    fontFamily: 'Helvetica',
+    fontFamily: 'Roboto',
     color: '#1f2937',
   },
   header: {
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const ClassicTemplate = ({ invoice, restaurant }) => {
+const ClassicTemplate = ({ invoice, restaurant, t }) => {
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-GB', {
@@ -192,15 +192,15 @@ const ClassicTemplate = ({ invoice, restaurant }) => {
           {restaurant.logo_url && (
             <Image src={restaurant.logo_url} style={styles.logo} />
           )}
-          <Text style={styles.title}>INVOICE</Text>
+          <Text style={styles.title}>{t.invoice}</Text>
           <View style={styles.invoiceInfo}>
             <View>
-              <Text>Invoice #: {invoice.invoice_number}</Text>
-              <Text>Date: {formatDate(invoice.invoice_date)}</Text>
+              <Text>{t.invoiceNumber} {invoice.invoice_number}</Text>
+              <Text>{t.date} {formatDate(invoice.invoice_date)}</Text>
             </View>
             {invoice.due_date && (
               <View>
-                <Text>Due Date: {formatDate(invoice.due_date)}</Text>
+                <Text>{t.dueDate} {formatDate(invoice.due_date)}</Text>
               </View>
             )}
           </View>
@@ -210,7 +210,7 @@ const ClassicTemplate = ({ invoice, restaurant }) => {
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 30 }}>
           {/* From (Business) */}
           <View style={{ width: '48%' }}>
-            <Text style={styles.sectionTitle}>From</Text>
+            <Text style={styles.sectionTitle}>{t.from}</Text>
             <View style={styles.addressBlock}>
               <Text style={{ fontWeight: 'bold', marginBottom: 4 }}>{invoice.business_name}</Text>
               {invoice.business_address && <Text>{invoice.business_address}</Text>}
@@ -218,15 +218,15 @@ const ClassicTemplate = ({ invoice, restaurant }) => {
                 <Text>{invoice.business_city}{invoice.business_postal_code && `, ${invoice.business_postal_code}`}</Text>
               )}
               {invoice.business_country && <Text>{invoice.business_country}</Text>}
-              {invoice.business_phone && <Text>Tel: {invoice.business_phone}</Text>}
-              {invoice.business_email && <Text>Email: {invoice.business_email}</Text>}
+              {invoice.business_phone && <Text>{t.tel} {invoice.business_phone}</Text>}
+              {invoice.business_email && <Text>{t.email} {invoice.business_email}</Text>}
               {invoice.business_vat_number && (
                 <Text style={{ marginTop: 6, fontWeight: 'bold' }}>
-                  VAT: {invoice.business_vat_number}
+                  {t.vat} {invoice.business_vat_number}
                 </Text>
               )}
               {invoice.business_tax_id && (
-                <Text style={{ fontWeight: 'bold' }}>Tax ID: {invoice.business_tax_id}</Text>
+                <Text style={{ fontWeight: 'bold' }}>{t.taxId} {invoice.business_tax_id}</Text>
               )}
             </View>
           </View>
@@ -234,7 +234,7 @@ const ClassicTemplate = ({ invoice, restaurant }) => {
           {/* To (Customer) */}
           {invoice.customer_name && (
             <View style={{ width: '48%' }}>
-              <Text style={styles.sectionTitle}>Bill To</Text>
+              <Text style={styles.sectionTitle}>{t.billTo}</Text>
               <View style={styles.addressBlock}>
                 <Text style={{ fontWeight: 'bold', marginBottom: 4 }}>{invoice.customer_name}</Text>
                 {invoice.customer_company && (
@@ -245,10 +245,10 @@ const ClassicTemplate = ({ invoice, restaurant }) => {
                   <Text>{invoice.customer_city}{invoice.customer_postal_code && `, ${invoice.customer_postal_code}`}</Text>
                 )}
                 {invoice.customer_country && <Text>{invoice.customer_country}</Text>}
-                {invoice.customer_email && <Text>Email: {invoice.customer_email}</Text>}
+                {invoice.customer_email && <Text>{t.email} {invoice.customer_email}</Text>}
                 {invoice.customer_vat_number && (
                   <Text style={{ marginTop: 6, fontWeight: 'bold' }}>
-                    VAT: {invoice.customer_vat_number}
+                    {t.vat} {invoice.customer_vat_number}
                   </Text>
                 )}
               </View>
@@ -259,10 +259,10 @@ const ClassicTemplate = ({ invoice, restaurant }) => {
         {/* Items Table */}
         <View style={styles.table}>
           <View style={styles.tableHeader}>
-            <Text style={styles.col1}>Description</Text>
-            <Text style={styles.col2}>Qty</Text>
-            <Text style={styles.col3}>Unit Price</Text>
-            <Text style={styles.col4}>Total</Text>
+            <Text style={styles.col1}>{t.description}</Text>
+            <Text style={styles.col2}>{t.qty}</Text>
+            <Text style={styles.col3}>{t.unitPrice}</Text>
+            <Text style={styles.col4}>{t.total}</Text>
           </View>
           {invoice.items.map((item, index) => (
             <View key={index} style={index % 2 === 0 ? styles.tableRow : styles.tableRowAlt}>
@@ -289,7 +289,7 @@ const ClassicTemplate = ({ invoice, restaurant }) => {
         <View style={styles.totalsSection}>
           <View style={styles.totalsBox}>
             <View style={styles.subtotalRow}>
-              <Text>Subtotal:</Text>
+              <Text>{t.subtotal}</Text>
               <Text>{formatCurrency(invoice.subtotal)} {invoice.currency}</Text>
             </View>
             <View style={styles.subtotalRow}>
@@ -297,12 +297,12 @@ const ClassicTemplate = ({ invoice, restaurant }) => {
               <Text>{formatCurrency(invoice.total_tax)} {invoice.currency}</Text>
             </View>
             <View style={styles.grandTotalRow}>
-              <Text>TOTAL:</Text>
+              <Text>{t.grandTotal}</Text>
               <Text>{formatCurrency(invoice.total)} {invoice.currency}</Text>
             </View>
             {invoice.payment_status === 'paid' && (
               <View style={styles.paymentStatus}>
-                <Text style={styles.paymentStatusText}>PAID</Text>
+                <Text style={styles.paymentStatusText}>{t.paid}</Text>
               </View>
             )}
           </View>
@@ -313,19 +313,19 @@ const ClassicTemplate = ({ invoice, restaurant }) => {
           <View style={styles.metadata}>
             {invoice.table_number && (
               <View style={styles.metadataRow}>
-                <Text style={styles.metadataLabel}>Table:</Text>
+                <Text style={styles.metadataLabel}>{t.table}</Text>
                 <Text style={styles.metadataValue}>{invoice.table_number}</Text>
               </View>
             )}
             {invoice.payment_method && (
               <View style={styles.metadataRow}>
-                <Text style={styles.metadataLabel}>Payment Method:</Text>
+                <Text style={styles.metadataLabel}>{t.paymentMethod}</Text>
                 <Text style={styles.metadataValue}>{invoice.payment_method}</Text>
               </View>
             )}
             {invoice.paid_at && (
               <View style={styles.metadataRow}>
-                <Text style={styles.metadataLabel}>Paid On:</Text>
+                <Text style={styles.metadataLabel}>{t.paidOn}</Text>
                 <Text style={styles.metadataValue}>{formatDate(invoice.paid_at)}</Text>
               </View>
             )}
@@ -335,7 +335,7 @@ const ClassicTemplate = ({ invoice, restaurant }) => {
         {/* Notes */}
         {invoice.notes && (
           <View style={{ marginTop: 20 }}>
-            <Text style={styles.sectionTitle}>Notes</Text>
+            <Text style={styles.sectionTitle}>{t.notes}</Text>
             <Text style={{ fontSize: 9, color: '#6b7280' }}>{invoice.notes}</Text>
           </View>
         )}

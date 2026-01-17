@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import DateRangeSelector from '@/components/analytics/DateRangeSelector'
 import Link from 'next/link'
+import { useTranslations } from '@/lib/i18n/LanguageContext'
 
 export default function StaffAnalyticsPage() {
+  const t = useTranslations('staffAnalytics')
   const [loading, setLoading] = useState(true)
   const [restaurant, setRestaurant] = useState(null)
   const [dateRange, setDateRange] = useState({
@@ -102,7 +104,7 @@ export default function StaffAnalyticsPage() {
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6262bd] mx-auto mb-4"></div>
-          <p className="text-slate-600">Loading...</p>
+          <p className="text-slate-600">{t('loading')}</p>
         </div>
       </div>
     )
@@ -123,8 +125,8 @@ export default function StaffAnalyticsPage() {
             </button>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-slate-800">Staff Analytics</h1>
-            <p className="text-slate-500">Performance metrics for staff at {restaurant.name}</p>
+            <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
+            <p className="text-slate-500">{t('subtitle').replace('{restaurantName}', restaurant.name)}</p>
           </div>
         </div>
       </div>
@@ -136,7 +138,7 @@ export default function StaffAnalyticsPage() {
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6262bd] mx-auto mb-4"></div>
-            <p className="text-slate-600">Loading staff analytics...</p>
+            <p className="text-slate-600">{t('loadingStaffAnalytics')}</p>
           </div>
         </div>
       ) : (
@@ -146,36 +148,36 @@ export default function StaffAnalyticsPage() {
             <>
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-                  <p className="text-slate-500 text-sm font-medium mb-1">Overall Revenue</p>
+                  <p className="text-slate-500 text-sm font-medium mb-1">{t('overallRevenue')}</p>
                   <p className="text-3xl font-bold text-green-600">
                     £{summary.total_revenue.toFixed(2)}
                   </p>
                 </div>
                 <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-                  <p className="text-slate-500 text-sm font-medium mb-1">Total Staff</p>
+                  <p className="text-slate-500 text-sm font-medium mb-1">{t('totalStaff')}</p>
                   <p className="text-3xl font-bold text-[#6262bd]">{summary.total_staff}</p>
                 </div>
                 <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-                  <p className="text-slate-500 text-sm font-medium mb-1">Avg Revenue/Staff</p>
+                  <p className="text-slate-500 text-sm font-medium mb-1">{t('avgRevenuePerStaff')}</p>
                   <p className="text-3xl font-bold text-slate-700">
                     £{summary.avg_revenue_per_staff.toFixed(2)}
                   </p>
                 </div>
                 <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-                  <p className="text-slate-500 text-sm font-medium mb-1">Total Orders</p>
+                  <p className="text-slate-500 text-sm font-medium mb-1">{t('totalOrders')}</p>
                   <p className="text-3xl font-bold text-slate-700">{summary.total_orders}</p>
                 </div>
               </div>
 
               {/* Bar vs Kitchen Ratio */}
               <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-                <h2 className="text-lg font-bold text-slate-700 mb-4">Product Type Distribution</h2>
+                <h2 className="text-lg font-bold text-slate-700 mb-4">{t('productTypeDistribution')}</h2>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <div className="flex justify-between items-center mb-2">
                       <div className="flex items-center gap-2">
                         <span className="text-2xl">🍸</span>
-                        <span className="text-sm font-medium text-slate-700">Bar Products</span>
+                        <span className="text-sm font-medium text-slate-700">{t('barProducts')}</span>
                       </div>
                       <span className="text-lg font-bold text-orange-600">
                         {summary.bar_ratio.toFixed(1)}%
@@ -188,14 +190,14 @@ export default function StaffAnalyticsPage() {
                       ></div>
                     </div>
                     <p className="text-xs text-slate-500 mt-1">
-                      {summary.bar_items_count} items sold
+                      {t('itemsSold').replace('{count}', summary.bar_items_count)}
                     </p>
                   </div>
                   <div>
                     <div className="flex justify-between items-center mb-2">
                       <div className="flex items-center gap-2">
                         <span className="text-2xl">🍳</span>
-                        <span className="text-sm font-medium text-slate-700">Kitchen Products</span>
+                        <span className="text-sm font-medium text-slate-700">{t('kitchenProducts')}</span>
                       </div>
                       <span className="text-lg font-bold text-green-600">
                         {summary.kitchen_ratio.toFixed(1)}%
@@ -208,7 +210,7 @@ export default function StaffAnalyticsPage() {
                       ></div>
                     </div>
                     <p className="text-xs text-slate-500 mt-1">
-                      {summary.kitchen_items_count} items sold
+                      {t('itemsSold').replace('{count}', summary.kitchen_items_count)}
                     </p>
                   </div>
                 </div>
@@ -219,12 +221,12 @@ export default function StaffAnalyticsPage() {
           {/* Sort Controls */}
           <div className="bg-white border-2 border-slate-100 rounded-2xl p-4">
             <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-slate-700">Sort by:</span>
+              <span className="text-sm font-medium text-slate-700">{t('sortBy')}</span>
               <div className="flex gap-2">
                 {[
-                  { value: 'revenue', label: 'Revenue' },
-                  { value: 'orders', label: 'Orders' },
-                  { value: 'avgOrder', label: 'Avg Order' }
+                  { value: 'revenue', label: t('sortRevenue') },
+                  { value: 'orders', label: t('sortOrders') },
+                  { value: 'avgOrder', label: t('sortAvgOrder') }
                 ].map((option) => (
                   <button
                     key={option.value}
@@ -246,7 +248,7 @@ export default function StaffAnalyticsPage() {
           <div className="grid gap-6">
             {sortedData.length === 0 ? (
               <div className="bg-white border-2 border-slate-100 rounded-2xl p-12 text-center">
-                <p className="text-slate-500">No data available for the selected date range</p>
+                <p className="text-slate-500">{t('noData')}</p>
               </div>
             ) : (
               sortedData.map((staff) => (
@@ -283,16 +285,16 @@ export default function StaffAnalyticsPage() {
                                 ? 'bg-green-100 text-green-700'
                                 : 'bg-[#6262bd]/10 text-[#6262bd]'
                             }`}>
-                              {staff.department === 'bar' ? '🍸 Bar' :
-                               staff.department === 'kitchen' ? '🍳 Kitchen' :
-                               '🌐 Universal'}
+                              {staff.department === 'bar' ? `🍸 ${t('bar')}` :
+                               staff.department === 'kitchen' ? `🍳 ${t('kitchen')}` :
+                               `🌐 ${t('universal')}`}
                             </span>
                           )}
                         </div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm text-slate-500">Total Revenue</p>
+                      <p className="text-sm text-slate-500">{t('totalRevenue')}</p>
                       <p className="text-2xl font-bold text-[#6262bd]">
                         £{staff.total_revenue.toFixed(2)}
                       </p>
@@ -302,58 +304,58 @@ export default function StaffAnalyticsPage() {
                   {/* Metrics Grid */}
                   <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="bg-slate-50 rounded-xl p-4">
-                      <p className="text-xs text-slate-500 font-medium mb-1">Orders Processed</p>
+                      <p className="text-xs text-slate-500 font-medium mb-1">{t('ordersProcessed')}</p>
                       <p className="text-lg font-bold text-slate-700">{staff.total_orders}</p>
                     </div>
                     <div className="bg-slate-50 rounded-xl p-4">
-                      <p className="text-xs text-slate-500 font-medium mb-1">Avg Order Value</p>
+                      <p className="text-xs text-slate-500 font-medium mb-1">{t('avgOrderValue')}</p>
                       <p className="text-lg font-bold text-slate-700">
                         £{staff.avg_order_value.toFixed(2)}
                       </p>
                     </div>
                     <div className="bg-green-50 rounded-xl p-4">
-                      <p className="text-xs text-green-600 font-medium mb-1">Tips Collected</p>
+                      <p className="text-xs text-green-600 font-medium mb-1">{t('tipsCollected')}</p>
                       <p className="text-lg font-bold text-green-700">
                         £{staff.total_tips.toFixed(2)}
                       </p>
                     </div>
                     <div className="bg-blue-50 rounded-xl p-4">
-                      <p className="text-xs text-blue-600 font-medium mb-1">Total Items Sold</p>
+                      <p className="text-xs text-blue-600 font-medium mb-1">{t('totalItemsSold')}</p>
                       <p className="text-lg font-bold text-blue-700">{staff.total_items_sold}</p>
                     </div>
                     <div className="bg-orange-50 rounded-xl p-4">
-                      <p className="text-xs text-orange-600 font-medium mb-1">👋 Waiter Response</p>
+                      <p className="text-xs text-orange-600 font-medium mb-1">{t('waiterResponse')}</p>
                       <p className="text-lg font-bold text-orange-700">
                         {staff.waiter_calls_handled > 0
-                          ? `${staff.avg_waiter_response_minutes.toFixed(1)} min`
-                          : 'N/A'}
+                          ? t('minutes').replace('{count}', staff.avg_waiter_response_minutes.toFixed(1))
+                          : t('notAvailable')}
                       </p>
                       <p className="text-xs text-orange-600 mt-1">
                         {staff.waiter_calls_handled > 0
-                          ? `${staff.waiter_calls_handled} call${staff.waiter_calls_handled !== 1 ? 's' : ''} handled`
-                          : 'No calls'}
+                          ? t('callsHandled').replace('{count}', staff.waiter_calls_handled).replace('{plural}', staff.waiter_calls_handled !== 1 ? 's' : '')
+                          : t('noCalls')}
                       </p>
                     </div>
 
                     {/* Bar vs Kitchen for this staff */}
                     <div className="bg-orange-50 rounded-xl p-4">
-                      <p className="text-xs text-orange-600 font-medium mb-1">🍸 Bar Items</p>
+                      <p className="text-xs text-orange-600 font-medium mb-1">{t('barItems')}</p>
                       <p className="text-lg font-bold text-orange-700">
-                        {staff.bar_items_sold} ({staff.bar_ratio.toFixed(0)}%)
+                        {t('itemsWithPercent').replace('{count}', staff.bar_items_sold).replace('{percent}', staff.bar_ratio.toFixed(0))}
                       </p>
                     </div>
                     <div className="bg-green-50 rounded-xl p-4">
-                      <p className="text-xs text-green-600 font-medium mb-1">🍳 Kitchen Items</p>
+                      <p className="text-xs text-green-600 font-medium mb-1">{t('kitchenItems')}</p>
                       <p className="text-lg font-bold text-green-700">
-                        {staff.kitchen_items_sold} ({staff.kitchen_ratio.toFixed(0)}%)
+                        {t('itemsWithPercent').replace('{count}', staff.kitchen_items_sold).replace('{percent}', staff.kitchen_ratio.toFixed(0))}
                       </p>
                     </div>
                     <div className="bg-slate-50 rounded-xl p-4 col-span-2">
-                      <p className="text-xs text-slate-500 font-medium mb-1">Performance</p>
+                      <p className="text-xs text-slate-500 font-medium mb-1">{t('performance')}</p>
                       <p className="text-sm text-slate-700">
                         {staff.performance === 'high'
-                          ? '⭐ High Performer - Above average revenue'
-                          : '📊 Standard Performance'}
+                          ? t('highPerformer')
+                          : t('standardPerformance')}
                       </p>
                     </div>
                   </div>

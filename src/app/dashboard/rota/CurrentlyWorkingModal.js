@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from '@/lib/i18n/LanguageContext';
 
 export default function CurrentlyWorkingModal({ restaurant, onClose }) {
+  const t = useTranslations('rota.currentlyWorkingModal');
   const [activeStaff, setActiveStaff] = useState([]);
   const [loading, setLoading] = useState(true);
   const [clockingOut, setClockingOut] = useState(null);
@@ -59,7 +61,7 @@ export default function CurrentlyWorkingModal({ restaurant, onClose }) {
   };
 
   const formatTime = (timeString) => {
-    if (!timeString) return 'N/A';
+    if (!timeString) return t('na');
     const date = new Date(timeString);
     return date.toLocaleTimeString('en-GB', {
       hour: '2-digit',
@@ -68,7 +70,7 @@ export default function CurrentlyWorkingModal({ restaurant, onClose }) {
   };
 
   const formatTimeFromString = (timeString) => {
-    if (!timeString) return 'N/A';
+    if (!timeString) return t('na');
     // Time is stored as "HH:mm:ss"
     return timeString.substring(0, 5);
   };
@@ -84,7 +86,7 @@ export default function CurrentlyWorkingModal({ restaurant, onClose }) {
   };
 
   const handleManualClockOut = async (attendance) => {
-    if (!confirm(`Clock out ${attendance.staff?.name}?\n\nThis will set their clock out time to now.`)) {
+    if (!confirm(t('confirmClockOut').replace('{name}', attendance.staff?.name))) {
       return;
     }
 
@@ -110,7 +112,7 @@ export default function CurrentlyWorkingModal({ restaurant, onClose }) {
       await fetchActiveStaff();
     } catch (error) {
       console.error('Error clocking out staff:', error);
-      alert(`Error: ${error.message}`);
+      alert(t('errorClockOut').replace('{message}', error.message));
     }
 
     setClockingOut(null);
@@ -120,20 +122,20 @@ export default function CurrentlyWorkingModal({ restaurant, onClose }) {
     if (attendance.clock_out) {
       return (
         <span className="px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs rounded-full font-medium">
-          Completed
+          {t('statusCompleted')}
         </span>
       );
     }
     if (attendance.break_start && !attendance.break_end) {
       return (
         <span className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 text-xs rounded-full font-medium">
-          On Break
+          {t('statusOnBreak')}
         </span>
       );
     }
     return (
       <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs rounded-full font-medium">
-        Working
+        {t('statusWorking')}
       </span>
     );
   };
@@ -143,9 +145,9 @@ export default function CurrentlyWorkingModal({ restaurant, onClose }) {
       <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 max-w-5xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">Today's Attendance</h2>
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">{t('title')}</h2>
             <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-              Staff members who worked today (currently working and completed shifts)
+              {t('subtitle')}
             </p>
           </div>
           <button
@@ -159,14 +161,14 @@ export default function CurrentlyWorkingModal({ restaurant, onClose }) {
         {loading ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6262bd] mx-auto"></div>
-            <p className="text-slate-500 dark:text-slate-400 mt-4">Loading...</p>
+            <p className="text-slate-500 dark:text-slate-400 mt-4">{t('loading')}</p>
           </div>
         ) : activeStaff.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">👥</div>
-            <p className="text-slate-600 dark:text-slate-300 text-lg font-medium">No attendance records for today</p>
+            <p className="text-slate-600 dark:text-slate-300 text-lg font-medium">{t('noRecordsTitle')}</p>
             <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">
-              Staff members will appear here when they clock in for their shifts
+              {t('noRecordsSubtitle')}
             </p>
           </div>
         ) : (
@@ -174,15 +176,15 @@ export default function CurrentlyWorkingModal({ restaurant, onClose }) {
             <table className="w-full">
               <thead>
                 <tr className="border-b-2 border-slate-200 dark:border-slate-700">
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">Staff</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">Role</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">Department</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">Status</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">Clocked In</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">Clocked Out</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">Scheduled Out</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">Duration</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">Actions</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">{t('staff')}</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">{t('role')}</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">{t('department')}</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">{t('status')}</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">{t('clockedIn')}</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">{t('clockedOut')}</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">{t('scheduledOut')}</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">{t('duration')}</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300">{t('actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -193,17 +195,17 @@ export default function CurrentlyWorkingModal({ restaurant, onClose }) {
                   >
                     <td className="py-4 px-4">
                       <div className="font-medium text-slate-800 dark:text-slate-200">
-                        {attendance.staff?.name || 'Unknown'}
+                        {attendance.staff?.name || t('unknown')}
                       </div>
                     </td>
                     <td className="py-4 px-4">
                       <span className="text-slate-600 dark:text-slate-400 text-sm">
-                        {attendance.shift?.role_required || attendance.staff?.role || 'N/A'}
+                        {attendance.shift?.role_required || attendance.staff?.role || t('na')}
                       </span>
                     </td>
                     <td className="py-4 px-4">
                       <span className="text-slate-600 dark:text-slate-400 text-sm capitalize">
-                        {attendance.staff?.department || attendance.shift?.department || 'N/A'}
+                        {attendance.staff?.department || attendance.shift?.department || t('na')}
                       </span>
                     </td>
                     <td className="py-4 px-4">
@@ -216,7 +218,7 @@ export default function CurrentlyWorkingModal({ restaurant, onClose }) {
                         </div>
                         {attendance.break_start && !attendance.break_end && (
                           <div className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
-                            Break: {formatTime(attendance.break_start)}
+                            {t('break')}: {formatTime(attendance.break_start)}
                           </div>
                         )}
                       </div>
@@ -228,7 +230,7 @@ export default function CurrentlyWorkingModal({ restaurant, onClose }) {
                             {formatTime(attendance.clock_out)}
                           </div>
                         ) : (
-                          <span className="text-slate-400 dark:text-slate-500 italic">Still working</span>
+                          <span className="text-slate-400 dark:text-slate-500 italic">{t('stillWorking')}</span>
                         )}
                       </div>
                     </td>
@@ -251,7 +253,7 @@ export default function CurrentlyWorkingModal({ restaurant, onClose }) {
                           disabled={clockingOut === attendance.id}
                           className="px-3 py-1.5 bg-red-600 text-white text-xs rounded-lg hover:bg-red-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          {clockingOut === attendance.id ? 'Clocking Out...' : 'Clock Out'}
+                          {clockingOut === attendance.id ? t('clockingOut') : t('clockOut')}
                         </button>
                       )}
                     </td>
@@ -266,19 +268,19 @@ export default function CurrentlyWorkingModal({ restaurant, onClose }) {
           <div className="text-sm text-slate-500 dark:text-slate-400">
             <span className="font-medium text-slate-700 dark:text-slate-300">
               {activeStaff.filter(att => !att.clock_out).length}
-            </span> currently working • {' '}
+            </span> {t('currentlyWorking')} • {' '}
             <span className="font-medium text-slate-700 dark:text-slate-300">
               {activeStaff.filter(att => att.clock_out).length}
-            </span> completed • {' '}
+            </span> {t('completed')} • {' '}
             <span className="font-medium text-slate-700 dark:text-slate-300">
               {activeStaff.length}
-            </span> total today
+            </span> {t('totalToday')}
           </div>
           <button
             onClick={onClose}
             className="px-6 py-3 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors font-medium"
           >
-            Close
+            {t('close')}
           </button>
         </div>
       </div>

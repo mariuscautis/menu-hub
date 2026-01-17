@@ -4,7 +4,7 @@ const styles = StyleSheet.create({
   page: {
     padding: 50,
     fontSize: 9,
-    fontFamily: 'Helvetica',
+    fontFamily: 'Roboto',
     color: '#374151',
     backgroundColor: '#ffffff',
   },
@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const ModernMinimalTemplate = ({ invoice, restaurant }) => {
+const ModernMinimalTemplate = ({ invoice, restaurant, t }) => {
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-GB', {
@@ -205,19 +205,19 @@ const ModernMinimalTemplate = ({ invoice, restaurant }) => {
               <Image src={restaurant.logo_url} style={styles.logo} />
             </View>
           )}
-          <Text style={styles.title}>INVOICE</Text>
+          <Text style={styles.title}>{t.invoice}</Text>
           <View style={styles.invoiceInfo}>
             <View>
-              <Text style={styles.infoLabel}>Invoice Number</Text>
+              <Text style={styles.infoLabel}>{t.invoiceNumberAlt}</Text>
               <Text style={styles.infoValue}>{invoice.invoice_number}</Text>
             </View>
             <View>
-              <Text style={styles.infoLabel}>Invoice Date</Text>
+              <Text style={styles.infoLabel}>{t.dateAlt}</Text>
               <Text style={styles.infoValue}>{formatDate(invoice.invoice_date)}</Text>
             </View>
             {invoice.due_date && (
               <View>
-                <Text style={styles.infoLabel}>Due Date</Text>
+                <Text style={styles.infoLabel}>{t.dueDateAlt}</Text>
                 <Text style={styles.infoValue}>{formatDate(invoice.due_date)}</Text>
               </View>
             )}
@@ -228,7 +228,7 @@ const ModernMinimalTemplate = ({ invoice, restaurant }) => {
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 40 }}>
           {/* From (Business) */}
           <View style={{ width: '48%' }}>
-            <Text style={styles.sectionTitle}>From</Text>
+            <Text style={styles.sectionTitle}>{t.from}</Text>
             <View style={styles.addressBlock}>
               <Text style={styles.addressName}>{invoice.business_name}</Text>
               {invoice.business_address && <Text>{invoice.business_address}</Text>}
@@ -240,11 +240,11 @@ const ModernMinimalTemplate = ({ invoice, restaurant }) => {
               {invoice.business_email && <Text>{invoice.business_email}</Text>}
               {invoice.business_vat_number && (
                 <Text style={{ marginTop: 8, fontSize: 8, color: '#6b7280' }}>
-                  VAT: {invoice.business_vat_number}
+                  {t.vat} {invoice.business_vat_number}
                 </Text>
               )}
               {invoice.business_tax_id && (
-                <Text style={{ fontSize: 8, color: '#6b7280' }}>Tax ID: {invoice.business_tax_id}</Text>
+                <Text style={{ fontSize: 8, color: '#6b7280' }}>{t.taxId} {invoice.business_tax_id}</Text>
               )}
             </View>
           </View>
@@ -252,7 +252,7 @@ const ModernMinimalTemplate = ({ invoice, restaurant }) => {
           {/* To (Customer) */}
           {invoice.customer_name && (
             <View style={{ width: '48%' }}>
-              <Text style={styles.sectionTitle}>Bill To</Text>
+              <Text style={styles.sectionTitle}>{t.billTo}</Text>
               <View style={styles.addressBlock}>
                 <Text style={styles.addressName}>{invoice.customer_name}</Text>
                 {invoice.customer_company && <Text>{invoice.customer_company}</Text>}
@@ -264,7 +264,7 @@ const ModernMinimalTemplate = ({ invoice, restaurant }) => {
                 {invoice.customer_email && <Text>{invoice.customer_email}</Text>}
                 {invoice.customer_vat_number && (
                   <Text style={{ marginTop: 8, fontSize: 8, color: '#6b7280' }}>
-                    VAT: {invoice.customer_vat_number}
+                    {t.vat} {invoice.customer_vat_number}
                   </Text>
                 )}
               </View>
@@ -275,10 +275,10 @@ const ModernMinimalTemplate = ({ invoice, restaurant }) => {
         {/* Items Table */}
         <View style={styles.table}>
           <View style={styles.tableHeader}>
-            <Text style={[styles.tableHeaderText, styles.col1]}>Description</Text>
-            <Text style={[styles.tableHeaderText, styles.col2]}>Qty</Text>
-            <Text style={[styles.tableHeaderText, styles.col3]}>Unit Price</Text>
-            <Text style={[styles.tableHeaderText, styles.col4]}>Total</Text>
+            <Text style={[styles.tableHeaderText, styles.col1]}>{t.description}</Text>
+            <Text style={[styles.tableHeaderText, styles.col2]}>{t.qty}</Text>
+            <Text style={[styles.tableHeaderText, styles.col3]}>{t.unitPrice}</Text>
+            <Text style={[styles.tableHeaderText, styles.col4]}>{t.total}</Text>
           </View>
           {invoice.items.map((item, index) => (
             <View key={index} style={styles.tableRow}>
@@ -303,7 +303,7 @@ const ModernMinimalTemplate = ({ invoice, restaurant }) => {
         <View style={styles.totalsSection}>
           <View style={styles.totalsBox}>
             <View style={styles.totalRow}>
-              <Text>Subtotal</Text>
+              <Text>{t.subtotalAlt}</Text>
               <Text>{formatCurrency(invoice.subtotal)} {invoice.currency}</Text>
             </View>
             <View style={styles.totalRow}>
@@ -311,12 +311,12 @@ const ModernMinimalTemplate = ({ invoice, restaurant }) => {
               <Text>{formatCurrency(invoice.total_tax)} {invoice.currency}</Text>
             </View>
             <View style={styles.grandTotalRow}>
-              <Text>Total</Text>
+              <Text>{t.totalAlt}</Text>
               <Text>{formatCurrency(invoice.total)} {invoice.currency}</Text>
             </View>
             {invoice.payment_status === 'paid' && (
               <View style={styles.paymentStatus}>
-                <Text style={styles.paymentStatusText}>Paid</Text>
+                <Text style={styles.paymentStatusText}>{t.paid}</Text>
               </View>
             )}
           </View>
@@ -327,19 +327,19 @@ const ModernMinimalTemplate = ({ invoice, restaurant }) => {
           <View style={styles.metadata}>
             {invoice.table_number && (
               <View style={styles.metadataRow}>
-                <Text style={styles.metadataLabel}>Table</Text>
+                <Text style={styles.metadataLabel}>{t.tableAlt}</Text>
                 <Text style={styles.metadataValue}>{invoice.table_number}</Text>
               </View>
             )}
             {invoice.payment_method && (
               <View style={styles.metadataRow}>
-                <Text style={styles.metadataLabel}>Payment Method</Text>
+                <Text style={styles.metadataLabel}>{t.paymentMethodAlt}</Text>
                 <Text style={styles.metadataValue}>{invoice.payment_method}</Text>
               </View>
             )}
             {invoice.paid_at && (
               <View style={styles.metadataRow}>
-                <Text style={styles.metadataLabel}>Paid On</Text>
+                <Text style={styles.metadataLabel}>{t.paidOnAlt}</Text>
                 <Text style={styles.metadataValue}>{formatDate(invoice.paid_at)}</Text>
               </View>
             )}
@@ -349,7 +349,7 @@ const ModernMinimalTemplate = ({ invoice, restaurant }) => {
         {/* Notes */}
         {invoice.notes && (
           <View style={{ marginTop: 25 }}>
-            <Text style={styles.sectionTitle}>Notes</Text>
+            <Text style={styles.sectionTitle}>{t.notes}</Text>
             <Text style={{ fontSize: 8, color: '#6b7280', lineHeight: 1.5 }}>{invoice.notes}</Text>
           </View>
         )}
