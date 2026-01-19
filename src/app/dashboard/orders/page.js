@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import InvoiceClientModal from '@/components/invoices/InvoiceClientModal'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import { generateInvoicePdfBase64, downloadInvoicePdf } from '@/lib/invoicePdfGenerator'
 
 export default function Orders() {
   const t = useTranslations('orders')
@@ -378,64 +379,51 @@ export default function Orders() {
     setGeneratingInvoice(true)
 
     try {
+      // First, generate invoice data from API
+      const generateResponse = await fetch('/api/invoices/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: invoiceOrderId,
+          clientId,
+          clientData
+        })
+      })
+
+      if (!generateResponse.ok) {
+        const errorData = await generateResponse.json().catch(() => ({ error: 'Unknown error' }))
+        throw new Error(errorData.error || `Failed to generate invoice (${generateResponse.status})`)
+      }
+
+      const { invoice, restaurant: invoiceRestaurant } = await generateResponse.json()
+
       if (action === 'email') {
-        // Send invoice via email
-        const response = await fetch('/api/invoices/email', {
+        // Generate PDF client-side and send via email API
+        const pdfBase64 = await generateInvoicePdfBase64(invoice, invoiceRestaurant)
+
+        const emailResponse = await fetch('/api/invoices/email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             orderId: invoiceOrderId,
             clientId,
-            clientData
+            clientData,
+            pdfBase64
           })
         })
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
-          throw new Error(errorData.error || `Failed to send invoice email (${response.status})`)
+        if (!emailResponse.ok) {
+          const errorData = await emailResponse.json().catch(() => ({ error: 'Unknown error' }))
+          throw new Error(errorData.error || `Failed to send invoice email (${emailResponse.status})`)
         }
-
-        const result = await response.json()
 
         // Close modal
         setShowInvoiceModal(false)
         setInvoiceOrderId(null)
         showNotification('success', t('invoiceEmailSuccess').replace('{email}', clientData.email))
       } else {
-        // Download invoice as PDF
-        const response = await fetch('/api/invoices/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            orderId: invoiceOrderId,
-            clientId,
-            clientData
-          })
-        })
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
-          throw new Error(errorData.error || `Failed to generate invoice (${response.status})`)
-        }
-
-        // Download PDF
-        const blob = await response.blob()
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-
-        const contentDisposition = response.headers.get('content-disposition')
-        let filename = 'invoice.pdf'
-        if (contentDisposition) {
-          const filenameMatch = contentDisposition.match(/filename="(.+)"/)
-          if (filenameMatch) filename = filenameMatch[1]
-        }
-
-        a.download = filename
-        document.body.appendChild(a)
-        a.click()
-        window.URL.revokeObjectURL(url)
-        document.body.removeChild(a)
+        // Download invoice as PDF (generated client-side)
+        await downloadInvoicePdf(invoice, invoiceRestaurant)
 
         // Close modal
         setShowInvoiceModal(false)
