@@ -4,19 +4,22 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 
-export default function StockManagement() {
-  const t = useTranslations('stock')
+export default function InventoryManagement() {
+  const t = useTranslations('inventory')
   const [products, setProducts] = useState([])
   const [entries, setEntries] = useState([])
   const [restaurant, setRestaurant] = useState(null)
   const [userEmail, setUserEmail] = useState('')
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('products')
-  const [filterCategory, setFilterCategory] = useState('all')
-  const [filterStockType, setFilterStockType] = useState('all') // 'all', 'low', 'kitchen', 'bar'
+  const [activeTab, setActiveTab] = useState('items')
+  const [filterStockType, setFilterStockType] = useState('all') // 'all', 'low'
   const [searchQuery, setSearchQuery] = useState('')
-  const [sortBy, setSortBy] = useState('name') // 'name', 'stock-low', 'stock-high'
-  const [taxCategories, setTaxCategories] = useState([])
+  const [sortBy, setSortBy] = useState('name')
+
+  // Invoice states
+  const [purchasingInvoices, setPurchasingInvoices] = useState([])
+  const [showInvoiceDropdown, setShowInvoiceDropdown] = useState(false)
+  const [invoiceSearch, setInvoiceSearch] = useState('')
 
   // Modal states
   const [showProductModal, setShowProductModal] = useState(false)
@@ -27,20 +30,13 @@ export default function StockManagement() {
   const [showStockDropdown, setShowStockDropdown] = useState(false)
   const [stockProductSearch, setStockProductSearch] = useState('')
 
-  // Invoice dropdown states
-  const [purchasingInvoices, setPurchasingInvoices] = useState([])
-  const [showInvoiceDropdown, setShowInvoiceDropdown] = useState(false)
-  const [invoiceSearch, setInvoiceSearch] = useState('')
-
   // Product form data
   const [productForm, setProductForm] = useState({
     name: '',
     brand: '',
-    category: 'kitchen',
-    base_unit: 'grams',
-    input_unit_type: 'kg',
-    units_to_base_multiplier: 1000,
-    tax_category_id: ''
+    description: '',
+    unit_type: 'units',
+    min_stock_level: 0
   })
 
   // Stock entry form data
@@ -56,7 +52,7 @@ export default function StockManagement() {
     fetchData()
   }, [])
 
-  // Click outside to close stock product dropdown
+  // Click outside to close dropdowns
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (showStockDropdown && !event.target.closest('.stock-dropdown-container')) {
@@ -71,41 +67,35 @@ export default function StockManagement() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [showStockDropdown, showInvoiceDropdown])
 
-  // Real-time subscriptions for live updates
+  // Real-time subscriptions
   useEffect(() => {
     if (!restaurant) return
 
-    // Subscribe to stock product changes
     const productsChannel = supabase
-      .channel('stock-products-realtime')
+      .channel('inventory-products-realtime')
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
-          table: 'stock_products',
+          table: 'inventory_products',
           filter: `restaurant_id=eq.${restaurant.id}`
         },
-        () => {
-          fetchData()
-        }
+        () => fetchData()
       )
       .subscribe()
 
-    // Subscribe to stock entry changes
     const entriesChannel = supabase
-      .channel('stock-entries-realtime')
+      .channel('inventory-entries-realtime')
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'stock_entries',
+          table: 'inventory_entries',
           filter: `restaurant_id=eq.${restaurant.id}`
         },
-        () => {
-          fetchData()
-        }
+        () => fetchData()
       )
       .subscribe()
 
@@ -122,7 +112,6 @@ export default function StockManagement() {
     setUserEmail(user.email)
     let restaurantData = null
 
-    // Check for staff session (PIN login)
     const staffSessionData = localStorage.getItem('staff_session')
     if (staffSessionData) {
       try {
@@ -135,7 +124,6 @@ export default function StockManagement() {
     }
 
     if (!restaurantData) {
-      // Check if owner
       const { data: ownedRestaurant } = await supabase
         .from('restaurants')
         .select('*')
@@ -145,7 +133,6 @@ export default function StockManagement() {
       if (ownedRestaurant) {
         restaurantData = ownedRestaurant
       } else {
-        // Check if staff
         const { data: staffRecords } = await supabase
           .from('staff')
           .select('*, restaurants(*)')
@@ -166,23 +153,10 @@ export default function StockManagement() {
 
     setRestaurant(restaurantData)
 
-    // Fetch tax categories
-    const { data: taxCatsData } = await supabase
-      .from('product_tax_categories')
-      .select('*')
-      .eq('restaurant_id', restaurantData.id)
-      .eq('is_active', true)
-      .order('name')
-
-    setTaxCategories(taxCatsData || [])
-
-    // Fetch products with tax category info
+    // Fetch inventory products
     const { data: productsData } = await supabase
-      .from('stock_products')
-      .select(`
-        *,
-        product_tax_categories(id, name, rate)
-      `)
+      .from('inventory_products')
+      .select('*')
       .eq('restaurant_id', restaurantData.id)
       .order('name')
 
@@ -190,10 +164,10 @@ export default function StockManagement() {
 
     // Fetch recent entries (last 50)
     const { data: entriesData } = await supabase
-      .from('stock_entries')
+      .from('inventory_entries')
       .select(`
         *,
-        stock_products(name, brand, input_unit_type)
+        inventory_products(name, brand, unit_type)
       `)
       .eq('restaurant_id', restaurantData.id)
       .order('created_at', { ascending: false })
@@ -201,7 +175,7 @@ export default function StockManagement() {
 
     setEntries(entriesData || [])
 
-    // Fetch recent purchasing invoices (last 5 for dropdown)
+    // Fetch recent purchasing invoices
     const { data: invoicesData } = await supabase
       .from('purchasing_invoices')
       .select('id, reference_number, supplier_name, invoice_date')
@@ -213,63 +187,24 @@ export default function StockManagement() {
     setLoading(false)
   }
 
-  const handleProductFormChange = (e) => {
-    const { name, value } = e.target
-    let updatedForm = { ...productForm, [name]: value }
-
-    // Auto-calculate multiplier when input_unit_type or base_unit changes
-    if (name === 'input_unit_type' || name === 'base_unit') {
-      updatedForm = calculateMultiplier(updatedForm)
-    }
-
-    setProductForm(updatedForm)
-  }
-
-  const calculateMultiplier = (form) => {
-    const { input_unit_type, base_unit } = form
-    let multiplier = 1
-
-    // Weight conversions
-    if (base_unit === 'grams') {
-      if (input_unit_type === 'kg') multiplier = 1000
-      else if (input_unit_type === 'grams') multiplier = 1
-    }
-
-    // Volume conversions
-    if (base_unit === 'ml') {
-      if (input_unit_type === 'liters') multiplier = 1000
-      else if (input_unit_type === 'ml') multiplier = 1
-      // For bottles, cans, units - user will specify custom amount
-      else if (['bottles', 'cans', 'units'].includes(input_unit_type)) {
-        multiplier = form.units_to_base_multiplier || 750 // Default to 750ml for bottles
-      }
-    }
-
-    return { ...form, units_to_base_multiplier: multiplier }
-  }
-
   const openProductModal = (product = null) => {
     if (product) {
       setEditingProduct(product)
       setProductForm({
         name: product.name,
         brand: product.brand || '',
-        category: product.category,
-        base_unit: product.base_unit,
-        input_unit_type: product.input_unit_type,
-        units_to_base_multiplier: product.units_to_base_multiplier,
-        tax_category_id: product.tax_category_id || ''
+        description: product.description || '',
+        unit_type: product.unit_type,
+        min_stock_level: product.min_stock_level || 0
       })
     } else {
       setEditingProduct(null)
       setProductForm({
         name: '',
         brand: '',
-        category: 'kitchen',
-        base_unit: 'grams',
-        input_unit_type: 'kg',
-        units_to_base_multiplier: 1000,
-        tax_category_id: ''
+        description: '',
+        unit_type: 'units',
+        min_stock_level: 0
       })
     }
     setShowProductModal(true)
@@ -307,21 +242,19 @@ export default function StockManagement() {
       restaurant_id: restaurant.id,
       name: productForm.name,
       brand: productForm.brand || null,
-      category: productForm.category,
-      base_unit: productForm.base_unit,
-      input_unit_type: productForm.input_unit_type,
-      units_to_base_multiplier: parseFloat(productForm.units_to_base_multiplier),
-      tax_category_id: productForm.tax_category_id || null
+      description: productForm.description || null,
+      unit_type: productForm.unit_type,
+      min_stock_level: parseInt(productForm.min_stock_level) || 0
     }
 
     if (editingProduct) {
       await supabase
-        .from('stock_products')
+        .from('inventory_products')
         .update(productData)
         .eq('id', editingProduct.id)
     } else {
       await supabase
-        .from('stock_products')
+        .from('inventory_products')
         .insert(productData)
     }
 
@@ -335,39 +268,18 @@ export default function StockManagement() {
     const product = products.find(p => p.id === stockForm.product_id)
     if (!product) return
 
-    const quantity = parseFloat(stockForm.quantity)
-    const purchasePrice = parseFloat(stockForm.purchase_price)
+    const quantity = parseInt(stockForm.quantity)
+    const purchasePrice = stockForm.purchase_price ? parseFloat(stockForm.purchase_price) : null
 
-    // Validation
     if (isNaN(quantity) || quantity <= 0) {
       alert('Please enter a valid quantity')
       return
     }
-    if (isNaN(purchasePrice) || purchasePrice <= 0) {
-      alert('Please enter a valid purchase price')
-      return
-    }
-
-    // Calculate cost per base unit
-    // Example: If adding 5 kg at $50, and multiplier is 1000 (kg to grams)
-    // Total base units = 5 * 1000 = 5000 grams
-    // Cost per gram = $50 / 5000 = $0.01
-    const totalBaseUnits = quantity * product.units_to_base_multiplier
-    const costPerBaseUnit = purchasePrice / totalBaseUnits
-
-    console.log('Stock entry calculation:', {
-      quantity,
-      purchasePrice,
-      multiplier: product.units_to_base_multiplier,
-      totalBaseUnits,
-      costPerBaseUnit
-    })
 
     const entryData = {
       restaurant_id: restaurant.id,
       product_id: stockForm.product_id,
       quantity: quantity,
-      unit_used: product.input_unit_type,
       purchase_price: purchasePrice,
       added_by_email: userEmail,
       notes: stockForm.notes || null,
@@ -375,32 +287,14 @@ export default function StockManagement() {
     }
 
     const { error: entryError } = await supabase
-      .from('stock_entries')
+      .from('inventory_entries')
       .insert(entryData)
 
     if (entryError) {
-      console.error('Error inserting stock entry:', entryError)
+      console.error('Error inserting inventory entry:', entryError)
       alert('Failed to add stock entry: ' + entryError.message)
       return
     }
-
-    // Update the product's cost tracking
-    const { error: updateError } = await supabase
-      .from('stock_products')
-      .update({
-        cost_per_base_unit: costPerBaseUnit,
-        last_purchase_price: purchasePrice,
-        last_purchase_date: new Date().toISOString()
-      })
-      .eq('id', stockForm.product_id)
-
-    if (updateError) {
-      console.error('Error updating product cost:', updateError)
-      alert('Failed to update product cost: ' + updateError.message)
-      return
-    }
-
-    console.log('Stock added successfully. Cost per base unit:', costPerBaseUnit)
 
     setShowStockModal(false)
     setStockForm({ product_id: '', quantity: '', purchase_price: '', notes: '', purchasing_invoice_id: '' })
@@ -408,50 +302,21 @@ export default function StockManagement() {
   }
 
   const deleteProduct = async (id) => {
-    if (!confirm('Are you sure? This will delete all stock entries for this product.')) return
+    if (!confirm('Are you sure? This will delete all entries for this item.')) return
 
     await supabase
-      .from('stock_products')
+      .from('inventory_products')
       .delete()
       .eq('id', id)
 
     fetchData()
   }
 
-  const formatStock = (amount, unit) => {
-    if (amount === 0) return `0 ${unit}`
-    if (amount >= 1000 && unit === 'grams') {
-      return `${(amount / 1000).toFixed(2)} kg`
-    }
-    if (amount >= 1000 && unit === 'ml') {
-      return `${(amount / 1000).toFixed(2)} L`
-    }
-    return `${amount.toFixed(2)} ${unit}`
-  }
-
-  const getUnitLabel = (unitType) => {
-    const labels = {
-      'kg': 'Kilograms',
-      'grams': 'Grams',
-      'liters': 'Liters',
-      'ml': 'Milliliters',
-      'bottles': 'Bottles',
-      'cans': 'Cans',
-      'units': 'Units'
-    }
-    return labels[unitType] || unitType
-  }
-
   // Filter and search products
   const filteredProducts = products
     .filter(p => {
-      // Stats card filter (Total, Low Stock, Kitchen, Bar)
-      if (filterStockType === 'low' && p.current_stock >= 100) return false
-      if (filterStockType === 'kitchen' && p.category !== 'kitchen') return false
-      if (filterStockType === 'bar' && p.category !== 'bar') return false
-
-      // Category filter (from the smaller buttons below)
-      if (filterCategory !== 'all' && p.category !== filterCategory) return false
+      // Stats card filter
+      if (filterStockType === 'low' && p.current_stock >= p.min_stock_level) return false
 
       // Search filter
       if (searchQuery) {
@@ -464,23 +329,22 @@ export default function StockManagement() {
       return true
     })
     .sort((a, b) => {
-      // Sort logic
-      if (sortBy === 'name') {
-        return a.name.localeCompare(b.name)
-      } else if (sortBy === 'stock-low') {
-        return a.current_stock - b.current_stock
-      } else if (sortBy === 'stock-high') {
-        return b.current_stock - a.current_stock
-      }
+      if (sortBy === 'name') return a.name.localeCompare(b.name)
+      if (sortBy === 'stock-low') return a.current_stock - b.current_stock
+      if (sortBy === 'stock-high') return b.current_stock - a.current_stock
       return 0
     })
 
   // Calculate stats
   const stats = {
-    totalProducts: products.length,
-    lowStock: products.filter(p => p.current_stock < 100).length,
-    kitchenItems: products.filter(p => p.category === 'kitchen').length,
-    barItems: products.filter(p => p.category === 'bar').length
+    totalItems: products.length,
+    lowStock: products.filter(p => p.current_stock < p.min_stock_level).length,
+    recentAdditions: entries.filter(e => {
+      const date = new Date(e.created_at)
+      const weekAgo = new Date()
+      weekAgo.setDate(weekAgo.getDate() - 7)
+      return date >= weekAgo
+    }).length
   }
 
   if (loading) {
@@ -511,7 +375,7 @@ export default function StockManagement() {
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
             </svg>
-            {t('newProduct')}
+            {t('newItem')}
           </button>
         </div>
       </div>
@@ -519,14 +383,14 @@ export default function StockManagement() {
       {/* Tabs */}
       <div className="flex gap-2 mb-6 border-b-2 border-slate-100">
         <button
-          onClick={() => setActiveTab('products')}
+          onClick={() => setActiveTab('items')}
           className={`px-6 py-3 font-medium transition-colors ${
-            activeTab === 'products'
+            activeTab === 'items'
               ? 'text-[#6262bd] border-b-2 border-[#6262bd] -mb-0.5'
               : 'text-slate-500 hover:text-slate-700'
           }`}
         >
-          {t('products')} ({products.length})
+          {t('items')} ({products.length})
         </button>
         <button
           onClick={() => setActiveTab('history')}
@@ -540,11 +404,11 @@ export default function StockManagement() {
         </button>
       </div>
 
-      {/* Products Tab */}
-      {activeTab === 'products' && (
+      {/* Items Tab */}
+      {activeTab === 'items' && (
         <div>
           {/* Stats Cards - Clickable Filters */}
-          <div className="grid grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-3 gap-4 mb-6">
             <button
               onClick={() => setFilterStockType('all')}
               className={`bg-white border-2 rounded-xl p-4 text-left transition-all ${
@@ -553,8 +417,8 @@ export default function StockManagement() {
                   : 'border-slate-100 hover:border-slate-200'
               }`}
             >
-              <p className="text-slate-500 text-sm font-medium mb-1">{t('totalProducts')}</p>
-              <p className="text-2xl font-bold text-[#6262bd]">{stats.totalProducts}</p>
+              <p className="text-slate-500 text-sm font-medium mb-1">{t('totalItems')}</p>
+              <p className="text-2xl font-bold text-[#6262bd]">{stats.totalItems}</p>
             </button>
             <button
               onClick={() => setFilterStockType('low')}
@@ -567,28 +431,10 @@ export default function StockManagement() {
               <p className="text-slate-500 text-sm font-medium mb-1">{t('lowStockItems')}</p>
               <p className="text-2xl font-bold text-amber-600">{stats.lowStock}</p>
             </button>
-            <button
-              onClick={() => setFilterStockType('kitchen')}
-              className={`bg-white border-2 rounded-xl p-4 text-left transition-all ${
-                filterStockType === 'kitchen'
-                  ? 'border-green-500 ring-2 ring-green-500/20'
-                  : 'border-slate-100 hover:border-slate-200'
-              }`}
-            >
-              <p className="text-slate-500 text-sm font-medium mb-1">{t('kitchenItems')}</p>
-              <p className="text-2xl font-bold text-green-600">{stats.kitchenItems}</p>
-            </button>
-            <button
-              onClick={() => setFilterStockType('bar')}
-              className={`bg-white border-2 rounded-xl p-4 text-left transition-all ${
-                filterStockType === 'bar'
-                  ? 'border-orange-500 ring-2 ring-orange-500/20'
-                  : 'border-slate-100 hover:border-slate-200'
-              }`}
-            >
-              <p className="text-slate-500 text-sm font-medium mb-1">{t('barItems')}</p>
-              <p className="text-2xl font-bold text-orange-600">{stats.barItems}</p>
-            </button>
+            <div className="bg-white border-2 border-slate-100 rounded-xl p-4">
+              <p className="text-slate-500 text-sm font-medium mb-1">{t('recentAdditions')}</p>
+              <p className="text-2xl font-bold text-green-600">{stats.recentAdditions}</p>
+            </div>
           </div>
 
           {/* Search and Sort Bar */}
@@ -626,44 +472,10 @@ export default function StockManagement() {
             </select>
           </div>
 
-          {/* Category Filter */}
-          <div className="mb-6 flex gap-2">
-            <button
-              onClick={() => setFilterCategory('all')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                filterCategory === 'all'
-                  ? 'bg-[#6262bd] text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
-            >
-              {t('all')}
-            </button>
-            <button
-              onClick={() => setFilterCategory('kitchen')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                filterCategory === 'kitchen'
-                  ? 'bg-green-600 text-white'
-                  : 'bg-green-100 text-green-700 hover:bg-green-200'
-              }`}
-            >
-              🍳 {t('kitchen')}
-            </button>
-            <button
-              onClick={() => setFilterCategory('bar')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                filterCategory === 'bar'
-                  ? 'bg-orange-600 text-white'
-                  : 'bg-orange-100 text-orange-700 hover:bg-orange-200'
-              }`}
-            >
-              🍸 {t('bar')}
-            </button>
-          </div>
-
           {/* Results Count */}
-          {(searchQuery || filterCategory !== 'all' || filterStockType !== 'all') && products.length > 0 && (
+          {(searchQuery || filterStockType !== 'all') && products.length > 0 && (
             <div className="mb-4 text-sm text-slate-600" dangerouslySetInnerHTML={{
-              __html: t('showingProducts')
+              __html: t('showingItems')
                 .replace('{filtered}', filteredProducts.length)
                 .replace('{total}', products.length)
             }} />
@@ -674,23 +486,16 @@ export default function StockManagement() {
             <div className="bg-white border-2 border-slate-100 rounded-2xl p-12 text-center">
               <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
-                  {searchQuery || filterCategory !== 'all' || filterStockType !== 'all' ? (
-                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-                  ) : (
-                    <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z"/>
-                  )}
+                  <path d="M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-1-2-2-2zm-5 12H9v-2h6v2zm5-7H4V4h16v3z"/>
                 </svg>
               </div>
-              {searchQuery || filterCategory !== 'all' || filterStockType !== 'all' ? (
+              {searchQuery || filterStockType !== 'all' ? (
                 <>
-                  <p className="text-slate-500 mb-2">{t('noProductsFound')}</p>
-                  <p className="text-sm text-slate-400 mb-4">
-                    {t('tryAdjusting')}
-                  </p>
+                  <p className="text-slate-500 mb-2">{t('noItemsFound')}</p>
+                  <p className="text-sm text-slate-400 mb-4">{t('tryAdjusting')}</p>
                   <button
                     onClick={() => {
                       setSearchQuery('')
-                      setFilterCategory('all')
                       setFilterStockType('all')
                     }}
                     className="text-[#6262bd] font-medium hover:underline"
@@ -700,12 +505,12 @@ export default function StockManagement() {
                 </>
               ) : (
                 <>
-                  <p className="text-slate-500 mb-4">{t('noProductsYet')}</p>
+                  <p className="text-slate-500 mb-4">{t('noItemsYet')}</p>
                   <button
                     onClick={() => openProductModal()}
                     className="text-[#6262bd] font-medium hover:underline"
                   >
-                    {t('addFirstProduct')}
+                    {t('addFirstItem')}
                   </button>
                 </>
               )}
@@ -719,43 +524,40 @@ export default function StockManagement() {
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-slate-800">
-                        {product.name}
-                      </h3>
+                      <h3 className="text-lg font-semibold text-slate-800">{product.name}</h3>
                       {product.brand && (
                         <span className="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-full font-medium">
                           {product.brand}
                         </span>
                       )}
-                      <span className={`px-2 py-1 text-xs rounded-full font-medium ${
-                        product.category === 'bar'
-                          ? 'bg-orange-100 text-orange-700'
-                          : 'bg-green-100 text-green-700'
-                      }`}>
-                        {product.category === 'bar' ? `🍸 ${t('bar')}` : `🍳 ${t('kitchen')}`}
-                      </span>
+                      {product.current_stock < product.min_stock_level && (
+                        <span className="px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded-full font-medium">
+                          Low Stock
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-4 text-sm text-slate-600">
                       <span>
-                        {t('currentStock')}: <strong className="text-[#6262bd]">{formatStock(product.current_stock, product.base_unit)}</strong>
+                        {t('currentStock')}: <strong className={`${product.current_stock < product.min_stock_level ? 'text-amber-600' : 'text-[#6262bd]'}`}>
+                          {product.current_stock} {product.unit_type}
+                        </strong>
                       </span>
                       <span className="text-slate-300">•</span>
                       <span>
-                        {t('inputUnit')}: <strong>{getUnitLabel(product.input_unit_type)}</strong>
+                        {t('minStockLevel')}: <strong>{product.min_stock_level}</strong>
                       </span>
-                      <span className="text-slate-300">•</span>
-                      <span>
-                        1 {product.input_unit_type} = {product.units_to_base_multiplier} {product.base_unit}
-                      </span>
-                      {product.product_tax_categories && (
+                      {product.last_purchase_price && (
                         <>
                           <span className="text-slate-300">•</span>
                           <span>
-                            {t('tax')}: <strong className="text-purple-600">{product.product_tax_categories.name} ({product.product_tax_categories.rate}%)</strong>
+                            Last Price: <strong className="text-green-600">£{parseFloat(product.last_purchase_price).toFixed(2)}</strong>
                           </span>
                         </>
                       )}
                     </div>
+                    {product.description && (
+                      <p className="text-sm text-slate-500 mt-2">{product.description}</p>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-2">
@@ -794,7 +596,7 @@ export default function StockManagement() {
         <div>
           {entries.length === 0 ? (
             <div className="bg-white border-2 border-slate-100 rounded-2xl p-12 text-center">
-              <p className="text-slate-500">{t('noStockEntries')}</p>
+              <p className="text-slate-500">{t('noEntries')}</p>
             </div>
           ) : (
             <div className="bg-white border-2 border-slate-100 rounded-2xl overflow-hidden">
@@ -803,7 +605,7 @@ export default function StockManagement() {
                   <thead className="bg-slate-50 border-b-2 border-slate-100">
                     <tr>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">{t('date')}</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">{t('product')}</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">{t('item')}</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">{t('quantity')}</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">{t('addedBy')}</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">{t('notes')}</th>
@@ -817,16 +619,16 @@ export default function StockManagement() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="font-medium text-slate-800">
-                            {entry.stock_products?.name}
+                            {entry.inventory_products?.name}
                           </div>
-                          {entry.stock_products?.brand && (
+                          {entry.inventory_products?.brand && (
                             <div className="text-xs text-slate-500">
-                              {entry.stock_products.brand}
+                              {entry.inventory_products.brand}
                             </div>
                           )}
                         </td>
                         <td className="px-6 py-4 text-sm font-medium text-slate-800">
-                          {entry.quantity} {entry.unit_used}
+                          {entry.quantity} {entry.inventory_products?.unit_type}
                         </td>
                         <td className="px-6 py-4 text-sm text-slate-600">
                           {entry.added_by_email}
@@ -848,167 +650,87 @@ export default function StockManagement() {
       {showProductModal && (
         <div
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-          onClick={() => {
-            setShowProductModal(false)
-            setEditingProduct(null)
-          }}
+          onClick={() => setShowProductModal(false)}
         >
           <div
-            className="bg-white rounded-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            className="bg-white rounded-2xl p-8 w-full max-w-lg"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold text-slate-800 mb-6">
-              {editingProduct ? t('editProduct') : t('newProduct')}
+              {editingProduct ? t('editItem') : t('newItem')}
             </h2>
 
             <form onSubmit={handleProductSubmit} className="space-y-5">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    {t('productName')} *
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={productForm.name}
-                    onChange={handleProductFormChange}
-                    required
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
-                    placeholder={t('productNamePlaceholder')}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    {t('brand')}
-                  </label>
-                  <input
-                    type="text"
-                    name="brand"
-                    value={productForm.brand}
-                    onChange={handleProductFormChange}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
-                    placeholder={t('brandPlaceholder')}
-                  />
-                </div>
-              </div>
-
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  {t('category')} *
-                </label>
-                <select
-                  name="category"
-                  value={productForm.category}
-                  onChange={handleProductFormChange}
-                  required
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
-                >
-                  <option value="kitchen">🍳 {t('kitchen')}</option>
-                  <option value="bar">🍸 {t('bar')}</option>
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    {t('baseStorageUnit')} *
-                  </label>
-                  <select
-                    name="base_unit"
-                    value={productForm.base_unit}
-                    onChange={handleProductFormChange}
-                    required
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
-                  >
-                    <option value="grams">{t('gramsForSolids')}</option>
-                    <option value="ml">{t('mlForLiquids')}</option>
-                  </select>
-                  <p className="text-xs text-slate-500 mt-1">
-                    {t('baseUnitHelp')}
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    {t('inputUnitType')} *
-                  </label>
-                  <select
-                    name="input_unit_type"
-                    value={productForm.input_unit_type}
-                    onChange={handleProductFormChange}
-                    required
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
-                  >
-                    <optgroup label={t('weight')}>
-                      <option value="kg">{t('kilograms')}</option>
-                      <option value="grams">{t('grams')}</option>
-                    </optgroup>
-                    <optgroup label={t('volume')}>
-                      <option value="liters">{t('liters')}</option>
-                      <option value="ml">{t('milliliters')}</option>
-                    </optgroup>
-                    <optgroup label={t('countedItems')}>
-                      <option value="bottles">{t('bottles')}</option>
-                      <option value="cans">{t('cans')}</option>
-                      <option value="units">{t('units')}</option>
-                    </optgroup>
-                  </select>
-                  <p className="text-xs text-slate-500 mt-1">
-                    {t('inputUnitHelp')}
-                  </p>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  {t('conversionFactor')} *
+                  {t('itemName')} *
                 </label>
                 <input
-                  type="number"
-                  name="units_to_base_multiplier"
-                  value={productForm.units_to_base_multiplier}
-                  onChange={handleProductFormChange}
+                  type="text"
+                  value={productForm.name}
+                  onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
                   required
-                  step="0.01"
-                  min="0.01"
                   className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  placeholder={t('itemNamePlaceholder')}
                 />
-                <p className="text-xs text-slate-500 mt-1">
-                  {t('conversionHelp').replace('{inputUnit}', productForm.input_unit_type).replace('{multiplier}', productForm.units_to_base_multiplier).replace('{baseUnit}', productForm.base_unit)}
-                  {['bottles', 'cans', 'units'].includes(productForm.input_unit_type) && (
-                    <span className="block mt-1">
-                      {t('conversionExample')}
-                    </span>
-                  )}
-                </p>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  {t('productTaxCategory')}
+                  {t('brand')}
                 </label>
-                <select
-                  name="tax_category_id"
-                  value={productForm.tax_category_id}
-                  onChange={handleProductFormChange}
+                <input
+                  type="text"
+                  value={productForm.brand}
+                  onChange={(e) => setProductForm({ ...productForm, brand: e.target.value })}
                   className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
-                >
-                  <option value="">{t('noTaxCategory')}</option>
-                  {taxCategories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name} ({cat.rate}%)
-                    </option>
-                  ))}
-                </select>
-                <p className="text-xs text-slate-500 mt-1">
-                  {t('taxCategoryHelp')}
-                  {taxCategories.length === 0 && (
-                    <span className="block mt-1 text-amber-600">
-                      {t('noTaxCategoriesAvailable')}
-                    </span>
-                  )}
-                </p>
+                  placeholder={t('brandPlaceholder')}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  {t('description')}
+                </label>
+                <textarea
+                  value={productForm.description}
+                  onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
+                  rows={2}
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 resize-none"
+                  placeholder={t('descriptionPlaceholder')}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    {t('unitType')} *
+                  </label>
+                  <select
+                    value={productForm.unit_type}
+                    onChange={(e) => setProductForm({ ...productForm, unit_type: e.target.value })}
+                    required
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  >
+                    <option value="units">{t('units')}</option>
+                    <option value="pieces">{t('pieces')}</option>
+                    <option value="sets">{t('sets')}</option>
+                    <option value="boxes">{t('boxes')}</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    {t('minStockLevel')}
+                  </label>
+                  <input
+                    type="number"
+                    value={productForm.min_stock_level}
+                    onChange={(e) => setProductForm({ ...productForm, min_stock_level: e.target.value })}
+                    min="0"
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  />
+                </div>
               </div>
 
               <div className="flex gap-3 pt-4">
@@ -1023,7 +745,7 @@ export default function StockManagement() {
                   type="submit"
                   className="flex-1 bg-[#6262bd] text-white py-3 rounded-xl font-medium hover:bg-[#5252a3]"
                 >
-                  {editingProduct ? t('saveChanges') : t('createProduct')}
+                  {editingProduct ? t('saveChanges') : t('createItem')}
                 </button>
               </div>
             </form>
@@ -1046,10 +768,9 @@ export default function StockManagement() {
             <form onSubmit={handleStockSubmit} className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  {t('selectProduct')} *
+                  {t('selectItem')} *
                 </label>
                 <div className="relative stock-dropdown-container">
-                  {/* Combo Bar Input */}
                   <input
                     type="text"
                     value={showStockDropdown
@@ -1058,7 +779,7 @@ export default function StockManagement() {
                           ? (() => {
                               const selectedProduct = products.find(p => p.id === stockForm.product_id)
                               return selectedProduct
-                                ? `${selectedProduct.name}${selectedProduct.brand ? ` (${selectedProduct.brand})` : ''} - ${selectedProduct.category}`
+                                ? `${selectedProduct.name}${selectedProduct.brand ? ` (${selectedProduct.brand})` : ''}`
                                 : ''
                             })()
                           : ''
@@ -1067,7 +788,6 @@ export default function StockManagement() {
                     onChange={(e) => {
                       setStockProductSearch(e.target.value)
                       setShowStockDropdown(true)
-                      // Clear selection when typing
                       if (stockForm.product_id) {
                         setStockForm({ ...stockForm, product_id: '' })
                       }
@@ -1076,22 +796,18 @@ export default function StockManagement() {
                       setShowStockDropdown(true)
                       setStockProductSearch('')
                     }}
-                    placeholder={t('searchOrSelectProduct')}
+                    placeholder={t('searchOrSelectItem')}
                     className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                     required
                   />
 
-                  {/* Dropdown List */}
                   {showStockDropdown && (
                     <div className="absolute z-10 w-full mt-1 bg-white border-2 border-slate-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
                       {(() => {
                         const filteredProducts = products.filter(product => {
                           if (!stockProductSearch) return true
                           const query = stockProductSearch.toLowerCase()
-                          const matchesName = product.name.toLowerCase().includes(query)
-                          const matchesBrand = product.brand?.toLowerCase().includes(query)
-                          const matchesCategory = product.category.toLowerCase().includes(query)
-                          return matchesName || matchesBrand || matchesCategory
+                          return product.name.toLowerCase().includes(query) || product.brand?.toLowerCase().includes(query)
                         })
 
                         return filteredProducts.length > 0 ? (
@@ -1105,12 +821,12 @@ export default function StockManagement() {
                               }}
                               className="px-4 py-2 hover:bg-[#6262bd] hover:text-white cursor-pointer transition-colors"
                             >
-                              {product.name} {product.brand ? `(${product.brand})` : ''} - {product.category}
+                              {product.name} {product.brand ? `(${product.brand})` : ''}
                             </div>
                           ))
                         ) : (
                           <div className="px-4 py-2 text-slate-400 text-sm">
-                            {t('noProductsFound')}
+                            {t('noItemsFound')}
                           </div>
                         )
                       })()}
@@ -1132,32 +848,28 @@ export default function StockManagement() {
                           value={stockForm.quantity}
                           onChange={(e) => setStockForm({ ...stockForm, quantity: e.target.value })}
                           required
-                          step="0.01"
-                          min="0.01"
+                          min="1"
                           className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                           placeholder="0"
                         />
                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 font-medium">
-                          {products.find(p => p.id === stockForm.product_id)?.input_unit_type}
+                          {products.find(p => p.id === stockForm.product_id)?.unit_type}
                         </span>
                       </div>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        {t('purchasePrice')} *
+                        {t('purchasePrice')}
                       </label>
                       <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-medium">
-                          £
-                        </span>
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-medium">£</span>
                         <input
                           type="number"
                           value={stockForm.purchase_price}
                           onChange={(e) => setStockForm({ ...stockForm, purchase_price: e.target.value })}
-                          required
                           step="0.01"
-                          min="0.01"
+                          min="0"
                           className="w-full pl-8 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                           placeholder="0.00"
                         />
@@ -1165,18 +877,7 @@ export default function StockManagement() {
                     </div>
                   </div>
 
-                  {stockForm.quantity && stockForm.purchase_price && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                      <p className="text-sm text-slate-700 mb-1">
-                        <strong>{t('totalStock')}:</strong> {(parseFloat(stockForm.quantity) * products.find(p => p.id === stockForm.product_id)?.units_to_base_multiplier).toFixed(2)} {products.find(p => p.id === stockForm.product_id)?.base_unit}
-                      </p>
-                      <p className="text-sm text-slate-700">
-                        <strong>{t('costPerUnit').replace('{unit}', products.find(p => p.id === stockForm.product_id)?.base_unit)}:</strong> £{(parseFloat(stockForm.purchase_price) / (parseFloat(stockForm.quantity) * products.find(p => p.id === stockForm.product_id)?.units_to_base_multiplier)).toFixed(4)}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Invoice Selection (Optional) */}
+                  {/* Invoice Selection */}
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">
                       {t('linkToInvoice')} ({t('optional')})

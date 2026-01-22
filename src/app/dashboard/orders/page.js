@@ -26,6 +26,12 @@ export default function Orders() {
   const [generatingInvoice, setGeneratingInvoice] = useState(false)
   const [notification, setNotification] = useState(null)
 
+  // Takeaway state
+  const [orderTypeFilter, setOrderTypeFilter] = useState('all') // 'all', 'dine_in', 'takeaway'
+  const [markingReady, setMarkingReady] = useState(null) // orderId being marked ready
+  const [showPickupModal, setShowPickupModal] = useState(false)
+  const [pickupOrderId, setPickupOrderId] = useState(null)
+
   useEffect(() => {
     const fetchData = async () => {
       let restaurantData = null
@@ -373,6 +379,78 @@ export default function Orders() {
     setShowInvoiceModal(true)
   }
 
+  // Mark takeaway order as ready for pickup
+  const markReadyForPickup = async (orderId) => {
+    setMarkingReady(orderId)
+    try {
+      const response = await fetch('/api/takeaway/ready', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to mark order ready')
+      }
+
+      if (data.emailSent) {
+        showNotification('success', t('pickupNotificationSent') || 'Customer notified - order ready for pickup!')
+      } else {
+        showNotification('success', t('markedReadyForPickup') || 'Order marked ready for pickup')
+      }
+
+      // Refresh orders
+      if (restaurant) {
+        fetchOrders(restaurant.id)
+      }
+    } catch (error) {
+      console.error('Error marking ready for pickup:', error)
+      showNotification('error', error.message || t('failedToMarkReady') || 'Failed to mark ready')
+    } finally {
+      setMarkingReady(null)
+    }
+  }
+
+  // Open pickup confirmation modal
+  const openPickupModal = (orderId) => {
+    setPickupOrderId(orderId)
+    setShowPickupModal(true)
+  }
+
+  // Confirm pickup - staff verbally verifies the code
+  const confirmPickup = async () => {
+    if (!pickupOrderId) return
+
+    try {
+      // Use API endpoint to bypass RLS for staff members
+      const response = await fetch('/api/takeaway/pickup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: pickupOrderId })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to confirm pickup')
+      }
+
+      showNotification('success', t('orderPickedUp') || 'Order marked as picked up!')
+      setShowPickupModal(false)
+      setPickupOrderId(null)
+
+      // Refresh orders
+      if (restaurant) {
+        fetchOrders(restaurant.id)
+      }
+    } catch (err) {
+      console.error('Error confirming pickup:', err)
+      showNotification('error', err.message || t('failedToConfirmPickup') || 'Failed to confirm pickup')
+    }
+  }
+
   const handleInvoiceGeneration = async ({ clientId, clientData, action }) => {
     if (!invoiceOrderId) return
 
@@ -439,8 +517,26 @@ export default function Orders() {
   }
 
   const filteredOrders = orders.filter(order => {
-    if (filter === 'active') return ['pending', 'preparing'].includes(order.status) && !order.paid && order.status !== 'cancelled'
-    if (filter === 'completed') return order.status === 'completed' || order.paid
+    // Status filter
+    if (filter === 'active') {
+      if (!(['pending', 'preparing', 'ready'].includes(order.status) && !order.paid && order.status !== 'cancelled')) {
+        return false
+      }
+    }
+    if (filter === 'completed') {
+      if (!(order.status === 'completed' || order.paid)) {
+        return false
+      }
+    }
+
+    // Order type filter
+    if (orderTypeFilter !== 'all') {
+      const orderType = order.order_type || 'dine_in'
+      if (orderType !== orderTypeFilter) {
+        return false
+      }
+    }
+
     return true
   })
 
@@ -514,7 +610,7 @@ export default function Orders() {
         </div>
 
       {/* Filters */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-6">
         {['active', 'completed', 'all'].map((f) => (
           <button
             key={f}
@@ -528,6 +624,40 @@ export default function Orders() {
             {t(f)}
           </button>
         ))}
+
+        <div className="w-px bg-slate-200 mx-2"></div>
+
+        {/* Order Type Filter */}
+        <button
+          onClick={() => setOrderTypeFilter('all')}
+          className={`px-4 py-2 rounded-xl font-medium ${
+            orderTypeFilter === 'all'
+              ? 'bg-slate-700 text-white'
+              : 'bg-white border-2 border-slate-200 text-slate-600 hover:border-slate-300'
+          }`}
+        >
+          {t('allOrders') || 'All Orders'}
+        </button>
+        <button
+          onClick={() => setOrderTypeFilter('dine_in')}
+          className={`px-4 py-2 rounded-xl font-medium ${
+            orderTypeFilter === 'dine_in'
+              ? 'bg-green-600 text-white'
+              : 'bg-white border-2 border-slate-200 text-slate-600 hover:border-slate-300'
+          }`}
+        >
+          🍽️ {t('dineIn') || 'Dine-in'}
+        </button>
+        <button
+          onClick={() => setOrderTypeFilter('takeaway')}
+          className={`px-4 py-2 rounded-xl font-medium ${
+            orderTypeFilter === 'takeaway'
+              ? 'bg-cyan-600 text-white'
+              : 'bg-white border-2 border-slate-200 text-slate-600 hover:border-slate-300'
+          }`}
+        >
+          🥡 {t('takeaway') || 'Takeaway'}
+        </button>
       </div>
 
       {/* Orders List */}
@@ -560,20 +690,46 @@ export default function Orders() {
             }
 
             return (
-            <div key={order.id} className="bg-white border-2 border-slate-100 rounded-2xl p-6">
+            <div key={order.id} className={`bg-white border-2 rounded-2xl p-6 ${
+              order.order_type === 'takeaway' ? 'border-cyan-200' : 'border-slate-100'
+            }`}>
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <div className="flex items-center gap-3 mb-1">
-                    <h3 className="text-lg font-bold text-slate-800">
-                      {t('table')} {order.tables?.table_number || 'N/A'}
-                    </h3>
+                    {order.order_type === 'takeaway' ? (
+                      <>
+                        <h3 className="text-lg font-bold text-cyan-700 flex items-center gap-2">
+                          🥡 {t('takeaway') || 'Takeaway'}
+                        </h3>
+                        {order.pickup_code && (
+                          <span className="px-3 py-1 bg-cyan-100 text-cyan-700 rounded-full text-sm font-bold tracking-wider">
+                            {order.pickup_code}
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      <h3 className="text-lg font-bold text-slate-800">
+                        {t('table')} {order.tables?.table_number || 'N/A'}
+                      </h3>
+                    )}
                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
                       {t(`status.${order.status}`)}
                     </span>
+                    {order.order_type === 'takeaway' && order.ready_for_pickup && !order.picked_up_at && (
+                      <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium animate-pulse">
+                        {t('readyForPickup') || 'Ready for Pickup'}
+                      </span>
+                    )}
                   </div>
                   <p className="text-slate-500 text-sm">
                     {t('orderNumber')}{order.id.slice(0, 8)} • {formatTime(order.created_at)}
+                    {order.order_type === 'takeaway' && order.customer_name && (
+                      <> • <span className="font-medium">{order.customer_name}</span></>
+                    )}
                   </p>
+                  {order.order_type === 'takeaway' && order.customer_email && (
+                    <p className="text-slate-400 text-xs mt-1">{order.customer_email}</p>
+                  )}
                 </div>
                 <p className="text-xl font-bold text-slate-800">£{order.total?.toFixed(2)}</p>
               </div>
@@ -725,7 +881,47 @@ export default function Orders() {
                     return <div className="space-y-2">{buttons}</div>
                   })()}
 
-                  {order.status === 'ready' && (
+                  {/* Takeaway-specific buttons */}
+                  {order.order_type === 'takeaway' && order.status === 'ready' && !order.ready_for_pickup && (
+                    <button
+                      onClick={() => markReadyForPickup(order.id)}
+                      disabled={markingReady === order.id}
+                      className="bg-cyan-600 text-white px-4 py-2 rounded-xl font-medium hover:bg-cyan-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {markingReady === order.id ? (
+                        <>
+                          <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                          </svg>
+                          {t('sendingNotification') || 'Sending...'}
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                          </svg>
+                          {t('notifyReadyForPickup') || 'Notify Ready for Pickup'}
+                        </>
+                      )}
+                    </button>
+                  )}
+
+                  {/* Takeaway: Mark as Picked Up button */}
+                  {order.order_type === 'takeaway' && order.ready_for_pickup && !order.picked_up_at && (
+                    <button
+                      onClick={() => openPickupModal(order.id)}
+                      className="bg-green-600 text-white px-4 py-2 rounded-xl font-medium hover:bg-green-700 flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                      </svg>
+                      {t('markPickedUp') || 'Mark as Picked Up'}
+                    </button>
+                  )}
+
+                  {/* Dine-in: Complete Order button */}
+                  {order.status === 'ready' && order.order_type !== 'takeaway' && (
                     <button
                       onClick={() => updateOrderStatus(order.id, 'completed')}
                       className="bg-slate-600 text-white px-4 py-2 rounded-xl font-medium hover:bg-slate-700"
@@ -821,6 +1017,87 @@ export default function Orders() {
                 <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
               </svg>
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Pickup Confirmation Modal */}
+      {showPickupModal && pickupOrderId && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => {
+            setShowPickupModal(false)
+            setPickupOrderId(null)
+          }}
+        >
+          <div
+            className="bg-white rounded-2xl p-8 w-full max-w-md"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+              </div>
+              <h2 className="text-xl font-bold text-slate-800 mb-2">
+                {t('confirmPickup') || 'Confirm Pickup'}
+              </h2>
+              <p className="text-slate-600">
+                {t('verifyCodeVerbally') || 'Ask the customer for their pickup code and verify it matches below.'}
+              </p>
+            </div>
+
+            {/* Order Details & Code Display */}
+            {(() => {
+              const order = orders.find(o => o.id === pickupOrderId)
+              return order ? (
+                <div className="mb-6">
+                  {/* Customer Info */}
+                  {order.customer_name && (
+                    <div className="bg-slate-50 rounded-xl p-4 mb-4">
+                      <p className="text-sm text-slate-500">{t('customerName') || 'Customer'}</p>
+                      <p className="text-lg font-semibold text-slate-800">{order.customer_name}</p>
+                    </div>
+                  )}
+
+                  {/* Pickup Code - Large Display */}
+                  <div className="bg-cyan-50 border-2 border-cyan-200 rounded-xl p-6 text-center">
+                    <p className="text-sm text-cyan-600 font-medium mb-2">{t('pickupCode') || 'Pickup Code'}</p>
+                    <p className="text-4xl font-bold text-cyan-700 tracking-widest">{order.pickup_code}</p>
+                  </div>
+
+                  {/* Order Total */}
+                  <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                    <div className="flex justify-between items-center">
+                      <span className="text-amber-700 font-medium">{t('totalToPay') || 'Total to collect (Cash)'}</span>
+                      <span className="text-xl font-bold text-amber-800">£{order.total?.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+              ) : null
+            })()}
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowPickupModal(false)
+                  setPickupOrderId(null)
+                }}
+                className="flex-1 border-2 border-slate-200 text-slate-600 py-3 rounded-xl font-medium hover:bg-slate-50"
+              >
+                {tc('close') || 'Cancel'}
+              </button>
+              <button
+                onClick={confirmPickup}
+                className="flex-1 bg-green-600 text-white py-3 rounded-xl font-medium hover:bg-green-700 flex items-center justify-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+                {t('confirmAndFinalise') || 'Confirm & Finalise'}
+              </button>
+            </div>
           </div>
         </div>
       )}

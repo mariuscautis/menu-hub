@@ -23,7 +23,8 @@ export default function DashboardLayout({ children }) {
   const [debug, setDebug] = useState('')
   const [expandedMenus, setExpandedMenus] = useState({
     analytics: true, // Analytics menu starts expanded
-    menu: true // Menu menu starts expanded
+    menu: true, // Menu menu starts expanded
+    stock: true // Stock menu starts expanded
   })
   const [pendingReservationsCount, setPendingReservationsCount] = useState(0)
   const [pendingOrdersCount, setPendingOrdersCount] = useState(0)
@@ -473,7 +474,37 @@ export default function DashboardLayout({ children }) {
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z"/>
           </svg>
-        )
+        ),
+        id: 'stock',
+        children: [
+          {
+            href: '/dashboard/stock',
+            label: 'Food Stock',
+            icon: (
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M18.06 22.99h1.66c.84 0 1.53-.64 1.63-1.46L23 5.05l-5 1V1h-1.97v5.05l-5-1 1.13 9.35c-.78.22-1.45.7-1.92 1.32L8.94 8.94c-.27-.54-.91-.91-1.59-.91-.97 0-1.76.77-1.76 1.72 0 .16.02.32.07.47l1.9 6.23c.31 1.04.97 1.9 1.85 2.44-.37.47-.59 1.06-.59 1.7v.42c-.13.03-.27.05-.41.05-.7 0-1.35-.29-1.82-.75l-.59-.65c-.36-.39-.77-.71-1.23-.95l-.28 1.51c.34.2.65.45.93.73l.61.66c.75.78 1.79 1.24 2.89 1.24.26 0 .51-.03.76-.08v.5c0 1.1.9 2 2 2h6.76c1.1 0 2-.9 2-2v-3.76c0-1.1-.9-2-2-2h-1.8l.47-3.89c.49.28 1.04.45 1.63.45 1.83 0 3.3-1.49 3.3-3.32 0-1.69-1.26-3.08-2.9-3.29l-.67 5.48c-.16.55-.42 1.04-.77 1.44l-.59-4.87-2.67.35"/>
+              </svg>
+            )
+          },
+          {
+            href: '/dashboard/stock/inventory',
+            label: 'Inventory',
+            icon: (
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-1-2-2-2zm-5 12H9v-2h6v2zm5-7H4V4h16v3z"/>
+              </svg>
+            )
+          },
+          {
+            href: '/dashboard/stock/purchasing-invoices',
+            label: 'Invoices',
+            icon: (
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+              </svg>
+            )
+          }
+        ]
       })
     }
 

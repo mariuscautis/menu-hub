@@ -3,6 +3,7 @@ export const runtime = 'edge';
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { sendEmail as sendBrevoEmail } from '@/lib/services/email-edge'
+import { getEmailTranslations, t, formatDateForLocale } from '@/lib/email-translations'
 
 function getSupabaseAdmin() {
   return createClient(
@@ -34,9 +35,13 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Reservation not found' }, { status: 404 })
     }
 
-    // Generate email
-    const subject = `Reservation Cancelled - ${reservation.restaurants.name}`
-    const htmlContent = generateCancellationEmail(reservation)
+    // Get translations for the reservation's locale
+    const locale = reservation.locale || 'en'
+    const tr = getEmailTranslations(locale)
+
+    // Generate email with translations
+    const subject = `❌ ${tr.reservationCancelled} - ${reservation.restaurants.name}`
+    const htmlContent = generateCancellationEmail(reservation, tr, locale)
 
     // Send email using Brevo
     await sendBrevoEmail({
@@ -53,16 +58,19 @@ export async function POST(request) {
   }
 }
 
-function generateCancellationEmail(reservation) {
-  const restaurantPhone = reservation.restaurants.phone || 'the restaurant directly'
+function generateCancellationEmail(reservation, tr, locale) {
   const phoneDisplay = reservation.restaurants.phone
     ? `<a href="tel:${reservation.restaurants.phone}" style="color: #6262bd; text-decoration: none;">${reservation.restaurants.phone}</a>`
-    : 'the restaurant directly'
+    : tr.theRestaurantDirectly
+
+  const formattedDate = formatDateForLocale(reservation.reservation_date, locale)
+  const guestText = reservation.party_size === 1 ? tr.guest : tr.guests
 
   return `
     <!DOCTYPE html>
     <html>
     <head>
+      <meta charset="utf-8">
       <style>
         body {
           font-family: Arial, sans-serif;
@@ -131,40 +139,40 @@ function generateCancellationEmail(reservation) {
     <body>
       <div class="container">
         <div class="header">
-          <h1>✗ Reservation Cancelled</h1>
+          <h1>❌ ${tr.reservationCancelled}</h1>
         </div>
         <div class="content">
-          <p>Dear ${reservation.customer_name},</p>
-          <p>Your reservation at <strong>${reservation.restaurants.name}</strong> has been cancelled.</p>
+          <p>${t(tr.dearCustomer, { customerName: reservation.customer_name })},</p>
+          <p>${t(tr.reservationCancelledMessage, { restaurantName: reservation.restaurants.name })}</p>
 
           <div class="details">
             <div class="detail-row">
-              <span class="detail-label">Original Date:</span> ${new Date(reservation.reservation_date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+              <span class="detail-label">${tr.originalDate}:</span> ${formattedDate}
             </div>
             <div class="detail-row">
-              <span class="detail-label">Original Time:</span> ${reservation.reservation_time.substring(0, 5)}
+              <span class="detail-label">${tr.originalTime}:</span> ${reservation.reservation_time.substring(0, 5)}
             </div>
             <div class="detail-row">
-              <span class="detail-label">Party Size:</span> ${reservation.party_size} ${reservation.party_size === 1 ? 'guest' : 'guests'}
+              <span class="detail-label">${tr.partySize}:</span> ${reservation.party_size} ${guestText}
             </div>
             ${reservation.cancellation_reason ? `
             <div class="detail-row">
-              <span class="detail-label">Reason:</span> ${reservation.cancellation_reason}
+              <span class="detail-label">${tr.reason}:</span> ${reservation.cancellation_reason}
             </div>
             ` : ''}
           </div>
 
           <div class="contact-box">
-            <h3>📞 Was this incorrect?</h3>
+            <h3>📞 ${tr.wasThisIncorrect}</h3>
             <p style="margin: 10px 0 0 0;">
-              If you believe this cancellation was made in error, please contact us at ${phoneDisplay} as soon as possible.
+              ${t(tr.cancellationErrorMessage, { phone: phoneDisplay })}
             </p>
           </div>
 
-          <p>We hope to see you at ${reservation.restaurants.name} in the future!</p>
+          <p>${t(tr.hopeToSeeYou, { restaurantName: reservation.restaurants.name })}</p>
         </div>
         <div class="footer">
-          <p>This is an automated message from ${reservation.restaurants.name}</p>
+          <p>${t(tr.automatedMessageFrom, { restaurantName: reservation.restaurants.name })}</p>
         </div>
       </div>
     </body>

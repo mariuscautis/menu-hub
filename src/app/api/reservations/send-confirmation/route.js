@@ -3,6 +3,7 @@ export const runtime = 'edge';
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { sendEmail as sendBrevoEmail } from '@/lib/services/email-edge'
+import { getEmailTranslations, t, formatDateForLocale } from '@/lib/email-translations'
 
 function getSupabaseAdmin() {
   return createClient(
@@ -20,7 +21,7 @@ function getSupabaseAdmin() {
 export async function POST(request) {
   const supabaseAdmin = getSupabaseAdmin()
   try {
-    const { reservationId, isConfirmation } = await request.json()
+    const { reservationId, isConfirmation, locale: requestLocale } = await request.json()
 
     console.log('Send confirmation email request:', { reservationId, isConfirmation })
 
@@ -42,18 +43,22 @@ export async function POST(request) {
       isConfirmation
     })
 
+    // Get translations for the reservation's locale
+    const locale = requestLocale || reservation.locale || 'en'
+    const tr = getEmailTranslations(locale)
+
     // Generate cancellation URL
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://www.venoapp.com'
     const cancelUrl = `${baseUrl}/${reservation.restaurants.slug}/reservation/cancel/${reservation.cancellation_token}`
 
     // Email subject and body
     const subject = isConfirmation
-      ? `Reservation Confirmed at ${reservation.restaurants.name}`
-      : `Reservation Request Received - ${reservation.restaurants.name}`
+      ? t(tr.reservationConfirmedAt, { restaurantName: reservation.restaurants.name })
+      : t(tr.reservationRequestReceivedAt, { restaurantName: reservation.restaurants.name })
 
     const htmlContent = isConfirmation
-      ? generateConfirmationEmail(reservation, cancelUrl)
-      : generatePendingEmail(reservation, cancelUrl)
+      ? generateConfirmationEmail(reservation, cancelUrl, tr, locale)
+      : generatePendingEmail(reservation, cancelUrl, tr, locale)
 
     console.log('Sending email:', { to: reservation.customer_email, subject })
 
@@ -84,7 +89,10 @@ export async function POST(request) {
   }
 }
 
-function generateConfirmationEmail(reservation, cancelUrl) {
+function generateConfirmationEmail(reservation, cancelUrl, tr, locale) {
+  const formattedDate = formatDateForLocale(reservation.reservation_date, locale)
+  const guestText = reservation.party_size === 1 ? tr.guest : tr.guests
+
   return `
     <!DOCTYPE html>
     <html>
@@ -150,40 +158,40 @@ function generateConfirmationEmail(reservation, cancelUrl) {
     <body>
       <div class="container">
         <div class="header">
-          <h1>✓ Reservation Confirmed!</h1>
+          <h1>✓ ${tr.reservationConfirmed}</h1>
         </div>
         <div class="content">
-          <p>Dear ${reservation.customer_name},</p>
-          <p>Great news! Your reservation at <strong>${reservation.restaurants.name}</strong> has been confirmed.</p>
+          <p>${t(tr.dearCustomer, { customerName: reservation.customer_name })}</p>
+          <p>${t(tr.reservationConfirmedMessage, { restaurantName: reservation.restaurants.name })}</p>
 
           <div class="details">
             <div class="detail-row">
-              <span class="detail-label">Date:</span> ${new Date(reservation.reservation_date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+              <span class="detail-label">${tr.date}:</span> ${formattedDate}
             </div>
             <div class="detail-row">
-              <span class="detail-label">Time:</span> ${reservation.reservation_time.substring(0, 5)}
+              <span class="detail-label">${tr.time}:</span> ${reservation.reservation_time.substring(0, 5)}
             </div>
             <div class="detail-row">
-              <span class="detail-label">Party Size:</span> ${reservation.party_size} ${reservation.party_size === 1 ? 'guest' : 'guests'}
+              <span class="detail-label">${tr.partySize}:</span> ${reservation.party_size} ${guestText}
             </div>
             <div class="detail-row">
-              <span class="detail-label">Table:</span> ${reservation.tables?.table_number || 'To be assigned'}
+              <span class="detail-label">${tr.table}:</span> ${reservation.tables?.table_number || tr.toBeAssigned}
             </div>
             ${reservation.special_requests ? `
             <div class="detail-row">
-              <span class="detail-label">Special Requests:</span> ${reservation.special_requests}
+              <span class="detail-label">${tr.specialRequests}:</span> ${reservation.special_requests}
             </div>
             ` : ''}
           </div>
 
-          <p><strong>Please arrive within 15 minutes of your reservation time.</strong></p>
-          <p>We look forward to serving you!</p>
+          <p><strong>${tr.arriveWithin15}</strong></p>
+          <p>${tr.lookForwardToServing}</p>
 
-          <p>If you need to cancel your reservation, please use the link below:</p>
-          <p><a href="${cancelUrl}" class="cancel-link">Cancel Reservation</a></p>
+          <p>${tr.needToCancel}</p>
+          <p><a href="${cancelUrl}" class="cancel-link">${tr.cancelReservation}</a></p>
         </div>
         <div class="footer">
-          <p>This is an automated message from ${reservation.restaurants.name}</p>
+          <p>${tr.automatedMessage.replace('email', 'message')} ${reservation.restaurants.name}</p>
         </div>
       </div>
     </body>
@@ -191,7 +199,10 @@ function generateConfirmationEmail(reservation, cancelUrl) {
   `
 }
 
-function generatePendingEmail(reservation, cancelUrl) {
+function generatePendingEmail(reservation, cancelUrl, tr, locale) {
+  const formattedDate = formatDateForLocale(reservation.reservation_date, locale)
+  const guestText = reservation.party_size === 1 ? tr.guest : tr.guests
+
   return `
     <!DOCTYPE html>
     <html>
@@ -261,39 +272,39 @@ function generatePendingEmail(reservation, cancelUrl) {
     <body>
       <div class="container">
         <div class="header">
-          <h1>⏳ Reservation Request Received</h1>
+          <h1>⏳ ${tr.reservationRequestReceived}</h1>
         </div>
         <div class="content">
-          <p>Dear ${reservation.customer_name},</p>
-          <p>We've received your reservation request at <strong>${reservation.restaurants.name}</strong>.</p>
+          <p>${t(tr.dearCustomer, { customerName: reservation.customer_name })}</p>
+          <p>${t(tr.receivedRequestMessage, { restaurantName: reservation.restaurants.name })}</p>
 
           <div class="details">
             <div class="detail-row">
-              <span class="detail-label">Date:</span> ${new Date(reservation.reservation_date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+              <span class="detail-label">${tr.date}:</span> ${formattedDate}
             </div>
             <div class="detail-row">
-              <span class="detail-label">Time:</span> ${reservation.reservation_time.substring(0, 5)}
+              <span class="detail-label">${tr.time}:</span> ${reservation.reservation_time.substring(0, 5)}
             </div>
             <div class="detail-row">
-              <span class="detail-label">Party Size:</span> ${reservation.party_size} ${reservation.party_size === 1 ? 'guest' : 'guests'}
+              <span class="detail-label">${tr.partySize}:</span> ${reservation.party_size} ${guestText}
             </div>
             ${reservation.special_requests ? `
             <div class="detail-row">
-              <span class="detail-label">Special Requests:</span> ${reservation.special_requests}
+              <span class="detail-label">${tr.specialRequests}:</span> ${reservation.special_requests}
             </div>
             ` : ''}
           </div>
 
           <div class="pending-notice">
-            <strong>⏳ Pending Approval</strong>
-            <p style="margin: 10px 0 0 0;">Your reservation is awaiting confirmation from the restaurant. You'll receive another email once it's been approved.</p>
+            <strong>⏳ ${tr.pendingApproval}</strong>
+            <p style="margin: 10px 0 0 0;">${tr.pendingApprovalMessage}</p>
           </div>
 
-          <p>If you need to cancel your request, please use the link below:</p>
-          <p><a href="${cancelUrl}" class="cancel-link">Cancel Request</a></p>
+          <p>${tr.needToCancel.replace('reservation', 'request')}</p>
+          <p><a href="${cancelUrl}" class="cancel-link">${tr.cancelRequest}</a></p>
         </div>
         <div class="footer">
-          <p>This is an automated message from ${reservation.restaurants.name}</p>
+          <p>${tr.automatedMessage.replace('email', 'message')} ${reservation.restaurants.name}</p>
         </div>
       </div>
     </body>

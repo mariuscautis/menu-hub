@@ -166,6 +166,14 @@ export default function BookReservation({ params }) {
         return
       }
 
+      // Detect user's locale from browser (fallback to 'en')
+      const browserLocale = (typeof navigator !== 'undefined' && navigator.language)
+        ? navigator.language.split('-')[0]
+        : 'en'
+      // Only use supported locales
+      const supportedLocales = ['en', 'ro', 'fr', 'it', 'es']
+      const locale = supportedLocales.includes(browserLocale) ? browserLocale : 'en'
+
       // Create reservation
       const { data, error: insertError } = await supabase
         .from('reservations')
@@ -178,7 +186,8 @@ export default function BookReservation({ params }) {
           reservation_date: selectedDate,
           reservation_time: selectedTime,
           special_requests: specialRequests || null,
-          status: 'pending'
+          status: 'pending',
+          locale: locale
         })
         .select()
         .single()
@@ -191,7 +200,8 @@ export default function BookReservation({ params }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           reservationId: data.id,
-          isConfirmation: false  // This is a pending reservation email
+          isConfirmation: false,  // This is a pending reservation email
+          locale: locale
         })
       }).catch(err => console.error('Email error:', err))
 

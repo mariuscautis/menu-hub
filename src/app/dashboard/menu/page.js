@@ -405,6 +405,13 @@ export default function Menu() {
       .update({ available: !item.available })
       .eq('id', item.id)
   }
+
+  const toggleTakeaway = async (item) => {
+    await supabase
+      .from('menu_items')
+      .update({ takeaway_available: !item.takeaway_available })
+      .eq('id', item.id)
+  }
   const getStockStatus = (item) => {
   if (!item.menu_item_ingredients || item.menu_item_ingredients.length === 0) {
     return { status: 'no_recipe', message: t('noRecipe'), color: 'slate' }
@@ -711,6 +718,11 @@ export default function Menu() {
                           {item.department === 'bar' ? '🍸 Bar' : '🍳 Kitchen'}
                         </span>
                       )}
+                      {item.takeaway_available && (
+                        <span className="px-2 py-1 text-xs rounded-full font-medium bg-cyan-100 text-cyan-700">
+                          🥡 {t('takeaway') || 'Takeaway'}
+                        </span>
+                      )}
                       {/* Stock Status Badge */}
                       <span className={`px-2 py-1 text-xs rounded-full font-medium ${
                         stockStatus.color === 'red' ? 'bg-red-100 text-red-700' :
@@ -774,6 +786,19 @@ export default function Menu() {
                         ) : (
                           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/>
                         )}
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => toggleTakeaway(item)}
+                      className={`p-2 rounded-xl ${
+                        item.takeaway_available
+                          ? 'bg-cyan-100 text-cyan-600 hover:bg-cyan-200'
+                          : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
+                      }`}
+                      title={item.takeaway_available ? (t('removeTakeaway') || 'Remove from takeaway') : (t('addTakeaway') || 'Add to takeaway')}
+                    >
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M22 9h-4.79l-4.38-6.56c-.19-.28-.51-.42-.83-.42s-.64.14-.83.43L6.79 9H2c-.55 0-1 .45-1 1 0 .09.01.18.04.27l2.54 9.27c.23.84 1 1.46 1.92 1.46h13c.92 0 1.69-.62 1.93-1.46l2.54-9.27L23 10c0-.55-.45-1-1-1zM12 4.8L14.8 9H9.2L12 4.8zM18.5 19l-12.99.01L3.31 11H20.7l-2.2 8zM12 13c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
                       </svg>
                     </button>
                     <button
