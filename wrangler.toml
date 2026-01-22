@@ -18,6 +18,10 @@ EMAIL_FROM_NAME = "Menu Hub"
 NEXT_PUBLIC_SUPABASE_URL = "https://rfquwezkkdyvjftveilf.supabase.co"
 NEXT_PUBLIC_BASE_URL = "https://www.venoapp.com"
 
+# Secrets are referenced here but values are set via `wrangler pages secret`
+# BREVO_API_KEY - set via wrangler pages secret
+# SUPABASE_SERVICE_ROLE_KEY - set via wrangler pages secret
+
 [env.preview]
 compatibility_flags = ["nodejs_compat"]
 
