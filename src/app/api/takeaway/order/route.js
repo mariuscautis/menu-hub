@@ -3,6 +3,8 @@ export const runtime = 'edge'
 import { createClient } from '@supabase/supabase-js'
 import { getEmailTranslations, t } from '@/lib/email-translations'
 
+// Email confirmation API for takeaway orders
+
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
