@@ -3,7 +3,7 @@ export const runtime = 'edge'
 import { createClient } from '@supabase/supabase-js'
 import { getEmailTranslations, t } from '@/lib/email-translations'
 
-// Takeaway order confirmation email API
+// Takeaway order confirmation email API with Brevo REST API
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
