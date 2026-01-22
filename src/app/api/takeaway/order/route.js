@@ -14,6 +14,15 @@ export async function POST(request) {
   try {
     const { orderId, restaurantId, locale: requestLocale } = await request.json()
 
+    // Debug: Check if API key is available
+    if (!process.env.BREVO_API_KEY) {
+      console.error('BREVO_API_KEY is not set in environment variables')
+      return Response.json(
+        { error: 'Email service not configured', details: 'BREVO_API_KEY missing' },
+        { status: 500 }
+      )
+    }
+
     if (!orderId || !restaurantId) {
       return Response.json(
         { error: 'Order ID and Restaurant ID are required' },
