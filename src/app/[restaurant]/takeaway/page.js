@@ -266,7 +266,7 @@ export default function TakeawayMenu({ params }) {
 
       // Send confirmation email via API
       try {
-        await fetch('/api/takeaway/order', {
+        const emailResponse = await fetch('/api/takeaway/order', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -275,6 +275,13 @@ export default function TakeawayMenu({ params }) {
             locale: locale
           })
         })
+
+        if (!emailResponse.ok) {
+          const errorData = await emailResponse.json()
+          console.error('Email API error:', errorData)
+        } else {
+          console.log('Confirmation email sent successfully')
+        }
       } catch (emailErr) {
         console.error('Failed to send confirmation email:', emailErr)
         // Don't fail the order if email fails
