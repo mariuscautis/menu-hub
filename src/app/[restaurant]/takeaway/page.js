@@ -3,6 +3,7 @@ export const runtime = 'edge'
 
 import { useState, useEffect, use } from 'react'
 import { supabase } from '@/lib/supabase'
+import { loadTranslations, createTranslator } from '@/lib/clientTranslations'
 
 // Generate a unique 6-character pickup code (ABC123 format)
 function generatePickupCode() {
@@ -102,31 +103,8 @@ export default function TakeawayMenu({ params }) {
 
       // Load translations based on restaurant's email language
       const locale = restaurantData.email_language || 'en'
-      try {
-        let translationModule
-        switch (locale) {
-          case 'ro':
-            translationModule = await import('@/messages/ro.json')
-            break
-          case 'es':
-            translationModule = await import('@/messages/es.json')
-            break
-          case 'fr':
-            translationModule = await import('@/messages/fr.json')
-            break
-          case 'it':
-            translationModule = await import('@/messages/it.json')
-            break
-          default:
-            translationModule = await import('@/messages/en.json')
-        }
-        setTranslations(translationModule.default.takeaway)
-      } catch (error) {
-        console.error('Translation loading error:', error)
-        // Fallback to English if translation fails
-        const translationModule = await import('@/messages/en.json')
-        setTranslations(translationModule.default.takeaway)
-      }
+      const translations = loadTranslations(locale, 'takeaway')
+      setTranslations(translations)
 
       // Get menu items that are available AND marked for takeaway
       const { data: items } = await supabase
