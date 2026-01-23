@@ -28,7 +28,7 @@ export async function POST(request) {
     // Fetch reservation details
     const { data: reservation, error: fetchError } = await supabaseAdmin
       .from('reservations')
-      .select('*, restaurants(name, slug), tables(table_number)')
+      .select('*, restaurants(name, slug, address, phone), tables(table_number)')
       .eq('id', reservationId)
       .single()
 
@@ -187,6 +187,31 @@ function generateConfirmationEmail(reservation, cancelUrl, tr, locale) {
           <p><strong>${tr.arriveWithin15}</strong></p>
           <p>${tr.lookForwardToServing}</p>
 
+          ${reservation.restaurants.address || reservation.restaurants.phone ? `
+          <div class="details">
+            <h3 style="margin: 0 0 12px 0; font-size: 16px; color: #6262bd;">📍 ${tr.restaurantLocation || 'Restaurant Location'}</h3>
+            <div class="detail-row">
+              <span class="detail-label">${reservation.restaurants.name}</span>
+            </div>
+            ${reservation.restaurants.address ? `
+            <div class="detail-row">
+              <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(reservation.restaurants.address)}"
+                 style="color: #6262bd; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;"
+                 target="_blank">
+                <span>📍</span>
+                <span style="text-decoration: underline;">${reservation.restaurants.address}</span>
+                <span style="font-size: 12px;">↗</span>
+              </a>
+            </div>
+            ` : ''}
+            ${reservation.restaurants.phone ? `
+            <div class="detail-row">
+              <span class="detail-label">${tr.phone || 'Phone'}:</span> ${reservation.restaurants.phone}
+            </div>
+            ` : ''}
+          </div>
+          ` : ''}
+
           <p>${tr.needToCancel}</p>
           <p><a href="${cancelUrl}" class="cancel-link">${tr.cancelReservation}</a></p>
         </div>
@@ -299,6 +324,31 @@ function generatePendingEmail(reservation, cancelUrl, tr, locale) {
             <strong>⏳ ${tr.pendingApproval}</strong>
             <p style="margin: 10px 0 0 0;">${tr.pendingApprovalMessage}</p>
           </div>
+
+          ${reservation.restaurants.address || reservation.restaurants.phone ? `
+          <div class="details">
+            <h3 style="margin: 0 0 12px 0; font-size: 16px; color: #d97706;">📍 ${tr.restaurantLocation || 'Restaurant Location'}</h3>
+            <div class="detail-row">
+              <span class="detail-label">${reservation.restaurants.name}</span>
+            </div>
+            ${reservation.restaurants.address ? `
+            <div class="detail-row">
+              <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(reservation.restaurants.address)}"
+                 style="color: #d97706; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;"
+                 target="_blank">
+                <span>📍</span>
+                <span style="text-decoration: underline;">${reservation.restaurants.address}</span>
+                <span style="font-size: 12px;">↗</span>
+              </a>
+            </div>
+            ` : ''}
+            ${reservation.restaurants.phone ? `
+            <div class="detail-row">
+              <span class="detail-label">${tr.phone || 'Phone'}:</span> ${reservation.restaurants.phone}
+            </div>
+            ` : ''}
+          </div>
+          ` : ''}
 
           <p>${tr.needToCancel.replace('reservation', 'request')}</p>
           <p><a href="${cancelUrl}" class="cancel-link">${tr.cancelRequest}</a></p>

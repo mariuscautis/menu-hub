@@ -153,7 +153,17 @@ export async function POST(request) {
               <div class="order-details">
                 <h4 style="margin-top: 0; color: #334155;">📍 ${tr.pickupLocation}</h4>
                 <p style="margin: 0; font-weight: bold; color: #334155;">${restaurant.name}</p>
-                ${restaurant.address ? `<p style="margin: 5px 0 0 0; color: #64748b;">${restaurant.address}</p>` : ''}
+                ${restaurant.address ? `
+                  <p style="margin: 5px 0 0 0;">
+                    <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant.address)}"
+                       style="color: #0891b2; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;"
+                       target="_blank">
+                      <span style="color: #64748b;">📍</span>
+                      <span style="text-decoration: underline;">${restaurant.address}</span>
+                      <span style="font-size: 12px; color: #64748b;">↗</span>
+                    </a>
+                  </p>
+                ` : ''}
                 ${restaurant.phone ? `<p style="margin: 5px 0 0 0; color: #64748b;">${tr.phone}: ${restaurant.phone}</p>` : ''}
               </div>
 
