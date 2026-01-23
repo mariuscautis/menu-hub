@@ -1465,7 +1465,22 @@
     "failedUpdateLogo": "Actualizarea logo-ului a eșuat",
     "storageBucketNotFound": "Bucket-ul de stocare nu a fost găsit. Creează mai întâi bucket-ul \"restaurant-logos\" în Supabase Storage.",
     "permissionDenied": "Permisiune refuzată. Configurează politicile de stocare.",
-    "confirmRemoveLogo": "Ești sigur că vrei să ștergi logo-ul?"
+    "confirmRemoveLogo": "Ești sigur că vrei să ștergi logo-ul?",
+    "emailLanguageSectionTitle": "Limba Email-urilor",
+    "emailLanguageSectionDescription": "Alege limba pentru toate email-urile trimise către clienți (confirmări de rezervări, notificări de comenzi, etc.)",
+    "emailLanguageLabel": "Limba Email-urilor",
+    "emailLanguageHelpText": "Aceasta este limba care va fi folosită pentru toate email-urile către clienți, incluzând confirmări de rezervări, comenzi takeaway și notificări.",
+    "saveEmailLanguage": "Salvează Limba Email-urilor",
+    "emailLanguageUpdatedSuccess": "Limba email-urilor a fost actualizată cu succes!",
+    "failedUpdateEmailLanguage": "Actualizarea limbii email-urilor a eșuat",
+    "addressSectionTitle": "Adresa Restaurantului",
+    "addressSectionDescription": "Adresa fizică a restaurantului tău. Va fi afișată clienților și inclusă în comunicări.",
+    "addressLabel": "Adresa Completă",
+    "addressPlaceholder": "Strada Principală 123, Oraș, Cod Poștal",
+    "addressHelpText": "Introdu adresa completă a restaurantului incluzând strada, orașul și codul poștal.",
+    "saveAddress": "Salvează Adresa",
+    "addressUpdatedSuccess": "Adresa a fost actualizată cu succes!",
+    "failedUpdateAddress": "Actualizarea adresei a eșuat"
   },
   "taxInvoicing": {
     "pageTitle": "Taxe și Facturare",

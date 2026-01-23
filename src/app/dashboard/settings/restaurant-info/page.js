@@ -16,6 +16,8 @@ export default function RestaurantInfo() {
   const [savingPhone, setSavingPhone] = useState(false)
   const [emailLanguage, setEmailLanguage] = useState('en')
   const [savingEmailLanguage, setSavingEmailLanguage] = useState(false)
+  const [restaurantAddress, setRestaurantAddress] = useState('')
+  const [savingAddress, setSavingAddress] = useState(false)
   useEffect(() => {
     const fetchRestaurant = async () => {
       const { data: { user } } = await supabase.auth.getUser()
@@ -31,6 +33,7 @@ export default function RestaurantInfo() {
         setLogoPreview(ownedRestaurant.logo_url || null)
         setRestaurantPhone(ownedRestaurant.phone || '')
         setEmailLanguage(ownedRestaurant.email_language || 'en')
+        setRestaurantAddress(ownedRestaurant.address || '')
       }
       setLoading(false)
     }
@@ -135,6 +138,20 @@ export default function RestaurantInfo() {
       setRestaurant({ ...restaurant, email_language: emailLanguage })
     }
     setSavingEmailLanguage(false)
+  }
+  const handleSaveAddress = async () => {
+    setSavingAddress(true)
+    const { error } = await supabase
+      .from('restaurants')
+      .update({ address: restaurantAddress || null })
+      .eq('id', restaurant.id)
+    if (error) {
+      setMessage({ type: 'error', text: t('failedUpdateAddress') })
+    } else {
+      setMessage({ type: 'success', text: t('addressUpdatedSuccess') })
+      setRestaurant({ ...restaurant, address: restaurantAddress })
+    }
+    setSavingAddress(false)
   }
   if (loading) {
     return (
@@ -253,6 +270,42 @@ export default function RestaurantInfo() {
               className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               {savingEmailLanguage ? (t('saving') || 'Saving...') : (t('saveEmailLanguage') || 'Save Email Language')}
+            </button>
+          </div>
+        </div>
+      </div>
+      {/* Restaurant Address Section */}
+      <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
+        <div className="mb-6">
+          <h2 className="text-lg font-bold text-slate-700 mb-2">{t('addressSectionTitle')}</h2>
+          <p className="text-sm text-slate-500">
+            {t('addressSectionDescription')}
+          </p>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              {t('addressLabel')}
+            </label>
+            <textarea
+              value={restaurantAddress}
+              onChange={(e) => setRestaurantAddress(e.target.value)}
+              placeholder={t('addressPlaceholder')}
+              rows={3}
+              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 resize-none"
+            />
+            <p className="text-xs text-slate-500 mt-2">
+              {t('addressHelpText')}
+            </p>
+          </div>
+          {/* Save Button */}
+          <div className="pt-2">
+            <button
+              onClick={handleSaveAddress}
+              disabled={savingAddress}
+              className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              {savingAddress ? t('saving') : t('saveAddress')}
             </button>
           </div>
         </div>

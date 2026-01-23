@@ -1465,7 +1465,22 @@
     "failedUpdateLogo": "Aggiornamento del logo fallito",
     "storageBucketNotFound": "Bucket di archiviazione non trovato. Si prega di creare prima il bucket \"restaurant-logos\" in Supabase Storage.",
     "permissionDenied": "Permesso negato. Si prega di configurare le policy di archiviazione.",
-    "confirmRemoveLogo": "Sei sicuro di voler rimuovere il logo?"
+    "confirmRemoveLogo": "Sei sicuro di voler rimuovere il logo?",
+    "emailLanguageSectionTitle": "Lingua delle Email",
+    "emailLanguageSectionDescription": "Scegli la lingua per tutte le email inviate ai tuoi clienti (conferme di prenotazione, notifiche di ordini, ecc.)",
+    "emailLanguageLabel": "Lingua delle Email",
+    "emailLanguageHelpText": "Questa è la lingua che verrà utilizzata per tutte le email ai clienti, incluse conferme di prenotazione, ordini da asporto e notifiche.",
+    "saveEmailLanguage": "Salva Lingua delle Email",
+    "emailLanguageUpdatedSuccess": "Lingua delle email aggiornata con successo!",
+    "failedUpdateEmailLanguage": "Aggiornamento della lingua delle email fallito",
+    "addressSectionTitle": "Indirizzo del Ristorante",
+    "addressSectionDescription": "L'indirizzo fisico del tuo ristorante. Verrà mostrato ai clienti e incluso nelle comunicazioni.",
+    "addressLabel": "Indirizzo Completo",
+    "addressPlaceholder": "Via Principale 123, Città, Codice Postale",
+    "addressHelpText": "Inserisci l'indirizzo completo del ristorante inclusi via, città e codice postale.",
+    "saveAddress": "Salva Indirizzo",
+    "addressUpdatedSuccess": "Indirizzo aggiornato con successo!",
+    "failedUpdateAddress": "Aggiornamento dell'indirizzo fallito"
   },
   "taxInvoicing": {
     "pageTitle": "Tasse e Fatturazione",

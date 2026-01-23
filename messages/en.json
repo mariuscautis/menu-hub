@@ -1465,7 +1465,22 @@
     "failedUpdateLogo": "Failed to update logo",
     "storageBucketNotFound": "Storage bucket not found. Please create the \"restaurant-logos\" bucket in Supabase Storage first.",
     "permissionDenied": "Permission denied. Please set up storage policies.",
-    "confirmRemoveLogo": "Are you sure you want to remove the logo?"
+    "confirmRemoveLogo": "Are you sure you want to remove the logo?",
+    "emailLanguageSectionTitle": "Email Language",
+    "emailLanguageSectionDescription": "Choose the language for all emails sent to your customers (booking confirmations, order notifications, etc.)",
+    "emailLanguageLabel": "Email Language",
+    "emailLanguageHelpText": "This is the language that will be used for all customer emails including booking confirmations, takeaway orders, and notifications.",
+    "saveEmailLanguage": "Save Email Language",
+    "emailLanguageUpdatedSuccess": "Email language updated successfully!",
+    "failedUpdateEmailLanguage": "Failed to update email language",
+    "addressSectionTitle": "Restaurant Address",
+    "addressSectionDescription": "Your restaurant's physical address. This will be displayed to customers and included in communications.",
+    "addressLabel": "Full Address",
+    "addressPlaceholder": "123 Main Street, City, Postal Code",
+    "addressHelpText": "Enter your complete restaurant address including street, city, and postal code.",
+    "saveAddress": "Save Address",
+    "addressUpdatedSuccess": "Address updated successfully!",
+    "failedUpdateAddress": "Failed to update address"
   },
   "taxInvoicing": {
     "pageTitle": "Tax & Invoicing",

@@ -1465,7 +1465,22 @@
     "failedUpdateLogo": "Error al actualizar el logo",
     "storageBucketNotFound": "Bucket de almacenamiento no encontrado. Por favor, crea primero el bucket \"restaurant-logos\" en Supabase Storage.",
     "permissionDenied": "Permiso denegado. Por favor, configura las políticas de almacenamiento.",
-    "confirmRemoveLogo": "¿Estás seguro de que quieres eliminar el logo?"
+    "confirmRemoveLogo": "¿Estás seguro de que quieres eliminar el logo?",
+    "emailLanguageSectionTitle": "Idioma de Correos",
+    "emailLanguageSectionDescription": "Elige el idioma para todos los correos electrónicos enviados a tus clientes (confirmaciones de reservas, notificaciones de pedidos, etc.)",
+    "emailLanguageLabel": "Idioma de Correos",
+    "emailLanguageHelpText": "Este es el idioma que se utilizará para todos los correos electrónicos a los clientes, incluyendo confirmaciones de reservas, pedidos para llevar y notificaciones.",
+    "saveEmailLanguage": "Guardar Idioma de Correos",
+    "emailLanguageUpdatedSuccess": "¡Idioma de correos actualizado con éxito!",
+    "failedUpdateEmailLanguage": "Error al actualizar el idioma de correos",
+    "addressSectionTitle": "Dirección del Restaurante",
+    "addressSectionDescription": "La dirección física de tu restaurante. Se mostrará a los clientes e incluirá en las comunicaciones.",
+    "addressLabel": "Dirección Completa",
+    "addressPlaceholder": "Calle Principal 123, Ciudad, Código Postal",
+    "addressHelpText": "Introduce la dirección completa del restaurante incluyendo calle, ciudad y código postal.",
+    "saveAddress": "Guardar Dirección",
+    "addressUpdatedSuccess": "¡Dirección actualizada con éxito!",
+    "failedUpdateAddress": "Error al actualizar la dirección"
   },
   "taxInvoicing": {
     "pageTitle": "Impuestos y Facturación",

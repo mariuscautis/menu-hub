@@ -1465,7 +1465,22 @@
     "failedUpdateLogo": "Échec de la mise à jour du logo",
     "storageBucketNotFound": "Bucket de stockage introuvable. Veuillez d'abord créer le bucket \"restaurant-logos\" dans Supabase Storage.",
     "permissionDenied": "Permission refusée. Veuillez configurer les politiques de stockage.",
-    "confirmRemoveLogo": "Êtes-vous sûr de vouloir supprimer le logo ?"
+    "confirmRemoveLogo": "Êtes-vous sûr de vouloir supprimer le logo ?",
+    "emailLanguageSectionTitle": "Langue des E-mails",
+    "emailLanguageSectionDescription": "Choisissez la langue pour tous les e-mails envoyés à vos clients (confirmations de réservation, notifications de commande, etc.)",
+    "emailLanguageLabel": "Langue des E-mails",
+    "emailLanguageHelpText": "C'est la langue qui sera utilisée pour tous les e-mails aux clients, y compris les confirmations de réservation, les commandes à emporter et les notifications.",
+    "saveEmailLanguage": "Enregistrer la Langue des E-mails",
+    "emailLanguageUpdatedSuccess": "Langue des e-mails mise à jour avec succès !",
+    "failedUpdateEmailLanguage": "Échec de la mise à jour de la langue des e-mails",
+    "addressSectionTitle": "Adresse du Restaurant",
+    "addressSectionDescription": "L'adresse physique de votre restaurant. Elle sera affichée aux clients et incluse dans les communications.",
+    "addressLabel": "Adresse Complète",
+    "addressPlaceholder": "123 Rue Principale, Ville, Code Postal",
+    "addressHelpText": "Entrez l'adresse complète du restaurant, y compris la rue, la ville et le code postal.",
+    "saveAddress": "Enregistrer l'Adresse",
+    "addressUpdatedSuccess": "Adresse mise à jour avec succès !",
+    "failedUpdateAddress": "Échec de la mise à jour de l'adresse"
   },
   "taxInvoicing": {
     "pageTitle": "Taxes et Facturation",
