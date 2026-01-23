@@ -220,12 +220,10 @@ export default function TakeawayMenu({ params }) {
       // Generate unique pickup code
       const code = generatePickupCode()
 
-      // Get user's selected language from localStorage (fallback to 'en')
+      // Use restaurant's email language preference (fallback to 'en')
       const supportedLocales = ['en', 'ro', 'fr', 'it', 'es']
-      const savedLocale = typeof localStorage !== 'undefined'
-        ? localStorage.getItem('app_language')
-        : null
-      const locale = savedLocale && supportedLocales.includes(savedLocale) ? savedLocale : 'en'
+      const restaurantLocale = restaurant.email_language
+      const locale = restaurantLocale && supportedLocales.includes(restaurantLocale) ? restaurantLocale : 'en'
 
       // Create takeaway order
       const { data: order, error: orderError } = await supabase

@@ -14,6 +14,8 @@ export default function RestaurantInfo() {
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [restaurantPhone, setRestaurantPhone] = useState('')
   const [savingPhone, setSavingPhone] = useState(false)
+  const [emailLanguage, setEmailLanguage] = useState('en')
+  const [savingEmailLanguage, setSavingEmailLanguage] = useState(false)
   useEffect(() => {
     const fetchRestaurant = async () => {
       const { data: { user } } = await supabase.auth.getUser()
@@ -28,6 +30,7 @@ export default function RestaurantInfo() {
         setRestaurant(ownedRestaurant)
         setLogoPreview(ownedRestaurant.logo_url || null)
         setRestaurantPhone(ownedRestaurant.phone || '')
+        setEmailLanguage(ownedRestaurant.email_language || 'en')
       }
       setLoading(false)
     }
@@ -119,6 +122,20 @@ export default function RestaurantInfo() {
     }
     setSavingPhone(false)
   }
+  const handleSaveEmailLanguage = async () => {
+    setSavingEmailLanguage(true)
+    const { error } = await supabase
+      .from('restaurants')
+      .update({ email_language: emailLanguage })
+      .eq('id', restaurant.id)
+    if (error) {
+      setMessage({ type: 'error', text: t('failedUpdateEmailLanguage') || 'Failed to update email language' })
+    } else {
+      setMessage({ type: 'success', text: t('emailLanguageUpdatedSuccess') || 'Email language updated successfully' })
+      setRestaurant({ ...restaurant, email_language: emailLanguage })
+    }
+    setSavingEmailLanguage(false)
+  }
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -196,6 +213,46 @@ export default function RestaurantInfo() {
               className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               {savingPhone ? t('saving') : t('saveButton')}
+            </button>
+          </div>
+        </div>
+      </div>
+      {/* Email Language Section */}
+      <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
+        <div className="mb-6">
+          <h2 className="text-lg font-bold text-slate-700 mb-2">{t('emailLanguageSectionTitle') || 'Email Language'}</h2>
+          <p className="text-sm text-slate-500">
+            {t('emailLanguageSectionDescription') || 'Choose the language for all emails sent to your customers (booking confirmations, order notifications, etc.)'}
+          </p>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              {t('emailLanguageLabel') || 'Email Language'}
+            </label>
+            <select
+              value={emailLanguage}
+              onChange={(e) => setEmailLanguage(e.target.value)}
+              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 bg-white"
+            >
+              <option value="en">🇬🇧 English</option>
+              <option value="ro">🇷🇴 Română (Romanian)</option>
+              <option value="es">🇪🇸 Español (Spanish)</option>
+              <option value="fr">🇫🇷 Français (French)</option>
+              <option value="it">🇮🇹 Italiano (Italian)</option>
+            </select>
+            <p className="text-xs text-slate-500 mt-2">
+              {t('emailLanguageHelpText') || 'This is the language that will be used for all customer emails including booking confirmations, takeaway orders, and notifications.'}
+            </p>
+          </div>
+          {/* Save Button */}
+          <div className="pt-2">
+            <button
+              onClick={handleSaveEmailLanguage}
+              disabled={savingEmailLanguage}
+              className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              {savingEmailLanguage ? (t('saving') || 'Saving...') : (t('saveEmailLanguage') || 'Save Email Language')}
             </button>
           </div>
         </div>
