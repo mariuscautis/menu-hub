@@ -4,6 +4,7 @@ export const runtime = 'edge'
 import { useState, useEffect, use } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import { loadTranslations, createTranslator } from '@/lib/clientTranslations'
 
 export default function BookReservation({ params }) {
   const { restaurant: slug } = use(params)
@@ -27,6 +28,10 @@ export default function BookReservation({ params }) {
   // Availability state
   const [availableTimeSlots, setAvailableTimeSlots] = useState([])
   const [checkingAvailability, setCheckingAvailability] = useState(false)
+
+  // Translation state
+  const [translations, setTranslations] = useState({})
+  const t = createTranslator(translations)
 
   useEffect(() => {
     fetchRestaurant()
@@ -60,6 +65,11 @@ export default function BookReservation({ params }) {
       }
 
       setRestaurant(data)
+
+      // Load translations based on restaurant's email language
+      const locale = data.email_language || 'en'
+      const bookingTranslations = loadTranslations(locale, 'booking')
+      setTranslations(bookingTranslations)
     } catch (err) {
       setError('Failed to load restaurant')
     } finally {
@@ -161,7 +171,7 @@ export default function BookReservation({ params }) {
       // Final availability check
       const isAvailable = await checkAvailability(selectedDate, selectedTime)
       if (!isAvailable) {
-        setError('Sorry, this time slot is no longer available. Please select another time.')
+        setError(t('slotUnavailable') || 'Sorry, this time slot is no longer available. Please select another time.')
         setSubmitting(false)
         return
       }
@@ -206,7 +216,7 @@ export default function BookReservation({ params }) {
 
     } catch (err) {
       console.error('Booking error:', err)
-      setError('Failed to create reservation. Please try again.')
+      setError(t('bookingError') || 'Failed to create reservation. Please try again.')
     } finally {
       setSubmitting(false)
     }
@@ -226,7 +236,7 @@ export default function BookReservation({ params }) {
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-slate-500">Loading...</div>
+        <div className="text-slate-500">{t('loading') || 'Loading...'}</div>
       </div>
     )
   }
@@ -240,7 +250,7 @@ export default function BookReservation({ params }) {
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-slate-800 mb-4">Oops!</h1>
+          <h1 className="text-2xl font-bold text-slate-800 mb-4">{t('errorTitle') || 'Oops!'}</h1>
           <p className="text-slate-600">{error}</p>
         </div>
       </div>
@@ -256,18 +266,24 @@ export default function BookReservation({ params }) {
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-slate-800 mb-4">Reservation Requested!</h1>
+          <h1 className="text-2xl font-bold text-slate-800 mb-4">{t('successTitle') || 'Reservation Requested!'}</h1>
           <p className="text-slate-600 mb-2">
-            Thank you, {customerName}! We've received your reservation request for {partySize} {partySize === 1 ? 'guest' : 'guests'} on {new Date(selectedDate).toLocaleDateString()} at {selectedTime}.
+            {t('successMessage', {
+              name: customerName,
+              partySize: partySize.toString(),
+              guests: partySize === 1 ? (t('guest') || 'guest') : (t('guests') || 'guests'),
+              date: new Date(selectedDate).toLocaleDateString(),
+              time: selectedTime
+            }) || `Thank you, ${customerName}! We've received your reservation request for ${partySize} ${partySize === 1 ? 'guest' : 'guests'} on ${new Date(selectedDate).toLocaleDateString()} at ${selectedTime}.`}
           </p>
           <p className="text-slate-600 mb-6">
-            You'll receive a confirmation email at <strong>{customerEmail}</strong> once the restaurant approves your request.
+            {t('confirmationEmailMessage', { email: customerEmail }) || `You'll receive a confirmation email at ${customerEmail} once the restaurant approves your request.`}
           </p>
           <button
             onClick={() => router.push(`/${slug}/menu`)}
             className="bg-[#6262bd] text-white px-6 py-3 rounded-xl font-medium hover:bg-[#5252a3]"
           >
-            View Menu
+            {t('viewMenuButton') || 'View Menu'}
           </button>
         </div>
       </div>
@@ -291,7 +307,7 @@ export default function BookReservation({ params }) {
             )}
             <div>
               <h1 className="text-3xl font-bold text-slate-800">{restaurant.name}</h1>
-              <p className="text-slate-500">Make a Reservation</p>
+              <p className="text-slate-500">{t('pageTitle') || 'Make a Reservation'}</p>
             </div>
           </div>
         </div>
@@ -310,7 +326,7 @@ export default function BookReservation({ params }) {
             {/* Date Selection */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                Date *
+                {t('dateLabel') || 'Date'} *
               </label>
               <input
                 type="date"
@@ -329,12 +345,12 @@ export default function BookReservation({ params }) {
             {/* Time Selection */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                Time *
+                {t('timeLabel') || 'Time'} *
               </label>
               {!selectedDate ? (
-                <p className="text-slate-400 text-sm">Please select a date first</p>
+                <p className="text-slate-400 text-sm">{t('selectDateFirst') || 'Please select a date first'}</p>
               ) : availableTimeSlots.length === 0 ? (
-                <p className="text-red-600 text-sm">No available time slots for this date</p>
+                <p className="text-red-600 text-sm">{t('noAvailableSlots') || 'No available time slots for this date'}</p>
               ) : (
                 <div className="grid grid-cols-3 gap-2">
                   {availableTimeSlots.map((slot) => (
@@ -358,7 +374,7 @@ export default function BookReservation({ params }) {
             {/* Party Size */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                Party Size *
+                {t('partySizeLabel') || 'Party Size'} *
               </label>
               <div className="flex items-center gap-3">
                 <button
@@ -391,14 +407,14 @@ export default function BookReservation({ params }) {
                 >
                   +
                 </button>
-                <span className="text-slate-600 ml-2">{partySize === 1 ? 'guest' : 'guests'}</span>
+                <span className="text-slate-600 ml-2">{partySize === 1 ? (t('guest') || 'guest') : (t('guests') || 'guests')}</span>
               </div>
             </div>
 
             {/* Customer Name */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                Your Name *
+                {t('nameLabel') || 'Your Name'} *
               </label>
               <input
                 type="text"
@@ -406,14 +422,14 @@ export default function BookReservation({ params }) {
                 onChange={(e) => setCustomerName(e.target.value)}
                 required
                 className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
-                placeholder="John Smith"
+                placeholder={t('namePlaceholder') || 'John Smith'}
               />
             </div>
 
             {/* Customer Email */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                Email Address *
+                {t('emailLabel') || 'Email Address'} *
               </label>
               <input
                 type="email"
@@ -421,38 +437,38 @@ export default function BookReservation({ params }) {
                 onChange={(e) => setCustomerEmail(e.target.value)}
                 required
                 className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
-                placeholder="john@example.com"
+                placeholder={t('emailPlaceholder') || 'john@example.com'}
               />
               <p className="text-xs text-slate-500 mt-1">
-                We'll send your confirmation to this email
+                {t('emailHelpText') || "We'll send your confirmation to this email"}
               </p>
             </div>
 
             {/* Customer Phone */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                Phone Number (Optional)
+                {t('phoneLabel') || 'Phone Number'} ({t('optional') || 'Optional'})
               </label>
               <input
                 type="tel"
                 value={customerPhone}
                 onChange={(e) => setCustomerPhone(e.target.value)}
                 className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
-                placeholder="+1 (555) 123-4567"
+                placeholder={t('phonePlaceholder') || '+1 (555) 123-4567'}
               />
             </div>
 
             {/* Special Requests */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                Special Requests (Optional)
+                {t('specialRequestsLabel') || 'Special Requests'} ({t('optional') || 'Optional'})
               </label>
               <textarea
                 value={specialRequests}
                 onChange={(e) => setSpecialRequests(e.target.value)}
                 rows={3}
                 className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 resize-none"
-                placeholder="Birthday celebration, dietary restrictions, accessibility needs..."
+                placeholder={t('specialRequestsPlaceholder') || 'Birthday celebration, dietary restrictions, accessibility needs...'}
               />
             </div>
 
@@ -462,7 +478,7 @@ export default function BookReservation({ params }) {
               disabled={submitting || checkingAvailability || !selectedDate || !selectedTime}
               className="w-full bg-[#6262bd] text-white py-4 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
-              {submitting ? 'Creating Reservation...' : checkingAvailability ? 'Checking Availability...' : 'Request Reservation'}
+              {submitting ? (t('submitting') || 'Creating Reservation...') : checkingAvailability ? (t('checkingAvailability') || 'Checking Availability...') : (t('submitButton') || 'Request Reservation')}
             </button>
           </form>
         </div>
@@ -474,12 +490,12 @@ export default function BookReservation({ params }) {
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
             </svg>
             <div>
-              <h3 className="font-bold text-blue-900 mb-2">How Reservations Work</h3>
+              <h3 className="font-bold text-blue-900 mb-2">{t('howItWorksTitle') || 'How Reservations Work'}</h3>
               <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
-                <li>Submit your reservation request</li>
-                <li>Receive confirmation email once approved by restaurant</li>
-                <li>Cancel anytime using the link in your email</li>
-                <li>Please arrive within 15 minutes of your reservation time</li>
+                <li>{t('howItWorksStep1') || 'Submit your reservation request'}</li>
+                <li>{t('howItWorksStep2') || 'Receive confirmation email once approved by restaurant'}</li>
+                <li>{t('howItWorksStep3') || 'Cancel anytime using the link in your email'}</li>
+                <li>{t('howItWorksStep4') || 'Please arrive within 15 minutes of your reservation time'}</li>
               </ul>
             </div>
           </div>
