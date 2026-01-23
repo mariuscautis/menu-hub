@@ -1480,7 +1480,13 @@
     "addressHelpText": "Inserisci l'indirizzo completo del ristorante inclusi via, città e codice postale.",
     "saveAddress": "Salva Indirizzo",
     "addressUpdatedSuccess": "Indirizzo aggiornato con successo!",
-    "failedUpdateAddress": "Aggiornamento dell'indirizzo fallito"
+    "failedUpdateAddress": "Aggiornamento dell'indirizzo fallito",
+    "customerLinksSectionTitle": "Link Per Clienti",
+    "customerLinksSectionDescription": "Condividi questi link con i tuoi clienti per prenotazioni e ordini da asporto.",
+    "bookingUrlLabel": "URL Pagina Prenotazioni",
+    "takeawayUrlLabel": "URL Menu da Asporto",
+    "copyButton": "Copia",
+    "urlCopiedSuccess": "URL copiato negli appunti!"
   },
   "taxInvoicing": {
     "pageTitle": "Tasse e Fatturazione",

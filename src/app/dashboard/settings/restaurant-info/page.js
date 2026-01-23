@@ -111,17 +111,20 @@ export default function RestaurantInfo() {
       setLogoFile(null)
     }
   }
-  const handleSavePhone = async () => {
+  const handleSaveRestaurantInfo = async () => {
     setSavingPhone(true)
     const { error } = await supabase
       .from('restaurants')
-      .update({ phone: restaurantPhone || null })
+      .update({
+        phone: restaurantPhone || null,
+        address: restaurantAddress || null
+      })
       .eq('id', restaurant.id)
     if (error) {
       setMessage({ type: 'error', text: t('failedUpdatePhone') })
     } else {
       setMessage({ type: 'success', text: t('phoneUpdatedSuccess') })
-      setRestaurant({ ...restaurant, phone: restaurantPhone })
+      setRestaurant({ ...restaurant, phone: restaurantPhone, address: restaurantAddress })
     }
     setSavingPhone(false)
   }
@@ -139,19 +142,9 @@ export default function RestaurantInfo() {
     }
     setSavingEmailLanguage(false)
   }
-  const handleSaveAddress = async () => {
-    setSavingAddress(true)
-    const { error } = await supabase
-      .from('restaurants')
-      .update({ address: restaurantAddress || null })
-      .eq('id', restaurant.id)
-    if (error) {
-      setMessage({ type: 'error', text: t('failedUpdateAddress') })
-    } else {
-      setMessage({ type: 'success', text: t('addressUpdatedSuccess') })
-      setRestaurant({ ...restaurant, address: restaurantAddress })
-    }
-    setSavingAddress(false)
+  const handleCopyUrl = (url) => {
+    navigator.clipboard.writeText(url)
+    setMessage({ type: 'success', text: t('urlCopiedSuccess') || 'URL copied to clipboard!' })
   }
   if (loading) {
     return (
@@ -222,15 +215,85 @@ export default function RestaurantInfo() {
               {t('phoneHelpText')}
             </p>
           </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              {t('addressLabel')}
+            </label>
+            <textarea
+              value={restaurantAddress}
+              onChange={(e) => setRestaurantAddress(e.target.value)}
+              placeholder={t('addressPlaceholder')}
+              rows={3}
+              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 resize-none"
+            />
+            <p className="text-xs text-slate-500 mt-2">
+              {t('addressHelpText')}
+            </p>
+          </div>
           {/* Save Button */}
           <div className="pt-2">
             <button
-              onClick={handleSavePhone}
+              onClick={handleSaveRestaurantInfo}
               disabled={savingPhone}
               className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               {savingPhone ? t('saving') : t('saveButton')}
             </button>
+          </div>
+        </div>
+      </div>
+      {/* Customer Links Section */}
+      <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
+        <div className="mb-6">
+          <h2 className="text-lg font-bold text-slate-700 mb-2">{t('customerLinksSectionTitle') || 'Customer Links'}</h2>
+          <p className="text-sm text-slate-500">
+            {t('customerLinksSectionDescription') || 'Share these links with your customers for bookings and takeaway orders.'}
+          </p>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              {t('bookingUrlLabel') || 'Booking Page URL'}
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={`${process.env.NEXT_PUBLIC_BASE_URL || 'https://venoapp.com'}/${restaurant.slug}/book`}
+                readOnly
+                className="flex-1 px-4 py-3 border-2 border-slate-200 rounded-xl bg-slate-50 text-slate-600 text-sm"
+              />
+              <button
+                onClick={() => handleCopyUrl(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://venoapp.com'}/${restaurant.slug}/book`)}
+                className="px-4 py-3 bg-[#6262bd] text-white rounded-xl font-medium hover:bg-[#5252a3] flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                {t('copyButton') || 'Copy'}
+              </button>
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              {t('takeawayUrlLabel') || 'Takeaway Menu URL'}
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={`${process.env.NEXT_PUBLIC_BASE_URL || 'https://venoapp.com'}/${restaurant.slug}/takeaway`}
+                readOnly
+                className="flex-1 px-4 py-3 border-2 border-slate-200 rounded-xl bg-slate-50 text-slate-600 text-sm"
+              />
+              <button
+                onClick={() => handleCopyUrl(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://venoapp.com'}/${restaurant.slug}/takeaway`)}
+                className="px-4 py-3 bg-[#6262bd] text-white rounded-xl font-medium hover:bg-[#5252a3] flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                {t('copyButton') || 'Copy'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -270,42 +333,6 @@ export default function RestaurantInfo() {
               className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               {savingEmailLanguage ? (t('saving') || 'Saving...') : (t('saveEmailLanguage') || 'Save Email Language')}
-            </button>
-          </div>
-        </div>
-      </div>
-      {/* Restaurant Address Section */}
-      <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
-        <div className="mb-6">
-          <h2 className="text-lg font-bold text-slate-700 mb-2">{t('addressSectionTitle')}</h2>
-          <p className="text-sm text-slate-500">
-            {t('addressSectionDescription')}
-          </p>
-        </div>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              {t('addressLabel')}
-            </label>
-            <textarea
-              value={restaurantAddress}
-              onChange={(e) => setRestaurantAddress(e.target.value)}
-              placeholder={t('addressPlaceholder')}
-              rows={3}
-              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 resize-none"
-            />
-            <p className="text-xs text-slate-500 mt-2">
-              {t('addressHelpText')}
-            </p>
-          </div>
-          {/* Save Button */}
-          <div className="pt-2">
-            <button
-              onClick={handleSaveAddress}
-              disabled={savingAddress}
-              className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-            >
-              {savingAddress ? t('saving') : t('saveAddress')}
             </button>
           </div>
         </div>

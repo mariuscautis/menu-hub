@@ -1480,7 +1480,13 @@
     "addressHelpText": "Introdu adresa completă a restaurantului incluzând strada, orașul și codul poștal.",
     "saveAddress": "Salvează Adresa",
     "addressUpdatedSuccess": "Adresa a fost actualizată cu succes!",
-    "failedUpdateAddress": "Actualizarea adresei a eșuat"
+    "failedUpdateAddress": "Actualizarea adresei a eșuat",
+    "customerLinksSectionTitle": "Link-uri Pentru Clienți",
+    "customerLinksSectionDescription": "Distribuie aceste link-uri clienților tăi pentru rezervări și comenzi takeaway.",
+    "bookingUrlLabel": "URL Pagină Rezervări",
+    "takeawayUrlLabel": "URL Meniu Takeaway",
+    "copyButton": "Copiază",
+    "urlCopiedSuccess": "URL copiat în clipboard!"
   },
   "taxInvoicing": {
     "pageTitle": "Taxe și Facturare",

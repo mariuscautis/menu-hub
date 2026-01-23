@@ -103,9 +103,26 @@ export default function TakeawayMenu({ params }) {
       // Load translations based on restaurant's email language
       const locale = restaurantData.email_language || 'en'
       try {
-        const translationModule = await import(`@/messages/${locale}.json`)
+        let translationModule
+        switch (locale) {
+          case 'ro':
+            translationModule = await import('@/messages/ro.json')
+            break
+          case 'es':
+            translationModule = await import('@/messages/es.json')
+            break
+          case 'fr':
+            translationModule = await import('@/messages/fr.json')
+            break
+          case 'it':
+            translationModule = await import('@/messages/it.json')
+            break
+          default:
+            translationModule = await import('@/messages/en.json')
+        }
         setTranslations(translationModule.default.takeaway)
       } catch (error) {
+        console.error('Translation loading error:', error)
         // Fallback to English if translation fails
         const translationModule = await import('@/messages/en.json')
         setTranslations(translationModule.default.takeaway)

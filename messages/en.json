@@ -1480,7 +1480,13 @@
     "addressHelpText": "Enter your complete restaurant address including street, city, and postal code.",
     "saveAddress": "Save Address",
     "addressUpdatedSuccess": "Address updated successfully!",
-    "failedUpdateAddress": "Failed to update address"
+    "failedUpdateAddress": "Failed to update address",
+    "customerLinksSectionTitle": "Customer Links",
+    "customerLinksSectionDescription": "Share these links with your customers for bookings and takeaway orders.",
+    "bookingUrlLabel": "Booking Page URL",
+    "takeawayUrlLabel": "Takeaway Menu URL",
+    "copyButton": "Copy",
+    "urlCopiedSuccess": "URL copied to clipboard!"
   },
   "taxInvoicing": {
     "pageTitle": "Tax & Invoicing",
