@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
+import { loadTranslations, createTranslator } from '@/lib/clientTranslations';
 import ClockInOut from './ClockInOut';
 import WorkHistory from './WorkHistory';
 import TimeOffRequestModal from './TimeOffRequestModal';
@@ -16,6 +17,8 @@ export default function MyRotaPage() {
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [requestType, setRequestType] = useState('time_off');
   const [leaveBalance, setLeaveBalance] = useState(null);
+  const [translations, setTranslations] = useState({});
+  const t = createTranslator(translations);
 
   useEffect(() => {
     // Check for staff session (PIN login)
@@ -45,6 +48,15 @@ export default function MyRotaPage() {
       }
     }
   }, []);
+
+  // Load translations when restaurant is loaded
+  useEffect(() => {
+    if (restaurant) {
+      const locale = restaurant.email_language || 'en';
+      const myRotaTranslations = loadTranslations(locale, 'myRota');
+      setTranslations(myRotaTranslations);
+    }
+  }, [restaurant]);
 
   const fetchShifts = useCallback(async () => {
     if (!restaurant || !staff) return;
@@ -189,7 +201,7 @@ export default function MyRotaPage() {
         throw new Error(result.error || 'Failed to submit request');
       }
 
-      alert('Time off request submitted successfully! You will be notified when it is reviewed.');
+      alert(t('timeOffRequestSubmitted') || 'Time off request submitted successfully! You will be notified when it is reviewed.');
       setShowRequestModal(false);
       fetchLeaveBalance(); // Refresh balance to show pending days
     } catch (error) {
@@ -212,7 +224,7 @@ export default function MyRotaPage() {
   if (!restaurant || !staff) {
     return (
       <div className="min-h-screen bg-gray-50 p-8">
-        <p>Loading...</p>
+        <p>{t('loading') || 'Loading...'}</p>
       </div>
     );
   }
@@ -223,34 +235,34 @@ export default function MyRotaPage() {
     <div className="min-h-screen bg-gray-50 p-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">My Rota</h1>
-        <p className="text-slate-600">View your upcoming shifts and manage requests</p>
+        <h1 className="text-3xl font-bold text-slate-800 mb-2">{t('pageTitle') || 'My Rota'}</h1>
+        <p className="text-slate-600">{t('pageSubtitle') || 'View your upcoming shifts and manage requests'}</p>
       </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-          <p className="text-sm text-slate-600 mb-1">Upcoming Shifts</p>
+          <p className="text-sm text-slate-600 mb-1">{t('upcomingShifts') || 'Upcoming Shifts'}</p>
           <p className="text-3xl font-bold text-[#6262bd]">{shifts.length}</p>
         </div>
         <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-          <p className="text-sm text-slate-600 mb-1">Total Hours</p>
+          <p className="text-sm text-slate-600 mb-1">{t('totalHours') || 'Total Hours'}</p>
           <p className="text-3xl font-bold text-slate-800">{getTotalHours()}h</p>
         </div>
         <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-          <p className="text-sm text-slate-600 mb-1">Next Shift</p>
+          <p className="text-sm text-slate-600 mb-1">{t('nextShift') || 'Next Shift'}</p>
           <p className="text-lg font-bold text-slate-800">
-            {shifts.length > 0 ? formatDate(shifts[0].date) : 'None'}
+            {shifts.length > 0 ? formatDate(shifts[0].date) : (t('none') || 'None')}
           </p>
         </div>
         <div className="bg-white border-2 border-green-100 rounded-2xl p-6">
-          <p className="text-sm text-green-600 mb-1">Holiday Days Left</p>
+          <p className="text-sm text-green-600 mb-1">{t('holidayDaysLeft') || 'Holiday Days Left'}</p>
           <p className="text-3xl font-bold text-green-700">
             {leaveBalance ? (leaveBalance.holiday_days_remaining - leaveBalance.holiday_days_pending).toFixed(1) : '—'}
           </p>
           {leaveBalance && leaveBalance.holiday_days_pending > 0 && (
             <p className="text-xs text-amber-600 mt-1">
-              ({leaveBalance.holiday_days_pending.toFixed(1)} pending)
+              ({leaveBalance.holiday_days_pending.toFixed(1)} {t('pending') || 'pending'})
             </p>
           )}
         </div>
@@ -258,7 +270,7 @@ export default function MyRotaPage() {
 
       {/* Clock In/Out Widget */}
       <div className="mb-8">
-        <ClockInOut staff={staff} restaurant={restaurant} />
+        <ClockInOut staff={staff} restaurant={restaurant} translations={translations} />
       </div>
 
       {/* Work History */}
@@ -273,8 +285,8 @@ export default function MyRotaPage() {
 
       {/* Upcoming Shifts Section Header */}
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-slate-800">Upcoming Shifts</h2>
-        <p className="text-slate-600 text-sm mt-1">Your scheduled shifts for the selected period</p>
+        <h2 className="text-2xl font-bold text-slate-800">{t('upcomingShifts') || 'Upcoming Shifts'}</h2>
+        <p className="text-slate-600 text-sm mt-1">{t('upcomingShiftsSubtitle') || 'Your scheduled shifts for the selected period'}</p>
       </div>
 
       {/* Actions */}
@@ -286,7 +298,7 @@ export default function MyRotaPage() {
           }}
           className="px-6 py-3 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252a5] transition-colors font-medium"
         >
-          Request Time Off
+          {t('requestTimeOff') || 'Request Time Off'}
         </button>
         <button
           onClick={() => {
@@ -295,7 +307,7 @@ export default function MyRotaPage() {
           }}
           className="px-6 py-3 bg-white border-2 border-slate-200 text-slate-700 rounded-xl hover:border-[#6262bd] transition-colors font-medium"
         >
-          Request Shift Swap
+          {t('requestShiftSwap') || 'Request Shift Swap'}
         </button>
         <div className="ml-auto flex gap-2">
           <button
@@ -306,7 +318,7 @@ export default function MyRotaPage() {
                 : 'bg-white border-2 border-slate-200 text-slate-700'
             }`}
           >
-            Next 7 Days
+            {t('next7Days') || 'Next 7 Days'}
           </button>
           <button
             onClick={() => setSelectedPeriod('month')}
@@ -316,7 +328,7 @@ export default function MyRotaPage() {
                 : 'bg-white border-2 border-slate-200 text-slate-700'
             }`}
           >
-            Next 30 Days
+            {t('next30Days') || 'Next 30 Days'}
           </button>
         </div>
       </div>
@@ -325,12 +337,12 @@ export default function MyRotaPage() {
       {loading ? (
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6262bd] mx-auto mb-4"></div>
-          <p className="text-slate-600">Loading your shifts...</p>
+          <p className="text-slate-600">{t('loadingShifts') || 'Loading your shifts...'}</p>
         </div>
       ) : shifts.length === 0 ? (
         <div className="bg-white border-2 border-slate-100 rounded-2xl p-12 text-center">
-          <p className="text-slate-600 mb-4">No shifts scheduled for the selected period</p>
-          <p className="text-sm text-slate-500">Check back later or contact your manager</p>
+          <p className="text-slate-600 mb-4">{t('noShifts') || 'No shifts scheduled for the selected period'}</p>
+          <p className="text-sm text-slate-500">{t('checkBackLater') || 'Check back later or contact your manager'}</p>
         </div>
       ) : (
         <div className="space-y-6">
@@ -358,9 +370,9 @@ export default function MyRotaPage() {
                           )}
                         </div>
                         <div className="flex items-center gap-4 text-sm text-slate-600">
-                          <span>Duration: {calculateShiftDuration(shift.shift_start, shift.shift_end, shift.break_duration)}</span>
+                          <span>{t('duration') || 'Duration'}: {calculateShiftDuration(shift.shift_start, shift.shift_end, shift.break_duration)}</span>
                           {shift.break_duration > 0 && (
-                            <span>Break: {shift.break_duration} min</span>
+                            <span>{t('break') || 'Break'}: {shift.break_duration} min</span>
                           )}
                         </div>
                         {shift.notes && (
@@ -372,12 +384,12 @@ export default function MyRotaPage() {
                       <div className="ml-4">
                         {shift.status === 'published' && (
                           <span className="px-4 py-2 bg-green-100 text-green-800 rounded-lg text-sm font-medium">
-                            Confirmed
+                            {t('confirmed') || 'Confirmed'}
                           </span>
                         )}
                         {shift.status === 'draft' && (
                           <span className="px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg text-sm font-medium">
-                            Pending
+                            {t('draft') || 'Pending'}
                           </span>
                         )}
                       </div>
@@ -396,6 +408,7 @@ export default function MyRotaPage() {
           staff={staff}
           restaurant={restaurant}
           leaveBalance={leaveBalance}
+          translations={translations}
           onClose={() => setShowRequestModal(false)}
           onSubmit={handleTimeOffSubmit}
         />
@@ -405,13 +418,13 @@ export default function MyRotaPage() {
       {showRequestModal && requestType === 'swap' && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full">
-            <h3 className="text-xl font-bold mb-4">Request Shift Swap</h3>
-            <p className="text-slate-600 mb-6">Shift swap functionality coming soon</p>
+            <h3 className="text-xl font-bold mb-4">{t('requestShiftSwap') || 'Request Shift Swap'}</h3>
+            <p className="text-slate-600 mb-6">{t('shiftSwapComingSoon') || 'Shift swap functionality coming soon'}</p>
             <button
               onClick={() => setShowRequestModal(false)}
               className="w-full px-6 py-3 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252a5] transition-colors font-medium"
             >
-              Close
+              {t('close') || 'Close'}
             </button>
           </div>
         </div>
