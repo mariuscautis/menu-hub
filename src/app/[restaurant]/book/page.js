@@ -166,13 +166,12 @@ export default function BookReservation({ params }) {
         return
       }
 
-      // Detect user's locale from browser (fallback to 'en')
-      const browserLocale = (typeof navigator !== 'undefined' && navigator.language)
-        ? navigator.language.split('-')[0]
-        : 'en'
-      // Only use supported locales
+      // Get user's selected language from localStorage (fallback to 'en')
       const supportedLocales = ['en', 'ro', 'fr', 'it', 'es']
-      const locale = supportedLocales.includes(browserLocale) ? browserLocale : 'en'
+      const savedLocale = typeof localStorage !== 'undefined'
+        ? localStorage.getItem('app_language')
+        : null
+      const locale = savedLocale && supportedLocales.includes(savedLocale) ? savedLocale : 'en'
 
       // Create reservation
       const { data, error: insertError } = await supabase
