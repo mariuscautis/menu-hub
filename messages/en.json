@@ -1459,6 +1459,7 @@
     "logoUpdatedSuccess": "Logo updated successfully!",
     "logoRemovedSuccess": "Logo removed successfully!",
     "phoneUpdatedSuccess": "Phone number updated successfully!",
+    "restaurantDetailsUpdatedSuccess": "Restaurant details have been saved successfully!",
     "failedUploadLogo": "Failed to upload logo",
     "failedRemoveLogo": "Failed to remove logo",
     "failedUpdatePhone": "Failed to update phone number",
@@ -1656,5 +1657,16 @@
     "howItWorksStep3": "Cancel anytime using the link in your email",
     "howItWorksStep4": "Please arrive within 15 minutes of your reservation time",
     "required": "*"
+  },
+  "cancellation": {
+    "cancelReservation": "Cancel Reservation",
+    "cancelConfirmationMessage": "Are you sure you want to cancel this reservation? This action cannot be undone.",
+    "goBack": "Go Back",
+    "yesCancel": "Yes, Cancel",
+    "cancelling": "Cancelling...",
+    "cancelContactMessage": "If you have any questions, please contact the restaurant directly.",
+    "reservationCancelled": "Reservation Cancelled",
+    "cancellationSuccessMessage": "Your reservation has been successfully cancelled. We hope to see you again soon!",
+    "close": "Close"
   }
 }

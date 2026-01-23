@@ -1,15 +1,37 @@
 'use client'
 export const runtime = 'edge'
 
-import { useState, use } from 'react'
+import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
+import { loadTranslations, createTranslator } from '@/lib/clientTranslations'
+import { supabase } from '@/lib/supabase'
 
 export default function CancelReservation({ params }) {
-  const { token } = use(params)
+  const { token, restaurant: slug } = use(params)
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState(null)
+  const [translations, setTranslations] = useState({})
+  const t = createTranslator(translations)
+
+  useEffect(() => {
+    const fetchRestaurantLocale = async () => {
+      const { data: restaurant } = await supabase
+        .from('restaurants')
+        .select('email_language')
+        .eq('slug', slug)
+        .single()
+
+      const locale = restaurant?.email_language || 'en'
+      const cancelTranslations = loadTranslations(locale, 'cancellation')
+      setTranslations(cancelTranslations)
+    }
+
+    if (slug) {
+      fetchRestaurantLocale()
+    }
+  }, [slug])
 
   const handleCancel = async () => {
     setLoading(true)
@@ -45,15 +67,15 @@ export default function CancelReservation({ params }) {
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-slate-800 mb-4">Reservation Cancelled</h1>
+          <h1 className="text-2xl font-bold text-slate-800 mb-4">{t('reservationCancelled') || 'Reservation Cancelled'}</h1>
           <p className="text-slate-600 mb-6">
-            Your reservation has been successfully cancelled. We hope to see you again soon!
+            {t('cancellationSuccessMessage') || 'Your reservation has been successfully cancelled. We hope to see you again soon!'}
           </p>
           <button
             onClick={() => router.back()}
             className="bg-[#6262bd] text-white px-6 py-3 rounded-xl font-medium hover:bg-[#5252a3]"
           >
-            Close
+            {t('close') || 'Close'}
           </button>
         </div>
       </div>
@@ -69,9 +91,9 @@ export default function CancelReservation({ params }) {
           </svg>
         </div>
 
-        <h1 className="text-2xl font-bold text-slate-800 mb-4 text-center">Cancel Reservation</h1>
+        <h1 className="text-2xl font-bold text-slate-800 mb-4 text-center">{t('cancelReservation') || 'Cancel Reservation'}</h1>
         <p className="text-slate-600 mb-6 text-center">
-          Are you sure you want to cancel this reservation? This action cannot be undone.
+          {t('cancelConfirmationMessage') || 'Are you sure you want to cancel this reservation? This action cannot be undone.'}
         </p>
 
         {error && (
@@ -86,19 +108,19 @@ export default function CancelReservation({ params }) {
             disabled={loading}
             className="flex-1 border-2 border-slate-200 text-slate-600 py-3 rounded-xl font-medium hover:bg-slate-50 disabled:opacity-50"
           >
-            Go Back
+            {t('goBack') || 'Go Back'}
           </button>
           <button
             onClick={handleCancel}
             disabled={loading}
             className="flex-1 bg-red-600 text-white py-3 rounded-xl font-medium hover:bg-red-700 disabled:opacity-50"
           >
-            {loading ? 'Cancelling...' : 'Yes, Cancel'}
+            {loading ? (t('cancelling') || 'Cancelling...') : (t('yesCancel') || 'Yes, Cancel')}
           </button>
         </div>
 
         <p className="text-xs text-slate-500 mt-6 text-center">
-          If you have any questions, please contact the restaurant directly.
+          {t('cancelContactMessage') || 'If you have any questions, please contact the restaurant directly.'}
         </p>
       </div>
     </div>

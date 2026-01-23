@@ -123,7 +123,7 @@ export default function RestaurantInfo() {
     if (error) {
       setMessage({ type: 'error', text: t('failedUpdatePhone') })
     } else {
-      setMessage({ type: 'success', text: t('phoneUpdatedSuccess') })
+      setMessage({ type: 'success', text: t('restaurantDetailsUpdatedSuccess') })
       setRestaurant({ ...restaurant, phone: restaurantPhone, address: restaurantAddress })
     }
     setSavingPhone(false)

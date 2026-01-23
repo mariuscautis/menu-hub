@@ -1212,6 +1212,7 @@
     "logoUpdatedSuccess": "Logo mis à jour avec succès !",
     "logoRemovedSuccess": "Logo supprimé avec succès !",
     "phoneUpdatedSuccess": "Numéro de téléphone mis à jour avec succès !",
+    "restaurantDetailsUpdatedSuccess": "Les détails du restaurant ont été enregistrés avec succès !",
     "failedUploadLogo": "Échec du téléchargement du logo",
     "failedRemoveLogo": "Échec de la suppression du logo",
     "failedUpdatePhone": "Échec de la mise à jour du numéro de téléphone",
@@ -1409,5 +1410,16 @@
     "howItWorksStep3": "Annulez à tout moment en utilisant le lien dans votre email",
     "howItWorksStep4": "Veuillez arriver dans les 15 minutes de votre heure de réservation",
     "required": "*"
+  },
+  "cancellation": {
+    "cancelReservation": "Annuler la Réservation",
+    "cancelConfirmationMessage": "Êtes-vous sûr de vouloir annuler cette réservation ? Cette action ne peut pas être annulée.",
+    "goBack": "Retour",
+    "yesCancel": "Oui, Annuler",
+    "cancelling": "Annulation...",
+    "cancelContactMessage": "Si vous avez des questions, veuillez contacter le restaurant directement.",
+    "reservationCancelled": "Réservation Annulée",
+    "cancellationSuccessMessage": "Votre réservation a été annulée avec succès. Nous espérons vous revoir bientôt !",
+    "close": "Fermer"
   }
 }

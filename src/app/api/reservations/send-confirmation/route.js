@@ -195,13 +195,10 @@ function generateConfirmationEmail(reservation, cancelUrl, tr, locale) {
             </div>
             ${reservation.restaurants.address ? `
             <div class="detail-row">
-              <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(reservation.restaurants.address)}"
-                 style="color: #6262bd; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;"
-                 target="_blank">
-                <span>📍</span>
-                <span style="text-decoration: underline;">${reservation.restaurants.address}</span>
-                <span style="font-size: 12px;">↗</span>
-              </a>
+              📍 <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(reservation.restaurants.address)}"
+                 style="color: #6262bd; text-decoration: underline;"
+                 target="_blank"
+                 rel="noopener noreferrer">${reservation.restaurants.address}</a>
             </div>
             ` : ''}
             ${reservation.restaurants.phone ? `
@@ -333,13 +330,10 @@ function generatePendingEmail(reservation, cancelUrl, tr, locale) {
             </div>
             ${reservation.restaurants.address ? `
             <div class="detail-row">
-              <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(reservation.restaurants.address)}"
-                 style="color: #d97706; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;"
-                 target="_blank">
-                <span>📍</span>
-                <span style="text-decoration: underline;">${reservation.restaurants.address}</span>
-                <span style="font-size: 12px;">↗</span>
-              </a>
+              📍 <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(reservation.restaurants.address)}"
+                 style="color: #d97706; text-decoration: underline;"
+                 target="_blank"
+                 rel="noopener noreferrer">${reservation.restaurants.address}</a>
             </div>
             ` : ''}
             ${reservation.restaurants.phone ? `

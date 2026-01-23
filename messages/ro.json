@@ -1212,6 +1212,7 @@
     "logoUpdatedSuccess": "Logo actualizat cu succes!",
     "logoRemovedSuccess": "Logo șters cu succes!",
     "phoneUpdatedSuccess": "Numărul de telefon a fost actualizat cu succes!",
+    "restaurantDetailsUpdatedSuccess": "Detaliile restaurantului au fost salvate cu succes!",
     "failedUploadLogo": "Încărcarea logo-ului a eșuat",
     "failedRemoveLogo": "Ștergerea logo-ului a eșuat",
     "failedUpdatePhone": "Actualizarea numărului de telefon a eșuat",
@@ -1409,5 +1410,16 @@
     "howItWorksStep3": "Anulează oricând folosind link-ul din email",
     "howItWorksStep4": "Te rugăm să ajungi în interval de 15 minute față de ora rezervării",
     "required": "*"
+  },
+  "cancellation": {
+    "cancelReservation": "Anulează Rezervarea",
+    "cancelConfirmationMessage": "Ești sigur că vrei să anulezi această rezervare? Această acțiune nu poate fi anulată.",
+    "goBack": "Înapoi",
+    "yesCancel": "Da, Anulează",
+    "cancelling": "Se anulează...",
+    "cancelContactMessage": "Dacă ai întrebări, te rugăm să contactezi restaurantul direct.",
+    "reservationCancelled": "Rezervare Anulată",
+    "cancellationSuccessMessage": "Rezervarea ta a fost anulată cu succes. Sperăm să te vedem din nou în curând!",
+    "close": "Închide"
   }
 }
