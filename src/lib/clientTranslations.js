@@ -1,11 +1,11 @@
 // Client-side translation loader for public pages
 // Loads translations based on restaurant's email_language setting
 
-import enTranslations from '@/messages/en.json'
-import roTranslations from '@/messages/ro.json'
-import esTranslations from '@/messages/es.json'
-import frTranslations from '@/messages/fr.json'
-import itTranslations from '@/messages/it.json'
+import enTranslations from '../../messages/en.json'
+import roTranslations from '../../messages/ro.json'
+import esTranslations from '../../messages/es.json'
+import frTranslations from '../../messages/fr.json'
+import itTranslations from '../../messages/it.json'
 
 const translations = {
   en: enTranslations,
