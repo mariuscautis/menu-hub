@@ -32,6 +32,7 @@ export default function TakeawayMenu({ params }) {
   const [expandedCategories, setExpandedCategories] = useState({})
   const [placingOrder, setPlacingOrder] = useState(false)
   const [emailError, setEmailError] = useState('')
+  const [translations, setTranslations] = useState(null)
 
   useEffect(() => {
     fetchData()
@@ -98,6 +99,17 @@ export default function TakeawayMenu({ params }) {
       }
 
       setRestaurant(restaurantData)
+
+      // Load translations based on restaurant's email language
+      const locale = restaurantData.email_language || 'en'
+      try {
+        const translationModule = await import(`@/messages/${locale}.json`)
+        setTranslations(translationModule.default.takeaway)
+      } catch (error) {
+        // Fallback to English if translation fails
+        const translationModule = await import('@/messages/en.json')
+        setTranslations(translationModule.default.takeaway)
+      }
 
       // Get menu items that are available AND marked for takeaway
       const { data: items } = await supabase
@@ -318,10 +330,20 @@ export default function TakeawayMenu({ params }) {
     }))
   }
 
+  // Helper function to get translation text
+  const t = (key, replacements = {}) => {
+    if (!translations) return ''
+    let text = translations[key] || key
+    Object.entries(replacements).forEach(([key, value]) => {
+      text = text.replace(`{${key}}`, value)
+    })
+    return text
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-slate-500">Loading takeaway menu...</div>
+        <div className="text-slate-500">{translations ? t('loadingMenu') : 'Loading takeaway menu...'}</div>
       </div>
     )
   }
@@ -335,8 +357,8 @@ export default function TakeawayMenu({ params }) {
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
             </svg>
           </div>
-          <h1 className="text-xl font-bold text-slate-800 mb-2">{error}</h1>
-          <p className="text-slate-500">Please check the URL or contact the restaurant.</p>
+          <h1 className="text-xl font-bold text-slate-800 mb-2">{translations ? t('errorTitle') : error}</h1>
+          <p className="text-slate-500">{translations ? t('errorDescription') : 'Please check the URL or contact the restaurant.'}</p>
         </div>
       </div>
     )
@@ -351,8 +373,8 @@ export default function TakeawayMenu({ params }) {
               <path d="M22 9h-4.79l-4.38-6.56c-.19-.28-.51-.42-.83-.42s-.64.14-.83.43L6.79 9H2c-.55 0-1 .45-1 1 0 .09.01.18.04.27l2.54 9.27c.23.84 1 1.46 1.92 1.46h13c.92 0 1.69-.62 1.93-1.46l2.54-9.27L23 10c0-.55-.45-1-1-1zM12 4.8L14.8 9H9.2L12 4.8zM18.5 19l-12.99.01L3.31 11H20.7l-2.2 8z"/>
             </svg>
           </div>
-          <h1 className="text-xl font-bold text-slate-800 mb-2">No Takeaway Items Available</h1>
-          <p className="text-slate-500">This restaurant hasn't set up their takeaway menu yet.</p>
+          <h1 className="text-xl font-bold text-slate-800 mb-2">{translations ? t('noItemsTitle') : 'No Takeaway Items Available'}</h1>
+          <p className="text-slate-500">{translations ? t('noItemsDescription') : 'This restaurant hasn\'t set up their takeaway menu yet.'}</p>
         </div>
       </div>
     )
@@ -367,21 +389,21 @@ export default function TakeawayMenu({ params }) {
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-slate-800 mb-2">Order Placed!</h1>
+          <h1 className="text-2xl font-bold text-slate-800 mb-2">{t('orderPlacedTitle')}</h1>
           <p className="text-slate-500 mb-6">
-            Your takeaway order has been sent to the kitchen. We'll email you when it's ready.
+            {t('orderPlacedDescription')}
           </p>
 
           {/* Pickup Code Display */}
           <div className="bg-white border-2 border-cyan-200 rounded-2xl p-6 mb-6">
-            <p className="text-sm text-slate-500 mb-2">Your Pickup Code</p>
+            <p className="text-sm text-slate-500 mb-2">{t('pickupCodeTitle')}</p>
             <p className="text-4xl font-bold text-cyan-600 tracking-widest mb-2">{pickupCode}</p>
-            <p className="text-sm text-slate-500">Show this code when collecting your order</p>
+            <p className="text-sm text-slate-500">{t('pickupCodeDescription')}</p>
           </div>
 
           <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-4 mb-6">
             <p className="text-sm text-amber-700">
-              <strong>Important:</strong> A confirmation email has been sent to <strong>{customerEmail}</strong> with your order details and pickup code.
+              <strong>{t('emailSentTitle')}</strong> {t('emailSentDescription', { email: customerEmail })}
             </p>
           </div>
 
@@ -396,7 +418,7 @@ export default function TakeawayMenu({ params }) {
             }}
             className="bg-[#6262bd] text-white px-6 py-3 rounded-xl font-medium hover:bg-[#5252a3]"
           >
-            Place Another Order
+            {t('placeAnotherOrder')}
           </button>
         </div>
       </div>
@@ -415,7 +437,7 @@ export default function TakeawayMenu({ params }) {
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M22 9h-4.79l-4.38-6.56c-.19-.28-.51-.42-.83-.42s-.64.14-.83.43L6.79 9H2c-.55 0-1 .45-1 1 0 .09.01.18.04.27l2.54 9.27c.23.84 1 1.46 1.92 1.46h13c.92 0 1.69-.62 1.93-1.46l2.54-9.27L23 10c0-.55-.45-1-1-1zM12 4.8L14.8 9H9.2L12 4.8zM18.5 19l-12.99.01L3.31 11H20.7l-2.2 8z"/>
                 </svg>
-                Takeaway Menu
+                {t('takeawayMenu')}
               </p>
             </div>
             {restaurant.logo_url && (
@@ -432,8 +454,8 @@ export default function TakeawayMenu({ params }) {
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
           </svg>
           <div className="text-sm text-cyan-700">
-            <p className="font-medium mb-1">How Takeaway Works</p>
-            <p>Place your order, pay with cash when collecting, and receive an email with your pickup code when your order is ready.</p>
+            <p className="font-medium mb-1">{t('howItWorksTitle')}</p>
+            <p>{t('howItWorksDescription')}</p>
           </div>
         </div>
       </div>
@@ -454,7 +476,7 @@ export default function TakeawayMenu({ params }) {
                 <h2 className="text-lg font-bold text-slate-800">{category.name}</h2>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-slate-500 font-medium">
-                    {category.items.length} {category.items.length === 1 ? 'item' : 'items'}
+                    {category.items.length} {category.items.length === 1 ? t('itemCount_one') : t('itemCount_other')}
                   </span>
                   <svg
                     className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
@@ -498,7 +520,7 @@ export default function TakeawayMenu({ params }) {
                               <p className="text-[#6262bd] font-bold">£{item.price.toFixed(2)}</p>
                               {showLimitedStock && (
                                 <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full font-medium">
-                                  Only {availableServings} left
+                                  {t('onlyLeft', { count: availableServings })}
                                 </span>
                               )}
                             </div>
@@ -560,7 +582,7 @@ export default function TakeawayMenu({ params }) {
                 <span className="bg-white/20 px-2 py-1 rounded-lg text-sm">
                   {getCartCount()}
                 </span>
-                View Takeaway Order
+                {t('viewOrder')}
               </span>
               <span>£{getCartTotal().toFixed(2)}</span>
             </button>
@@ -580,8 +602,8 @@ export default function TakeawayMenu({ params }) {
           >
             <div className="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex justify-between items-center">
               <div>
-                <h2 className="text-xl font-bold text-slate-800">Your Takeaway Order</h2>
-                <p className="text-sm text-cyan-600">Pay with cash when collecting</p>
+                <h2 className="text-xl font-bold text-slate-800">{t('yourOrder')}</h2>
+                <p className="text-sm text-cyan-600">{t('payWithCash')}</p>
               </div>
               <button
                 onClick={() => setShowCart(false)}
@@ -600,7 +622,7 @@ export default function TakeawayMenu({ params }) {
                   <div key={item.id} className="flex justify-between items-center">
                     <div className="flex-1">
                       <p className="font-medium text-slate-800">{item.name}</p>
-                      <p className="text-slate-500 text-sm">£{item.price.toFixed(2)} each</p>
+                      <p className="text-slate-500 text-sm">£{item.price.toFixed(2)} {t('each')}</p>
                     </div>
                     <div className="flex items-center gap-3">
                       <button
@@ -632,20 +654,20 @@ export default function TakeawayMenu({ params }) {
               <div className="space-y-4 mb-6">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Your Name <span className="text-red-500">*</span>
+                    {t('yourName')} <span className="text-red-500">{t('required')}</span>
                   </label>
                   <input
                     type="text"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
                     className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
-                    placeholder="Enter your name"
+                    placeholder={t('namePlaceholder')}
                     required
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Email Address <span className="text-red-500">*</span>
+                    {t('emailAddress')} <span className="text-red-500">{t('required')}</span>
                   </label>
                   <input
                     type="email"
@@ -657,36 +679,36 @@ export default function TakeawayMenu({ params }) {
                     className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none text-slate-700 ${
                       emailError ? 'border-red-300 focus:border-red-500' : 'border-slate-200 focus:border-[#6262bd]'
                     }`}
-                    placeholder="your@email.com"
+                    placeholder={t('emailPlaceholder')}
                     required
                   />
                   {emailError && (
                     <p className="text-red-500 text-sm mt-1">{emailError}</p>
                   )}
-                  <p className="text-slate-400 text-xs mt-1">We'll send your pickup code and order updates here</p>
+                  <p className="text-slate-400 text-xs mt-1">{t('emailHelper')}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Phone Number (optional)
+                    {t('phoneNumber')}
                   </label>
                   <input
                     type="tel"
                     value={customerPhone}
                     onChange={(e) => setCustomerPhone(e.target.value)}
                     className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
-                    placeholder="+44 7123 456789"
+                    placeholder={t('phonePlaceholder')}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Special Requests (optional)
+                    {t('specialRequests')}
                   </label>
                   <textarea
                     value={orderNotes}
                     onChange={(e) => setOrderNotes(e.target.value)}
                     rows={2}
                     className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 resize-none"
-                    placeholder="Allergies, no onions, extra spicy..."
+                    placeholder={t('requestsPlaceholder')}
                   />
                 </div>
               </div>
@@ -694,7 +716,7 @@ export default function TakeawayMenu({ params }) {
               {/* Total */}
               <div className="border-t-2 border-slate-100 pt-4 mb-6">
                 <div className="flex justify-between text-lg font-bold text-slate-800">
-                  <span>Total</span>
+                  <span>{t('total')}</span>
                   <span>£{getCartTotal().toFixed(2)}</span>
                 </div>
               </div>
@@ -711,20 +733,20 @@ export default function TakeawayMenu({ params }) {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
                     </svg>
-                    Placing Order...
+                    {t('placingOrder')}
                   </>
                 ) : (
                   <>
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M22 9h-4.79l-4.38-6.56c-.19-.28-.51-.42-.83-.42s-.64.14-.83.43L6.79 9H2c-.55 0-1 .45-1 1 0 .09.01.18.04.27l2.54 9.27c.23.84 1 1.46 1.92 1.46h13c.92 0 1.69-.62 1.93-1.46l2.54-9.27L23 10c0-.55-.45-1-1-1zM12 4.8L14.8 9H9.2L12 4.8zM18.5 19l-12.99.01L3.31 11H20.7l-2.2 8z"/>
                     </svg>
-                    Place Takeaway Order
+                    {t('placeOrder')}
                   </>
                 )}
               </button>
 
               <p className="text-center text-slate-400 text-sm mt-4">
-                Payment will be collected when you pick up your order
+                {t('paymentNotice')}
               </p>
             </div>
           </div>
