@@ -49,17 +49,18 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, t
 
   const validate = () => {
     const newErrors = {};
+    const errorTranslations = t('errors') || {};
 
     if (!formData.date_from) {
-      newErrors.date_from = 'Start date is required';
+      newErrors.date_from = errorTranslations.startDateRequired || 'Start date is required';
     }
 
     if (!formData.date_to) {
-      newErrors.date_to = 'End date is required';
+      newErrors.date_to = errorTranslations.endDateRequired || 'End date is required';
     }
 
     if (formData.date_from && formData.date_to && formData.date_from > formData.date_to) {
-      newErrors.date_to = 'End date must be after start date';
+      newErrors.date_to = errorTranslations.endDateAfterStart || 'End date must be after start date';
     }
 
     // Check if dates are in the past
@@ -68,7 +69,7 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, t
     const startDate = new Date(formData.date_from);
 
     if (startDate < today) {
-      newErrors.date_from = 'Cannot request leave for past dates';
+      newErrors.date_from = errorTranslations.noPastDates || 'Cannot request leave for past dates';
     }
 
     // Check if requesting more days than available (for annual holiday)
@@ -77,13 +78,17 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, t
       const pending = leaveBalance.holiday_days_pending || 0;
       const availableDays = remaining - pending;
       if (workingDays > availableDays) {
-        newErrors.days = `You only have ${availableDays.toFixed(1)} days available (${remaining.toFixed(1)} remaining - ${pending.toFixed(1)} pending)`;
+        const insufficientMsg = errorTranslations.insufficientDays || 'You only have {available} days available ({remaining} remaining - {pending} pending)';
+        newErrors.days = insufficientMsg
+          .replace('{available}', availableDays.toFixed(1))
+          .replace('{remaining}', remaining.toFixed(1))
+          .replace('{pending}', pending.toFixed(1));
       }
     }
 
     // Sick leave validation
     if (formData.leave_type === 'sick_medical_cert' && !formData.medical_certificate_provided) {
-      newErrors.medical_certificate = 'Medical certificate must be provided for medical certificated sick leave';
+      newErrors.medical_certificate = errorTranslations.medicalCertRequired || 'Medical certificate must be provided for medical certificated sick leave';
     }
 
     setErrors(newErrors);
@@ -125,40 +130,43 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, t
   };
 
   const getLeaveTypeInfo = () => {
+    const leaveTypeDescriptions = t('leaveTypeDescriptions') || {};
+    const leaveTypes = t('leaveTypes') || {};
+
     const info = {
       annual_holiday: {
-        title: 'Annual Holiday',
-        description: 'Paid leave from your annual entitlement',
+        title: leaveTypes.annualHoliday || 'Annual Holiday',
+        description: leaveTypeDescriptions.annualHoliday || 'Paid leave from your annual entitlement',
         color: 'blue',
         requiresReason: false
       },
       sick_self_cert: {
-        title: 'Sick Leave (Self-Certified)',
-        description: 'For illness up to 7 days - no medical certificate required',
+        title: leaveTypes.sickSelfCert || 'Sick Leave (Self-Certified)',
+        description: leaveTypeDescriptions.sickSelfCert || 'For illness up to 7 days - no medical certificate required',
         color: 'orange',
         requiresReason: true
       },
       sick_medical_cert: {
-        title: 'Sick Leave (Medical Certificate)',
-        description: 'For illness over 7 days - requires medical certificate',
+        title: leaveTypes.sickMedicalCert || 'Sick Leave (Medical Certificate)',
+        description: leaveTypeDescriptions.sickMedicalCert || 'For illness over 7 days - requires medical certificate',
         color: 'red',
         requiresReason: true
       },
       unpaid: {
-        title: 'Unpaid Leave',
-        description: 'Time off without pay',
+        title: leaveTypes.unpaid || 'Unpaid Leave',
+        description: leaveTypeDescriptions.unpaid || 'Time off without pay',
         color: 'gray',
         requiresReason: true
       },
       compassionate: {
-        title: 'Compassionate Leave',
-        description: 'For bereavement or family emergencies',
+        title: leaveTypes.compassionate || 'Compassionate Leave',
+        description: leaveTypeDescriptions.compassionate || 'For bereavement or family emergencies',
         color: 'purple',
         requiresReason: true
       },
       other: {
-        title: 'Other',
-        description: 'Other type of leave',
+        title: leaveTypes.other || 'Other',
+        description: leaveTypeDescriptions.other || 'Other type of leave',
         color: 'slate',
         requiresReason: true
       }
@@ -189,21 +197,21 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, t
         {leaveBalance && (
           <div className="grid grid-cols-3 gap-4 mb-6">
             <div className="bg-blue-50 border-2 border-blue-100 rounded-xl p-4">
-              <p className="text-xs text-blue-600 font-medium mb-1">Annual Entitlement</p>
+              <p className="text-xs text-blue-600 font-medium mb-1">{t('annualEntitlement') || 'Annual Entitlement'}</p>
               <p className="text-2xl font-bold text-blue-900">{leaveBalance.annual_holiday_days}</p>
-              <p className="text-xs text-blue-600">days/year</p>
+              <p className="text-xs text-blue-600">{t('daysPerYear') || 'days/year'}</p>
             </div>
             <div className="bg-green-50 border-2 border-green-100 rounded-xl p-4">
-              <p className="text-xs text-green-600 font-medium mb-1">Available</p>
+              <p className="text-xs text-green-600 font-medium mb-1">{t('available') || 'Available'}</p>
               <p className="text-2xl font-bold text-green-900">
                 {((leaveBalance.holiday_days_remaining || 0) - (leaveBalance.holiday_days_pending || 0)).toFixed(1)}
               </p>
-              <p className="text-xs text-green-600">days remaining</p>
+              <p className="text-xs text-green-600">{t('daysRemaining') || 'days remaining'}</p>
             </div>
             <div className="bg-amber-50 border-2 border-amber-100 rounded-xl p-4">
-              <p className="text-xs text-amber-600 font-medium mb-1">Pending</p>
+              <p className="text-xs text-amber-600 font-medium mb-1">{t('pending') || 'Pending'}</p>
               <p className="text-2xl font-bold text-amber-900">{(leaveBalance.holiday_days_pending || 0).toFixed(1)}</p>
-              <p className="text-xs text-amber-600">days awaiting approval</p>
+              <p className="text-xs text-amber-600">{t('daysAwaitingApproval') || 'days awaiting approval'}</p>
             </div>
           </div>
         )}
@@ -212,7 +220,7 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, t
           {/* Leave Type */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Leave Type *
+              {t('leaveTypeRequired') || 'Leave Type *'}
             </label>
             <select
               name="leave_type"
@@ -221,12 +229,12 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, t
               required
               className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
             >
-              <option value="annual_holiday">Annual Holiday (Paid)</option>
-              <option value="sick_self_cert">Sick Leave - Self Certified (up to 7 days)</option>
-              <option value="sick_medical_cert">Sick Leave - Medical Certificate Required (7+ days)</option>
-              <option value="unpaid">Unpaid Leave</option>
-              <option value="compassionate">Compassionate Leave</option>
-              <option value="other">Other</option>
+              <option value="annual_holiday">{(t('leaveTypes') || {}).annualHoliday || 'Annual Holiday (Paid)'}</option>
+              <option value="sick_self_cert">{(t('leaveTypes') || {}).sickSelfCert || 'Sick Leave - Self Certified (up to 7 days)'}</option>
+              <option value="sick_medical_cert">{(t('leaveTypes') || {}).sickMedicalCert || 'Sick Leave - Medical Certificate Required (7+ days)'}</option>
+              <option value="unpaid">{(t('leaveTypes') || {}).unpaid || 'Unpaid Leave'}</option>
+              <option value="compassionate">{(t('leaveTypes') || {}).compassionate || 'Compassionate Leave'}</option>
+              <option value="other">{(t('leaveTypes') || {}).other || 'Other'}</option>
             </select>
             <div className={`mt-2 p-3 bg-${leaveTypeInfo.color}-50 border border-${leaveTypeInfo.color}-200 rounded-lg`}>
               <p className="text-sm text-slate-700">
@@ -239,7 +247,7 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, t
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                Start Date *
+                {t('startDateRequired') || 'Start Date *'}
               </label>
               <input
                 type="date"
@@ -259,7 +267,7 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, t
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                End Date *
+                {t('endDateRequired') || 'End Date *'}
               </label>
               <input
                 type="date"
@@ -283,8 +291,8 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, t
             <div className="bg-slate-50 border-2 border-slate-200 rounded-xl p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-700">Working Days Requested</p>
-                  <p className="text-xs text-slate-500 mt-1">Excludes weekends</p>
+                  <p className="text-sm font-medium text-slate-700">{t('workingDaysRequested') || 'Working Days Requested'}</p>
+                  <p className="text-xs text-slate-500 mt-1">{t('excludesWeekends') || 'Excludes weekends'}</p>
                 </div>
                 <p className="text-3xl font-bold text-[#6262bd]">{workingDays}</p>
               </div>
@@ -306,8 +314,8 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, t
                   className="w-5 h-5 text-[#6262bd] rounded focus:ring-[#6262bd]"
                 />
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-slate-700">Medical Certificate Provided</p>
-                  <p className="text-xs text-slate-500">I confirm that I have or will provide a medical certificate</p>
+                  <p className="text-sm font-medium text-slate-700">{t('medicalCertificateProvided') || 'Medical Certificate Provided'}</p>
+                  <p className="text-xs text-slate-500">{t('medicalCertificateConfirm') || 'I confirm that I have or will provide a medical certificate'}</p>
                 </div>
               </label>
               {errors.medical_certificate && (
@@ -319,7 +327,7 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, t
           {/* Reason (required for some leave types) */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Reason {leaveTypeInfo.requiresReason && '*'}
+              {leaveTypeInfo.requiresReason ? (t('reasonRequired') || 'Reason *') : (t('reason') || 'Reason')}
             </label>
             <textarea
               name="reason"
@@ -329,8 +337,8 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, t
               rows="4"
               placeholder={
                 formData.leave_type === 'annual_holiday'
-                  ? 'Optional - add any notes about your holiday...'
-                  : 'Please provide details...'
+                  ? (t('reasonPlaceholderHoliday') || 'Optional - add any notes about your holiday...')
+                  : (t('reasonPlaceholder') || 'Please provide details...')
               }
               className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] resize-none"
             />
@@ -339,16 +347,16 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, t
           {/* Info Box */}
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
             <p className="text-sm text-blue-800">
-              <strong>Please note:</strong>
+              <strong>{t('pleaseNote') || 'Please note:'}</strong>
             </p>
             <ul className="text-sm text-blue-700 mt-2 space-y-1 ml-4">
-              <li>• Requests require manager approval</li>
-              <li>• You'll receive a notification when your request is reviewed</li>
+              <li>• {t('requiresApproval') || 'Requests require manager approval'}</li>
+              <li>• {t('notifyOnReview') || "You'll receive a notification when your request is reviewed"}</li>
               {formData.leave_type === 'annual_holiday' && (
-                <li>• Holiday days will be deducted from your balance when approved</li>
+                <li>• {t('holidayDeduction') || 'Holiday days will be deducted from your balance when approved'}</li>
               )}
               {formData.leave_type.startsWith('sick_') && (
-                <li>• Sick leave may require a return-to-work meeting</li>
+                <li>• {t('sickLeaveNote') || 'Sick leave may require a return-to-work meeting'}</li>
               )}
             </ul>
           </div>
@@ -367,14 +375,14 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, t
               onClick={onClose}
               className="flex-1 px-6 py-3 border-2 border-slate-200 text-slate-700 rounded-xl hover:border-[#6262bd] transition-colors font-medium"
             >
-              Cancel
+              {t('cancel') || 'Cancel'}
             </button>
             <button
               type="submit"
               disabled={submitting || Object.keys(errors).length > 0}
               className="flex-1 px-6 py-3 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252a5] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {submitting ? 'Submitting...' : 'Submit Request'}
+              {submitting ? (t('submitting') || 'Submitting...') : (t('submitRequest') || 'Submit Request')}
             </button>
           </div>
         </form>
