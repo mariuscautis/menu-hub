@@ -16,9 +16,20 @@ const translations = {
 }
 
 /**
+ * Get nested value from object using dot notation path
+ * @param {object} obj - The object to traverse
+ * @param {string} path - Dot notation path (e.g., 'myRota.workHistory')
+ * @returns {*} The value at the path or undefined
+ */
+function getNestedValue(obj, path) {
+  if (!obj || !path) return undefined
+  return path.split('.').reduce((current, key) => current?.[key], obj)
+}
+
+/**
  * Load translations for a specific locale and namespace
  * @param {string} locale - Language code (en, ro, es, fr, it)
- * @param {string} namespace - Translation namespace (e.g., 'takeaway', 'booking')
+ * @param {string} namespace - Translation namespace (e.g., 'takeaway', 'booking', 'myRota.workHistory')
  * @returns {object} Translation object for the namespace
  */
 export function loadTranslations(locale = 'en', namespace) {
@@ -29,7 +40,8 @@ export function loadTranslations(locale = 'en', namespace) {
     const translation = translations[validLocale]
 
     if (namespace) {
-      return translation[namespace] || translations.en[namespace] || {}
+      // Support nested paths like 'myRota.workHistory'
+      return getNestedValue(translation, namespace) || getNestedValue(translations.en, namespace) || {}
     }
 
     return translation || translations.en
@@ -37,7 +49,7 @@ export function loadTranslations(locale = 'en', namespace) {
     console.error('Translation loading error:', error)
     // Fallback to English
     if (namespace) {
-      return translations.en[namespace] || {}
+      return getNestedValue(translations.en, namespace) || {}
     }
     return translations.en
   }
