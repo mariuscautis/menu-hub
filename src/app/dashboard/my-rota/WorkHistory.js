@@ -1,14 +1,26 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { loadTranslations, createTranslator } from '@/lib/clientTranslations';
 
 export default function WorkHistory({ staff, restaurant }) {
+  const [translations, setTranslations] = useState({});
+  const t = createTranslator(translations);
   const [attendance, setAttendance] = useState([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('this_week'); // this_week, last_week, this_month, last_month, custom
   const [customDateFrom, setCustomDateFrom] = useState('');
   const [customDateTo, setCustomDateTo] = useState('');
   const [showCustom, setShowCustom] = useState(false);
+
+  // Load translations
+  useEffect(() => {
+    if (restaurant) {
+      const locale = restaurant.email_language || 'en';
+      const workHistoryTranslations = loadTranslations(locale, 'myRota.workHistory');
+      setTranslations(workHistoryTranslations);
+    }
+  }, [restaurant]);
 
   const getDateRange = useCallback(() => {
     const now = new Date();
@@ -184,9 +196,9 @@ export default function WorkHistory({ staff, restaurant }) {
   return (
     <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold text-slate-800">Work History</h2>
+        <h2 className="text-xl font-bold text-slate-800">{t('title') || 'Work History'}</h2>
         <div className="text-right">
-          <p className="text-sm text-slate-600">Total Hours Worked</p>
+          <p className="text-sm text-slate-600">{t('totalHoursWorked') || 'Total Hours Worked'}</p>
           <p className="text-2xl font-bold text-[#6262bd]">{formatHours(getTotalHours())}</p>
         </div>
       </div>
@@ -202,7 +214,7 @@ export default function WorkHistory({ staff, restaurant }) {
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
           >
-            This Week
+            {t('thisWeek') || 'This Week'}
           </button>
           <button
             onClick={() => { setPeriod('last_week'); setShowCustom(false); }}
@@ -212,7 +224,7 @@ export default function WorkHistory({ staff, restaurant }) {
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
           >
-            Last Week
+            {t('lastWeek') || 'Last Week'}
           </button>
           <button
             onClick={() => { setPeriod('this_month'); setShowCustom(false); }}
@@ -222,7 +234,7 @@ export default function WorkHistory({ staff, restaurant }) {
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
           >
-            This Month
+            {t('thisMonth') || 'This Month'}
           </button>
           <button
             onClick={() => { setPeriod('last_month'); setShowCustom(false); }}
@@ -232,7 +244,7 @@ export default function WorkHistory({ staff, restaurant }) {
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
           >
-            Last Month
+            {t('lastMonth') || 'Last Month'}
           </button>
           <button
             onClick={() => setShowCustom(!showCustom)}
@@ -242,7 +254,7 @@ export default function WorkHistory({ staff, restaurant }) {
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
           >
-            Custom Range
+            {t('customRange') || 'Custom Range'}
           </button>
         </div>
 
@@ -252,7 +264,7 @@ export default function WorkHistory({ staff, restaurant }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  From Date
+                  {t('fromDate') || 'From Date'}
                 </label>
                 <input
                   type="date"
@@ -263,7 +275,7 @@ export default function WorkHistory({ staff, restaurant }) {
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  To Date
+                  {t('toDate') || 'To Date'}
                 </label>
                 <input
                   type="date"
@@ -278,7 +290,7 @@ export default function WorkHistory({ staff, restaurant }) {
               disabled={!customDateFrom || !customDateTo}
               className="px-6 py-2 bg-[#6262bd] text-white rounded-lg hover:bg-[#5252a5] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Apply
+              {t('apply') || 'Apply'}
             </button>
           </div>
         )}
@@ -288,13 +300,13 @@ export default function WorkHistory({ staff, restaurant }) {
       {loading ? (
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6262bd] mx-auto mb-4"></div>
-          <p className="text-slate-600">Loading work history...</p>
+          <p className="text-slate-600">{t('loading') || 'Loading work history...'}</p>
         </div>
       ) : attendance.length === 0 ? (
         <div className="text-center py-12 bg-slate-50 rounded-xl">
           <div className="text-4xl mb-3">📊</div>
-          <p className="text-slate-600 font-medium">No work history for this period</p>
-          <p className="text-sm text-slate-500 mt-1">Completed shifts will appear here</p>
+          <p className="text-slate-600 font-medium">{t('noHistory') || 'No work history for this period'}</p>
+          <p className="text-sm text-slate-500 mt-1">{t('completedShiftsNote') || 'Completed shifts will appear here'}</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -334,19 +346,19 @@ export default function WorkHistory({ staff, restaurant }) {
                             )}
                             {att.status === 'late' && (
                               <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium">
-                                Late
+                                {t('late') || 'Late'}
                               </span>
                             )}
                             {att.status === 'early_leave' && (
                               <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
-                                Early Leave
+                                {t('earlyLeave') || 'Early Leave'}
                               </span>
                             )}
                           </div>
                           <div className="flex items-center gap-3 text-sm text-slate-600">
-                            <span>Worked: {formatHours(hoursWorked)}</span>
+                            <span>{t('worked') || 'Worked'}: {formatHours(hoursWorked)}</span>
                             {breakDuration > 0 && (
-                              <span>Break: {Math.round(breakDuration)}m</span>
+                              <span>{t('break') || 'Break'}: {Math.round(breakDuration)}m</span>
                             )}
                           </div>
                         </div>
@@ -374,15 +386,15 @@ export default function WorkHistory({ staff, restaurant }) {
       {attendance.length > 0 && (
         <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="p-4 bg-blue-50 border-2 border-blue-100 rounded-xl">
-            <p className="text-sm text-blue-700 mb-1">Total Shifts</p>
+            <p className="text-sm text-blue-700 mb-1">{t('totalShifts') || 'Total Shifts'}</p>
             <p className="text-2xl font-bold text-blue-800">{attendance.length}</p>
           </div>
           <div className="p-4 bg-green-50 border-2 border-green-100 rounded-xl">
-            <p className="text-sm text-green-700 mb-1">Total Hours</p>
+            <p className="text-sm text-green-700 mb-1">{t('totalHours') || 'Total Hours'}</p>
             <p className="text-2xl font-bold text-green-800">{formatHours(getTotalHours())}</p>
           </div>
           <div className="p-4 bg-purple-50 border-2 border-purple-100 rounded-xl">
-            <p className="text-sm text-purple-700 mb-1">Average per Shift</p>
+            <p className="text-sm text-purple-700 mb-1">{t('averagePerShift') || 'Average per Shift'}</p>
             <p className="text-2xl font-bold text-purple-800">
               {formatHours(getTotalHours() / attendance.length)}
             </p>

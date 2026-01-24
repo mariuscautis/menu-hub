@@ -1,11 +1,23 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { loadTranslations, createTranslator } from '@/lib/clientTranslations';
 
 export default function RequestHistory({ staff, restaurant }) {
+  const [translations, setTranslations] = useState({});
+  const t = createTranslator(translations);
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // 'all', 'pending', 'approved', 'rejected'
+
+  // Load translations
+  useEffect(() => {
+    if (restaurant) {
+      const locale = restaurant.email_language || 'en';
+      const requestHistoryTranslations = loadTranslations(locale, 'myRota.requestHistory');
+      setTranslations(requestHistoryTranslations);
+    }
+  }, [restaurant]);
 
   useEffect(() => {
     fetchRequests();
@@ -49,10 +61,10 @@ export default function RequestHistory({ staff, restaurant }) {
     };
 
     const labels = {
-      pending: '⏳ Pending',
-      approved: '✅ Approved',
-      rejected: '❌ Rejected',
-      cancelled: '🚫 Cancelled'
+      pending: `⏳ ${t('pending') || 'Pending'}`,
+      approved: `✅ ${t('approved') || 'Approved'}`,
+      rejected: `❌ ${t('rejected') || 'Rejected'}`,
+      cancelled: `🚫 ${t('cancelled') || 'Cancelled'}`
     };
 
     return (
@@ -74,13 +86,14 @@ export default function RequestHistory({ staff, restaurant }) {
       other: 'bg-slate-50 text-slate-700'
     };
 
+    const leaveTypeLabels = t('leaveTypes') || {};
     const labels = {
-      annual_holiday: '🏖️ Holiday',
-      sick_self_cert: '🤒 Sick (Self-Cert)',
-      sick_medical_cert: '🏥 Sick (Medical)',
-      unpaid: '💰 Unpaid',
-      compassionate: '🕊️ Compassionate',
-      other: 'Other'
+      annual_holiday: `🏖️ ${leaveTypeLabels.annualHoliday || 'Holiday'}`,
+      sick_self_cert: `🤒 ${leaveTypeLabels.sickSelfCert || 'Sick (Self-Cert)'}`,
+      sick_medical_cert: `🏥 ${leaveTypeLabels.sickMedicalCert || 'Sick (Medical)'}`,
+      unpaid: `💰 ${leaveTypeLabels.unpaid || 'Unpaid'}`,
+      compassionate: `🕊️ ${leaveTypeLabels.compassionate || 'Compassionate'}`,
+      other: leaveTypeLabels.other || 'Other'
     };
 
     return (
@@ -108,7 +121,7 @@ export default function RequestHistory({ staff, restaurant }) {
     return (
       <div className="bg-white rounded-2xl border-2 border-slate-200 p-6">
         <div className="flex items-center justify-center py-12">
-          <div className="text-slate-500">Loading request history...</div>
+          <div className="text-slate-500">{t('loadingRequests') || 'Loading request history...'}</div>
         </div>
       </div>
     );
@@ -117,7 +130,7 @@ export default function RequestHistory({ staff, restaurant }) {
   return (
     <div className="bg-white rounded-2xl border-2 border-slate-200 p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-slate-800">My Request History</h2>
+        <h2 className="text-xl font-bold text-slate-800">{t('title') || 'My Request History'}</h2>
 
         {/* Filter tabs */}
         <div className="flex gap-2">
@@ -131,7 +144,7 @@ export default function RequestHistory({ staff, restaurant }) {
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              {filterOption.charAt(0).toUpperCase() + filterOption.slice(1)}
+              {t(filterOption) || filterOption.charAt(0).toUpperCase() + filterOption.slice(1)}
             </button>
           ))}
         </div>
@@ -139,11 +152,11 @@ export default function RequestHistory({ staff, restaurant }) {
 
       {requests.length === 0 ? (
         <div className="text-center py-12 text-slate-500">
-          <p className="text-lg mb-2">📭 No requests found</p>
+          <p className="text-lg mb-2">📭 {t('noRequestsFound') || 'No requests found'}</p>
           <p className="text-sm">
             {filter === 'all'
-              ? 'You haven\'t submitted any time-off requests yet.'
-              : `You don't have any ${filter} requests.`}
+              ? (t('noRequestsYet') || 'You haven\'t submitted any time-off requests yet.')
+              : (t('noRequestsWithFilter') || `You don't have any ${filter} requests.`).replace('{filter}', t(filter) || filter)}
           </p>
         </div>
       ) : (
@@ -159,7 +172,7 @@ export default function RequestHistory({ staff, restaurant }) {
                   {getStatusBadge(request.status)}
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-slate-600">Submitted</p>
+                  <p className="text-sm text-slate-600">{t('submitted') || 'Submitted'}</p>
                   <p className="text-sm font-medium text-slate-800">
                     {formatDate(request.created_at)}
                   </p>
@@ -168,16 +181,16 @@ export default function RequestHistory({ staff, restaurant }) {
 
               <div className="grid grid-cols-2 gap-4 mb-3">
                 <div>
-                  <p className="text-xs text-slate-600 mb-1">Dates</p>
+                  <p className="text-xs text-slate-600 mb-1">{t('dates') || 'Dates'}</p>
                   <p className="text-sm font-semibold text-slate-800">
                     {formatDateRange(request.date_from, request.date_to)}
                   </p>
                 </div>
                 {request.days_requested && (
                   <div>
-                    <p className="text-xs text-slate-600 mb-1">Duration</p>
+                    <p className="text-xs text-slate-600 mb-1">{t('duration') || 'Duration'}</p>
                     <p className="text-sm font-semibold text-[#6262bd]">
-                      {request.days_requested} working {request.days_requested === 1 ? 'day' : 'days'}
+                      {request.days_requested} {request.days_requested === 1 ? (t('workingDay') || 'working day') : (t('workingDays') || 'working days')}
                     </p>
                   </div>
                 )}
@@ -185,27 +198,27 @@ export default function RequestHistory({ staff, restaurant }) {
 
               {request.reason && (
                 <div className="mb-3">
-                  <p className="text-xs text-slate-600 mb-1">Reason</p>
+                  <p className="text-xs text-slate-600 mb-1">{t('reason') || 'Reason'}</p>
                   <p className="text-sm text-slate-800">{request.reason}</p>
                 </div>
               )}
 
               {request.status === 'approved' && request.approved_at && (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-800">
-                  ✅ Approved on {formatDate(request.approved_at)}
+                  ✅ {t('approvedOn') || 'Approved on'} {formatDate(request.approved_at)}
                 </div>
               )}
 
               {request.status === 'rejected' && request.rejection_reason && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                  <p className="text-sm font-medium text-red-800 mb-1">❌ Rejection Reason:</p>
+                  <p className="text-sm font-medium text-red-800 mb-1">❌ {t('rejectionReason') || 'Rejection Reason'}:</p>
                   <p className="text-sm text-red-700">{request.rejection_reason}</p>
                 </div>
               )}
 
               {request.status === 'pending' && (
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-yellow-800">
-                  ⏳ Awaiting manager approval
+                  ⏳ {t('awaitingApproval') || 'Awaiting manager approval'}
                 </div>
               )}
             </div>
