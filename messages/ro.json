@@ -446,6 +446,8 @@
       "ordersBarDesc": "Vizualizează și gestionează comenzile de la bar în timp real",
       "reservations": "Rezervări",
       "reservationsDesc": "Vizualizează și gestionează rezervările clienților",
+      "floorPlan": "Plan Sală",
+      "floorPlanDesc": "Vizualizează dispunerea meselor și statusul (acces doar pentru vizualizare)",
       "menu": "Gestionare Meniu",
       "menuDesc": "Editează produsele din meniu, prețurile și rețetele",
       "staff": "Gestionare Personal",

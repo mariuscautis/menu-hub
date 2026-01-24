@@ -631,6 +631,8 @@
       "ordersBarDesc": "View and manage bar orders in real-time",
       "reservations": "Reservations",
       "reservationsDesc": "View and manage customer reservations",
+      "floorPlan": "Floor Plan",
+      "floorPlanDesc": "View table layout and status (view-only access)",
       "menu": "Menu Management",
       "menuDesc": "Edit menu items, prices, and recipes",
       "staff": "Staff Management",

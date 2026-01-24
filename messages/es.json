@@ -446,6 +446,8 @@
       "ordersBarDesc": "Ver y gestionar pedidos de bar en tiempo real",
       "reservations": "Reservas",
       "reservationsDesc": "Ver y gestionar reservas de clientes",
+      "floorPlan": "Plano del Local",
+      "floorPlanDesc": "Ver disposición de mesas y estado (acceso de solo lectura)",
       "menu": "Gestión de Menú",
       "menuDesc": "Editar artículos del menú, precios y recetas",
       "staff": "Gestión de Personal",

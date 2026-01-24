@@ -13,6 +13,7 @@ export default function DepartmentsSettingsPage() {
     { id: 'orders_kitchen', label: t('permissions.ordersKitchen'), description: t('permissions.ordersKitchenDesc') },
     { id: 'orders_bar', label: t('permissions.ordersBar'), description: t('permissions.ordersBarDesc') },
     { id: 'reservations', label: t('permissions.reservations'), description: t('permissions.reservationsDesc') },
+    { id: 'floor_plan', label: t('permissions.floorPlan'), description: t('permissions.floorPlanDesc') },
     { id: 'menu', label: t('permissions.menu'), description: t('permissions.menuDesc') },
     { id: 'staff', label: t('permissions.staff'), description: t('permissions.staffDesc') },
     { id: 'rota', label: t('permissions.rota'), description: t('permissions.rotaDesc') },
