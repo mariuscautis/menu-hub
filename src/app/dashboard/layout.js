@@ -30,11 +30,11 @@ export default function DashboardLayout({ children }) {
   const [pendingReservationsCount, setPendingReservationsCount] = useState(0)
   const [pendingOrdersCount, setPendingOrdersCount] = useState(0)
 
-  // Mobile responsive state
-  const [isMobile, setIsMobile] = useState(false)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  // Responsive state - works on all devices
+  const [sidebarOpen, setSidebarOpen] = useState(true) // Start with sidebar open on desktop
   const [fullWidthMode, setFullWidthMode] = useState(false)
   const [initialRedirectDone, setInitialRedirectDone] = useState(false)
+  const [isSmallScreen, setIsSmallScreen] = useState(false) // For initial sidebar state
 
   // Session validation for staff users (validates every 30 seconds)
   useSessionValidator({
@@ -42,21 +42,28 @@ export default function DashboardLayout({ children }) {
     validateInterval: 30000 // 30 seconds
   })
 
-  // Detect screen size
+  // Detect screen size for initial sidebar state
   useEffect(() => {
     const checkScreenSize = () => {
-      const mobile = window.innerWidth < 1000
-      setIsMobile(mobile)
-      // Auto-close sidebar when switching to desktop
-      if (!mobile) {
-        setSidebarOpen(false)
-      }
+      const smallScreen = window.innerWidth < 1000
+      setIsSmallScreen(smallScreen)
     }
 
     checkScreenSize()
     window.addEventListener('resize', checkScreenSize)
     return () => window.removeEventListener('resize', checkScreenSize)
   }, [])
+
+  // Set initial sidebar state based on screen size (only on first load)
+  useEffect(() => {
+    if (!loading && userType) {
+      // On small screens, start with sidebar closed
+      // On large screens, start with sidebar open (unless staff on first login)
+      if (isSmallScreen) {
+        setSidebarOpen(false)
+      }
+    }
+  }, [loading, userType, isSmallScreen])
 
   // Helper function to fetch department permissions
   const fetchDepartmentPermissions = async (restaurantId, department) => {
@@ -355,13 +362,13 @@ export default function DashboardLayout({ children }) {
     return departmentPermissions.includes(permissionId)
   }, [userType, departmentPermissions])
 
-  // Mobile: Auto-redirect to priority page and enable full-width mode for staff
+  // Auto-redirect to priority page and enable full-width mode for staff (all devices)
   useEffect(() => {
-    if (loading || initialRedirectDone || !isMobile) return
+    if (loading || initialRedirectDone) return
     if (userType !== 'staff' && userType !== 'staff-admin') return
 
     // Check if this is a fresh login (coming from staff login page)
-    const isFirstLoad = sessionStorage.getItem('staff_mobile_redirect_done') !== 'true'
+    const isFirstLoad = sessionStorage.getItem('staff_redirect_done') !== 'true'
     if (!isFirstLoad) {
       setInitialRedirectDone(true)
       return
@@ -385,15 +392,17 @@ export default function DashboardLayout({ children }) {
 
     if (priorityPage && pathname !== priorityPage) {
       setFullWidthMode(true)
-      sessionStorage.setItem('staff_mobile_redirect_done', 'true')
+      setSidebarOpen(false) // Close sidebar for full-width view
+      sessionStorage.setItem('staff_redirect_done', 'true')
       router.push(priorityPage)
     } else if (priorityPage) {
       setFullWidthMode(true)
-      sessionStorage.setItem('staff_mobile_redirect_done', 'true')
+      setSidebarOpen(false) // Close sidebar for full-width view
+      sessionStorage.setItem('staff_redirect_done', 'true')
     }
 
     setInitialRedirectDone(true)
-  }, [loading, isMobile, userType, departmentPermissions, pathname, router, initialRedirectDone, checkPermission])
+  }, [loading, userType, departmentPermissions, pathname, router, initialRedirectDone, checkPermission])
 
   // Clear the redirect flag on logout
   useEffect(() => {
@@ -441,8 +450,8 @@ export default function DashboardLayout({ children }) {
     // Clear staff session and session token
     localStorage.removeItem('staff_session')
     localStorage.removeItem('session_token')
-    // Clear mobile redirect flag
-    sessionStorage.removeItem('staff_mobile_redirect_done')
+    // Clear redirect flag
+    sessionStorage.removeItem('staff_redirect_done')
     // Sign out from Supabase auth (for owners/admins)
     await supabase.auth.signOut()
     router.push(redirectUrl)
@@ -884,16 +893,16 @@ export default function DashboardLayout({ children }) {
     <LanguageProvider>
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex relative">
 
-      {/* Mobile Overlay */}
-      {isMobile && sidebarOpen && (
+      {/* Overlay when sidebar is open (for closing by clicking outside) */}
+      {sidebarOpen && !fullWidthMode && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 transition-opacity"
+          className="fixed inset-0 bg-black/30 z-40 transition-opacity lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* Mobile Top Bar - Only show when sidebar is hidden and not in full-width mode */}
-      {isMobile && !sidebarOpen && !fullWidthMode && (
+      {/* Top Bar - Show when sidebar is hidden and not in full-width mode */}
+      {!sidebarOpen && !fullWidthMode && (
         <div className="fixed top-0 left-0 right-0 h-14 bg-white dark:bg-slate-900 border-b-2 border-slate-100 dark:border-slate-800 z-30 flex items-center justify-between px-4">
           <button
             onClick={() => setSidebarOpen(true)}
@@ -913,7 +922,7 @@ export default function DashboardLayout({ children }) {
                 <span className="text-white font-bold">M</span>
               </div>
             )}
-            <span className="font-semibold text-slate-700 dark:text-slate-200 truncate max-w-[150px]">
+            <span className="font-semibold text-slate-700 dark:text-slate-200 truncate max-w-[200px]">
               {restaurant?.name || 'Menu Hub'}
             </span>
           </div>
@@ -930,7 +939,7 @@ export default function DashboardLayout({ children }) {
       )}
 
       {/* Full-width mode floating buttons */}
-      {isMobile && fullWidthMode && (
+      {fullWidthMode && (
         <div className="fixed top-4 right-4 z-50 flex gap-2">
           <button
             onClick={() => setSidebarOpen(true)}
@@ -955,10 +964,11 @@ export default function DashboardLayout({ children }) {
 
       {/* Sidebar */}
       <aside className={`
-        ${isMobile
-          ? `fixed inset-y-0 left-0 z-50 w-72 transform transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`
-          : 'w-64'
+        ${sidebarOpen
+          ? 'fixed inset-y-0 left-0 z-50 w-72 translate-x-0'
+          : 'fixed inset-y-0 left-0 z-50 w-72 -translate-x-full'
         }
+        transform transition-transform duration-300 ease-in-out
         bg-white dark:bg-slate-900 border-r-2 border-slate-100 dark:border-slate-800 flex flex-col h-screen
       `}>
         <div className="p-6 border-b-2 border-slate-100 dark:border-slate-800">
@@ -981,17 +991,15 @@ export default function DashboardLayout({ children }) {
                 {restaurant?.name || 'Menu Hub'}
               </span>
             </div>
-            {/* Close button for mobile */}
-            {isMobile && (
-              <button
-                onClick={() => setSidebarOpen(false)}
-                className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex-shrink-0"
-              >
-                <svg className="w-5 h-5 text-slate-500" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                </svg>
-              </button>
-            )}
+            {/* Close button */}
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex-shrink-0"
+            >
+              <svg className="w-5 h-5 text-slate-500" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+              </svg>
+            </button>
           </div>
         </div>
 
@@ -1037,7 +1045,6 @@ export default function DashboardLayout({ children }) {
                           <li key={child.href}>
                             <Link
                               href={child.href}
-                              onClick={() => isMobile && setSidebarOpen(false)}
                               className={`flex items-center space-x-3 px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                                 pathname === child.href
                                   ? 'bg-primary/10 text-primary dark:bg-primary/20'
@@ -1056,7 +1063,6 @@ export default function DashboardLayout({ children }) {
                   // Regular menu item without children
                   <Link
                     href={item.href}
-                    onClick={() => isMobile && setSidebarOpen(false)}
                     className={`flex items-center justify-between px-4 py-3 rounded-xl font-medium transition-colors ${
                       pathname === item.href
                         ? 'bg-primary/10 text-primary dark:bg-primary/20'
@@ -1083,7 +1089,6 @@ export default function DashboardLayout({ children }) {
               <li className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800">
                 <Link
                   href="/admin"
-                  onClick={() => isMobile && setSidebarOpen(false)}
                   className="flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-amber-600 dark:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950 transition-colors"
                 >
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -1151,14 +1156,18 @@ export default function DashboardLayout({ children }) {
       {/* Main content */}
       <main className={`
         flex-1
-        ${isMobile && !fullWidthMode ? 'pt-14' : ''}
-        ${isMobile && fullWidthMode ? 'p-0' : 'p-8'}
-        ${!isMobile ? 'p-8' : !fullWidthMode ? 'p-4' : ''}
+        ${sidebarOpen ? 'ml-72' : 'ml-0'}
+        ${fullWidthMode
+          ? 'p-4 pt-16'
+          : sidebarOpen
+            ? 'p-4 md:p-8'
+            : 'pt-20 px-4 pb-4 md:px-8 md:pb-8'
+        }
         ${debug ? 'mt-10' : ''}
         transition-all duration-300
       `}>
         {/* Full-width wrapper for the content */}
-        <div className={`${isMobile && fullWidthMode ? 'h-screen overflow-auto' : ''}`}>
+        <div className={`${fullWidthMode ? 'h-[calc(100vh-4rem)] overflow-auto' : ''}`}>
           {children}
         </div>
       </main>
