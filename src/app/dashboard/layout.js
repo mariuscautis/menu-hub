@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
@@ -30,11 +30,33 @@ export default function DashboardLayout({ children }) {
   const [pendingReservationsCount, setPendingReservationsCount] = useState(0)
   const [pendingOrdersCount, setPendingOrdersCount] = useState(0)
 
+  // Mobile responsive state
+  const [isMobile, setIsMobile] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [fullWidthMode, setFullWidthMode] = useState(false)
+  const [initialRedirectDone, setInitialRedirectDone] = useState(false)
+
   // Session validation for staff users (validates every 30 seconds)
   useSessionValidator({
     enabled: userType === 'staff' || userType === 'staff-admin',
     validateInterval: 30000 // 30 seconds
   })
+
+  // Detect screen size
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const mobile = window.innerWidth < 1000
+      setIsMobile(mobile)
+      // Auto-close sidebar when switching to desktop
+      if (!mobile) {
+        setSidebarOpen(false)
+      }
+    }
+
+    checkScreenSize()
+    window.addEventListener('resize', checkScreenSize)
+    return () => window.removeEventListener('resize', checkScreenSize)
+  }, [])
 
   // Helper function to fetch department permissions
   const fetchDepartmentPermissions = async (restaurantId, department) => {
@@ -325,6 +347,61 @@ export default function DashboardLayout({ children }) {
     }
   }, [restaurant])
 
+  // Helper function to check if user has permission (used for mobile redirect)
+  const checkPermission = useCallback((permissionId) => {
+    if (userType === 'owner' || userType === 'staff-admin') {
+      return true
+    }
+    return departmentPermissions.includes(permissionId)
+  }, [userType, departmentPermissions])
+
+  // Mobile: Auto-redirect to priority page and enable full-width mode for staff
+  useEffect(() => {
+    if (loading || initialRedirectDone || !isMobile) return
+    if (userType !== 'staff' && userType !== 'staff-admin') return
+
+    // Check if this is a fresh login (coming from staff login page)
+    const isFirstLoad = sessionStorage.getItem('staff_mobile_redirect_done') !== 'true'
+    if (!isFirstLoad) {
+      setInitialRedirectDone(true)
+      return
+    }
+
+    // Determine priority page based on permissions
+    let priorityPage = null
+
+    // Priority 1: Floor Plan
+    if (userType === 'staff-admin' || checkPermission('floor_plan')) {
+      priorityPage = userType === 'staff-admin' ? '/dashboard/floor-plan' : '/dashboard/tables-floor-plan'
+    }
+    // Priority 2: Orders
+    else if (checkPermission('orders_kitchen') || checkPermission('orders_bar')) {
+      priorityPage = '/dashboard/orders'
+    }
+    // Priority 3: My Rota
+    else if (checkPermission('my_rota')) {
+      priorityPage = '/dashboard/my-rota'
+    }
+
+    if (priorityPage && pathname !== priorityPage) {
+      setFullWidthMode(true)
+      sessionStorage.setItem('staff_mobile_redirect_done', 'true')
+      router.push(priorityPage)
+    } else if (priorityPage) {
+      setFullWidthMode(true)
+      sessionStorage.setItem('staff_mobile_redirect_done', 'true')
+    }
+
+    setInitialRedirectDone(true)
+  }, [loading, isMobile, userType, departmentPermissions, pathname, router, initialRedirectDone, checkPermission])
+
+  // Clear the redirect flag on logout
+  useEffect(() => {
+    return () => {
+      // This will be called when component unmounts (e.g., on logout)
+    }
+  }, [])
+
   const handleLogout = async () => {
     // Check if staff session exists to redirect to restaurant-specific login
     const staffSessionData = localStorage.getItem('staff_session')
@@ -364,9 +441,20 @@ export default function DashboardLayout({ children }) {
     // Clear staff session and session token
     localStorage.removeItem('staff_session')
     localStorage.removeItem('session_token')
+    // Clear mobile redirect flag
+    sessionStorage.removeItem('staff_mobile_redirect_done')
     // Sign out from Supabase auth (for owners/admins)
     await supabase.auth.signOut()
     router.push(redirectUrl)
+  }
+
+  // Toggle full-width mode
+  const toggleFullWidth = () => {
+    setFullWidthMode(!fullWidthMode)
+    // Close sidebar when entering full-width mode
+    if (!fullWidthMode) {
+      setSidebarOpen(false)
+    }
   }
 
   const getNavItems = () => {
@@ -794,33 +882,120 @@ export default function DashboardLayout({ children }) {
 
   return (
     <LanguageProvider>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex relative">
 
+      {/* Mobile Overlay */}
+      {isMobile && sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 transition-opacity"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
-      {/* Sidebar */}
-      <aside className={`w-64 bg-white dark:bg-slate-900 border-r-2 border-slate-100 dark:border-slate-800 flex flex-col`}>
-        <div className="p-6 border-b-2 border-slate-100 dark:border-slate-800">
-          <div className="flex items-center space-x-2">
+      {/* Mobile Top Bar - Only show when sidebar is hidden and not in full-width mode */}
+      {isMobile && !sidebarOpen && !fullWidthMode && (
+        <div className="fixed top-0 left-0 right-0 h-14 bg-white dark:bg-slate-900 border-b-2 border-slate-100 dark:border-slate-800 z-30 flex items-center justify-between px-4">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          >
+            <svg className="w-6 h-6 text-slate-600 dark:text-slate-400" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+            </svg>
+          </button>
+          <div className="flex items-center gap-2">
             {restaurant?.logo_url ? (
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800">
-                <img
-                  src={restaurant.logo_url}
-                  alt={restaurant.name}
-                  className="max-w-full max-h-full object-contain"
-                />
+              <div className="w-8 h-8 rounded-lg overflow-hidden bg-slate-50 dark:bg-slate-800">
+                <img src={restaurant.logo_url} alt={restaurant.name} className="w-full h-full object-contain" />
               </div>
             ) : (
-              <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-lg">M</span>
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold">M</span>
               </div>
             )}
-            <span className="text-xl font-bold text-slate-700 dark:text-slate-200">
+            <span className="font-semibold text-slate-700 dark:text-slate-200 truncate max-w-[150px]">
               {restaurant?.name || 'Menu Hub'}
             </span>
           </div>
+          <button
+            onClick={toggleFullWidth}
+            className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            title="Enter full-width mode"
+          >
+            <svg className="w-6 h-6 text-slate-600 dark:text-slate-400" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+            </svg>
+          </button>
+        </div>
+      )}
+
+      {/* Full-width mode floating buttons */}
+      {isMobile && fullWidthMode && (
+        <div className="fixed top-4 right-4 z-50 flex gap-2">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-3 bg-white dark:bg-slate-800 rounded-full shadow-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+            title="Open menu"
+          >
+            <svg className="w-5 h-5 text-slate-600 dark:text-slate-400" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+            </svg>
+          </button>
+          <button
+            onClick={toggleFullWidth}
+            className="p-3 bg-white dark:bg-slate-800 rounded-full shadow-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+            title="Exit full-width mode"
+          >
+            <svg className="w-5 h-5 text-slate-600 dark:text-slate-400" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>
+            </svg>
+          </button>
+        </div>
+      )}
+
+      {/* Sidebar */}
+      <aside className={`
+        ${isMobile
+          ? `fixed inset-y-0 left-0 z-50 w-72 transform transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`
+          : 'w-64'
+        }
+        bg-white dark:bg-slate-900 border-r-2 border-slate-100 dark:border-slate-800 flex flex-col h-screen
+      `}>
+        <div className="p-6 border-b-2 border-slate-100 dark:border-slate-800">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2 flex-1 min-w-0">
+              {restaurant?.logo_url ? (
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800 flex-shrink-0">
+                  <img
+                    src={restaurant.logo_url}
+                    alt={restaurant.name}
+                    className="max-w-full max-h-full object-contain"
+                  />
+                </div>
+              ) : (
+                <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center flex-shrink-0">
+                  <span className="text-white font-bold text-lg">M</span>
+                </div>
+              )}
+              <span className="text-xl font-bold text-slate-700 dark:text-slate-200 truncate">
+                {restaurant?.name || 'Menu Hub'}
+              </span>
+            </div>
+            {/* Close button for mobile */}
+            {isMobile && (
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex-shrink-0"
+              >
+                <svg className="w-5 h-5 text-slate-500" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </button>
+            )}
+          </div>
         </div>
 
-        <nav className="p-4">
+        <nav className="p-4 flex-1 overflow-y-auto">
           <ul className="space-y-1">
             {navItems.map((item) => (
               <li key={item.href}>
@@ -862,6 +1037,7 @@ export default function DashboardLayout({ children }) {
                           <li key={child.href}>
                             <Link
                               href={child.href}
+                              onClick={() => isMobile && setSidebarOpen(false)}
                               className={`flex items-center space-x-3 px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                                 pathname === child.href
                                   ? 'bg-primary/10 text-primary dark:bg-primary/20'
@@ -880,6 +1056,7 @@ export default function DashboardLayout({ children }) {
                   // Regular menu item without children
                   <Link
                     href={item.href}
+                    onClick={() => isMobile && setSidebarOpen(false)}
                     className={`flex items-center justify-between px-4 py-3 rounded-xl font-medium transition-colors ${
                       pathname === item.href
                         ? 'bg-primary/10 text-primary dark:bg-primary/20'
@@ -906,6 +1083,7 @@ export default function DashboardLayout({ children }) {
               <li className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800">
                 <Link
                   href="/admin"
+                  onClick={() => isMobile && setSidebarOpen(false)}
                   className="flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-amber-600 dark:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950 transition-colors"
                 >
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -918,7 +1096,7 @@ export default function DashboardLayout({ children }) {
           </ul>
         </nav>
 
-        <div className="p-4 border-t-2 border-slate-100 dark:border-slate-800">
+        <div className="p-4 border-t-2 border-slate-100 dark:border-slate-800 mt-auto flex-shrink-0">
           <div className="px-4 py-3 mb-3">
             <div className="flex items-start justify-between mb-2">
               <div className="flex-1">
@@ -971,8 +1149,18 @@ export default function DashboardLayout({ children }) {
       </aside>
 
       {/* Main content */}
-      <main className={`flex-1 p-8 ${debug ? 'mt-10' : ''}`}>
-        {children}
+      <main className={`
+        flex-1
+        ${isMobile && !fullWidthMode ? 'pt-14' : ''}
+        ${isMobile && fullWidthMode ? 'p-0' : 'p-8'}
+        ${!isMobile ? 'p-8' : !fullWidthMode ? 'p-4' : ''}
+        ${debug ? 'mt-10' : ''}
+        transition-all duration-300
+      `}>
+        {/* Full-width wrapper for the content */}
+        <div className={`${isMobile && fullWidthMode ? 'h-screen overflow-auto' : ''}`}>
+          {children}
+        </div>
       </main>
 
       {/* Offline Indicator */}
