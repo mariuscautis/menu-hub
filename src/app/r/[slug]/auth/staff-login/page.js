@@ -6,6 +6,21 @@ import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
+// Generate or retrieve device ID
+function getOrCreateDeviceId() {
+  if (typeof window === 'undefined') return null
+
+  let deviceId = localStorage.getItem('device_id')
+  if (!deviceId) {
+    // Generate a unique device ID
+    const array = new Uint8Array(16)
+    crypto.getRandomValues(array)
+    deviceId = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('')
+    localStorage.setItem('device_id', deviceId)
+  }
+  return deviceId
+}
+
 export default function StaffLogin() {
   const router = useRouter()
   const params = useParams()
@@ -151,6 +166,31 @@ export default function StaffLogin() {
         setPinCode('') // Clear the PIN input
         setLoggingIn(false)
         return
+      }
+
+      // Create session in the database for device tracking
+      const deviceId = getOrCreateDeviceId()
+      let sessionToken = null
+
+      try {
+        const sessionResponse = await fetch('/api/sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            restaurantId: restaurant.id,
+            staffId: staffMember.id,
+            deviceId
+          })
+        })
+        const sessionData = await sessionResponse.json()
+
+        if (sessionData.success && sessionData.sessionToken) {
+          sessionToken = sessionData.sessionToken
+          localStorage.setItem('session_token', sessionToken)
+        }
+      } catch (sessionError) {
+        // Log but don't fail login if session creation fails
+        console.error('Session creation error:', sessionError)
       }
 
       // Store staff session in localStorage

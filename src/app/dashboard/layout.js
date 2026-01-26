@@ -9,6 +9,7 @@ import ThemeToggle from '@/components/ThemeToggle'
 import OfflineIndicator from '@/components/OfflineIndicator'
 import { LanguageProvider } from '@/lib/i18n/LanguageContext'
 import LanguageSelector from '@/components/LanguageSelector'
+import { useSessionValidator } from '@/hooks/useSessionValidator'
 
 export default function DashboardLayout({ children }) {
   const pathname = usePathname()
@@ -28,6 +29,12 @@ export default function DashboardLayout({ children }) {
   })
   const [pendingReservationsCount, setPendingReservationsCount] = useState(0)
   const [pendingOrdersCount, setPendingOrdersCount] = useState(0)
+
+  // Session validation for staff users (validates every 30 seconds)
+  useSessionValidator({
+    enabled: userType === 'staff' || userType === 'staff-admin',
+    validateInterval: 30000 // 30 seconds
+  })
 
   // Helper function to fetch department permissions
   const fetchDepartmentPermissions = async (restaurantId, department) => {
@@ -321,6 +328,8 @@ export default function DashboardLayout({ children }) {
   const handleLogout = async () => {
     // Check if staff session exists to redirect to restaurant-specific login
     const staffSessionData = localStorage.getItem('staff_session')
+    const sessionToken = localStorage.getItem('session_token')
+    const deviceId = localStorage.getItem('device_id')
     let redirectUrl = '/'
 
     if (staffSessionData) {
@@ -329,13 +338,32 @@ export default function DashboardLayout({ children }) {
         if (staffSession.restaurant && staffSession.restaurant.slug) {
           redirectUrl = `/r/${staffSession.restaurant.slug}/auth/staff-login`
         }
+
+        // Delete the session from the database if we have a token
+        if (sessionToken && staffSession.restaurant_id) {
+          try {
+            // Find and delete the session by querying with session token
+            await fetch(`/api/sessions/validate`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                sessionToken,
+                deviceId,
+                action: 'logout'
+              })
+            })
+          } catch (err) {
+            console.error('Error deleting session:', err)
+          }
+        }
       } catch (err) {
         console.error('Error parsing staff session:', err)
       }
     }
 
-    // Clear staff session
+    // Clear staff session and session token
     localStorage.removeItem('staff_session')
+    localStorage.removeItem('session_token')
     // Sign out from Supabase auth (for owners/admins)
     await supabase.auth.signOut()
     router.push(redirectUrl)

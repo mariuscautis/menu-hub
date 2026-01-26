@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import PWAInstallButton from '@/components/PWAInstallButton'
 import QRCode from 'qrcode'
+import ConnectedDevicesPanel from '@/components/ConnectedDevicesPanel'
 
 export default function Security() {
   const [restaurant, setRestaurant] = useState(null)
@@ -141,6 +142,9 @@ export default function Security() {
           {message.text}
         </div>
       )}
+
+      {/* Connected Devices Panel */}
+      <ConnectedDevicesPanel restaurantId={restaurant.id} />
 
       {/* Staff Login Security Section */}
       <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
