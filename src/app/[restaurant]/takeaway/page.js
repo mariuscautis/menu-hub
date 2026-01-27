@@ -4,6 +4,7 @@ export const runtime = 'edge'
 import { useState, useEffect, use } from 'react'
 import { supabase } from '@/lib/supabase'
 import { loadTranslations, createTranslator } from '@/lib/clientTranslations'
+import useOfflineOrder from '@/hooks/useOfflineOrder'
 
 // Generate a unique 6-character pickup code (ABC123 format)
 function generatePickupCode() {
@@ -34,6 +35,9 @@ export default function TakeawayMenu({ params }) {
   const [placingOrder, setPlacingOrder] = useState(false)
   const [emailError, setEmailError] = useState('')
   const [translations, setTranslations] = useState(null)
+  const [orderedOffline, setOrderedOffline] = useState(false)
+
+  const { placeOrder: placeOfflineOrder, isOnline, pendingCount } = useOfflineOrder()
 
   useEffect(() => {
     fetchData()
@@ -232,66 +236,25 @@ export default function TakeawayMenu({ params }) {
       const restaurantLocale = restaurant.email_language
       const locale = restaurantLocale && supportedLocales.includes(restaurantLocale) ? restaurantLocale : 'en'
 
-      // Create takeaway order
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          restaurant_id: restaurant.id,
-          table_id: null, // No table for takeaway
-          total: getCartTotal(),
-          customer_name: customerName.trim(),
-          customer_email: customerEmail.trim().toLowerCase(),
-          customer_phone: customerPhone.trim() || null,
-          notes: orderNotes.trim() || null,
-          status: 'pending',
-          order_type: 'takeaway',
-          pickup_code: code,
-          locale: locale
-        })
-        .select()
-        .single()
+      // Place order via offline-aware hook (handles both online and offline)
+      const result = await placeOfflineOrder({
+        restaurant,
+        cart,
+        customerName,
+        customerEmail,
+        customerPhone,
+        orderNotes,
+        pickupCode: code,
+        locale,
+        total: getCartTotal(),
+      })
 
-      if (orderError) throw orderError
-
-      // Create order items
-      const orderItems = cart.map(item => ({
-        order_id: order.id,
-        menu_item_id: item.id,
-        name: item.name,
-        quantity: item.quantity,
-        price_at_time: item.price
-      }))
-
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(orderItems)
-
-      if (itemsError) throw itemsError
-
-      // Send confirmation email via API
-      try {
-        const emailResponse = await fetch('/api/takeaway/order', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            orderId: order.id,
-            restaurantId: restaurant.id,
-            locale: locale
-          })
-        })
-
-        if (!emailResponse.ok) {
-          const errorData = await emailResponse.json()
-          console.error('Email API error:', errorData)
-        } else {
-          console.log('Confirmation email sent successfully')
-        }
-      } catch (emailErr) {
-        console.error('Failed to send confirmation email:', emailErr)
-        // Don't fail the order if email fails
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to place order')
       }
 
       setPickupCode(code)
+      setOrderedOffline(result.offline)
       setOrderPlaced(true)
       setCart([])
       setShowCart(false)
@@ -396,11 +359,19 @@ export default function TakeawayMenu({ params }) {
             <p className="text-sm text-slate-500">{t('pickupCodeDescription')}</p>
           </div>
 
-          <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-4 mb-6">
-            <p className="text-sm text-amber-700">
-              <strong>{t('emailSentTitle')}</strong> {t('emailSentDescription', { email: customerEmail })}
-            </p>
-          </div>
+          {orderedOffline ? (
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 mb-6">
+              <p className="text-sm text-blue-700">
+                <strong>Order saved offline.</strong> Your order has been saved and will be sent to the restaurant as soon as the internet connection is restored. Your confirmation email will arrive after syncing.
+              </p>
+            </div>
+          ) : (
+            <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-4 mb-6">
+              <p className="text-sm text-amber-700">
+                <strong>{t('emailSentTitle')}</strong> {t('emailSentDescription', { email: customerEmail })}
+              </p>
+            </div>
+          )}
 
           <button
             onClick={() => {
@@ -410,6 +381,7 @@ export default function TakeawayMenu({ params }) {
               setCustomerEmail('')
               setCustomerPhone('')
               setOrderNotes('')
+              setOrderedOffline(false)
             }}
             className="bg-[#6262bd] text-white px-6 py-3 rounded-xl font-medium hover:bg-[#5252a3]"
           >

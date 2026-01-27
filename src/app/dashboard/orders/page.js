@@ -5,6 +5,8 @@ import { supabase } from '@/lib/supabase'
 import InvoiceClientModal from '@/components/invoices/InvoiceClientModal'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { generateInvoicePdfBase64, downloadInvoicePdf } from '@/lib/invoicePdfGenerator'
+import { getPendingOrders, getOrderItems as getOfflineOrderItems } from '@/lib/offlineQueue'
+import { onSyncEvent, initAutoSync } from '@/lib/syncManager'
 
 export default function Orders() {
   const t = useTranslations('orders')
@@ -31,6 +33,9 @@ export default function Orders() {
   const [markingReady, setMarkingReady] = useState(null) // orderId being marked ready
   const [showPickupModal, setShowPickupModal] = useState(false)
   const [pickupOrderId, setPickupOrderId] = useState(null)
+
+  // Offline orders state
+  const [offlineOrders, setOfflineOrders] = useState([])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -149,6 +154,53 @@ export default function Orders() {
 
     fetchData()
   }, [])
+
+  // Load offline (pending sync) orders and listen for sync changes
+  useEffect(() => {
+    if (!restaurant) return
+
+    const loadOfflineOrders = async () => {
+      try {
+        const pending = await getPendingOrders(restaurant.id)
+        // For each pending order, also load its items
+        const ordersWithItems = await Promise.all(
+          pending.map(async (order) => {
+            const items = await getOfflineOrderItems(order.client_id)
+            return {
+              ...order,
+              id: `offline-${order.client_id}`,
+              _isOffline: true,
+              created_at: order.created_at,
+              order_items: items.map((item) => ({
+                ...item,
+                price_at_time: item.price_at_time,
+              })),
+              tables: null,
+            }
+          })
+        )
+        setOfflineOrders(ordersWithItems)
+      } catch (err) {
+        console.error('Failed to load offline orders:', err)
+      }
+    }
+
+    loadOfflineOrders()
+
+    const cleanupAutoSync = initAutoSync()
+
+    // Refresh offline orders after sync completes
+    const unsubComplete = onSyncEvent('sync-complete', () => {
+      loadOfflineOrders()
+      // Also refresh server orders to pick up newly synced ones
+      fetchOrders(restaurant.id)
+    })
+
+    return () => {
+      cleanupAutoSync()
+      unsubComplete()
+    }
+  }, [restaurant])
 
   const fetchOrders = async (restaurantId) => {
     const { data } = await supabase
@@ -516,7 +568,20 @@ export default function Orders() {
     }
   }
 
-  const filteredOrders = orders.filter(order => {
+  // Merge server orders with offline (pending sync) orders
+  const allOrders = [...offlineOrders, ...orders]
+
+  const filteredOrders = allOrders.filter(order => {
+    // Offline orders are always 'active'/'pending'
+    if (order._isOffline) {
+      if (filter === 'completed') return false
+      if (orderTypeFilter !== 'all') {
+        const orderType = order.order_type || 'dine_in'
+        if (orderType !== orderTypeFilter) return false
+      }
+      return true
+    }
+
     // Status filter
     if (filter === 'active') {
       if (!(['pending', 'preparing', 'ready'].includes(order.status) && !order.paid && order.status !== 'cancelled')) {
@@ -691,7 +756,7 @@ export default function Orders() {
 
             return (
             <div key={order.id} className={`bg-white border-2 rounded-2xl p-6 ${
-              order.order_type === 'takeaway' ? 'border-cyan-200' : 'border-slate-100'
+              order._isOffline ? 'border-orange-300 bg-orange-50/30' : order.order_type === 'takeaway' ? 'border-cyan-200' : 'border-slate-100'
             }`}>
               <div className="flex justify-between items-start mb-4">
                 <div>
@@ -715,6 +780,11 @@ export default function Orders() {
                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
                       {t(`status.${order.status}`)}
                     </span>
+                    {order._isOffline && (
+                      <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium animate-pulse">
+                        Pending sync
+                      </span>
+                    )}
                     {order.order_type === 'takeaway' && order.ready_for_pickup && !order.picked_up_at && (
                       <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium animate-pulse">
                         {t('readyForPickup') || 'Ready for Pickup'}
