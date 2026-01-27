@@ -41,37 +41,51 @@ export default function StaffLogin() {
 
   useEffect(() => {
     const fetchRestaurant = async () => {
-      // Fetch restaurant by slug
-      const { data: restaurantData, error: restaurantError } = await supabase
-        .from('restaurants')
-        .select('*')
-        .eq('slug', slug)
-        .maybeSingle()
+      try {
+        // Fetch restaurant by slug
+        const { data: restaurantData, error: restaurantError } = await supabase
+          .from('restaurants')
+          .select('*')
+          .eq('slug', slug)
+          .maybeSingle()
 
-      if (restaurantError) {
-        console.error('Restaurant fetch error:', restaurantError)
-        setError('Error loading restaurant: ' + restaurantError.message)
+        if (restaurantError) {
+          if (!navigator.onLine) {
+            setError('You are offline. Please check your internet connection and try again.')
+          } else {
+            console.error('Restaurant fetch error:', restaurantError)
+            setError('Error loading restaurant: ' + restaurantError.message)
+          }
+          setLoading(false)
+          return
+        }
+
+        if (!restaurantData) {
+          setError('Restaurant not found')
+          setLoading(false)
+          return
+        }
+
+        setRestaurant(restaurantData)
+
+        // Check if restaurant password is already authenticated in session
+        const sessionKey = `restaurant_auth_${restaurantData.id}`
+        const storedAuth = sessionStorage.getItem(sessionKey)
+
+        if (storedAuth === restaurantData.staff_login_password) {
+          setPasswordAuthenticated(true)
+        }
+
         setLoading(false)
-        return
-      }
-
-      if (!restaurantData) {
-        setError('Restaurant not found')
+      } catch (err) {
+        if (!navigator.onLine) {
+          setError('You are offline. Please check your internet connection and try again.')
+        } else {
+          console.error('Restaurant fetch error:', err)
+          setError('Something went wrong. Please try again.')
+        }
         setLoading(false)
-        return
       }
-
-      setRestaurant(restaurantData)
-
-      // Check if restaurant password is already authenticated in session
-      const sessionKey = `restaurant_auth_${restaurantData.id}`
-      const storedAuth = sessionStorage.getItem(sessionKey)
-
-      if (storedAuth === restaurantData.staff_login_password) {
-        setPasswordAuthenticated(true)
-      }
-
-      setLoading(false)
     }
 
     fetchRestaurant()
@@ -154,9 +168,13 @@ export default function StaffLogin() {
       console.log('All staff for this restaurant:', allStaff)
 
       if (staffError) {
-        console.error('Database error:', staffError)
-        setError(`Database error: ${staffError.message}`)
-        setPinCode('') // Clear the PIN input
+        if (!navigator.onLine) {
+          setError('You are offline. Staff login requires an internet connection.')
+        } else {
+          console.error('Database error:', staffError)
+          setError(`Database error: ${staffError.message}`)
+        }
+        setPinCode('')
         setLoggingIn(false)
         return
       }
@@ -208,9 +226,13 @@ export default function StaffLogin() {
       router.push('/dashboard')
 
     } catch (err) {
-      console.error('Unexpected error:', err)
-      setError('Something went wrong. Please try again.')
-      setPinCode('') // Clear the PIN input
+      if (!navigator.onLine) {
+        setError('You are offline. Staff login requires an internet connection.')
+      } else {
+        console.error('Unexpected error:', err)
+        setError('Something went wrong. Please try again.')
+      }
+      setPinCode('')
       setLoggingIn(false)
     }
   }
