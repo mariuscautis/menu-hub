@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import InvoiceClientModal from '@/components/invoices/InvoiceClientModal'
 import { generateInvoicePdfBase64, downloadInvoicePdf } from '@/lib/invoicePdfGenerator'
+import { addPendingOrder, generateClientId } from '@/lib/offlineQueue'
 
 // Read-only Table Component for Staff
 function FloorPlanTable({ table, orderInfo, reservations, waiterCalls, onClick, onMarkCleaned, onMarkDelivered, onViewReservations }) {
@@ -1005,6 +1006,34 @@ export default function StaffFloorPlanPage() {
 
       showNotificationMessage('success', currentOrder ? 'Order updated successfully!' : 'Order placed successfully!')
     } catch (error) {
+      // If offline and creating a new order, queue it locally
+      if (!navigator.onLine && !currentOrder) {
+        try {
+          const clientId = generateClientId()
+          await addPendingOrder({
+            client_id: clientId,
+            restaurant_id: restaurant.id,
+            table_id: selectedTable.id,
+            total,
+            status: 'pending',
+            order_type: 'dine_in',
+          }, consolidatedItems.map(item => ({
+            menu_item_id: item.menu_item_id,
+            name: item.name,
+            quantity: item.quantity,
+            price_at_time: item.price_at_time,
+          })))
+
+          setShowOrderModal(false)
+          setCurrentOrder(null)
+          setOrderItems([])
+          showNotificationMessage('success', 'Order saved offline. It will sync when internet is restored.')
+          return
+        } catch (offlineErr) {
+          console.error('Failed to save order offline:', offlineErr)
+        }
+      }
+
       console.error('Error submitting order:', error)
       showNotificationMessage('error', 'Failed to submit order. Please try again.')
     }

@@ -6,6 +6,7 @@ import QRCode from 'qrcode'
 import InvoiceClientModal from '@/components/invoices/InvoiceClientModal'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { generateInvoicePdfBase64, downloadInvoicePdf } from '@/lib/invoicePdfGenerator'
+import { addPendingOrder, generateClientId } from '@/lib/offlineQueue'
 
 export default function Tables() {
   const t = useTranslations('tables')
@@ -1517,6 +1518,35 @@ export default function Tables() {
 
       showNotification('success', currentOrder ? t('notifications.orderUpdated') : t('notifications.orderPlaced'))
     } catch (error) {
+      // If offline and creating a new order, queue it locally
+      if (!navigator.onLine && !currentOrder) {
+        try {
+          const clientId = generateClientId()
+          await addPendingOrder({
+            client_id: clientId,
+            restaurant_id: restaurant.id,
+            table_id: selectedTable.id,
+            total,
+            status: 'pending',
+            order_type: 'dine_in',
+          }, consolidatedItems.map(item => ({
+            menu_item_id: item.menu_item_id,
+            name: item.name,
+            quantity: item.quantity,
+            price_at_time: item.price_at_time,
+          })))
+
+          setShowOrderModal(false)
+          setSelectedTable(null)
+          setCurrentOrder(null)
+          setOrderItems([])
+          showNotification('success', 'Order saved offline — will sync when internet is restored.')
+          return
+        } catch (offlineErr) {
+          console.error('Failed to save order offline:', offlineErr)
+        }
+      }
+
       console.error('Error submitting order:', error)
       showNotification('error', t('notifications.orderFailed'))
     }
