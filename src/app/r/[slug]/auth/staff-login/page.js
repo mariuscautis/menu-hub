@@ -21,6 +21,35 @@ function getOrCreateDeviceId() {
   return deviceId
 }
 
+// Cache key for offline staff login data (per restaurant slug)
+function getOfflineCacheKey(slug) {
+  return `offline_staff_cache_${slug}`
+}
+
+// Save staff login data locally for offline access
+function cacheStaffLoginData(slug, restaurantData, staffList) {
+  try {
+    localStorage.setItem(getOfflineCacheKey(slug), JSON.stringify({
+      restaurant: restaurantData,
+      staff: staffList,
+      cached_at: new Date().toISOString(),
+    }))
+  } catch (err) {
+    console.warn('Failed to cache staff login data:', err)
+  }
+}
+
+// Load cached staff login data for offline use
+function loadCachedStaffLoginData(slug) {
+  try {
+    const raw = localStorage.getItem(getOfflineCacheKey(slug))
+    if (!raw) return null
+    return JSON.parse(raw)
+  } catch {
+    return null
+  }
+}
+
 export default function StaffLogin() {
   const router = useRouter()
   const params = useParams()
@@ -39,8 +68,33 @@ export default function StaffLogin() {
   const [pinCode, setPinCode] = useState('')
   const [loggingIn, setLoggingIn] = useState(false)
 
+  const [isOfflineMode, setIsOfflineMode] = useState(false)
+
   useEffect(() => {
     const fetchRestaurant = async () => {
+      // If offline, try to use cached data
+      if (!navigator.onLine) {
+        const cached = loadCachedStaffLoginData(slug)
+        if (cached) {
+          setRestaurant(cached.restaurant)
+          setIsOfflineMode(true)
+
+          // Check if restaurant password is already authenticated in session
+          const sessionKey = `restaurant_auth_${cached.restaurant.id}`
+          const storedAuth = sessionStorage.getItem(sessionKey)
+          if (storedAuth === cached.restaurant.staff_login_password) {
+            setPasswordAuthenticated(true)
+          }
+
+          setLoading(false)
+          return
+        }
+        // No cache available — can't do anything offline
+        setError('You are offline and this device has no cached login data. Please connect to the internet first.')
+        setLoading(false)
+        return
+      }
+
       try {
         // Fetch restaurant by slug
         const { data: restaurantData, error: restaurantError } = await supabase
@@ -50,12 +104,8 @@ export default function StaffLogin() {
           .maybeSingle()
 
         if (restaurantError) {
-          if (!navigator.onLine) {
-            setError('You are offline. Please check your internet connection and try again.')
-          } else {
-            console.error('Restaurant fetch error:', restaurantError)
-            setError('Error loading restaurant: ' + restaurantError.message)
-          }
+          console.error('Restaurant fetch error:', restaurantError)
+          setError('Error loading restaurant: ' + restaurantError.message)
           setLoading(false)
           return
         }
@@ -68,6 +118,17 @@ export default function StaffLogin() {
 
         setRestaurant(restaurantData)
 
+        // Fetch and cache staff list for future offline use
+        const { data: staffList } = await supabase
+          .from('staff')
+          .select('id, name, email, pin_code, role, department, restaurant_id, status')
+          .eq('restaurant_id', restaurantData.id)
+          .eq('status', 'active')
+
+        if (staffList) {
+          cacheStaffLoginData(slug, restaurantData, staffList)
+        }
+
         // Check if restaurant password is already authenticated in session
         const sessionKey = `restaurant_auth_${restaurantData.id}`
         const storedAuth = sessionStorage.getItem(sessionKey)
@@ -78,12 +139,24 @@ export default function StaffLogin() {
 
         setLoading(false)
       } catch (err) {
-        if (!navigator.onLine) {
-          setError('You are offline. Please check your internet connection and try again.')
-        } else {
-          console.error('Restaurant fetch error:', err)
-          setError('Something went wrong. Please try again.')
+        // Network error — try cache fallback
+        const cached = loadCachedStaffLoginData(slug)
+        if (cached) {
+          setRestaurant(cached.restaurant)
+          setIsOfflineMode(true)
+
+          const sessionKey = `restaurant_auth_${cached.restaurant.id}`
+          const storedAuth = sessionStorage.getItem(sessionKey)
+          if (storedAuth === cached.restaurant.staff_login_password) {
+            setPasswordAuthenticated(true)
+          }
+
+          setLoading(false)
+          return
         }
+
+        console.error('Restaurant fetch error:', err)
+        setError('Something went wrong. Please try again.')
         setLoading(false)
       }
     }
@@ -139,15 +212,44 @@ export default function StaffLogin() {
       return
     }
 
-    try {
-      // DEBUG: Log what we're searching for
-      console.log('Searching for staff with:', {
-        pin_code: pinCode,
-        pin_code_type: typeof pinCode,
-        restaurant_id: restaurant.id,
-        status: 'active'
-      })
+    // Offline path: verify PIN against cached staff list
+    if (isOfflineMode || !navigator.onLine) {
+      const cached = loadCachedStaffLoginData(slug)
+      if (!cached || !cached.staff) {
+        setError('No cached staff data available. Please connect to the internet to login.')
+        setPinCode('')
+        setLoggingIn(false)
+        return
+      }
 
+      const staffMember = cached.staff.find(
+        (s) => s.pin_code === pinCode && s.status === 'active'
+      )
+
+      if (!staffMember) {
+        setError('Invalid PIN code or staff member is not active')
+        setPinCode('')
+        setLoggingIn(false)
+        return
+      }
+
+      // Store staff session in localStorage (same as online flow)
+      localStorage.setItem('staff_session', JSON.stringify({
+        id: staffMember.id,
+        name: staffMember.name,
+        email: staffMember.email,
+        role: staffMember.role,
+        department: staffMember.department,
+        restaurant_id: staffMember.restaurant_id,
+        restaurant: restaurant
+      }))
+
+      router.push('/dashboard')
+      return
+    }
+
+    // Online path: verify PIN against Supabase
+    try {
       // Look up staff member by PIN code and restaurant
       const { data: staffMember, error: staffError } = await supabase
         .from('staff')
@@ -157,23 +259,9 @@ export default function StaffLogin() {
         .eq('status', 'active')
         .maybeSingle()
 
-      console.log('PIN lookup result:', { staffMember, staffError })
-
-      // DEBUG: Let's also check all staff for this restaurant
-      const { data: allStaff } = await supabase
-        .from('staff')
-        .select('id, name, pin_code, status, restaurant_id')
-        .eq('restaurant_id', restaurant.id)
-
-      console.log('All staff for this restaurant:', allStaff)
-
       if (staffError) {
-        if (!navigator.onLine) {
-          setError('You are offline. Staff login requires an internet connection.')
-        } else {
-          console.error('Database error:', staffError)
-          setError(`Database error: ${staffError.message}`)
-        }
+        console.error('Database error:', staffError)
+        setError(`Database error: ${staffError.message}`)
         setPinCode('')
         setLoggingIn(false)
         return
@@ -181,14 +269,13 @@ export default function StaffLogin() {
 
       if (!staffMember) {
         setError('Invalid PIN code or staff member is not active')
-        setPinCode('') // Clear the PIN input
+        setPinCode('')
         setLoggingIn(false)
         return
       }
 
       // Create session in the database for device tracking
       const deviceId = getOrCreateDeviceId()
-      let sessionToken = null
 
       try {
         const sessionResponse = await fetch('/api/sessions', {
@@ -203,8 +290,7 @@ export default function StaffLogin() {
         const sessionData = await sessionResponse.json()
 
         if (sessionData.success && sessionData.sessionToken) {
-          sessionToken = sessionData.sessionToken
-          localStorage.setItem('session_token', sessionToken)
+          localStorage.setItem('session_token', sessionData.sessionToken)
         }
       } catch (sessionError) {
         // Log but don't fail login if session creation fails
@@ -222,16 +308,45 @@ export default function StaffLogin() {
         restaurant: restaurant
       }))
 
+      // Refresh the offline cache with latest staff data
+      const { data: staffList } = await supabase
+        .from('staff')
+        .select('id, name, email, pin_code, role, department, restaurant_id, status')
+        .eq('restaurant_id', restaurant.id)
+        .eq('status', 'active')
+
+      if (staffList) {
+        cacheStaffLoginData(slug, restaurant, staffList)
+      }
+
       // Redirect to dashboard
       router.push('/dashboard')
 
     } catch (err) {
-      if (!navigator.onLine) {
-        setError('You are offline. Staff login requires an internet connection.')
-      } else {
-        console.error('Unexpected error:', err)
-        setError('Something went wrong. Please try again.')
+      // Network failed mid-request — try offline fallback
+      const cached = loadCachedStaffLoginData(slug)
+      if (cached && cached.staff) {
+        const staffMember = cached.staff.find(
+          (s) => s.pin_code === pinCode && s.status === 'active'
+        )
+
+        if (staffMember) {
+          localStorage.setItem('staff_session', JSON.stringify({
+            id: staffMember.id,
+            name: staffMember.name,
+            email: staffMember.email,
+            role: staffMember.role,
+            department: staffMember.department,
+            restaurant_id: staffMember.restaurant_id,
+            restaurant: restaurant
+          }))
+          router.push('/dashboard')
+          return
+        }
       }
+
+      console.error('Unexpected error:', err)
+      setError('Something went wrong. Please try again.')
       setPinCode('')
       setLoggingIn(false)
     }
@@ -295,6 +410,15 @@ export default function StaffLogin() {
               </h1>
               <p className="text-slate-500">Staff Login</p>
             </div>
+
+            {isOfflineMode && (
+              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl text-blue-700 text-sm flex items-center gap-2">
+                <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M24 .01c0-.01 0-.01 0 0L2.41 0 .84 1.58l3.7 3.7C2.84 6.89 1.64 8.74 1.01 10.8l1.91.65c.52-1.7 1.5-3.22 2.82-4.41l2.08 2.08c-1.13.93-2 2.17-2.47 3.57l1.9.65c.4-1.16 1.12-2.15 2.06-2.88l7.7 7.7L18.56 20l1.57-1.57L22.59 21 24 19.58 24 .01zM1 21h6v-2H1v2zm12-12c-1.2 0-2.33.28-3.35.77l1.53 1.53c.57-.2 1.18-.3 1.82-.3 3.31 0 6 2.69 6 6 0 .64-.1 1.25-.3 1.82l1.53 1.53c.49-1.02.77-2.15.77-3.35 0-4.42-3.58-8-8-8zm0 4c-2.21 0-4 1.79-4 4 0 .64.15 1.24.42 1.77l5.35-5.35C14.24 13.15 13.64 13 13 13z"/>
+                </svg>
+                <span>Offline mode — using cached credentials</span>
+              </div>
+            )}
 
             {error && (
               <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">

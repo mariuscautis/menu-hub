@@ -65,10 +65,20 @@ export default function DashboardLayout({ children }) {
     }
   }, [loading, userType, isSmallScreen])
 
-  // Helper function to fetch department permissions
+  // Helper function to fetch department permissions (with local caching)
   const fetchDepartmentPermissions = async (restaurantId, department) => {
     if (!restaurantId || !department) return []
-    if (typeof navigator !== 'undefined' && !navigator.onLine) return []
+
+    const cacheKey = `dept_permissions_${restaurantId}_${department}`
+
+    // If offline, use cached permissions
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      try {
+        const cached = localStorage.getItem(cacheKey)
+        if (cached) return JSON.parse(cached)
+      } catch {}
+      return []
+    }
 
     try {
       const { data, error } = await supabase
@@ -79,14 +89,31 @@ export default function DashboardLayout({ children }) {
         .single()
 
       if (error) {
-        // Don't log as error when it's just a network issue
-        if (!navigator.onLine) return []
+        if (!navigator.onLine) {
+          try {
+            const cached = localStorage.getItem(cacheKey)
+            if (cached) return JSON.parse(cached)
+          } catch {}
+          return []
+        }
         console.error('Error fetching department permissions:', error)
         return []
       }
 
-      return data?.permissions || []
+      const permissions = data?.permissions || []
+
+      // Cache for offline use
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify(permissions))
+      } catch {}
+
+      return permissions
     } catch (err) {
+      // Network error — try cache
+      try {
+        const cached = localStorage.getItem(cacheKey)
+        if (cached) return JSON.parse(cached)
+      } catch {}
       console.warn('Could not fetch department permissions (possibly offline):', err.message)
       return []
     }
@@ -108,6 +135,12 @@ export default function DashboardLayout({ children }) {
           const dept = staffSession.department || 'universal'
           setStaffDepartment(dept)
 
+          // Load cached department permissions immediately (so UI works offline)
+          if (staffType === 'staff') {
+            const permissions = await fetchDepartmentPermissions(staffSession.restaurant_id, dept)
+            setDepartmentPermissions(permissions)
+          }
+
           // Try to fetch fresh data (non-blocking — falls back to cached if offline)
           try {
             const { data: freshRestaurant } = await supabase
@@ -120,13 +153,13 @@ export default function DashboardLayout({ children }) {
               setRestaurant(freshRestaurant)
             }
 
-            // Fetch department permissions (only for regular staff, not admins)
+            // Refresh department permissions with fresh data (only for regular staff)
             if (staffType === 'staff') {
-              const permissions = await fetchDepartmentPermissions(staffSession.restaurant_id, dept)
-              setDepartmentPermissions(permissions)
+              const freshPermissions = await fetchDepartmentPermissions(staffSession.restaurant_id, dept)
+              setDepartmentPermissions(freshPermissions)
             }
           } catch (networkErr) {
-            // Offline or network error — use cached session data, which is already set above
+            // Offline or network error — cached data already set above
             console.warn('Offline: using cached staff session data')
           }
 
