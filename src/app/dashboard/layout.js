@@ -68,6 +68,7 @@ export default function DashboardLayout({ children }) {
   // Helper function to fetch department permissions
   const fetchDepartmentPermissions = async (restaurantId, department) => {
     if (!restaurantId || !department) return []
+    if (typeof navigator !== 'undefined' && !navigator.onLine) return []
 
     try {
       const { data, error } = await supabase
@@ -78,13 +79,15 @@ export default function DashboardLayout({ children }) {
         .single()
 
       if (error) {
+        // Don't log as error when it's just a network issue
+        if (!navigator.onLine) return []
         console.error('Error fetching department permissions:', error)
         return []
       }
 
       return data?.permissions || []
     } catch (err) {
-      console.error('Error in fetchDepartmentPermissions:', err)
+      console.warn('Could not fetch department permissions (possibly offline):', err.message)
       return []
     }
   }
@@ -97,25 +100,34 @@ export default function DashboardLayout({ children }) {
         try {
           const staffSession = JSON.parse(staffSessionData)
 
-          // Fetch fresh restaurant data to get the latest logo
-          const { data: freshRestaurant } = await supabase
-            .from('restaurants')
-            .select('id, name, slug, logo_url')
-            .eq('id', staffSession.restaurant_id)
-            .single()
-
-          // Use fresh restaurant data if available, otherwise fall back to cached
-          setRestaurant(freshRestaurant || staffSession.restaurant)
+          // Set cached data immediately so the UI works even offline
+          setRestaurant(staffSession.restaurant)
           const staffType = staffSession.role === 'admin' ? 'staff-admin' : 'staff'
           setUserType(staffType)
           setUserEmail(staffSession.email)
           const dept = staffSession.department || 'universal'
           setStaffDepartment(dept)
 
-          // Fetch department permissions (only for regular staff, not admins)
-          if (staffType === 'staff') {
-            const permissions = await fetchDepartmentPermissions(staffSession.restaurant_id, dept)
-            setDepartmentPermissions(permissions)
+          // Try to fetch fresh data (non-blocking — falls back to cached if offline)
+          try {
+            const { data: freshRestaurant } = await supabase
+              .from('restaurants')
+              .select('id, name, slug, logo_url')
+              .eq('id', staffSession.restaurant_id)
+              .single()
+
+            if (freshRestaurant) {
+              setRestaurant(freshRestaurant)
+            }
+
+            // Fetch department permissions (only for regular staff, not admins)
+            if (staffType === 'staff') {
+              const permissions = await fetchDepartmentPermissions(staffSession.restaurant_id, dept)
+              setDepartmentPermissions(permissions)
+            }
+          } catch (networkErr) {
+            // Offline or network error — use cached session data, which is already set above
+            console.warn('Offline: using cached staff session data')
           }
 
           setLoading(false)
@@ -127,7 +139,16 @@ export default function DashboardLayout({ children }) {
       }
 
       // Check for owner/admin auth session
-      const { data: { user } } = await supabase.auth.getUser()
+      let user = null
+      try {
+        const { data } = await supabase.auth.getUser()
+        user = data?.user
+      } catch (authErr) {
+        // Offline and no staff session — can't authenticate
+        console.warn('Offline: cannot authenticate owner session')
+        setLoading(false)
+        return
+      }
 
       if (!user) {
         router.push('/auth/login')

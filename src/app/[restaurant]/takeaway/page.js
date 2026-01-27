@@ -36,12 +36,26 @@ export default function TakeawayMenu({ params }) {
   const [emailError, setEmailError] = useState('')
   const [translations, setTranslations] = useState(null)
   const [orderedOffline, setOrderedOffline] = useState(false)
+  const [isOfflineError, setIsOfflineError] = useState(false)
 
   const { placeOrder: placeOfflineOrder, isOnline, pendingCount } = useOfflineOrder()
 
   useEffect(() => {
     fetchData()
   }, [slug])
+
+  // Auto-retry when coming back online after an offline error
+  useEffect(() => {
+    if (!isOfflineError) return
+    const handleOnline = () => {
+      setError(null)
+      setIsOfflineError(false)
+      setLoading(true)
+      fetchData()
+    }
+    window.addEventListener('online', handleOnline)
+    return () => window.removeEventListener('online', handleOnline)
+  }, [isOfflineError])
 
   // Real-time subscriptions for live updates
   useEffect(() => {
@@ -139,7 +153,12 @@ export default function TakeawayMenu({ params }) {
       setLoading(false)
 
     } catch (err) {
-      setError('Something went wrong')
+      if (!navigator.onLine) {
+        setIsOfflineError(true)
+        setError('You are currently offline')
+      } else {
+        setError('Something went wrong')
+      }
       setLoading(false)
     }
   }
@@ -310,13 +329,38 @@ export default function TakeawayMenu({ params }) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
         <div className="text-center">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-            </svg>
-          </div>
-          <h1 className="text-xl font-bold text-slate-800 mb-2">{translations ? t('errorTitle') : error}</h1>
-          <p className="text-slate-500">{translations ? t('errorDescription') : 'Please check the URL or contact the restaurant.'}</p>
+          {isOfflineError ? (
+            <>
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M24 .01c0-.01 0-.01 0 0L2.41 0 .84 1.58l3.7 3.7C2.84 6.89 1.64 8.74 1.01 10.8l1.91.65c.52-1.7 1.5-3.22 2.82-4.41l2.08 2.08c-1.13.93-2 2.17-2.47 3.57l1.9.65c.4-1.16 1.12-2.15 2.06-2.88l7.7 7.7L18.56 20l1.57-1.57L22.59 21 24 19.58 24 .01zM1 21h6v-2H1v2zm12-12c-1.2 0-2.33.28-3.35.77l1.53 1.53c.57-.2 1.18-.3 1.82-.3 3.31 0 6 2.69 6 6 0 .64-.1 1.25-.3 1.82l1.53 1.53c.49-1.02.77-2.15.77-3.35 0-4.42-3.58-8-8-8zm0 4c-2.21 0-4 1.79-4 4 0 .64.15 1.24.42 1.77l5.35-5.35C14.24 13.15 13.64 13 13 13z"/>
+                </svg>
+              </div>
+              <h1 className="text-xl font-bold text-slate-800 mb-2">You&apos;re offline</h1>
+              <p className="text-slate-500 mb-6">The menu couldn&apos;t be loaded because there&apos;s no internet connection. Please check your connection and try again.</p>
+              <button
+                onClick={() => {
+                  setError(null)
+                  setIsOfflineError(false)
+                  setLoading(true)
+                  fetchData()
+                }}
+                className="bg-[#6262bd] text-white px-6 py-3 rounded-xl font-medium hover:bg-[#5252a3]"
+              >
+                Try again
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                </svg>
+              </div>
+              <h1 className="text-xl font-bold text-slate-800 mb-2">{translations ? t('errorTitle') : error}</h1>
+              <p className="text-slate-500">{translations ? t('errorDescription') : 'Please check the URL or contact the restaurant.'}</p>
+            </>
+          )}
         </div>
       </div>
     )
