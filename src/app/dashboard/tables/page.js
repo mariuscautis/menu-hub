@@ -13,6 +13,7 @@ import {
   getPendingOrdersForTable,
   markOrdersPaidOffline,
   getAllPendingOrdersByTable,
+  clearPaidOfflineOrders,
 } from '@/lib/offlineQueue'
 
 export default function Tables() {
@@ -874,8 +875,11 @@ export default function Tables() {
     setSelectedTable(table)
 
     try {
-      // Get all unpaid, non-cancelled orders for this table
-      const { data: orders, error: ordersError } = await supabase
+      let orders = []
+      let existingSplitBills = []
+
+      // Try to fetch from Supabase (will use cache if offline)
+      const { data: ordersData, error: ordersError } = await supabase
         .from('orders')
         .select('*, order_items(*)')
         .eq('table_id', table.id)
@@ -883,14 +887,53 @@ export default function Tables() {
         .neq('status', 'cancelled')
         .order('created_at', { ascending: true })
 
-      if (ordersError) throw ordersError
+      if (ordersError && !navigator.onLine) {
+        // Offline and no cached data — continue with just offline orders
+        orders = []
+      } else if (ordersError) {
+        throw ordersError
+      } else {
+        orders = ordersData || []
+      }
 
-      // Get existing paid split bills for this table to know what's already been paid
-      const { data: existingSplitBills } = await supabase
-        .from('split_bills')
-        .select('*, split_bill_items(*)')
-        .eq('table_id', table.id)
-        .eq('payment_status', 'completed')
+      // Try to fetch split bills (ignore errors if offline)
+      try {
+        const { data: splitBillsData } = await supabase
+          .from('split_bills')
+          .select('*, split_bill_items(*)')
+          .eq('table_id', table.id)
+          .eq('payment_status', 'completed')
+        existingSplitBills = splitBillsData || []
+      } catch {
+        // Ignore split bills fetch error when offline
+      }
+
+      // Also get pending offline orders for this table
+      const offlineOrders = await getPendingOrdersForTable(table.id)
+
+      // Convert offline orders to the same format as Supabase orders
+      const formattedOfflineOrders = offlineOrders.map(order => ({
+        client_id: order.client_id,
+        table_id: order.table_id,
+        total: order.total,
+        status: order.status,
+        created_at: order.created_at,
+        order_items: order.order_items?.map(item => ({
+          id: `offline_${item.id || Math.random()}`,
+          menu_item_id: item.menu_item_id,
+          name: item.name,
+          quantity: item.quantity,
+          price_at_time: item.price_at_time,
+        })) || []
+      }))
+
+      // Deduplicate: filter out offline orders that were already synced to Supabase
+      // (their client_id will match an order in Supabase)
+      const supabaseClientIds = new Set(orders.filter(o => o.client_id).map(o => o.client_id))
+      const uniqueOfflineOrders = formattedOfflineOrders.filter(o => !supabaseClientIds.has(o.client_id))
+
+      // Combine online and unique offline orders
+      const allOrders = [...orders, ...uniqueOfflineOrders]
 
       // Create a map of order_item_id -> total quantity already paid
       const paidQuantities = {}
@@ -904,7 +947,7 @@ export default function Tables() {
       })
 
       // Filter out fully paid items and adjust quantities for partially paid items
-      const filteredOrders = orders?.map(order => {
+      const filteredOrders = allOrders?.map(order => {
         const filteredItems = order.order_items?.map(item => {
           const alreadyPaid = paidQuantities[item.id] || 0
           const remainingQuantity = item.quantity - alreadyPaid
@@ -932,15 +975,16 @@ export default function Tables() {
         }
       }).filter(order => order.order_items && order.order_items.length > 0) // Remove orders with no remaining items
 
+      if (filteredOrders.length === 0) {
+        showNotification('info', 'No unpaid orders found for this table.')
+        return
+      }
+
       setUnpaidOrders(filteredOrders || [])
       setShowPaymentModal(true)
     } catch (err) {
       console.error('Error opening payment modal:', err)
-      if (!navigator.onLine) {
-        showNotification('error', 'Payment is not available offline. Please connect to the internet.')
-      } else {
-        showNotification('error', t('notifications.paymentFailed'))
-      }
+      showNotification('error', t('notifications.paymentFailed'))
     }
   }
 
@@ -1039,6 +1083,17 @@ export default function Tables() {
   }
 
   const markTableAsCleaned = async (table) => {
+    // OFFLINE: Update local state immediately
+    if (!navigator.onLine) {
+      setTables(prev => prev.map(t =>
+        t.id === table.id
+          ? { ...t, status: 'available', payment_completed_at: null }
+          : t
+      ))
+      showNotification('success', `Table ${table.table_number} marked as cleaned (will sync when online)`)
+      return
+    }
+
     try {
       // Call the RPC function to mark table as cleaned
       // This function has SECURITY DEFINER so it works for staff too
@@ -1065,6 +1120,16 @@ export default function Tables() {
       showNotification('success', message)
     } catch (error) {
       console.error('Error marking table as cleaned:', error)
+      // If network failed mid-request, update local state anyway
+      if (error.message?.includes('fetch') || error.message?.includes('network')) {
+        setTables(prev => prev.map(t =>
+          t.id === table.id
+            ? { ...t, status: 'available', payment_completed_at: null }
+            : t
+        ))
+        showNotification('success', `Table ${table.table_number} marked as cleaned (will sync when online)`)
+        return
+      }
       showNotification('error', t('notifications.tableCleanedFailed'))
     }
   }
@@ -1207,6 +1272,9 @@ export default function Tables() {
         setShowPaymentModal(false)
         setUnpaidOrders([])
 
+        // Clean up any stale offline orders for this table
+        await clearPaidOfflineOrders(selectedTable.id)
+
         showNotification('success', `Cash payment of £${totalAmount.toFixed(2)} saved offline. Will sync when internet is restored.`)
 
         // Don't show post-payment modal for offline payments (invoice generation needs internet)
@@ -1220,8 +1288,8 @@ export default function Tables() {
 
     // ONLINE PAYMENT HANDLING
     try {
-      // Get order IDs
-      const orderIds = unpaidOrders.map(order => order.id)
+      // Get order IDs - filter out offline-only orders that don't have real IDs
+      const orderIds = unpaidOrders.filter(order => order.id && !order.id.toString().startsWith('offline_')).map(order => order.id)
 
       // Use RPC function to process payment (bypasses RLS)
       // This function also marks the table as needs cleaning
@@ -1240,9 +1308,13 @@ export default function Tables() {
 
       // Close payment modal
       setShowPaymentModal(false)
+      setUnpaidOrders([])
 
       // Store completed order IDs for invoice generation
       setCompletedOrderIds(orderIds)
+
+      // Clean up any stale offline orders for this table
+      await clearPaidOfflineOrders(selectedTable.id)
 
       // Refresh table order info and table list
       await fetchTableOrderInfo(restaurant.id)

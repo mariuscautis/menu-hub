@@ -12,6 +12,7 @@ import {
   getPendingOrdersForTable,
   markOrdersPaidOffline,
   getAllPendingOrdersByTable,
+  clearPaidOfflineOrders,
 } from '@/lib/offlineQueue'
 
 // Read-only Table Component for Staff
@@ -693,6 +694,17 @@ export default function StaffFloorPlanPage() {
   }
 
   const handleMarkCleaned = async (table) => {
+    // OFFLINE: Update local state immediately
+    if (!navigator.onLine) {
+      setFloorTables(prev => prev.map(t =>
+        t.id === table.id
+          ? { ...t, status: 'available', payment_completed_at: null }
+          : t
+      ))
+      showNotificationMessage('success', `Table ${table.table_number} marked as cleaned (will sync when online)`)
+      return
+    }
+
     try {
       // Use the RPC function to properly mark table as cleaned
       // This function has SECURITY DEFINER so it works for staff too
@@ -720,6 +732,16 @@ export default function StaffFloorPlanPage() {
       showNotificationMessage('success', message)
     } catch (error) {
       console.error('Error marking table as cleaned:', error)
+      // If network failed mid-request, update local state anyway
+      if (error.message?.includes('fetch') || error.message?.includes('network')) {
+        setFloorTables(prev => prev.map(t =>
+          t.id === table.id
+            ? { ...t, status: 'available', payment_completed_at: null }
+            : t
+        ))
+        showNotificationMessage('success', `Table ${table.table_number} marked as cleaned (will sync when online)`)
+        return
+      }
       showNotificationMessage('error', 'Failed to mark table as cleaned')
     }
   }
@@ -1102,7 +1124,9 @@ export default function StaffFloorPlanPage() {
     if (!selectedTable) return
 
     try {
-      // Fetch unpaid orders for this table
+      let orders = []
+
+      // Try to fetch from Supabase (will use cache if offline)
       const { data: ordersData, error } = await supabase
         .from('orders')
         .select('*, order_items(*)')
@@ -1110,19 +1134,52 @@ export default function StaffFloorPlanPage() {
         .eq('paid', false)
         .order('created_at', { ascending: false })
 
-      if (error) {
+      if (error && !navigator.onLine) {
+        // Offline and no cached data — continue with just offline orders
+        orders = []
+      } else if (error) {
         throw error
+      } else {
+        orders = ordersData || []
       }
 
-      setUnpaidOrders(ordersData || [])
+      // Also get pending offline orders for this table
+      const offlineOrders = await getPendingOrdersForTable(selectedTable.id)
+
+      // Convert offline orders to the same format as Supabase orders
+      const formattedOfflineOrders = offlineOrders.map(order => ({
+        client_id: order.client_id,
+        table_id: order.table_id,
+        total: order.total,
+        status: order.status,
+        created_at: order.created_at,
+        order_items: order.order_items?.map(item => ({
+          id: `offline_${item.id || Math.random()}`,
+          menu_item_id: item.menu_item_id,
+          name: item.name,
+          quantity: item.quantity,
+          price_at_time: item.price_at_time,
+        })) || []
+      }))
+
+      // Deduplicate: filter out offline orders that were already synced to Supabase
+      // (their client_id will match an order in Supabase)
+      const supabaseClientIds = new Set(orders.filter(o => o.client_id).map(o => o.client_id))
+      const uniqueOfflineOrders = formattedOfflineOrders.filter(o => !supabaseClientIds.has(o.client_id))
+
+      // Combine online and unique offline orders
+      const allOrders = [...orders, ...uniqueOfflineOrders]
+
+      if (allOrders.length === 0) {
+        showNotificationMessage('info', 'No unpaid orders found for this table.')
+        return
+      }
+
+      setUnpaidOrders(allOrders)
       setShowPaymentModal(true)
     } catch (err) {
       console.error('Error fetching orders:', err)
-      if (!navigator.onLine) {
-        showNotificationMessage('error', 'Payment is not available offline. Please connect to the internet.')
-      } else {
-        showNotificationMessage('error', 'Failed to load orders')
-      }
+      showNotificationMessage('error', 'Failed to load orders')
     }
   }
 
@@ -1201,6 +1258,9 @@ export default function StaffFloorPlanPage() {
         setShowPaymentModal(false)
         setUnpaidOrders([])
 
+        // Clean up any stale offline orders for this table
+        await clearPaidOfflineOrders(selectedTable.id)
+
         showNotificationMessage('success', `Cash payment of £${totalAmount.toFixed(2)} saved offline. Will sync when internet is restored.`)
 
         // Don't show post-payment modal for offline payments (invoice generation needs internet)
@@ -1214,7 +1274,8 @@ export default function StaffFloorPlanPage() {
 
     // ONLINE PAYMENT HANDLING
     try {
-      const orderIds = unpaidOrders.map(order => order.id)
+      // Get order IDs - filter out offline-only orders that don't have real IDs
+      const orderIds = unpaidOrders.filter(order => order.id && !order.id.toString().startsWith('offline_')).map(order => order.id)
 
       // Use RPC function to process payment (bypasses RLS)
       const { data, error } = await supabase.rpc('process_table_payment', {
@@ -1231,10 +1292,15 @@ export default function StaffFloorPlanPage() {
       }
 
       setShowPaymentModal(false)
+      setUnpaidOrders([])
       setCompletedOrderIds(orderIds)
+
+      // Clean up any stale offline orders for this table
+      await clearPaidOfflineOrders(selectedTable.id)
 
       // Refresh data
       await loadFloorData(currentFloor.id, restaurant.id)
+      await fetchTableOrderInfo(restaurant.id)
 
       showNotificationMessage('success', `Payment of £${totalAmount.toFixed(2)} processed successfully via ${paymentMethod}!`)
 

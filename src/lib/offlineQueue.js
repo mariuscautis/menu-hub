@@ -360,6 +360,51 @@ export async function clearSyncedOrders() {
   })
 }
 
+/**
+ * Clear all paid offline orders (both synced and locally paid).
+ * Call this after processing payment to clean up stale data.
+ * @param {string} [tableId] - Optional: only clear orders for this table
+ */
+export async function clearPaidOfflineOrders(tableId = null) {
+  const db = await openDB()
+  const tx = db.transaction([ORDERS_STORE, ORDER_ITEMS_STORE], 'readwrite')
+  const orderStore = tx.objectStore(ORDERS_STORE)
+  const itemsStore = tx.objectStore(ORDER_ITEMS_STORE)
+  const request = orderStore.getAll()
+
+  request.onsuccess = () => {
+    const orders = request.result || []
+    for (const order of orders) {
+      // Skip if table filter is set and doesn't match
+      if (tableId && order.table_id !== tableId) continue
+
+      // Remove orders that are synced OR paid offline
+      if (order.sync_status === 'synced' || order.paid_offline) {
+        orderStore.delete(order.client_id)
+        // Clean up items
+        const itemsIndex = itemsStore.index('order_client_id')
+        const itemsReq = itemsIndex.getAllKeys(order.client_id)
+        itemsReq.onsuccess = () => {
+          for (const itemKey of itemsReq.result) {
+            itemsStore.delete(itemKey)
+          }
+        }
+      }
+    }
+  }
+
+  return new Promise((resolve, reject) => {
+    tx.oncomplete = () => {
+      db.close()
+      resolve()
+    }
+    tx.onerror = () => {
+      db.close()
+      reject(tx.error)
+    }
+  })
+}
+
 // ============================================================================
 // OFFLINE CASH PAYMENTS
 // ============================================================================
