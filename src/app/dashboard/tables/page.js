@@ -732,31 +732,46 @@ export default function Tables() {
     // Get the most recent unpaid order (there might be multiple)
     console.log('STEP 3: Fetching existing order from database...')
     console.log('Looking for orders with table_id:', table.id)
-    const { data: existingOrders, error: fetchError } = await supabase
-      .from('orders')
-      .select('*, order_items(*)')
-      .eq('table_id', table.id)
-      .in('status', ['pending', 'preparing', 'ready'])
-      .is('paid', false)
-      .order('created_at', { ascending: false })
-      .limit(1)
 
-    if (fetchError) {
-      console.error('Error fetching existing order:', fetchError)
-    }
+    let existingOrder = null
 
-    const existingOrder = existingOrders && existingOrders.length > 0 ? existingOrders[0] : null
-    console.log('STEP 4: Existing order found?', !!existingOrder)
-    if (!existingOrder) {
-      // Debug: Let's see ALL orders for this table to understand why
-      const { data: allOrders } = await supabase
+    try {
+      const { data: existingOrders, error: fetchError } = await supabase
         .from('orders')
-        .select('id, status, paid, created_at')
+        .select('*, order_items(*)')
         .eq('table_id', table.id)
+        .in('status', ['pending', 'preparing', 'ready'])
+        .is('paid', false)
         .order('created_at', { ascending: false })
-        .limit(5)
-      console.log('All recent orders for this table:', allOrders)
+        .limit(1)
+
+      if (fetchError) {
+        console.error('Error fetching existing order:', fetchError)
+        // Don't throw - we'll proceed with empty order
+      } else {
+        existingOrder = existingOrders && existingOrders.length > 0 ? existingOrders[0] : null
+      }
+
+      console.log('STEP 4: Existing order found?', !!existingOrder)
+      if (!existingOrder) {
+        // Debug: Let's see ALL orders for this table to understand why
+        const { data: allOrders } = await supabase
+          .from('orders')
+          .select('id, status, paid, created_at')
+          .eq('table_id', table.id)
+          .order('created_at', { ascending: false })
+          .limit(5)
+        console.log('All recent orders for this table:', allOrders)
+      }
+    } catch (err) {
+      // Network error - offline mode
+      console.warn('Offline: could not fetch existing order for table', table.table_number)
+      if (!navigator.onLine) {
+        showNotification('info', 'Offline mode — starting new order')
+      }
+      // existingOrder remains null, so we'll start with empty order
     }
+
     if (existingOrder) {
       console.log('Existing order ID:', existingOrder.id)
       console.log('Raw order_items from DB:', existingOrder.order_items)
@@ -800,136 +815,169 @@ export default function Tables() {
   const openPaymentModal = async (table) => {
     setSelectedTable(table)
 
-    // Get all unpaid, non-cancelled orders for this table
-    const { data: orders } = await supabase
-      .from('orders')
-      .select('*, order_items(*)')
-      .eq('table_id', table.id)
-      .is('paid', false)
-      .neq('status', 'cancelled')
-      .order('created_at', { ascending: true })
+    try {
+      // Get all unpaid, non-cancelled orders for this table
+      const { data: orders, error: ordersError } = await supabase
+        .from('orders')
+        .select('*, order_items(*)')
+        .eq('table_id', table.id)
+        .is('paid', false)
+        .neq('status', 'cancelled')
+        .order('created_at', { ascending: true })
 
-    // Get existing paid split bills for this table to know what's already been paid
-    const { data: existingSplitBills } = await supabase
-      .from('split_bills')
-      .select('*, split_bill_items(*)')
-      .eq('table_id', table.id)
-      .eq('payment_status', 'completed')
+      if (ordersError) throw ordersError
 
-    // Create a map of order_item_id -> total quantity already paid
-    const paidQuantities = {}
-    existingSplitBills?.forEach(splitBill => {
-      splitBill.split_bill_items?.forEach(item => {
-        if (!paidQuantities[item.order_item_id]) {
-          paidQuantities[item.order_item_id] = 0
-        }
-        paidQuantities[item.order_item_id] += item.quantity
+      // Get existing paid split bills for this table to know what's already been paid
+      const { data: existingSplitBills } = await supabase
+        .from('split_bills')
+        .select('*, split_bill_items(*)')
+        .eq('table_id', table.id)
+        .eq('payment_status', 'completed')
+
+      // Create a map of order_item_id -> total quantity already paid
+      const paidQuantities = {}
+      existingSplitBills?.forEach(splitBill => {
+        splitBill.split_bill_items?.forEach(item => {
+          if (!paidQuantities[item.order_item_id]) {
+            paidQuantities[item.order_item_id] = 0
+          }
+          paidQuantities[item.order_item_id] += item.quantity
+        })
       })
-    })
 
-    // Filter out fully paid items and adjust quantities for partially paid items
-    const filteredOrders = orders?.map(order => {
-      const filteredItems = order.order_items?.map(item => {
-        const alreadyPaid = paidQuantities[item.id] || 0
-        const remainingQuantity = item.quantity - alreadyPaid
+      // Filter out fully paid items and adjust quantities for partially paid items
+      const filteredOrders = orders?.map(order => {
+        const filteredItems = order.order_items?.map(item => {
+          const alreadyPaid = paidQuantities[item.id] || 0
+          const remainingQuantity = item.quantity - alreadyPaid
 
-        if (remainingQuantity <= 0) {
-          return null // Item fully paid via split bills
-        }
+          if (remainingQuantity <= 0) {
+            return null // Item fully paid via split bills
+          }
 
-        // Return item with adjusted quantity
+          // Return item with adjusted quantity
+          return {
+            ...item,
+            quantity: remainingQuantity
+          }
+        }).filter(item => item !== null) // Remove null entries
+
+        // Recalculate order total based on remaining items
+        const newTotal = filteredItems?.reduce((sum, item) => {
+          return sum + (item.quantity * item.price_at_time)
+        }, 0) || 0
+
         return {
-          ...item,
-          quantity: remainingQuantity
+          ...order,
+          order_items: filteredItems,
+          total: newTotal
         }
-      }).filter(item => item !== null) // Remove null entries
+      }).filter(order => order.order_items && order.order_items.length > 0) // Remove orders with no remaining items
 
-      // Recalculate order total based on remaining items
-      const newTotal = filteredItems?.reduce((sum, item) => {
-        return sum + (item.quantity * item.price_at_time)
-      }, 0) || 0
-
-      return {
-        ...order,
-        order_items: filteredItems,
-        total: newTotal
+      setUnpaidOrders(filteredOrders || [])
+      setShowPaymentModal(true)
+    } catch (err) {
+      console.error('Error opening payment modal:', err)
+      if (!navigator.onLine) {
+        showNotification('error', 'Payment is not available offline. Please connect to the internet.')
+      } else {
+        showNotification('error', t('notifications.paymentFailed'))
       }
-    }).filter(order => order.order_items && order.order_items.length > 0) // Remove orders with no remaining items
-
-    setUnpaidOrders(filteredOrders || [])
-    setShowPaymentModal(true)
+    }
   }
 
   const openSplitBillModal = async (table) => {
     setSelectedTable(table)
     setSplitBillTableId(table.id)
 
-    // Get all unpaid, non-cancelled orders for this table
-    const { data: orders } = await supabase
-      .from('orders')
-      .select('*, order_items(*)')
-      .eq('table_id', table.id)
-      .is('paid', false)
-      .neq('status', 'cancelled')
-      .order('created_at', { ascending: true })
+    try {
+      // Get all unpaid, non-cancelled orders for this table
+      const { data: orders, error: ordersError } = await supabase
+        .from('orders')
+        .select('*, order_items(*)')
+        .eq('table_id', table.id)
+        .is('paid', false)
+        .neq('status', 'cancelled')
+        .order('created_at', { ascending: true })
 
-    // Get existing paid split bills for this table to know what's already been paid
-    const { data: existingSplitBills } = await supabase
-      .from('split_bills')
-      .select('*, split_bill_items(*)')
-      .eq('table_id', table.id)
-      .eq('payment_status', 'completed')
+      if (ordersError) throw ordersError
 
-    // Create a map of order_item_id -> total quantity already paid
-    const paidQuantities = {}
-    existingSplitBills?.forEach(splitBill => {
-      splitBill.split_bill_items?.forEach(item => {
-        if (!paidQuantities[item.order_item_id]) {
-          paidQuantities[item.order_item_id] = 0
-        }
-        paidQuantities[item.order_item_id] += item.quantity
+      // Get existing paid split bills for this table to know what's already been paid
+      const { data: existingSplitBills } = await supabase
+        .from('split_bills')
+        .select('*, split_bill_items(*)')
+        .eq('table_id', table.id)
+        .eq('payment_status', 'completed')
+
+      // Create a map of order_item_id -> total quantity already paid
+      const paidQuantities = {}
+      existingSplitBills?.forEach(splitBill => {
+        splitBill.split_bill_items?.forEach(item => {
+          if (!paidQuantities[item.order_item_id]) {
+            paidQuantities[item.order_item_id] = 0
+          }
+          paidQuantities[item.order_item_id] += item.quantity
+        })
       })
-    })
 
-    // Flatten all order items into a single list with orderId reference
-    // Subtract already paid quantities from available quantities
-    const items = []
-    orders?.forEach(order => {
-      order.order_items?.forEach(item => {
-        const alreadyPaid = paidQuantities[item.id] || 0
-        const remainingQuantity = item.quantity - alreadyPaid
+      // Flatten all order items into a single list with orderId reference
+      // Subtract already paid quantities from available quantities
+      const items = []
+      orders?.forEach(order => {
+        order.order_items?.forEach(item => {
+          const alreadyPaid = paidQuantities[item.id] || 0
+          const remainingQuantity = item.quantity - alreadyPaid
 
-        if (remainingQuantity > 0) {
-          items.push({
-            id: item.id,
-            name: item.name,
-            quantity: remainingQuantity,
-            price: item.price_at_time,
-            orderId: order.id
-          })
-        }
+          if (remainingQuantity > 0) {
+            items.push({
+              id: item.id,
+              name: item.name,
+              quantity: remainingQuantity,
+              price: item.price_at_time,
+              orderId: order.id
+            })
+          }
+        })
       })
-    })
 
-    setAvailableItems(items)
-    setSplitBills([]) // Reset split bills
-    setShowSplitBillModal(true)
+      setAvailableItems(items)
+      setSplitBills([]) // Reset split bills
+      setShowSplitBillModal(true)
+    } catch (err) {
+      console.error('Error opening split bill modal:', err)
+      if (!navigator.onLine) {
+        showNotification('error', 'Split bill is not available offline. Please connect to the internet.')
+      } else {
+        showNotification('error', t('notifications.splitBillPaymentFailed'))
+      }
+    }
   }
 
   const openOrderDetailsModal = async (table) => {
     setSelectedTable(table)
 
-    // Get all unpaid, non-cancelled orders for this table
-    const { data: orders } = await supabase
-      .from('orders')
-      .select('*, order_items(*)')
-      .eq('table_id', table.id)
-      .is('paid', false)
-      .neq('status', 'cancelled')
-      .order('created_at', { ascending: true })
+    try {
+      // Get all unpaid, non-cancelled orders for this table
+      const { data: orders, error: ordersError } = await supabase
+        .from('orders')
+        .select('*, order_items(*)')
+        .eq('table_id', table.id)
+        .is('paid', false)
+        .neq('status', 'cancelled')
+        .order('created_at', { ascending: true })
 
-    setTableOrderDetails(orders || [])
-    setShowOrderDetailsModal(true)
+      if (ordersError) throw ordersError
+
+      setTableOrderDetails(orders || [])
+      setShowOrderDetailsModal(true)
+    } catch (err) {
+      console.error('Error opening order details modal:', err)
+      if (!navigator.onLine) {
+        showNotification('error', 'Order details not available offline.')
+      } else {
+        showNotification('error', 'Failed to load order details')
+      }
+    }
   }
 
   const markTableAsCleaned = async (table) => {

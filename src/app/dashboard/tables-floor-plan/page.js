@@ -784,33 +784,45 @@ export default function StaffFloorPlanPage() {
     setOrderItems([])
     setCurrentOrder(null)
 
-    // Check if table has existing unpaid orders
-    const { data: existingOrders } = await supabase
-      .from('orders')
-      .select('*, order_items(*)')
-      .eq('table_id', selectedTable.id)
-      .eq('paid', false)
-      .order('created_at', { ascending: false })
+    try {
+      // Check if table has existing unpaid orders
+      const { data: existingOrders, error: fetchError } = await supabase
+        .from('orders')
+        .select('*, order_items(*)')
+        .eq('table_id', selectedTable.id)
+        .eq('paid', false)
+        .order('created_at', { ascending: false })
 
-    if (existingOrders && existingOrders.length > 0) {
-      // Load the most recent order for editing
-      const orderToEdit = existingOrders[0]
-      setCurrentOrder(orderToEdit)
+      if (fetchError) {
+        console.error('Error fetching existing orders:', fetchError)
+        // Don't throw - we'll proceed with empty order
+      } else if (existingOrders && existingOrders.length > 0) {
+        // Load the most recent order for editing
+        const orderToEdit = existingOrders[0]
+        setCurrentOrder(orderToEdit)
 
-      // Map existing items with flags
-      const itemsMap = {}
-      orderToEdit.order_items.forEach(item => {
-        itemsMap[item.menu_item_id] = {
-          menu_item_id: item.menu_item_id,
-          name: item.name,
-          price_at_time: item.price_at_time,
-          quantity: item.quantity,
-          isExisting: true,
-          existingQuantity: item.quantity
-        }
-      })
+        // Map existing items with flags
+        const itemsMap = {}
+        orderToEdit.order_items.forEach(item => {
+          itemsMap[item.menu_item_id] = {
+            menu_item_id: item.menu_item_id,
+            name: item.name,
+            price_at_time: item.price_at_time,
+            quantity: item.quantity,
+            isExisting: true,
+            existingQuantity: item.quantity
+          }
+        })
 
-      setOrderItems(Object.values(itemsMap))
+        setOrderItems(Object.values(itemsMap))
+      }
+    } catch (err) {
+      // Network error - offline mode
+      console.warn('Offline: could not fetch existing order for table', selectedTable.table_number)
+      if (!navigator.onLine) {
+        showNotificationMessage('info', 'Offline mode — starting new order')
+      }
+      // existingOrders remains empty, so we'll start with empty order
     }
 
     setShowOrderModal(true)
@@ -1048,22 +1060,29 @@ export default function StaffFloorPlanPage() {
   const handlePayBill = async () => {
     if (!selectedTable) return
 
-    // Fetch unpaid orders for this table
-    const { data: ordersData, error } = await supabase
-      .from('orders')
-      .select('*, order_items(*)')
-      .eq('table_id', selectedTable.id)
-      .eq('paid', false)
-      .order('created_at', { ascending: false })
+    try {
+      // Fetch unpaid orders for this table
+      const { data: ordersData, error } = await supabase
+        .from('orders')
+        .select('*, order_items(*)')
+        .eq('table_id', selectedTable.id)
+        .eq('paid', false)
+        .order('created_at', { ascending: false })
 
-    if (error) {
-      console.error('Error fetching orders:', error)
-      showNotificationMessage('error', 'Failed to load orders')
-      return
+      if (error) {
+        throw error
+      }
+
+      setUnpaidOrders(ordersData || [])
+      setShowPaymentModal(true)
+    } catch (err) {
+      console.error('Error fetching orders:', err)
+      if (!navigator.onLine) {
+        showNotificationMessage('error', 'Payment is not available offline. Please connect to the internet.')
+      } else {
+        showNotificationMessage('error', 'Failed to load orders')
+      }
     }
-
-    setUnpaidOrders(ordersData || [])
-    setShowPaymentModal(true)
   }
 
   const calculateTableTotal = () => {
@@ -2271,49 +2290,60 @@ export default function StaffFloorPlanPage() {
 
                   <button
                     onClick={async () => {
-                      // Get existing paid split bills for this table to know what's already been paid
-                      const { data: existingSplitBills } = await supabase
-                        .from('split_bills')
-                        .select('*, split_bill_items(*)')
-                        .eq('table_id', selectedTable.id)
-                        .eq('payment_status', 'completed')
+                      try {
+                        // Get existing paid split bills for this table to know what's already been paid
+                        const { data: existingSplitBills, error: splitBillsError } = await supabase
+                          .from('split_bills')
+                          .select('*, split_bill_items(*)')
+                          .eq('table_id', selectedTable.id)
+                          .eq('payment_status', 'completed')
 
-                      // Create a map of order_item_id -> total quantity already paid
-                      const paidQuantities = {}
-                      existingSplitBills?.forEach(splitBill => {
-                        splitBill.split_bill_items?.forEach(item => {
-                          if (!paidQuantities[item.order_item_id]) {
-                            paidQuantities[item.order_item_id] = 0
-                          }
-                          paidQuantities[item.order_item_id] += item.quantity
+                        if (splitBillsError) throw splitBillsError
+
+                        // Create a map of order_item_id -> total quantity already paid
+                        const paidQuantities = {}
+                        existingSplitBills?.forEach(splitBill => {
+                          splitBill.split_bill_items?.forEach(item => {
+                            if (!paidQuantities[item.order_item_id]) {
+                              paidQuantities[item.order_item_id] = 0
+                            }
+                            paidQuantities[item.order_item_id] += item.quantity
+                          })
                         })
-                      })
 
-                      // Prepare items from unpaid orders, subtracting already paid quantities
-                      const items = []
-                      unpaidOrders.forEach(order => {
-                        order.order_items?.forEach(item => {
-                          const alreadyPaid = paidQuantities[item.id] || 0
-                          const remainingQuantity = item.quantity - alreadyPaid
+                        // Prepare items from unpaid orders, subtracting already paid quantities
+                        const items = []
+                        unpaidOrders.forEach(order => {
+                          order.order_items?.forEach(item => {
+                            const alreadyPaid = paidQuantities[item.id] || 0
+                            const remainingQuantity = item.quantity - alreadyPaid
 
-                          if (remainingQuantity > 0) {
-                            items.push({
-                              id: item.id,
-                              orderId: order.id,
-                              name: item.name,
-                              quantity: remainingQuantity,
-                              price: item.price_at_time || item.price || 0,
-                              total: remainingQuantity * (item.price_at_time || item.price || 0),
-                              assignedToBill: null
-                            })
-                          }
+                            if (remainingQuantity > 0) {
+                              items.push({
+                                id: item.id,
+                                orderId: order.id,
+                                name: item.name,
+                                quantity: remainingQuantity,
+                                price: item.price_at_time || item.price || 0,
+                                total: remainingQuantity * (item.price_at_time || item.price || 0),
+                                assignedToBill: null
+                              })
+                            }
+                          })
                         })
-                      })
 
-                      setAvailableItems(items)
-                      setSplitBills([{ id: 1, name: 'Bill 1', items: [], total: 0 }])
-                      setSplitBillTableId(selectedTable?.id || null) // Store table ID for this split bill session
-                      setShowSplitBillModal(true)
+                        setAvailableItems(items)
+                        setSplitBills([{ id: 1, name: 'Bill 1', items: [], total: 0 }])
+                        setSplitBillTableId(selectedTable?.id || null) // Store table ID for this split bill session
+                        setShowSplitBillModal(true)
+                      } catch (err) {
+                        console.error('Error opening split bill:', err)
+                        if (!navigator.onLine) {
+                          showNotificationMessage('error', 'Split bill is not available offline. Please connect to the internet.')
+                        } else {
+                          showNotificationMessage('error', 'Failed to open split bill')
+                        }
+                      }
                     }}
                     className="w-full bg-slate-600 text-white py-3 rounded-xl font-semibold hover:bg-slate-700 flex items-center justify-center gap-2 border-2 border-slate-400"
                   >
