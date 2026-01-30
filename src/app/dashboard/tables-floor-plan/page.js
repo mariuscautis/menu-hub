@@ -5,7 +5,13 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import InvoiceClientModal from '@/components/invoices/InvoiceClientModal'
 import { generateInvoicePdfBase64, downloadInvoicePdf } from '@/lib/invoicePdfGenerator'
-import { addPendingOrder, generateClientId } from '@/lib/offlineQueue'
+import {
+  addPendingOrder,
+  generateClientId,
+  addPendingPayment,
+  getPendingOrdersForTable,
+  markOrdersPaidOffline,
+} from '@/lib/offlineQueue'
 
 // Read-only Table Component for Staff
 function FloorPlanTable({ table, orderInfo, reservations, waiterCalls, onClick, onMarkCleaned, onMarkDelivered, onViewReservations }) {
@@ -1036,6 +1042,19 @@ export default function StaffFloorPlanPage() {
             price_at_time: item.price_at_time,
           })))
 
+          // Update local table state to show the new order immediately
+          setTableOrderInfo(prev => {
+            const existing = prev[selectedTable.id] || { count: 0, total: 0, readyDepartments: [] }
+            return {
+              ...prev,
+              [selectedTable.id]: {
+                count: existing.count + 1,
+                total: existing.total + total,
+                readyDepartments: existing.readyDepartments,
+              }
+            }
+          })
+
           setShowOrderModal(false)
           setCurrentOrder(null)
           setOrderItems([])
@@ -1092,23 +1111,88 @@ export default function StaffFloorPlanPage() {
   const processPayment = async (paymentMethod) => {
     if (unpaidOrders.length === 0) return
 
-    try {
-      let userName = 'Unknown'
-      let userId = null
+    // Get user info for payment tracking
+    let userName = 'Unknown'
+    let userId = null
 
-      // Check if staff session (PIN login)
-      const staffSessionData = localStorage.getItem('staff_session')
-      if (staffSessionData) {
-        const staffSession = JSON.parse(staffSessionData)
-        userName = staffSession.name || staffSession.email || 'Staff'
-      } else {
+    // Check if staff session (PIN login)
+    const staffSessionData = localStorage.getItem('staff_session')
+    if (staffSessionData) {
+      const staffSession = JSON.parse(staffSessionData)
+      userName = staffSession.name || staffSession.email || 'Staff'
+    } else {
+      try {
         const { data: userData } = await supabase.auth.getUser()
         userName = userData.user?.user_metadata?.name || userData.user?.email || 'Unknown'
         userId = userData.user?.id || null
+      } catch {
+        // Offline — use default
+      }
+    }
+
+    const totalAmount = calculateTableTotal()
+
+    // OFFLINE CASH PAYMENT HANDLING
+    if (!navigator.onLine) {
+      if (paymentMethod !== 'cash') {
+        showNotificationMessage('error', 'Only cash payments are available offline. Card payments require internet.')
+        return
       }
 
+      try {
+        // Separate real order IDs from offline order client_ids
+        const orderIds = unpaidOrders.filter(o => o.id && !o.client_id).map(o => o.id)
+        const orderClientIds = unpaidOrders.filter(o => o.client_id).map(o => o.client_id)
+
+        // Store payment locally for later sync
+        await addPendingPayment({
+          restaurant_id: restaurant.id,
+          table_id: selectedTable.id,
+          order_ids: orderIds,
+          order_client_ids: orderClientIds,
+          total_amount: totalAmount,
+          payment_method: 'cash',
+          staff_name: userName,
+          user_id: userId,
+        })
+
+        // Mark offline orders as paid locally
+        if (orderClientIds.length > 0) {
+          await markOrdersPaidOffline(orderClientIds)
+        }
+
+        // Update local table state immediately
+        setTableOrderInfo(prev => {
+          const updated = { ...prev }
+          delete updated[selectedTable.id] // Remove this table's order info (it's now paid)
+          return updated
+        })
+
+        // Update table to show as needing cleaning
+        setFloorTables(prev => prev.map(t =>
+          t.id === selectedTable.id
+            ? { ...t, status: 'needs_cleaning', payment_completed_at: new Date().toISOString() }
+            : t
+        ))
+
+        // Close payment modal
+        setShowPaymentModal(false)
+        setUnpaidOrders([])
+
+        showNotificationMessage('success', `Cash payment of £${totalAmount.toFixed(2)} saved offline. Will sync when internet is restored.`)
+
+        // Don't show post-payment modal for offline payments (invoice generation needs internet)
+        return
+      } catch (offlineErr) {
+        console.error('Offline payment error:', offlineErr)
+        showNotificationMessage('error', 'Failed to save offline payment. Please try again.')
+        return
+      }
+    }
+
+    // ONLINE PAYMENT HANDLING
+    try {
       const orderIds = unpaidOrders.map(order => order.id)
-      const totalAmount = calculateTableTotal()
 
       // Use RPC function to process payment (bypasses RLS)
       const { data, error } = await supabase.rpc('process_table_payment', {

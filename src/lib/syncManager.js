@@ -13,6 +13,10 @@ import {
   updateSyncStatus,
   removeSyncedOrder,
   getPendingCount,
+  getPaymentsToSync,
+  updatePaymentSyncStatus,
+  removeSyncedPayment,
+  getPendingPaymentCount,
 } from './offlineQueue'
 
 // Event target for sync status updates (so UI components can listen)
@@ -180,6 +184,104 @@ export async function syncPendingOrders() {
 }
 
 /**
+ * Sync all pending cash payments to Supabase.
+ * @returns {{ synced: number, failed: number }}
+ */
+export async function syncPendingPayments() {
+  if (!navigator.onLine) return { synced: 0, failed: 0, offline: true }
+
+  let synced = 0
+  let failed = 0
+
+  try {
+    const payments = await getPaymentsToSync()
+    if (payments.length === 0) {
+      return { synced: 0, failed: 0 }
+    }
+
+    const supabase = getSyncSupabase()
+
+    for (const payment of payments) {
+      try {
+        await updatePaymentSyncStatus(payment.payment_id, 'syncing')
+        emitSyncEvent('sync-progress', { paymentId: payment.payment_id, status: 'syncing', type: 'payment' })
+
+        // If payment includes offline order client_ids, first sync those orders and get their real IDs
+        let orderIdsToProcess = [...(payment.order_ids || [])]
+
+        if (payment.order_client_ids && payment.order_client_ids.length > 0) {
+          // Look up real order IDs by client_id
+          for (const clientId of payment.order_client_ids) {
+            const { data: order } = await supabase
+              .from('orders')
+              .select('id')
+              .eq('client_id', clientId)
+              .maybeSingle()
+
+            if (order) {
+              orderIdsToProcess.push(order.id)
+            } else {
+              console.warn(`[SyncManager] Offline order ${clientId} not found in DB — may need to sync orders first`)
+            }
+          }
+        }
+
+        if (orderIdsToProcess.length === 0) {
+          // No orders to process — mark as synced anyway
+          await updatePaymentSyncStatus(payment.payment_id, 'synced')
+          await removeSyncedPayment(payment.payment_id)
+          synced++
+          continue
+        }
+
+        // Use the RPC function to process payment (same as online flow)
+        const { data, error } = await supabase.rpc('process_table_payment', {
+          p_order_ids: orderIdsToProcess,
+          p_payment_method: payment.payment_method,
+          p_staff_name: payment.staff_name,
+          p_user_id: payment.user_id,
+        })
+
+        if (error) throw error
+
+        if (data && !data.success) {
+          throw new Error(data.error || 'Failed to process payment')
+        }
+
+        // Mark as synced and clean up
+        await updatePaymentSyncStatus(payment.payment_id, 'synced')
+        await removeSyncedPayment(payment.payment_id)
+        synced++
+        emitSyncEvent('sync-progress', { paymentId: payment.payment_id, status: 'synced', type: 'payment' })
+      } catch (err) {
+        console.error(`[SyncManager] Failed to sync payment ${payment.payment_id}:`, err)
+        await updatePaymentSyncStatus(payment.payment_id, 'failed', err.message)
+        failed++
+        emitSyncEvent('sync-progress', { paymentId: payment.payment_id, status: 'failed', type: 'payment', error: err.message })
+      }
+    }
+  } catch (err) {
+    console.error('[SyncManager] Payment sync process error:', err)
+  }
+
+  return { synced, failed }
+}
+
+/**
+ * Sync both orders and payments.
+ * Orders are synced first, then payments (since payments may reference order IDs).
+ */
+export async function syncAll() {
+  const ordersResult = await syncPendingOrders()
+  const paymentsResult = await syncPendingPayments()
+
+  return {
+    orders: ordersResult,
+    payments: paymentsResult,
+  }
+}
+
+/**
  * Set up automatic sync triggers:
  * - When coming back online
  * - Periodic retry every 30 seconds while online
@@ -194,7 +296,7 @@ export function initAutoSync() {
 
   const handleOnline = () => {
     console.log('[SyncManager] Back online — triggering sync')
-    syncPendingOrders()
+    syncAll()
   }
 
   window.addEventListener('online', handleOnline)
@@ -202,13 +304,13 @@ export function initAutoSync() {
   // Periodic sync every 30s when online
   intervalId = setInterval(() => {
     if (navigator.onLine) {
-      syncPendingOrders()
+      syncAll()
     }
   }, 30000)
 
   // Initial sync attempt
   if (navigator.onLine) {
-    syncPendingOrders()
+    syncAll()
   }
 
   // Register Background Sync and send Supabase config to SW
