@@ -622,6 +622,55 @@ export async function markOrdersPaidOffline(clientIds) {
 }
 
 /**
+ * Get all pending (unpaid) orders grouped by table ID.
+ * Used by fetchTableOrderInfo to merge offline orders with Supabase data.
+ * @returns {Object} Map of tableId -> { count, total }
+ */
+export async function getAllPendingOrdersByTable() {
+  const db = await openDB()
+  const tx = db.transaction([ORDERS_STORE, ORDER_ITEMS_STORE], 'readonly')
+  const orderStore = tx.objectStore(ORDERS_STORE)
+  const itemsStore = tx.objectStore(ORDER_ITEMS_STORE)
+
+  const ordersRequest = orderStore.getAll()
+
+  return new Promise((resolve, reject) => {
+    ordersRequest.onsuccess = async () => {
+      const allOrders = ordersRequest.result || []
+      // Filter: only unsynced orders that aren't paid offline
+      const pendingOrders = allOrders.filter(o =>
+        o.table_id &&
+        o.sync_status !== 'synced' &&
+        !o.paid_offline
+      )
+
+      // Group by table and calculate totals
+      const ordersByTable = {}
+      for (const order of pendingOrders) {
+        if (!ordersByTable[order.table_id]) {
+          ordersByTable[order.table_id] = {
+            count: 0,
+            total: 0,
+            readyDepartments: [], // Offline orders aren't ready yet
+            orders: []
+          }
+        }
+        ordersByTable[order.table_id].count += 1
+        ordersByTable[order.table_id].total += order.total || 0
+        ordersByTable[order.table_id].orders.push(order)
+      }
+
+      db.close()
+      resolve(ordersByTable)
+    }
+    ordersRequest.onerror = () => {
+      db.close()
+      reject(ordersRequest.error)
+    }
+  })
+}
+
+/**
  * Get pending payment count (for UI indicator).
  * @returns {number}
  */

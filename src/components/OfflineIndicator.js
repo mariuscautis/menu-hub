@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { getPendingCount } from '@/lib/offlineQueue'
-import { onSyncEvent, syncPendingOrders } from '@/lib/syncManager'
+import { useState, useEffect, useCallback } from 'react'
+import { getPendingCount, getPendingPaymentCount } from '@/lib/offlineQueue'
+import { onSyncEvent, syncAll } from '@/lib/syncManager'
 
 export default function OfflineIndicator() {
   const [isOnline, setIsOnline] = useState(true)
@@ -11,14 +11,33 @@ export default function OfflineIndicator() {
   const [isSyncing, setIsSyncing] = useState(false)
   const [lastSyncResult, setLastSyncResult] = useState(null)
 
+  // Refresh pending count (orders + payments)
+  const refreshPendingCount = useCallback(async () => {
+    try {
+      const [orders, payments] = await Promise.all([
+        getPendingCount(),
+        getPendingPaymentCount(),
+      ])
+      setPendingCount(orders + payments)
+    } catch {
+      // Ignore errors
+    }
+  }, [])
+
   useEffect(() => {
     // Set initial state
     setIsOnline(navigator.onLine)
 
-    const handleOnline = () => {
+    const handleOnline = async () => {
       setIsOnline(true)
       setShowNotification(true)
       setTimeout(() => setShowNotification(false), 3000)
+
+      // Refresh pending count immediately
+      await refreshPendingCount()
+
+      // Auto-sync when coming back online
+      syncAll()
     }
 
     const handleOffline = () => {
@@ -33,38 +52,42 @@ export default function OfflineIndicator() {
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
     }
-  }, [])
+  }, [refreshPendingCount])
 
   // Listen for sync events and pending count changes
   useEffect(() => {
-    getPendingCount().then(setPendingCount).catch(() => {})
+    // Initial count
+    refreshPendingCount()
+
+    // Poll for pending count changes every 2 seconds (for quick UI updates)
+    const pollInterval = setInterval(refreshPendingCount, 2000)
 
     const unsubStart = onSyncEvent('sync-start', () => setIsSyncing(true))
     const unsubComplete = onSyncEvent('sync-complete', (e) => {
       setIsSyncing(false)
-      const { synced, failed, pendingCount: remaining } = e.detail
+      const { synced, failed } = e.detail
       if (synced > 0 || failed > 0) {
         setLastSyncResult({ synced, failed })
         setTimeout(() => setLastSyncResult(null), 5000)
       }
-      if (typeof remaining === 'number') {
-        setPendingCount(remaining)
-      }
+      // Refresh count after sync completes
+      refreshPendingCount()
     })
-    const unsubCount = onSyncEvent('pending-count-change', (e) => {
-      setPendingCount(e.detail.count)
+    const unsubCount = onSyncEvent('pending-count-change', () => {
+      refreshPendingCount()
     })
 
     return () => {
+      clearInterval(pollInterval)
       unsubStart()
       unsubComplete()
       unsubCount()
     }
-  }, [])
+  }, [refreshPendingCount])
 
   const handleManualSync = async () => {
     if (!navigator.onLine || isSyncing) return
-    await syncPendingOrders()
+    await syncAll()
   }
 
   // Show the persistent pending bar when there are unsynced orders
@@ -126,8 +149,8 @@ export default function OfflineIndicator() {
               )}
               <span className="font-medium">
                 {isSyncing
-                  ? 'Syncing orders...'
-                  : `${pendingCount} order${pendingCount > 1 ? 's' : ''} pending sync`
+                  ? 'Syncing...'
+                  : `${pendingCount} item${pendingCount > 1 ? 's' : ''} pending sync`
                 }
               </span>
             </div>

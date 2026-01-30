@@ -12,6 +12,7 @@ import {
   addPendingPayment,
   getPendingOrdersForTable,
   markOrdersPaidOffline,
+  getAllPendingOrdersByTable,
 } from '@/lib/offlineQueue'
 
 export default function Tables() {
@@ -125,6 +126,11 @@ export default function Tables() {
         },
         (payload) => {
           console.log('Tables page - Order changed:', payload)
+          // Skip refetch when offline to preserve local state
+          if (!navigator.onLine) {
+            console.log('Tables page - Skipping refetch (offline)')
+            return
+          }
           // Small delay to ensure database has committed the changes
           setTimeout(() => {
             console.log('Tables page - Fetching updated table order info after order change')
@@ -148,6 +154,11 @@ export default function Tables() {
         },
         (payload) => {
           console.log('Tables page - Order item changed:', payload)
+          // Skip refetch when offline to preserve local state
+          if (!navigator.onLine) {
+            console.log('Tables page - Skipping refetch (offline)')
+            return
+          }
           // Refetch when items are added or updated (marked ready, delivered, etc.)
           setTimeout(() => {
             console.log('Tables page - Fetching updated table order info after order item change')
@@ -172,6 +183,11 @@ export default function Tables() {
         },
         (payload) => {
           console.log('Tables page - Table updated:', payload)
+          // Skip refetch when offline to preserve local state
+          if (!navigator.onLine) {
+            console.log('Tables page - Skipping refetch (offline)')
+            return
+          }
           // Refetch table data when any table is updated (status, cleaning, etc.)
           setTimeout(() => {
             fetchData()
@@ -193,6 +209,11 @@ export default function Tables() {
         },
         (payload) => {
           console.log('Tables page - Reservation changed:', payload)
+          // Skip refetch when offline to preserve local state
+          if (!navigator.onLine) {
+            console.log('Tables page - Skipping refetch (offline)')
+            return
+          }
           // Refetch today's reservations when any reservation changes
           setTimeout(() => {
             console.log('Tables page - Refetching today\'s reservations')
@@ -217,6 +238,11 @@ export default function Tables() {
         },
         (payload) => {
           console.log('Tables page - Waiter call changed:', payload)
+          // Skip refetch when offline to preserve local state
+          if (!navigator.onLine) {
+            console.log('Tables page - Skipping refetch (offline)')
+            return
+          }
           // Refetch waiter calls
           setTimeout(() => {
             fetchWaiterCalls(restaurantId)
@@ -240,6 +266,11 @@ export default function Tables() {
         },
         (payload) => {
           console.log('Tables page - Split bill changed:', payload)
+          // Skip refetch when offline to preserve local state
+          if (!navigator.onLine) {
+            console.log('Tables page - Skipping refetch (offline)')
+            return
+          }
           // Refetch table order info when split bills change
           setTimeout(() => {
             fetchTableOrderInfo(restaurantId)
@@ -487,6 +518,27 @@ export default function Tables() {
         }
       }
     })
+
+    // Merge with pending offline orders (so they persist in UI when offline)
+    try {
+      const offlineOrdersByTable = await getAllPendingOrdersByTable()
+      Object.entries(offlineOrdersByTable).forEach(([tableId, offlineData]) => {
+        if (orderInfo[tableId]) {
+          // Add offline orders to existing table data
+          orderInfo[tableId].count += offlineData.count
+          orderInfo[tableId].total += offlineData.total
+        } else {
+          // Table only has offline orders
+          orderInfo[tableId] = {
+            count: offlineData.count,
+            total: offlineData.total,
+            readyDepartments: [], // Offline orders are never "ready" (not prepared yet)
+          }
+        }
+      })
+    } catch (err) {
+      console.warn('Failed to get offline orders for merge:', err)
+    }
 
     console.log('fetchTableOrderInfo result:', orderInfo)
     setTableOrderInfo(orderInfo)

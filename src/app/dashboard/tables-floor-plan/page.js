@@ -11,6 +11,7 @@ import {
   addPendingPayment,
   getPendingOrdersForTable,
   markOrdersPaidOffline,
+  getAllPendingOrdersByTable,
 } from '@/lib/offlineQueue'
 
 // Read-only Table Component for Staff
@@ -603,6 +604,27 @@ export default function StaffFloorPlanPage() {
         }
       }
     })
+
+    // Merge with pending offline orders (so they persist in UI when offline)
+    try {
+      const offlineOrdersByTable = await getAllPendingOrdersByTable()
+      Object.entries(offlineOrdersByTable).forEach(([tableId, offlineData]) => {
+        if (orderInfo[tableId]) {
+          // Add offline orders to existing table data
+          orderInfo[tableId].count += offlineData.count
+          orderInfo[tableId].total += offlineData.total
+        } else {
+          // Table only has offline orders
+          orderInfo[tableId] = {
+            count: offlineData.count,
+            total: offlineData.total,
+            readyDepartments: [], // Offline orders are never "ready" (not prepared yet)
+          }
+        }
+      })
+    } catch (err) {
+      console.warn('Failed to get offline orders for merge:', err)
+    }
 
     setTableOrderInfo(orderInfo)
   }
