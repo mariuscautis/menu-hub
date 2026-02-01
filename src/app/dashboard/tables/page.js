@@ -14,6 +14,9 @@ import {
   markOrdersPaidOffline,
   getAllPendingOrdersByTable,
   clearPaidOfflineOrders,
+  addPendingOrderUpdate,
+  getPendingOrderUpdatesForTable,
+  clearPendingOrderUpdates,
 } from '@/lib/offlineQueue'
 
 export default function Tables() {
@@ -931,6 +934,9 @@ export default function Tables() {
       // Also get pending offline orders for this table
       const offlineOrders = await getPendingOrdersForTable(table.id)
 
+      // Get pending order updates (items added to existing orders while offline)
+      const pendingUpdates = await getPendingOrderUpdatesForTable(table.id)
+
       // Convert offline orders to the same format as Supabase orders
       const formattedOfflineOrders = offlineOrders.map(order => ({
         client_id: order.client_id,
@@ -952,8 +958,46 @@ export default function Tables() {
       const supabaseClientIds = new Set(orders.filter(o => o.client_id).map(o => o.client_id))
       const uniqueOfflineOrders = formattedOfflineOrders.filter(o => !supabaseClientIds.has(o.client_id))
 
-      // Combine online and unique offline orders
-      const allOrders = [...orders, ...uniqueOfflineOrders]
+      // Merge pending order updates into their parent orders
+      // This handles items added to existing orders while offline
+      const ordersWithUpdates = orders.map(order => {
+        const updates = pendingUpdates.filter(u => u.order_id === order.id)
+        if (updates.length === 0) return order
+
+        // Merge all update items into this order
+        const mergedItems = [...(order.order_items || [])]
+        let additionalTotal = 0
+
+        for (const update of updates) {
+          for (const item of update.items || []) {
+            const existingIdx = mergedItems.findIndex(i => i.menu_item_id === item.menu_item_id)
+            if (existingIdx >= 0) {
+              mergedItems[existingIdx] = {
+                ...mergedItems[existingIdx],
+                quantity: mergedItems[existingIdx].quantity + item.quantity
+              }
+            } else {
+              mergedItems.push({
+                id: `offline_update_${Date.now()}_${Math.random()}`,
+                menu_item_id: item.menu_item_id,
+                name: item.name,
+                quantity: item.quantity,
+                price_at_time: item.price_at_time,
+              })
+            }
+            additionalTotal += (item.price_at_time || 0) * (item.quantity || 0)
+          }
+        }
+
+        return {
+          ...order,
+          order_items: mergedItems,
+          total: (order.total || 0) + additionalTotal
+        }
+      })
+
+      // Combine online orders (with updates merged) and unique offline orders
+      const allOrders = [...ordersWithUpdates, ...uniqueOfflineOrders]
 
       // Create a map of order_item_id -> total quantity already paid
       const paidQuantities = {}
@@ -1295,6 +1339,9 @@ export default function Tables() {
         // Clean up any stale offline orders for this table
         await clearPaidOfflineOrders(selectedTable.id)
 
+        // Clear any pending order updates for this table
+        await clearPendingOrderUpdates(selectedTable.id)
+
         // Clear the localStorage cache for this table
         localStorage.removeItem(`table_orders_${selectedTable.id}`)
 
@@ -1338,6 +1385,9 @@ export default function Tables() {
 
       // Clean up any stale offline orders for this table
       await clearPaidOfflineOrders(selectedTable.id)
+
+      // Clear any pending order updates for this table
+      await clearPendingOrderUpdates(selectedTable.id)
 
       // Clear the localStorage cache for this table
       localStorage.removeItem(`table_orders_${selectedTable.id}`)
@@ -1837,8 +1887,80 @@ export default function Tables() {
             }
 
             totalToSave = itemsToSave.reduce((sum, item) => sum + (item.price_at_time * item.quantity), 0)
+
+            // If this is an existing order from Supabase, store as an ORDER UPDATE
+            // so items get added to the same order (not as separate orders)
+            if (currentOrder.id) {
+              await addPendingOrderUpdate(currentOrder.id, selectedTable.id, itemsToSave.map(item => ({
+                menu_item_id: item.menu_item_id,
+                name: item.name,
+                quantity: item.quantity,
+                price_at_time: item.price_at_time,
+              })))
+
+              // Update localStorage cache to include the new items
+              try {
+                const cacheKey = `table_orders_${selectedTable.id}`
+                const cached = localStorage.getItem(cacheKey)
+                if (cached) {
+                  const cachedOrders = JSON.parse(cached)
+                  const updatedOrders = cachedOrders.map(order => {
+                    if (order.id === currentOrder.id) {
+                      // Merge new items into existing order
+                      const mergedItems = [...(order.order_items || [])]
+                      for (const newItem of itemsToSave) {
+                        const existingIdx = mergedItems.findIndex(i => i.menu_item_id === newItem.menu_item_id)
+                        if (existingIdx >= 0) {
+                          mergedItems[existingIdx] = {
+                            ...mergedItems[existingIdx],
+                            quantity: mergedItems[existingIdx].quantity + newItem.quantity
+                          }
+                        } else {
+                          mergedItems.push({
+                            id: `offline_update_${Date.now()}`,
+                            menu_item_id: newItem.menu_item_id,
+                            name: newItem.name,
+                            quantity: newItem.quantity,
+                            price_at_time: newItem.price_at_time,
+                          })
+                        }
+                      }
+                      return {
+                        ...order,
+                        order_items: mergedItems,
+                        total: (order.total || 0) + totalToSave
+                      }
+                    }
+                    return order
+                  })
+                  localStorage.setItem(cacheKey, JSON.stringify(updatedOrders))
+                }
+              } catch (e) {
+                console.warn('Failed to update cached orders:', e)
+              }
+
+              // Update local table state
+              setTableOrderInfo(prev => {
+                const existing = prev[selectedTable.id] || { count: 0, total: 0, readyDepartments: [] }
+                return {
+                  ...prev,
+                  [selectedTable.id]: {
+                    ...existing,
+                    total: existing.total + totalToSave,
+                  }
+                }
+              })
+
+              setShowOrderModal(false)
+              setSelectedTable(null)
+              setCurrentOrder(null)
+              setOrderItems([])
+              showNotification('success', 'Items added to order offline. Will sync when internet is restored.')
+              return
+            }
           }
 
+          // New order (or updating an offline-only order that doesn't have a real ID yet)
           const clientId = generateClientId()
           await addPendingOrder({
             client_id: clientId,

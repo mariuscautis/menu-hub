@@ -7,10 +7,11 @@
  */
 
 const DB_NAME = 'menuhub-offline'
-const DB_VERSION = 2 // Incremented for pending_payments store
+const DB_VERSION = 3 // Incremented for pending_order_updates store
 const ORDERS_STORE = 'pending_orders'
 const ORDER_ITEMS_STORE = 'pending_order_items'
 const PAYMENTS_STORE = 'pending_payments'
+const ORDER_UPDATES_STORE = 'pending_order_updates'
 
 function openDB() {
   return new Promise((resolve, reject) => {
@@ -48,6 +49,14 @@ function openDB() {
         paymentsStore.createIndex('sync_status', 'sync_status', { unique: false })
         paymentsStore.createIndex('created_at', 'created_at', { unique: false })
         paymentsStore.createIndex('table_id', 'table_id', { unique: false })
+      }
+
+      // Pending order updates store (for adding items to existing orders offline)
+      if (!db.objectStoreNames.contains(ORDER_UPDATES_STORE)) {
+        const updatesStore = db.createObjectStore(ORDER_UPDATES_STORE, { keyPath: 'update_id' })
+        updatesStore.createIndex('order_id', 'order_id', { unique: false })
+        updatesStore.createIndex('sync_status', 'sync_status', { unique: false })
+        updatesStore.createIndex('table_id', 'table_id', { unique: false })
       }
     }
 
@@ -742,6 +751,190 @@ export async function getPendingPaymentCount() {
     request.onerror = () => {
       db.close()
       reject(request.error)
+    }
+  })
+}
+
+// ============================================================================
+// OFFLINE ORDER UPDATES (adding items to existing orders)
+// ============================================================================
+
+/**
+ * Add a pending update to an existing order (adding items offline).
+ * @param {string} orderId - The original order ID from Supabase
+ * @param {string} tableId - The table ID
+ * @param {Array} itemsToAdd - Items to add to the order
+ * @returns {string} The update_id
+ */
+export async function addPendingOrderUpdate(orderId, tableId, itemsToAdd) {
+  const db = await openDB()
+  const updateId = generateClientId()
+
+  const update = {
+    update_id: updateId,
+    order_id: orderId,
+    table_id: tableId,
+    items: itemsToAdd,
+    total_to_add: itemsToAdd.reduce((sum, item) => sum + (item.price_at_time * item.quantity), 0),
+    sync_status: 'pending',
+    created_at: new Date().toISOString(),
+  }
+
+  const tx = db.transaction(ORDER_UPDATES_STORE, 'readwrite')
+  const store = tx.objectStore(ORDER_UPDATES_STORE)
+  store.add(update)
+
+  return new Promise((resolve, reject) => {
+    tx.oncomplete = () => {
+      db.close()
+      resolve(updateId)
+    }
+    tx.onerror = () => {
+      db.close()
+      reject(tx.error)
+    }
+  })
+}
+
+/**
+ * Get all pending order updates for a table.
+ * Used to merge with cached orders when displaying for payment.
+ * @param {string} tableId
+ * @returns {Array} Pending updates grouped by order_id
+ */
+export async function getPendingOrderUpdatesForTable(tableId) {
+  const db = await openDB()
+  const tx = db.transaction(ORDER_UPDATES_STORE, 'readonly')
+  const store = tx.objectStore(ORDER_UPDATES_STORE)
+  const index = store.index('table_id')
+  const request = index.getAll(tableId)
+
+  return new Promise((resolve, reject) => {
+    request.onsuccess = () => {
+      const updates = (request.result || []).filter(u => u.sync_status !== 'synced')
+      db.close()
+      resolve(updates)
+    }
+    request.onerror = () => {
+      db.close()
+      reject(request.error)
+    }
+  })
+}
+
+/**
+ * Get all pending order updates to sync.
+ * @returns {Array}
+ */
+export async function getOrderUpdatesToSync() {
+  const db = await openDB()
+  const tx = db.transaction(ORDER_UPDATES_STORE, 'readonly')
+  const store = tx.objectStore(ORDER_UPDATES_STORE)
+  const request = store.getAll()
+
+  return new Promise((resolve, reject) => {
+    request.onsuccess = () => {
+      const all = request.result || []
+      const toSync = all.filter(u =>
+        u.sync_status === 'pending' ||
+        (u.sync_status === 'failed' && (u.retry_count || 0) < 5)
+      )
+      db.close()
+      resolve(toSync)
+    }
+    request.onerror = () => {
+      db.close()
+      reject(request.error)
+    }
+  })
+}
+
+/**
+ * Update the sync status of an order update.
+ */
+export async function updateOrderUpdateSyncStatus(updateId, status, errorMessage = null) {
+  const db = await openDB()
+  const tx = db.transaction(ORDER_UPDATES_STORE, 'readwrite')
+  const store = tx.objectStore(ORDER_UPDATES_STORE)
+  const request = store.get(updateId)
+
+  return new Promise((resolve, reject) => {
+    request.onsuccess = () => {
+      const update = request.result
+      if (!update) {
+        db.close()
+        resolve(false)
+        return
+      }
+
+      update.sync_status = status
+      if (status === 'failed') {
+        update.retry_count = (update.retry_count || 0) + 1
+        update.error_message = errorMessage
+      }
+
+      const putRequest = store.put(update)
+      putRequest.onsuccess = () => {
+        db.close()
+        resolve(true)
+      }
+      putRequest.onerror = () => {
+        db.close()
+        reject(putRequest.error)
+      }
+    }
+    request.onerror = () => {
+      db.close()
+      reject(request.error)
+    }
+  })
+}
+
+/**
+ * Remove a synced order update.
+ */
+export async function removeSyncedOrderUpdate(updateId) {
+  const db = await openDB()
+  const tx = db.transaction(ORDER_UPDATES_STORE, 'readwrite')
+  const store = tx.objectStore(ORDER_UPDATES_STORE)
+  store.delete(updateId)
+
+  return new Promise((resolve, reject) => {
+    tx.oncomplete = () => {
+      db.close()
+      resolve(true)
+    }
+    tx.onerror = () => {
+      db.close()
+      reject(tx.error)
+    }
+  })
+}
+
+/**
+ * Clear all pending order updates for a table (after payment).
+ */
+export async function clearPendingOrderUpdates(tableId) {
+  const db = await openDB()
+  const tx = db.transaction(ORDER_UPDATES_STORE, 'readwrite')
+  const store = tx.objectStore(ORDER_UPDATES_STORE)
+  const index = store.index('table_id')
+  const request = index.getAllKeys(tableId)
+
+  request.onsuccess = () => {
+    for (const key of request.result) {
+      store.delete(key)
+    }
+  }
+
+  return new Promise((resolve, reject) => {
+    tx.oncomplete = () => {
+      db.close()
+      resolve()
+    }
+    tx.onerror = () => {
+      db.close()
+      reject(tx.error)
     }
   })
 }

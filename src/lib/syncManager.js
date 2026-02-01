@@ -17,6 +17,9 @@ import {
   updatePaymentSyncStatus,
   removeSyncedPayment,
   getPendingPaymentCount,
+  getOrderUpdatesToSync,
+  updateOrderUpdateSyncStatus,
+  removeSyncedOrderUpdate,
 } from './offlineQueue'
 
 // Event target for sync status updates (so UI components can listen)
@@ -268,15 +271,101 @@ export async function syncPendingPayments() {
 }
 
 /**
- * Sync both orders and payments.
- * Orders are synced first, then payments (since payments may reference order IDs).
+ * Sync pending order updates (items added to existing orders while offline).
+ * @returns {{ synced: number, failed: number }}
+ */
+export async function syncPendingOrderUpdates() {
+  if (!navigator.onLine) return { synced: 0, failed: 0, offline: true }
+
+  let synced = 0
+  let failed = 0
+
+  try {
+    const updates = await getOrderUpdatesToSync()
+    if (updates.length === 0) {
+      return { synced: 0, failed: 0 }
+    }
+
+    const supabase = getSyncSupabase()
+
+    for (const update of updates) {
+      try {
+        await updateOrderUpdateSyncStatus(update.update_id, 'syncing')
+        emitSyncEvent('sync-progress', { updateId: update.update_id, status: 'syncing', type: 'order_update' })
+
+        // Verify the order still exists
+        const { data: order, error: orderError } = await supabase
+          .from('orders')
+          .select('id, total')
+          .eq('id', update.order_id)
+          .maybeSingle()
+
+        if (orderError) throw orderError
+
+        if (!order) {
+          console.warn(`[SyncManager] Order ${update.order_id} not found — skipping update`)
+          await updateOrderUpdateSyncStatus(update.update_id, 'failed', 'Order not found')
+          failed++
+          continue
+        }
+
+        // Insert the new order items
+        const orderItems = (update.items || []).map((item) => ({
+          order_id: update.order_id,
+          menu_item_id: item.menu_item_id,
+          name: item.name,
+          quantity: item.quantity,
+          price_at_time: item.price_at_time,
+        }))
+
+        if (orderItems.length > 0) {
+          const { error: itemsError } = await supabase
+            .from('order_items')
+            .insert(orderItems)
+
+          if (itemsError) throw itemsError
+        }
+
+        // Update the order total
+        const newTotal = (order.total || 0) + (update.total_to_add || 0)
+        const { error: updateError } = await supabase
+          .from('orders')
+          .update({ total: newTotal })
+          .eq('id', update.order_id)
+
+        if (updateError) throw updateError
+
+        // Mark as synced and clean up
+        await updateOrderUpdateSyncStatus(update.update_id, 'synced')
+        await removeSyncedOrderUpdate(update.update_id)
+        synced++
+        emitSyncEvent('sync-progress', { updateId: update.update_id, status: 'synced', type: 'order_update' })
+      } catch (err) {
+        console.error(`[SyncManager] Failed to sync order update ${update.update_id}:`, err)
+        await updateOrderUpdateSyncStatus(update.update_id, 'failed', err.message)
+        failed++
+        emitSyncEvent('sync-progress', { updateId: update.update_id, status: 'failed', type: 'order_update', error: err.message })
+      }
+    }
+  } catch (err) {
+    console.error('[SyncManager] Order updates sync process error:', err)
+  }
+
+  return { synced, failed }
+}
+
+/**
+ * Sync orders, order updates, and payments.
+ * Orders are synced first, then updates, then payments.
  */
 export async function syncAll() {
   const ordersResult = await syncPendingOrders()
+  const orderUpdatesResult = await syncPendingOrderUpdates()
   const paymentsResult = await syncPendingPayments()
 
   return {
     orders: ordersResult,
+    orderUpdates: orderUpdatesResult,
     payments: paymentsResult,
   }
 }
