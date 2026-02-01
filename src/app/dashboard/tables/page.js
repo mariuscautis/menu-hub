@@ -1775,6 +1775,22 @@ export default function Tables() {
         if (itemsError) throw itemsError
       }
 
+      // Cache orders for this table (for offline payment support)
+      try {
+        const { data: ordersData } = await supabase
+          .from('orders')
+          .select('*, order_items(*)')
+          .eq('table_id', selectedTable.id)
+          .is('paid', false)
+          .neq('status', 'cancelled')
+          .order('created_at', { ascending: true })
+        if (ordersData && ordersData.length > 0) {
+          localStorage.setItem(`table_orders_${selectedTable.id}`, JSON.stringify(ordersData))
+        }
+      } catch (e) {
+        console.warn('Failed to cache orders:', e)
+      }
+
       // Close modal and reset
       setShowOrderModal(false)
       setSelectedTable(null)

@@ -1066,6 +1066,21 @@ export default function StaffFloorPlanPage() {
       // Refresh data
       await loadFloorData(currentFloor.id, restaurant.id)
 
+      // Cache orders for this table (for offline payment support)
+      try {
+        const { data: ordersData } = await supabase
+          .from('orders')
+          .select('*, order_items(*)')
+          .eq('table_id', selectedTable.id)
+          .eq('paid', false)
+          .order('created_at', { ascending: false })
+        if (ordersData && ordersData.length > 0) {
+          localStorage.setItem(`table_orders_${selectedTable.id}`, JSON.stringify(ordersData))
+        }
+      } catch (e) {
+        console.warn('Failed to cache orders:', e)
+      }
+
       showNotificationMessage('success', currentOrder ? 'Order updated successfully!' : 'Order placed successfully!')
     } catch (error) {
       // If offline and creating a new order, queue it locally
