@@ -21,6 +21,7 @@ import {
   updateOrderUpdateSyncStatus,
   removeSyncedOrderUpdate,
 } from './offlineQueue'
+import { wasTableCleanedOffline, clearTableCleanedOfflineStatus, clearAllOfflinePaidTables } from './supabase'
 
 // Event target for sync status updates (so UI components can listen)
 const syncEventTarget = typeof window !== 'undefined' ? new EventTarget() : null
@@ -251,6 +252,21 @@ export async function syncPendingPayments() {
           throw new Error(data.error || 'Failed to process payment')
         }
 
+        // If the table was cleaned offline, restore its 'available' status
+        // (process_table_payment sets it to 'needs_cleaning', but staff already cleaned it)
+        if (payment.table_id && wasTableCleanedOffline(payment.table_id)) {
+          try {
+            await supabase.rpc('mark_table_cleaned', {
+              p_table_id: payment.table_id,
+              p_payment_completed_at: null
+            })
+            clearTableCleanedOfflineStatus(payment.table_id)
+            console.log(`[SyncManager] Restored table ${payment.table_id} to 'available' (was cleaned offline)`)
+          } catch (cleanErr) {
+            console.warn(`[SyncManager] Failed to restore table status:`, cleanErr)
+          }
+        }
+
         // Mark as synced and clean up
         await updatePaymentSyncStatus(payment.payment_id, 'synced')
         await removeSyncedPayment(payment.payment_id)
@@ -362,6 +378,12 @@ export async function syncAll() {
   const ordersResult = await syncPendingOrders()
   const orderUpdatesResult = await syncPendingOrderUpdates()
   const paymentsResult = await syncPendingPayments()
+
+  // Clear offline paid tables tracking after successful sync
+  // (the data is now in sync with the server)
+  if (paymentsResult.synced > 0) {
+    clearAllOfflinePaidTables()
+  }
 
   return {
     orders: ordersResult,

@@ -192,12 +192,12 @@ export function clearOrdersCacheForTable(tableId) {
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i)
       if (key && key.startsWith(CACHE_PREFIX)) {
-        // Clear any cached orders queries that might contain this table
-        if (key.includes('/orders') && key.includes(tableId)) {
+        // Clear any cached query that contains this table ID (handles URL encoding too)
+        if (key.includes(tableId)) {
           keysToRemove.push(key)
         }
-        // Also clear any queries that filter by table_id
-        if (key.includes(`table_id=eq.${tableId}`)) {
+        // Also check for URL-encoded version
+        if (key.includes(encodeURIComponent(tableId))) {
           keysToRemove.push(key)
         }
       }
@@ -205,8 +205,125 @@ export function clearOrdersCacheForTable(tableId) {
     for (const key of keysToRemove) {
       localStorage.removeItem(key)
     }
+
+    // Also mark this table as "paid offline" so handleNewOrder knows to skip cached data
+    markTablePaidOffline(tableId)
   } catch {
     // Ignore errors
+  }
+}
+
+/**
+ * Mark a table as having been paid offline.
+ * This prevents stale cached orders from loading until the device syncs.
+ */
+export function markTablePaidOffline(tableId) {
+  if (typeof window === 'undefined') return
+  try {
+    const key = 'offline_paid_tables'
+    const existing = JSON.parse(localStorage.getItem(key) || '{}')
+    existing[tableId] = Date.now()
+    localStorage.setItem(key, JSON.stringify(existing))
+  } catch {
+    // Ignore
+  }
+}
+
+/**
+ * Check if a table was paid offline (and hasn't synced yet).
+ */
+export function wasTablePaidOffline(tableId) {
+  if (typeof window === 'undefined') return false
+  try {
+    const key = 'offline_paid_tables'
+    const existing = JSON.parse(localStorage.getItem(key) || '{}')
+    return !!existing[tableId]
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Clear the offline paid status for a table (call after sync or when back online).
+ */
+export function clearTablePaidOfflineStatus(tableId) {
+  if (typeof window === 'undefined') return
+  try {
+    const key = 'offline_paid_tables'
+    const existing = JSON.parse(localStorage.getItem(key) || '{}')
+    delete existing[tableId]
+    localStorage.setItem(key, JSON.stringify(existing))
+  } catch {
+    // Ignore
+  }
+}
+
+/**
+ * Clear all offline paid table statuses (call when coming back online after sync).
+ */
+export function clearAllOfflinePaidTables() {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.removeItem('offline_paid_tables')
+  } catch {
+    // Ignore
+  }
+}
+
+/**
+ * Mark a table as cleaned offline.
+ * This prevents the payment sync from resetting the table to 'needs_cleaning'.
+ */
+export function markTableCleanedOffline(tableId) {
+  if (typeof window === 'undefined') return
+  try {
+    const key = 'offline_cleaned_tables'
+    const existing = JSON.parse(localStorage.getItem(key) || '{}')
+    existing[tableId] = Date.now()
+    localStorage.setItem(key, JSON.stringify(existing))
+  } catch {
+    // Ignore
+  }
+}
+
+/**
+ * Check if a table was cleaned offline.
+ */
+export function wasTableCleanedOffline(tableId) {
+  if (typeof window === 'undefined') return false
+  try {
+    const key = 'offline_cleaned_tables'
+    const existing = JSON.parse(localStorage.getItem(key) || '{}')
+    return !!existing[tableId]
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Clear the offline cleaned status for a table (call after sync).
+ */
+export function clearTableCleanedOfflineStatus(tableId) {
+  if (typeof window === 'undefined') return
+  try {
+    const key = 'offline_cleaned_tables'
+    const existing = JSON.parse(localStorage.getItem(key) || '{}')
+    delete existing[tableId]
+    localStorage.setItem(key, JSON.stringify(existing))
+  } catch {
+    // Ignore
+  }
+}
+
+/**
+ * Clear all offline cleaned table statuses.
+ */
+export function clearAllOfflineCleanedTables() {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.removeItem('offline_cleaned_tables')
+  } catch {
+    // Ignore
   }
 }
 

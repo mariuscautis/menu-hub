@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase, clearOrdersCacheForTable } from '@/lib/supabase'
+import { supabase, clearOrdersCacheForTable, wasTablePaidOffline, clearTablePaidOfflineStatus, markTableCleanedOffline } from '@/lib/supabase'
 import InvoiceClientModal from '@/components/invoices/InvoiceClientModal'
 import { generateInvoicePdfBase64, downloadInvoicePdf } from '@/lib/invoicePdfGenerator'
 import {
@@ -704,6 +704,8 @@ export default function StaffFloorPlanPage() {
           ? { ...t, status: 'available', payment_completed_at: null }
           : t
       ))
+      // Track that this table was cleaned offline to prevent payment sync from resetting status
+      markTableCleanedOffline(table.id)
       showNotificationMessage('success', `Table ${table.table_number} marked as cleaned (will sync when online)`)
       return
     }
@@ -742,6 +744,8 @@ export default function StaffFloorPlanPage() {
             ? { ...t, status: 'available', payment_completed_at: null }
             : t
         ))
+        // Track that this table was cleaned offline
+        markTableCleanedOffline(table.id)
         showNotificationMessage('success', `Table ${table.table_number} marked as cleaned (will sync when online)`)
         return
       }
@@ -836,6 +840,22 @@ export default function StaffFloorPlanPage() {
     // Clear state first
     setOrderItems([])
     setCurrentOrder(null)
+
+    // Check if this table was paid offline - if so, skip loading cached orders
+    // The cache might still contain stale "unpaid" orders
+    const wasPaidOffline = wasTablePaidOffline(selectedTable.id)
+
+    // If we're back online, clear the offline paid status
+    if (navigator.onLine && wasPaidOffline) {
+      clearTablePaidOfflineStatus(selectedTable.id)
+    }
+
+    // If paid offline and still offline, start with empty order (don't load cached data)
+    if (wasPaidOffline && !navigator.onLine) {
+      showNotificationMessage('info', 'Starting new order')
+      setShowOrderModal(true)
+      return
+    }
 
     try {
       // Check if table has existing unpaid orders

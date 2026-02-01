@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { supabase, clearOrdersCacheForTable } from '@/lib/supabase'
+import { supabase, clearOrdersCacheForTable, wasTablePaidOffline, clearTablePaidOfflineStatus } from '@/lib/supabase'
 import QRCode from 'qrcode'
 import InvoiceClientModal from '@/components/invoices/InvoiceClientModal'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
@@ -789,6 +789,23 @@ export default function Tables() {
 
     console.log('STEP 2: Setting selected table')
     setSelectedTable(table)
+
+    // Check if this table was paid offline - if so, skip loading cached orders
+    // The cache might still contain stale "unpaid" orders
+    const wasPaidOffline = wasTablePaidOffline(table.id)
+
+    // If we're back online, clear the offline paid status
+    if (navigator.onLine && wasPaidOffline) {
+      clearTablePaidOfflineStatus(table.id)
+    }
+
+    // If paid offline and still offline, start with empty order (don't load cached data)
+    if (wasPaidOffline && !navigator.onLine) {
+      console.log('Table was paid offline - starting fresh order')
+      showNotification('info', 'Starting new order')
+      setShowOrderModal(true)
+      return
+    }
 
     // Check if there's an existing open order for this table that is not completed and not paid
     // Get the most recent unpaid order (there might be multiple)
