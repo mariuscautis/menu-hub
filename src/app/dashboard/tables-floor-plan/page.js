@@ -1083,8 +1083,14 @@ export default function StaffFloorPlanPage() {
 
       showNotificationMessage('success', currentOrder ? 'Order updated successfully!' : 'Order placed successfully!')
     } catch (error) {
-      // If offline and creating a new order, queue it locally
-      if (!navigator.onLine && !currentOrder) {
+      // Check if this is a network error (offline or connection dropped)
+      const isNetworkError = !navigator.onLine ||
+        error?.message?.includes('fetch') ||
+        error?.message?.includes('network') ||
+        error?.code === 'NETWORK_ERROR'
+
+      // If offline/network error and creating a new order, queue it locally
+      if (isNetworkError && !currentOrder) {
         try {
           const clientId = generateClientId()
           await addPendingOrder({
