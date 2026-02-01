@@ -15,6 +15,7 @@ import {
   getPendingPaymentsForTable,
   markOrdersPaidOffline,
   getAllPendingOrdersByTable,
+  getAllPendingOrderUpdatesByTable,
   clearPaidOfflineOrders,
   addPendingOrderUpdate,
   getPendingOrderUpdatesForTable,
@@ -546,6 +547,26 @@ export default function Tables() {
       console.warn('Failed to get offline orders for merge:', err)
     }
 
+    // Also merge pending order updates (items added to existing orders while offline)
+    try {
+      const offlineUpdatesByTable = await getAllPendingOrderUpdatesByTable()
+      Object.entries(offlineUpdatesByTable).forEach(([tableId, updateData]) => {
+        if (orderInfo[tableId]) {
+          // Add offline update totals to existing table data
+          orderInfo[tableId].total += updateData.total
+        } else {
+          // Table has only offline updates (order exists in Supabase but wasn't fetched)
+          orderInfo[tableId] = {
+            count: 0, // Don't add count, the order already exists
+            total: updateData.total,
+            readyDepartments: [],
+          }
+        }
+      })
+    } catch (err) {
+      console.warn('Failed to get offline order updates for merge:', err)
+    }
+
     console.log('fetchTableOrderInfo result:', orderInfo)
     setTableOrderInfo(orderInfo)
   }
@@ -936,6 +957,37 @@ export default function Tables() {
           }
         }
       })
+
+      // ALSO merge any pending order updates (items added offline to this order)
+      try {
+        const pendingUpdates = await getPendingOrderUpdatesForTable(table.id)
+        const orderUpdates = pendingUpdates.filter(u => u.order_id === existingOrder.id)
+        if (orderUpdates.length > 0) {
+          console.log('Found pending order updates:', orderUpdates.length)
+          for (const update of orderUpdates) {
+            for (const item of update.items || []) {
+              if (itemsMap[item.menu_item_id]) {
+                // Add to existing item quantity
+                itemsMap[item.menu_item_id].quantity += item.quantity
+                // Don't update existingQuantity - these are NEW items added offline
+              } else {
+                // New item from offline update
+                itemsMap[item.menu_item_id] = {
+                  menu_item_id: item.menu_item_id,
+                  name: item.name,
+                  price_at_time: item.price_at_time,
+                  quantity: item.quantity,
+                  isExisting: true, // Mark as existing so staff can't reduce
+                  existingQuantity: item.quantity
+                }
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to get pending order updates:', err)
+      }
+
       const normalizedItems = Object.values(itemsMap)
       console.log('STEP 5: Setting orderItems to:', normalizedItems.length, 'items')
       console.log('Items:', normalizedItems.map(i => `${i.name} x${i.quantity}`))

@@ -784,6 +784,48 @@ export async function getAllPendingOrdersByTable() {
 }
 
 /**
+ * Get all pending order updates grouped by table ID.
+ * Used by fetchTableOrderInfo to include offline-added items in totals.
+ * @returns {Object} Map of tableId -> { total, updates: [...] }
+ */
+export async function getAllPendingOrderUpdatesByTable() {
+  const db = await openDB()
+  const tx = db.transaction(ORDER_UPDATES_STORE, 'readonly')
+  const store = tx.objectStore(ORDER_UPDATES_STORE)
+  const request = store.getAll()
+
+  return new Promise((resolve, reject) => {
+    request.onsuccess = () => {
+      const allUpdates = request.result || []
+      // Filter: only unsynced updates
+      const pendingUpdates = allUpdates.filter(u => u.sync_status !== 'synced')
+
+      // Group by table
+      const updatesByTable = {}
+      for (const update of pendingUpdates) {
+        if (!update.table_id) continue
+
+        if (!updatesByTable[update.table_id]) {
+          updatesByTable[update.table_id] = {
+            total: 0,
+            updates: []
+          }
+        }
+        updatesByTable[update.table_id].total += update.total_to_add || 0
+        updatesByTable[update.table_id].updates.push(update)
+      }
+
+      db.close()
+      resolve(updatesByTable)
+    }
+    request.onerror = () => {
+      db.close()
+      reject(request.error)
+    }
+  })
+}
+
+/**
  * Get pending payment count (for UI indicator).
  * @returns {number}
  */
