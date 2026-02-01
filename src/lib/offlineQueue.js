@@ -140,6 +140,65 @@ export async function addPendingOrder(orderData, orderItems) {
 }
 
 /**
+ * Update an existing pending order in IndexedDB (add items and update total).
+ * Use this when adding items to an order that was created offline.
+ * @param {string} clientId - The client_id of the existing offline order
+ * @param {Array} newItems - New items to add to the order
+ * @param {number} additionalTotal - Amount to add to the order total
+ * @returns {boolean} True if successful
+ */
+export async function updatePendingOrder(clientId, newItems, additionalTotal) {
+  const db = await openDB()
+  const tx = db.transaction([ORDERS_STORE, ORDER_ITEMS_STORE], 'readwrite')
+  const orderStore = tx.objectStore(ORDERS_STORE)
+  const itemsStore = tx.objectStore(ORDER_ITEMS_STORE)
+
+  // Get the existing order
+  const getRequest = orderStore.get(clientId)
+
+  return new Promise((resolve, reject) => {
+    getRequest.onsuccess = () => {
+      const order = getRequest.result
+      if (!order) {
+        db.close()
+        reject(new Error(`Order with client_id ${clientId} not found`))
+        return
+      }
+
+      // Update the order total
+      order.total = (order.total || 0) + additionalTotal
+      orderStore.put(order)
+
+      // Add the new items
+      for (const item of newItems) {
+        itemsStore.add({
+          order_client_id: clientId,
+          menu_item_id: item.menu_item_id || item.id,
+          name: item.name,
+          quantity: item.quantity,
+          price_at_time: item.price_at_time || item.price,
+        })
+      }
+    }
+
+    getRequest.onerror = () => {
+      db.close()
+      reject(getRequest.error)
+    }
+
+    tx.oncomplete = () => {
+      db.close()
+      resolve(true)
+    }
+
+    tx.onerror = () => {
+      db.close()
+      reject(tx.error)
+    }
+  })
+}
+
+/**
  * Get all pending orders (not yet synced).
  * @param {string} [restaurantId] - Optional filter by restaurant
  * @returns {Array} Array of pending order objects

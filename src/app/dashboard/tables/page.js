@@ -8,6 +8,7 @@ import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { generateInvoicePdfBase64, downloadInvoicePdf } from '@/lib/invoicePdfGenerator'
 import {
   addPendingOrder,
+  updatePendingOrder,
   generateClientId,
   addPendingPayment,
   getPendingOrdersForTable,
@@ -2051,7 +2052,42 @@ export default function Tables() {
             }
           }
 
-          // New order (or updating an offline-only order that doesn't have a real ID yet)
+          // Check if this is an existing OFFLINE order (has client_id but no Supabase id)
+          if (currentOrder && currentOrder.client_id && !currentOrder.id) {
+            // Update the existing offline order in IndexedDB
+            console.log('Updating existing offline order:', currentOrder.client_id)
+            await updatePendingOrder(
+              currentOrder.client_id,
+              itemsToSave.map(item => ({
+                menu_item_id: item.menu_item_id,
+                name: item.name,
+                quantity: item.quantity,
+                price_at_time: item.price_at_time,
+              })),
+              totalToSave
+            )
+
+            // Update local table state
+            setTableOrderInfo(prev => {
+              const existing = prev[selectedTable.id] || { count: 0, total: 0, readyDepartments: [] }
+              return {
+                ...prev,
+                [selectedTable.id]: {
+                  ...existing,
+                  total: existing.total + totalToSave,
+                }
+              }
+            })
+
+            setShowOrderModal(false)
+            setSelectedTable(null)
+            setCurrentOrder(null)
+            setOrderItems([])
+            showNotification('success', 'Items added to offline order. Will sync when internet is restored.')
+            return
+          }
+
+          // New order - create a fresh pending order
           const clientId = generateClientId()
           await addPendingOrder({
             client_id: clientId,
