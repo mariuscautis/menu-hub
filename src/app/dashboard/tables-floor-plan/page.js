@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { supabase, clearOrdersCacheForTable } from '@/lib/supabase'
 import InvoiceClientModal from '@/components/invoices/InvoiceClientModal'
 import { generateInvoicePdfBase64, downloadInvoicePdf } from '@/lib/invoicePdfGenerator'
 import {
@@ -1453,6 +1453,10 @@ export default function StaffFloorPlanPage() {
 
         // Clear the localStorage cache for this table
         localStorage.removeItem(`table_orders_${selectedTable.id}`)
+
+        // Clear the Supabase query cache for this table's orders
+        // This prevents stale cached orders from appearing when placing new orders
+        clearOrdersCacheForTable(selectedTable.id)
 
         showNotificationMessage('success', `Cash payment of £${totalAmount.toFixed(2)} saved offline. Will sync when internet is restored.`)
 

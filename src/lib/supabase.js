@@ -179,6 +179,37 @@ export const supabase = new Proxy({}, {
   }
 })
 
+/**
+ * Clear cached Supabase responses for a specific table's orders.
+ * This should be called after offline payment to prevent stale orders from appearing.
+ * @param {string} tableId - The table ID to clear cache for
+ */
+export function clearOrdersCacheForTable(tableId) {
+  if (typeof window === 'undefined') return
+
+  try {
+    const keysToRemove = []
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key && key.startsWith(CACHE_PREFIX)) {
+        // Clear any cached orders queries that might contain this table
+        if (key.includes('/orders') && key.includes(tableId)) {
+          keysToRemove.push(key)
+        }
+        // Also clear any queries that filter by table_id
+        if (key.includes(`table_id=eq.${tableId}`)) {
+          keysToRemove.push(key)
+        }
+      }
+    }
+    for (const key of keysToRemove) {
+      localStorage.removeItem(key)
+    }
+  } catch {
+    // Ignore errors
+  }
+}
+
 export const supabaseAdmin = new Proxy({}, {
   get(target, prop) {
     return getSupabaseAdmin()[prop]
