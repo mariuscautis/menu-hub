@@ -1808,18 +1808,46 @@ export default function Tables() {
         error?.message?.includes('network') ||
         error?.code === 'NETWORK_ERROR'
 
-      // If offline/network error and creating a new order, queue it locally
-      if (isNetworkError && !currentOrder) {
+      // If offline/network error, queue order locally
+      if (isNetworkError) {
         try {
+          let itemsToSave = consolidatedItems
+          let totalToSave = total
+
+          // If updating an existing order, only save the NEW items
+          if (currentOrder) {
+            const originalItems = currentOrder.order_items || []
+            itemsToSave = consolidatedItems.filter(newItem => {
+              const original = originalItems.find(o => o.menu_item_id === newItem.menu_item_id)
+              if (!original) return true // completely new item
+              return newItem.quantity > original.quantity // increased quantity
+            }).map(newItem => {
+              const original = originalItems.find(o => o.menu_item_id === newItem.menu_item_id)
+              if (!original) return newItem
+              // Only save the additional quantity
+              return {
+                ...newItem,
+                quantity: newItem.quantity - original.quantity
+              }
+            }).filter(item => item.quantity > 0)
+
+            if (itemsToSave.length === 0) {
+              showNotification('info', 'No new items to add. Reducing quantities requires internet.')
+              return
+            }
+
+            totalToSave = itemsToSave.reduce((sum, item) => sum + (item.price_at_time * item.quantity), 0)
+          }
+
           const clientId = generateClientId()
           await addPendingOrder({
             client_id: clientId,
             restaurant_id: restaurant.id,
             table_id: selectedTable.id,
-            total,
+            total: totalToSave,
             status: 'pending',
             order_type: 'dine_in',
-          }, consolidatedItems.map(item => ({
+          }, itemsToSave.map(item => ({
             menu_item_id: item.menu_item_id,
             name: item.name,
             quantity: item.quantity,
@@ -1832,8 +1860,8 @@ export default function Tables() {
             return {
               ...prev,
               [selectedTable.id]: {
-                count: existing.count + 1,
-                total: existing.total + total,
+                count: existing.count + (currentOrder ? 0 : 1), // Don't increment count for updates
+                total: existing.total + totalToSave,
                 readyDepartments: existing.readyDepartments,
               }
             }
@@ -1843,7 +1871,10 @@ export default function Tables() {
           setSelectedTable(null)
           setCurrentOrder(null)
           setOrderItems([])
-          showNotification('success', 'Order saved offline — will sync when internet is restored.')
+          const message = currentOrder
+            ? 'Additional items saved offline — will sync when internet is restored.'
+            : 'Order saved offline — will sync when internet is restored.'
+          showNotification('success', message)
           return
         } catch (offlineErr) {
           console.error('Failed to save order offline:', offlineErr)
