@@ -874,38 +874,58 @@ export default function Tables() {
   const openPaymentModal = async (table) => {
     setSelectedTable(table)
 
+    const cacheKey = `table_orders_${table.id}`
+
     try {
       let orders = []
       let existingSplitBills = []
 
-      // Try to fetch from Supabase (will use cache if offline)
-      const { data: ordersData, error: ordersError } = await supabase
-        .from('orders')
-        .select('*, order_items(*)')
-        .eq('table_id', table.id)
-        .is('paid', false)
-        .neq('status', 'cancelled')
-        .order('created_at', { ascending: true })
-
-      if (ordersError && !navigator.onLine) {
-        // Offline and no cached data — continue with just offline orders
-        orders = []
-      } else if (ordersError) {
-        throw ordersError
-      } else {
-        orders = ordersData || []
-      }
-
-      // Try to fetch split bills (ignore errors if offline)
-      try {
-        const { data: splitBillsData } = await supabase
-          .from('split_bills')
-          .select('*, split_bill_items(*)')
+      if (navigator.onLine) {
+        // Online: fetch from Supabase and cache
+        const { data: ordersData, error: ordersError } = await supabase
+          .from('orders')
+          .select('*, order_items(*)')
           .eq('table_id', table.id)
-          .eq('payment_status', 'completed')
-        existingSplitBills = splitBillsData || []
-      } catch {
-        // Ignore split bills fetch error when offline
+          .is('paid', false)
+          .neq('status', 'cancelled')
+          .order('created_at', { ascending: true })
+
+        if (ordersError) {
+          throw ordersError
+        }
+
+        orders = ordersData || []
+
+        // Cache the orders for offline use
+        if (orders.length > 0) {
+          try {
+            localStorage.setItem(cacheKey, JSON.stringify(orders))
+          } catch (e) {
+            console.warn('Failed to cache orders:', e)
+          }
+        }
+
+        // Also fetch split bills when online
+        try {
+          const { data: splitBillsData } = await supabase
+            .from('split_bills')
+            .select('*, split_bill_items(*)')
+            .eq('table_id', table.id)
+            .eq('payment_status', 'completed')
+          existingSplitBills = splitBillsData || []
+        } catch {
+          // Ignore split bills fetch error
+        }
+      } else {
+        // Offline: try to use cached data
+        try {
+          const cached = localStorage.getItem(cacheKey)
+          if (cached) {
+            orders = JSON.parse(cached)
+          }
+        } catch (e) {
+          console.warn('Failed to load cached orders:', e)
+        }
       }
 
       // Also get pending offline orders for this table
@@ -1275,6 +1295,9 @@ export default function Tables() {
         // Clean up any stale offline orders for this table
         await clearPaidOfflineOrders(selectedTable.id)
 
+        // Clear the localStorage cache for this table
+        localStorage.removeItem(`table_orders_${selectedTable.id}`)
+
         showNotification('success', `Cash payment of £${totalAmount.toFixed(2)} saved offline. Will sync when internet is restored.`)
 
         // Don't show post-payment modal for offline payments (invoice generation needs internet)
@@ -1315,6 +1338,9 @@ export default function Tables() {
 
       // Clean up any stale offline orders for this table
       await clearPaidOfflineOrders(selectedTable.id)
+
+      // Clear the localStorage cache for this table
+      localStorage.removeItem(`table_orders_${selectedTable.id}`)
 
       // Refresh table order info and table list
       await fetchTableOrderInfo(restaurant.id)

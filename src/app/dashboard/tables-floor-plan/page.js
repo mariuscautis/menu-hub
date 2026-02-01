@@ -1123,24 +1123,44 @@ export default function StaffFloorPlanPage() {
   const handlePayBill = async () => {
     if (!selectedTable) return
 
+    const cacheKey = `table_orders_${selectedTable.id}`
+
     try {
       let orders = []
 
-      // Try to fetch from Supabase (will use cache if offline)
-      const { data: ordersData, error } = await supabase
-        .from('orders')
-        .select('*, order_items(*)')
-        .eq('table_id', selectedTable.id)
-        .eq('paid', false)
-        .order('created_at', { ascending: false })
+      if (navigator.onLine) {
+        // Online: fetch from Supabase and cache
+        const { data: ordersData, error } = await supabase
+          .from('orders')
+          .select('*, order_items(*)')
+          .eq('table_id', selectedTable.id)
+          .eq('paid', false)
+          .order('created_at', { ascending: false })
 
-      if (error && !navigator.onLine) {
-        // Offline and no cached data — continue with just offline orders
-        orders = []
-      } else if (error) {
-        throw error
-      } else {
+        if (error) {
+          throw error
+        }
+
         orders = ordersData || []
+
+        // Cache the orders for offline use
+        if (orders.length > 0) {
+          try {
+            localStorage.setItem(cacheKey, JSON.stringify(orders))
+          } catch (e) {
+            console.warn('Failed to cache orders:', e)
+          }
+        }
+      } else {
+        // Offline: try to use cached data
+        try {
+          const cached = localStorage.getItem(cacheKey)
+          if (cached) {
+            orders = JSON.parse(cached)
+          }
+        } catch (e) {
+          console.warn('Failed to load cached orders:', e)
+        }
       }
 
       // Also get pending offline orders for this table
@@ -1261,6 +1281,9 @@ export default function StaffFloorPlanPage() {
         // Clean up any stale offline orders for this table
         await clearPaidOfflineOrders(selectedTable.id)
 
+        // Clear the localStorage cache for this table
+        localStorage.removeItem(`table_orders_${selectedTable.id}`)
+
         showNotificationMessage('success', `Cash payment of £${totalAmount.toFixed(2)} saved offline. Will sync when internet is restored.`)
 
         // Don't show post-payment modal for offline payments (invoice generation needs internet)
@@ -1297,6 +1320,9 @@ export default function StaffFloorPlanPage() {
 
       // Clean up any stale offline orders for this table
       await clearPaidOfflineOrders(selectedTable.id)
+
+      // Clear the localStorage cache for this table
+      localStorage.removeItem(`table_orders_${selectedTable.id}`)
 
       // Refresh data
       await loadFloorData(currentFloor.id, restaurant.id)
