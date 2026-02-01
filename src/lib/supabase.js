@@ -214,6 +214,47 @@ export function clearOrdersCacheForTable(tableId) {
 }
 
 /**
+ * Clear ALL cached Supabase responses related to orders.
+ * This is more aggressive than clearOrdersCacheForTable and should be called
+ * after sync operations to ensure no stale order data remains.
+ */
+export function clearAllOrdersCache() {
+  if (typeof window === 'undefined') return
+
+  try {
+    const keysToRemove = []
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key && key.startsWith(CACHE_PREFIX)) {
+        // Clear any cache entry that involves orders or order_items
+        if (key.includes('/orders') || key.includes('order_items')) {
+          keysToRemove.push(key)
+        }
+      }
+    }
+    for (const key of keysToRemove) {
+      localStorage.removeItem(key)
+    }
+    console.log(`[Supabase Cache] Cleared ${keysToRemove.length} order-related cache entries`)
+  } catch {
+    // Ignore errors
+  }
+}
+
+/**
+ * Clear table-specific localStorage cache (table_orders_${tableId}).
+ * @param {string} tableId - The table ID to clear cache for
+ */
+export function clearTableOrdersLocalCache(tableId) {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.removeItem(`table_orders_${tableId}`)
+  } catch {
+    // Ignore errors
+  }
+}
+
+/**
  * Mark a table as having been paid offline.
  * This prevents stale cached orders from loading until the device syncs.
  */

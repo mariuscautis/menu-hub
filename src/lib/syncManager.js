@@ -21,7 +21,14 @@ import {
   updateOrderUpdateSyncStatus,
   removeSyncedOrderUpdate,
 } from './offlineQueue'
-import { wasTableCleanedOffline, clearTableCleanedOfflineStatus, clearAllOfflinePaidTables } from './supabase'
+import {
+  wasTableCleanedOffline,
+  clearTableCleanedOfflineStatus,
+  clearAllOfflinePaidTables,
+  clearAllOrdersCache,
+  clearOrdersCacheForTable,
+  clearTableOrdersLocalCache,
+} from './supabase'
 
 // Event target for sync status updates (so UI components can listen)
 const syncEventTarget = typeof window !== 'undefined' ? new EventTarget() : null
@@ -165,6 +172,13 @@ export async function syncPendingOrders() {
         // Mark as synced and clean up
         await updateSyncStatus(order.client_id, 'synced')
         await removeSyncedOrder(order.client_id)
+
+        // Clear cached data for this table to prevent stale items appearing
+        if (order.table_id) {
+          clearOrdersCacheForTable(order.table_id)
+          clearTableOrdersLocalCache(order.table_id)
+        }
+
         synced++
         emitSyncEvent('sync-progress', { clientId: order.client_id, status: 'synced', serverId })
       } catch (err) {
@@ -270,6 +284,13 @@ export async function syncPendingPayments() {
         // Mark as synced and clean up
         await updatePaymentSyncStatus(payment.payment_id, 'synced')
         await removeSyncedPayment(payment.payment_id)
+
+        // Clear cached data for this table to prevent stale items appearing
+        if (payment.table_id) {
+          clearOrdersCacheForTable(payment.table_id)
+          clearTableOrdersLocalCache(payment.table_id)
+        }
+
         synced++
         emitSyncEvent('sync-progress', { paymentId: payment.payment_id, status: 'synced', type: 'payment' })
       } catch (err) {
@@ -354,6 +375,13 @@ export async function syncPendingOrderUpdates() {
         // Mark as synced and clean up
         await updateOrderUpdateSyncStatus(update.update_id, 'synced')
         await removeSyncedOrderUpdate(update.update_id)
+
+        // Clear cached data for this table to prevent stale items appearing
+        if (update.table_id) {
+          clearOrdersCacheForTable(update.table_id)
+          clearTableOrdersLocalCache(update.table_id)
+        }
+
         synced++
         emitSyncEvent('sync-progress', { updateId: update.update_id, status: 'synced', type: 'order_update' })
       } catch (err) {
@@ -383,6 +411,14 @@ export async function syncAll() {
   // (the data is now in sync with the server)
   if (paymentsResult.synced > 0) {
     clearAllOfflinePaidTables()
+  }
+
+  // If any orders, updates, or payments were synced, clear all order caches
+  // This is an aggressive but safe approach to ensure no stale data remains
+  const totalSynced = (ordersResult.synced || 0) + (orderUpdatesResult.synced || 0) + (paymentsResult.synced || 0)
+  if (totalSynced > 0) {
+    clearAllOrdersCache()
+    console.log(`[SyncManager] Cleared all order caches after syncing ${totalSynced} items`)
   }
 
   return {
