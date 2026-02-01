@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { supabase, clearOrdersCacheForTable, wasTablePaidOffline, clearTablePaidOfflineStatus } from '@/lib/supabase'
+import { supabase, clearOrdersCacheForTable, clearTableOrdersLocalCache, wasTablePaidOffline, clearTablePaidOfflineStatus } from '@/lib/supabase'
 import QRCode from 'qrcode'
 import InvoiceClientModal from '@/components/invoices/InvoiceClientModal'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
@@ -776,13 +776,18 @@ export default function Tables() {
 
   const openOrderModal = async (table) => {
     console.log('========== OPENING ORDER MODAL ==========')
-    console.log('Table:', table.table_number)
+    console.log('Table:', table.table_number, 'ID:', table.id)
 
     // IMPORTANT: Clear state FIRST to prevent duplicates from previous modal opens
     console.log('STEP 1: Clearing ALL state completely')
     setOrderItems([])
     setCurrentOrder(null)
     setSelectedTable(null)
+
+    // Clear any cached data for this table to prevent stale items
+    // This is critical for offline mode where cached responses might be stale
+    clearOrdersCacheForTable(table.id)
+    clearTableOrdersLocalCache(table.id)
 
     // Small delay to ensure React has processed the state clears
     await new Promise(resolve => setTimeout(resolve, 0))
@@ -829,6 +834,14 @@ export default function Tables() {
         // Don't throw - we'll proceed with empty order
       } else {
         existingOrder = existingOrders && existingOrders.length > 0 ? existingOrders[0] : null
+
+        // CRITICAL VALIDATION: Ensure the returned order actually belongs to this table
+        // This prevents cached responses from other tables being used incorrectly
+        if (existingOrder && existingOrder.table_id !== table.id) {
+          console.error('CACHE MISMATCH: Order table_id', existingOrder.table_id, 'does not match selected table', table.id)
+          console.error('Discarding stale cached order to prevent cross-table pollution')
+          existingOrder = null
+        }
       }
 
       console.log('STEP 4: Existing order found?', !!existingOrder)
@@ -894,6 +907,9 @@ export default function Tables() {
   const openPaymentModal = async (table) => {
     setSelectedTable(table)
 
+    // Clear Supabase cache for this table to prevent stale cached responses
+    clearOrdersCacheForTable(table.id)
+
     const cacheKey = `table_orders_${table.id}`
 
     try {
@@ -914,7 +930,13 @@ export default function Tables() {
           throw ordersError
         }
 
-        orders = ordersData || []
+        // CRITICAL VALIDATION: Filter to only orders that actually belong to this table
+        // This prevents cached responses from other tables being used incorrectly
+        orders = (ordersData || []).filter(order => order.table_id === table.id)
+
+        if (orders.length !== (ordersData || []).length) {
+          console.warn('CACHE MISMATCH: Filtered out', (ordersData || []).length - orders.length, 'orders with wrong table_id')
+        }
 
         // Cache the orders for offline use
         if (orders.length > 0) {
@@ -923,6 +945,9 @@ export default function Tables() {
           } catch (e) {
             console.warn('Failed to cache orders:', e)
           }
+        } else {
+          // Clear cache if no orders
+          localStorage.removeItem(cacheKey)
         }
 
         // Also fetch split bills when online
@@ -941,7 +966,15 @@ export default function Tables() {
         try {
           const cached = localStorage.getItem(cacheKey)
           if (cached) {
-            orders = JSON.parse(cached)
+            const cachedOrders = JSON.parse(cached)
+            // CRITICAL VALIDATION: Filter to only orders that belong to this table
+            orders = cachedOrders.filter(order => order.table_id === table.id)
+
+            if (orders.length !== cachedOrders.length) {
+              console.warn('CACHE MISMATCH: Filtered out', cachedOrders.length - orders.length, 'cached orders with wrong table_id')
+              // Clear the corrupted cache
+              localStorage.removeItem(cacheKey)
+            }
           }
         } catch (e) {
           console.warn('Failed to load cached orders:', e)
@@ -972,8 +1005,11 @@ export default function Tables() {
 
       // Deduplicate: filter out offline orders that were already synced to Supabase
       // (their client_id will match an order in Supabase)
+      // Also double-check table_id matches to prevent cross-table pollution
       const supabaseClientIds = new Set(orders.filter(o => o.client_id).map(o => o.client_id))
-      const uniqueOfflineOrders = formattedOfflineOrders.filter(o => !supabaseClientIds.has(o.client_id))
+      const uniqueOfflineOrders = formattedOfflineOrders.filter(o =>
+        !supabaseClientIds.has(o.client_id) && o.table_id === table.id
+      )
 
       // Merge pending order updates into their parent orders
       // This handles items added to existing orders while offline
