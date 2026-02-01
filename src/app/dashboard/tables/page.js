@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { supabase, clearOrdersCacheForTable, clearTableOrdersLocalCache, wasTablePaidOffline, clearTablePaidOfflineStatus } from '@/lib/supabase'
+import { supabase, clearOrdersCacheForTable, clearTableOrdersLocalCache, clearAllOrdersCache, wasTablePaidOffline, clearTablePaidOfflineStatus } from '@/lib/supabase'
 import QRCode from 'qrcode'
 import InvoiceClientModal from '@/components/invoices/InvoiceClientModal'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
@@ -784,9 +784,10 @@ export default function Tables() {
     setCurrentOrder(null)
     setSelectedTable(null)
 
-    // Clear any cached data for this table to prevent stale items
-    // This is critical for offline mode where cached responses might be stale
-    clearOrdersCacheForTable(table.id)
+    // AGGRESSIVE CACHE CLEARING: Clear ALL order caches to prevent stale data
+    // This is critical because cached Supabase responses may show orders as unpaid
+    // when they've actually been paid (after offline payment + sync)
+    clearAllOrdersCache()
     clearTableOrdersLocalCache(table.id)
 
     // Small delay to ensure React has processed the state clears
@@ -795,25 +796,58 @@ export default function Tables() {
     console.log('STEP 2: Setting selected table')
     setSelectedTable(table)
 
-    // Check if this table was paid offline - if so, skip loading cached orders
-    // The cache might still contain stale "unpaid" orders
-    const wasPaidOffline = wasTablePaidOffline(table.id)
+    // CRITICAL: When offline, DON'T trust cached Supabase data for orders
+    // The cache may contain orders that were paid since the cache was created
+    // Only check for pending offline orders in IndexedDB (which are trustworthy)
+    if (!navigator.onLine) {
+      console.log('OFFLINE MODE: Checking for pending offline orders only')
 
-    // If we're back online, clear the offline paid status
-    if (navigator.onLine && wasPaidOffline) {
-      clearTablePaidOfflineStatus(table.id)
-    }
+      // Check for pending offline orders for this table in IndexedDB
+      try {
+        const pendingOrders = await getPendingOrdersForTable(table.id)
+        if (pendingOrders && pendingOrders.length > 0) {
+          // Use the most recent pending offline order
+          const latestOrder = pendingOrders[pendingOrders.length - 1]
+          console.log('Found pending offline order:', latestOrder.client_id)
 
-    // If paid offline and still offline, start with empty order (don't load cached data)
-    if (wasPaidOffline && !navigator.onLine) {
-      console.log('Table was paid offline - starting fresh order')
-      showNotification('info', 'Starting new order')
+          // Format it as currentOrder so we can add items to it
+          setCurrentOrder({
+            client_id: latestOrder.client_id,
+            table_id: latestOrder.table_id,
+            order_items: latestOrder.order_items || [],
+            isOfflineOrder: true
+          })
+
+          // Load the items
+          const itemsMap = {}
+          latestOrder.order_items?.forEach(item => {
+            if (itemsMap[item.menu_item_id]) {
+              itemsMap[item.menu_item_id].quantity += item.quantity
+            } else {
+              itemsMap[item.menu_item_id] = {
+                menu_item_id: item.menu_item_id,
+                name: item.name,
+                price_at_time: item.price_at_time,
+                quantity: item.quantity,
+                isExisting: true,
+                existingQuantity: item.quantity
+              }
+            }
+          })
+          setOrderItems(Object.values(itemsMap))
+        } else {
+          console.log('No pending offline orders - starting fresh')
+        }
+      } catch (err) {
+        console.warn('Error checking offline orders:', err)
+      }
+
       setShowOrderModal(true)
       return
     }
 
+    // ONLINE MODE: Fetch fresh data from Supabase (not from cache)
     // Check if there's an existing open order for this table that is not completed and not paid
-    // Get the most recent unpaid order (there might be multiple)
     console.log('STEP 3: Fetching existing order from database...')
     console.log('Looking for orders with table_id:', table.id)
 
