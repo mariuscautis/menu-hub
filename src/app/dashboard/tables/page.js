@@ -12,6 +12,7 @@ import {
   generateClientId,
   addPendingPayment,
   getPendingOrdersForTable,
+  getPendingPaymentsForTable,
   markOrdersPaidOffline,
   getAllPendingOrdersByTable,
   clearPaidOfflineOrders,
@@ -797,52 +798,63 @@ export default function Tables() {
     console.log('STEP 2: Setting selected table')
     setSelectedTable(table)
 
-    // CRITICAL: When offline, DON'T trust cached Supabase data for orders
-    // The cache may contain orders that were paid since the cache was created
-    // Only check for pending offline orders in IndexedDB (which are trustworthy)
-    if (!navigator.onLine) {
-      console.log('OFFLINE MODE: Checking for pending offline orders only')
-
-      // Check for pending offline orders for this table in IndexedDB
-      try {
-        const pendingOrders = await getPendingOrdersForTable(table.id)
-        if (pendingOrders && pendingOrders.length > 0) {
-          // Use the most recent pending offline order
-          const latestOrder = pendingOrders[pendingOrders.length - 1]
-          console.log('Found pending offline order:', latestOrder.client_id)
-
-          // Format it as currentOrder so we can add items to it
-          setCurrentOrder({
-            client_id: latestOrder.client_id,
-            table_id: latestOrder.table_id,
-            order_items: latestOrder.order_items || [],
-            isOfflineOrder: true
-          })
-
-          // Load the items
-          const itemsMap = {}
-          latestOrder.order_items?.forEach(item => {
-            if (itemsMap[item.menu_item_id]) {
-              itemsMap[item.menu_item_id].quantity += item.quantity
-            } else {
-              itemsMap[item.menu_item_id] = {
-                menu_item_id: item.menu_item_id,
-                name: item.name,
-                price_at_time: item.price_at_time,
-                quantity: item.quantity,
-                isExisting: true,
-                existingQuantity: item.quantity
-              }
-            }
-          })
-          setOrderItems(Object.values(itemsMap))
-        } else {
-          console.log('No pending offline orders - starting fresh')
-        }
-      } catch (err) {
-        console.warn('Error checking offline orders:', err)
+    // CRITICAL CHECK: If there's a pending payment for this table, it means the table
+    // was just paid (even if offline). Don't load any cached order data - start fresh.
+    try {
+      const pendingPayments = await getPendingPaymentsForTable(table.id)
+      if (pendingPayments && pendingPayments.length > 0) {
+        console.log('Table has pending payment - starting fresh (table was paid offline)')
+        setShowOrderModal(true)
+        return
       }
+    } catch (err) {
+      console.warn('Error checking pending payments:', err)
+    }
 
+    // Check for pending offline orders for this table in IndexedDB
+    // These are orders created offline that haven't been synced yet
+    try {
+      const pendingOrders = await getPendingOrdersForTable(table.id)
+      if (pendingOrders && pendingOrders.length > 0) {
+        // Use the most recent pending offline order
+        const latestOrder = pendingOrders[pendingOrders.length - 1]
+        console.log('Found pending offline order:', latestOrder.client_id)
+
+        // Format it as currentOrder so we can add items to it
+        setCurrentOrder({
+          client_id: latestOrder.client_id,
+          table_id: latestOrder.table_id,
+          order_items: latestOrder.order_items || [],
+          isOfflineOrder: true
+        })
+
+        // Load the items
+        const itemsMap = {}
+        latestOrder.order_items?.forEach(item => {
+          if (itemsMap[item.menu_item_id]) {
+            itemsMap[item.menu_item_id].quantity += item.quantity
+          } else {
+            itemsMap[item.menu_item_id] = {
+              menu_item_id: item.menu_item_id,
+              name: item.name,
+              price_at_time: item.price_at_time,
+              quantity: item.quantity,
+              isExisting: true,
+              existingQuantity: item.quantity
+            }
+          }
+        })
+        setOrderItems(Object.values(itemsMap))
+        setShowOrderModal(true)
+        return
+      }
+    } catch (err) {
+      console.warn('Error checking offline orders:', err)
+    }
+
+    // If offline and no pending orders, start fresh
+    if (!navigator.onLine) {
+      console.log('OFFLINE MODE: No pending orders - starting fresh')
       setShowOrderModal(true)
       return
     }
