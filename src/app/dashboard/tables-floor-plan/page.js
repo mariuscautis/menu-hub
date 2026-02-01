@@ -696,7 +696,7 @@ export default function StaffFloorPlanPage() {
   const handleMarkCleaned = async (table) => {
     // OFFLINE: Update local state immediately
     if (!navigator.onLine) {
-      setFloorTables(prev => prev.map(t =>
+      setTables(prev => prev.map(t =>
         t.id === table.id
           ? { ...t, status: 'available', payment_completed_at: null }
           : t
@@ -734,7 +734,7 @@ export default function StaffFloorPlanPage() {
       console.error('Error marking table as cleaned:', error)
       // If network failed mid-request, update local state anyway
       if (error.message?.includes('fetch') || error.message?.includes('network')) {
-        setFloorTables(prev => prev.map(t =>
+        setTables(prev => prev.map(t =>
           t.id === table.id
             ? { ...t, status: 'available', payment_completed_at: null }
             : t
@@ -1248,7 +1248,7 @@ export default function StaffFloorPlanPage() {
         })
 
         // Update table to show as needing cleaning
-        setFloorTables(prev => prev.map(t =>
+        setTables(prev => prev.map(t =>
           t.id === selectedTable.id
             ? { ...t, status: 'needs_cleaning', payment_completed_at: new Date().toISOString() }
             : t
