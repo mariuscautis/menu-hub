@@ -1090,9 +1090,6 @@ export default function Tables() {
   const openPaymentModal = async (table) => {
     setSelectedTable(table)
 
-    // Clear Supabase cache for this table to prevent stale cached responses
-    clearOrdersCacheForTable(table.id)
-
     const cacheKey = `table_orders_${table.id}`
 
     try {
@@ -1100,6 +1097,9 @@ export default function Tables() {
       let existingSplitBills = []
 
       if (navigator.onLine) {
+        // Clear Supabase cache ONLY when online (before fresh fetch)
+        // Don't clear when offline - we need the cached data!
+        clearOrdersCacheForTable(table.id)
         // Online: fetch from Supabase and cache
         const { data: ordersData, error: ordersError } = await supabase
           .from('orders')
