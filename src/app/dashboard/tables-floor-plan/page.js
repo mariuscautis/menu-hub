@@ -1315,50 +1315,13 @@ export default function StaffFloorPlanPage() {
                 price_at_time: item.price_at_time,
               })))
 
-              // Update localStorage cache to include the new items
-              try {
-                const cacheKey = `table_orders_${selectedTable.id}`
-                const cached = localStorage.getItem(cacheKey)
-                if (cached) {
-                  const cachedOrders = JSON.parse(cached)
-                  const updatedOrders = cachedOrders.map(order => {
-                    if (order.id === currentOrder.id) {
-                      // Merge new items into existing order
-                      const mergedItems = [...(order.order_items || [])]
-                      for (const newItem of itemsToSave) {
-                        const existingIdx = mergedItems.findIndex(i => i.menu_item_id === newItem.menu_item_id)
-                        if (existingIdx >= 0) {
-                          mergedItems[existingIdx] = {
-                            ...mergedItems[existingIdx],
-                            quantity: mergedItems[existingIdx].quantity + newItem.quantity
-                          }
-                        } else {
-                          mergedItems.push({
-                            id: `offline_update_${Date.now()}`,
-                            menu_item_id: newItem.menu_item_id,
-                            name: newItem.name,
-                            quantity: newItem.quantity,
-                            price_at_time: newItem.price_at_time,
-                          })
-                        }
-                      }
-                      return {
-                        ...order,
-                        order_items: mergedItems,
-                        total: (order.total || 0) + totalToSave
-                      }
-                    }
-                    return order
-                  })
-                  localStorage.setItem(cacheKey, JSON.stringify(updatedOrders))
-                }
-              } catch (e) {
-                console.warn('Failed to update cached orders:', e)
-              }
+              // NOTE: We do NOT update localStorage cache here to avoid double-counting!
+              // The cache stays as the "online state" and pending updates are the "offline delta"
+              // When loading the order, we merge: cache + pending updates = full state
+              // If we updated the cache here, items would be counted twice when loading
 
               // Recalculate table order info to include the new offline items
               // This uses getAllPendingOrderUpdatesByTable() which will include our just-added items
-              // We do NOT manually update the total here to avoid double-counting
               await fetchTableOrderInfo(restaurant.id)
 
               setShowOrderModal(false)
