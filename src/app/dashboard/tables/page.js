@@ -2151,17 +2151,10 @@ export default function Tables() {
               // The items are stored in IndexedDB and will be merged by openPaymentModal/openOrderModal.
               // Updating localStorage too would cause duplicate items when the modal reads from both sources.
 
-              // Update local table state
-              setTableOrderInfo(prev => {
-                const existing = prev[selectedTable.id] || { count: 0, total: 0, readyDepartments: [] }
-                return {
-                  ...prev,
-                  [selectedTable.id]: {
-                    ...existing,
-                    total: existing.total + totalToSave,
-                  }
-                }
-              })
+              // Recalculate table order info to include the new offline items
+              // This uses getAllPendingOrderUpdatesByTable() which will include our just-added items
+              // We do NOT manually update the total here to avoid double-counting
+              await fetchTableOrderInfo(restaurant.id)
 
               setShowOrderModal(false)
               setSelectedTable(null)
@@ -2187,17 +2180,8 @@ export default function Tables() {
               totalToSave
             )
 
-            // Update local table state
-            setTableOrderInfo(prev => {
-              const existing = prev[selectedTable.id] || { count: 0, total: 0, readyDepartments: [] }
-              return {
-                ...prev,
-                [selectedTable.id]: {
-                  ...existing,
-                  total: existing.total + totalToSave,
-                }
-              }
-            })
+            // Recalculate table order info to include the updated offline items
+            await fetchTableOrderInfo(restaurant.id)
 
             setShowOrderModal(false)
             setSelectedTable(null)
@@ -2223,18 +2207,10 @@ export default function Tables() {
             price_at_time: item.price_at_time,
           })))
 
-          // Update local table state to show the new order immediately
-          setTableOrderInfo(prev => {
-            const existing = prev[selectedTable.id] || { count: 0, total: 0, readyDepartments: [] }
-            return {
-              ...prev,
-              [selectedTable.id]: {
-                count: existing.count + (currentOrder ? 0 : 1), // Don't increment count for updates
-                total: existing.total + totalToSave,
-                readyDepartments: existing.readyDepartments,
-              }
-            }
-          })
+          // Recalculate table order info to include the new offline order
+          // This uses getAllPendingOrderUpdatesByTable() which will include our just-added items
+          // We do NOT manually update the total here to avoid double-counting
+          await fetchTableOrderInfo(restaurant.id)
 
           setShowOrderModal(false)
           setSelectedTable(null)
