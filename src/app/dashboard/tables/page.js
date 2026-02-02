@@ -875,39 +875,75 @@ export default function Tables() {
     }
 
     // Check for existing orders - try localStorage cache first when offline
-    console.log('STEP 3: Fetching existing order...')
-    console.log('Looking for orders with table_id:', table.id)
+    console.log('========== STEP 3: Fetching existing order ==========')
+    console.log('Table ID:', table.id)
+    console.log('navigator.onLine:', navigator.onLine)
 
     let existingOrder = null
     const cacheKey = `table_orders_${table.id}`
 
+    // DEBUG: Show all localStorage keys related to orders
+    console.log('DEBUG: Checking localStorage for cache key:', cacheKey)
+    const allKeys = []
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key && (key.includes('table_orders') || key.includes('sbcache'))) {
+        allKeys.push(key)
+      }
+    }
+    console.log('DEBUG: All order-related localStorage keys:', allKeys)
+
     if (!navigator.onLine) {
       // OFFLINE MODE: Try to load existing order from localStorage cache
       // This handles the case where user ordered online, then went offline
-      console.log('OFFLINE MODE: Checking localStorage cache for existing orders')
+      console.log('========== OFFLINE MODE ==========')
+      console.log('Checking localStorage cache for existing orders...')
       try {
         const cached = localStorage.getItem(cacheKey)
+        console.log('DEBUG: Raw cached value exists:', !!cached)
         if (cached) {
+          console.log('DEBUG: Cache found, length:', cached.length)
           const cachedOrders = JSON.parse(cached)
+          console.log('DEBUG: Parsed cached orders:', cachedOrders.length, 'orders')
+          console.log('DEBUG: Cached orders:', cachedOrders.map(o => ({
+            id: o.id,
+            table_id: o.table_id,
+            status: o.status,
+            paid: o.paid,
+            items: o.order_items?.length || 0
+          })))
+
           // Find unpaid orders for this table
           const unpaidOrders = cachedOrders.filter(order =>
             order.table_id === table.id &&
             !order.paid &&
             ['pending', 'preparing', 'ready'].includes(order.status)
           )
+          console.log('DEBUG: Filtered unpaid orders:', unpaidOrders.length)
+
           if (unpaidOrders.length > 0) {
             // Use the most recent order
             existingOrder = unpaidOrders[unpaidOrders.length - 1]
-            console.log('Found cached order:', existingOrder.id)
+            console.log('SUCCESS: Found cached order:', existingOrder.id)
+            console.log('DEBUG: Cached order items:', existingOrder.order_items?.map(i => ({
+              menu_item_id: i.menu_item_id,
+              name: i.name,
+              quantity: i.quantity
+            })))
+          } else {
+            console.log('DEBUG: No unpaid orders found in cache')
           }
+        } else {
+          console.log('DEBUG: No cache found for key:', cacheKey)
         }
       } catch (e) {
-        console.warn('Failed to load cached orders:', e)
+        console.error('ERROR: Failed to load cached orders:', e)
       }
 
       // If no cached order found, start fresh
       if (!existingOrder) {
-        console.log('OFFLINE MODE: No cached orders - starting fresh')
+        console.log('OFFLINE MODE: No cached orders - starting fresh order')
+        console.log('========== OPENING MODAL (FRESH) ==========')
         setShowOrderModal(true)
         return
       }
@@ -2115,6 +2151,7 @@ export default function Tables() {
       }
 
       // Cache orders for this table (for offline payment support)
+      console.log('========== CACHING ORDERS FOR OFFLINE USE ==========')
       try {
         const { data: ordersData } = await supabase
           .from('orders')
@@ -2123,11 +2160,26 @@ export default function Tables() {
           .is('paid', false)
           .neq('status', 'cancelled')
           .order('created_at', { ascending: true })
+        console.log('DEBUG: Orders to cache:', ordersData?.length || 0)
         if (ordersData && ordersData.length > 0) {
-          localStorage.setItem(`table_orders_${selectedTable.id}`, JSON.stringify(ordersData))
+          const cacheKey = `table_orders_${selectedTable.id}`
+          console.log('DEBUG: Caching to key:', cacheKey)
+          console.log('DEBUG: Orders being cached:', ordersData.map(o => ({
+            id: o.id,
+            table_id: o.table_id,
+            status: o.status,
+            items: o.order_items?.map(i => ({ name: i.name, qty: i.quantity }))
+          })))
+          localStorage.setItem(cacheKey, JSON.stringify(ordersData))
+          console.log('SUCCESS: Orders cached successfully')
+          // Verify the cache was saved
+          const verify = localStorage.getItem(cacheKey)
+          console.log('DEBUG: Cache verification - exists:', !!verify, 'length:', verify?.length)
+        } else {
+          console.log('DEBUG: No orders to cache')
         }
       } catch (e) {
-        console.warn('Failed to cache orders:', e)
+        console.error('ERROR: Failed to cache orders:', e)
       }
 
       // Close modal and reset
@@ -2141,51 +2193,89 @@ export default function Tables() {
 
       showNotification('success', currentOrder ? t('notifications.orderUpdated') : t('notifications.orderPlaced'))
     } catch (error) {
+      console.log('========== ORDER SUBMISSION ERROR ==========')
+      console.log('Error:', error?.message || error)
+      console.log('navigator.onLine:', navigator.onLine)
+
       // Check if this is a network error (offline or connection dropped)
       const isNetworkError = !navigator.onLine ||
         error?.message?.includes('fetch') ||
         error?.message?.includes('network') ||
         error?.code === 'NETWORK_ERROR'
 
+      console.log('Is network error:', isNetworkError)
+
       // If offline/network error, queue order locally
       if (isNetworkError) {
+        console.log('========== OFFLINE ORDER SUBMISSION ==========')
         try {
           let itemsToSave = consolidatedItems
           let totalToSave = total
 
+          console.log('DEBUG: consolidatedItems:', consolidatedItems.map(i => ({
+            menu_item_id: i.menu_item_id,
+            name: i.name,
+            quantity: i.quantity
+          })))
+          console.log('DEBUG: currentOrder exists:', !!currentOrder)
+          console.log('DEBUG: currentOrder.id:', currentOrder?.id)
+          console.log('DEBUG: currentOrder.order_items:', currentOrder?.order_items?.map(i => ({
+            menu_item_id: i.menu_item_id,
+            name: i.name,
+            quantity: i.quantity
+          })))
+
           // If updating an existing order, only save the NEW items
           if (currentOrder) {
+            console.log('DEBUG: Updating existing order - calculating new items only')
             const originalItems = currentOrder.order_items || []
+            console.log('DEBUG: Original items count:', originalItems.length)
+
             itemsToSave = consolidatedItems.filter(newItem => {
               const original = originalItems.find(o => o.menu_item_id === newItem.menu_item_id)
+              const isNew = !original
+              const isIncreased = original && newItem.quantity > original.quantity
+              console.log(`DEBUG: Item ${newItem.name}: original=${original?.quantity || 'N/A'}, new=${newItem.quantity}, isNew=${isNew}, isIncreased=${isIncreased}`)
               if (!original) return true // completely new item
               return newItem.quantity > original.quantity // increased quantity
             }).map(newItem => {
               const original = originalItems.find(o => o.menu_item_id === newItem.menu_item_id)
               if (!original) return newItem
               // Only save the additional quantity
+              const additionalQty = newItem.quantity - original.quantity
+              console.log(`DEBUG: Item ${newItem.name}: saving additional quantity ${additionalQty}`)
               return {
                 ...newItem,
-                quantity: newItem.quantity - original.quantity
+                quantity: additionalQty
               }
             }).filter(item => item.quantity > 0)
 
+            console.log('DEBUG: Items to save after filtering:', itemsToSave.map(i => ({
+              name: i.name,
+              quantity: i.quantity
+            })))
+
             if (itemsToSave.length === 0) {
+              console.log('DEBUG: No new items to save - returning')
               showNotification('info', 'No new items to add. Reducing quantities requires internet.')
               return
             }
 
             totalToSave = itemsToSave.reduce((sum, item) => sum + ((item.price_at_time || 0) * (item.quantity || 0)), 0)
+            console.log('DEBUG: Total to save:', totalToSave)
 
             // If this is an existing order from Supabase, store as an ORDER UPDATE
             // so items get added to the same order (not as separate orders)
             if (currentOrder.id) {
+              console.log('DEBUG: Creating ORDER UPDATE for order ID:', currentOrder.id)
               await addPendingOrderUpdate(currentOrder.id, selectedTable.id, itemsToSave.map(item => ({
                 menu_item_id: item.menu_item_id,
                 name: item.name,
                 quantity: item.quantity,
                 price_at_time: item.price_at_time,
               })))
+
+              console.log('SUCCESS: addPendingOrderUpdate called')
 
               // NOTE: We intentionally do NOT update localStorage cache here.
               // The items are stored in IndexedDB and will be merged by openPaymentModal/openOrderModal.
@@ -2200,15 +2290,18 @@ export default function Tables() {
               setSelectedTable(null)
               setCurrentOrder(null)
               setOrderItems([])
+              console.log('========== OFFLINE ORDER UPDATE COMPLETE ==========')
               showNotification('success', 'Items added to order offline. Will sync when internet is restored.')
               return
             }
+          } else {
+            console.log('DEBUG: No currentOrder - will create new offline order')
           }
 
           // Check if this is an existing OFFLINE order (has client_id but no Supabase id)
           if (currentOrder && currentOrder.client_id && !currentOrder.id) {
             // Update the existing offline order in IndexedDB
-            console.log('Updating existing offline order:', currentOrder.client_id)
+            console.log('DEBUG: Updating existing OFFLINE order (not synced yet):', currentOrder.client_id)
             await updatePendingOrder(
               currentOrder.client_id,
               itemsToSave.map(item => ({
@@ -2232,7 +2325,15 @@ export default function Tables() {
           }
 
           // New order - create a fresh pending order
+          console.log('========== CREATING NEW OFFLINE ORDER ==========')
+          console.log('DEBUG: No existing order found - creating brand new offline order')
           const clientId = generateClientId()
+          console.log('DEBUG: Generated client_id:', clientId)
+          console.log('DEBUG: Items for new order:', itemsToSave.map(i => ({
+            name: i.name,
+            quantity: i.quantity
+          })))
+
           await addPendingOrder({
             client_id: clientId,
             restaurant_id: restaurant.id,
@@ -2247,6 +2348,8 @@ export default function Tables() {
             price_at_time: item.price_at_time,
           })))
 
+          console.log('SUCCESS: New offline order created')
+
           // Recalculate table order info to include the new offline order
           // This uses getAllPendingOrderUpdatesByTable() which will include our just-added items
           // We do NOT manually update the total here to avoid double-counting
@@ -2259,6 +2362,7 @@ export default function Tables() {
           const message = currentOrder
             ? 'Additional items saved offline — will sync when internet is restored.'
             : 'Order saved offline — will sync when internet is restored.'
+          console.log('========== NEW OFFLINE ORDER COMPLETE ==========')
           showNotification('success', message)
           return
         } catch (offlineErr) {
