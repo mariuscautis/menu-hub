@@ -473,6 +473,62 @@ export async function clearPaidOfflineOrders(tableId = null) {
   })
 }
 
+/**
+ * Aggressively clear ALL offline orders for a specific table.
+ * Call this after payment to ensure no stale orders remain.
+ * This removes ALL orders regardless of their sync/paid status.
+ * @param {string} tableId - The table ID to clear orders for
+ */
+export async function clearAllOfflineOrdersForTable(tableId) {
+  if (!tableId) return
+
+  const db = await openDB()
+  const tx = db.transaction([ORDERS_STORE, ORDER_ITEMS_STORE, ORDER_UPDATES_STORE], 'readwrite')
+  const orderStore = tx.objectStore(ORDERS_STORE)
+  const itemsStore = tx.objectStore(ORDER_ITEMS_STORE)
+  const updatesStore = tx.objectStore(ORDER_UPDATES_STORE)
+
+  // Get and remove all orders for this table
+  const ordersRequest = orderStore.getAll()
+  ordersRequest.onsuccess = () => {
+    const orders = ordersRequest.result || []
+    for (const order of orders) {
+      if (order.table_id === tableId) {
+        orderStore.delete(order.client_id)
+        // Clean up items for this order
+        const itemsIndex = itemsStore.index('order_client_id')
+        const itemsReq = itemsIndex.getAllKeys(order.client_id)
+        itemsReq.onsuccess = () => {
+          for (const itemKey of itemsReq.result) {
+            itemsStore.delete(itemKey)
+          }
+        }
+      }
+    }
+  }
+
+  // Also clear any pending order updates for this table
+  const updatesIndex = updatesStore.index('table_id')
+  const updatesRequest = updatesIndex.getAllKeys(tableId)
+  updatesRequest.onsuccess = () => {
+    for (const key of updatesRequest.result || []) {
+      updatesStore.delete(key)
+    }
+  }
+
+  return new Promise((resolve, reject) => {
+    tx.oncomplete = () => {
+      db.close()
+      console.log(`[OfflineQueue] Cleared all offline orders for table ${tableId}`)
+      resolve()
+    }
+    tx.onerror = () => {
+      db.close()
+      reject(tx.error)
+    }
+  })
+}
+
 // ============================================================================
 // OFFLINE CASH PAYMENTS
 // ============================================================================

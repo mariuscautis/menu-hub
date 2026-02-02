@@ -189,25 +189,41 @@ export function clearOrdersCacheForTable(tableId) {
 
   try {
     const keysToRemove = []
+    // Create multiple search patterns to catch all variations
+    const searchPatterns = [
+      tableId,
+      encodeURIComponent(tableId),
+      `table_id=eq.${tableId}`,
+      `table_id%3Deq.${tableId}`, // URL-encoded =
+      `"table_id":"${tableId}"`, // JSON body format
+    ]
+
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i)
       if (key && key.startsWith(CACHE_PREFIX)) {
-        // Clear any cached query that contains this table ID (handles URL encoding too)
-        if (key.includes(tableId)) {
+        // Check if any pattern matches
+        const shouldRemove = searchPatterns.some(pattern => key.includes(pattern))
+        if (shouldRemove) {
           keysToRemove.push(key)
         }
-        // Also check for URL-encoded version
-        if (key.includes(encodeURIComponent(tableId))) {
+        // Also clear any order-related caches for this table
+        // This is more aggressive but prevents stale data
+        if (key.includes('/orders') || key.includes('order_items')) {
           keysToRemove.push(key)
         }
       }
     }
-    for (const key of keysToRemove) {
+
+    // Deduplicate and remove
+    const uniqueKeys = [...new Set(keysToRemove)]
+    for (const key of uniqueKeys) {
       localStorage.removeItem(key)
     }
 
     // Also mark this table as "paid offline" so handleNewOrder knows to skip cached data
     markTablePaidOffline(tableId)
+
+    console.log(`[Supabase Cache] Cleared ${uniqueKeys.length} cache entries for table ${tableId}`)
   } catch {
     // Ignore errors
   }

@@ -20,6 +20,7 @@ import {
   addPendingOrderUpdate,
   getPendingOrderUpdatesForTable,
   clearPendingOrderUpdates,
+  clearAllOfflineOrdersForTable,
 } from '@/lib/offlineQueue'
 
 export default function Tables() {
@@ -1528,9 +1529,16 @@ export default function Tables() {
       }
 
       try {
-        // Separate real order IDs from offline order client_ids
-        const orderIds = unpaidOrders.filter(o => o.id && !o.client_id).map(o => o.id)
-        const orderClientIds = unpaidOrders.filter(o => o.client_id).map(o => o.client_id)
+        // Separate orders by type:
+        // - Orders with real ID (from Supabase) go to orderIds - these need to be processed by RPC on sync
+        // - Orders with only client_id (pure offline, not yet synced) go to orderClientIds
+        // Note: Synced orders have BOTH id and client_id - they should go to orderIds since they exist in Supabase
+        const orderIds = unpaidOrders
+          .filter(o => o.id && !o.id.toString().startsWith('offline_'))
+          .map(o => o.id)
+        const orderClientIds = unpaidOrders
+          .filter(o => o.client_id && !o.id) // Only pure offline orders (no Supabase ID yet)
+          .map(o => o.client_id)
 
         // Store payment locally for later sync
         await addPendingPayment({
@@ -1544,7 +1552,7 @@ export default function Tables() {
           user_id: userId,
         })
 
-        // Mark offline orders as paid locally
+        // Mark pure offline orders as paid locally (these are in IndexedDB)
         if (orderClientIds.length > 0) {
           await markOrdersPaidOffline(orderClientIds)
         }
@@ -1567,13 +1575,11 @@ export default function Tables() {
         setShowPaymentModal(false)
         setUnpaidOrders([])
 
-        // Clean up any stale offline orders for this table
-        await clearPaidOfflineOrders(selectedTable.id)
+        // AGGRESSIVE CLEANUP: Remove ALL offline data for this table to prevent stale orders
+        // This is critical because old orders must not appear when creating new orders
+        await clearAllOfflineOrdersForTable(selectedTable.id)
 
-        // Clear any pending order updates for this table
-        await clearPendingOrderUpdates(selectedTable.id)
-
-        // Clear the localStorage cache for this table
+        // Also clear localStorage cache for this table
         localStorage.removeItem(`table_orders_${selectedTable.id}`)
 
         // Clear the Supabase query cache for this table's orders
@@ -1642,7 +1648,15 @@ export default function Tables() {
   }
 
   const calculateTableTotal = () => {
-    return unpaidOrders.reduce((sum, order) => sum + (order.total || 0), 0)
+    // Calculate total from items instead of using stored order.total
+    // This ensures accuracy even when stored totals are stale or incorrect
+    return unpaidOrders.reduce((orderSum, order) => {
+      const orderItemsTotal = (order.order_items || []).reduce((itemSum, item) => {
+        return itemSum + ((item.price_at_time || 0) * (item.quantity || 0))
+      }, 0)
+      // Fall back to order.total if no items (shouldn't happen, but safety first)
+      return orderSum + (orderItemsTotal > 0 ? orderItemsTotal : (order.total || 0))
+    }, 0)
   }
 
   const processSplitBillPayment = async (bill, paymentMethod) => {
@@ -2722,16 +2736,22 @@ export default function Tables() {
                 <div className="mb-6">
                   <h3 className="font-semibold text-slate-700 mb-3">{t('paymentModal.ordersSummary')}</h3>
                   <div className="bg-slate-50 rounded-xl p-4 space-y-3 max-h-64 overflow-y-auto">
-                    {unpaidOrders.map((order, index) => (
+                    {unpaidOrders.map((order, index) => {
+                      // Calculate order total from items for accuracy
+                      const orderTotal = (order.order_items || []).reduce((sum, item) => {
+                        return sum + ((item.price_at_time || 0) * (item.quantity || 0))
+                      }, 0) || order.total || 0
+                      return (
                       <div key={order.id} className="border-b border-slate-200 pb-3 last:border-0 last:pb-0">
                         <div className="flex justify-between items-start mb-2">
                           <span className="text-sm font-medium text-slate-600">{t('paymentModal.orderNumber').replace('{number}', index + 1)}</span>
-                          <span className="text-sm font-semibold text-[#6262bd]">£{order.total?.toFixed(2)}</span>
+                          <span className="text-sm font-semibold text-[#6262bd]">£{orderTotal.toFixed(2)}</span>
                         </div>
                         <div className="text-xs text-slate-500 space-y-1">
                           {order.order_items?.map((item, idx) => (
-                            <div key={idx}>
-                              {item.quantity}x {item.name}
+                            <div key={idx} className="flex justify-between items-center">
+                              <span>{item.quantity}x {item.name}</span>
+                              <span className="text-slate-600 font-medium">£{((item.price_at_time || 0) * (item.quantity || 1)).toFixed(2)}</span>
                             </div>
                           ))}
                         </div>
@@ -2739,7 +2759,8 @@ export default function Tables() {
                           {t('paymentModal.status')}: <span className="capitalize">{order.status}</span>
                         </div>
                       </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </div>
 
@@ -3158,7 +3179,12 @@ export default function Tables() {
                   <div className="flex justify-between items-center">
                     <span className="font-semibold text-slate-700">Total Unpaid</span>
                     <span className="text-2xl font-bold text-[#6262bd]">
-                      £{tableOrderDetails.reduce((sum, order) => sum + (order.total || 0), 0).toFixed(2)}
+                      £{tableOrderDetails.reduce((orderSum, order) => {
+                        const orderItemsTotal = (order.order_items || []).reduce((itemSum, item) => {
+                          return itemSum + ((item.price_at_time || 0) * (item.quantity || 0))
+                        }, 0)
+                        return orderSum + (orderItemsTotal > 0 ? orderItemsTotal : (order.total || 0))
+                      }, 0).toFixed(2)}
                     </span>
                   </div>
                 </div>
