@@ -802,8 +802,8 @@ export default function Tables() {
     // DEPLOYMENT TEST: This alert confirms the latest code is deployed
     // Remove this after confirming deployment works
     if (typeof window !== 'undefined') {
-      window.__DEPLOYMENT_VERSION__ = 'v4-slice-fix'
-      console.log('%c DEPLOYMENT VERSION: v4-slice-fix ', 'background: green; color: white; font-size: 20px;')
+      window.__DEPLOYMENT_VERSION__ = 'v5-merge-orders'
+      console.log('%c DEPLOYMENT VERSION: v5-merge-orders ', 'background: blue; color: white; font-size: 20px;')
     }
     console.log('========== OPENING ORDER MODAL ==========')
     console.log('Table:', table.table_number, 'ID:', table.id)
