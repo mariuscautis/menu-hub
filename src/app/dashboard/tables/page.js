@@ -937,7 +937,6 @@ export default function Tables() {
       console.log('Existing order ID:', existingOrder.id)
       console.log('Raw order_items from DB:', existingOrder.order_items)
 
-      setCurrentOrder(existingOrder)
       // Consolidate existing order items (in case there are duplicates in DB)
       const itemsMap = {}
       existingOrder.order_items?.forEach(item => {
@@ -970,7 +969,8 @@ export default function Tables() {
               if (itemsMap[item.menu_item_id]) {
                 // Add to existing item quantity
                 itemsMap[item.menu_item_id].quantity += item.quantity
-                // Don't update existingQuantity - these are NEW items added offline
+                // ALSO update existingQuantity so these aren't treated as "new" on next submit
+                itemsMap[item.menu_item_id].existingQuantity += item.quantity
               } else {
                 // New item from offline update
                 itemsMap[item.menu_item_id] = {
@@ -992,6 +992,22 @@ export default function Tables() {
       const normalizedItems = Object.values(itemsMap)
       console.log('STEP 5: Setting orderItems to:', normalizedItems.length, 'items')
       console.log('Items:', normalizedItems.map(i => `${i.name} x${i.quantity}`))
+
+      // CRITICAL: Update currentOrder.order_items to include merged offline items
+      // This ensures that when submitting, the comparison uses ALL existing items
+      // (both from Supabase AND from pending offline updates) to avoid creating
+      // duplicate pending updates for items that were already added offline
+      const mergedOrderItems = normalizedItems.map(item => ({
+        menu_item_id: item.menu_item_id,
+        name: item.name,
+        price_at_time: item.price_at_time,
+        quantity: item.quantity, // Use the merged quantity (online + offline)
+      }))
+      setCurrentOrder({
+        ...existingOrder,
+        order_items: mergedOrderItems
+      })
+
       setOrderItems(normalizedItems)
     } else {
       console.log('STEP 5: No existing order - confirmed empty orderItems')
