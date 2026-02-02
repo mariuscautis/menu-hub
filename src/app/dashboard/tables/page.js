@@ -874,63 +874,87 @@ export default function Tables() {
       console.warn('Error checking offline orders:', err)
     }
 
-    // If offline and no pending orders, start fresh
-    if (!navigator.onLine) {
-      console.log('OFFLINE MODE: No pending orders - starting fresh')
-      setShowOrderModal(true)
-      return
-    }
-
-    // ONLINE MODE: Fetch fresh data from Supabase (not from cache)
-    // Check if there's an existing open order for this table that is not completed and not paid
-    console.log('STEP 3: Fetching existing order from database...')
+    // Check for existing orders - try localStorage cache first when offline
+    console.log('STEP 3: Fetching existing order...')
     console.log('Looking for orders with table_id:', table.id)
 
     let existingOrder = null
+    const cacheKey = `table_orders_${table.id}`
 
-    try {
-      const { data: existingOrders, error: fetchError } = await supabase
-        .from('orders')
-        .select('*, order_items(*)')
-        .eq('table_id', table.id)
-        .in('status', ['pending', 'preparing', 'ready'])
-        .is('paid', false)
-        .order('created_at', { ascending: false })
-        .limit(1)
-
-      if (fetchError) {
-        console.error('Error fetching existing order:', fetchError)
-        // Don't throw - we'll proceed with empty order
-      } else {
-        existingOrder = existingOrders && existingOrders.length > 0 ? existingOrders[0] : null
-
-        // CRITICAL VALIDATION: Ensure the returned order actually belongs to this table
-        // This prevents cached responses from other tables being used incorrectly
-        if (existingOrder && existingOrder.table_id !== table.id) {
-          console.error('CACHE MISMATCH: Order table_id', existingOrder.table_id, 'does not match selected table', table.id)
-          console.error('Discarding stale cached order to prevent cross-table pollution')
-          existingOrder = null
+    if (!navigator.onLine) {
+      // OFFLINE MODE: Try to load existing order from localStorage cache
+      // This handles the case where user ordered online, then went offline
+      console.log('OFFLINE MODE: Checking localStorage cache for existing orders')
+      try {
+        const cached = localStorage.getItem(cacheKey)
+        if (cached) {
+          const cachedOrders = JSON.parse(cached)
+          // Find unpaid orders for this table
+          const unpaidOrders = cachedOrders.filter(order =>
+            order.table_id === table.id &&
+            !order.paid &&
+            ['pending', 'preparing', 'ready'].includes(order.status)
+          )
+          if (unpaidOrders.length > 0) {
+            // Use the most recent order
+            existingOrder = unpaidOrders[unpaidOrders.length - 1]
+            console.log('Found cached order:', existingOrder.id)
+          }
         }
+      } catch (e) {
+        console.warn('Failed to load cached orders:', e)
       }
 
-      console.log('STEP 4: Existing order found?', !!existingOrder)
+      // If no cached order found, start fresh
       if (!existingOrder) {
-        // Debug: Let's see ALL orders for this table to understand why
-        const { data: allOrders } = await supabase
+        console.log('OFFLINE MODE: No cached orders - starting fresh')
+        setShowOrderModal(true)
+        return
+      }
+    } else {
+      // ONLINE MODE: Fetch fresh data from Supabase
+      try {
+        const { data: existingOrders, error: fetchError } = await supabase
           .from('orders')
-          .select('id, status, paid, created_at')
+          .select('*, order_items(*)')
           .eq('table_id', table.id)
+          .in('status', ['pending', 'preparing', 'ready'])
+          .is('paid', false)
           .order('created_at', { ascending: false })
-          .limit(5)
-        console.log('All recent orders for this table:', allOrders)
-      }
-    } catch (err) {
-      // Network error - offline mode
-      console.warn('Offline: could not fetch existing order for table', table.table_number)
-      if (!navigator.onLine) {
+          .limit(1)
+
+        if (fetchError) {
+          console.error('Error fetching existing order:', fetchError)
+          // Don't throw - we'll proceed with empty order
+        } else {
+          existingOrder = existingOrders && existingOrders.length > 0 ? existingOrders[0] : null
+
+          // CRITICAL VALIDATION: Ensure the returned order actually belongs to this table
+          // This prevents cached responses from other tables being used incorrectly
+          if (existingOrder && existingOrder.table_id !== table.id) {
+            console.error('CACHE MISMATCH: Order table_id', existingOrder.table_id, 'does not match selected table', table.id)
+            console.error('Discarding stale cached order to prevent cross-table pollution')
+            existingOrder = null
+          }
+        }
+
+        console.log('STEP 4: Existing order found?', !!existingOrder)
+        if (!existingOrder) {
+          // Debug: Let's see ALL orders for this table to understand why
+          const { data: allOrders } = await supabase
+            .from('orders')
+            .select('id, status, paid, created_at')
+            .eq('table_id', table.id)
+            .order('created_at', { ascending: false })
+            .limit(5)
+          console.log('All recent orders for this table:', allOrders)
+        }
+      } catch (err) {
+        // Network error - offline mode
+        console.warn('Offline: could not fetch existing order for table', table.table_number)
         showNotification('info', 'Offline mode — starting new order')
+        // existingOrder remains null, so we'll start with empty order
       }
-      // existingOrder remains null, so we'll start with empty order
     }
 
     if (existingOrder) {
