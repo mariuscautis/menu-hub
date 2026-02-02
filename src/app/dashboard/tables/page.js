@@ -799,6 +799,12 @@ export default function Tables() {
   }
 
   const openOrderModal = async (table) => {
+    // DEPLOYMENT TEST: This alert confirms the latest code is deployed
+    // Remove this after confirming deployment works
+    if (typeof window !== 'undefined') {
+      window.__DEPLOYMENT_VERSION__ = 'v3-2026-02-02'
+      console.log('%c DEPLOYMENT VERSION: v3-2026-02-02 ', 'background: red; color: white; font-size: 20px;')
+    }
     console.log('========== OPENING ORDER MODAL ==========')
     console.log('Table:', table.table_number, 'ID:', table.id)
 
