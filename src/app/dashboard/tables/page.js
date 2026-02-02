@@ -875,6 +875,7 @@ export default function Tables() {
     }
 
     // Check for existing orders - try localStorage cache first when offline
+    // DEBUG BUILD: 2026-02-02-v2
     console.log('========== STEP 3: Fetching existing order ==========')
     console.log('Table ID:', table.id)
     console.log('navigator.onLine:', navigator.onLine)
