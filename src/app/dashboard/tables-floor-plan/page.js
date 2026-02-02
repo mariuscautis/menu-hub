@@ -12,10 +12,12 @@ import {
   getPendingOrdersForTable,
   markOrdersPaidOffline,
   getAllPendingOrdersByTable,
+  getAllPendingOrderUpdatesByTable,
   clearPaidOfflineOrders,
   addPendingOrderUpdate,
   getPendingOrderUpdatesForTable,
   clearPendingOrderUpdates,
+  updatePendingOrder,
 } from '@/lib/offlineQueue'
 
 // Read-only Table Component for Staff
@@ -630,6 +632,26 @@ export default function StaffFloorPlanPage() {
       console.warn('Failed to get offline orders for merge:', err)
     }
 
+    // Also merge pending ORDER UPDATES (items added to existing orders while offline)
+    try {
+      const pendingUpdatesByTable = await getAllPendingOrderUpdatesByTable()
+      Object.entries(pendingUpdatesByTable).forEach(([tableId, updateData]) => {
+        if (orderInfo[tableId]) {
+          // Add pending update totals to existing table data
+          orderInfo[tableId].total += updateData.total
+        } else {
+          // Table only has pending updates (edge case - shouldn't happen normally)
+          orderInfo[tableId] = {
+            count: 1,
+            total: updateData.total,
+            readyDepartments: [],
+          }
+        }
+      })
+    } catch (err) {
+      console.warn('Failed to get pending order updates for merge:', err)
+    }
+
     setTableOrderInfo(orderInfo)
   }
 
@@ -857,45 +879,143 @@ export default function StaffFloorPlanPage() {
       return
     }
 
+    // FIRST: Check for pending offline orders in IndexedDB
     try {
-      // Check if table has existing unpaid orders
-      const { data: existingOrders, error: fetchError } = await supabase
-        .from('orders')
-        .select('*, order_items(*)')
-        .eq('table_id', selectedTable.id)
-        .eq('paid', false)
-        .order('created_at', { ascending: false })
+      const pendingOrders = await getPendingOrdersForTable(selectedTable.id)
+      if (pendingOrders && pendingOrders.length > 0) {
+        // Use the most recent pending offline order
+        const pendingOrder = pendingOrders[pendingOrders.length - 1]
+        setCurrentOrder(pendingOrder)
 
-      if (fetchError) {
-        console.error('Error fetching existing orders:', fetchError)
-        // Don't throw - we'll proceed with empty order
-      } else if (existingOrders && existingOrders.length > 0) {
-        // Load the most recent order for editing
-        const orderToEdit = existingOrders[0]
-        setCurrentOrder(orderToEdit)
-
-        // Map existing items with flags
+        // Map items from the pending order
         const itemsMap = {}
-        orderToEdit.order_items.forEach(item => {
-          itemsMap[item.menu_item_id] = {
-            menu_item_id: item.menu_item_id,
-            name: item.name,
-            price_at_time: item.price_at_time,
-            quantity: item.quantity,
-            isExisting: true,
-            existingQuantity: item.quantity
-          }
-        })
-
+        if (pendingOrder.items && pendingOrder.items.length > 0) {
+          pendingOrder.items.forEach(item => {
+            itemsMap[item.menu_item_id] = {
+              menu_item_id: item.menu_item_id,
+              name: item.name,
+              price_at_time: item.price_at_time,
+              quantity: item.quantity,
+              isExisting: true,
+              existingQuantity: item.quantity
+            }
+          })
+        }
         setOrderItems(Object.values(itemsMap))
+        setShowOrderModal(true)
+        return
       }
     } catch (err) {
-      // Network error - offline mode
-      console.warn('Offline: could not fetch existing order for table', selectedTable.table_number)
-      if (!navigator.onLine) {
-        showNotificationMessage('info', 'Offline mode — starting new order')
+      console.warn('Error checking offline orders:', err)
+    }
+
+    let existingOrder = null
+    const cacheKey = `table_orders_${selectedTable.id}`
+
+    if (!navigator.onLine) {
+      // OFFLINE MODE: Try to load existing order from localStorage cache
+      try {
+        const cached = localStorage.getItem(cacheKey)
+        if (cached) {
+          const cachedOrders = JSON.parse(cached)
+          const unpaidOrders = cachedOrders.filter(order =>
+            order.table_id === selectedTable.id &&
+            !order.paid &&
+            ['pending', 'preparing', 'ready'].includes(order.status)
+          )
+          if (unpaidOrders.length > 0) {
+            existingOrder = unpaidOrders[unpaidOrders.length - 1]
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to load cached orders:', e)
       }
-      // existingOrders remains empty, so we'll start with empty order
+
+      if (!existingOrder) {
+        showNotificationMessage('info', 'Offline mode — starting new order')
+        setShowOrderModal(true)
+        return
+      }
+    } else {
+      // ONLINE MODE: Fetch from Supabase
+      try {
+        const { data: existingOrders, error: fetchError } = await supabase
+          .from('orders')
+          .select('*, order_items(*)')
+          .eq('table_id', selectedTable.id)
+          .eq('paid', false)
+          .order('created_at', { ascending: false })
+
+        if (fetchError) {
+          console.error('Error fetching existing orders:', fetchError)
+        } else if (existingOrders && existingOrders.length > 0) {
+          existingOrder = existingOrders[0]
+        }
+      } catch (err) {
+        console.warn('Network error fetching orders:', err)
+      }
+    }
+
+    if (existingOrder) {
+      // Map existing items with flags
+      const itemsMap = {}
+      const orderItems = existingOrder.order_items || []
+      orderItems.forEach(item => {
+        itemsMap[item.menu_item_id] = {
+          menu_item_id: item.menu_item_id,
+          name: item.name,
+          price_at_time: item.price_at_time,
+          quantity: item.quantity,
+          isExisting: true,
+          existingQuantity: item.quantity
+        }
+      })
+
+      // CRITICAL: Merge any pending offline updates for this order
+      if (existingOrder.id) {
+        try {
+          const pendingUpdates = await getPendingOrderUpdatesForTable(selectedTable.id)
+          if (pendingUpdates && pendingUpdates.length > 0) {
+            for (const update of pendingUpdates) {
+              if (update.order_id === existingOrder.id && update.items) {
+                for (const item of update.items) {
+                  if (itemsMap[item.menu_item_id]) {
+                    // Item exists - add the offline quantity
+                    itemsMap[item.menu_item_id].quantity += item.quantity
+                  } else {
+                    // New item from offline update
+                    itemsMap[item.menu_item_id] = {
+                      menu_item_id: item.menu_item_id,
+                      name: item.name,
+                      price_at_time: item.price_at_time,
+                      quantity: item.quantity,
+                      isExisting: true,
+                      existingQuantity: item.quantity
+                    }
+                  }
+                }
+              }
+            }
+          }
+        } catch (err) {
+          console.warn('Error merging pending order updates:', err)
+        }
+      }
+
+      // Normalize items for consistency
+      const normalizedItems = Object.values(itemsMap)
+
+      // Update currentOrder with merged items to prevent duplicates on submit
+      setCurrentOrder({
+        ...existingOrder,
+        order_items: normalizedItems.map(item => ({
+          menu_item_id: item.menu_item_id,
+          name: item.name,
+          price_at_time: item.price_at_time,
+          quantity: item.quantity,
+        }))
+      })
+      setOrderItems(normalizedItems)
     }
 
     setShowOrderModal(true)
@@ -1193,17 +1313,10 @@ export default function StaffFloorPlanPage() {
                 console.warn('Failed to update cached orders:', e)
               }
 
-              // Update local table state
-              setTableOrderInfo(prev => {
-                const existing = prev[selectedTable.id] || { count: 0, total: 0, readyDepartments: [] }
-                return {
-                  ...prev,
-                  [selectedTable.id]: {
-                    ...existing,
-                    total: existing.total + totalToSave,
-                  }
-                }
-              })
+              // Recalculate table order info to include the new offline items
+              // This uses getAllPendingOrderUpdatesByTable() which will include our just-added items
+              // We do NOT manually update the total here to avoid double-counting
+              await fetchTableOrderInfo(restaurant.id)
 
               setShowOrderModal(false)
               setCurrentOrder(null)
@@ -3150,7 +3263,7 @@ export default function StaffFloorPlanPage() {
                   {currentOrder ? 'Update Order' : 'Place Order'} - Table {selectedTable.table_number}
                 </h2>
                 {currentOrder && (
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Order #{currentOrder.id.slice(0, 8)}</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Order #{(currentOrder.id || currentOrder.client_id || 'new').slice(0, 8)}</p>
                 )}
               </div>
               <button

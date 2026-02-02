@@ -2586,7 +2586,7 @@ export default function Tables() {
                   {currentOrder ? 'Update Order' : 'Place Order'} - Table {selectedTable.table_number}
                 </h2>
                 {currentOrder && (
-                  <p className="text-sm text-slate-500">Order #{currentOrder.id.slice(0, 8)}</p>
+                  <p className="text-sm text-slate-500">Order #{(currentOrder.id || currentOrder.client_id || 'new').slice(0, 8)}</p>
                 )}
               </div>
               <button
