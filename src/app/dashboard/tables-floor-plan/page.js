@@ -880,30 +880,12 @@ export default function StaffFloorPlanPage() {
     }
 
     // FIRST: Check for pending offline orders in IndexedDB
+    // NOTE: Don't return early - we need to also check for cached online orders and merge them!
+    let pendingOfflineOrders = []
     try {
-      const pendingOrders = await getPendingOrdersForTable(selectedTable.id)
-      if (pendingOrders && pendingOrders.length > 0) {
-        // Use the most recent pending offline order
-        const pendingOrder = pendingOrders[pendingOrders.length - 1]
-        setCurrentOrder(pendingOrder)
-
-        // Map items from the pending order
-        const itemsMap = {}
-        if (pendingOrder.items && pendingOrder.items.length > 0) {
-          pendingOrder.items.forEach(item => {
-            itemsMap[item.menu_item_id] = {
-              menu_item_id: item.menu_item_id,
-              name: item.name,
-              price_at_time: item.price_at_time,
-              quantity: item.quantity,
-              isExisting: true,
-              existingQuantity: item.quantity
-            }
-          })
-        }
-        setOrderItems(Object.values(itemsMap))
-        setShowOrderModal(true)
-        return
+      pendingOfflineOrders = await getPendingOrdersForTable(selectedTable.id) || []
+      if (pendingOfflineOrders.length > 0) {
+        console.log('Found pending offline orders:', pendingOfflineOrders.length)
       }
     } catch (err) {
       console.warn('Error checking offline orders:', err)
@@ -914,6 +896,7 @@ export default function StaffFloorPlanPage() {
 
     if (!navigator.onLine) {
       // OFFLINE MODE: Try to load existing order from localStorage cache
+      console.log('OFFLINE MODE: Checking localStorage cache for existing orders...')
       try {
         const cached = localStorage.getItem(cacheKey)
         if (cached) {
@@ -925,13 +908,47 @@ export default function StaffFloorPlanPage() {
           )
           if (unpaidOrders.length > 0) {
             existingOrder = unpaidOrders[unpaidOrders.length - 1]
+            console.log('OFFLINE: Found cached order:', existingOrder.id)
           }
         }
       } catch (e) {
         console.warn('Failed to load cached orders:', e)
       }
 
+      // If no cached online order, check if we have pending offline orders
+      if (!existingOrder && pendingOfflineOrders.length > 0) {
+        console.log('OFFLINE: No cached orders but found pending offline orders')
+        const latestOfflineOrder = pendingOfflineOrders[pendingOfflineOrders.length - 1]
+        console.log('Using pending offline order:', latestOfflineOrder.client_id)
+
+        // Map items from the pending offline order
+        const itemsMap = {}
+        const offlineItems = latestOfflineOrder.items || latestOfflineOrder.order_items || []
+        offlineItems.forEach(item => {
+          itemsMap[item.menu_item_id] = {
+            menu_item_id: item.menu_item_id,
+            name: item.name,
+            price_at_time: item.price_at_time,
+            quantity: item.quantity,
+            isExisting: true,
+            existingQuantity: item.quantity
+          }
+        })
+
+        setCurrentOrder({
+          client_id: latestOfflineOrder.client_id,
+          table_id: latestOfflineOrder.table_id,
+          order_items: offlineItems,
+          isOfflineOrder: true
+        })
+        setOrderItems(Object.values(itemsMap))
+        setShowOrderModal(true)
+        return
+      }
+
+      // If still no order, start fresh
       if (!existingOrder) {
+        console.log('OFFLINE: No cached orders and no offline orders - starting fresh')
         showNotificationMessage('info', 'Offline mode — starting new order')
         setShowOrderModal(true)
         return
@@ -976,12 +993,14 @@ export default function StaffFloorPlanPage() {
         try {
           const pendingUpdates = await getPendingOrderUpdatesForTable(selectedTable.id)
           if (pendingUpdates && pendingUpdates.length > 0) {
+            console.log('Merging pending order updates:', pendingUpdates.length)
             for (const update of pendingUpdates) {
               if (update.order_id === existingOrder.id && update.items) {
                 for (const item of update.items) {
                   if (itemsMap[item.menu_item_id]) {
                     // Item exists - add the offline quantity
                     itemsMap[item.menu_item_id].quantity += item.quantity
+                    itemsMap[item.menu_item_id].existingQuantity += item.quantity
                   } else {
                     // New item from offline update
                     itemsMap[item.menu_item_id] = {
@@ -999,6 +1018,30 @@ export default function StaffFloorPlanPage() {
           }
         } catch (err) {
           console.warn('Error merging pending order updates:', err)
+        }
+      }
+
+      // ALSO merge any pending offline ORDERS (full orders created while offline)
+      // This handles legacy data created before the order update fix
+      if (pendingOfflineOrders.length > 0) {
+        console.log('Merging pending offline orders into existing online order:', pendingOfflineOrders.length)
+        for (const offlineOrder of pendingOfflineOrders) {
+          const offlineItems = offlineOrder.items || offlineOrder.order_items || []
+          for (const item of offlineItems) {
+            if (itemsMap[item.menu_item_id]) {
+              itemsMap[item.menu_item_id].quantity += item.quantity
+              itemsMap[item.menu_item_id].existingQuantity += item.quantity
+            } else {
+              itemsMap[item.menu_item_id] = {
+                menu_item_id: item.menu_item_id,
+                name: item.name,
+                price_at_time: item.price_at_time,
+                quantity: item.quantity,
+                isExisting: true,
+                existingQuantity: item.quantity
+              }
+            }
+          }
         }
       }
 

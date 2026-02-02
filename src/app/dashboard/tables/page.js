@@ -802,8 +802,8 @@ export default function Tables() {
     // DEPLOYMENT TEST: This alert confirms the latest code is deployed
     // Remove this after confirming deployment works
     if (typeof window !== 'undefined') {
-      window.__DEPLOYMENT_VERSION__ = 'v5-merge-orders'
-      console.log('%c DEPLOYMENT VERSION: v5-merge-orders ', 'background: blue; color: white; font-size: 20px;')
+      window.__DEPLOYMENT_VERSION__ = 'v6-preserve-cache-offline'
+      console.log('%c DEPLOYMENT VERSION: v6-preserve-cache-offline ', 'background: blue; color: white; font-size: 20px;')
     }
     console.log('========== OPENING ORDER MODAL ==========')
     console.log('Table:', table.table_number, 'ID:', table.id)
@@ -817,8 +817,14 @@ export default function Tables() {
     // AGGRESSIVE CACHE CLEARING: Clear ALL order caches to prevent stale data
     // This is critical because cached Supabase responses may show orders as unpaid
     // when they've actually been paid (after offline payment + sync)
-    clearAllOrdersCache()
-    clearTableOrdersLocalCache(table.id)
+    // IMPORTANT: Only clear cache when ONLINE - when offline we NEED the cached data!
+    if (navigator.onLine) {
+      console.log('ONLINE: Clearing order caches to fetch fresh data')
+      clearAllOrdersCache()
+      clearTableOrdersLocalCache(table.id)
+    } else {
+      console.log('OFFLINE: Preserving order caches - will use cached data for offline items')
+    }
 
     // Small delay to ensure React has processed the state clears
     await new Promise(resolve => setTimeout(resolve, 0))
@@ -853,7 +859,7 @@ export default function Tables() {
     }
 
     // Check for existing orders - try localStorage cache first when offline
-    // DEBUG BUILD: 2026-02-02-v2
+    // DEBUG BUILD: 2026-02-02-v6-preserve-cache-offline
     console.log('========== STEP 3: Fetching existing order ==========')
     console.log('Table ID:', table.id)
     console.log('navigator.onLine:', navigator.onLine)
