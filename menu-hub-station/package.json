@@ -1,0 +1,57 @@
+{
+  "name": "menu-hub-station",
+  "version": "1.0.0",
+  "description": "Menu Hub Station - Local network coordinator for offline order sync",
+  "main": "src/main/index.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "concurrently \"npm run dev:renderer\" \"npm run dev:electron\"",
+    "dev:renderer": "vite",
+    "dev:electron": "wait-on http://localhost:5173 && electron .",
+    "build": "vite build && electron-builder",
+    "build:win": "vite build && electron-builder --win",
+    "build:mac": "vite build && electron-builder --mac",
+    "build:linux": "vite build && electron-builder --linux"
+  },
+  "build": {
+    "appId": "com.menuhub.station",
+    "productName": "Menu Hub Station",
+    "files": [
+      "src/main/**/*",
+      "dist/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "buildResources": "assets",
+      "output": "release"
+    },
+    "mac": {
+      "category": "public.app-category.business",
+      "target": ["dmg", "zip"]
+    },
+    "win": {
+      "target": ["nsis", "portable"]
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "category": "Office"
+    }
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.86.0",
+    "better-sqlite3": "^11.7.0",
+    "bonjour-service": "^1.2.1",
+    "ws": "^8.18.0",
+    "node-machine-id": "^1.1.12"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.2",
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "vite": "^6.0.5",
+    "wait-on": "^8.0.1"
+  }
+}

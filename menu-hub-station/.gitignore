@@ -1,0 +1,25 @@
+node_modules/
+dist/
+release/
+.env
+.env.local
+
+# Electron user data
+*.db
+*.db-shm
+*.db-wal
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Linux
+*~
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
