@@ -23,7 +23,8 @@ export default function Staff() {
     pin_code: '',
     department: '',
     annual_holiday_days: 28.0,
-    holiday_year_start: new Date().toISOString().split('T')[0]
+    holiday_year_start: new Date().toISOString().split('T')[0],
+    is_hub: false
   })
   const [passwordData, setPasswordData] = useState({
     newPassword: ''
@@ -129,6 +130,19 @@ export default function Staff() {
       return
     }
 
+    // If setting as hub, unset any existing hub user first
+    if (formData.is_hub) {
+      try {
+        await supabase
+          .from('staff')
+          .update({ is_hub: false })
+          .eq('restaurant_id', restaurant.id)
+          .eq('is_hub', true)
+      } catch (err) {
+        console.warn('Failed to unset existing hub:', err)
+      }
+    }
+
     try {
       const response = await fetch('/api/staff', {
         method: 'POST',
@@ -141,7 +155,8 @@ export default function Staff() {
           pin_code: formData.pin_code,
           department: formData.department,
           annual_holiday_days: parseFloat(formData.annual_holiday_days),
-          holiday_year_start: formData.holiday_year_start
+          holiday_year_start: formData.holiday_year_start,
+          is_hub: formData.is_hub
         })
       })
       const data = await response.json()
@@ -155,7 +170,8 @@ export default function Staff() {
         pin_code: '',
         department: departments[0] || '',
         annual_holiday_days: 28.0,
-        holiday_year_start: new Date().toISOString().split('T')[0]
+        holiday_year_start: new Date().toISOString().split('T')[0],
+        is_hub: false
       })
       setShowModal(false)
       fetchData()
@@ -255,7 +271,8 @@ export default function Staff() {
       pin_code: member.pin_code,
       department: member.department,
       annual_holiday_days: entitlement?.annual_holiday_days || 28.0,
-      holiday_year_start: entitlement?.holiday_year_start || new Date().toISOString().split('T')[0]
+      holiday_year_start: entitlement?.holiday_year_start || new Date().toISOString().split('T')[0],
+      is_hub: member.is_hub || false
     })
     setIsEditing(true)
     setShowModal(true)
@@ -265,6 +282,15 @@ export default function Staff() {
     e.preventDefault()
     setError(null)
     try {
+      // If setting as hub, unset any existing hub user first
+      if (formData.is_hub && !selectedStaff.is_hub) {
+        await supabase
+          .from('staff')
+          .update({ is_hub: false })
+          .eq('restaurant_id', restaurant.id)
+          .eq('is_hub', true)
+      }
+
       // Update staff details
       const { error: staffError } = await supabase
         .from('staff')
@@ -272,7 +298,8 @@ export default function Staff() {
           name: formData.name,
           email: formData.email,
           role: formData.role,
-          department: formData.department
+          department: formData.department,
+          is_hub: formData.is_hub
         })
         .eq('id', selectedStaff.id)
       if (staffError) throw staffError
@@ -441,8 +468,17 @@ export default function Staff() {
               {staff.map((member) => (
                 <tr key={member.id} className="border-b border-slate-100 dark:border-slate-800 last:border-0">
                   <td className="px-6 py-4">
-                    <p className="font-medium text-slate-800 dark:text-slate-200">{member.name || '-'}</p>
-                    <p className="text-xs text-slate-400">{member.email}</p>
+                    <div className="flex items-center gap-2">
+                      <div>
+                        <p className="font-medium text-slate-800 dark:text-slate-200">{member.name || '-'}</p>
+                        <p className="text-xs text-slate-400">{member.email}</p>
+                      </div>
+                      {member.is_hub && (
+                        <span className="px-2 py-1 bg-green-100 text-green-700 rounded-md text-xs font-semibold flex items-center gap-1 whitespace-nowrap">
+                          🍽️ Hub
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-6 py-4">
                     <span className={`px-3 py-1 rounded-full text-sm font-medium capitalize ${getRoleBadge(member.role)}`}>
@@ -644,6 +680,37 @@ export default function Staff() {
                   <p className="text-slate-400 text-sm mt-2">
                     {t('departmentHint')}
                   </p>
+                </div>
+
+                {/* Hub User Toggle */}
+                <div className="pt-4 border-t-2 border-slate-100">
+                  <div className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      id="is_hub"
+                      checked={formData.is_hub}
+                      onChange={(e) => setFormData({ ...formData, is_hub: e.target.checked })}
+                      className="mt-1 w-5 h-5 text-[#6262bd] border-slate-300 rounded focus:ring-[#6262bd]"
+                    />
+                    <div className="flex-1">
+                      <label htmlFor="is_hub" className="block text-sm font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
+                        🍽️ Designate as Local Hub
+                      </label>
+                      <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+                        This device will coordinate local network sync between staff devices. Only one hub user allowed per restaurant. When this user logs in, they'll see the hub dashboard.
+                      </p>
+                      {formData.is_hub && (
+                        <div className="mt-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                          <p className="text-green-700 dark:text-green-400 text-sm font-medium">
+                            ✅ This user will become the hub coordinator
+                          </p>
+                          <p className="text-green-600 dark:text-green-500 text-xs mt-1">
+                            Other staff devices will automatically connect for instant local sync
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Holiday Entitlement Section */}

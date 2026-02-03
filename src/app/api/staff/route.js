@@ -20,7 +20,7 @@ function getSupabaseAdmin() {
 export async function POST(request) {
   const supabaseAdmin = getSupabaseAdmin()
   try {
-    const { restaurantId, email, name, role, pin_code, department, annual_holiday_days, holiday_year_start } = await request.json()
+    const { restaurantId, email, name, role, pin_code, department, annual_holiday_days, holiday_year_start, is_hub } = await request.json()
 
     // Validate required fields
     if (!email || !pin_code || !restaurantId) {
@@ -68,7 +68,7 @@ export async function POST(request) {
     }
 
     // Add staff member to staff table (no auth account needed)
-    const { data: staffData, error: staffError } = await supabaseAdmin
+    const { data: staffData, error: staffError} = await supabaseAdmin
       .from('staff')
       .insert({
         restaurant_id: restaurantId,
@@ -77,7 +77,8 @@ export async function POST(request) {
         role: role || 'staff',
         status: 'active',
         department: department || 'kitchen',
-        pin_code: pin_code
+        pin_code: pin_code,
+        is_hub: is_hub || false
       })
       .select()
       .single()

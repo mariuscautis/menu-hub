@@ -121,7 +121,7 @@ export default function StaffLogin() {
         // Fetch and cache staff list for future offline use
         const { data: staffList } = await supabase
           .from('staff')
-          .select('id, name, email, pin_code, role, department, restaurant_id, status')
+          .select('id, name, email, pin_code, role, department, restaurant_id, status, is_hub')
           .eq('restaurant_id', restaurantData.id)
           .eq('status', 'active')
 
@@ -241,10 +241,16 @@ export default function StaffLogin() {
         role: staffMember.role,
         department: staffMember.department,
         restaurant_id: staffMember.restaurant_id,
-        restaurant: restaurant
+        restaurant: restaurant,
+        is_hub: staffMember.is_hub || false
       }))
 
-      router.push('/dashboard')
+      // Redirect to hub dashboard if this is a hub user
+      if (staffMember.is_hub) {
+        router.push('/hub-dashboard')
+      } else {
+        router.push('/dashboard')
+      }
       return
     }
 
@@ -305,13 +311,14 @@ export default function StaffLogin() {
         role: staffMember.role,
         department: staffMember.department,
         restaurant_id: staffMember.restaurant_id,
-        restaurant: restaurant
+        restaurant: restaurant,
+        is_hub: staffMember.is_hub || false
       }))
 
       // Refresh the offline cache with latest staff data
       const { data: staffList } = await supabase
         .from('staff')
-        .select('id, name, email, pin_code, role, department, restaurant_id, status')
+        .select('id, name, email, pin_code, role, department, restaurant_id, status, is_hub')
         .eq('restaurant_id', restaurant.id)
         .eq('status', 'active')
 
@@ -319,8 +326,13 @@ export default function StaffLogin() {
         cacheStaffLoginData(slug, restaurant, staffList)
       }
 
-      // Redirect to dashboard
-      router.push('/dashboard')
+      // Redirect to hub dashboard if this is a hub user
+      if (staffMember.is_hub) {
+        router.push('/hub-dashboard')
+      } else {
+        router.push('/dashboard')
+      }
+
 
     } catch (err) {
       // Network failed mid-request — try offline fallback
@@ -338,9 +350,15 @@ export default function StaffLogin() {
             role: staffMember.role,
             department: staffMember.department,
             restaurant_id: staffMember.restaurant_id,
-            restaurant: restaurant
+            restaurant: restaurant,
+            is_hub: staffMember.is_hub || false
           }))
-          router.push('/dashboard')
+          // Redirect to hub dashboard if this is a hub user
+          if (staffMember.is_hub) {
+            router.push('/hub-dashboard')
+          } else {
+            router.push('/dashboard')
+          }
           return
         }
       }
