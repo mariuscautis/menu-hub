@@ -23,19 +23,29 @@ class LocalHubClient {
     this.reconnectTimer = null
     this.pingTimer = null
     this.listeners = new Map()
-    this.deviceId = this.getOrCreateDeviceId()
-    this.deviceInfo = this.getDeviceInfo()
+    this.deviceId = null
+    this.deviceInfo = null
   }
 
   /**
    * Get or create a unique device ID
    */
   getOrCreateDeviceId() {
+    // Lazy initialization
+    if (this.deviceId) return this.deviceId
+
+    if (typeof window === 'undefined') {
+      // SSR context - return temporary ID
+      this.deviceId = `device_ssr_${Date.now()}`
+      return this.deviceId
+    }
+
     let deviceId = localStorage.getItem('menuhub_device_id')
     if (!deviceId) {
       deviceId = `device_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       localStorage.setItem('menuhub_device_id', deviceId)
     }
+    this.deviceId = deviceId
     return deviceId
   }
 
@@ -43,17 +53,44 @@ class LocalHubClient {
    * Get device information
    */
   getDeviceInfo() {
-    return {
-      deviceName: localStorage.getItem('menuhub_device_name') || navigator.userAgent.includes('Mobile') ? 'Mobile Device' : 'Desktop Device',
+    // Lazy initialization
+    if (this.deviceInfo) return this.deviceInfo
+
+    if (typeof window === 'undefined') {
+      // SSR context - return defaults
+      this.deviceInfo = {
+        deviceName: 'Server Device',
+        deviceRole: 'staff',
+        restaurantId: null
+      }
+      return this.deviceInfo
+    }
+
+    this.deviceInfo = {
+      deviceName: localStorage.getItem('menuhub_device_name') || (navigator.userAgent.includes('Mobile') ? 'Mobile Device' : 'Desktop Device'),
       deviceRole: localStorage.getItem('menuhub_device_role') || 'staff',
       restaurantId: null // Will be set when connecting
     }
+    return this.deviceInfo
   }
 
   /**
    * Set device information (call this after user logs in)
    */
   setDeviceInfo(info) {
+    // Initialize deviceInfo if not already done
+    if (!this.deviceInfo) {
+      this.getDeviceInfo()
+    }
+
+    if (typeof window === 'undefined') {
+      // SSR context - just update in-memory values
+      if (info.deviceName) this.deviceInfo.deviceName = info.deviceName
+      if (info.deviceRole) this.deviceInfo.deviceRole = info.deviceRole
+      if (info.restaurantId) this.deviceInfo.restaurantId = info.restaurantId
+      return
+    }
+
     if (info.deviceName) {
       this.deviceInfo.deviceName = info.deviceName
       localStorage.setItem('menuhub_device_name', info.deviceName)
@@ -78,13 +115,15 @@ class LocalHubClient {
 
     try {
       // Method 1: Check localStorage for cached hub URL
-      const cachedUrl = localStorage.getItem('menuhub_station_url')
-      if (cachedUrl) {
-        console.log('[LocalHub] Trying cached URL:', cachedUrl)
-        if (await this.testConnection(cachedUrl)) {
-          this.hubUrl = cachedUrl
-          this.isDiscovering = false
-          return cachedUrl
+      if (typeof window !== 'undefined') {
+        const cachedUrl = localStorage.getItem('menuhub_station_url')
+        if (cachedUrl) {
+          console.log('[LocalHub] Trying cached URL:', cachedUrl)
+          if (await this.testConnection(cachedUrl)) {
+            this.hubUrl = cachedUrl
+            this.isDiscovering = false
+            return cachedUrl
+          }
         }
       }
 
@@ -96,7 +135,9 @@ class LocalHubClient {
         const url = `ws://${ip}:3001`
         if (await this.testConnection(url)) {
           this.hubUrl = url
-          localStorage.setItem('menuhub_station_url', url)
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('menuhub_station_url', url)
+          }
           this.isDiscovering = false
           this.emit('discovered', { url })
           return url
@@ -171,6 +212,14 @@ class LocalHubClient {
     if (this.isConnected) {
       console.log('[LocalHub] Already connected')
       return true
+    }
+
+    // Initialize device info if needed
+    if (!this.deviceInfo) {
+      this.getDeviceInfo()
+    }
+    if (!this.deviceId) {
+      this.getOrCreateDeviceId()
     }
 
     // Set restaurant ID
@@ -453,6 +502,14 @@ class LocalHubClient {
    * Get connection status
    */
   getStatus() {
+    // Initialize if needed
+    if (!this.deviceId) {
+      this.getOrCreateDeviceId()
+    }
+    if (!this.deviceInfo) {
+      this.getDeviceInfo()
+    }
+
     return {
       isConnected: this.isConnected,
       hubUrl: this.hubUrl,
