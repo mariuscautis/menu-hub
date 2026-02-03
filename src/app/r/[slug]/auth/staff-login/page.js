@@ -247,7 +247,7 @@ export default function StaffLogin() {
 
       // Redirect to hub dashboard if this is a hub user
       if (staffMember.is_hub) {
-        router.push('/hub-dashboard')
+        router.push(`/r/${slug}/hub-dashboard`)
       } else {
         router.push('/dashboard')
       }
@@ -328,7 +328,7 @@ export default function StaffLogin() {
 
       // Redirect to hub dashboard if this is a hub user
       if (staffMember.is_hub) {
-        router.push('/hub-dashboard')
+        router.push(`/r/${slug}/hub-dashboard`)
       } else {
         router.push('/dashboard')
       }
@@ -355,7 +355,7 @@ export default function StaffLogin() {
           }))
           // Redirect to hub dashboard if this is a hub user
           if (staffMember.is_hub) {
-            router.push('/hub-dashboard')
+            router.push(`/r/${slug}/hub-dashboard`)
           } else {
             router.push('/dashboard')
           }
