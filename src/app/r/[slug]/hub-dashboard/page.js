@@ -3,7 +3,8 @@ export const runtime = 'edge'
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import localHubClient from '@/lib/localHubClient'
+import webrtcHub from '@/lib/webrtcHub'
+import HubConnectionQR from '@/components/HubConnectionQR'
 
 // Force dynamic rendering (don't pre-render at build time)
 export const dynamic = 'force-dynamic'
@@ -15,12 +16,14 @@ export default function HubDashboard() {
 
   const [staffSession, setStaffSession] = useState(null)
   const [hubStatus, setHubStatus] = useState({
-    isConnected: false,
+    isActive: false,
     isOnline: navigator.onLine,
     connectedDevices: [],
     lastSync: null
   })
   const [recentOrders, setRecentOrders] = useState([])
+  const [connectionOffer, setConnectionOffer] = useState(null)
+  const [showQRModal, setShowQRModal] = useState(false)
 
   useEffect(() => {
     // Check if user is logged in and is a hub user
@@ -51,38 +54,69 @@ export default function HubDashboard() {
   }, [router, slug])
 
   const initializeHub = async (session) => {
-    // Set device info
-    localHubClient.setDeviceInfo({
-      deviceName: `${session.name}'s Hub Device`,
-      deviceRole: 'hub',
-      restaurantId: session.restaurant_id
+    // Initialize WebRTC hub
+    const initialized = await webrtcHub.initialize(
+      session.restaurant_id,
+      `hub_${session.restaurant_id}_${session.id}`
+    )
+
+    if (!initialized) {
+      console.error('[HubDashboard] Failed to initialize WebRTC hub')
+      return
+    }
+
+    // Listen for hub events
+    const unsubDeviceConnected = webrtcHub.on('device_connected', ({ deviceId, deviceInfo }) => {
+      console.log('[HubDashboard] Device connected:', deviceId)
+      updateStatus()
     })
 
-    // Connect to hub (this will start the WebSocket server)
-    await localHubClient.connect(session.restaurant_id)
+    const unsubDeviceDisconnected = webrtcHub.on('device_disconnected', ({ deviceId }) => {
+      console.log('[HubDashboard] Device disconnected:', deviceId)
+      updateStatus()
+    })
 
-    // Listen for status updates
-    const unsubConnected = localHubClient.on('connected', updateStatus)
-    const unsubDisconnected = localHubClient.on('disconnected', updateStatus)
-    const unsubNewOrder = localHubClient.on('new_order', handleNewOrder)
+    const unsubNewOrder = webrtcHub.on('new_order', (data) => {
+      console.log('[HubDashboard] New order received:', data.order?.client_id)
+      handleNewOrder(data)
+    })
+
+    const unsubError = webrtcHub.on('error', ({ error }) => {
+      console.error('[HubDashboard] Hub error:', error)
+    })
+
+    // Generate initial connection offer
+    await generateNewOffer()
 
     // Initial status
     updateStatus()
 
     return () => {
-      unsubConnected()
-      unsubDisconnected()
+      unsubDeviceConnected()
+      unsubDeviceDisconnected()
       unsubNewOrder()
+      unsubError()
+      webrtcHub.shutdown()
+    }
+  }
+
+  const generateNewOffer = async () => {
+    try {
+      const offer = await webrtcHub.createOffer()
+      setConnectionOffer(offer)
+      console.log('[HubDashboard] Generated new connection offer')
+    } catch (error) {
+      console.error('[HubDashboard] Failed to generate offer:', error)
     }
   }
 
   const updateStatus = () => {
-    const status = localHubClient.getStatus()
+    const status = webrtcHub.getStatus()
     setHubStatus({
-      isConnected: status.isConnected,
+      isActive: status.isActive,
       isOnline: navigator.onLine,
       connectedDevices: status.connectedDevices || [],
-      lastSync: status.lastSync
+      lastSync: Date.now() // Update to current time
     })
   }
 
@@ -105,8 +139,8 @@ export default function HubDashboard() {
     if (confirm('Log out from hub station?')) {
       // Clear session
       localStorage.removeItem('staff_session')
-      // Disconnect from hub
-      localHubClient.disconnect()
+      // Shutdown WebRTC hub
+      webrtcHub.shutdown()
       // Redirect to login
       router.push(`/r/${slug}/auth/staff-login`)
     }
@@ -120,7 +154,7 @@ export default function HubDashboard() {
     )
   }
 
-  const { isConnected, isOnline, connectedDevices } = hubStatus
+  const { isActive, isOnline, connectedDevices } = hubStatus
 
   return (
     <>
@@ -147,12 +181,33 @@ export default function HubDashboard() {
                 <p className="text-slate-500 text-sm mt-1">{staffSession.restaurant.name}</p>
               )}
             </div>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-medium transition-colors"
-            >
-              Log Out
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowQRModal(true)}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                Connect Device
+              </button>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-medium transition-colors"
+              >
+                Log Out
+              </button>
+            </div>
           </div>
         </div>
 
@@ -289,6 +344,46 @@ export default function HubDashboard() {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* QR Code Modal */}
+      {showQRModal && (
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => setShowQRModal(false)}
+        >
+          <div
+            className="bg-slate-800 rounded-2xl p-8 max-w-lg w-full border border-slate-700"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">Connect New Device</h2>
+              <button
+                onClick={() => setShowQRModal(false)}
+                className="text-slate-400 hover:text-white transition-colors"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <HubConnectionQR
+              offerData={connectionOffer}
+              onNewOffer={generateNewOffer}
+            />
           </div>
         </div>
       )}
