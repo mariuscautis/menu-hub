@@ -149,13 +149,13 @@ export default function Staff() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           restaurantId: restaurant.id,
-          email: formData.email,
+          email: formData.is_hub ? `hub_${Date.now()}@menuhub.local` : formData.email,
           name: formData.name,
-          role: formData.role,
+          role: formData.is_hub ? 'staff' : formData.role,
           pin_code: formData.pin_code,
-          department: formData.department,
-          annual_holiday_days: parseFloat(formData.annual_holiday_days),
-          holiday_year_start: formData.holiday_year_start,
+          department: formData.is_hub ? 'kitchen' : formData.department,
+          annual_holiday_days: formData.is_hub ? 0 : parseFloat(formData.annual_holiday_days),
+          holiday_year_start: formData.is_hub ? new Date().toISOString().split('T')[0] : formData.holiday_year_start,
           is_hub: formData.is_hub
         })
       })
@@ -296,43 +296,45 @@ export default function Staff() {
         .from('staff')
         .update({
           name: formData.name,
-          email: formData.email,
-          role: formData.role,
-          department: formData.department,
+          email: formData.is_hub ? `hub_${selectedStaff.id}@menuhub.local` : formData.email,
+          role: formData.is_hub ? 'staff' : formData.role,
+          department: formData.is_hub ? 'kitchen' : formData.department,
           is_hub: formData.is_hub
         })
         .eq('id', selectedStaff.id)
       if (staffError) throw staffError
 
-      // Update or create leave entitlement
-      const { data: existingEntitlement } = await supabase
-        .from('staff_leave_entitlements')
-        .select('id')
-        .eq('staff_id', selectedStaff.id)
-        .maybeSingle()
-
-      if (existingEntitlement) {
-        // Update existing entitlement
-        const { error: entitlementError } = await supabase
+      // Update or create leave entitlement (only for non-hub users)
+      if (!formData.is_hub) {
+        const { data: existingEntitlement } = await supabase
           .from('staff_leave_entitlements')
-          .update({
-            annual_holiday_days: parseFloat(formData.annual_holiday_days),
-            holiday_year_start: formData.holiday_year_start,
-            updated_at: new Date().toISOString()
-          })
+          .select('id')
           .eq('staff_id', selectedStaff.id)
+          .maybeSingle()
+
+        if (existingEntitlement) {
+          // Update existing entitlement
+          const { error: entitlementError } = await supabase
+            .from('staff_leave_entitlements')
+            .update({
+              annual_holiday_days: parseFloat(formData.annual_holiday_days),
+              holiday_year_start: formData.holiday_year_start,
+              updated_at: new Date().toISOString()
+            })
+            .eq('staff_id', selectedStaff.id)
+          if (entitlementError) throw entitlementError
+        } else {
+          // Create new entitlement
+          const { error: entitlementError } = await supabase
+            .from('staff_leave_entitlements')
+            .insert({
+              restaurant_id: restaurant.id,
+              staff_id: selectedStaff.id,
+              annual_holiday_days: parseFloat(formData.annual_holiday_days),
+              holiday_year_start: formData.holiday_year_start
+            })
         if (entitlementError) throw entitlementError
-      } else {
-        // Create new entitlement
-        const { error: entitlementError } = await supabase
-          .from('staff_leave_entitlements')
-          .insert({
-            restaurant_id: restaurant.id,
-            staff_id: selectedStaff.id,
-            annual_holiday_days: parseFloat(formData.annual_holiday_days),
-            holiday_year_start: formData.holiday_year_start
-          })
-        if (entitlementError) throw entitlementError
+        }
       }
 
       setShowModal(false)
@@ -599,23 +601,57 @@ export default function Staff() {
                     value={formData.name}
                     onChange={handleChange}
                     className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 placeholder:text-slate-400 dark:placeholder:text-slate-500"
-                    placeholder={t('namePlaceholder')}
+                    placeholder={formData.is_hub ? "Hub Device Name" : t('namePlaceholder')}
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    {t('emailLabel')}
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 placeholder:text-slate-400 dark:placeholder:text-slate-500"
-                    placeholder={t('emailPlaceholder')}
-                  />
+
+                {/* Hub User Toggle - Moved to top */}
+                <div className="pt-4 border-t-2 border-slate-100 dark:border-slate-700">
+                  <div className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      id="is_hub"
+                      checked={formData.is_hub}
+                      onChange={(e) => setFormData({ ...formData, is_hub: e.target.checked })}
+                      className="mt-1 w-5 h-5 text-[#6262bd] border-slate-300 rounded focus:ring-[#6262bd]"
+                    />
+                    <div className="flex-1">
+                      <label htmlFor="is_hub" className="block text-sm font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
+                        🍽️ Designate as Local Hub
+                      </label>
+                      <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+                        This device will coordinate local network sync between staff devices. Only one hub user allowed per restaurant.
+                      </p>
+                      {formData.is_hub && (
+                        <div className="mt-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                          <p className="text-green-700 dark:text-green-400 text-sm font-medium">
+                            ✅ Hub user only needs a name and PIN code
+                          </p>
+                          <p className="text-green-600 dark:text-green-500 text-xs mt-1">
+                            Other fields are not required for hub coordination
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
+
+                {!formData.is_hub && (
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      {t('emailLabel')}
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                      placeholder={t('emailPlaceholder')}
+                    />
+                  </div>
+                )}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                     {t('pinCodeLabel')}
@@ -647,74 +683,46 @@ export default function Staff() {
                     {isEditing ? t('pinHintEdit') : t('pinHintAdd')}
                   </p>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    {t('roleLabel')}
-                  </label>
-                  <select
-                    name="role"
-                    value={formData.role}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800"
-                  >
-                    <option value="staff">{t('roleStaff')}</option>
-                    <option value="admin">{t('roleAdmin')}</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    {t('departmentLabel')}
-                  </label>
-                  <select
-                    name="department"
-                    value={formData.department}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800"
-                  >
-                    {departments.map(dept => (
-                      <option key={dept} value={dept}>
-                        {dept.charAt(0).toUpperCase() + dept.slice(1)}
-                      </option>
-                    ))}
-                  </select>
-                  <p className="text-slate-400 text-sm mt-2">
-                    {t('departmentHint')}
-                  </p>
-                </div>
 
-                {/* Hub User Toggle */}
-                <div className="pt-4 border-t-2 border-slate-100">
-                  <div className="flex items-start gap-3">
-                    <input
-                      type="checkbox"
-                      id="is_hub"
-                      checked={formData.is_hub}
-                      onChange={(e) => setFormData({ ...formData, is_hub: e.target.checked })}
-                      className="mt-1 w-5 h-5 text-[#6262bd] border-slate-300 rounded focus:ring-[#6262bd]"
-                    />
-                    <div className="flex-1">
-                      <label htmlFor="is_hub" className="block text-sm font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
-                        🍽️ Designate as Local Hub
+                {!formData.is_hub && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        {t('roleLabel')}
                       </label>
-                      <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-                        This device will coordinate local network sync between staff devices. Only one hub user allowed per restaurant. When this user logs in, they'll see the hub dashboard.
-                      </p>
-                      {formData.is_hub && (
-                        <div className="mt-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                          <p className="text-green-700 dark:text-green-400 text-sm font-medium">
-                            ✅ This user will become the hub coordinator
-                          </p>
-                          <p className="text-green-600 dark:text-green-500 text-xs mt-1">
-                            Other staff devices will automatically connect for instant local sync
-                          </p>
-                        </div>
-                      )}
+                      <select
+                        name="role"
+                        value={formData.role}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800"
+                      >
+                        <option value="staff">{t('roleStaff')}</option>
+                        <option value="admin">{t('roleAdmin')}</option>
+                      </select>
                     </div>
-                  </div>
-                </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        {t('departmentLabel')}
+                      </label>
+                      <select
+                        name="department"
+                        value={formData.department}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800"
+                      >
+                        {departments.map(dept => (
+                          <option key={dept} value={dept}>
+                            {dept.charAt(0).toUpperCase() + dept.slice(1)}
+                          </option>
+                        ))}
+                      </select>
+                      <p className="text-slate-400 text-sm mt-2">
+                        {t('departmentHint')}
+                      </p>
+                    </div>
 
-                {/* Holiday Entitlement Section */}
-                <div className="pt-4 border-t-2 border-slate-100">
+                    {/* Holiday Entitlement Section */}
+                    <div className="pt-4 border-t-2 border-slate-100 dark:border-slate-700">
                   <h3 className="text-sm font-semibold text-slate-700 mb-4">{t('holidayEntitlementTitle')}</h3>
 
                   <div className="space-y-4">
@@ -754,6 +762,9 @@ export default function Staff() {
                     </div>
                   </div>
                 </div>
+                  </>
+                )}
+
                 <div className="flex gap-3 pt-4">
                   <button
                     type="button"
