@@ -101,9 +101,14 @@ export default function HubDashboard() {
     return date.toLocaleTimeString()
   }
 
-  const switchToNormalMode = () => {
-    if (confirm('Switch to normal staff dashboard? The hub will stop coordinating orders.')) {
-      router.push('/dashboard')
+  const handleLogout = () => {
+    if (confirm('Log out from hub station?')) {
+      // Clear session
+      localStorage.removeItem('staff_session')
+      // Disconnect from hub
+      localHubClient.disconnect()
+      // Redirect to login
+      router.push(`/r/${slug}/auth/staff-login`)
     }
   }
 
@@ -118,25 +123,38 @@ export default function HubDashboard() {
   const { isConnected, isOnline, connectedDevices } = hubStatus
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center p-8 text-white">
-      {/* Header */}
-      <div className="w-full max-w-4xl mb-12">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">🍽️ Menu Hub Station</h1>
-            <p className="text-slate-400">Local Network Coordinator</p>
-            {staffSession?.restaurant && (
-              <p className="text-slate-500 text-sm mt-1">{staffSession.restaurant.name}</p>
-            )}
+    <>
+      <style jsx>{`
+        @keyframes ping-slow {
+          75%, 100% {
+            transform: scale(2);
+            opacity: 0;
+          }
+        }
+        .animate-ping-slow {
+          animation: ping-slow 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+      `}</style>
+
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center p-8 text-white">
+        {/* Header */}
+        <div className="w-full max-w-4xl mb-12">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">🍽️ Menu Hub Station</h1>
+              <p className="text-slate-400">Local Network Coordinator</p>
+              {staffSession?.restaurant && (
+                <p className="text-slate-500 text-sm mt-1">{staffSession.restaurant.name}</p>
+              )}
+            </div>
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-medium transition-colors"
+            >
+              Log Out
+            </button>
           </div>
-          <button
-            onClick={switchToNormalMode}
-            className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-medium transition-colors"
-          >
-            Switch to Normal Dashboard
-          </button>
         </div>
-      </div>
 
       {/* Main Status Circle */}
       <div className="w-full max-w-4xl mb-16">
@@ -162,7 +180,7 @@ export default function HubDashboard() {
             </div>
             {/* Pulse animation */}
             {isOnline && (
-              <div className="absolute inset-0 rounded-full bg-green-500/20 animate-ping" />
+              <div className="absolute inset-0 rounded-full bg-green-500/20 animate-ping-slow" />
             )}
           </div>
 
@@ -274,6 +292,7 @@ export default function HubDashboard() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   )
 }
