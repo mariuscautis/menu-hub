@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import localHubClient from '@/lib/localHubClient'
 
+// Force dynamic rendering (don't pre-render at build time)
+export const dynamic = 'force-dynamic'
+
 export default function HubDashboard() {
   const router = useRouter()
   const [staffSession, setStaffSession] = useState(null)
