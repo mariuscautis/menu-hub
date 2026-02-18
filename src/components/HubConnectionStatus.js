@@ -35,6 +35,16 @@ export default function HubConnectionStatus({ restaurantId, staffInfo }) {
       })
     }
 
+    // Auto-connect if the user arrived via QR code scan
+    const pendingData = sessionStorage.getItem('pending_hub_connection')
+    if (pendingData) {
+      sessionStorage.removeItem('pending_hub_connection')
+      console.log('[HubConnectionStatus] Found pending hub connection from QR scan')
+      handleConnect(pendingData).catch((err) => {
+        console.error('[HubConnectionStatus] Auto-connect failed:', err)
+      })
+    }
+
     // Listen for connection events
     const unsubConnected = webrtcClient.on('connected', () => {
       console.log('[HubConnectionStatus] Connected to hub')

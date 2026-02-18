@@ -383,6 +383,7 @@ export default function HubDashboard() {
             <HubConnectionQR
               offerData={connectionOffer}
               onNewOffer={generateNewOffer}
+              restaurantSlug={slug}
             />
           </div>
         </div>

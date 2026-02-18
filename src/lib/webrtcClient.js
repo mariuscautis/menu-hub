@@ -90,12 +90,23 @@ class WebRTCClient {
    */
   parseQRCode(qrData) {
     try {
-      // Expected format: menuhub://connect?data=base64encodedJson
-      if (!qrData.startsWith('menuhub://connect?data=')) {
+      let base64
+
+      if (qrData.includes('/hub-connect?data=')) {
+        // New HTTPS format: https://domain/r/slug/hub-connect?data=base64
+        const url = new URL(qrData)
+        base64 = url.searchParams.get('data')
+        if (!base64) throw new Error('Missing data param in hub-connect URL')
+      } else if (qrData.startsWith('menuhub://connect?data=')) {
+        // Legacy custom scheme format
+        base64 = qrData.replace('menuhub://connect?data=', '')
+      } else if (!qrData.includes('?') && qrData.length > 20) {
+        // Bare base64 pasted directly (manual input fallback)
+        base64 = qrData.trim()
+      } else {
         throw new Error('Invalid QR code format')
       }
 
-      const base64 = qrData.replace('menuhub://connect?data=', '')
       const jsonStr = atob(base64)
       const data = JSON.parse(jsonStr)
 

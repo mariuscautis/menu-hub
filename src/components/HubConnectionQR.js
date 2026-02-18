@@ -7,7 +7,7 @@ import QRCode from 'qrcode'
  * Hub Connection QR Code Component
  * Displays a QR code that staff devices can scan to connect to the hub
  */
-export default function HubConnectionQR({ offerData, onNewOffer }) {
+export default function HubConnectionQR({ offerData, onNewOffer, restaurantSlug }) {
   const [qrDataUrl, setQrDataUrl] = useState(null)
   const canvasRef = useRef(null)
   const [timeRemaining, setTimeRemaining] = useState(300) // 5 minutes in seconds
@@ -60,11 +60,12 @@ export default function HubConnectionQR({ offerData, onNewOffer }) {
   }
 
   const createConnectionUrl = (data) => {
-    // Create a URL that includes all connection data
-    // Format: menuhub://connect?data=base64encodedJson
+    // Create an HTTPS URL so native phone cameras can open it directly
     const jsonStr = JSON.stringify(data)
     const base64 = btoa(jsonStr)
-    return `menuhub://connect?data=${base64}`
+    const origin = typeof window !== 'undefined' ? window.location.origin : ''
+    const slug = restaurantSlug || data.restaurantSlug || ''
+    return `${origin}/r/${slug}/hub-connect?data=${base64}`
   }
 
   const formatTime = (seconds) => {

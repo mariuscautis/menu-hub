@@ -92,8 +92,12 @@ export default function HubScanner({ onConnect, onCancel }) {
         if (code && code.data) {
           console.log('[HubScanner] QR code detected:', code.data)
 
-          // Check if it's a valid hub connection code
-          if (code.data.startsWith('menuhub://connect')) {
+          // Accept both HTTPS hub-connect URLs and the legacy custom scheme
+          const isHubConnect =
+            code.data.includes('/hub-connect?data=') ||
+            code.data.startsWith('menuhub://connect')
+
+          if (isHubConnect) {
             setConnectionCode(code.data)
             stopCamera()
             setIsScanning(false)
@@ -248,7 +252,7 @@ export default function HubScanner({ onConnect, onCancel }) {
             disabled={isConnecting}
           />
           <p className="text-slate-400 text-xs mt-2">
-            The code starts with "menuhub://connect?data="
+            The code is an HTTPS link containing "/hub-connect?data="
           </p>
         </div>
       )}
