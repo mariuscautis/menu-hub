@@ -11,6 +11,7 @@ export default function HubConnectionQR({ offerData, onNewOffer }) {
   const [qrDataUrl, setQrDataUrl] = useState(null)
   const canvasRef = useRef(null)
   const [timeRemaining, setTimeRemaining] = useState(300) // 5 minutes in seconds
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     if (!offerData) return
@@ -78,6 +79,18 @@ export default function HubConnectionQR({ offerData, onNewOffer }) {
     }
   }
 
+  const handleCopyCode = async () => {
+    if (!offerData) return
+    const url = createConnectionUrl(offerData)
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 3000)
+    } catch (error) {
+      console.error('[HubConnectionQR] Failed to copy:', error)
+    }
+  }
+
   if (!offerData || !qrDataUrl) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -105,8 +118,8 @@ export default function HubConnectionQR({ offerData, onNewOffer }) {
         </p>
       </div>
 
-      {/* Timer and Refresh */}
-      <div className="flex items-center gap-4">
+      {/* Timer and Actions */}
+      <div className="flex items-center gap-3 flex-wrap justify-center">
         <div className="flex items-center gap-2">
           <svg
             className="w-5 h-5 text-slate-400"
@@ -125,6 +138,32 @@ export default function HubConnectionQR({ offerData, onNewOffer }) {
             {formatTime(timeRemaining)}
           </span>
         </div>
+
+        {/* Copy connection code button */}
+        <button
+          onClick={handleCopyCode}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+            copied
+              ? 'bg-green-600 text-white'
+              : 'bg-slate-700 hover:bg-slate-600 text-white'
+          }`}
+        >
+          {copied ? (
+            <>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              Copied!
+            </>
+          ) : (
+            <>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              Copy Code
+            </>
+          )}
+        </button>
 
         <button
           onClick={handleRefresh}

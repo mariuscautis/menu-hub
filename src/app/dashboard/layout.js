@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase'
 import NotificationBell from '@/components/NotificationBell'
 import ThemeToggle from '@/components/ThemeToggle'
 import OfflineIndicator from '@/components/OfflineIndicator'
+import HubConnectionStatus from '@/components/HubConnectionStatus'
 import { LanguageProvider } from '@/lib/i18n/LanguageContext'
 import LanguageSelector from '@/components/LanguageSelector'
 import { useSessionValidator } from '@/hooks/useSessionValidator'
@@ -1177,6 +1178,18 @@ export default function DashboardLayout({ children }) {
               )}
             </div>
           </div>
+          {/* Hub Connection Status for staff users */}
+          {(userType === 'staff' || userType === 'staff-admin') && restaurant && (
+            <div className="mb-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+              <HubConnectionStatus
+                restaurantId={restaurant.id}
+                staffInfo={{
+                  name: userEmail?.split('@')[0],
+                  department: staffDepartment
+                }}
+              />
+            </div>
+          )}
           <div className="mb-2">
             <ThemeToggle />
           </div>

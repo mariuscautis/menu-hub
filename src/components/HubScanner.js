@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import jsQR from 'jsqr'
 
 /**
  * Hub Scanner Component
@@ -11,9 +12,11 @@ export default function HubScanner({ onConnect, onCancel }) {
   const [connectionCode, setConnectionCode] = useState('')
   const [error, setError] = useState(null)
   const [isConnecting, setIsConnecting] = useState(false)
+  const [isScanning, setIsScanning] = useState(false)
   const videoRef = useRef(null)
   const canvasRef = useRef(null)
   const streamRef = useRef(null)
+  const scanningRef = useRef(false)
 
   useEffect(() => {
     // Cleanup on unmount
@@ -34,21 +37,25 @@ export default function HubScanner({ onConnect, onCancel }) {
 
       // Request camera access
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' } // Use back camera on mobile
+        video: {
+          facingMode: 'environment', // Use back camera on mobile
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
       })
 
       streamRef.current = stream
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream
-        videoRef.current.play()
+        await videoRef.current.play()
       }
 
       setScanMode('camera')
+      setIsScanning(true)
 
-      // Start scanning for QR codes
-      // Note: In production, you'd use a library like jsQR or @zxing/library
-      // For now, we'll provide manual input as fallback
+      // Start QR code scanning
+      scanQRCode()
     } catch (error) {
       console.error('[HubScanner] Camera error:', error)
       setError('Failed to access camera. Please use manual input.')
@@ -56,7 +63,72 @@ export default function HubScanner({ onConnect, onCancel }) {
     }
   }
 
+  const scanQRCode = () => {
+    if (!videoRef.current || !canvasRef.current) return
+    if (scanningRef.current) return // Already scanning
+
+    scanningRef.current = true
+
+    const scan = () => {
+      if (!scanningRef.current) return
+      if (!videoRef.current || !canvasRef.current) return
+
+      const video = videoRef.current
+      const canvas = canvasRef.current
+
+      // Set canvas dimensions to match video
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        canvas.width = video.videoWidth
+        canvas.height = video.videoHeight
+
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: 'dontInvert'
+        })
+
+        if (code && code.data) {
+          console.log('[HubScanner] QR code detected:', code.data)
+
+          // Check if it's a valid hub connection code
+          if (code.data.startsWith('menuhub://connect')) {
+            setConnectionCode(code.data)
+            stopCamera()
+            setIsScanning(false)
+
+            // Auto-connect with the scanned code
+            handleConnect(code.data)
+          } else {
+            setError('Invalid QR code. Please scan the hub connection QR code.')
+          }
+        }
+      }
+
+      // Continue scanning
+      requestAnimationFrame(scan)
+    }
+
+    scan()
+  }
+
+  const handleConnect = async (code) => {
+    setIsConnecting(true)
+    setError(null)
+
+    try {
+      await onConnect(code)
+    } catch (error) {
+      setError(error.message || 'Failed to connect to hub')
+      setIsConnecting(false)
+    }
+  }
+
   const stopCamera = () => {
+    scanningRef.current = false
+    setIsScanning(false)
+
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop())
       streamRef.current = null
@@ -152,9 +224,12 @@ export default function HubScanner({ onConnect, onCancel }) {
             Point your camera at the QR code on the hub device
           </p>
 
-          <p className="text-slate-500 text-xs text-center mt-2">
-            Note: QR scanning requires a QR code library. For now, use manual input.
-          </p>
+          {isScanning && (
+            <div className="flex items-center justify-center gap-2 mt-2">
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-green-400 text-xs">Scanning...</span>
+            </div>
+          )}
         </div>
       )}
 
@@ -188,44 +263,62 @@ export default function HubScanner({ onConnect, onCancel }) {
       {/* Action Buttons */}
       <div className="flex gap-3">
         <button
-          onClick={onCancel}
+          onClick={() => {
+            stopCamera()
+            onCancel()
+          }}
           className="flex-1 py-3 px-4 bg-slate-700 hover:bg-slate-600 rounded-lg font-medium text-white transition-colors disabled:opacity-50"
           disabled={isConnecting}
         >
           Cancel
         </button>
-        <button
-          onClick={handleManualConnect}
-          className="flex-1 py-3 px-4 bg-green-600 hover:bg-green-700 rounded-lg font-medium text-white transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-          disabled={isConnecting || (scanMode === 'manual' && !connectionCode.trim())}
-        >
-          {isConnecting ? (
-            <>
-              <svg
-                className="animate-spin h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                />
-              </svg>
-              Connecting...
-            </>
-          ) : (
-            'Connect'
-          )}
-        </button>
+        {scanMode === 'manual' && (
+          <button
+            onClick={() => handleConnect(connectionCode.trim())}
+            className="flex-1 py-3 px-4 bg-green-600 hover:bg-green-700 rounded-lg font-medium text-white transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            disabled={isConnecting || !connectionCode.trim()}
+          >
+            {isConnecting ? (
+              <>
+                <svg
+                  className="animate-spin h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+                Connecting...
+              </>
+            ) : (
+              'Connect'
+            )}
+          </button>
+        )}
+        {scanMode === 'camera' && isConnecting && (
+          <div className="flex-1 py-3 px-4 bg-green-600/50 rounded-lg font-medium text-white flex items-center justify-center gap-2">
+            <svg
+              className="animate-spin h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+            </svg>
+            Connecting...
+          </div>
+        )}
       </div>
 
       {/* Instructions */}
@@ -233,9 +326,9 @@ export default function HubScanner({ onConnect, onCancel }) {
         <h3 className="text-sm font-semibold text-white mb-2">How to connect:</h3>
         <ol className="text-xs text-slate-400 space-y-1 list-decimal list-inside">
           <li>Ask the manager to open the hub dashboard</li>
-          <li>Click "Connect Device" on the hub</li>
-          <li>Either scan the QR code or copy the connection code</li>
-          <li>Paste the code here and click Connect</li>
+          <li>Tap "Connect Device" on the hub screen</li>
+          <li><strong className="text-slate-300">Scan QR:</strong> point camera at the QR code — auto-connects</li>
+          <li><strong className="text-slate-300">Manual:</strong> copy connection code from hub and paste here</li>
         </ol>
       </div>
     </div>
