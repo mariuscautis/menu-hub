@@ -37,18 +37,30 @@ export async function GET(request, { params }) {
     // Use restaurant name if available, otherwise platform name
     const appName = restaurant?.name || platformName
 
-    // Build icons array - use custom icons if available, otherwise default
+    // Build icons array - prioritize restaurant logo, then platform icons, then defaults
     const icons = []
     const sizes = [72, 96, 128, 144, 152, 192, 384, 512]
 
+    // Use restaurant logo as the app icon if available
+    const restaurantLogo = restaurant?.logo_url
+    const platformLogo = branding.logo_url
+
     for (const size of sizes) {
-      const customIcon = branding[`icon_${size}`]
-      if (customIcon) {
+      if (restaurantLogo) {
+        // Use restaurant logo for all sizes (browser will scale)
         icons.push({
-          src: customIcon,
+          src: restaurantLogo,
           sizes: `${size}x${size}`,
           type: 'image/png',
-          purpose: 'maskable any'
+          purpose: 'any'
+        })
+      } else if (platformLogo) {
+        // Fall back to platform logo
+        icons.push({
+          src: platformLogo,
+          sizes: `${size}x${size}`,
+          type: 'image/png',
+          purpose: 'any'
         })
       } else {
         // Fall back to default icons

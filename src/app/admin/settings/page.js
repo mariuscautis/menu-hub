@@ -11,17 +11,12 @@ export default function AdminSettings() {
   const [branding, setBranding] = useState({
     platform_name: 'Menu Hub',
     logo_url: null,
-    icon_192: null,
-    icon_512: null,
     theme_color: '#6262bd',
     background_color: '#ffffff'
   })
   const [logoPreview, setLogoPreview] = useState(null)
-  const [iconPreview, setIconPreview] = useState(null)
   const [uploadingLogo, setUploadingLogo] = useState(false)
-  const [uploadingIcon, setUploadingIcon] = useState(false)
   const logoInputRef = useRef(null)
-  const iconInputRef = useRef(null)
 
   useEffect(() => {
     fetchBranding()
@@ -37,7 +32,6 @@ export default function AdminSettings() {
     if (data?.value) {
       setBranding(prev => ({ ...prev, ...data.value }))
       if (data.value.logo_url) setLogoPreview(data.value.logo_url)
-      if (data.value.icon_192) setIconPreview(data.value.icon_192)
     }
     setLoading(false)
   }
@@ -103,107 +97,9 @@ export default function AdminSettings() {
     setUploadingLogo(false)
   }
 
-  const handleIconUpload = async (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    // Validate file type (PNG only for icons)
-    if (file.type !== 'image/png') {
-      setMessage({ type: 'error', text: 'App icon must be a PNG file' })
-      return
-    }
-
-    // Validate file size (max 2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      setMessage({ type: 'error', text: 'Icon file size must be less than 2MB' })
-      return
-    }
-
-    setUploadingIcon(true)
-    setMessage(null)
-
-    try {
-      // Create preview
-      const reader = new FileReader()
-      reader.onloadend = () => setIconPreview(reader.result)
-      reader.readAsDataURL(file)
-
-      // Validate dimensions (should be at least 512x512)
-      const img = new Image()
-      img.src = URL.createObjectURL(file)
-      await new Promise((resolve) => { img.onload = resolve })
-
-      if (img.width < 512 || img.height < 512) {
-        setMessage({ type: 'error', text: 'Icon must be at least 512x512 pixels' })
-        setUploadingIcon(false)
-        return
-      }
-
-      // Upload multiple sizes
-      const sizes = [72, 96, 128, 144, 152, 192, 384, 512]
-      const uploadedIcons = {}
-
-      for (const size of sizes) {
-        // Resize image using canvas
-        const canvas = document.createElement('canvas')
-        canvas.width = size
-        canvas.height = size
-        const ctx = canvas.getContext('2d')
-        ctx.drawImage(img, 0, 0, size, size)
-
-        // Convert to blob
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'))
-        const fileName = `icon-${size}x${size}.png`
-        const filePath = `branding/${fileName}`
-
-        const { error: uploadError } = await supabase.storage
-          .from('platform-assets')
-          .upload(filePath, blob, { upsert: true, contentType: 'image/png' })
-
-        if (uploadError) {
-          if (uploadError.message.includes('not found')) {
-            setMessage({ type: 'error', text: 'Storage bucket not configured. Please run the migration first.' })
-            setUploadingIcon(false)
-            return
-          }
-          throw uploadError
-        }
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('platform-assets')
-          .getPublicUrl(filePath)
-
-        uploadedIcons[`icon_${size}`] = `${publicUrl}?t=${Date.now()}`
-      }
-
-      setBranding(prev => ({ ...prev, ...uploadedIcons }))
-      setMessage({ type: 'success', text: 'App icons uploaded and resized successfully!' })
-    } catch (error) {
-      console.error('Icon upload error:', error)
-      setMessage({ type: 'error', text: 'Failed to upload icons' })
-    }
-
-    setUploadingIcon(false)
-  }
-
   const removeLogo = () => {
     setBranding(prev => ({ ...prev, logo_url: null }))
     setLogoPreview(null)
-  }
-
-  const removeIcons = () => {
-    setBranding(prev => ({
-      ...prev,
-      icon_72: null,
-      icon_96: null,
-      icon_128: null,
-      icon_144: null,
-      icon_152: null,
-      icon_192: null,
-      icon_384: null,
-      icon_512: null
-    }))
-    setIconPreview(null)
   }
 
   const handleSave = async () => {
@@ -346,89 +242,19 @@ export default function AdminSettings() {
         </div>
       </div>
 
-      {/* App Icon Upload */}
-      <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
-        <h2 className="text-lg font-bold text-slate-700 mb-4">App Icon (PWA)</h2>
-        <p className="text-sm text-slate-500 mb-4">
-          This icon appears when the app is installed on phones and tablets. It will be automatically resized to all required sizes.
+      {/* App Icon Info */}
+      <div className="bg-green-50 border-2 border-green-200 rounded-2xl p-6 mb-6">
+        <h2 className="text-lg font-bold text-green-800 mb-3 flex items-center gap-2">
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/>
+          </svg>
+          Staff App Icon (PWA)
+        </h2>
+        <p className="text-sm text-green-700">
+          The staff app icon is automatically set to each restaurant's logo for a personalized experience.
+          When staff install the app, it will show their restaurant's logo on their home screen.
+          If a restaurant doesn't have a logo, the platform logo above will be used instead.
         </p>
-
-        <div className="flex items-start gap-6">
-          {/* Preview */}
-          <div className="flex-shrink-0">
-            {iconPreview ? (
-              <div className="relative">
-                <img
-                  src={iconPreview}
-                  alt="Icon preview"
-                  className="w-32 h-32 object-contain rounded-2xl border-2 border-slate-200 bg-slate-50"
-                />
-                <button
-                  onClick={removeIcons}
-                  className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
-                >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                  </svg>
-                </button>
-              </div>
-            ) : (
-              <div className="w-32 h-32 bg-gradient-to-br from-[#6262bd] to-[#8b5cf6] rounded-2xl flex items-center justify-center">
-                <span className="text-white text-4xl font-bold">M</span>
-              </div>
-            )}
-          </div>
-
-          {/* Upload Button */}
-          <div className="flex-1">
-            <input
-              ref={iconInputRef}
-              type="file"
-              accept="image/png"
-              onChange={handleIconUpload}
-              className="hidden"
-            />
-            <button
-              onClick={() => iconInputRef.current?.click()}
-              disabled={uploadingIcon}
-              className="px-6 py-3 bg-[#6262bd] text-white rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 transition-all flex items-center gap-2"
-            >
-              {uploadingIcon ? (
-                <>
-                  <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-                  </svg>
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/>
-                  </svg>
-                  Upload App Icon
-                </>
-              )}
-            </button>
-            <p className="text-xs text-slate-500 mt-2">
-              Must be a PNG file, at least 512x512 pixels. This will generate all icon sizes automatically.
-            </p>
-
-            {/* Generated sizes preview */}
-            {branding.icon_192 && (
-              <div className="mt-4 p-3 bg-slate-50 rounded-xl">
-                <p className="text-xs font-medium text-slate-600 mb-2">Generated icon sizes:</p>
-                <div className="flex flex-wrap gap-2">
-                  {[72, 96, 128, 144, 152, 192, 384, 512].map(size => (
-                    <span key={size} className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-lg">
-                      {size}x{size}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
       </div>
 
       {/* Theme Colors */}
