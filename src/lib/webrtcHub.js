@@ -15,7 +15,7 @@
  * - Broadcast orders to all connected peers
  */
 
-import webrtcSignaling from '@/lib/webrtcSignaling'
+import { createSignaling } from '@/lib/webrtcSignaling'
 
 // STUN servers for NAT traversal (free public servers)
 const ICE_SERVERS = [
@@ -32,6 +32,7 @@ class WebRTCHub {
     this.hubId = null
     this.restaurantId = null
     this.isActive = false
+    this.signaling = null // Own signaling instance
   }
 
   /**
@@ -55,12 +56,15 @@ class WebRTCHub {
 
     console.log('[WebRTCHub] Initialized:', this.hubId)
 
+    // Create own signaling instance
+    this.signaling = createSignaling()
+
     // Join signaling channel as hub
     try {
-      await webrtcSignaling.joinAsHub(this.hubId, restaurantId)
+      await this.signaling.joinAsHub(this.hubId, restaurantId)
 
       // Listen for client offers
-      this.signalingCleanupOffer = webrtcSignaling.on('client-offer', async (data) => {
+      this.signalingCleanupOffer = this.signaling.on('client-offer', async (data) => {
         console.log('[WebRTCHub] Received client offer via signaling')
         try {
           const result = await this.handleClientConnection(
@@ -70,7 +74,7 @@ class WebRTCHub {
           )
 
           // Send answer back to client
-          await webrtcSignaling.sendAnswer(result.answer, data.deviceId)
+          await this.signaling.sendAnswer(result.answer, data.deviceId)
           console.log('[WebRTCHub] Sent answer to client:', data.deviceId)
         } catch (err) {
           console.error('[WebRTCHub] Failed to handle client offer:', err)
@@ -78,7 +82,7 @@ class WebRTCHub {
       })
 
       // Listen for ICE candidates from clients
-      this.signalingCleanupIce = webrtcSignaling.on('client-ice-candidate', async (data) => {
+      this.signalingCleanupIce = this.signaling.on('client-ice-candidate', async (data) => {
         console.log('[WebRTCHub] Received ICE candidate from client:', data.deviceId)
         try {
           const peer = this.peers.get(data.deviceId)
@@ -171,7 +175,7 @@ class WebRTCHub {
       if (event.candidate) {
         console.log('[WebRTCHub] New ICE candidate for:', deviceId)
         try {
-          await webrtcSignaling.sendIceCandidate(event.candidate, deviceId)
+          await this.signaling.sendIceCandidate(event.candidate, deviceId)
         } catch (err) {
           console.error('[WebRTCHub] Failed to send ICE candidate:', err)
         }
@@ -415,7 +419,10 @@ class WebRTCHub {
     }
 
     // Leave signaling channel
-    webrtcSignaling.leave().catch(() => {})
+    if (this.signaling) {
+      this.signaling.leave().catch(() => {})
+      this.signaling = null
+    }
 
     // Close all peer connections
     for (const deviceId of this.peers.keys()) {

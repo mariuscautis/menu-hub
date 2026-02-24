@@ -15,7 +15,7 @@
  * - Fallback to cloud sync if hub unavailable
  */
 
-import webrtcSignaling from '@/lib/webrtcSignaling'
+import { createSignaling } from '@/lib/webrtcSignaling'
 
 // STUN servers for NAT traversal
 const ICE_SERVERS = [
@@ -38,6 +38,7 @@ class WebRTCClient {
     this.deviceInfo = null
     this.reconnectTimer = null
     this.pingTimer = null
+    this.signaling = null // Own signaling instance
   }
 
   /**
@@ -177,12 +178,15 @@ class WebRTCClient {
         throw new Error('Restaurant ID mismatch')
       }
 
+      // Create own signaling instance
+      this.signaling = createSignaling()
+
       // Join the signaling channel
       console.log('[WebRTCClient] Joining signaling channel...')
-      await webrtcSignaling.joinAsClient(hubOffer.hubId, hubOffer.restaurantId, this.deviceId)
+      await this.signaling.joinAsClient(hubOffer.hubId, hubOffer.restaurantId, this.deviceId)
 
       // Listen for hub answer
-      const unsubAnswer = webrtcSignaling.on('hub-answer', async (data) => {
+      const unsubAnswer = this.signaling.on('hub-answer', async (data) => {
         console.log('[WebRTCClient] Received answer from hub')
         try {
           await this.handleHubAnswer(data.answer)
@@ -192,7 +196,7 @@ class WebRTCClient {
       })
 
       // Listen for ICE candidates from hub
-      const unsubIce = webrtcSignaling.on('hub-ice-candidate', async (data) => {
+      const unsubIce = this.signaling.on('hub-ice-candidate', async (data) => {
         console.log('[WebRTCClient] Received ICE candidate from hub')
         try {
           if (this.connection && data.candidate) {
@@ -219,7 +223,7 @@ class WebRTCClient {
         if (event.candidate) {
           console.log('[WebRTCClient] New ICE candidate, sending to hub')
           try {
-            await webrtcSignaling.sendIceCandidate(event.candidate)
+            await this.signaling.sendIceCandidate(event.candidate)
           } catch (err) {
             console.error('[WebRTCClient] Failed to send ICE candidate:', err)
           }
@@ -259,7 +263,7 @@ class WebRTCClient {
       console.log('[WebRTCClient] Created offer, sending to hub via signaling...')
 
       // Send offer to hub via signaling channel
-      await webrtcSignaling.sendOffer(
+      await this.signaling.sendOffer(
         this.connection.localDescription,
         this.deviceId,
         this.deviceInfo
@@ -539,7 +543,10 @@ class WebRTCClient {
     }
 
     // Leave signaling channel
-    webrtcSignaling.leave().catch(() => {})
+    if (this.signaling) {
+      this.signaling.leave().catch(() => {})
+      this.signaling = null
+    }
 
     if (this.channel) {
       this.channel.close()

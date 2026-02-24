@@ -12,7 +12,7 @@ export default function HubDashboard() {
   const [staffSession, setStaffSession] = useState(null)
   const [hubStatus, setHubStatus] = useState({
     isConnected: false,
-    isOnline: navigator.onLine,
+    isOnline: typeof navigator !== 'undefined' ? navigator.onLine : true,
     connectedDevices: [],
     lastSync: null
   })
@@ -69,7 +69,7 @@ export default function HubDashboard() {
     const status = localHubClient.getStatus()
     setHubStatus({
       isConnected: status.isConnected,
-      isOnline: navigator.onLine,
+      isOnline: typeof navigator !== 'undefined' ? navigator.onLine : true,
       connectedDevices: status.connectedDevices || [],
       lastSync: status.lastSync
     })
