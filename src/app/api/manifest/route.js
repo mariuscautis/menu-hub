@@ -129,3 +129,4 @@ export async function GET() {
 
 // Force dynamic rendering to avoid build-time data fetching
 export const dynamic = 'force-dynamic'
+export const runtime = 'edge'

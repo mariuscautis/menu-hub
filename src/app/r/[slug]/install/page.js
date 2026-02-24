@@ -4,6 +4,10 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
+// Force edge runtime for Cloudflare Pages
+export const runtime = 'edge'
+export const dynamic = 'force-dynamic'
+
 export default function InstallApp() {
   const params = useParams()
   const [restaurant, setRestaurant] = useState(null)
