@@ -35,6 +35,9 @@ export default function HubScanner({ onConnect, onCancel }) {
         return
       }
 
+      // Switch to camera mode FIRST so the video element renders
+      setScanMode('camera')
+
       // Request camera access
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
@@ -46,12 +49,26 @@ export default function HubScanner({ onConnect, onCancel }) {
 
       streamRef.current = stream
 
+      // Wait a tick for the video element to mount after setScanMode
+      await new Promise(resolve => setTimeout(resolve, 50))
+
       if (videoRef.current) {
         videoRef.current.srcObject = stream
 
         // Wait for video to be ready before playing
         await new Promise((resolve, reject) => {
           const video = videoRef.current
+          if (!video) {
+            reject(new Error('Video element not found'))
+            return
+          }
+
+          // If metadata is already loaded, play immediately
+          if (video.readyState >= 1) {
+            video.play().then(resolve).catch(reject)
+            return
+          }
+
           video.onloadedmetadata = () => {
             video.play()
               .then(resolve)
@@ -60,15 +77,21 @@ export default function HubScanner({ onConnect, onCancel }) {
           // Timeout if metadata never loads
           setTimeout(() => reject(new Error('Video load timeout')), 5000)
         })
+
+        setIsScanning(true)
+        // Start QR code scanning
+        scanQRCode()
+      } else {
+        throw new Error('Video element not available')
       }
-
-      setScanMode('camera')
-      setIsScanning(true)
-
-      // Start QR code scanning
-      scanQRCode()
     } catch (error) {
       console.error('[HubScanner] Camera error:', error)
+
+      // Stop any stream that was started
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop())
+        streamRef.current = null
+      }
 
       // Provide specific error messages
       let errorMessage = 'Failed to access camera. Please use manual input.'
