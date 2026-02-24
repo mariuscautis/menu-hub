@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 
+// Threshold for considering a session as "online" (30 minutes)
+const ONLINE_THRESHOLD_MS = 30 * 60 * 1000
+
 // Helper function to format relative time
 function formatRelativeTime(dateString) {
   const date = new Date(dateString)
@@ -18,6 +21,14 @@ function formatRelativeTime(dateString) {
   if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`
 
   return date.toLocaleDateString()
+}
+
+// Helper function to check if a session is currently online (active within threshold)
+function isSessionOnline(lastActiveAt) {
+  if (!lastActiveAt) return false
+  const lastActive = new Date(lastActiveAt)
+  const now = new Date()
+  return (now - lastActive) < ONLINE_THRESHOLD_MS
 }
 
 // Helper function to mask IP address for privacy
@@ -209,7 +220,8 @@ export default function ConnectedDevicesPanel({ restaurantId }) {
     }
   }
 
-  const activeSessionsCount = sessions.filter(s => !s.is_blocked).length
+  const onlineSessionsCount = sessions.filter(s => !s.is_blocked && isSessionOnline(s.last_active_at)).length
+  const inactiveSessionsCount = sessions.filter(s => !s.is_blocked && !isSessionOnline(s.last_active_at)).length
   const blockedSessionsCount = sessions.filter(s => s.is_blocked).length
 
   return (
@@ -230,7 +242,10 @@ export default function ConnectedDevicesPanel({ restaurantId }) {
             <p className="text-sm text-slate-500 dark:text-slate-400">
               {loading ? 'Loading...' : (
                 <>
-                  <span className="text-green-600 dark:text-green-400 font-medium">{activeSessionsCount} active</span>
+                  <span className="text-green-600 dark:text-green-400 font-medium">{onlineSessionsCount} online</span>
+                  {inactiveSessionsCount > 0 && (
+                    <span className="text-slate-500 dark:text-slate-400 ml-2">{inactiveSessionsCount} inactive</span>
+                  )}
                   {blockedSessionsCount > 0 && (
                     <span className="text-red-500 dark:text-red-400 ml-2">({blockedSessionsCount} blocked)</span>
                   )}
@@ -240,7 +255,7 @@ export default function ConnectedDevicesPanel({ restaurantId }) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {!loading && activeSessionsCount > 1 && (
+          {!loading && sessions.filter(s => !s.is_blocked).length > 1 && (
             <button
               onClick={(e) => {
                 e.stopPropagation()
@@ -292,20 +307,21 @@ export default function ConnectedDevicesPanel({ restaurantId }) {
             {sessions.map((session) => {
               const isCurrentSession = session.session_token === currentSessionToken
               const isBlocked = session.is_blocked
+              const isOnline = isSessionOnline(session.last_active_at)
 
               return (
                 <div
                   key={session.id}
-                  className={`p-4 ${isBlocked ? 'bg-red-50/50 dark:bg-red-900/10' : ''}`}
+                  className={`p-4 ${isBlocked ? 'bg-red-50/50 dark:bg-red-900/10' : !isOnline && !isCurrentSession ? 'bg-slate-50/50 dark:bg-slate-800/30' : ''}`}
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-3 flex-1 min-w-0">
                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
                         isBlocked
                           ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                          : isCurrentSession
+                          : isCurrentSession || isOnline
                             ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500'
                       }`}>
                         {getDeviceIcon(session.device_name)}
                       </div>
@@ -317,6 +333,16 @@ export default function ConnectedDevicesPanel({ restaurantId }) {
                           {isCurrentSession && (
                             <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs rounded-full font-medium">
                               This device
+                            </span>
+                          )}
+                          {!isCurrentSession && !isBlocked && isOnline && (
+                            <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs rounded-full font-medium">
+                              Online
+                            </span>
+                          )}
+                          {!isCurrentSession && !isBlocked && !isOnline && (
+                            <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-xs rounded-full font-medium">
+                              Inactive
                             </span>
                           )}
                           {isBlocked && (
@@ -404,7 +430,7 @@ export default function ConnectedDevicesPanel({ restaurantId }) {
         {!loading && sessions.length > 0 && (
           <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800">
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              <strong>Tip:</strong> Block suspicious devices to immediately prevent access. Blocked devices will be signed out and cannot log in again until unblocked.
+              <strong>Tip:</strong> Devices are shown as "Online" if active in the last 30 minutes. Block suspicious devices to immediately prevent access. Blocked devices cannot log in again until unblocked.
             </p>
           </div>
         )}

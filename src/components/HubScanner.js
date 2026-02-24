@@ -48,7 +48,18 @@ export default function HubScanner({ onConnect, onCancel }) {
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream
-        await videoRef.current.play()
+
+        // Wait for video to be ready before playing
+        await new Promise((resolve, reject) => {
+          const video = videoRef.current
+          video.onloadedmetadata = () => {
+            video.play()
+              .then(resolve)
+              .catch(reject)
+          }
+          // Timeout if metadata never loads
+          setTimeout(() => reject(new Error('Video load timeout')), 5000)
+        })
       }
 
       setScanMode('camera')
@@ -58,7 +69,20 @@ export default function HubScanner({ onConnect, onCancel }) {
       scanQRCode()
     } catch (error) {
       console.error('[HubScanner] Camera error:', error)
-      setError('Failed to access camera. Please use manual input.')
+
+      // Provide specific error messages
+      let errorMessage = 'Failed to access camera. Please use manual input.'
+      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        errorMessage = 'Camera permission denied. Please allow camera access in your browser settings.'
+      } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+        errorMessage = 'No camera found on this device. Please use manual input.'
+      } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+        errorMessage = 'Camera is in use by another app. Please close other apps and try again.'
+      } else if (error.message === 'Video load timeout') {
+        errorMessage = 'Camera failed to initialize. Please try again or use manual input.'
+      }
+
+      setError(errorMessage)
       setScanMode('manual')
     }
   }
@@ -77,7 +101,7 @@ export default function HubScanner({ onConnect, onCancel }) {
       const canvas = canvasRef.current
 
       // Set canvas dimensions to match video
-      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+      if (video.readyState === video.HAVE_ENOUGH_DATA && video.videoWidth > 0 && video.videoHeight > 0) {
         canvas.width = video.videoWidth
         canvas.height = video.videoHeight
 
@@ -210,6 +234,7 @@ export default function HubScanner({ onConnect, onCancel }) {
               className="w-full h-full object-cover"
               playsInline
               muted
+              autoPlay
             />
             <canvas ref={canvasRef} className="hidden" />
 
