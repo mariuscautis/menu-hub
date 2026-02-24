@@ -132,8 +132,9 @@ export default function HubScanner({ onConnect, onCancel }) {
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
 
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+        // Try multiple inversion attempts for better scanning on various screen types
         const code = jsQR(imageData.data, imageData.width, imageData.height, {
-          inversionAttempts: 'dontInvert'
+          inversionAttempts: 'attemptBoth' // Try both normal and inverted for better detection
         })
 
         if (code && code.data) {

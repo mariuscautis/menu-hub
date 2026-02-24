@@ -9,10 +9,13 @@
  * Features:
  * - Create WebRTC peer connections
  * - Generate QR codes for easy device pairing
+ * - Supabase Realtime signaling for offer/answer exchange
  * - Handle ICE candidate exchange
  * - Manage data channels for order sync
  * - Broadcast orders to all connected peers
  */
+
+import webrtcSignaling from '@/lib/webrtcSignaling'
 
 // STUN servers for NAT traversal (free public servers)
 const ICE_SERVERS = [
@@ -51,6 +54,47 @@ class WebRTCHub {
     this.isActive = true
 
     console.log('[WebRTCHub] Initialized:', this.hubId)
+
+    // Join signaling channel as hub
+    try {
+      await webrtcSignaling.joinAsHub(this.hubId, restaurantId)
+
+      // Listen for client offers
+      this.signalingCleanupOffer = webrtcSignaling.on('client-offer', async (data) => {
+        console.log('[WebRTCHub] Received client offer via signaling')
+        try {
+          const result = await this.handleClientConnection(
+            data.deviceId,
+            data.deviceInfo,
+            data.offer
+          )
+
+          // Send answer back to client
+          await webrtcSignaling.sendAnswer(result.answer, data.deviceId)
+          console.log('[WebRTCHub] Sent answer to client:', data.deviceId)
+        } catch (err) {
+          console.error('[WebRTCHub] Failed to handle client offer:', err)
+        }
+      })
+
+      // Listen for ICE candidates from clients
+      this.signalingCleanupIce = webrtcSignaling.on('client-ice-candidate', async (data) => {
+        console.log('[WebRTCHub] Received ICE candidate from client:', data.deviceId)
+        try {
+          const peer = this.peers.get(data.deviceId)
+          if (peer && peer.connection && data.candidate) {
+            await peer.connection.addIceCandidate(new RTCIceCandidate(data.candidate))
+          }
+        } catch (err) {
+          console.error('[WebRTCHub] Failed to add client ICE candidate:', err)
+        }
+      })
+
+      console.log('[WebRTCHub] Signaling channel ready')
+    } catch (err) {
+      console.error('[WebRTCHub] Failed to join signaling channel:', err)
+    }
+
     this.emit('initialized', { hubId: this.hubId })
 
     // Start cleanup interval for stale connections
@@ -122,12 +166,15 @@ class WebRTCHub {
     }
     this.peers.set(deviceId, peerInfo)
 
-    // Handle ICE candidates
-    connection.onicecandidate = (event) => {
+    // Handle ICE candidates - send to client via signaling
+    connection.onicecandidate = async (event) => {
       if (event.candidate) {
         console.log('[WebRTCHub] New ICE candidate for:', deviceId)
-        // In a real implementation, we'd signal this to the client
-        // For local network, candidates should be discovered automatically
+        try {
+          await webrtcSignaling.sendIceCandidate(event.candidate, deviceId)
+        } catch (err) {
+          console.error('[WebRTCHub] Failed to send ICE candidate:', err)
+        }
       }
     }
 
@@ -356,6 +403,19 @@ class WebRTCHub {
     if (this.cleanupInterval) {
       clearInterval(this.cleanupInterval)
     }
+
+    // Cleanup signaling listeners
+    if (this.signalingCleanupOffer) {
+      this.signalingCleanupOffer()
+      this.signalingCleanupOffer = null
+    }
+    if (this.signalingCleanupIce) {
+      this.signalingCleanupIce()
+      this.signalingCleanupIce = null
+    }
+
+    // Leave signaling channel
+    webrtcSignaling.leave().catch(() => {})
 
     // Close all peer connections
     for (const deviceId of this.peers.keys()) {

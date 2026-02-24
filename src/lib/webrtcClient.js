@@ -9,10 +9,13 @@
  * Features:
  * - QR code scanning for hub discovery
  * - WebRTC peer connection to hub
+ * - Supabase Realtime signaling for offer/answer exchange
  * - Data channel for order messages
  * - Auto-reconnect on disconnect
  * - Fallback to cloud sync if hub unavailable
  */
+
+import webrtcSignaling from '@/lib/webrtcSignaling'
 
 // STUN servers for NAT traversal
 const ICE_SERVERS = [
@@ -150,8 +153,40 @@ class WebRTCClient {
       }
 
       // Verify restaurant match
-      if (this.deviceInfo.restaurantId !== hubOffer.restaurantId) {
+      if (this.deviceInfo.restaurantId && this.deviceInfo.restaurantId !== hubOffer.restaurantId) {
         throw new Error('Restaurant ID mismatch')
+      }
+
+      // Join the signaling channel
+      console.log('[WebRTCClient] Joining signaling channel...')
+      await webrtcSignaling.joinAsClient(hubOffer.hubId, hubOffer.restaurantId, this.deviceId)
+
+      // Listen for hub answer
+      const unsubAnswer = webrtcSignaling.on('hub-answer', async (data) => {
+        console.log('[WebRTCClient] Received answer from hub')
+        try {
+          await this.handleHubAnswer(data.answer)
+        } catch (err) {
+          console.error('[WebRTCClient] Failed to handle hub answer:', err)
+        }
+      })
+
+      // Listen for ICE candidates from hub
+      const unsubIce = webrtcSignaling.on('hub-ice-candidate', async (data) => {
+        console.log('[WebRTCClient] Received ICE candidate from hub')
+        try {
+          if (this.connection && data.candidate) {
+            await this.connection.addIceCandidate(new RTCIceCandidate(data.candidate))
+          }
+        } catch (err) {
+          console.error('[WebRTCClient] Failed to add ICE candidate:', err)
+        }
+      })
+
+      // Store cleanup functions
+      this.signalingCleanup = () => {
+        unsubAnswer()
+        unsubIce()
       }
 
       // Create peer connection
@@ -160,9 +195,14 @@ class WebRTCClient {
       })
 
       // Set up connection handlers
-      this.connection.onicecandidate = (event) => {
+      this.connection.onicecandidate = async (event) => {
         if (event.candidate) {
-          console.log('[WebRTCClient] New ICE candidate')
+          console.log('[WebRTCClient] New ICE candidate, sending to hub')
+          try {
+            await webrtcSignaling.sendIceCandidate(event.candidate)
+          } catch (err) {
+            console.error('[WebRTCClient] Failed to send ICE candidate:', err)
+          }
         }
       }
 
@@ -196,11 +236,18 @@ class WebRTCClient {
       const offer = await this.connection.createOffer()
       await this.connection.setLocalDescription(offer)
 
-      console.log('[WebRTCClient] Created offer, waiting for answer from hub')
+      console.log('[WebRTCClient] Created offer, sending to hub via signaling...')
 
-      // In a real implementation, we would send this offer to the hub
-      // and receive an answer. For now, we'll emit an event that the UI
-      // can use to facilitate the connection
+      // Send offer to hub via signaling channel
+      await webrtcSignaling.sendOffer(
+        this.connection.localDescription,
+        this.deviceId,
+        this.deviceInfo
+      )
+
+      console.log('[WebRTCClient] Offer sent, waiting for answer from hub')
+
+      // Emit event for UI
       this.emit('offer_created', {
         offer: this.connection.localDescription,
         hubOffer
@@ -464,6 +511,15 @@ class WebRTCClient {
     }
 
     this.stopPing()
+
+    // Cleanup signaling listeners
+    if (this.signalingCleanup) {
+      this.signalingCleanup()
+      this.signalingCleanup = null
+    }
+
+    // Leave signaling channel
+    webrtcSignaling.leave().catch(() => {})
 
     if (this.channel) {
       this.channel.close()

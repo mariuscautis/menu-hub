@@ -26,7 +26,23 @@ const pwaConfig = withPWA({
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
   customWorkerDir: 'worker',
+  fallbacks: {
+    document: '/offline.html', // Fallback page when offline and page not cached
+  },
   runtimeCaching: [
+    // Cache HTML pages with network-first strategy and offline fallback
+    {
+      urlPattern: /^https?:\/\/.*\/(?:dashboard|r\/|staff|hub).*$/i,
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'pages-cache',
+        expiration: {
+          maxEntries: 50,
+          maxAgeSeconds: 7 * 24 * 60 * 60 // 7 days
+        },
+        networkTimeoutSeconds: 5,
+      }
+    },
     {
       urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/.*/i,
       handler: 'NetworkFirst',

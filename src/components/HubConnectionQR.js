@@ -44,12 +44,14 @@ export default function HubConnectionQR({ offerData, onNewOffer, restaurantSlug 
       const connectionUrl = createConnectionUrl(data)
 
       // Generate QR code as data URL
+      // Use high error correction and larger size for better scanning on small screens
       const dataUrl = await QRCode.toDataURL(connectionUrl, {
-        width: 300,
-        margin: 2,
+        width: 400,
+        margin: 3,
+        errorCorrectionLevel: 'H', // Highest error correction - works better on small/low-res screens
         color: {
-          dark: '#1e293b', // slate-900
-          light: '#f8fafc'  // slate-50
+          dark: '#000000', // Pure black for maximum contrast
+          light: '#ffffff'  // Pure white for maximum contrast
         }
       })
 
@@ -103,11 +105,12 @@ export default function HubConnectionQR({ offerData, onNewOffer, restaurantSlug 
   return (
     <div className="flex flex-col items-center">
       {/* QR Code */}
-      <div className="bg-white p-6 rounded-2xl shadow-lg mb-6">
+      <div className="bg-white p-8 rounded-2xl shadow-lg mb-6">
         <img
           src={qrDataUrl}
           alt="Connection QR Code"
-          className="w-[300px] h-[300px]"
+          className="w-[280px] h-[280px] sm:w-[320px] sm:h-[320px]"
+          style={{ imageRendering: 'pixelated' }}
         />
       </div>
 
