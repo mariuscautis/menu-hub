@@ -4,7 +4,7 @@ import { ThemeProvider } from '@/lib/ThemeContext'
 export const metadata = {
   title: 'Menu Hub - QR Menu & Ordering for Restaurants',
   description: 'Let your customers scan, browse your menu, and order directly from their table.',
-  manifest: '/manifest.json',
+  manifest: '/api/manifest',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -24,8 +24,8 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        <link rel="apple-touch-icon" sizes="192x192" href="/icon-192x192.png" />
-        <link rel="apple-touch-icon" sizes="512x512" href="/icon-512x512.png" />
+        <link rel="apple-touch-icon" sizes="192x192" href="/api/icon/192" />
+        <link rel="apple-touch-icon" sizes="512x512" href="/api/icon/512" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Menu Hub" />

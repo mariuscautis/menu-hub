@@ -13,9 +13,12 @@ export default function Security() {
   const [message, setMessage] = useState(null)
   const [showPassword, setShowPassword] = useState(false)
   const [staffLoginPassword, setStaffLoginPassword] = useState('')
-  const [qrCodeUrl, setQrCodeUrl] = useState('')
-  const [copied, setCopied] = useState(false)
-  const canvasRef = useRef(null)
+  const [loginQrUrl, setLoginQrUrl] = useState('')
+  const [installQrUrl, setInstallQrUrl] = useState('')
+  const [copiedLogin, setCopiedLogin] = useState(false)
+  const [copiedInstall, setCopiedInstall] = useState(false)
+  const loginCanvasRef = useRef(null)
+  const installCanvasRef = useRef(null)
 
   useEffect(() => {
     const fetchRestaurant = async () => {
@@ -38,30 +41,57 @@ export default function Security() {
     fetchRestaurant()
   }, [])
 
-  // Generate QR code for staff login
+  // Generate QR codes for staff login and app install
   useEffect(() => {
-    if (typeof window !== 'undefined' && canvasRef.current && restaurant) {
+    if (typeof window !== 'undefined' && restaurant) {
       const staffLoginUrl = `${window.location.origin}/r/${restaurant.slug}/auth/staff-login`
-      setQrCodeUrl(staffLoginUrl)
+      const staffInstallUrl = `${window.location.origin}/r/${restaurant.slug}/install`
+      setLoginQrUrl(staffLoginUrl)
+      setInstallQrUrl(staffInstallUrl)
 
-      QRCode.toCanvas(canvasRef.current, staffLoginUrl, {
-        width: 200,
-        margin: 2,
-        color: {
-          dark: '#6262bd',
-          light: '#ffffff'
-        }
-      }, (error) => {
-        if (error) console.error('QR Code generation error:', error)
-      })
+      // Generate login QR code
+      if (loginCanvasRef.current) {
+        QRCode.toCanvas(loginCanvasRef.current, staffLoginUrl, {
+          width: 180,
+          margin: 2,
+          color: {
+            dark: '#6262bd',
+            light: '#ffffff'
+          }
+        }, (error) => {
+          if (error) console.error('Login QR Code generation error:', error)
+        })
+      }
+
+      // Generate install QR code
+      if (installCanvasRef.current) {
+        QRCode.toCanvas(installCanvasRef.current, staffInstallUrl, {
+          width: 180,
+          margin: 2,
+          color: {
+            dark: '#059669',
+            light: '#ffffff'
+          }
+        }, (error) => {
+          if (error) console.error('Install QR Code generation error:', error)
+        })
+      }
     }
   }, [restaurant])
 
-  const copyStaffLink = () => {
-    if (qrCodeUrl) {
-      navigator.clipboard.writeText(qrCodeUrl)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+  const copyLoginLink = () => {
+    if (loginQrUrl) {
+      navigator.clipboard.writeText(loginQrUrl)
+      setCopiedLogin(true)
+      setTimeout(() => setCopiedLogin(false), 2000)
+    }
+  }
+
+  const copyInstallLink = () => {
+    if (installQrUrl) {
+      navigator.clipboard.writeText(installQrUrl)
+      setCopiedInstall(true)
+      setTimeout(() => setCopiedInstall(false), 2000)
     }
   }
 
@@ -261,38 +291,91 @@ export default function Security() {
             <p className="text-sm opacity-90">Share with your team to install their app</p>
           </div>
           <div className="bg-white border-2 border-slate-100 border-t-0 rounded-b-2xl p-6">
-            <div className="space-y-4">
-              {/* QR Code Section */}
-              <div className="flex flex-col items-center p-4 bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl">
-                <p className="text-sm font-semibold text-slate-700 mb-3">Scan to Install Staff App</p>
-                <div className="bg-white p-3 rounded-lg shadow-sm">
-                  <canvas ref={canvasRef} />
+            <div className="space-y-6">
+
+              {/* Two QR Codes Side by Side */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Install App QR Code */}
+                <div className="flex flex-col items-center p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border-2 border-green-200">
+                  <div className="flex items-center gap-2 mb-3">
+                    <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                    </svg>
+                    <p className="text-sm font-bold text-green-800">Install App</p>
+                  </div>
+                  <div className="bg-white p-2 rounded-lg shadow-sm">
+                    <canvas ref={installCanvasRef} />
+                  </div>
+                  <p className="text-xs text-green-700 mt-2 text-center font-medium">
+                    Scan to download & install
+                  </p>
                 </div>
-                <p className="text-xs text-slate-500 mt-3 text-center">Staff can scan this QR code to access the login page</p>
+
+                {/* Login QR Code */}
+                <div className="flex flex-col items-center p-4 bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl border-2 border-purple-200">
+                  <div className="flex items-center gap-2 mb-3">
+                    <svg className="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                    <p className="text-sm font-bold text-purple-800">Login Page</p>
+                  </div>
+                  <div className="bg-white p-2 rounded-lg shadow-sm">
+                    <canvas ref={loginCanvasRef} />
+                  </div>
+                  <p className="text-xs text-purple-700 mt-2 text-center font-medium">
+                    Scan to open login in browser
+                  </p>
+                </div>
               </div>
 
-              {/* Link Section */}
+              {/* Install Link Section */}
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                <div className="flex items-start gap-3">
+                  <svg className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                  </svg>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-green-900 mb-2">Direct Install Link</h4>
+                    <p className="text-xs text-green-700 mb-2">
+                      Share this link to download and install the app as a standalone application:
+                    </p>
+                    <div className="flex gap-2">
+                      <div className="flex-1 bg-white border border-green-300 rounded-lg p-3 font-mono text-xs break-all">
+                        {installQrUrl || 'Loading...'}
+                      </div>
+                      <button
+                        onClick={copyInstallLink}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors whitespace-nowrap text-sm font-medium"
+                      >
+                        {copiedInstall ? 'Copied!' : 'Copy'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Login Link Section */}
               <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                 <div className="flex items-start gap-3">
                   <svg className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                    <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
                   </svg>
                   <div className="flex-1">
-                    <h4 className="font-semibold text-blue-900 mb-2">Or Share This Link</h4>
+                    <h4 className="font-semibold text-blue-900 mb-2">Browser Login Link</h4>
+                    <p className="text-xs text-blue-700 mb-2">
+                      Share this link to open the login page in a web browser:
+                    </p>
                     <div className="flex gap-2">
                       <div className="flex-1 bg-white border border-blue-300 rounded-lg p-3 font-mono text-xs break-all">
-                        {qrCodeUrl || 'Loading...'}
+                        {loginQrUrl || 'Loading...'}
                       </div>
                       <button
-                        onClick={copyStaffLink}
+                        onClick={copyLoginLink}
                         className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm font-medium"
                       >
-                        {copied ? '✓ Copied!' : 'Copy'}
+                        {copiedLogin ? 'Copied!' : 'Copy'}
                       </button>
                     </div>
-                    <p className="text-xs text-blue-700 mt-3">
-                      Staff will login with the password you set above, then install the app.
-                    </p>
                   </div>
                 </div>
               </div>
@@ -338,7 +421,8 @@ export default function Security() {
           <div>
             <h3 className="font-bold text-blue-900 mb-2">How Staff Login Works</h3>
             <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
-              <li>Staff navigate to your restaurant's login URL</li>
+              <li>Staff scan the <strong>Install App</strong> QR code to download the app</li>
+              <li>Or they scan the <strong>Login Page</strong> QR code to use in browser</li>
               <li>They enter the restaurant password (one-time per session)</li>
               <li>They enter their personal 3-digit PIN code</li>
               <li>They access their dashboard</li>

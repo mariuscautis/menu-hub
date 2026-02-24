@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import PlatformLogo from '@/components/PlatformLogo'
 
 export default function AdminLayout({ children }) {
   const pathname = usePathname()
@@ -59,6 +60,11 @@ export default function AdminLayout({ children }) {
         <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
       </svg>
     )},
+    { href: '/admin/settings', label: 'Branding', icon: (
+      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+      </svg>
+    )},
   ]
 
   if (loading) {
@@ -78,14 +84,9 @@ export default function AdminLayout({ children }) {
       {/* Sidebar */}
       <aside className="w-64 bg-slate-900 flex flex-col">
         <div className="p-6 border-b border-slate-800">
-          <Link href="/admin" className="flex items-center space-x-2">
-            <div className="w-9 h-9 bg-[#6262bd] rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-lg">M</span>
-            </div>
-            <div>
-              <span className="text-xl font-bold text-white">Menu Hub</span>
-              <span className="block text-xs text-slate-400">Admin Panel</span>
-            </div>
+          <Link href="/admin" className="block">
+            <PlatformLogo darkMode={true} />
+            <span className="block text-xs text-slate-400 ml-11 -mt-1">Admin Panel</span>
           </Link>
         </div>
 

@@ -11,6 +11,7 @@ import HubConnectionStatus from '@/components/HubConnectionStatus'
 import { LanguageProvider } from '@/lib/i18n/LanguageContext'
 import LanguageSelector from '@/components/LanguageSelector'
 import { useSessionValidator } from '@/hooks/useSessionValidator'
+import PlatformLogo from '@/components/PlatformLogo'
 
 export default function DashboardLayout({ children }) {
   const pathname = usePathname()
@@ -969,17 +970,17 @@ export default function DashboardLayout({ children }) {
           </button>
           <div className="flex items-center gap-2">
             {restaurant?.logo_url ? (
-              <div className="w-8 h-8 rounded-lg overflow-hidden bg-slate-50 dark:bg-slate-800">
-                <img src={restaurant.logo_url} alt={restaurant.name} className="w-full h-full object-contain" />
-              </div>
+              <>
+                <div className="w-8 h-8 rounded-lg overflow-hidden bg-slate-50 dark:bg-slate-800">
+                  <img src={restaurant.logo_url} alt={restaurant.name} className="w-full h-full object-contain" />
+                </div>
+                <span className="font-semibold text-slate-700 dark:text-slate-200 truncate max-w-[200px]">
+                  {restaurant?.name || 'Menu Hub'}
+                </span>
+              </>
             ) : (
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold">M</span>
-              </div>
+              <PlatformLogo size="sm" />
             )}
-            <span className="font-semibold text-slate-700 dark:text-slate-200 truncate max-w-[200px]">
-              {restaurant?.name || 'Menu Hub'}
-            </span>
           </div>
           <button
             onClick={toggleFullWidth}
@@ -1030,21 +1031,21 @@ export default function DashboardLayout({ children }) {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 flex-1 min-w-0">
               {restaurant?.logo_url ? (
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800 flex-shrink-0">
-                  <img
-                    src={restaurant.logo_url}
-                    alt={restaurant.name}
-                    className="max-w-full max-h-full object-contain"
-                  />
-                </div>
+                <>
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800 flex-shrink-0">
+                    <img
+                      src={restaurant.logo_url}
+                      alt={restaurant.name}
+                      className="max-w-full max-h-full object-contain"
+                    />
+                  </div>
+                  <span className="text-xl font-bold text-slate-700 dark:text-slate-200 truncate">
+                    {restaurant?.name || 'Menu Hub'}
+                  </span>
+                </>
               ) : (
-                <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center flex-shrink-0">
-                  <span className="text-white font-bold text-lg">M</span>
-                </div>
+                <PlatformLogo size="md" />
               )}
-              <span className="text-xl font-bold text-slate-700 dark:text-slate-200 truncate">
-                {restaurant?.name || 'Menu Hub'}
-              </span>
             </div>
             {/* Close button */}
             <button
