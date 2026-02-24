@@ -9,9 +9,18 @@ function getSupabaseClient() {
   )
 }
 
-export async function GET() {
+export async function GET(request, { params }) {
+  const { slug } = await params
+
   try {
     const supabase = getSupabaseClient()
+
+    // Fetch restaurant info
+    const { data: restaurant } = await supabase
+      .from('restaurants')
+      .select('name, logo_url, slug')
+      .eq('slug', slug)
+      .single()
 
     // Fetch branding settings
     const { data: brandingData } = await supabase
@@ -24,6 +33,9 @@ export async function GET() {
     const platformName = branding.platform_name || 'Menu Hub'
     const themeColor = branding.theme_color || '#6262bd'
     const backgroundColor = branding.background_color || '#ffffff'
+
+    // Use restaurant name if available, otherwise platform name
+    const appName = restaurant?.name || platformName
 
     // Build icons array - use custom icons if available, otherwise default
     const icons = []
@@ -49,11 +61,13 @@ export async function GET() {
       }
     }
 
+    // Restaurant-specific manifest with start_url pointing to staff login
     const manifest = {
-      name: `${platformName} - Restaurant Management`,
-      short_name: platformName,
-      description: 'Complete restaurant management system for orders, reservations, staff, and inventory',
-      start_url: '/',
+      name: `${appName} - Staff App`,
+      short_name: appName,
+      description: `Staff app for ${appName}`,
+      start_url: `/r/${slug}/auth/staff-login`,
+      scope: `/r/${slug}/`,
       display: 'standalone',
       background_color: backgroundColor,
       theme_color: themeColor,
@@ -63,24 +77,17 @@ export async function GET() {
       screenshots: [],
       shortcuts: [
         {
-          name: 'Orders',
-          short_name: 'Orders',
-          description: 'View and manage orders',
-          url: '/dashboard/orders',
+          name: 'Staff Login',
+          short_name: 'Login',
+          description: 'Go to staff login',
+          url: `/r/${slug}/auth/staff-login`,
           icons: [{ src: icons.find(i => i.sizes === '192x192')?.src || '/icon-192x192.png', sizes: '192x192' }]
         },
         {
           name: 'Staff Dashboard',
-          short_name: 'Staff',
-          description: 'Staff view and rota',
-          url: '/staff-login',
-          icons: [{ src: icons.find(i => i.sizes === '192x192')?.src || '/icon-192x192.png', sizes: '192x192' }]
-        },
-        {
-          name: 'Reservations',
-          short_name: 'Reservations',
-          description: 'Manage table reservations',
-          url: '/dashboard/reservations',
+          short_name: 'Dashboard',
+          description: 'View staff dashboard',
+          url: `/r/${slug}/staff`,
           icons: [{ src: icons.find(i => i.sizes === '192x192')?.src || '/icon-192x192.png', sizes: '192x192' }]
         }
       ]
@@ -97,10 +104,11 @@ export async function GET() {
 
     // Return default manifest on error
     const defaultManifest = {
-      name: 'Menu Hub - Restaurant Management',
-      short_name: 'Menu Hub',
-      description: 'Complete restaurant management system for orders, reservations, staff, and inventory',
-      start_url: '/',
+      name: 'Staff App',
+      short_name: 'Staff',
+      description: 'Staff app for restaurant management',
+      start_url: `/r/${slug}/auth/staff-login`,
+      scope: `/r/${slug}/`,
       display: 'standalone',
       background_color: '#ffffff',
       theme_color: '#6262bd',

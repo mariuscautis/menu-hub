@@ -4,19 +4,15 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
-// Force edge runtime for Cloudflare Pages
-export const runtime = 'edge'
-export const dynamic = 'force-dynamic'
-
 export default function InstallApp() {
   const params = useParams()
   const [restaurant, setRestaurant] = useState(null)
+  const [branding, setBranding] = useState(null)
   const [loading, setLoading] = useState(true)
   const [deferredPrompt, setDeferredPrompt] = useState(null)
   const [isInstalled, setIsInstalled] = useState(false)
   const [isIOS, setIsIOS] = useState(false)
   const [isAndroid, setIsAndroid] = useState(false)
-  const [platformLogo, setPlatformLogo] = useState(null)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,14 +28,14 @@ export default function InstallApp() {
       }
 
       // Fetch platform branding
-      const { data: branding } = await supabase
+      const { data: brandingData } = await supabase
         .from('platform_settings')
         .select('value')
         .eq('key', 'branding')
         .single()
 
-      if (branding?.value?.logo_url) {
-        setPlatformLogo(branding.value.logo_url)
+      if (brandingData?.value) {
+        setBranding(brandingData.value)
       }
 
       setLoading(false)
@@ -79,6 +75,35 @@ export default function InstallApp() {
     }
   }, [params.slug])
 
+  // Dynamically inject the manifest link for this restaurant
+  useEffect(() => {
+    if (!params.slug) return
+
+    // Remove any existing manifest link
+    const existingManifest = document.querySelector('link[rel="manifest"]')
+    if (existingManifest) {
+      existingManifest.remove()
+    }
+
+    // Add restaurant-specific manifest
+    const manifestLink = document.createElement('link')
+    manifestLink.rel = 'manifest'
+    manifestLink.href = `/api/manifest/${params.slug}`
+    document.head.appendChild(manifestLink)
+
+    // Update apple-mobile-web-app-title
+    let appleTitleMeta = document.querySelector('meta[name="apple-mobile-web-app-title"]')
+    if (appleTitleMeta) {
+      appleTitleMeta.content = restaurant?.name || branding?.platform_name || 'Staff App'
+    }
+
+    return () => {
+      // Cleanup on unmount
+      const link = document.querySelector('link[rel="manifest"][href*="/api/manifest/"]')
+      if (link) link.remove()
+    }
+  }, [params.slug, restaurant, branding])
+
   const handleInstall = async () => {
     if (!deferredPrompt) return
 
@@ -99,7 +124,10 @@ export default function InstallApp() {
     )
   }
 
-  const logoSrc = restaurant?.logo_url || platformLogo || null
+  // Determine which logo to show - restaurant logo takes priority, then platform logo
+  const logoSrc = restaurant?.logo_url || branding?.logo_url || null
+  const appName = restaurant?.name || branding?.platform_name || 'Staff App'
+  const themeColor = branding?.theme_color || '#6262bd'
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center p-4">
@@ -109,21 +137,26 @@ export default function InstallApp() {
           {logoSrc ? (
             <img
               src={logoSrc}
-              alt={restaurant?.name || 'App'}
+              alt={appName}
               className="w-24 h-24 object-contain rounded-2xl"
             />
           ) : (
-            <div className="w-24 h-24 bg-gradient-to-br from-[#6262bd] to-[#8b5cf6] rounded-2xl flex items-center justify-center">
-              <span className="text-white text-4xl font-bold">M</span>
+            <div
+              className="w-24 h-24 rounded-2xl flex items-center justify-center"
+              style={{ background: `linear-gradient(135deg, ${themeColor}, ${themeColor}dd)` }}
+            >
+              <span className="text-white text-4xl font-bold">
+                {appName.charAt(0).toUpperCase()}
+              </span>
             </div>
           )}
         </div>
 
         <h1 className="text-2xl font-bold text-slate-800 text-center mb-2">
-          Install Staff App
+          Install {appName}
         </h1>
         <p className="text-slate-500 text-center mb-8">
-          {restaurant?.name || 'Menu Hub'}
+          Staff App for {restaurant?.name || appName}
         </p>
 
         {isInstalled ? (
@@ -146,7 +179,8 @@ export default function InstallApp() {
           <div className="space-y-4">
             <button
               onClick={handleInstall}
-              className="w-full bg-gradient-to-r from-[#6262bd] to-[#8b5cf6] text-white py-4 rounded-xl font-semibold text-lg hover:shadow-lg transition-all flex items-center justify-center gap-3"
+              className="w-full text-white py-4 rounded-xl font-semibold text-lg hover:shadow-lg transition-all flex items-center justify-center gap-3"
+              style={{ background: `linear-gradient(135deg, ${themeColor}, ${themeColor}dd)` }}
             >
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
@@ -212,25 +246,25 @@ export default function InstallApp() {
               <h3 className="font-semibold text-slate-700 mb-4 text-center">Why Install?</h3>
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl">
-                  <svg className="w-5 h-5 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5" style={{ color: themeColor }} fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                   </svg>
                   <span className="text-sm text-slate-700">Works Offline</span>
                 </div>
                 <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl">
-                  <svg className="w-5 h-5 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5" style={{ color: themeColor }} fill="currentColor" viewBox="0 0 24 24">
                     <path d="M13 7h-2v4H7v2h4v4h2v-4h4v-2h-4V7zm-1-5C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
                   </svg>
                   <span className="text-sm text-slate-700">Faster Access</span>
                 </div>
                 <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl">
-                  <svg className="w-5 h-5 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5" style={{ color: themeColor }} fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
                   </svg>
                   <span className="text-sm text-slate-700">Push Alerts</span>
                 </div>
                 <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl">
-                  <svg className="w-5 h-5 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5" style={{ color: themeColor }} fill="currentColor" viewBox="0 0 24 24">
                     <path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/>
                   </svg>
                   <span className="text-sm text-slate-700">Full Screen</span>
@@ -242,7 +276,7 @@ export default function InstallApp() {
             <div className="text-center pt-4">
               <a
                 href={`/r/${params.slug}/auth/staff-login`}
-                className="text-sm text-slate-500 hover:text-[#6262bd] underline"
+                className="text-sm text-slate-500 hover:underline"
               >
                 Skip and continue in browser
               </a>

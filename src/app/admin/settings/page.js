@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
+import { clearBrandingCache } from '@/lib/usePlatformBranding'
 
 export default function AdminSettings() {
   const [loading, setLoading] = useState(true)
@@ -220,7 +221,10 @@ export default function AdminSettings() {
 
       if (error) throw error
 
-      setMessage({ type: 'success', text: 'Branding settings saved successfully!' })
+      // Clear the branding cache so changes take effect immediately
+      clearBrandingCache()
+
+      setMessage({ type: 'success', text: 'Branding settings saved successfully! Refresh the page to see changes across the site.' })
     } catch (error) {
       console.error('Save error:', error)
       setMessage({ type: 'error', text: 'Failed to save settings' })
@@ -480,6 +484,21 @@ export default function AdminSettings() {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* PWA Update Info */}
+      <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-6 mb-6">
+        <h2 className="text-lg font-bold text-blue-800 mb-3 flex items-center gap-2">
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+          </svg>
+          How PWA Updates Work
+        </h2>
+        <ul className="text-sm text-blue-700 space-y-2">
+          <li><strong>Website changes:</strong> Take effect immediately after saving. Refresh the browser to see changes.</li>
+          <li><strong>Installed app (PWA) updates:</strong> The app automatically checks for updates in the background. Users will see the new logo and name the next time they open the app after closing it completely.</li>
+          <li><strong>App icon on home screen:</strong> The icon shown on the home screen is cached by the device. For a new icon to appear, users need to uninstall and reinstall the app.</li>
+        </ul>
       </div>
 
       {/* Save Button */}
