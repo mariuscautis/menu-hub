@@ -1,14 +1,18 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
-// Create a Supabase client for server-side use
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-)
+// Create client lazily inside the handler to avoid build-time errors
+function getSupabaseClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  )
+}
 
 export async function GET() {
   try {
+    const supabase = getSupabaseClient()
+
     // Fetch branding settings
     const { data: brandingData } = await supabase
       .from('platform_settings')
@@ -122,3 +126,6 @@ export async function GET() {
     })
   }
 }
+
+// Force dynamic rendering to avoid build-time data fetching
+export const dynamic = 'force-dynamic'
