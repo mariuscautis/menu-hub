@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
+// Required for Cloudflare Pages
+export const runtime = 'edge'
+
 export default function InstallApp() {
   const params = useParams()
   const [restaurant, setRestaurant] = useState(null)
