@@ -40,18 +40,18 @@ export default function HubConnectionQR({ offerData, onNewOffer, restaurantSlug 
 
   const generateQRCode = async (data) => {
     try {
-      // Create connection URL with offer data
+      // Create a compact connection URL
       const connectionUrl = createConnectionUrl(data)
 
-      // Generate QR code as data URL
-      // Use high error correction and larger size for better scanning on small screens
+      // Generate QR code - use Medium error correction for smaller QR
+      // Lower error correction = less dense = easier to scan
       const dataUrl = await QRCode.toDataURL(connectionUrl, {
-        width: 400,
-        margin: 3,
-        errorCorrectionLevel: 'H', // Highest error correction - works better on small/low-res screens
+        width: 300,
+        margin: 2,
+        errorCorrectionLevel: 'M', // Medium - good balance between size and reliability
         color: {
-          dark: '#000000', // Pure black for maximum contrast
-          light: '#ffffff'  // Pure white for maximum contrast
+          dark: '#000000',
+          light: '#ffffff'
         }
       })
 
@@ -62,12 +62,21 @@ export default function HubConnectionQR({ offerData, onNewOffer, restaurantSlug 
   }
 
   const createConnectionUrl = (data) => {
-    // Create an HTTPS URL so native phone cameras can open it directly
-    const jsonStr = JSON.stringify(data)
-    const base64 = btoa(jsonStr)
+    // Create a compact URL with only essential data
+    // Format: /r/{slug}/hub-connect?h={hubId}&r={restaurantId}&t={timestamp}
+    // This is much shorter than base64-encoding the entire object
     const origin = typeof window !== 'undefined' ? window.location.origin : ''
     const slug = restaurantSlug || data.restaurantSlug || ''
-    return `${origin}/r/${slug}/hub-connect?data=${base64}`
+
+    // Use short parameter names to minimize QR code size
+    const params = new URLSearchParams({
+      h: data.hubId,
+      r: data.restaurantId,
+      o: data.offerId,
+      t: data.timestamp.toString()
+    })
+
+    return `${origin}/r/${slug}/hub-connect?${params.toString()}`
   }
 
   const formatTime = (seconds) => {
@@ -105,12 +114,11 @@ export default function HubConnectionQR({ offerData, onNewOffer, restaurantSlug 
   return (
     <div className="flex flex-col items-center">
       {/* QR Code */}
-      <div className="bg-white p-8 rounded-2xl shadow-lg mb-6">
+      <div className="bg-white p-6 rounded-2xl shadow-lg mb-6">
         <img
           src={qrDataUrl}
           alt="Connection QR Code"
-          className="w-[280px] h-[280px] sm:w-[320px] sm:h-[320px]"
-          style={{ imageRendering: 'pixelated' }}
+          className="w-[250px] h-[250px] sm:w-[280px] sm:h-[280px]"
         />
       </div>
 

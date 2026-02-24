@@ -20,25 +20,45 @@ export default function HubConnectPage() {
   const [errorMsg, setErrorMsg] = useState(null)
 
   useEffect(() => {
-    const data = searchParams.get('data')
+    // Support both old format (data=base64) and new compact format (h=hubId&r=restaurantId&o=offerId&t=timestamp)
+    const dataParam = searchParams.get('data')
+    const hubId = searchParams.get('h')
+    const restaurantId = searchParams.get('r')
+    const offerId = searchParams.get('o')
+    const timestamp = searchParams.get('t')
 
-    if (!data) {
+    let connectionData = null
+
+    // Try new compact format first
+    if (hubId && restaurantId && offerId) {
+      connectionData = {
+        type: 'hub_offer',
+        hubId,
+        restaurantId,
+        offerId,
+        timestamp: timestamp ? parseInt(timestamp, 10) : Date.now()
+      }
+    }
+    // Fall back to old base64 format
+    else if (dataParam) {
+      try {
+        const decoded = atob(dataParam)
+        connectionData = JSON.parse(decoded)
+      } catch {
+        // Invalid base64
+      }
+    }
+
+    if (!connectionData || !connectionData.hubId || !connectionData.offerId) {
       setStatus('error')
       setErrorMsg('No connection data found in the QR code. Please ask the hub manager to generate a new QR code.')
       return
     }
 
     try {
-      // Validate that the data is valid base64 JSON
-      const decoded = atob(data)
-      const parsed = JSON.parse(decoded)
-
-      if (!parsed.hubId || !parsed.offerId) {
-        throw new Error('Invalid connection data structure')
-      }
-
-      // Store the connection data so HubConnectionStatus can pick it up
-      sessionStorage.setItem('pending_hub_connection', data)
+      // Store the connection data as base64 so HubConnectionStatus can pick it up
+      const base64Data = btoa(JSON.stringify(connectionData))
+      sessionStorage.setItem('pending_hub_connection', base64Data)
 
       setStatus('redirecting')
 

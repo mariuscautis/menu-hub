@@ -140,9 +140,12 @@ export default function HubScanner({ onConnect, onCancel }) {
         if (code && code.data) {
           console.log('[HubScanner] QR code detected:', code.data)
 
-          // Accept both HTTPS hub-connect URLs and the legacy custom scheme
+          // Accept hub-connect URLs in various formats:
+          // - New compact: /hub-connect?h=...&r=...&o=...
+          // - Old base64: /hub-connect?data=...
+          // - Legacy scheme: menuhub://connect
           const isHubConnect =
-            code.data.includes('/hub-connect?data=') ||
+            code.data.includes('/hub-connect?') ||
             code.data.startsWith('menuhub://connect')
 
           if (isHubConnect) {

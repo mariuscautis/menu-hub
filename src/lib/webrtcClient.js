@@ -93,10 +93,30 @@ class WebRTCClient {
    */
   parseQRCode(qrData) {
     try {
+      // Try new compact URL format first: /hub-connect?h=...&r=...&o=...&t=...
+      if (qrData.includes('/hub-connect?') && qrData.includes('h=')) {
+        const url = new URL(qrData)
+        const hubId = url.searchParams.get('h')
+        const restaurantId = url.searchParams.get('r')
+        const offerId = url.searchParams.get('o')
+        const timestamp = url.searchParams.get('t')
+
+        if (hubId && restaurantId && offerId) {
+          return {
+            type: 'hub_offer',
+            hubId,
+            restaurantId,
+            offerId,
+            timestamp: timestamp ? parseInt(timestamp, 10) : Date.now()
+          }
+        }
+      }
+
+      // Fall back to old base64 format
       let base64
 
       if (qrData.includes('/hub-connect?data=')) {
-        // New HTTPS format: https://domain/r/slug/hub-connect?data=base64
+        // Old HTTPS format: https://domain/r/slug/hub-connect?data=base64
         const url = new URL(qrData)
         base64 = url.searchParams.get('data')
         if (!base64) throw new Error('Missing data param in hub-connect URL')
