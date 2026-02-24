@@ -17,7 +17,7 @@ export default function HubDashboard() {
   const [staffSession, setStaffSession] = useState(null)
   const [hubStatus, setHubStatus] = useState({
     isActive: false,
-    isOnline: navigator.onLine,
+    isOnline: typeof navigator !== 'undefined' ? navigator.onLine : true,
     connectedDevices: [],
     lastSync: null
   })
@@ -114,7 +114,7 @@ export default function HubDashboard() {
     const status = webrtcHub.getStatus()
     setHubStatus({
       isActive: status.isActive,
-      isOnline: navigator.onLine,
+      isOnline: typeof navigator !== 'undefined' ? navigator.onLine : true,
       connectedDevices: status.connectedDevices || [],
       lastSync: Date.now() // Update to current time
     })

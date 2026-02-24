@@ -150,25 +150,23 @@ class WebRTCHub {
       iceServers: ICE_SERVERS
     })
 
-    // Create data channel
-    const channel = connection.createDataChannel('orders', {
-      ordered: true,
-      maxRetransmits: 3
-    })
-
-    // Set up channel handlers
-    this.setupDataChannel(channel, deviceId)
-
-    // Store peer info
+    // Store peer info (channel will be set when we receive it via ondatachannel)
     const peerInfo = {
       connection,
-      channel,
+      channel: null,
       deviceId,
       deviceInfo,
       connectedAt: Date.now(),
       lastActivity: Date.now()
     }
     this.peers.set(deviceId, peerInfo)
+
+    // Listen for data channel from client (client creates it as offerer)
+    connection.ondatachannel = (event) => {
+      console.log('[WebRTCHub] Received data channel from client:', deviceId)
+      peerInfo.channel = event.channel
+      this.setupDataChannel(event.channel, deviceId)
+    }
 
     // Handle ICE candidates - send to client via signaling
     connection.onicecandidate = async (event) => {

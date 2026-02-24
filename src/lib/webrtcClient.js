@@ -218,6 +218,13 @@ class WebRTCClient {
         iceServers: ICE_SERVERS
       })
 
+      // Create data channel BEFORE creating offer (offerer must create it)
+      this.channel = this.connection.createDataChannel('orders', {
+        ordered: true,
+        maxRetransmits: 3
+      })
+      this.setupDataChannel()
+
       // Set up connection handlers
       this.connection.onicecandidate = async (event) => {
         if (event.candidate) {
@@ -249,12 +256,7 @@ class WebRTCClient {
         console.log('[WebRTCClient] ICE state:', this.connection.iceConnectionState)
       }
 
-      // Listen for data channel from hub
-      this.connection.ondatachannel = (event) => {
-        console.log('[WebRTCClient] Received data channel')
-        this.channel = event.channel
-        this.setupDataChannel()
-      }
+      // Note: We created the data channel above, so we don't need ondatachannel
 
       // Create offer
       const offer = await this.connection.createOffer()
