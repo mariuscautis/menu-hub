@@ -17,6 +17,7 @@ export default function Security() {
   const [installQrUrl, setInstallQrUrl] = useState('')
   const [copiedLogin, setCopiedLogin] = useState(false)
   const [copiedInstall, setCopiedInstall] = useState(false)
+  const [copiedTakeaway, setCopiedTakeaway] = useState(false)
   const loginCanvasRef = useRef(null)
   const installCanvasRef = useRef(null)
 
@@ -92,6 +93,20 @@ export default function Security() {
       navigator.clipboard.writeText(installQrUrl)
       setCopiedInstall(true)
       setTimeout(() => setCopiedInstall(false), 2000)
+    }
+  }
+
+  const getTakeawayMenuUrl = () => {
+    if (typeof window === 'undefined' || !restaurant) return ''
+    return `${window.location.origin}/r/${restaurant.slug}/takeaway`
+  }
+
+  const copyTakeawayLink = () => {
+    const url = getTakeawayMenuUrl()
+    if (url) {
+      navigator.clipboard.writeText(url)
+      setCopiedTakeaway(true)
+      setTimeout(() => setCopiedTakeaway(false), 2000)
     }
   }
 
@@ -273,18 +288,8 @@ export default function Security() {
         </div>
       </div>
 
-      {/* PWA Install Sections */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* Manager/Owner App */}
-        <div>
-          <div className="bg-gradient-to-r from-[#6262bd] to-[#8b5cf6] text-white rounded-t-2xl p-4">
-            <h3 className="font-bold text-lg">Manager App</h3>
-            <p className="text-sm opacity-90">Full dashboard access for restaurant management</p>
-          </div>
-          <PWAInstallButton />
-        </div>
-
-        {/* Staff App */}
+      {/* Staff App Section */}
+      <div className="mb-6">
         <div>
           <div className="bg-gradient-to-r from-[#8b5cf6] to-[#a78bfa] text-white rounded-t-2xl p-4">
             <h3 className="font-bold text-lg">Staff App</h3>
@@ -407,6 +412,52 @@ export default function Security() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Takeaway Menu Link Section */}
+      <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <h2 className="text-lg font-bold text-slate-700 mb-2">Takeaway Menu Link</h2>
+            <p className="text-sm text-slate-500">
+              Share this link on your website or social media to let customers browse your takeaway menu and place orders.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1 bg-orange-100 text-orange-700 rounded-lg text-sm font-medium">
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M18.06 22.99h1.66c.84 0 1.53-.64 1.63-1.46L23 5.05l-5 2V1h-1.97v6.05l-5-2-1.66 15.48c-.1.82.59 1.46 1.43 1.46h1.66l.57-2.68H17.5l.56 2.68zM9.65 11.58L9 13.67l-.65-2.09H5.93l1.3.96-.5 1.54 1.3-.96 1.3.96-.5-1.54 1.3-.96z"/>
+            </svg>
+            <span>Takeaway</span>
+          </div>
+        </div>
+
+        <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <svg className="w-6 h-6 text-orange-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+            </svg>
+            <div className="flex-1">
+              <h4 className="font-semibold text-orange-900 mb-2">Your Takeaway Menu URL</h4>
+              <p className="text-xs text-orange-700 mb-2">
+                Customers can browse your menu and place takeaway orders at this link:
+              </p>
+              <div className="flex gap-2">
+                <div className="flex-1 bg-white border border-orange-300 rounded-lg p-3 font-mono text-xs break-all text-orange-800">
+                  {getTakeawayMenuUrl() || 'Loading...'}
+                </div>
+                <button
+                  onClick={copyTakeawayLink}
+                  className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors whitespace-nowrap text-sm font-medium"
+                >
+                  {copiedTakeaway ? 'Copied!' : 'Copy'}
+                </button>
+              </div>
+              <p className="text-xs text-orange-600 mt-3">
+                <strong>Tip:</strong> Add this link to your website, Google Business Profile, or social media pages to increase takeaway orders.
+              </p>
             </div>
           </div>
         </div>

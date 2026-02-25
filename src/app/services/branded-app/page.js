@@ -32,7 +32,7 @@ export default function BrandedAppPage() {
               </h1>
 
               <p className="text-xl text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
-                Give your customers a branded app experience with your own logo, colors, and name. They install it on their phone and it feels like your very own custom-built restaurant app — powered by Veno App behind the scenes.
+                Give your customers a branded app experience with your own logo and name. They install it on their phone and it feels like your very own custom-built restaurant app — powered by Veno App behind the scenes.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
@@ -172,7 +172,7 @@ export default function BrandedAppPage() {
 
                 {/* Admin dashboard hint */}
                 <g transform="translate(20, 300)">
-                  <rect x="0" y="0" width="120" height="80" rx="10" fill="white" filter="url(#shadow1)" />
+                  <rect x="0" y="0" width="120" height="70" rx="10" fill="white" filter="url(#shadow1)" />
                   <rect x="0" y="0" width="120" height="25" rx="10" fill="#6262bd" />
                   <rect x="0" y="15" width="120" height="10" fill="#6262bd" />
                   <text x="60" y="17" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">ADMIN DASHBOARD</text>
@@ -182,14 +182,9 @@ export default function BrandedAppPage() {
                   <rect x="40" y="32" width="30" height="12" rx="3" fill="#f8fafc" stroke="#e2e8f0" />
                   <text x="55" y="41" fontSize="6" textAnchor="middle">🍽️</text>
 
-                  <text x="10" y="55" fontSize="7" fill="#64748b">Color:</text>
-                  <rect x="40" y="47" width="12" height="12" rx="3" fill="#6262bd" />
-                  <rect x="55" y="47" width="12" height="12" rx="3" fill="#8b5cf6" />
-                  <rect x="70" y="47" width="12" height="12" rx="3" fill="#ec4899" />
-
-                  <text x="10" y="70" fontSize="7" fill="#64748b">Name:</text>
-                  <rect x="40" y="62" width="70" height="12" rx="3" fill="#f8fafc" stroke="#e2e8f0" />
-                  <text x="75" y="71" fontSize="6" fill="#64748b" textAnchor="middle">Your Restaurant</text>
+                  <text x="10" y="58" fontSize="7" fill="#64748b">Name:</text>
+                  <rect x="40" y="50" width="70" height="12" rx="3" fill="#f8fafc" stroke="#e2e8f0" />
+                  <text x="75" y="59" fontSize="6" fill="#64748b" textAnchor="middle">Your Restaurant</text>
                 </g>
 
                 {/* Sync arrow from dashboard */}
@@ -254,7 +249,7 @@ export default function BrandedAppPage() {
                   </svg>
                 ),
                 title: 'Your Branding, Everywhere',
-                description: 'Your logo, your colors, your name. Customers see YOUR brand when they open the app, not ours.',
+                description: 'Your logo, your name. Customers see YOUR restaurant brand when they open the app, not ours.',
               },
               {
                 icon: (
@@ -332,7 +327,7 @@ export default function BrandedAppPage() {
                 {
                   step: '1',
                   title: 'Upload Your Branding',
-                  description: 'Add your logo, choose your brand colors, and enter your restaurant name in the admin dashboard.',
+                  description: 'Add your logo and enter your restaurant name in the admin dashboard.',
                 },
                 {
                   step: '2',
@@ -347,7 +342,7 @@ export default function BrandedAppPage() {
                 {
                   step: '4',
                   title: 'They See Your Brand',
-                  description: 'When customers open the app, they see YOUR logo, YOUR colors, YOUR restaurant. It feels like their own personal connection to your venue.',
+                  description: 'When customers open the app, they see YOUR logo and YOUR restaurant name. It feels like their own personal connection to your venue.',
                 },
               ].map((item, index) => (
                 <div key={index} className="flex gap-6">
@@ -380,17 +375,15 @@ export default function BrandedAppPage() {
                   <text x="40" y="78" fontSize="8" fill="#64748b" textAnchor="middle">Upload</text>
                 </g>
 
-                {/* Color picker */}
+                {/* Restaurant name input */}
                 <g transform="translate(150, 75)">
-                  <text x="0" y="0" fontSize="10" fill="#1e293b" fontWeight="bold">Brand Color</text>
-                  <rect x="0" y="10" width="35" height="35" rx="8" fill="#6262bd" stroke="#1e293b" strokeWidth="2" />
-                  <rect x="45" y="10" width="35" height="35" rx="8" fill="#8b5cf6" />
-                  <rect x="90" y="10" width="35" height="35" rx="8" fill="#ec4899" />
-                  <rect x="135" y="10" width="35" height="35" rx="8" fill="#f59e0b" />
+                  <text x="0" y="0" fontSize="10" fill="#1e293b" fontWeight="bold">Restaurant Name</text>
+                  <rect x="0" y="12" width="200" height="35" rx="6" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="2" />
+                  <text x="100" y="35" fontSize="11" fill="#64748b" textAnchor="middle">Your Restaurant Name</text>
 
-                  <text x="0" y="65" fontSize="10" fill="#1e293b" fontWeight="bold">Restaurant Name</text>
-                  <rect x="0" y="75" width="200" height="35" rx="6" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="2" />
-                  <text x="100" y="98" fontSize="11" fill="#64748b" textAnchor="middle">Your Restaurant Name</text>
+                  <text x="0" y="70" fontSize="10" fill="#1e293b" fontWeight="bold">Tagline (optional)</text>
+                  <rect x="0" y="82" width="200" height="35" rx="6" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="2" />
+                  <text x="100" y="105" fontSize="11" fill="#64748b" textAnchor="middle">Fine Dining Since 1990</text>
                 </g>
 
                 {/* Arrow down */}

@@ -364,14 +364,14 @@ export default function CustomerMenu({ params }) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-24">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-24">
       {/* Header */}
-      <div className="bg-white border-b-2 border-slate-100 sticky top-0 z-10">
+      <div className="bg-white dark:bg-slate-800 border-b-2 border-slate-100 dark:border-slate-700 sticky top-0 z-10">
         <div className="max-w-lg mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-bold text-slate-800">{restaurant.name}</h1>
-              <p className="text-slate-500 text-sm">Table {table.table_number}</p>
+              <h1 className="text-xl font-bold text-slate-800 dark:text-white">{restaurant.name}</h1>
+              <p className="text-slate-500 dark:text-slate-400 text-sm">Table {table.table_number}</p>
             </div>
             {restaurant.logo_url && (
               <img src={restaurant.logo_url} alt={restaurant.name} className="w-12 h-12 rounded-xl object-cover" />
@@ -387,8 +387,8 @@ export default function CustomerMenu({ params }) {
           disabled={callingWaiter || waiterCalled}
           className={`w-full py-3 px-4 rounded-xl font-medium flex items-center justify-center gap-2 transition-all ${
             waiterCalled
-              ? 'bg-green-100 text-green-700 border-2 border-green-200'
-              : 'bg-amber-50 text-amber-700 border-2 border-amber-200 hover:bg-amber-100 active:scale-95'
+              ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 border-2 border-green-200 dark:border-green-700'
+              : 'bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-200 border-2 border-amber-300 dark:border-amber-700 hover:bg-amber-200 dark:hover:bg-amber-800/50 active:scale-95'
           } disabled:cursor-not-allowed`}
         >
           {waiterCalled ? (
