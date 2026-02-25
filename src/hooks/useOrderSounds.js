@@ -15,11 +15,23 @@ const defaultSoundSettings = {
 
 // Available sound options
 export const soundOptions = [
-  { value: 'bell', label: 'Bell' },
-  { value: 'chime', label: 'Chime' },
-  { value: 'ding', label: 'Ding' },
-  { value: 'notification', label: 'Notification' },
-  { value: 'alert', label: 'Alert' }
+  // Premium sounds
+  { value: 'doorbell', label: 'Doorbell', premium: true },
+  { value: 'marimba', label: 'Marimba', premium: true },
+  { value: 'harp', label: 'Harp', premium: true },
+  { value: 'crystal', label: 'Crystal', premium: true },
+  { value: 'modern', label: 'Modern', premium: true },
+  { value: 'success', label: 'Success', premium: true },
+  { value: 'windchime', label: 'Wind Chime', premium: true },
+  { value: 'piano', label: 'Piano', premium: true },
+  { value: 'zen', label: 'Zen Bell', premium: true },
+  { value: 'pop', label: 'Pop', premium: true },
+  // Classic sounds
+  { value: 'bell', label: 'Classic Bell' },
+  { value: 'chime', label: 'Classic Chime' },
+  { value: 'ding', label: 'Classic Ding' },
+  { value: 'notification', label: 'Classic Notification' },
+  { value: 'alert', label: 'Classic Alert' }
 ]
 
 export function useOrderSounds(restaurantId) {
