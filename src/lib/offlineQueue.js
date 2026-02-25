@@ -124,6 +124,7 @@ export async function addPendingOrder(orderData, orderItems) {
       name: item.name,
       quantity: item.quantity,
       price_at_time: item.price_at_time || item.price,
+      special_instructions: item.special_instructions || null,
     })
   }
 
@@ -177,6 +178,7 @@ export async function updatePendingOrder(clientId, newItems, additionalTotal) {
           name: item.name,
           quantity: item.quantity,
           price_at_time: item.price_at_time || item.price,
+          special_instructions: item.special_instructions || null,
         })
       }
     }

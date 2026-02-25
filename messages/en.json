@@ -251,7 +251,17 @@
     "saveChanges": "Save Changes",
     "takeaway": "Takeaway",
     "addTakeaway": "Add to takeaway menu",
-    "removeTakeaway": "Remove from takeaway menu"
+    "removeTakeaway": "Remove from takeaway menu",
+    "specialInstructions": "Special Instructions",
+    "specialInstructionsDesc": "Allow customers or staff to add notes for this item (e.g., how to cook a steak)",
+    "customLabel": "Custom Label",
+    "optional": "optional",
+    "labelHint": "Leave empty to use default: \"Special instructions\"",
+    "previewLabel": "Preview",
+    "specialInstructionsDefault": "Special instructions",
+    "customerInputHere": "Customer will type here...",
+    "needsNotes": "Needs notes",
+    "specialInstructionsPlaceholder": "e.g., How would you like it cooked?"
   },
   "staff": {
     "title": "Staff",
@@ -1611,7 +1621,10 @@
     "emailSentTitle": "Important:",
     "emailSentDescription": "A confirmation email has been sent to {email} with your order details and pickup code.",
     "placeAnotherOrder": "Place Another Order",
-    "required": "*"
+    "required": "*",
+    "specialInstructions": "Special instructions",
+    "specialInstructionsPlaceholder": "e.g., Medium-rare, No onions...",
+    "note": "Note"
   },
   "booking": {
     "loading": "Loading...",

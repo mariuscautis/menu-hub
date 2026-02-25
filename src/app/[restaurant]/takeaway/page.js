@@ -32,6 +32,7 @@ export default function TakeawayMenu({ params }) {
   const [customerPhone, setCustomerPhone] = useState('')
   const [orderNotes, setOrderNotes] = useState('')
   const [expandedCategories, setExpandedCategories] = useState({})
+  const [itemNotes, setItemNotes] = useState({}) // Track notes for items requiring special instructions
   const [placingOrder, setPlacingOrder] = useState(false)
   const [emailError, setEmailError] = useState('')
   const [translations, setTranslations] = useState(null)
@@ -191,13 +192,25 @@ export default function TakeawayMenu({ params }) {
       return
     }
 
+    // Get special instructions for this item if any
+    const specialInstructions = itemNotes[item.id] || ''
+
     if (existing) {
       setCart(cart.map(c =>
-        c.id === item.id ? { ...c, quantity: c.quantity + 1 } : c
+        c.id === item.id ? { ...c, quantity: c.quantity + 1, special_instructions: specialInstructions } : c
       ))
     } else {
-      setCart([...cart, { ...item, quantity: 1 }])
+      setCart([...cart, { ...item, quantity: 1, special_instructions: specialInstructions }])
     }
+  }
+
+  // Update item notes
+  const updateItemNote = (itemId, note) => {
+    setItemNotes(prev => ({ ...prev, [itemId]: note }))
+    // Also update cart if item is already in cart
+    setCart(cart.map(c =>
+      c.id === itemId ? { ...c, special_instructions: note } : c
+    ))
   }
 
   const removeFromCart = (itemId) => {
@@ -535,6 +548,21 @@ export default function TakeawayMenu({ params }) {
                                 </span>
                               )}
                             </div>
+                            {/* Special Instructions Input */}
+                            {item.requires_special_instructions && (
+                              <div className="mt-3">
+                                <label className="block text-xs font-medium text-amber-700 mb-1">
+                                  📝 {item.special_instructions_label || t('specialInstructions') || 'Special instructions'}
+                                </label>
+                                <input
+                                  type="text"
+                                  value={itemNotes[item.id] || ''}
+                                  onChange={(e) => updateItemNote(item.id, e.target.value)}
+                                  className="w-full px-3 py-2 border-2 border-amber-200 rounded-lg focus:outline-none focus:border-amber-400 text-slate-700 text-sm bg-amber-50"
+                                  placeholder={t('specialInstructionsPlaceholder') || 'e.g., Medium-rare, No onions...'}
+                                />
+                              </div>
+                            )}
                           </div>
                           <div className="flex items-center">
                             {cartItem ? (
@@ -630,33 +658,43 @@ export default function TakeawayMenu({ params }) {
               {/* Cart Items */}
               <div className="space-y-4 mb-6">
                 {cart.map((item) => (
-                  <div key={item.id} className="flex justify-between items-center">
-                    <div className="flex-1">
-                      <p className="font-medium text-slate-800">{item.name}</p>
-                      <p className="text-slate-500 text-sm">£{item.price.toFixed(2)} {t('each')}</p>
+                  <div key={item.id} className="border-b border-slate-100 pb-4 last:border-0">
+                    <div className="flex justify-between items-center">
+                      <div className="flex-1">
+                        <p className="font-medium text-slate-800">{item.name}</p>
+                        <p className="text-slate-500 text-sm">£{item.price.toFixed(2)} {t('each')}</p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => removeFromCart(item.id)}
+                          className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center"
+                        >
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 13H5v-2h14v2z"/>
+                          </svg>
+                        </button>
+                        <span className="font-semibold w-6 text-center">{item.quantity}</span>
+                        <button
+                          onClick={() => addToCart(item)}
+                          className="w-8 h-8 rounded-full bg-[#6262bd] text-white flex items-center justify-center"
+                        >
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                          </svg>
+                        </button>
+                        <span className="font-semibold text-slate-800 w-16 text-right">
+                          £{(item.price * item.quantity).toFixed(2)}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={() => removeFromCart(item.id)}
-                        className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center"
-                      >
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M19 13H5v-2h14v2z"/>
-                        </svg>
-                      </button>
-                      <span className="font-semibold w-6 text-center">{item.quantity}</span>
-                      <button
-                        onClick={() => addToCart(item)}
-                        className="w-8 h-8 rounded-full bg-[#6262bd] text-white flex items-center justify-center"
-                      >
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-                        </svg>
-                      </button>
-                      <span className="font-semibold text-slate-800 w-16 text-right">
-                        £{(item.price * item.quantity).toFixed(2)}
-                      </span>
-                    </div>
+                    {/* Show special instructions if any */}
+                    {item.special_instructions && (
+                      <div className="mt-2 ml-0 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg">
+                        <p className="text-xs text-amber-700">
+                          <span className="font-medium">📝 {t('note') || 'Note'}:</span> {item.special_instructions}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

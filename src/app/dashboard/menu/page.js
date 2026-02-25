@@ -25,7 +25,9 @@ export default function Menu() {
     dynamic_pricing_enabled: false,
     base_cost: '',
     profit_margin_percentage: 100,
-    price_rounding_mode: 'none'
+    price_rounding_mode: 'none',
+    requires_special_instructions: false,
+    special_instructions_label: ''
   })
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
@@ -221,7 +223,9 @@ export default function Menu() {
         dynamic_pricing_enabled: item.dynamic_pricing_enabled || false,
         base_cost: item.base_cost || '',
         profit_margin_percentage: item.profit_margin_percentage || 100,
-        price_rounding_mode: item.price_rounding_mode || 'none'
+        price_rounding_mode: item.price_rounding_mode || 'none',
+        requires_special_instructions: item.requires_special_instructions || false,
+        special_instructions_label: item.special_instructions_label || ''
       })
       setImagePreview(item.image_url || null)
       setImageFile(null)
@@ -252,7 +256,9 @@ export default function Menu() {
         dynamic_pricing_enabled: false,
         base_cost: '',
         profit_margin_percentage: 100,
-        price_rounding_mode: 'none'
+        price_rounding_mode: 'none',
+        requires_special_instructions: false,
+        special_instructions_label: ''
       })
       setImagePreview(null)
       setRecipeIngredients([])
@@ -340,7 +346,9 @@ export default function Menu() {
       base_cost: formData.dynamic_pricing_enabled ? calculatedBaseCost : null,
       profit_margin_percentage: formData.dynamic_pricing_enabled ? parseFloat(formData.profit_margin_percentage) : null,
       calculated_price: formData.dynamic_pricing_enabled ? calculateDynamicPrice() : null,
-      price_rounding_mode: formData.dynamic_pricing_enabled ? formData.price_rounding_mode : 'none'
+      price_rounding_mode: formData.dynamic_pricing_enabled ? formData.price_rounding_mode : 'none',
+      requires_special_instructions: formData.requires_special_instructions,
+      special_instructions_label: formData.requires_special_instructions ? (formData.special_instructions_label || null) : null
     }
     let menuItemId
     if (editingItem) {
@@ -723,6 +731,11 @@ export default function Menu() {
                           🥡 {t('takeaway') || 'Takeaway'}
                         </span>
                       )}
+                      {item.requires_special_instructions && (
+                        <span className="px-2 py-1 text-xs rounded-full font-medium bg-amber-100 text-amber-700" title={item.special_instructions_label || (t('specialInstructions') || 'Special instructions')}>
+                          📝 {t('needsNotes') || 'Needs notes'}
+                        </span>
+                      )}
                       {/* Stock Status Badge */}
                       <span className={`px-2 py-1 text-xs rounded-full font-medium ${
                         stockStatus.color === 'red' ? 'bg-red-100 text-red-700' :
@@ -954,6 +967,56 @@ export default function Menu() {
                 <label className="text-sm font-medium text-slate-700">
                   {t('availableForOrdering')}
                 </label>
+              </div>
+              {/* Special Instructions Section */}
+              <div className="border-t-2 border-slate-100 pt-5">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-slate-800">{t('specialInstructions') || 'Special Instructions'}</h3>
+                    <p className="text-sm text-slate-500">{t('specialInstructionsDesc') || 'Allow customers to add notes for this item (e.g., how to cook a steak)'}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      name="requires_special_instructions"
+                      checked={formData.requires_special_instructions}
+                      onChange={handleChange}
+                      className="w-5 h-5 rounded border-slate-300 text-[#6262bd] focus:ring-[#6262bd]"
+                    />
+                    <label className="text-sm font-medium text-slate-700">
+                      {t('enable') || 'Enable'}
+                    </label>
+                  </div>
+                </div>
+                {formData.requires_special_instructions && (
+                  <div className="bg-amber-50 p-4 rounded-xl space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        {t('customLabel') || 'Custom Label'} <span className="text-slate-400 font-normal">({t('optional') || 'optional'})</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="special_instructions_label"
+                        value={formData.special_instructions_label}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                        placeholder={t('specialInstructionsPlaceholder') || 'e.g., How would you like it cooked?'}
+                      />
+                      <p className="text-xs text-slate-500 mt-1">
+                        {t('labelHint') || 'Leave empty to use default: "Special instructions"'}
+                      </p>
+                    </div>
+                    <div className="bg-white border-2 border-amber-200 rounded-xl p-3">
+                      <p className="text-xs text-amber-700 font-medium mb-1">{t('previewLabel') || 'Preview'}</p>
+                      <p className="text-sm text-slate-600">
+                        {formData.special_instructions_label || (t('specialInstructionsDefault') || 'Special instructions')}
+                      </p>
+                      <div className="mt-2 px-3 py-2 bg-slate-100 rounded-lg text-sm text-slate-400">
+                        {t('customerInputHere') || 'Customer will type here...'}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
               {/* Dynamic Pricing Section */}
               <div className="border-t-2 border-slate-100 pt-5">

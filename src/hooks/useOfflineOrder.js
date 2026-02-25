@@ -127,6 +127,7 @@ export default function useOfflineOrder() {
       name: item.name,
       quantity: item.quantity,
       price_at_time: item.price,
+      special_instructions: item.special_instructions || null,
     }))
 
     // Generate client_id for deduplication

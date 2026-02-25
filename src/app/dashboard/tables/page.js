@@ -39,6 +39,7 @@ export default function Tables() {
   const [categories, setCategories] = useState([])
   const [currentOrder, setCurrentOrder] = useState(null)
   const [orderItems, setOrderItems] = useState([])
+  const [itemNotes, setItemNotes] = useState({}) // Track special instructions per item { menuItemId: 'note' }
   const [unpaidOrders, setUnpaidOrders] = useState([])
   const [currentUser, setCurrentUser] = useState(null)
   const [tableOrderInfo, setTableOrderInfo] = useState({})
@@ -414,7 +415,22 @@ export default function Tables() {
       setMenuItems(fallbackItems || [])
     } else {
       console.log('Menu items loaded (in stock only):', items)
-      setMenuItems(items || [])
+      // RPC might not return special_instructions fields, fetch them separately and merge
+      const { data: menuItemsWithInstructions } = await supabase
+        .from('menu_items')
+        .select('id, requires_special_instructions, special_instructions_label')
+        .eq('restaurant_id', restaurantData.id)
+
+      // Merge special instructions data into the items from RPC
+      const mergedItems = (items || []).map(item => {
+        const extra = menuItemsWithInstructions?.find(mi => mi.id === item.id)
+        return {
+          ...item,
+          requires_special_instructions: extra?.requires_special_instructions || false,
+          special_instructions_label: extra?.special_instructions_label || null
+        }
+      })
+      setMenuItems(mergedItems)
     }
 
     if (catsError) console.error('Categories error:', catsError)
@@ -811,6 +827,7 @@ export default function Tables() {
     // IMPORTANT: Clear state FIRST to prevent duplicates from previous modal opens
     console.log('STEP 1: Clearing ALL state completely')
     setOrderItems([])
+    setItemNotes({})
     setCurrentOrder(null)
     setSelectedTable(null)
 
@@ -1110,6 +1127,7 @@ export default function Tables() {
       console.log('STEP 5: No existing order - confirmed empty orderItems')
       setCurrentOrder(null)
       setOrderItems([])
+      setItemNotes({})
     }
 
     console.log('STEP 6: Opening modal')
@@ -2056,6 +2074,14 @@ export default function Tables() {
     })
   }
 
+  // Update special instructions for an item
+  const updateItemNote = (menuItemId, note) => {
+    setItemNotes(prev => ({
+      ...prev,
+      [menuItemId]: note
+    }))
+  }
+
   // Consolidate duplicate items in the array (safety measure)
   const consolidateOrderItems = (items) => {
     const consolidated = {}
@@ -2142,7 +2168,8 @@ export default function Tables() {
           menu_item_id: item.menu_item_id,
           quantity: item.quantity,
           price_at_time: item.price_at_time,
-          name: item.name
+          name: item.name,
+          special_instructions: itemNotes[item.menu_item_id] || null
         }))
 
         console.log('Inserting new order items:', itemsToInsert.length, 'items')
@@ -2177,7 +2204,8 @@ export default function Tables() {
           menu_item_id: item.menu_item_id,
           quantity: item.quantity,
           price_at_time: item.price_at_time,
-          name: item.name
+          name: item.name,
+          special_instructions: itemNotes[item.menu_item_id] || null
         }))
 
         const { error: itemsError } = await supabase
@@ -2224,6 +2252,7 @@ export default function Tables() {
       setSelectedTable(null)
       setCurrentOrder(null)
       setOrderItems([])
+      setItemNotes({})
 
       // Refresh table order info
       await fetchTableOrderInfo(restaurant.id)
@@ -2327,6 +2356,7 @@ export default function Tables() {
               setSelectedTable(null)
               setCurrentOrder(null)
               setOrderItems([])
+              setItemNotes({})
               console.log('========== OFFLINE ORDER UPDATE COMPLETE ==========')
               showNotification('success', 'Items added to order offline. Will sync when internet is restored.')
               return
@@ -2357,6 +2387,7 @@ export default function Tables() {
             setSelectedTable(null)
             setCurrentOrder(null)
             setOrderItems([])
+            setItemNotes({})
             showNotification('success', 'Items added to offline order. Will sync when internet is restored.')
             return
           }
@@ -2396,6 +2427,7 @@ export default function Tables() {
           setSelectedTable(null)
           setCurrentOrder(null)
           setOrderItems([])
+          setItemNotes({})
           const message = currentOrder
             ? 'Additional items saved offline — will sync when internet is restored.'
             : 'Order saved offline — will sync when internet is restored.'
@@ -2604,6 +2636,7 @@ export default function Tables() {
             setSelectedTable(null)
             setCurrentOrder(null)
             setOrderItems([])
+            setItemNotes({})
           }}
         >
           <div
@@ -2625,6 +2658,7 @@ export default function Tables() {
                   setSelectedTable(null)
                   setCurrentOrder(null)
                   setOrderItems([])
+                  setItemNotes({})
                 }}
                 className="text-slate-400 hover:text-slate-600"
               >
@@ -2747,6 +2781,9 @@ export default function Tables() {
                       {orderItems.map((item) => {
                         const newQuantity = item.isExisting ? item.quantity - item.existingQuantity : item.quantity
                         const hasNewItems = newQuantity > 0
+                        const menuItem = menuItems.find(mi => mi.id === item.menu_item_id)
+                        const requiresInstructions = menuItem?.requires_special_instructions
+                        const instructionsLabel = menuItem?.special_instructions_label || 'Special instructions'
 
                         return (
                           <div key={item.menu_item_id} className={`mb-3 last:mb-0 rounded-lg p-2 ${item.isExisting ? 'bg-blue-50/50 border border-blue-200' : ''}`}>
@@ -2760,6 +2797,20 @@ export default function Tables() {
                                   <p className="text-xs text-blue-600 mt-1">
                                     {t('orderModal.quantityBreakdown').replace('{existing}', item.existingQuantity).replace('{new}', newQuantity)}
                                   </p>
+                                )}
+
+                                {/* Special Instructions Input */}
+                                {requiresInstructions && (
+                                  <div className="mt-2">
+                                    <input
+                                      type="text"
+                                      placeholder={instructionsLabel}
+                                      value={itemNotes[item.menu_item_id] || ''}
+                                      onChange={(e) => updateItemNote(item.menu_item_id, e.target.value)}
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="w-full px-2 py-1 text-xs border border-amber-200 rounded bg-amber-50 text-amber-800 placeholder-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400"
+                                    />
+                                  </div>
                                 )}
                               </div>
 

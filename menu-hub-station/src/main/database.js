@@ -72,6 +72,7 @@ function createTables() {
       quantity INTEGER NOT NULL,
       price_at_time REAL NOT NULL,
       department TEXT,
+      special_instructions TEXT,
       preparing_started_at TEXT,
       marked_ready_at TEXT,
       delivered_at TEXT,
@@ -185,15 +186,18 @@ function deleteOrder(clientId) {
 function insertOrderItems(items) {
   const stmt = db.prepare(`
     INSERT INTO order_items (
-      order_client_id, menu_item_id, name, quantity, price_at_time, department
+      order_client_id, menu_item_id, name, quantity, price_at_time, department, special_instructions
     ) VALUES (
-      @order_client_id, @menu_item_id, @name, @quantity, @price_at_time, @department
+      @order_client_id, @menu_item_id, @name, @quantity, @price_at_time, @department, @special_instructions
     )
   `);
 
   const insertMany = db.transaction((items) => {
     for (const item of items) {
-      stmt.run(item);
+      stmt.run({
+        ...item,
+        special_instructions: item.special_instructions || null
+      });
     }
   });
 

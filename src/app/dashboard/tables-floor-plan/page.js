@@ -295,6 +295,7 @@ export default function StaffFloorPlanPage() {
   const [categories, setCategories] = useState([])
   const [currentOrder, setCurrentOrder] = useState(null)
   const [orderItems, setOrderItems] = useState([])
+  const [itemNotes, setItemNotes] = useState({}) // Track special instructions per item
   const [userType, setUserType] = useState(null)
 
   // Canvas settings
@@ -506,9 +507,10 @@ export default function StaffFloorPlanPage() {
       }
 
       // Fetch menu items and categories for order modal
+      // Explicitly include special instructions fields
       const { data: menuData } = await supabase
         .from('menu_items')
-        .select('*')
+        .select('*, requires_special_instructions, special_instructions_label')
         .eq('restaurant_id', restaurantId)
         .eq('available', true)
         .order('name')
@@ -861,6 +863,7 @@ export default function StaffFloorPlanPage() {
 
     // Clear state first
     setOrderItems([])
+    setItemNotes({})
     setCurrentOrder(null)
 
     // Check if this table was paid offline - if so, skip loading cached orders
@@ -1121,6 +1124,14 @@ export default function StaffFloorPlanPage() {
     })
   }
 
+  // Update special instructions for an item
+  const updateItemNote = (menuItemId, note) => {
+    setItemNotes(prev => ({
+      ...prev,
+      [menuItemId]: note
+    }))
+  }
+
   const consolidateOrderItems = (items) => {
     const consolidated = {}
     items.forEach(item => {
@@ -1196,7 +1207,8 @@ export default function StaffFloorPlanPage() {
           menu_item_id: item.menu_item_id,
           quantity: item.quantity,
           price_at_time: item.price_at_time,
-          name: item.name
+          name: item.name,
+          special_instructions: itemNotes[item.menu_item_id] || null
         }))
 
         const { error: itemsError } = await supabase
@@ -1225,7 +1237,8 @@ export default function StaffFloorPlanPage() {
           menu_item_id: item.menu_item_id,
           quantity: item.quantity,
           price_at_time: item.price_at_time,
-          name: item.name
+          name: item.name,
+          special_instructions: itemNotes[item.menu_item_id] || null
         }))
 
         const { error: itemsError } = await supabase
@@ -1248,6 +1261,7 @@ export default function StaffFloorPlanPage() {
       setShowOrderModal(false)
       setCurrentOrder(null)
       setOrderItems([])
+      setItemNotes({})
 
       // Refresh data
       await loadFloorData(currentFloor.id, restaurant.id)
@@ -1327,6 +1341,7 @@ export default function StaffFloorPlanPage() {
               setShowOrderModal(false)
               setCurrentOrder(null)
               setOrderItems([])
+              setItemNotes({})
               showNotificationMessage('success', 'Items added to order offline. Will sync when internet is restored.')
               return
             }
@@ -1364,6 +1379,7 @@ export default function StaffFloorPlanPage() {
           setShowOrderModal(false)
           setCurrentOrder(null)
           setOrderItems([])
+          setItemNotes({})
           const message = currentOrder
             ? 'Additional items saved offline. Will sync when internet is restored.'
             : 'Order saved offline. It will sync when internet is restored.'
@@ -3257,6 +3273,7 @@ export default function StaffFloorPlanPage() {
             setSelectedTable(null)
             setCurrentOrder(null)
             setOrderItems([])
+            setItemNotes({})
           }}
         >
           <div
@@ -3278,6 +3295,7 @@ export default function StaffFloorPlanPage() {
                   setSelectedTable(null)
                   setCurrentOrder(null)
                   setOrderItems([])
+                  setItemNotes({})
                 }}
                 className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
               >
@@ -3393,6 +3411,9 @@ export default function StaffFloorPlanPage() {
                       {orderItems.map((item) => {
                         const newQuantity = item.isExisting ? item.quantity - item.existingQuantity : item.quantity
                         const hasNewItems = newQuantity > 0
+                        const menuItem = menuItems.find(mi => mi.id === item.menu_item_id)
+                        const requiresInstructions = menuItem?.requires_special_instructions
+                        const instructionsLabel = menuItem?.special_instructions_label || 'Special instructions'
 
                         return (
                           <div key={item.menu_item_id} className={`mb-3 last:mb-0 rounded-lg p-2 ${item.isExisting ? 'bg-blue-50/50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700' : ''}`}>
@@ -3405,6 +3426,20 @@ export default function StaffFloorPlanPage() {
                                   <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
                                     {item.existingQuantity} existing + {newQuantity} new
                                   </p>
+                                )}
+
+                                {/* Special Instructions Input */}
+                                {requiresInstructions && (
+                                  <div className="mt-2">
+                                    <input
+                                      type="text"
+                                      placeholder={instructionsLabel}
+                                      value={itemNotes[item.menu_item_id] || ''}
+                                      onChange={(e) => updateItemNote(item.menu_item_id, e.target.value)}
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="w-full px-2 py-1 text-xs border border-amber-200 dark:border-amber-700 rounded bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 placeholder-amber-400 dark:placeholder-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-400"
+                                    />
+                                  </div>
                                 )}
                               </div>
 

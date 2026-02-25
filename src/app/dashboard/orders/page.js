@@ -913,22 +913,32 @@ export default function Orders() {
                 {filteredItems.map((item, index) => {
                   const department = getItemDepartment(item.menu_item_id)
                   return (
-                    <div key={index} className="flex justify-between items-center py-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-slate-700">
-                          {item.quantity}x {item.name}
-                        </span>
-                        {(userType === 'owner' || staffDepartment === 'universal') && (
-                          <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${
-                            department === 'bar'
-                              ? 'bg-orange-100 text-orange-700'
-                              : 'bg-green-100 text-green-700'
-                          }`}>
-                            {department === 'bar' ? '🍸' : '🍳'}
+                    <div key={index} className="py-1">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                          <span className="text-slate-700">
+                            {item.quantity}x {item.name}
                           </span>
-                        )}
+                          {(userType === 'owner' || staffDepartment === 'universal') && (
+                            <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${
+                              department === 'bar'
+                                ? 'bg-orange-100 text-orange-700'
+                                : 'bg-green-100 text-green-700'
+                            }`}>
+                              {department === 'bar' ? '🍸' : '🍳'}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-slate-500">£{(item.price_at_time * item.quantity).toFixed(2)}</span>
                       </div>
-                      <span className="text-slate-500">£{(item.price_at_time * item.quantity).toFixed(2)}</span>
+                      {/* Special Instructions for this item */}
+                      {item.special_instructions && (
+                        <div className="mt-1 ml-4 px-3 py-1.5 bg-amber-100 border border-amber-300 rounded-lg">
+                          <p className="text-xs text-amber-800 font-medium">
+                            📝 {item.special_instructions}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   )
                 })}
