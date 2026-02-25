@@ -43,6 +43,12 @@ export default function Orders() {
   const knownOrderIdsRef = useRef(new Set())
   const isInitialLoadRef = useRef(true)
   const menuItemsRef = useRef([])
+  const playNewOrderSoundRef = useRef(playNewOrderSound)
+
+  // Keep sound function ref updated
+  useEffect(() => {
+    playNewOrderSoundRef.current = playNewOrderSound
+  }, [playNewOrderSound])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -151,9 +157,11 @@ export default function Orders() {
           },
           async (payload) => {
             // New order inserted - fetch full order with items and play sound
+            console.log('🔔 New order INSERT event received:', payload.new?.id)
             const newOrderId = payload.new?.id
             if (newOrderId && !knownOrderIdsRef.current.has(newOrderId)) {
               knownOrderIdsRef.current.add(newOrderId)
+              console.log('🔔 New order detected (not in known list):', newOrderId)
 
               // Fetch the full order with items to determine department
               const { data: newOrder } = await supabase
@@ -169,10 +177,15 @@ export default function Orders() {
                 .eq('id', newOrderId)
                 .single()
 
+              console.log('🔔 Fetched new order:', newOrder?.id, 'isInitialLoad:', isInitialLoadRef.current)
+
               if (newOrder && !isInitialLoadRef.current) {
                 // Play sound based on order type/department
-                playNewOrderSound(newOrder, menuItemsRef.current)
+                console.log('🔔 Calling playNewOrderSound')
+                playNewOrderSoundRef.current(newOrder, menuItemsRef.current)
               }
+            } else {
+              console.log('🔔 Order already known or no ID:', newOrderId)
             }
             fetchOrders(restaurantData.id)
           }
@@ -214,7 +227,8 @@ export default function Orders() {
     }
 
     fetchData()
-  }, [playNewOrderSound])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Load offline (pending sync) orders and listen for sync changes
   useEffect(() => {

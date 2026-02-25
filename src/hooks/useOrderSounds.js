@@ -27,11 +27,19 @@ export function useOrderSounds(restaurantId) {
   const [loading, setLoading] = useState(true)
   const soundGeneratorRef = useRef(null)
   const lastPlayedRef = useRef({})
+  const soundSettingsRef = useRef(soundSettings)
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    soundSettingsRef.current = soundSettings
+    console.log('🔊 Sound settings updated:', soundSettings)
+  }, [soundSettings])
 
   // Initialize sound generator
   useEffect(() => {
     if (typeof window !== 'undefined') {
       soundGeneratorRef.current = getSoundGenerator()
+      console.log('🔊 Sound generator initialized')
     }
   }, [])
 
@@ -44,17 +52,22 @@ export function useOrderSounds(restaurantId) {
       }
 
       try {
+        console.log('🔊 Fetching sound settings for restaurant:', restaurantId)
         const { data, error } = await supabase
           .from('restaurants')
           .select('sound_settings')
           .eq('id', restaurantId)
           .single()
 
+        console.log('🔊 Fetched sound settings:', data?.sound_settings, 'Error:', error)
+
         if (!error && data?.sound_settings) {
-          setSoundSettings({
+          const newSettings = {
             ...defaultSoundSettings,
             ...data.sound_settings
-          })
+          }
+          setSoundSettings(newSettings)
+          soundSettingsRef.current = newSettings
         }
       } catch (err) {
         console.error('Error fetching sound settings:', err)
@@ -70,16 +83,24 @@ export function useOrderSounds(restaurantId) {
   const resumeAudio = useCallback(() => {
     if (soundGeneratorRef.current) {
       soundGeneratorRef.current.resume()
+      console.log('🔊 Audio context resumed')
     }
   }, [])
 
-  // Play sound for a specific department/type
+  // Play sound for a specific department/type - uses ref for latest settings
   const playSound = useCallback((type) => {
-    if (!soundSettings.enabled) return
+    const settings = soundSettingsRef.current
+    console.log('🔊 playSound called:', type, 'enabled:', settings.enabled)
+
+    if (!settings.enabled) {
+      console.log('🔊 Sound not enabled, skipping')
+      return
+    }
 
     // Prevent playing same sound too frequently (debounce 1 second)
     const now = Date.now()
     if (lastPlayedRef.current[type] && now - lastPlayedRef.current[type] < 1000) {
+      console.log('🔊 Sound debounced, skipping')
       return
     }
     lastPlayedRef.current[type] = now
@@ -87,29 +108,40 @@ export function useOrderSounds(restaurantId) {
     let soundKey
     switch (type) {
       case 'kitchen':
-        soundKey = soundSettings.kitchenSound
+        soundKey = settings.kitchenSound
         break
       case 'bar':
-        soundKey = soundSettings.barSound
+        soundKey = settings.barSound
         break
       case 'takeaway':
-        soundKey = soundSettings.takeawaySound
+        soundKey = settings.takeawaySound
         break
       default:
-        soundKey = soundSettings.kitchenSound
+        soundKey = settings.kitchenSound
     }
+
+    console.log('🔊 Playing sound:', soundKey, 'volume:', settings.volume)
 
     if (soundGeneratorRef.current) {
-      soundGeneratorRef.current.play(soundKey, soundSettings.volume)
+      soundGeneratorRef.current.play(soundKey, settings.volume)
+    } else {
+      console.log('🔊 Sound generator not available')
     }
-  }, [soundSettings])
+  }, [])
 
-  // Play sound for new order based on order items
+  // Play sound for new order based on order items - uses ref for latest settings
   const playNewOrderSound = useCallback((order, menuItems = []) => {
-    if (!soundSettings.enabled || !order) return
+    const settings = soundSettingsRef.current
+    console.log('🔊 playNewOrderSound called, enabled:', settings.enabled, 'order:', order?.id)
+
+    if (!settings.enabled || !order) {
+      console.log('🔊 Skipping - enabled:', settings.enabled, 'order:', !!order)
+      return
+    }
 
     // Check if this is a takeaway order
     if (order.order_type === 'takeaway') {
+      console.log('🔊 Takeaway order detected')
       playSound('takeaway')
       return
     }
@@ -118,12 +150,16 @@ export function useOrderSounds(restaurantId) {
     const orderItems = order.order_items || []
     const departments = new Set()
 
+    console.log('🔊 Order items:', orderItems.length, 'Menu items:', menuItems.length)
+
     orderItems.forEach(item => {
       const menuItem = menuItems.find(mi => mi.id === item.menu_item_id)
       if (menuItem?.department) {
         departments.add(menuItem.department)
       }
     })
+
+    console.log('🔊 Departments found:', [...departments])
 
     // Play sounds for each department (with slight delay between)
     let delay = 0
@@ -137,12 +173,14 @@ export function useOrderSounds(restaurantId) {
 
     // If no specific department found, default to kitchen
     if (departments.size === 0) {
+      console.log('🔊 No department found, defaulting to kitchen')
       playSound('kitchen')
     }
-  }, [soundSettings, playSound])
+  }, [playSound])
 
   // Test sound function for settings page
   const testSound = useCallback((soundKey, volume = 0.7) => {
+    console.log('🔊 Testing sound:', soundKey, 'volume:', volume)
     if (soundGeneratorRef.current) {
       soundGeneratorRef.current.play(soundKey, volume)
     }
@@ -159,6 +197,7 @@ export function useOrderSounds(restaurantId) {
 
     if (!error) {
       setSoundSettings(newSettings)
+      soundSettingsRef.current = newSettings
     }
 
     return { error }
