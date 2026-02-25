@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import InvoiceClientModal from '@/components/invoices/InvoiceClientModal'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { generateInvoicePdfBase64, downloadInvoicePdf } from '@/lib/invoicePdfGenerator'
 import { getPendingOrders, getOrderItems as getOfflineOrderItems } from '@/lib/offlineQueue'
 import { onSyncEvent, initAutoSync } from '@/lib/syncManager'
+import { useOrderSounds } from '@/hooks/useOrderSounds'
 
 export default function Orders() {
   const t = useTranslations('orders')
@@ -36,6 +37,12 @@ export default function Orders() {
 
   // Offline orders state
   const [offlineOrders, setOfflineOrders] = useState([])
+
+  // Sound notifications
+  const { playNewOrderSound, resumeAudio, soundSettings } = useOrderSounds(restaurant?.id)
+  const knownOrderIdsRef = useRef(new Set())
+  const isInitialLoadRef = useRef(true)
+  const menuItemsRef = useRef([])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -114,6 +121,7 @@ export default function Orders() {
         .eq('restaurant_id', restaurantData.id)
 
       setMenuItems(items || [])
+      menuItemsRef.current = items || []
 
       // Fetch department permissions for regular staff
       if (userTypeData === 'staff' && departmentData) {
@@ -136,7 +144,55 @@ export default function Orders() {
         .on(
           'postgres_changes',
           {
-            event: '*',
+            event: 'INSERT',
+            schema: 'public',
+            table: 'orders',
+            filter: `restaurant_id=eq.${restaurantData.id}`
+          },
+          async (payload) => {
+            // New order inserted - fetch full order with items and play sound
+            const newOrderId = payload.new?.id
+            if (newOrderId && !knownOrderIdsRef.current.has(newOrderId)) {
+              knownOrderIdsRef.current.add(newOrderId)
+
+              // Fetch the full order with items to determine department
+              const { data: newOrder } = await supabase
+                .from('orders')
+                .select(`
+                  *,
+                  order_items (
+                    id,
+                    menu_item_id,
+                    name
+                  )
+                `)
+                .eq('id', newOrderId)
+                .single()
+
+              if (newOrder && !isInitialLoadRef.current) {
+                // Play sound based on order type/department
+                playNewOrderSound(newOrder, menuItemsRef.current)
+              }
+            }
+            fetchOrders(restaurantData.id)
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'orders',
+            filter: `restaurant_id=eq.${restaurantData.id}`
+          },
+          () => {
+            fetchOrders(restaurantData.id)
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'DELETE',
             schema: 'public',
             table: 'orders',
             filter: `restaurant_id=eq.${restaurantData.id}`
@@ -147,13 +203,18 @@ export default function Orders() {
         )
         .subscribe()
 
+      // Mark initial load complete after a short delay
+      setTimeout(() => {
+        isInitialLoadRef.current = false
+      }, 2000)
+
       return () => {
         supabase.removeChannel(channel)
       }
     }
 
     fetchData()
-  }, [])
+  }, [playNewOrderSound])
 
   // Load offline (pending sync) orders and listen for sync changes
   useEffect(() => {
@@ -225,6 +286,13 @@ export default function Orders() {
         preparing_started_at: i.preparing_started_at,
         marked_ready_at: i.marked_ready_at
       })))
+    }
+
+    // Track known order IDs for sound notification detection
+    if (data) {
+      data.forEach(order => {
+        knownOrderIdsRef.current.add(order.id)
+      })
     }
 
     setOrders(data || [])
@@ -666,12 +734,21 @@ export default function Orders() {
   }
 
   return (
-      <div>
+      <div onClick={resumeAudio}>
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
             <p className="text-slate-500">{t('subtitle')}</p>
           </div>
+          {/* Sound indicator */}
+          {soundSettings?.enabled && (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+              </svg>
+              <span>Sound alerts on</span>
+            </div>
+          )}
         </div>
 
       {/* Filters */}
