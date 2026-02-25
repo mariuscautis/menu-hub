@@ -144,91 +144,104 @@ export default function Orders() {
       await fetchOrders(restaurantData.id)
       setLoading(false)
 
-      // Set up real-time subscription
-      const channel = supabase
-        .channel('orders-changes')
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'orders',
-            filter: `restaurant_id=eq.${restaurantData.id}`
-          },
-          async (payload) => {
-            // New order inserted - fetch full order with items and play sound
-            console.log('🔔 New order INSERT event received:', payload.new?.id)
-            const newOrderId = payload.new?.id
-            if (newOrderId && !knownOrderIdsRef.current.has(newOrderId)) {
-              knownOrderIdsRef.current.add(newOrderId)
-              console.log('🔔 New order detected (not in known list):', newOrderId)
-
-              // Fetch the full order with items to determine department
-              const { data: newOrder } = await supabase
-                .from('orders')
-                .select(`
-                  *,
-                  order_items (
-                    id,
-                    menu_item_id,
-                    name
-                  )
-                `)
-                .eq('id', newOrderId)
-                .single()
-
-              console.log('🔔 Fetched new order:', newOrder?.id, 'isInitialLoad:', isInitialLoadRef.current)
-
-              if (newOrder && !isInitialLoadRef.current) {
-                // Play sound based on order type/department
-                console.log('🔔 Calling playNewOrderSound')
-                playNewOrderSoundRef.current(newOrder, menuItemsRef.current)
-              }
-            } else {
-              console.log('🔔 Order already known or no ID:', newOrderId)
-            }
-            fetchOrders(restaurantData.id)
-          }
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'orders',
-            filter: `restaurant_id=eq.${restaurantData.id}`
-          },
-          () => {
-            fetchOrders(restaurantData.id)
-          }
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: 'DELETE',
-            schema: 'public',
-            table: 'orders',
-            filter: `restaurant_id=eq.${restaurantData.id}`
-          },
-          () => {
-            fetchOrders(restaurantData.id)
-          }
-        )
-        .subscribe()
-
       // Mark initial load complete after a short delay
       setTimeout(() => {
         isInitialLoadRef.current = false
       }, 2000)
-
-      return () => {
-        supabase.removeChannel(channel)
-      }
     }
 
     fetchData()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Real-time subscription for orders - separate useEffect for proper cleanup
+  useEffect(() => {
+    if (!restaurant) return
+
+    const restaurantId = restaurant.id
+    console.log('🔔 Setting up real-time subscription for restaurant:', restaurantId)
+
+    const channel = supabase
+      .channel(`orders-realtime-${Date.now()}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'orders',
+          filter: `restaurant_id=eq.${restaurantId}`
+        },
+        async (payload) => {
+          // New order inserted - fetch full order with items and play sound
+          console.log('🔔 New order INSERT event received:', payload.new?.id)
+          const newOrderId = payload.new?.id
+          if (newOrderId && !knownOrderIdsRef.current.has(newOrderId)) {
+            knownOrderIdsRef.current.add(newOrderId)
+            console.log('🔔 New order detected (not in known list):', newOrderId)
+
+            // Fetch the full order with items to determine department
+            const { data: newOrder } = await supabase
+              .from('orders')
+              .select(`
+                *,
+                order_items (
+                  id,
+                  menu_item_id,
+                  name
+                )
+              `)
+              .eq('id', newOrderId)
+              .single()
+
+            console.log('🔔 Fetched new order:', newOrder?.id, 'isInitialLoad:', isInitialLoadRef.current)
+
+            if (newOrder && !isInitialLoadRef.current) {
+              // Play sound based on order type/department
+              console.log('🔔 Calling playNewOrderSound')
+              playNewOrderSoundRef.current(newOrder, menuItemsRef.current)
+            }
+          } else {
+            console.log('🔔 Order already known or no ID:', newOrderId)
+          }
+          // Delay fetch to ensure database has committed
+          setTimeout(() => fetchOrders(restaurantId), 100)
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'orders',
+          filter: `restaurant_id=eq.${restaurantId}`
+        },
+        () => {
+          console.log('🔔 Order UPDATE event received')
+          setTimeout(() => fetchOrders(restaurantId), 100)
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'orders',
+          filter: `restaurant_id=eq.${restaurantId}`
+        },
+        () => {
+          console.log('🔔 Order DELETE event received')
+          setTimeout(() => fetchOrders(restaurantId), 100)
+        }
+      )
+      .subscribe((status) => {
+        console.log('🔔 Orders subscription status:', status)
+      })
+
+    return () => {
+      console.log('🔔 Cleaning up orders subscription')
+      supabase.removeChannel(channel)
+    }
+  }, [restaurant])
 
   // Load offline (pending sync) orders and listen for sync changes
   useEffect(() => {
