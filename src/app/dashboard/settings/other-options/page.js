@@ -56,7 +56,7 @@ export default function OtherOptionsSettings() {
     setSaving(true)
     setMessage(null)
 
-    const soundSettings = {
+    const soundSettingsData = {
       enabled: soundEnabled,
       kitchenSound,
       barSound,
@@ -64,20 +64,30 @@ export default function OtherOptionsSettings() {
       volume
     }
 
-    const { error } = await supabase
+    console.log('Saving sound settings:', soundSettingsData)
+    console.log('Restaurant ID:', restaurant.id)
+
+    const { data, error } = await supabase
       .from('restaurants')
-      .update({ sound_settings: soundSettings })
+      .update({ sound_settings: soundSettingsData })
       .eq('id', restaurant.id)
+      .select()
+
+    console.log('Save response - data:', data)
+    console.log('Save response - error:', error)
 
     if (error) {
-      setMessage({ type: 'error', text: 'Failed to save sound settings' })
+      console.error('Supabase error:', error)
+      setMessage({ type: 'error', text: `Failed to save: ${error.message}` })
+    } else if (!data || data.length === 0) {
+      setMessage({ type: 'error', text: 'No rows updated. Check database permissions.' })
     } else {
       setMessage({ type: 'success', text: 'Sound settings saved successfully!' })
-      setRestaurant({ ...restaurant, sound_settings: soundSettings })
+      setRestaurant({ ...restaurant, sound_settings: soundSettingsData })
     }
 
     setSaving(false)
-    setTimeout(() => setMessage(null), 3000)
+    setTimeout(() => setMessage(null), 5000)
   }
 
   const handleTestSound = (soundKey) => {
