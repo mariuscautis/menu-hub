@@ -49,21 +49,19 @@ export default function ContactPage() {
     setError(null)
 
     try {
-      // Create mailto link with form data
-      const subject = encodeURIComponent(`[${formData.enquiryType}] New Contact Form Submission - ${formData.businessName}`)
-      const body = encodeURIComponent(
-        `Enquiry Type: ${formData.enquiryType}\n\n` +
-        `Name: ${formData.firstName} ${formData.lastName}\n` +
-        `Business Name: ${formData.businessName}\n` +
-        `Business Type: ${formData.businessType}\n` +
-        `Location: ${formData.location}\n` +
-        `Phone: ${formData.phone}\n` +
-        `Email: ${formData.email}\n\n` +
-        `Message:\n${formData.message}`
-      )
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
 
-      // Open mailto link
-      window.location.href = `mailto:marius.cautis@gmail.com?subject=${subject}&body=${body}`
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send message')
+      }
 
       setSuccess(true)
       setFormData({
@@ -78,7 +76,7 @@ export default function ContactPage() {
         message: '',
       })
     } catch (err) {
-      setError('Something went wrong. Please try again or email us directly.')
+      setError(err.message || 'Something went wrong. Please try again or email us directly.')
     } finally {
       setLoading(false)
     }
@@ -122,10 +120,7 @@ export default function ContactPage() {
                     Thanks for reaching out!
                   </h3>
                   <p className="text-slate-600 dark:text-slate-400 mb-8">
-                    Your email client should have opened with your message. If it didn't, please email us directly at{' '}
-                    <a href="mailto:marius.cautis@gmail.com" className="text-[#6262bd] hover:underline">
-                      hello@venoapp.com
-                    </a>
+                    We've received your message and will get back to you within 24 hours. In the meantime, feel free to explore our platform or check out our help center.
                   </p>
                   <button
                     onClick={() => setSuccess(false)}
