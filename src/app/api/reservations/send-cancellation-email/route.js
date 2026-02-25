@@ -43,11 +43,12 @@ export async function POST(request) {
     const subject = `❌ ${tr.reservationCancelled} - ${reservation.restaurants.name}`
     const htmlContent = generateCancellationEmail(reservation, tr, locale)
 
-    // Send email using Brevo
+    // Send email using Brevo - use restaurant name as sender name
     await sendBrevoEmail({
       to: reservation.customer_email,
       subject,
-      htmlContent
+      htmlContent,
+      fromName: reservation.restaurants.name
     })
 
     return NextResponse.json({ success: true })

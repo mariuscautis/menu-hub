@@ -62,11 +62,12 @@ export async function POST(request) {
 
     console.log('Sending email:', { to: reservation.customer_email, subject })
 
-    // Send email using Brevo
+    // Send email using Brevo - use restaurant name as sender name
     const emailResult = await sendBrevoEmail({
       to: reservation.customer_email,
       subject,
-      htmlContent
+      htmlContent,
+      fromName: reservation.restaurants.name
     })
 
     console.log('Email send result:', emailResult)
