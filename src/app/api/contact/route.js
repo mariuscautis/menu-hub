@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { sendEmail } from '@/lib/services/email'
 
 export const runtime = 'edge'
 
@@ -115,17 +114,30 @@ ${message ? `Message:\n${message}` : ''}
 This message was sent from the Veno App contact form.
     `
 
-    // Send email to the contact address
-    const result = await sendEmail({
-      to: 'marius.cautis@gmail.com',
-      subject: `[${enquiryType}] Contact Form: ${businessName}`,
-      htmlContent,
-      textContent,
-      replyTo: email
+    // Send email using Brevo REST API directly (Edge compatible)
+    const brevoResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': process.env.BREVO_API_KEY,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        sender: {
+          name: process.env.EMAIL_FROM_NAME || 'Veno App',
+          email: process.env.EMAIL_FROM || 'noreply@venoapp.com'
+        },
+        to: [{ email: 'marius.cautis@gmail.com' }],
+        replyTo: { email: email },
+        subject: `[${enquiryType}] Contact Form: ${businessName}`,
+        htmlContent: htmlContent,
+        textContent: textContent
+      })
     })
 
-    if (!result.success) {
-      console.error('Failed to send contact email:', result.error)
+    if (!brevoResponse.ok) {
+      const errorData = await brevoResponse.json().catch(() => ({}))
+      console.error('Brevo API error:', errorData)
       return NextResponse.json(
         { error: 'Failed to send message. Please try again later.' },
         { status: 500 }
