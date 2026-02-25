@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 
 const defaultBranding = {
-  platform_name: 'Menu Hub',
+  platform_name: 'Veno App',
   logo_url: null,
   icon_192: null,
   theme_color: '#6262bd',

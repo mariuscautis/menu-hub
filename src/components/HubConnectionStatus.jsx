@@ -52,7 +52,7 @@ export default function HubConnectionStatus({ className = '' }) {
       return {
         icon: '🟢',
         label: 'Local Hub',
-        description: 'Connected to Menu Hub Station',
+        description: 'Connected to Veno App Station',
         color: 'text-green-600',
         bgColor: 'bg-green-50',
         borderColor: 'border-green-200'

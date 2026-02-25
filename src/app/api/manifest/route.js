@@ -21,7 +21,7 @@ export async function GET() {
       .single()
 
     const branding = brandingData?.value || {}
-    const platformName = branding.platform_name || 'Menu Hub'
+    const platformName = branding.platform_name || 'Veno App'
     const themeColor = branding.theme_color || '#6262bd'
     const backgroundColor = branding.background_color || '#ffffff'
 
@@ -97,8 +97,8 @@ export async function GET() {
 
     // Return default manifest on error
     const defaultManifest = {
-      name: 'Menu Hub - Restaurant Management',
-      short_name: 'Menu Hub',
+      name: 'Veno App - Restaurant Management',
+      short_name: 'Veno App',
       description: 'Complete restaurant management system for orders, reservations, staff, and inventory',
       start_url: '/',
       display: 'standalone',

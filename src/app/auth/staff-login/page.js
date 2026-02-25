@@ -11,7 +11,7 @@ export default function StaffLoginRedirect() {
           <div className="w-9 h-9 bg-[#6262bd] rounded-xl flex items-center justify-center">
             <span className="text-white font-bold text-lg">M</span>
           </div>
-          <span className="text-xl font-bold text-slate-700">Menu Hub</span>
+          <span className="text-xl font-bold text-slate-700">Veno App</span>
         </Link>
       </div>
 

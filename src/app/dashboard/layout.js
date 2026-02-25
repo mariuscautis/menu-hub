@@ -975,7 +975,7 @@ export default function DashboardLayout({ children }) {
                   <img src={restaurant.logo_url} alt={restaurant.name} className="w-full h-full object-contain" />
                 </div>
                 <span className="font-semibold text-slate-700 dark:text-slate-200 truncate max-w-[200px]">
-                  {restaurant?.name || 'Menu Hub'}
+                  {restaurant?.name || 'Veno App'}
                 </span>
               </>
             ) : (
@@ -1040,7 +1040,7 @@ export default function DashboardLayout({ children }) {
                     />
                   </div>
                   <span className="text-xl font-bold text-slate-700 dark:text-slate-200 truncate">
-                    {restaurant?.name || 'Menu Hub'}
+                    {restaurant?.name || 'Veno App'}
                   </span>
                 </>
               ) : (

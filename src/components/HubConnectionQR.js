@@ -126,7 +126,7 @@ export default function HubConnectionQR({ offerData, onNewOffer, restaurantSlug 
       <div className="text-center mb-6">
         <h3 className="text-xl font-semibold mb-2">Connect a Device</h3>
         <p className="text-slate-400 max-w-md">
-          Open the Menu Hub app on a staff device and scan this QR code to connect to the local hub
+          Open the Veno App app on a staff device and scan this QR code to connect to the local hub
         </p>
       </div>
 

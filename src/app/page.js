@@ -9,7 +9,7 @@ export default function Home() {
           <div className="w-10 h-10 bg-[#6262bd] rounded-xl flex items-center justify-center">
             <span className="text-white font-bold text-xl">M</span>
           </div>
-          <span className="text-2xl font-bold text-slate-700">Menu Hub</span>
+          <span className="text-2xl font-bold text-slate-700">Veno App</span>
         </div>
         <div className="flex items-center space-x-6">
           <Link href="/auth/login" className="text-slate-500 hover:text-slate-700 font-medium">
@@ -51,7 +51,7 @@ export default function Home() {
             <div className="w-8 h-8 bg-[#6262bd] rounded-lg flex items-center justify-center">
               <span className="text-white font-bold">M</span>
             </div>
-            <span className="text-slate-400 font-medium">© 2025 Menu Hub</span>
+            <span className="text-slate-400 font-medium">© 2025 Veno App</span>
           </div>
           <div className="flex gap-6 text-slate-400 font-medium">
             <Link href="/privacy" className="hover:text-slate-600">Privacy</Link>

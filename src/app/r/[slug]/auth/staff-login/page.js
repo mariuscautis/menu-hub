@@ -392,7 +392,7 @@ export default function StaffLogin() {
             <div className="w-9 h-9 bg-[#6262bd] rounded-xl flex items-center justify-center">
               <span className="text-white font-bold text-lg">M</span>
             </div>
-            <span className="text-xl font-bold text-slate-700">Menu Hub</span>
+            <span className="text-xl font-bold text-slate-700">Veno App</span>
           </Link>
         </div>
         <div className="flex-1 flex items-center justify-center p-6">
@@ -409,12 +409,22 @@ export default function StaffLogin() {
     <div className="min-h-screen bg-slate-50 flex flex-col">
       {/* Header */}
       <div className="bg-white border-b-2 border-slate-100 px-6 py-4">
-        <Link href="/" className="flex items-center space-x-2">
-          <div className="w-9 h-9 bg-[#6262bd] rounded-xl flex items-center justify-center">
-            <span className="text-white font-bold text-lg">M</span>
-          </div>
-          <span className="text-xl font-bold text-slate-700">Menu Hub</span>
-        </Link>
+        <div className="flex items-center space-x-2">
+          {restaurant?.logo_url ? (
+            <img
+              src={restaurant.logo_url}
+              alt={restaurant.name}
+              className="w-9 h-9 object-contain rounded-xl"
+            />
+          ) : (
+            <div className="w-9 h-9 bg-[#6262bd] rounded-xl flex items-center justify-center">
+              <span className="text-white font-bold text-lg">
+                {restaurant?.name?.charAt(0) || 'M'}
+              </span>
+            </div>
+          )}
+          <span className="text-xl font-bold text-slate-700">{restaurant?.name || 'Veno App'}</span>
+        </div>
       </div>
 
       {/* Main Content */}

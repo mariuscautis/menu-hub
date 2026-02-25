@@ -53,7 +53,7 @@ export default function AdminDashboard() {
     <div>
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-800">Admin Dashboard</h1>
-        <p className="text-slate-500">Overview of Menu Hub platform</p>
+        <p className="text-slate-500">Overview of Veno App platform</p>
       </div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">

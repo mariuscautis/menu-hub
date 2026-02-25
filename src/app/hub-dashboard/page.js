@@ -112,7 +112,7 @@ export default function HubDashboard() {
       <div className="w-full max-w-4xl mb-12">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold mb-2">🍽️ Menu Hub Station</h1>
+            <h1 className="text-3xl font-bold mb-2">🍽️ Veno App Station</h1>
             <p className="text-slate-400">Local Network Coordinator</p>
           </div>
           <button

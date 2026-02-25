@@ -9,7 +9,7 @@ export default function AdminSettings() {
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState(null)
   const [branding, setBranding] = useState({
-    platform_name: 'Menu Hub',
+    platform_name: 'Veno App',
     logo_url: null,
     theme_color: '#6262bd',
     background_color: '#ffffff'
@@ -166,7 +166,7 @@ export default function AdminSettings() {
             value={branding.platform_name}
             onChange={(e) => setBranding(prev => ({ ...prev, platform_name: e.target.value }))}
             className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
-            placeholder="Menu Hub"
+            placeholder="Veno App"
           />
         </div>
       </div>

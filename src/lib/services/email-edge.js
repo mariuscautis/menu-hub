@@ -112,7 +112,7 @@ export async function sendPasswordResetEmail(email, resetLink) {
           </div>
           <div class="content">
             <p>Hello,</p>
-            <p>We received a request to reset your password for your Menu Hub account.</p>
+            <p>We received a request to reset your password for your Veno App account.</p>
             <p>Click the button below to reset your password:</p>
             <p style="text-align: center;">
               <a href="${resetLink}" class="button">Reset Password</a>
@@ -122,7 +122,7 @@ export async function sendPasswordResetEmail(email, resetLink) {
             <p><strong>This link will expire in 1 hour.</strong></p>
             <p>If you didn't request a password reset, you can safely ignore this email.</p>
             <div class="footer">
-              <p>Menu Hub - Restaurant Management Platform</p>
+              <p>Veno App - Restaurant Management Platform</p>
               <p>This is an automated email, please do not reply.</p>
             </div>
           </div>
@@ -134,7 +134,7 @@ export async function sendPasswordResetEmail(email, resetLink) {
   const textContent = `
 Password Reset Request
 
-We received a request to reset your password for your Menu Hub account.
+We received a request to reset your password for your Veno App account.
 
 Click this link to reset your password:
 ${resetLink}
@@ -144,13 +144,13 @@ This link will expire in 1 hour.
 If you didn't request a password reset, you can safely ignore this email.
 
 ---
-Menu Hub - Restaurant Management Platform
+Veno App - Restaurant Management Platform
 This is an automated email, please do not reply.
   `
 
   return sendEmail({
     to: email,
-    subject: 'Reset Your Password - Menu Hub',
+    subject: 'Reset Your Password - Veno App',
     htmlContent,
     textContent
   })
@@ -179,12 +179,12 @@ export async function sendWelcomeEmail(email, name) {
       <body>
         <div class="container">
           <div class="header">
-            <h1>Welcome to Menu Hub!</h1>
+            <h1>Welcome to Veno App!</h1>
           </div>
           <div class="content">
             <p>Hello ${name},</p>
-            <p>Thank you for joining Menu Hub! We're excited to help you manage your restaurant more efficiently.</p>
-            <p>Here's what you can do with Menu Hub:</p>
+            <p>Thank you for joining Veno App! We're excited to help you manage your restaurant more efficiently.</p>
+            <p>Here's what you can do with Veno App:</p>
             <ul>
               <li>Manage your menu and categories</li>
               <li>Track orders and reservations</li>
@@ -194,7 +194,7 @@ export async function sendWelcomeEmail(email, name) {
             </ul>
             <p>If you have any questions or need help getting started, feel free to reach out to our support team.</p>
             <div class="footer">
-              <p>Menu Hub - Restaurant Management Platform</p>
+              <p>Veno App - Restaurant Management Platform</p>
               <p>This is an automated email, please do not reply.</p>
             </div>
           </div>
@@ -204,13 +204,13 @@ export async function sendWelcomeEmail(email, name) {
   `
 
   const textContent = `
-Welcome to Menu Hub!
+Welcome to Veno App!
 
 Hello ${name},
 
-Thank you for joining Menu Hub! We're excited to help you manage your restaurant more efficiently.
+Thank you for joining Veno App! We're excited to help you manage your restaurant more efficiently.
 
-Here's what you can do with Menu Hub:
+Here's what you can do with Veno App:
 - Manage your menu and categories
 - Track orders and reservations
 - Monitor inventory and stock levels
@@ -220,13 +220,13 @@ Here's what you can do with Menu Hub:
 If you have any questions or need help getting started, feel free to reach out to our support team.
 
 ---
-Menu Hub - Restaurant Management Platform
+Veno App - Restaurant Management Platform
 This is an automated email, please do not reply.
   `
 
   return sendEmail({
     to: email,
-    subject: 'Welcome to Menu Hub!',
+    subject: 'Welcome to Veno App!',
     htmlContent,
     textContent
   })

@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * Local Hub Client - Connects to Menu Hub Station for offline sync
+ * Local Hub Client - Connects to Veno App Station for offline sync
  *
  * Features:
  * - Auto-discovery of local hub via mDNS (fallback to manual IP)
@@ -105,7 +105,7 @@ class LocalHubClient {
   }
 
   /**
-   * Discover Menu Hub Station on local network
+   * Discover Veno App Station on local network
    */
   async discover() {
     if (this.isDiscovering) return this.hubUrl

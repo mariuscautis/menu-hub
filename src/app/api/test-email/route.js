@@ -17,16 +17,16 @@ export async function GET(request) {
       // Test basic email
       result = await sendEmail({
         to: testEmail,
-        subject: 'Test Email from Menu Hub',
+        subject: 'Test Email from Veno App',
         htmlContent: `
-          <h1>Hello from Menu Hub!</h1>
+          <h1>Hello from Veno App!</h1>
           <p>This is a test email to verify that Brevo email integration is working correctly.</p>
           <p>If you're reading this, it means emails are being sent successfully!</p>
           <hr>
           <p style="color: #666; font-size: 12px;">Sent at: ${new Date().toISOString()}</p>
         `,
         textContent: `
-Hello from Menu Hub!
+Hello from Veno App!
 
 This is a test email to verify that Brevo email integration is working correctly.
 

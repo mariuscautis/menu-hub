@@ -405,13 +405,13 @@ export default function ProductTaxSettings() {
                       </div>
                       <button
                         onClick={() => setEditingId(category.id)}
-                        className="px-3 py-1.5 text-sm bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 disabled:opacity-50"
+                        className="px-3 py-1.5 text-sm bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 disabled:opacity-50 dark:bg-slate-600 dark:text-white dark:hover:bg-slate-500"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleDeleteCategory(category.id, category.name)}
-                        className="px-3 py-1.5 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 disabled:opacity-50"
+                        className="px-3 py-1.5 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 disabled:opacity-50 dark:bg-red-600 dark:text-white dark:hover:bg-red-700"
                       >
                         Delete
                       </button>

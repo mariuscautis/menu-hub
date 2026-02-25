@@ -1,6 +1,6 @@
 /**
  * SMS Service using Brevo
- * Handles transactional SMS for the Menu Hub application
+ * Handles transactional SMS for the Veno App application
  */
 
 import * as brevo from '@getbrevo/brevo'
@@ -20,7 +20,7 @@ apiInstance.setApiKey(
  * @param {string} [options.sender] - Sender name (max 11 characters, alphanumeric)
  * @returns {Promise<Object>} - Response from Brevo API
  */
-export async function sendSMS({ to, message, sender = 'MenuHub' }) {
+export async function sendSMS({ to, message, sender = 'VenoApp' }) {
   try {
     // Validate phone number format (should be E.164 format)
     if (!to.startsWith('+')) {
@@ -64,7 +64,7 @@ export async function sendSMS({ to, message, sender = 'MenuHub' }) {
  * @returns {Promise<Object>}
  */
 export async function sendOrderReadySMS(phone, orderNumber) {
-  const message = `Your order #${orderNumber} is ready for pickup! - Menu Hub`
+  const message = `Your order #${orderNumber} is ready for pickup! - Veno App`
 
   return sendSMS({
     to: phone,
@@ -79,7 +79,7 @@ export async function sendOrderReadySMS(phone, orderNumber) {
  * @returns {Promise<Object>}
  */
 export async function sendTableReadySMS(phone, tableNumber) {
-  const message = `Your table #${tableNumber} is now ready. Please proceed to the host stand. - Menu Hub`
+  const message = `Your table #${tableNumber} is now ready. Please proceed to the host stand. - Veno App`
 
   return sendSMS({
     to: phone,
@@ -96,7 +96,7 @@ export async function sendTableReadySMS(phone, tableNumber) {
 export async function sendReservationConfirmationSMS(phone, reservationDetails) {
   const { date, time, partySize, restaurantName } = reservationDetails
 
-  const message = `Reservation confirmed at ${restaurantName} for ${partySize} on ${date} at ${time}. See you then! - Menu Hub`
+  const message = `Reservation confirmed at ${restaurantName} for ${partySize} on ${date} at ${time}. See you then! - Veno App`
 
   return sendSMS({
     to: phone,
@@ -113,7 +113,7 @@ export async function sendReservationConfirmationSMS(phone, reservationDetails) 
 export async function sendReservationReminderSMS(phone, reservationDetails) {
   const { time, restaurantName } = reservationDetails
 
-  const message = `Reminder: Your reservation at ${restaurantName} is today at ${time}. We look forward to seeing you! - Menu Hub`
+  const message = `Reminder: Your reservation at ${restaurantName} is today at ${time}. We look forward to seeing you! - Veno App`
 
   return sendSMS({
     to: phone,
@@ -130,7 +130,7 @@ export async function sendReservationReminderSMS(phone, reservationDetails) {
 export async function sendShiftReminderSMS(phone, shiftDetails) {
   const { date, startTime, position } = shiftDetails
 
-  const message = `Shift reminder: ${position} shift tomorrow ${date} at ${startTime}. - Menu Hub`
+  const message = `Shift reminder: ${position} shift tomorrow ${date} at ${startTime}. - Veno App`
 
   return sendSMS({
     to: phone,

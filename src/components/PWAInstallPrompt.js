@@ -90,7 +90,7 @@ export default function PWAInstallPrompt() {
           </div>
 
           <div className="flex-1">
-            <h3 className="font-bold text-lg mb-1">Install Menu Hub</h3>
+            <h3 className="font-bold text-lg mb-1">Install Veno App</h3>
             <p className="text-sm text-white/90 mb-4">
               Install this app on your device for a better experience. Works offline and loads faster!
             </p>

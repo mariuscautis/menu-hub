@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import PlatformLogo from '@/components/PlatformLogo'
 
 // Service categories for mega menu
 const services = {
@@ -13,37 +14,43 @@ const services = {
         name: 'Digital QR Menu',
         description: 'Contactless menus via smartphone',
         icon: '📱',
-        href: '#digital-menu',
+        href: '/services/qr-menu',
       },
       {
         name: 'Table Ordering',
         description: 'Customers order directly from tables',
         icon: '🍽️',
-        href: '#table-ordering',
+        href: '/services/table-ordering',
       },
       {
         name: 'Staff Dashboard',
         description: 'Kitchen & bar order management',
         icon: '👨‍🍳',
-        href: '#staff-dashboard',
+        href: '/services/dashboard',
       },
       {
         name: 'Business Analytics',
         description: 'Sales trends and insights',
         icon: '📈',
-        href: '#analytics',
+        href: '/services/analytics',
       },
       {
         name: 'Reservations',
         description: 'Online booking with confirmations',
         icon: '📅',
-        href: '#reservations',
+        href: '/services/reservations',
       },
       {
         name: 'Inventory Management',
         description: 'Stock tracking and cost control',
         icon: '📦',
-        href: '#inventory',
+        href: '/services/inventory',
+      },
+      {
+        name: 'Your Branded App',
+        description: 'White-label PWA with your logo',
+        icon: '📲',
+        href: '/services/branded-app',
       },
     ],
   },
@@ -78,7 +85,7 @@ const services = {
     ],
   },
   benefits: {
-    title: 'Why Menu Hub?',
+    title: 'Why Veno App?',
     description: 'What makes us different',
     items: [
       {
@@ -91,19 +98,19 @@ const services = {
         name: 'Save Time',
         description: 'Automate the busy work',
         icon: '⏱️',
-        href: '#why-menu-hub',
+        href: '#why-veno-app',
       },
       {
         name: 'Reduce Errors',
         description: 'Digital ordering means clarity',
         icon: '✅',
-        href: '#why-menu-hub',
+        href: '#why-veno-app',
       },
       {
         name: 'Boost Revenue',
         description: 'Data-driven growth insights',
         icon: '📊',
-        href: '#why-menu-hub',
+        href: '#why-veno-app',
       },
     ],
   },
@@ -200,6 +207,21 @@ const features = [
     ],
     color: 'from-slate-500 to-slate-700',
     href: '/services/inventory',
+  },
+  {
+    id: 'branded-app',
+    title: 'Your Branded App',
+    subtitle: 'Your Restaurant, Your App',
+    description:
+      'Get your very own restaurant app with your logo, colors, and name. Customers install it on their phones and it feels like your own custom-built application — powered by Veno App behind the scenes.',
+    benefits: [
+      'Your logo and branding',
+      'Installable on any device',
+      'Works offline',
+      'No app store needed',
+    ],
+    color: 'from-indigo-500 to-violet-600',
+    href: '/services/branded-app',
   },
 ]
 
@@ -607,6 +629,91 @@ const FeatureIllustrations = {
       </g>
     </svg>
   ),
+  'branded-app': () => (
+    <svg viewBox="0 0 400 300" className="w-full h-full">
+      {/* Central phone with custom branding */}
+      <g transform="translate(140, 20)">
+        <rect x="0" y="0" width="120" height="220" rx="20" fill="#1e293b" />
+        <rect x="8" y="15" width="104" height="190" rx="12" fill="#f8fafc" />
+
+        {/* Custom restaurant logo placeholder */}
+        <circle cx="60" cy="65" r="30" fill="#6262bd" opacity="0.15" />
+        <circle cx="60" cy="65" r="22" fill="#6262bd" opacity="0.3" />
+        <text x="60" y="72" fontSize="24" textAnchor="middle">🍽️</text>
+
+        {/* Restaurant name */}
+        <rect x="25" y="105" width="70" height="12" rx="3" fill="#1e293b" />
+        <text x="60" y="114" fontSize="9" fill="white" textAnchor="middle" fontWeight="bold">YOUR LOGO</text>
+
+        {/* Menu items preview */}
+        <rect x="15" y="130" width="90" height="18" rx="4" fill="#6262bd" opacity="0.1" />
+        <rect x="20" y="134" width="50" height="10" rx="2" fill="#6262bd" opacity="0.3" />
+
+        <rect x="15" y="155" width="90" height="18" rx="4" fill="#e2e8f0" />
+        <rect x="20" y="159" width="40" height="10" rx="2" fill="#cbd5e1" />
+
+        <rect x="15" y="180" width="90" height="18" rx="4" fill="#e2e8f0" />
+        <rect x="20" y="184" width="55" height="10" rx="2" fill="#cbd5e1" />
+
+        {/* Home indicator */}
+        <rect x="45" y="208" width="30" height="4" rx="2" fill="#cbd5e1" />
+      </g>
+
+      {/* Install prompt arrow */}
+      <g transform="translate(270, 80)">
+        <rect x="0" y="0" width="90" height="60" rx="10" fill="white" filter="url(#shadow)" />
+        <text x="45" y="20" fontSize="9" fill="#1e293b" textAnchor="middle" fontWeight="bold">Add to Home</text>
+        <text x="45" y="32" fontSize="8" fill="#64748b" textAnchor="middle">Screen</text>
+        <rect x="20" y="40" width="50" height="14" rx="4" fill="#6262bd" />
+        <text x="45" y="50" fontSize="7" fill="white" textAnchor="middle" fontWeight="bold">INSTALL</text>
+      </g>
+
+      {/* Arrow from install to phone */}
+      <path d="M270 110 Q240 130 260 160" fill="none" stroke="#6262bd" strokeWidth="2" strokeDasharray="4">
+        <animate attributeName="stroke-dashoffset" values="0;-8" dur="1s" repeatCount="indefinite" />
+      </path>
+
+      {/* Multiple devices showing same branded app */}
+      <g transform="translate(30, 100)">
+        {/* Tablet */}
+        <rect x="0" y="0" width="80" height="110" rx="10" fill="#1e293b" />
+        <rect x="5" y="8" width="70" height="90" rx="6" fill="#f8fafc" />
+        <circle cx="40" cy="40" r="15" fill="#6262bd" opacity="0.3" />
+        <text x="40" y="45" fontSize="14" textAnchor="middle">🍽️</text>
+        <rect x="15" y="62" width="50" height="8" rx="2" fill="#1e293b" />
+        <rect x="12" y="78" width="56" height="12" rx="3" fill="#e2e8f0" />
+      </g>
+
+      {/* Desktop browser */}
+      <g transform="translate(290, 160)">
+        <rect x="0" y="0" width="80" height="60" rx="6" fill="#1e293b" />
+        <rect x="4" y="12" width="72" height="44" rx="3" fill="#f8fafc" />
+        {/* Browser dots */}
+        <circle cx="10" cy="6" r="2" fill="#ef4444" />
+        <circle cx="18" cy="6" r="2" fill="#f59e0b" />
+        <circle cx="26" cy="6" r="2" fill="#22c55e" />
+        {/* Content */}
+        <circle cx="40" cy="30" r="10" fill="#6262bd" opacity="0.3" />
+        <text x="40" y="34" fontSize="10" textAnchor="middle">🍽️</text>
+        <rect x="15" y="45" width="50" height="6" rx="2" fill="#e2e8f0" />
+      </g>
+
+      {/* Sync lines connecting devices */}
+      <path d="M110 155 Q140 180 140 130" fill="none" stroke="#6262bd" strokeWidth="1.5" opacity="0.4" strokeDasharray="3">
+        <animate attributeName="stroke-dashoffset" values="0;-6" dur="2s" repeatCount="indefinite" />
+      </path>
+      <path d="M260 130 Q280 150 290 190" fill="none" stroke="#6262bd" strokeWidth="1.5" opacity="0.4" strokeDasharray="3">
+        <animate attributeName="stroke-dashoffset" values="0;-6" dur="2s" repeatCount="indefinite" />
+      </path>
+
+      {/* "Your Brand" label */}
+      <g transform="translate(30, 230)">
+        <rect x="0" y="0" width="340" height="35" rx="8" fill="#6262bd" opacity="0.1" />
+        <text x="170" y="15" fontSize="10" fill="#6262bd" textAnchor="middle" fontWeight="bold">ONE PLATFORM • EVERY DEVICE • YOUR BRAND</text>
+        <text x="170" y="28" fontSize="8" fill="#64748b" textAnchor="middle">Customers see your restaurant app, powered by Veno App</text>
+      </g>
+    </svg>
+  ),
 }
 
 // Icons for feature cards
@@ -641,6 +748,12 @@ const FeatureIcons = {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
     </svg>
   ),
+  'branded-app': (
+    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11l4-4m0 0l-4-4m4 4H3" />
+    </svg>
+  ),
 }
 
 export default function HomePage() {
@@ -655,11 +768,8 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16 lg:h-20">
             {/* Logo */}
-            <Link href="/" className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-[#6262bd] to-[#8585d0] rounded-xl flex items-center justify-center shadow-lg shadow-[#6262bd]/20">
-                <span className="text-white font-bold text-xl">M</span>
-              </div>
-              <span className="text-2xl font-bold text-slate-800 dark:text-white">Menu Hub</span>
+            <Link href="/" className="flex items-center">
+              <PlatformLogo size="md" />
             </Link>
 
             {/* Desktop Navigation */}
@@ -1094,7 +1204,7 @@ export default function HomePage() {
               Up and Running in Minutes
             </h2>
             <p className="text-lg text-slate-600 dark:text-slate-400">
-              Getting started with Menu Hub is simple. Set up your restaurant profile, configure your menu, and start accepting orders.
+              Getting started with Veno App is simple. Set up your restaurant profile, configure your menu, and start accepting orders.
             </p>
           </div>
 
@@ -1241,7 +1351,7 @@ export default function HomePage() {
                 Use the Devices You Already Own
               </h2>
               <p className="text-lg text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
-                Forget about expensive POS terminals and proprietary hardware. Menu Hub works beautifully on any laptop, tablet, or smartphone you already have. No special equipment to buy, no technicians to install it.
+                Forget about expensive POS terminals and proprietary hardware. Veno App works beautifully on any laptop, tablet, or smartphone you already have. No special equipment to buy, no technicians to install it.
               </p>
 
               <div className="space-y-4">
@@ -1281,7 +1391,7 @@ export default function HomePage() {
                   </div>
                   <div>
                     <p className="font-semibold text-green-800 dark:text-green-200">Save thousands on equipment</p>
-                    <p className="text-sm text-green-600 dark:text-green-400">Traditional POS systems can cost thousands. Menu Hub works on what you have.</p>
+                    <p className="text-sm text-green-600 dark:text-green-400">Traditional POS systems can cost thousands. Veno App works on what you have.</p>
                   </div>
                 </div>
               </div>
@@ -1301,7 +1411,7 @@ export default function HomePage() {
               One Platform, Endless Possibilities
             </h2>
             <p className="text-lg text-slate-600 dark:text-slate-400">
-              Whether you run a cozy cafe, a bustling pub, or a high-volume takeaway, Menu Hub adapts to your unique needs.
+              Whether you run a cozy cafe, a bustling pub, or a high-volume takeaway, Veno App adapts to your unique needs.
             </p>
           </div>
 
@@ -1321,17 +1431,17 @@ export default function HomePage() {
       </section>
 
       {/* Why Owners Love It Section */}
-      <section id="why-menu-hub" className="py-20 lg:py-32 bg-slate-50 dark:bg-slate-800/50">
+      <section id="why-veno-app" className="py-20 lg:py-32 bg-slate-50 dark:bg-slate-800/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <div className="inline-block px-4 py-1.5 bg-[#6262bd]/10 dark:bg-[#6262bd]/20 rounded-full text-[#6262bd] dark:text-[#8585d0] text-sm font-semibold mb-4">
-              Why Menu Hub?
+              Why Veno App?
             </div>
             <h2 className="text-3xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-6">
               Built by Hospitality Experts, for Hospitality Experts
             </h2>
             <p className="text-lg text-slate-600 dark:text-slate-400">
-              We understand the challenges of running a food business. That's why we built Menu Hub to solve real problems you face every day.
+              We understand the challenges of running a food business. That's why we built Veno App to solve real problems you face every day.
             </p>
           </div>
 
@@ -1426,7 +1536,7 @@ export default function HomePage() {
             Ready to Transform Your Restaurant?
           </h2>
           <p className="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
-            Start your free trial today and see how Menu Hub can streamline your operations and delight your customers.
+            Start your free trial today and see how Veno App can streamline your operations and delight your customers.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
@@ -1454,11 +1564,8 @@ export default function HomePage() {
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 lg:gap-12 mb-12">
             {/* Brand */}
             <div className="col-span-2 lg:col-span-1">
-              <Link href="/" className="flex items-center space-x-3 mb-6">
-                <div className="w-10 h-10 bg-gradient-to-br from-[#6262bd] to-[#8585d0] rounded-xl flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">M</span>
-                </div>
-                <span className="text-2xl font-bold text-white">Menu Hub</span>
+              <Link href="/" className="flex items-center mb-6">
+                <PlatformLogo size="md" darkMode={true} />
               </Link>
               <p className="text-slate-400 text-sm leading-relaxed">
                 The complete restaurant management platform. Simplify operations, delight customers.
@@ -1513,7 +1620,7 @@ export default function HomePage() {
           {/* Bottom bar */}
           <div className="pt-8 border-t border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="text-slate-400 text-sm">
-              © {new Date().getFullYear()} Menu Hub. All rights reserved.
+              © {new Date().getFullYear()} Veno App. All rights reserved.
             </p>
             <div className="flex items-center space-x-6">
               <Link href="https://linkedin.com" className="text-slate-400 hover:text-white transition-colors">

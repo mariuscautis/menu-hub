@@ -78,9 +78,9 @@ export default function PWAInstallButton() {
       <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h2 className="text-lg font-bold text-slate-700 mb-2">Install Menu Hub App</h2>
+            <h2 className="text-lg font-bold text-slate-700 mb-2">Install Veno App App</h2>
             <p className="text-sm text-slate-500">
-              Access Menu Hub from your home screen for a faster, app-like experience
+              Access Veno App from your home screen for a faster, app-like experience
             </p>
           </div>
           <div className="flex items-center gap-2 px-3 py-1 bg-green-100 text-green-700 rounded-lg text-sm font-medium">
@@ -96,9 +96,9 @@ export default function PWAInstallButton() {
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
           </svg>
           <div>
-            <h3 className="font-semibold text-green-900 mb-1">Menu Hub is Installed!</h3>
+            <h3 className="font-semibold text-green-900 mb-1">Veno App is Installed!</h3>
             <p className="text-sm text-green-800">
-              You can now access Menu Hub from your home screen, dock, or app drawer. It works offline and loads faster than the browser version.
+              You can now access Veno App from your home screen, dock, or app drawer. It works offline and loads faster than the browser version.
             </p>
           </div>
         </div>
@@ -112,9 +112,9 @@ export default function PWAInstallButton() {
       <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h2 className="text-lg font-bold text-slate-700 mb-2">Install Menu Hub App</h2>
+            <h2 className="text-lg font-bold text-slate-700 mb-2">Install Veno App App</h2>
             <p className="text-sm text-slate-500">
-              Access Menu Hub from your home screen for a faster, app-like experience
+              Access Veno App from your home screen for a faster, app-like experience
             </p>
           </div>
           <div className="flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium">
@@ -195,9 +195,9 @@ export default function PWAInstallButton() {
     <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
       <div className="flex items-start justify-between mb-4">
         <div>
-          <h2 className="text-lg font-bold text-slate-700 mb-2">Install Menu Hub App</h2>
+          <h2 className="text-lg font-bold text-slate-700 mb-2">Install Veno App App</h2>
           <p className="text-sm text-slate-500">
-            Access Menu Hub from your home screen for a faster, app-like experience
+            Access Veno App from your home screen for a faster, app-like experience
           </p>
         </div>
         <div className="flex items-center gap-2 px-3 py-1 bg-purple-100 text-purple-700 rounded-lg text-sm font-medium">
@@ -261,12 +261,12 @@ export default function PWAInstallButton() {
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
           </svg>
-          <span>Install Menu Hub App</span>
+          <span>Install Veno App App</span>
         </button>
 
         {/* Note */}
         <p className="text-xs text-slate-500 text-center">
-          Menu Hub will be installed on your device. You can uninstall it anytime from your device settings.
+          Veno App will be installed on your device. You can uninstall it anytime from your device settings.
         </p>
       </div>
     </div>

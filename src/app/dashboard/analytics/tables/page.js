@@ -237,90 +237,90 @@ export default function TableAnalyticsPage() {
                     </div>
                   </div>
                   {/* Metrics Grid */}
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 table-analytics-grid">
                     {/* Revenue Metrics */}
-                    <div className="bg-slate-50 rounded-xl p-4">
-                      <p className="text-xs text-slate-500 font-medium mb-1">{t('avgRevenuePerOrder')}</p>
-                      <p className="text-lg font-bold text-slate-700">
+                    <div className="bg-slate-50 dark:!bg-slate-800 rounded-xl p-4">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1">{t('avgRevenuePerOrder')}</p>
+                      <p className="text-lg font-bold text-slate-700 dark:text-slate-200">
                         £{table.avg_revenue_per_order.toFixed(2)}
                       </p>
-                      <p className="text-xs text-slate-500 font-medium mb-1">{t('avgSpendPerPerson')}</p>
-                      <p className="text-lg font-bold text-slate-700">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1">{t('avgSpendPerPerson')}</p>
+                      <p className="text-lg font-bold text-slate-700 dark:text-slate-200">
                         £{table.avg_spend_per_person.toFixed(2)}
                       </p>
                       <p className="text-xs text-slate-400 mt-1">{t('estGuestsPerOrder')}</p>
-                      <p className="text-xs text-slate-500 font-medium mb-1">{t('revenuePerHour')}</p>
-                      <p className="text-lg font-bold text-slate-700">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1">{t('revenuePerHour')}</p>
+                      <p className="text-lg font-bold text-slate-700 dark:text-slate-200">
                         £{table.revenue_per_hour.toFixed(2)}
                       </p>
-                      <p className="text-xs text-slate-500 font-medium mb-1">{t('totalOrders')}</p>
-                      <p className="text-lg font-bold text-slate-700">{table.total_orders}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1">{t('totalOrders')}</p>
+                      <p className="text-lg font-bold text-slate-700 dark:text-slate-200">{table.total_orders}</p>
                     </div>
                     {/* Operational Metrics */}
-                    <div className="bg-blue-50 rounded-xl p-4">
-                      <p className="text-xs text-blue-600 font-medium mb-1">{t('avgSeatingTime')}</p>
-                      <p className="text-lg font-bold text-blue-700">
+                    <div className="bg-blue-50 dark:!bg-blue-950 rounded-xl p-4">
+                      <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1">{t('avgSeatingTime')}</p>
+                      <p className="text-lg font-bold text-blue-700 dark:text-blue-300">
                         {t('minutes').replace('{count}', table.avg_duration_minutes)}
                       </p>
                     </div>
-                    <div className="bg-purple-50 rounded-xl p-4">
-                      <p className="text-xs text-purple-600 font-medium mb-1">{t('turnoverRate')}</p>
-                      <p className="text-lg font-bold text-purple-700">
+                    <div className="bg-purple-50 dark:!bg-purple-950 rounded-xl p-4">
+                      <p className="text-xs text-purple-600 dark:text-purple-400 font-medium mb-1">{t('turnoverRate')}</p>
+                      <p className="text-lg font-bold text-purple-700 dark:text-purple-300">
                         {t('perDay').replace('{rate}', table.turnover_rate.toFixed(1))}
                       </p>
                     </div>
-                    <div className="bg-amber-50 rounded-xl p-4">
-                      <p className="text-xs text-amber-600 font-medium mb-1">{t('occupancyRate')}</p>
-                      <p className="text-lg font-bold text-amber-700">
+                    <div className="bg-amber-50 dark:!bg-amber-950 rounded-xl p-4">
+                      <p className="text-xs text-amber-600 dark:text-amber-400 font-medium mb-1">{t('occupancyRate')}</p>
+                      <p className="text-lg font-bold text-amber-700 dark:text-amber-300">
                         {t('percentage').replace('{percent}', table.occupancy_rate.toFixed(1))}
                       </p>
                     </div>
-                    <div className="bg-green-50 rounded-xl p-4">
-                      <p className="text-xs text-green-600 font-medium mb-1">{t('tipsCollected')}</p>
-                      <p className="text-lg font-bold text-green-700">
+                    <div className="bg-green-50 dark:!bg-green-950 rounded-xl p-4">
+                      <p className="text-xs text-green-600 dark:text-green-400 font-medium mb-1">{t('tipsCollected')}</p>
+                      <p className="text-lg font-bold text-green-700 dark:text-green-300">
                         £{table.total_tips.toFixed(2)}
                       </p>
                       {table.tip_percentage > 0 && (
-                        <p className="text-xs text-green-600 mt-1">
+                        <p className="text-xs text-green-600 dark:text-green-400 mt-1">
                           {t('avgTipPercentage').replace('{percent}', table.tip_percentage.toFixed(1))}
                         </p>
                       )}
                     </div>
-                    <div className="bg-cyan-50 rounded-xl p-4">
-                      <p className="text-xs text-cyan-600 font-medium mb-1">{t('avgCleanupTime')}</p>
-                      <p className="text-lg font-bold text-cyan-700">
+                    <div className="bg-cyan-50 dark:!bg-cyan-950 rounded-xl p-4">
+                      <p className="text-xs text-cyan-600 dark:text-cyan-400 font-medium mb-1">{t('avgCleanupTime')}</p>
+                      <p className="text-lg font-bold text-cyan-700 dark:text-cyan-300">
                         {table.avg_cleanup_time_minutes > 0 ? t('minutes').replace('{count}', table.avg_cleanup_time_minutes) : t('notAvailable')}
                       </p>
-                      <p className="text-xs text-cyan-600 mt-1">
+                      <p className="text-xs text-cyan-600 dark:text-cyan-400 mt-1">
                         {table.avg_cleanup_time_minutes > 0 ? t('postPaymentToReady') : t('noDataYet')}
                       </p>
                     </div>
-                    <div className="bg-orange-50 rounded-xl p-4">
-                      <p className="text-xs text-orange-600 font-medium mb-1">{t('waiterResponseTime')}</p>
-                      <p className="text-lg font-bold text-orange-700">
+                    <div className="bg-orange-50 dark:!bg-orange-950 rounded-xl p-4">
+                      <p className="text-xs text-orange-600 dark:text-orange-400 font-medium mb-1">{t('waiterResponseTime')}</p>
+                      <p className="text-lg font-bold text-orange-700 dark:text-orange-300">
                         {table.total_waiter_calls > 0 ? t('minutes').replace('{count}', table.avg_waiter_response_minutes.toFixed(1)) : t('notAvailable')}
                       </p>
-                      <p className="text-xs text-orange-600 mt-1">
+                      <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
                         {table.total_waiter_calls > 0
                           ? t('calls').replace('{count}', table.total_waiter_calls).replace('{plural}', table.total_waiter_calls !== 1 ? 's' : '')
                           : t('noCalls')}
                       </p>
                     </div>
                     {/* Upsell Metrics */}
-                    <div className="bg-indigo-50 rounded-xl p-4">
-                      <p className="text-xs text-indigo-600 font-medium mb-1">{t('totalItemsSold')}</p>
-                      <p className="text-lg font-bold text-indigo-700">{table.total_items_sold}</p>
-                      <p className="text-xs text-indigo-600 font-medium mb-1">{t('avgItemsPerOrder')}</p>
-                      <p className="text-lg font-bold text-indigo-700">
+                    <div className="bg-indigo-50 dark:!bg-indigo-950 rounded-xl p-4">
+                      <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium mb-1">{t('totalItemsSold')}</p>
+                      <p className="text-lg font-bold text-indigo-700 dark:text-indigo-300">{table.total_items_sold}</p>
+                      <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium mb-1">{t('avgItemsPerOrder')}</p>
+                      <p className="text-lg font-bold text-indigo-700 dark:text-indigo-300">
                         {table.avg_items_per_order.toFixed(1)}
                       </p>
-                      <p className="text-xs text-indigo-600 mt-1">
+                      <p className="text-xs text-indigo-600 dark:text-indigo-400 mt-1">
                         {table.avg_items_per_order >= 3 ? t('goodUpselling') : t('upsellOpportunity')}
                       </p>
                     </div>
-                    <div className="bg-slate-50 rounded-xl p-4 col-span-2">
-                      <p className="text-xs text-slate-500 font-medium mb-1">{t('performanceInsights')}</p>
-                      <p className="text-sm text-slate-700">
+                    <div className="bg-slate-50 dark:!bg-slate-800 rounded-xl p-4 col-span-2">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1">{t('performanceInsights')}</p>
+                      <p className="text-sm text-slate-700 dark:text-slate-200">
                         {table.occupancy_rate > 50 && table.avg_items_per_order >= 3
                           ? t('excellentPerformance')
                           : table.occupancy_rate > 50

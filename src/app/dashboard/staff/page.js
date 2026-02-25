@@ -512,7 +512,7 @@ export default function Staff() {
                     <div className="flex justify-end gap-2">
                       <button
                         onClick={() => sendMagicLink(member)}
-                        className="px-3 py-1.5 bg-purple-50 text-purple-600 rounded-lg text-sm font-medium hover:bg-purple-100"
+                        className="px-3 py-1.5 bg-purple-50 text-purple-600 rounded-lg text-sm font-medium hover:bg-purple-100 dark:bg-purple-600 dark:text-white dark:hover:bg-purple-700"
                         title="Generate and copy magic link for staff login"
                       >
                         <svg className="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 24 24">
@@ -522,14 +522,14 @@ export default function Staff() {
                       </button>
                       <button
                         onClick={() => openEditModal(member)}
-                        className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-100"
+                        className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-100 dark:bg-blue-600 dark:text-white dark:hover:bg-blue-700"
                       >
                         {t('edit')}
                       </button>
                       {member.status === 'pending' && (
                         <button
                           onClick={() => updateStaffStatus(member.id, 'active')}
-                          className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200"
+                          className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200 dark:bg-green-600 dark:text-white dark:hover:bg-green-700"
                         >
                           {t('activate')}
                         </button>
@@ -537,7 +537,7 @@ export default function Staff() {
                       {member.status === 'active' && (
                         <button
                           onClick={() => updateStaffStatus(member.id, 'inactive')}
-                          className="px-3 py-1.5 bg-amber-100 text-amber-700 rounded-lg text-sm font-medium hover:bg-amber-200"
+                          className="px-3 py-1.5 bg-amber-100 text-amber-700 rounded-lg text-sm font-medium hover:bg-amber-200 dark:bg-amber-600 dark:text-white dark:hover:bg-amber-700"
                         >
                           {t('deactivate')}
                         </button>
@@ -545,14 +545,14 @@ export default function Staff() {
                       {member.status === 'inactive' && (
                         <button
                           onClick={() => updateStaffStatus(member.id, 'active')}
-                          className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200"
+                          className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200 dark:bg-green-600 dark:text-white dark:hover:bg-green-700"
                         >
                           {t('reactivate')}
                         </button>
                       )}
                       <button
                         onClick={() => deleteStaff(member.id, member.name)}
-                        className="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100"
+                        className="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100 dark:bg-red-600 dark:text-white dark:hover:bg-red-700"
                       >
                         {t('remove')}
                       </button>

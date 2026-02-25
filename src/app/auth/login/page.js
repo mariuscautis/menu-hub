@@ -148,7 +148,7 @@ export default function Login() {
           <div className="w-10 h-10 bg-[#6262bd] rounded-xl flex items-center justify-center">
             <span className="text-white font-bold text-xl">M</span>
           </div>
-          <span className="text-2xl font-bold text-slate-700">Menu Hub</span>
+          <span className="text-2xl font-bold text-slate-700">Veno App</span>
         </Link>
         <div className="flex items-center space-x-4">
           <span className="text-slate-500 text-sm">Don't have an account?</span>

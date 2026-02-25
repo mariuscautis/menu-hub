@@ -30,7 +30,7 @@ export async function GET(request, { params }) {
       .single()
 
     const branding = brandingData?.value || {}
-    const platformName = branding.platform_name || 'Menu Hub'
+    const platformName = branding.platform_name || 'Veno App'
     const themeColor = branding.theme_color || '#6262bd'
     const backgroundColor = branding.background_color || '#ffffff'
 

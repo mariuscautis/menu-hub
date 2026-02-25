@@ -2,7 +2,7 @@ import './globals.css'
 import { ThemeProvider } from '@/lib/ThemeContext'
 
 export const metadata = {
-  title: 'Menu Hub - QR Menu & Ordering for Restaurants',
+  title: 'Veno App - QR Menu & Ordering for Restaurants',
   description: 'Let your customers scan, browse your menu, and order directly from their table.',
   manifest: '/api/manifest',
   robots: {
@@ -16,7 +16,7 @@ export const metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Menu Hub'
+    title: 'Veno App'
   }
 }
 
@@ -36,7 +36,7 @@ export default function RootLayout({ children }) {
         <link rel="apple-touch-icon" sizes="512x512" href="/api/icon/512" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Menu Hub" />
+        <meta name="apple-mobile-web-app-title" content="Veno App" />
       </head>
       <body>
         <ThemeProvider>{children}</ThemeProvider>
