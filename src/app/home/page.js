@@ -11,6 +11,12 @@ const services = {
     description: 'Everything your venue needs',
     items: [
       {
+        name: 'Your Branded App',
+        description: 'White-label PWA with your logo',
+        icon: '📲',
+        href: '/services/branded-app',
+      },
+      {
         name: 'Digital QR Menu',
         description: 'Contactless menus via smartphone',
         icon: '📱',
@@ -21,6 +27,12 @@ const services = {
         description: 'Customers order directly from tables',
         icon: '🍽️',
         href: '/services/table-ordering',
+      },
+      {
+        name: 'Staff Management',
+        description: 'Rotas, shifts, and time tracking',
+        icon: '👥',
+        href: '/services/staff-management',
       },
       {
         name: 'Staff Dashboard',
@@ -45,12 +57,6 @@ const services = {
         description: 'Stock tracking and cost control',
         icon: '📦',
         href: '/services/inventory',
-      },
-      {
-        name: 'Your Branded App',
-        description: 'White-label PWA with your logo',
-        icon: '📲',
-        href: '/services/branded-app',
       },
     ],
   },
@@ -119,6 +125,21 @@ const services = {
 // Feature modules for the main content
 const features = [
   {
+    id: 'branded-app',
+    title: 'Your Branded App',
+    subtitle: 'Your Restaurant, Your App',
+    description:
+      'Get your very own restaurant app with your logo, colors, and name. Customers install it on their phones and it feels like your own custom-built application — powered by Veno App behind the scenes.',
+    benefits: [
+      'Your logo and branding',
+      'Installable on any device',
+      'Works offline',
+      'No app store needed',
+    ],
+    color: 'from-indigo-500 to-violet-600',
+    href: '/services/branded-app',
+  },
+  {
     id: 'digital-menu',
     title: 'Digital QR Menu',
     subtitle: 'Contactless Dining Experience',
@@ -147,6 +168,21 @@ const features = [
     ],
     color: 'from-blue-500 to-cyan-500',
     href: '/services/table-ordering',
+  },
+  {
+    id: 'staff-management',
+    title: 'Staff Management',
+    subtitle: 'Complete Workforce Control',
+    description:
+      'Manage your entire team from one place. Create rotas and schedules, track clock-ins and clock-outs, handle vacation requests, and assign departments. Keep your staff organized and your operations running smoothly.',
+    benefits: [
+      'Rota & shift scheduling',
+      'Clock in/out tracking',
+      'Vacation & leave management',
+      'Department assignments',
+    ],
+    color: 'from-cyan-500 to-blue-600',
+    href: '/services/staff-management',
   },
   {
     id: 'staff-dashboard',
@@ -207,21 +243,6 @@ const features = [
     ],
     color: 'from-slate-500 to-slate-700',
     href: '/services/inventory',
-  },
-  {
-    id: 'branded-app',
-    title: 'Your Branded App',
-    subtitle: 'Your Restaurant, Your App',
-    description:
-      'Get your very own restaurant app with your logo, colors, and name. Customers install it on their phones and it feels like your own custom-built application — powered by Veno App behind the scenes.',
-    benefits: [
-      'Your logo and branding',
-      'Installable on any device',
-      'Works offline',
-      'No app store needed',
-    ],
-    color: 'from-indigo-500 to-violet-600',
-    href: '/services/branded-app',
   },
 ]
 
@@ -368,6 +389,105 @@ const FeatureIllustrations = {
         <rect x="38" y="26" width="35" height="6" rx="2" fill="#cbd5e1" />
         <rect x="10" y="45" width="80" height="16" rx="4" fill="#10b981" />
         <text x="50" y="56" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">NEW ORDER</text>
+      </g>
+    </svg>
+  ),
+  'staff-management': () => (
+    <svg viewBox="0 0 400 300" className="w-full h-full">
+      {/* Main calendar/rota view */}
+      <rect x="40" y="30" width="320" height="240" rx="16" fill="white" filter="url(#shadow)" />
+
+      {/* Header with title */}
+      <rect x="40" y="30" width="320" height="45" rx="16" fill="#0891b2" />
+      <rect x="40" y="60" width="320" height="15" fill="#0891b2" />
+      <text x="200" y="58" fontSize="14" fill="white" textAnchor="middle" fontWeight="bold">Staff Rota - Week 9</text>
+
+      {/* Day columns headers */}
+      <g transform="translate(55, 85)">
+        {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => (
+          <text key={i} x={i * 43} y="0" fontSize="9" fill="#64748b" textAnchor="middle" fontWeight="bold">{day}</text>
+        ))}
+      </g>
+
+      {/* Staff row 1 - Sarah */}
+      <g transform="translate(55, 105)">
+        <circle cx="-25" cy="15" r="12" fill="#dbeafe" />
+        <text x="-25" y="19" fontSize="10" textAnchor="middle">👩</text>
+        {/* Shifts */}
+        <rect x="0" y="5" width="38" height="20" rx="4" fill="#3b82f6" />
+        <text x="19" y="18" fontSize="7" fill="white" textAnchor="middle">9-5</text>
+        <rect x="43" y="5" width="38" height="20" rx="4" fill="#3b82f6" />
+        <text x="62" y="18" fontSize="7" fill="white" textAnchor="middle">9-5</text>
+        <rect x="86" y="5" width="38" height="20" rx="4" fill="#3b82f6" />
+        <text x="105" y="18" fontSize="7" fill="white" textAnchor="middle">9-5</text>
+        <rect x="172" y="5" width="38" height="20" rx="4" fill="#3b82f6" />
+        <text x="191" y="18" fontSize="7" fill="white" textAnchor="middle">12-8</text>
+        <rect x="215" y="5" width="38" height="20" rx="4" fill="#3b82f6" />
+        <text x="234" y="18" fontSize="7" fill="white" textAnchor="middle">12-8</text>
+      </g>
+
+      {/* Staff row 2 - Mike */}
+      <g transform="translate(55, 140)">
+        <circle cx="-25" cy="15" r="12" fill="#fef3c7" />
+        <text x="-25" y="19" fontSize="10" textAnchor="middle">👨</text>
+        {/* Shifts */}
+        <rect x="43" y="5" width="38" height="20" rx="4" fill="#f59e0b" />
+        <text x="62" y="18" fontSize="7" fill="white" textAnchor="middle">6-2</text>
+        <rect x="86" y="5" width="38" height="20" rx="4" fill="#f59e0b" />
+        <text x="105" y="18" fontSize="7" fill="white" textAnchor="middle">6-2</text>
+        <rect x="129" y="5" width="38" height="20" rx="4" fill="#f59e0b" />
+        <text x="148" y="18" fontSize="7" fill="white" textAnchor="middle">6-2</text>
+        <rect x="172" y="5" width="38" height="20" rx="4" fill="#f59e0b" />
+        <text x="191" y="18" fontSize="7" fill="white" textAnchor="middle">6-2</text>
+        <rect x="258" y="5" width="38" height="20" rx="4" fill="#f59e0b" />
+        <text x="277" y="18" fontSize="7" fill="white" textAnchor="middle">6-2</text>
+      </g>
+
+      {/* Staff row 3 - Lisa */}
+      <g transform="translate(55, 175)">
+        <circle cx="-25" cy="15" r="12" fill="#dcfce7" />
+        <text x="-25" y="19" fontSize="10" textAnchor="middle">👩</text>
+        {/* Shifts */}
+        <rect x="0" y="5" width="38" height="20" rx="4" fill="#22c55e" />
+        <text x="19" y="18" fontSize="7" fill="white" textAnchor="middle">2-10</text>
+        <rect x="129" y="5" width="38" height="20" rx="4" fill="#22c55e" />
+        <text x="148" y="18" fontSize="7" fill="white" textAnchor="middle">2-10</text>
+        <rect x="215" y="5" width="38" height="20" rx="4" fill="#22c55e" />
+        <text x="234" y="18" fontSize="7" fill="white" textAnchor="middle">2-10</text>
+        <rect x="258" y="5" width="38" height="20" rx="4" fill="#22c55e" />
+        <text x="277" y="18" fontSize="7" fill="white" textAnchor="middle">2-10</text>
+      </g>
+
+      {/* Clock in/out panel */}
+      <g transform="translate(280, 85)">
+        <rect x="0" y="0" width="70" height="45" rx="6" fill="#f0fdf4" stroke="#22c55e" strokeWidth="1" />
+        <text x="35" y="15" fontSize="8" fill="#16a34a" textAnchor="middle" fontWeight="bold">Clocked In</text>
+        <circle cx="20" cy="30" r="8" fill="#22c55e" />
+        <text x="20" y="33" fontSize="8" fill="white" textAnchor="middle">✓</text>
+        <text x="45" y="33" fontSize="9" fill="#16a34a" fontWeight="bold">3h 24m</text>
+      </g>
+
+      {/* Leave request notification */}
+      <g transform="translate(280, 140)">
+        <rect x="0" y="0" width="70" height="45" rx="6" fill="#fef3c7" stroke="#f59e0b" strokeWidth="1" />
+        <text x="35" y="15" fontSize="8" fill="#d97706" textAnchor="middle" fontWeight="bold">Leave Request</text>
+        <rect x="8" y="23" width="54" height="16" rx="3" fill="#f59e0b" />
+        <text x="35" y="34" fontSize="7" fill="white" textAnchor="middle" fontWeight="bold">APPROVE</text>
+      </g>
+
+      {/* Stats footer */}
+      <g transform="translate(55, 230)">
+        <rect x="0" y="0" width="75" height="28" rx="4" fill="#f0fdf4" />
+        <text x="37" y="12" fontSize="7" fill="#64748b" textAnchor="middle">Active Now</text>
+        <text x="37" y="23" fontSize="11" fill="#16a34a" textAnchor="middle" fontWeight="bold">5 Staff</text>
+
+        <rect x="85" y="0" width="75" height="28" rx="4" fill="#ede9fe" />
+        <text x="122" y="12" fontSize="7" fill="#64748b" textAnchor="middle">Hours This Week</text>
+        <text x="122" y="23" fontSize="11" fill="#6262bd" textAnchor="middle" fontWeight="bold">156h</text>
+
+        <rect x="170" y="0" width="75" height="28" rx="4" fill="#fef3c7" />
+        <text x="207" y="12" fontSize="7" fill="#64748b" textAnchor="middle">Pending Requests</text>
+        <text x="207" y="23" fontSize="11" fill="#d97706" textAnchor="middle" fontWeight="bold">2</text>
       </g>
     </svg>
   ),
@@ -728,6 +848,11 @@ const FeatureIcons = {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
     </svg>
   ),
+  'staff-management': (
+    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+    </svg>
+  ),
   'staff-dashboard': (
     <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
@@ -895,7 +1020,7 @@ export default function HomePage() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+          <div className="lg:hidden border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 max-h-[calc(100vh-4rem)] overflow-y-auto">
             <div className="px-4 py-6 space-y-4">
               <div className="space-y-2">
                 <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3">Services</div>

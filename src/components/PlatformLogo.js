@@ -58,7 +58,7 @@ export default function PlatformLogo({
       ) : (
         <div className={`${logoSize} bg-[#6262bd] rounded-xl flex items-center justify-center`}>
           <span className={`text-white font-bold ${letterSize}`}>
-            {branding.platform_name?.charAt(0) || 'M'}
+            {branding.platform_name?.charAt(0) || 'V'}
           </span>
         </div>
       )}
