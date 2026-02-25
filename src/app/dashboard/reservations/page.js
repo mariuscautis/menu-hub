@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import { useOrderSounds } from '@/hooks/useOrderSounds'
 
 export default function Reservations() {
   const t = useTranslations('reservations')
@@ -33,6 +34,17 @@ export default function Reservations() {
 
   const realtimeChannelRef = useRef(null)
 
+  // Sound notifications
+  const { playNewReservationSound, resumeAudio, soundSettings } = useOrderSounds(restaurant?.id)
+  const knownReservationIdsRef = useRef(new Set())
+  const isInitialLoadRef = useRef(true)
+  const playNewReservationSoundRef = useRef(playNewReservationSound)
+
+  // Keep sound function ref updated
+  useEffect(() => {
+    playNewReservationSoundRef.current = playNewReservationSound
+  }, [playNewReservationSound])
+
   const showNotification = useCallback((type, message) => {
     setNotification({ type, message })
     setTimeout(() => setNotification(null), 4000)
@@ -49,6 +61,10 @@ export default function Reservations() {
     .order('reservation_time', { ascending: true })
 
   if (!error && data) {
+    // Track known reservation IDs for sound notification detection
+    data.forEach(reservation => {
+      knownReservationIdsRef.current.add(reservation.id)
+    })
     setReservations(data)
   }
 }, [])
@@ -136,6 +152,11 @@ export default function Reservations() {
         fetchReservations(restaurantData.id),
         fetchTables(restaurantData.id)
       ])
+
+      // Mark initial load complete after a short delay
+      setTimeout(() => {
+        isInitialLoadRef.current = false
+      }, 2000)
     }
 
     setLoading(false)
@@ -178,23 +199,68 @@ export default function Reservations() {
       supabase.removeChannel(realtimeChannelRef.current)
     }
 
+    const restaurantId = restaurant.id
+    console.log('🔔 Setting up real-time reservation subscription for restaurant:', restaurantId)
+
     const channel = supabase
-      .channel(`reservations-${restaurant.id}`)
+      .channel(`reservations-realtime-${Date.now()}`)
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'INSERT',
           schema: 'public',
           table: 'reservations',
-          filter: `restaurant_id=eq.${restaurant.id}`
+          filter: `restaurant_id=eq.${restaurantId}`
         },
-        () => fetchReservations(restaurant.id)
+        (payload) => {
+          console.log('🔔 New reservation INSERT event received:', payload.new?.id)
+          const newReservationId = payload.new?.id
+          if (newReservationId && !knownReservationIdsRef.current.has(newReservationId)) {
+            knownReservationIdsRef.current.add(newReservationId)
+            console.log('🔔 New reservation detected (not in known list):', newReservationId)
+
+            if (!isInitialLoadRef.current) {
+              console.log('🔔 Playing reservation sound')
+              playNewReservationSoundRef.current()
+            }
+          }
+          setTimeout(() => fetchReservations(restaurantId), 100)
+        }
       )
-      .subscribe()
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'reservations',
+          filter: `restaurant_id=eq.${restaurantId}`
+        },
+        () => {
+          console.log('🔔 Reservation UPDATE event received')
+          setTimeout(() => fetchReservations(restaurantId), 100)
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'reservations',
+          filter: `restaurant_id=eq.${restaurantId}`
+        },
+        () => {
+          console.log('🔔 Reservation DELETE event received')
+          setTimeout(() => fetchReservations(restaurantId), 100)
+        }
+      )
+      .subscribe((status) => {
+        console.log('🔔 Reservations subscription status:', status)
+      })
 
     realtimeChannelRef.current = channel
 
     return () => {
+      console.log('🔔 Cleaning up reservations subscription')
       supabase.removeChannel(channel)
     }
   }, [restaurant, fetchReservations])
@@ -406,11 +472,22 @@ export default function Reservations() {
   }
   return (
 
-    <div>
+    <div onClick={resumeAudio}>
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-2">{t('title')}</h1>
-        <p className="text-slate-500 dark:text-slate-400">{t('subtitle')}</p>
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-2">{t('title')}</h1>
+          <p className="text-slate-500 dark:text-slate-400">{t('subtitle')}</p>
+        </div>
+        {/* Sound indicator */}
+        {soundSettings?.enabled && soundSettings?.reservationSound !== 'silent' && (
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-50 border border-purple-200 rounded-lg text-purple-700 text-sm">
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+            </svg>
+            <span>Sound alerts on</span>
+          </div>
+        )}
       </div>
       {/* Notification */}
       {notification && (

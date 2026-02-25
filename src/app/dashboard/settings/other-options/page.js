@@ -15,6 +15,7 @@ export default function OtherOptionsSettings() {
   const [kitchenSound, setKitchenSound] = useState('bell')
   const [barSound, setBarSound] = useState('chime')
   const [takeawaySound, setTakeawaySound] = useState('ding')
+  const [reservationSound, setReservationSound] = useState('doorbell')
   const [volume, setVolume] = useState(0.7)
 
   const { testSound, resumeAudio } = useOrderSounds(restaurant?.id)
@@ -40,6 +41,7 @@ export default function OtherOptionsSettings() {
           setKitchenSound(ownedRestaurant.sound_settings.kitchenSound || 'bell')
           setBarSound(ownedRestaurant.sound_settings.barSound || 'chime')
           setTakeawaySound(ownedRestaurant.sound_settings.takeawaySound || 'ding')
+          setReservationSound(ownedRestaurant.sound_settings.reservationSound || 'doorbell')
           setVolume(ownedRestaurant.sound_settings.volume || 0.7)
         }
       }
@@ -61,6 +63,7 @@ export default function OtherOptionsSettings() {
       kitchenSound,
       barSound,
       takeawaySound,
+      reservationSound,
       volume
     }
 
@@ -200,7 +203,8 @@ export default function OtherOptionsSettings() {
                 </div>
                 <button
                   onClick={() => handleTestSound(kitchenSound)}
-                  className="px-3 py-1.5 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg text-sm font-medium flex items-center gap-1 transition-colors"
+                  disabled={kitchenSound === 'silent'}
+                  className="px-3 py-1.5 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg text-sm font-medium flex items-center gap-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z"/>
@@ -231,7 +235,8 @@ export default function OtherOptionsSettings() {
                 </div>
                 <button
                   onClick={() => handleTestSound(barSound)}
-                  className="px-3 py-1.5 bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-lg text-sm font-medium flex items-center gap-1 transition-colors"
+                  disabled={barSound === 'silent'}
+                  className="px-3 py-1.5 bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-lg text-sm font-medium flex items-center gap-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z"/>
@@ -262,7 +267,8 @@ export default function OtherOptionsSettings() {
                 </div>
                 <button
                   onClick={() => handleTestSound(takeawaySound)}
-                  className="px-3 py-1.5 bg-cyan-100 hover:bg-cyan-200 text-cyan-700 rounded-lg text-sm font-medium flex items-center gap-1 transition-colors"
+                  disabled={takeawaySound === 'silent'}
+                  className="px-3 py-1.5 bg-cyan-100 hover:bg-cyan-200 text-cyan-700 rounded-lg text-sm font-medium flex items-center gap-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z"/>
@@ -281,6 +287,38 @@ export default function OtherOptionsSettings() {
               </select>
             </div>
 
+            {/* Reservation Sound */}
+            <div className="p-4 bg-purple-50 rounded-xl border border-purple-100">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">📅</span>
+                  <div>
+                    <h3 className="font-semibold text-purple-800">Reservations</h3>
+                    <p className="text-xs text-purple-600">Sound for new reservations</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleTestSound(reservationSound)}
+                  disabled={reservationSound === 'silent'}
+                  className="px-3 py-1.5 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg text-sm font-medium flex items-center gap-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"/>
+                  </svg>
+                  Test
+                </button>
+              </div>
+              <select
+                value={reservationSound}
+                onChange={(e) => setReservationSound(e.target.value)}
+                className="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:outline-none focus:border-purple-400 text-slate-700 bg-white"
+              >
+                {soundOptions.map(option => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
+            </div>
+
             {/* Info Box */}
             <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
               <div className="flex gap-3">
@@ -291,10 +329,10 @@ export default function OtherOptionsSettings() {
                   <p className="font-medium mb-1">How it works</p>
                   <ul className="text-xs text-blue-700 space-y-1 list-disc list-inside">
                     <li>Sounds play when new orders arrive on the Orders page</li>
-                    <li>Different sounds help staff identify order types quickly</li>
-                    <li>Kitchen items trigger the kitchen sound</li>
-                    <li>Bar items trigger the bar sound</li>
-                    <li>Takeaway orders have their own distinct sound</li>
+                    <li>Reservation sounds play on the Reservations page</li>
+                    <li>Different sounds help staff identify event types quickly</li>
+                    <li>Set any sound to &quot;Silent&quot; to disable it individually</li>
+                    <li>Kitchen, bar, takeaway, and reservations can each have unique sounds</li>
                     <li>Make sure your device volume is turned up</li>
                   </ul>
                 </div>

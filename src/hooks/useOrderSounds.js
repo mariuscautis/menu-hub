@@ -10,11 +10,14 @@ const defaultSoundSettings = {
   kitchenSound: 'bell',
   barSound: 'chime',
   takeawaySound: 'ding',
+  reservationSound: 'doorbell',
   volume: 0.7
 }
 
 // Available sound options
 export const soundOptions = [
+  // Silent option
+  { value: 'silent', label: 'Silent (No Sound)' },
   // Premium sounds
   { value: 'doorbell', label: 'Doorbell', premium: true },
   { value: 'marimba', label: 'Marimba', premium: true },
@@ -128,8 +131,17 @@ export function useOrderSounds(restaurantId) {
       case 'takeaway':
         soundKey = settings.takeawaySound
         break
+      case 'reservation':
+        soundKey = settings.reservationSound
+        break
       default:
         soundKey = settings.kitchenSound
+    }
+
+    // Skip if set to silent
+    if (soundKey === 'silent') {
+      console.log('🔊 Sound set to silent, skipping')
+      return
     }
 
     console.log('🔊 Playing sound:', soundKey, 'volume:', settings.volume)
@@ -190,6 +202,19 @@ export function useOrderSounds(restaurantId) {
     }
   }, [playSound])
 
+  // Play sound for new reservation
+  const playNewReservationSound = useCallback(() => {
+    const settings = soundSettingsRef.current
+    console.log('🔊 playNewReservationSound called, enabled:', settings.enabled)
+
+    if (!settings.enabled) {
+      console.log('🔊 Skipping - sounds not enabled')
+      return
+    }
+
+    playSound('reservation')
+  }, [playSound])
+
   // Test sound function for settings page
   const testSound = useCallback((soundKey, volume = 0.7) => {
     console.log('🔊 Testing sound:', soundKey, 'volume:', volume)
@@ -221,6 +246,7 @@ export function useOrderSounds(restaurantId) {
     loading,
     playSound,
     playNewOrderSound,
+    playNewReservationSound,
     testSound,
     saveSoundSettings,
     resumeAudio,
