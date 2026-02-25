@@ -18,6 +18,7 @@ export default function Security() {
   const [copiedLogin, setCopiedLogin] = useState(false)
   const [copiedInstall, setCopiedInstall] = useState(false)
   const [copiedTakeaway, setCopiedTakeaway] = useState(false)
+  const [copiedDineIn, setCopiedDineIn] = useState(false)
   const loginCanvasRef = useRef(null)
   const installCanvasRef = useRef(null)
 
@@ -98,7 +99,7 @@ export default function Security() {
 
   const getTakeawayMenuUrl = () => {
     if (typeof window === 'undefined' || !restaurant) return ''
-    return `${window.location.origin}/r/${restaurant.slug}/takeaway`
+    return `${window.location.origin}/${restaurant.slug}/takeaway`
   }
 
   const copyTakeawayLink = () => {
@@ -107,6 +108,20 @@ export default function Security() {
       navigator.clipboard.writeText(url)
       setCopiedTakeaway(true)
       setTimeout(() => setCopiedTakeaway(false), 2000)
+    }
+  }
+
+  const getDineInMenuUrl = () => {
+    if (typeof window === 'undefined' || !restaurant) return ''
+    return `${window.location.origin}/${restaurant.slug}/menu`
+  }
+
+  const copyDineInLink = () => {
+    const url = getDineInMenuUrl()
+    if (url) {
+      navigator.clipboard.writeText(url)
+      setCopiedDineIn(true)
+      setTimeout(() => setCopiedDineIn(false), 2000)
     }
   }
 
@@ -457,6 +472,52 @@ export default function Security() {
               </div>
               <p className="text-xs text-orange-600 mt-3">
                 <strong>Tip:</strong> Add this link to your website, Google Business Profile, or social media pages to increase takeaway orders.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Dine-In Menu Link Section */}
+      <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <h2 className="text-lg font-bold text-slate-700 mb-2">Dine-In Menu Link</h2>
+            <p className="text-sm text-slate-500">
+              Share this link to let customers browse your full menu online. Great for your website or social media.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-sm font-medium">
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/>
+            </svg>
+            <span>Dine-In</span>
+          </div>
+        </div>
+
+        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <svg className="w-6 h-6 text-emerald-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+            </svg>
+            <div className="flex-1">
+              <h4 className="font-semibold text-emerald-900 mb-2">Your Dine-In Menu URL</h4>
+              <p className="text-xs text-emerald-700 mb-2">
+                Customers can view your full menu at this link:
+              </p>
+              <div className="flex gap-2">
+                <div className="flex-1 bg-white border border-emerald-300 rounded-lg p-3 font-mono text-xs break-all text-emerald-800">
+                  {getDineInMenuUrl() || 'Loading...'}
+                </div>
+                <button
+                  onClick={copyDineInLink}
+                  className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors whitespace-nowrap text-sm font-medium"
+                >
+                  {copiedDineIn ? 'Copied!' : 'Copy'}
+                </button>
+              </div>
+              <p className="text-xs text-emerald-600 mt-3">
+                <strong>Tip:</strong> This is your main menu page. Customers scanning table QR codes will see a version of this with table-specific features.
               </p>
             </div>
           </div>
