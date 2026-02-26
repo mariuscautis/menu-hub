@@ -1322,6 +1322,8 @@ export default function StaffFloorPlanPage() {
   const submitOrder = async () => {
     if (orderItems.length === 0) return
 
+    // DEPLOYMENT MARKER v2 - 2026-02-26 14:15
+    console.log('%c 🚀 FLOOR PLAN SUBMIT v2 - DELETE VERIFICATION ENABLED ', 'background: green; color: white; font-size: 16px;')
     console.log('========== FLOOR PLAN: SUBMITTING ORDER ==========')
     console.log('DEBUG: Raw orderItems BEFORE consolidation:', orderItems.map(i => `${i.name} x${i.quantity} (menuItemId: ${i.menu_item_id})`))
     console.log('DEBUG: orderItems length:', orderItems.length)
