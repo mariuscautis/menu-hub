@@ -2179,7 +2179,12 @@ export default function Tables() {
           special_instructions: itemNotes[item.menu_item_id] || null
         }))
 
-        console.log('Inserting new order items:', itemsToInsert.length, 'items')
+        // DEBUG: Log exactly what we're inserting to the database
+        console.log('========== INSERTING TO DATABASE ==========')
+        console.log('Order ID:', currentOrder.id)
+        console.log('Items to insert:', itemsToInsert.map(i => `${i.name} x${i.quantity} (menu_item_id: ${i.menu_item_id})`))
+        console.log('Total items count:', itemsToInsert.length)
+
         const { error: itemsError } = await supabase
           .from('order_items')
           .insert(itemsToInsert)
@@ -2188,7 +2193,7 @@ export default function Tables() {
           console.error('ERROR inserting new order items:', itemsError)
           throw itemsError
         }
-        console.log('New items inserted successfully')
+        console.log('SUCCESS: Items inserted to database')
 
       } else {
         // Create new order

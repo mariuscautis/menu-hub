@@ -1077,8 +1077,18 @@ export default function StaffFloorPlanPage() {
     // ========== STEP 5: Process existing order and merge offline data ==========
     if (existingOrder) {
       console.log('STEP 5: Processing existing order:', existingOrder.id)
-      console.log('DEBUG: Raw order_items from DB (FULL):', JSON.stringify(existingOrder.order_items, null, 2))
+      console.log('DEBUG: Raw order_items from DB:', existingOrder.order_items?.map(i => `${i.name} x${i.quantity} (id: ${i.id}, menu_item_id: ${i.menu_item_id})`))
       console.log('DEBUG: order_items count from DB:', existingOrder.order_items?.length)
+
+      // CRITICAL VALIDATION: Check if DB already has duplicates
+      const menuItemCounts = {}
+      existingOrder.order_items?.forEach(item => {
+        menuItemCounts[item.menu_item_id] = (menuItemCounts[item.menu_item_id] || 0) + 1
+      })
+      const duplicates = Object.entries(menuItemCounts).filter(([_, count]) => count > 1)
+      if (duplicates.length > 0) {
+        console.error('⚠️ DUPLICATE ITEMS IN DATABASE:', duplicates)
+      }
 
       // Use a map to consolidate items by menu_item_id
       // This prevents duplicates and allows easy merging of quantities
@@ -1365,6 +1375,7 @@ export default function StaffFloorPlanPage() {
         if (deleteError) throw deleteError
 
         // Insert new items
+        // CRITICAL: Build items from consolidatedItems which is already deduplicated
         const itemsToInsert = consolidatedItems.map(item => ({
           order_id: currentOrder.id,
           menu_item_id: item.menu_item_id,
@@ -1374,11 +1385,19 @@ export default function StaffFloorPlanPage() {
           special_instructions: itemNotes[item.menu_item_id] || null
         }))
 
+        // DEBUG: Log exactly what we're inserting to the database
+        console.log('========== INSERTING TO DATABASE ==========')
+        console.log('Order ID:', currentOrder.id)
+        console.log('Items to insert:', itemsToInsert.map(i => `${i.name} x${i.quantity} (menu_item_id: ${i.menu_item_id})`))
+        console.log('Total items count:', itemsToInsert.length)
+
         const { error: itemsError } = await supabase
           .from('order_items')
           .insert(itemsToInsert)
 
         if (itemsError) throw itemsError
+
+        console.log('SUCCESS: Items inserted to database')
       } else {
         // Create new order
         const { data: newOrder, error: orderError } = await supabase
