@@ -2157,17 +2157,40 @@ export default function Tables() {
         if (orderError) throw orderError
 
         // Delete old order items FIRST (with error checking!)
+        // CRITICAL FIX: Use .select() to get deleted rows and verify deletion
         console.log('Deleting old order items for order:', currentOrder.id)
-        const { error: deleteError } = await supabase
+        const { data: deletedItems, error: deleteError } = await supabase
           .from('order_items')
           .delete()
           .eq('order_id', currentOrder.id)
+          .select()
 
         if (deleteError) {
           console.error('ERROR deleting old order items:', deleteError)
           throw deleteError
         }
-        console.log('Old items deleted successfully')
+        console.log('Deleted items count:', deletedItems?.length || 0)
+        console.log('Deleted items:', deletedItems?.map(i => `${i.name} (id: ${i.id})`))
+
+        // CRITICAL: Verify all items were deleted before inserting
+        // This prevents race conditions where delete hasn't fully propagated
+        const { data: remainingItems, error: verifyError } = await supabase
+          .from('order_items')
+          .select('id, name')
+          .eq('order_id', currentOrder.id)
+
+        if (verifyError) {
+          console.error('ERROR verifying deletion:', verifyError)
+        } else if (remainingItems && remainingItems.length > 0) {
+          console.error('⚠️ ITEMS STILL EXIST AFTER DELETE:', remainingItems)
+          // Force delete remaining items
+          for (const item of remainingItems) {
+            await supabase.from('order_items').delete().eq('id', item.id)
+          }
+          console.log('Force deleted remaining items')
+        } else {
+          console.log('✅ Verified: All old items deleted successfully')
+        }
 
         // Now insert new items
         const itemsToInsert = consolidatedItems.map(item => ({
