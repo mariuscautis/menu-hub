@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase, clearOrdersCacheForTable, wasTablePaidOffline, clearTablePaidOfflineStatus, markTableCleanedOffline } from '@/lib/supabase'
+import { supabase, clearOrdersCacheForTable, clearAllOrdersCache, clearTableOrdersLocalCache, wasTablePaidOffline, clearTablePaidOfflineStatus, markTableCleanedOffline } from '@/lib/supabase'
 import InvoiceClientModal from '@/components/invoices/InvoiceClientModal'
 import { generateInvoicePdfBase64, downloadInvoicePdf } from '@/lib/invoicePdfGenerator'
 import {
@@ -862,63 +862,128 @@ export default function StaffFloorPlanPage() {
     setSelectedTable(table)
   }
 
+  // ============================================================================
+  // handleNewOrder - Opens the order modal for a selected table
+  // ============================================================================
+  // SYNC ARCHITECTURE OVERVIEW:
+  //
+  // This function handles loading existing orders when staff opens a table.
+  // It must work in both ONLINE and OFFLINE modes:
+  //
+  // ONLINE MODE:
+  //   1. Clear Supabase query cache to ensure fresh data (prevents stale reads)
+  //   2. Clear localStorage order cache for this table
+  //   3. Fetch fresh order data directly from Supabase
+  //   4. Merge any pending offline updates (items added while offline)
+  //
+  // OFFLINE MODE:
+  //   1. Read from localStorage cache (table_orders_${tableId})
+  //   2. Merge with pending offline orders from IndexedDB
+  //   3. Merge with pending order updates from IndexedDB
+  //
+  // CACHING LAYERS:
+  //   - Supabase query cache (sbcache_*): Auto-caches GET responses for offline fallback
+  //   - localStorage order cache (table_orders_*): Manual cache after order submit
+  //   - IndexedDB pending_orders: Full orders created while offline
+  //   - IndexedDB pending_order_updates: Items added to existing orders while offline
+  //
+  // CRITICAL: Both pages (/tables and /tables-floor-plan) must use IDENTICAL
+  // query filters to avoid loading different orders for the same table!
+  // ============================================================================
   const handleNewOrder = async () => {
     if (!selectedTable) return
 
-    // Clear state first
+    console.log('========== FLOOR PLAN: OPENING ORDER MODAL ==========')
+    console.log('Table:', selectedTable.table_number, 'ID:', selectedTable.id)
+
+    // STEP 1: Clear ALL state first to prevent duplicates from previous modal opens
+    // This is critical - leftover state can cause item duplication
+    console.log('STEP 1: Clearing ALL state completely')
     setOrderItems([])
     setItemNotes({})
     setCurrentOrder(null)
     setSelectedCategory(null)
     setProductSearch('')
 
-    // Check if this table was paid offline - if so, skip loading cached orders
-    // The cache might still contain stale "unpaid" orders
+    // STEP 2: Check if this table was paid offline
+    // If paid offline, the localStorage cache might still contain stale "unpaid" orders
+    // that were actually paid - we need to skip loading that stale data
     const wasPaidOffline = wasTablePaidOffline(selectedTable.id)
+    console.log('STEP 2: Was table paid offline?', wasPaidOffline)
 
-    // If we're back online, clear the offline paid status
+    // If we're back online, clear the offline paid status since we can fetch fresh data
     if (navigator.onLine && wasPaidOffline) {
+      console.log('Back online - clearing offline paid status')
       clearTablePaidOfflineStatus(selectedTable.id)
     }
 
     // If paid offline and still offline, start with empty order (don't load cached data)
     if (wasPaidOffline && !navigator.onLine) {
+      console.log('Table was paid offline and still offline - starting fresh')
       showNotificationMessage('info', 'Starting new order')
       setShowOrderModal(true)
       return
     }
 
-    // FIRST: Check for pending offline orders in IndexedDB
+    // STEP 3: Clear caches when ONLINE to ensure fresh data
+    // This prevents the scenario where:
+    //   1. Order placed on /tables page (cached)
+    //   2. Order updated on /tables-floor-plan (but reads stale cache)
+    // IMPORTANT: Only clear cache when ONLINE - when offline we NEED the cached data!
+    if (navigator.onLine) {
+      console.log('STEP 3: ONLINE - Clearing caches to fetch fresh data')
+      clearAllOrdersCache() // Clears all sbcache_* entries for orders
+      clearTableOrdersLocalCache(selectedTable.id) // Clears table_orders_${tableId}
+    } else {
+      console.log('STEP 3: OFFLINE - Preserving caches for offline data access')
+    }
+
+    // STEP 4: Check for pending offline orders in IndexedDB
+    // These are FULL orders created while offline that haven't synced yet
     // NOTE: Don't return early - we need to also check for cached online orders and merge them!
     let pendingOfflineOrders = []
     try {
       pendingOfflineOrders = await getPendingOrdersForTable(selectedTable.id) || []
       if (pendingOfflineOrders.length > 0) {
-        console.log('Found pending offline orders:', pendingOfflineOrders.length)
+        console.log('STEP 4: Found pending offline orders:', pendingOfflineOrders.length)
+      } else {
+        console.log('STEP 4: No pending offline orders')
       }
     } catch (err) {
-      console.warn('Error checking offline orders:', err)
+      console.warn('STEP 4: Error checking offline orders:', err)
     }
 
     let existingOrder = null
     const cacheKey = `table_orders_${selectedTable.id}`
 
     if (!navigator.onLine) {
-      // OFFLINE MODE: Try to load existing order from localStorage cache
-      console.log('OFFLINE MODE: Checking localStorage cache for existing orders...')
+      // ========== OFFLINE MODE ==========
+      // When offline, we cannot fetch from Supabase, so we rely on cached data
+      console.log('========== OFFLINE MODE ==========')
+      console.log('Checking localStorage cache for existing orders...')
+
       try {
         const cached = localStorage.getItem(cacheKey)
         if (cached) {
           const cachedOrders = JSON.parse(cached)
+          console.log('Found cached orders:', cachedOrders.length)
+
+          // Filter to only unpaid orders with valid status
+          // MUST match the same filter used in ONLINE mode!
           const unpaidOrders = cachedOrders.filter(order =>
             order.table_id === selectedTable.id &&
             !order.paid &&
             ['pending', 'preparing', 'ready'].includes(order.status)
           )
+          console.log('Filtered unpaid orders:', unpaidOrders.length)
+
           if (unpaidOrders.length > 0) {
+            // Use the most recent order (last in ascending order, first in descending)
             existingOrder = unpaidOrders[unpaidOrders.length - 1]
-            console.log('OFFLINE: Found cached order:', existingOrder.id)
+            console.log('OFFLINE: Using cached order:', existingOrder.id)
           }
+        } else {
+          console.log('No cache found for key:', cacheKey)
         }
       } catch (e) {
         console.warn('Failed to load cached orders:', e)
@@ -931,6 +996,7 @@ export default function StaffFloorPlanPage() {
         console.log('Using pending offline order:', latestOfflineOrder.client_id)
 
         // Map items from the pending offline order
+        // Use a map to consolidate duplicate items by menu_item_id
         const itemsMap = {}
         const offlineItems = latestOfflineOrder.items || latestOfflineOrder.order_items || []
         offlineItems.forEach(item => {
@@ -939,8 +1005,8 @@ export default function StaffFloorPlanPage() {
             name: item.name,
             price_at_time: item.price_at_time,
             quantity: item.quantity,
-            isExisting: true,
-            existingQuantity: item.quantity
+            isExisting: true,        // Mark as existing so UI shows it correctly
+            existingQuantity: item.quantity  // Track original quantity for validation
           }
         })
 
@@ -948,7 +1014,7 @@ export default function StaffFloorPlanPage() {
           client_id: latestOfflineOrder.client_id,
           table_id: latestOfflineOrder.table_id,
           order_items: offlineItems,
-          isOfflineOrder: true
+          isOfflineOrder: true  // Flag to indicate this is an offline-only order
         })
         setOrderItems(Object.values(itemsMap))
         setShowOrderModal(true)
@@ -963,61 +1029,113 @@ export default function StaffFloorPlanPage() {
         return
       }
     } else {
-      // ONLINE MODE: Fetch from Supabase
+      // ========== ONLINE MODE ==========
+      // Fetch fresh data from Supabase
+      // CRITICAL: Query filters MUST match /tables page to avoid sync issues!
+      console.log('========== ONLINE MODE ==========')
+      console.log('Fetching fresh data from Supabase...')
+
       try {
         const { data: existingOrders, error: fetchError } = await supabase
           .from('orders')
           .select('*, order_items(*)')
           .eq('table_id', selectedTable.id)
-          .eq('paid', false)
+          // CRITICAL: Use .in() for status filter - matches /tables page exactly
+          .in('status', ['pending', 'preparing', 'ready'])
+          // CRITICAL: Use .is() not .eq() for boolean - handles null correctly
+          .is('paid', false)
           .order('created_at', { ascending: false })
+          // CRITICAL: Limit to 1 order to avoid confusion with multiple orders
+          .limit(1)
 
         if (fetchError) {
           console.error('Error fetching existing orders:', fetchError)
-        } else if (existingOrders && existingOrders.length > 0) {
-          existingOrder = existingOrders[0]
+        } else {
+          console.log('Fetched orders:', existingOrders?.length || 0)
+          if (existingOrders && existingOrders.length > 0) {
+            existingOrder = existingOrders[0]
+            console.log('Using order:', existingOrder.id, 'with', existingOrder.order_items?.length, 'items')
+
+            // VALIDATION: Ensure the returned order actually belongs to this table
+            // This prevents cached responses from other tables being used incorrectly
+            if (existingOrder.table_id !== selectedTable.id) {
+              console.error('CACHE MISMATCH: Order table_id', existingOrder.table_id, 'does not match selected table', selectedTable.id)
+              console.error('Discarding stale cached order to prevent cross-table pollution')
+              existingOrder = null
+            }
+          } else {
+            console.log('No existing unpaid orders found for this table')
+          }
         }
       } catch (err) {
         console.warn('Network error fetching orders:', err)
+        // Don't throw - we'll proceed with empty order or try offline data
       }
     }
 
+    // ========== STEP 5: Process existing order and merge offline data ==========
     if (existingOrder) {
-      // Map existing items with flags
+      console.log('STEP 5: Processing existing order:', existingOrder.id)
+      console.log('Raw order_items from DB:', existingOrder.order_items?.map(i => ({
+        menu_item_id: i.menu_item_id,
+        name: i.name,
+        quantity: i.quantity
+      })))
+
+      // Use a map to consolidate items by menu_item_id
+      // This prevents duplicates and allows easy merging of quantities
       const itemsMap = {}
       const orderItems = existingOrder.order_items || []
+
+      // First, add all items from the Supabase order
       orderItems.forEach(item => {
-        itemsMap[item.menu_item_id] = {
-          menu_item_id: item.menu_item_id,
-          name: item.name,
-          price_at_time: item.price_at_time,
-          quantity: item.quantity,
-          isExisting: true,
-          existingQuantity: item.quantity
+        if (itemsMap[item.menu_item_id]) {
+          // Duplicate item in DB - sum quantities (shouldn't happen but handle gracefully)
+          console.warn('DUPLICATE FOUND IN DB:', item.menu_item_id, item.name)
+          itemsMap[item.menu_item_id].quantity += item.quantity
+          itemsMap[item.menu_item_id].existingQuantity += item.quantity
+        } else {
+          itemsMap[item.menu_item_id] = {
+            menu_item_id: item.menu_item_id,
+            name: item.name,
+            price_at_time: item.price_at_time,
+            quantity: item.quantity,
+            isExisting: true,        // Mark as existing so staff can't reduce below this
+            existingQuantity: item.quantity  // Track original quantity for validation
+          }
         }
       })
 
-      // CRITICAL: Merge any pending offline updates for this order
+      // ========== MERGE PENDING ORDER UPDATES ==========
+      // These are items added to THIS specific order while offline
+      // Stored in IndexedDB pending_order_updates table
+      // Example: User adds pizza offline to an existing wine order
       if (existingOrder.id) {
         try {
           const pendingUpdates = await getPendingOrderUpdatesForTable(selectedTable.id)
-          if (pendingUpdates && pendingUpdates.length > 0) {
-            console.log('Merging pending order updates:', pendingUpdates.length)
-            for (const update of pendingUpdates) {
-              if (update.order_id === existingOrder.id && update.items) {
+          // Filter to only updates for THIS order
+          const orderUpdates = pendingUpdates.filter(u => u.order_id === existingOrder.id)
+
+          if (orderUpdates.length > 0) {
+            console.log('Merging', orderUpdates.length, 'pending order updates for order:', existingOrder.id)
+            for (const update of orderUpdates) {
+              if (update.items) {
                 for (const item of update.items) {
                   if (itemsMap[item.menu_item_id]) {
-                    // Item exists - add the offline quantity
+                    // Item already exists - add the offline quantity
+                    console.log(`  Adding ${item.quantity}x ${item.name} to existing item`)
                     itemsMap[item.menu_item_id].quantity += item.quantity
+                    // ALSO update existingQuantity so these aren't treated as "new" on next submit
                     itemsMap[item.menu_item_id].existingQuantity += item.quantity
                   } else {
                     // New item from offline update
+                    console.log(`  Adding new item: ${item.quantity}x ${item.name}`)
                     itemsMap[item.menu_item_id] = {
                       menu_item_id: item.menu_item_id,
                       name: item.name,
                       price_at_time: item.price_at_time,
                       quantity: item.quantity,
-                      isExisting: true,
+                      isExisting: true,  // Mark as existing so staff can't reduce
                       existingQuantity: item.quantity
                     }
                   }
@@ -1030,17 +1148,22 @@ export default function StaffFloorPlanPage() {
         }
       }
 
-      // ALSO merge any pending offline ORDERS (full orders created while offline)
-      // This handles legacy data created before the order update fix
+      // ========== MERGE PENDING OFFLINE ORDERS ==========
+      // These are FULL orders created while offline (not updates to existing orders)
+      // This handles legacy data and edge cases where offline orders exist alongside online ones
+      // NOTE: This should be rare - normally offline orders are separate from online orders
       if (pendingOfflineOrders.length > 0) {
-        console.log('Merging pending offline orders into existing online order:', pendingOfflineOrders.length)
+        console.log('Merging', pendingOfflineOrders.length, 'pending offline orders into existing online order')
+        console.log('WARNING: This indicates offline orders exist alongside online order - may cause duplication')
         for (const offlineOrder of pendingOfflineOrders) {
           const offlineItems = offlineOrder.items || offlineOrder.order_items || []
           for (const item of offlineItems) {
             if (itemsMap[item.menu_item_id]) {
+              console.log(`  Adding ${item.quantity}x ${item.name} from offline order`)
               itemsMap[item.menu_item_id].quantity += item.quantity
               itemsMap[item.menu_item_id].existingQuantity += item.quantity
             } else {
+              console.log(`  Adding new offline item: ${item.quantity}x ${item.name}`)
               itemsMap[item.menu_item_id] = {
                 menu_item_id: item.menu_item_id,
                 name: item.name,
@@ -1054,22 +1177,34 @@ export default function StaffFloorPlanPage() {
         }
       }
 
-      // Normalize items for consistency
+      // Convert map back to array
       const normalizedItems = Object.values(itemsMap)
+      console.log('STEP 5 COMPLETE: Final orderItems:', normalizedItems.map(i => `${i.name} x${i.quantity}`))
 
-      // Update currentOrder with merged items to prevent duplicates on submit
+      // ========== STEP 6: Set state with merged data ==========
+      // CRITICAL: Update currentOrder.order_items to include ALL merged items
+      // This ensures that when submitting, the comparison uses ALL existing items
+      // (both from Supabase AND from pending offline updates) to avoid creating
+      // duplicate pending updates for items that were already added offline
+      console.log('STEP 6: Setting state with merged data')
       setCurrentOrder({
         ...existingOrder,
         order_items: normalizedItems.map(item => ({
           menu_item_id: item.menu_item_id,
           name: item.name,
           price_at_time: item.price_at_time,
-          quantity: item.quantity,
+          quantity: item.quantity,  // Use the merged quantity (online + offline)
         }))
       })
       setOrderItems(normalizedItems)
+    } else {
+      console.log('STEP 5: No existing order - starting with empty orderItems')
+      setCurrentOrder(null)
+      setOrderItems([])
+      setItemNotes({})
     }
 
+    console.log('========== FLOOR PLAN: MODAL OPEN COMPLETE ==========')
     setShowOrderModal(true)
   }
 
@@ -1160,15 +1295,38 @@ export default function StaffFloorPlanPage() {
     return consolidated.reduce((sum, item) => sum + (item.price_at_time * item.quantity), 0)
   }
 
+  // ============================================================================
+  // submitOrder - Saves order to Supabase (online) or IndexedDB (offline)
+  // ============================================================================
+  // ONLINE FLOW:
+  //   1. Consolidate items to merge duplicates
+  //   2. If updating existing order: DELETE all old items, INSERT all new items
+  //   3. If creating new order: INSERT order, then INSERT items
+  //   4. Cache the updated order to localStorage for offline fallback
+  //
+  // OFFLINE FLOW:
+  //   1. If updating existing Supabase order: Create pending_order_update in IndexedDB
+  //      - Only saves the NEW/INCREASED items (delta from original)
+  //   2. If creating new order: Create pending_order in IndexedDB
+  //
+  // CRITICAL: The online flow uses DELETE-then-INSERT for updates, not UPSERT
+  // This ensures a clean slate and prevents orphaned items
+  // ============================================================================
   const submitOrder = async () => {
     if (orderItems.length === 0) return
 
+    console.log('========== FLOOR PLAN: SUBMITTING ORDER ==========')
     const consolidatedItems = consolidateOrderItems(orderItems)
     const total = consolidatedItems.reduce((sum, item) => sum + (item.price_at_time * item.quantity), 0)
+    console.log('Consolidated items:', consolidatedItems.map(i => `${i.name} x${i.quantity}`))
+    console.log('Total:', total)
 
     try {
       if (currentOrder) {
-        // Updating existing order
+        // ========== UPDATING EXISTING ORDER ==========
+        console.log('Updating existing order:', currentOrder.id)
+
+        // Staff validation: prevent reducing quantities or removing items
         if (userType === 'staff') {
           const originalItems = currentOrder.order_items || []
 
@@ -1264,29 +1422,47 @@ export default function StaffFloorPlanPage() {
         }
       }
 
+      // Close modal and reset state
       setShowOrderModal(false)
       setCurrentOrder(null)
       setOrderItems([])
       setItemNotes({})
 
-      // Refresh data
+      // Refresh floor data to update table badges/indicators
       await loadFloorData(currentFloor.id, restaurant.id)
 
-      // Cache orders for this table (for offline payment support)
+      // ========== CACHE ORDERS FOR OFFLINE SUPPORT ==========
+      // After successfully submitting an order online, cache the updated orders
+      // to localStorage so they're available if the device goes offline before payment
+      //
+      // IMPORTANT: Use the same query filters as handleNewOrder to ensure consistency!
+      // Cache key: table_orders_${tableId}
+      console.log('========== CACHING ORDERS FOR OFFLINE USE ==========')
       try {
         const { data: ordersData } = await supabase
           .from('orders')
           .select('*, order_items(*)')
           .eq('table_id', selectedTable.id)
-          .eq('paid', false)
-          .order('created_at', { ascending: false })
+          // CRITICAL: Must match the filters used in handleNewOrder
+          .in('status', ['pending', 'preparing', 'ready'])
+          .is('paid', false)
+          .order('created_at', { ascending: true })  // Ascending so oldest order is first
+
+        console.log('Orders to cache:', ordersData?.length || 0)
         if (ordersData && ordersData.length > 0) {
-          localStorage.setItem(`table_orders_${selectedTable.id}`, JSON.stringify(ordersData))
+          const cacheKey = `table_orders_${selectedTable.id}`
+          localStorage.setItem(cacheKey, JSON.stringify(ordersData))
+          console.log('Orders cached successfully to:', cacheKey)
+        } else {
+          // Clear cache if no orders (table was paid/cleared)
+          localStorage.removeItem(`table_orders_${selectedTable.id}`)
+          console.log('No orders to cache - cleared cache')
         }
       } catch (e) {
         console.warn('Failed to cache orders:', e)
       }
 
+      console.log('========== FLOOR PLAN: ORDER SUBMITTED SUCCESSFULLY ==========')
       showNotificationMessage('success', currentOrder ? 'Order updated successfully!' : 'Order placed successfully!')
     } catch (error) {
       // Check if this is a network error (offline or connection dropped)
