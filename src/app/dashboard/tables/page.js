@@ -87,6 +87,10 @@ export default function Tables() {
   const [availableItems, setAvailableItems] = useState([])
   const [splitBillTableId, setSplitBillTableId] = useState(null)
 
+  // Order modal UX state - category navigation and search
+  const [selectedCategory, setSelectedCategory] = useState(null)
+  const [productSearch, setProductSearch] = useState('')
+
   // Show notification helper
   const showNotification = (type, message) => {
     setNotification({ type, message })
@@ -2630,17 +2634,19 @@ export default function Tables() {
       {/* Place Order Modal */}
       {showOrderModal && selectedTable && (
         <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto"
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto animate-fade-in"
           onClick={() => {
             setShowOrderModal(false)
             setSelectedTable(null)
             setCurrentOrder(null)
             setOrderItems([])
             setItemNotes({})
+            setSelectedCategory(null)
+            setProductSearch('')
           }}
         >
           <div
-            className="bg-white rounded-2xl p-8 w-full max-w-4xl my-8"
+            className="bg-white rounded-2xl p-6 w-full max-w-6xl my-4 max-h-[90vh] flex flex-col animate-zoom-in"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-6">
@@ -2659,6 +2665,8 @@ export default function Tables() {
                   setCurrentOrder(null)
                   setOrderItems([])
                   setItemNotes({})
+                  setSelectedCategory(null)
+                  setProductSearch('')
                 }}
                 className="text-slate-400 hover:text-slate-600"
               >
@@ -2685,85 +2693,241 @@ export default function Tables() {
               </div>
             )}
 
-            <div className="grid lg:grid-cols-3 gap-6">
+            <div className="grid lg:grid-cols-3 gap-6 flex-1 min-h-0 overflow-hidden">
               {/* Menu Items */}
-              <div className="lg:col-span-2">
-                <h3 className="font-semibold text-slate-700 mb-4">{t('orderModal.menuItems')}</h3>
+              <div className="lg:col-span-2 flex flex-col min-h-0">
+                {/* Search Bar - Always visible */}
+                <div className="mb-4">
+                  <div className="relative">
+                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input
+                      type="text"
+                      placeholder="Search products..."
+                      value={productSearch}
+                      onChange={(e) => setProductSearch(e.target.value)}
+                      className="w-full pl-10 pr-10 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6262bd]/50 focus:border-[#6262bd] text-slate-800 placeholder-slate-400 transition-colors"
+                    />
+                    {productSearch && (
+                      <button
+                        onClick={() => setProductSearch('')}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      >
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
                 {menuItems.length === 0 ? (
                   <div className="bg-slate-50 rounded-xl p-8 text-center">
                     <p className="text-slate-500">{t('orderModal.noMenuItems')}</p>
                     <p className="text-sm text-slate-400 mt-2">{t('orderModal.addItemsFirst')}</p>
                   </div>
-                ) : (
-                  <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
-                    {categories.length > 0 ? (
-                      categories.map(category => {
-                        const categoryItems = menuItems.filter(item => item.category_id === category.id)
-                        if (categoryItems.length === 0) return null
-
+                ) : productSearch ? (
+                  /* Search Results View */
+                  <div className="flex-1 overflow-y-auto pr-2">
+                    <h3 className="font-semibold text-slate-700 mb-3">Search Results</h3>
+                    {(() => {
+                      const searchLower = productSearch.toLowerCase()
+                      const filteredItems = menuItems.filter(item =>
+                        item.name.toLowerCase().includes(searchLower) ||
+                        (item.description && item.description.toLowerCase().includes(searchLower))
+                      )
+                      if (filteredItems.length === 0) {
                         return (
-                          <div key={category.id}>
-                            <h4 className="font-medium text-slate-600 mb-2">{category.name}</h4>
-                            <div className="space-y-2">
-                              {categoryItems.map(item => (
-                                <button
-                                  key={item.id}
-                                  onClick={() => addItemToOrder(item)}
-                                  className="w-full flex items-center gap-3 p-3 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors text-left"
-                                >
-                                  {item.image_url && (
-                                    <img
-                                      src={item.image_url}
-                                      alt={item.name}
-                                      className="w-16 h-16 rounded-lg object-cover"
-                                    />
-                                  )}
-                                  <div className="flex-1">
-                                    <p className="font-medium text-slate-800">{item.name}</p>
-                                    {item.description && (
-                                      <p className="text-sm text-slate-500">{item.description}</p>
-                                    )}
-                                    {!item.available && (
-                                      <span className="text-xs text-red-500">{t('orderModal.unavailable')}</span>
-                                    )}
-                                  </div>
-                                  <span className="font-semibold text-[#6262bd] ml-2">£{item.price.toFixed(2)}</span>
-                                </button>
-                              ))}
-                            </div>
+                          <div className="bg-slate-50 rounded-xl p-6 text-center">
+                            <p className="text-slate-500">No products found</p>
                           </div>
                         )
-                      })
+                      }
+                      return (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          {filteredItems.map(item => (
+                            <button
+                              key={item.id}
+                              onClick={() => addItemToOrder(item)}
+                              disabled={!item.available}
+                              className={`flex flex-col p-3 rounded-xl transition-all text-left ${
+                                item.available
+                                  ? 'bg-slate-50 hover:bg-slate-100 hover:shadow-md'
+                                  : 'bg-slate-100 opacity-60 cursor-not-allowed'
+                              }`}
+                            >
+                              {item.image_url ? (
+                                <img
+                                  src={item.image_url}
+                                  alt={item.name}
+                                  className="w-full h-24 rounded-lg object-cover mb-2"
+                                />
+                              ) : (
+                                <div className="w-full h-24 rounded-lg bg-slate-200 mb-2 flex items-center justify-center">
+                                  <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                  </svg>
+                                </div>
+                              )}
+                              <p className="font-medium text-slate-800 text-sm line-clamp-2">{item.name}</p>
+                              <div className="mt-auto pt-2 flex items-center justify-between">
+                                <span className="font-semibold text-[#6262bd]">£{item.price.toFixed(2)}</span>
+                                {!item.available && (
+                                  <span className="text-xs text-red-500">{t('orderModal.unavailable')}</span>
+                                )}
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )
+                    })()}
+                  </div>
+                ) : !selectedCategory ? (
+                  /* Categories Grid View */
+                  <div className="flex-1 overflow-y-auto pr-2">
+                    <h3 className="font-semibold text-slate-700 mb-3">Select a Category</h3>
+                    {categories.length > 0 ? (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {categories.map(category => {
+                          const categoryItems = menuItems.filter(item => item.category_id === category.id)
+                          if (categoryItems.length === 0) return null
+                          return (
+                            <button
+                              key={category.id}
+                              onClick={() => setSelectedCategory(category)}
+                              className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-slate-50 to-slate-100 hover:from-[#6262bd]/10 hover:to-[#6262bd]/5 rounded-xl transition-all hover:shadow-md border border-slate-200 hover:border-[#6262bd]/30"
+                            >
+                              <div className="w-12 h-12 rounded-full bg-[#6262bd]/10 flex items-center justify-center mb-3">
+                                <svg className="w-6 h-6 text-[#6262bd]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                </svg>
+                              </div>
+                              <span className="font-semibold text-slate-700 text-center">{category.name}</span>
+                              <span className="text-xs text-slate-500 mt-1">{categoryItems.length} {categoryItems.length === 1 ? 'item' : 'items'}</span>
+                            </button>
+                          )
+                        })}
+                        {/* Show uncategorized items if any */}
+                        {(() => {
+                          const uncategorizedItems = menuItems.filter(item => !item.category_id || !categories.find(c => c.id === item.category_id))
+                          if (uncategorizedItems.length === 0) return null
+                          return (
+                            <button
+                              onClick={() => setSelectedCategory({ id: 'uncategorized', name: t('orderModal.uncategorized') || 'Other' })}
+                              className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-slate-50 to-slate-100 hover:from-[#6262bd]/10 hover:to-[#6262bd]/5 rounded-xl transition-all hover:shadow-md border border-slate-200 hover:border-[#6262bd]/30"
+                            >
+                              <div className="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center mb-3">
+                                <svg className="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                                </svg>
+                              </div>
+                              <span className="font-semibold text-slate-700 text-center">{t('orderModal.uncategorized') || 'Other'}</span>
+                              <span className="text-xs text-slate-500 mt-1">{uncategorizedItems.length} {uncategorizedItems.length === 1 ? 'item' : 'items'}</span>
+                            </button>
+                          )
+                        })()}
+                      </div>
                     ) : (
-                      // Show all items without categories if no categories exist
-                      <div className="space-y-2">
+                      /* No categories - show all products directly */
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         {menuItems.map(item => (
                           <button
                             key={item.id}
                             onClick={() => addItemToOrder(item)}
-                            className="w-full flex items-center gap-3 p-3 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors text-left"
+                            disabled={!item.available}
+                            className={`flex flex-col p-3 rounded-xl transition-all text-left ${
+                              item.available
+                                ? 'bg-slate-50 hover:bg-slate-100 hover:shadow-md'
+                                : 'bg-slate-100 opacity-60 cursor-not-allowed'
+                            }`}
                           >
-                            {item.image_url && (
+                            {item.image_url ? (
                               <img
                                 src={item.image_url}
                                 alt={item.name}
-                                className="w-16 h-16 rounded-lg object-cover"
+                                className="w-full h-24 rounded-lg object-cover mb-2"
                               />
+                            ) : (
+                              <div className="w-full h-24 rounded-lg bg-slate-200 mb-2 flex items-center justify-center">
+                                <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                              </div>
                             )}
-                            <div className="flex-1">
-                              <p className="font-medium text-slate-800">{item.name}</p>
-                              {item.description && (
-                                <p className="text-sm text-slate-500">{item.description}</p>
-                              )}
+                            <p className="font-medium text-slate-800 text-sm line-clamp-2">{item.name}</p>
+                            <div className="mt-auto pt-2 flex items-center justify-between">
+                              <span className="font-semibold text-[#6262bd]">£{item.price.toFixed(2)}</span>
                               {!item.available && (
                                 <span className="text-xs text-red-500">{t('orderModal.unavailable')}</span>
                               )}
                             </div>
-                            <span className="font-semibold text-[#6262bd] ml-2">£{item.price.toFixed(2)}</span>
                           </button>
                         ))}
                       </div>
                     )}
+                  </div>
+                ) : (
+                  /* Products in Selected Category View */
+                  <div className="flex-1 overflow-y-auto pr-2">
+                    <div className="flex items-center gap-3 mb-3">
+                      <button
+                        onClick={() => setSelectedCategory(null)}
+                        className="flex items-center gap-1 text-[#6262bd] hover:text-[#5252a3] font-medium"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Back
+                      </button>
+                      <h3 className="font-semibold text-slate-700">{selectedCategory.name}</h3>
+                    </div>
+                    {(() => {
+                      const categoryItems = selectedCategory.id === 'uncategorized'
+                        ? menuItems.filter(item => !item.category_id || !categories.find(c => c.id === item.category_id))
+                        : menuItems.filter(item => item.category_id === selectedCategory.id)
+
+                      return (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          {categoryItems.map(item => (
+                            <button
+                              key={item.id}
+                              onClick={() => addItemToOrder(item)}
+                              disabled={!item.available}
+                              className={`flex flex-col p-3 rounded-xl transition-all text-left ${
+                                item.available
+                                  ? 'bg-slate-50 hover:bg-slate-100 hover:shadow-md'
+                                  : 'bg-slate-100 opacity-60 cursor-not-allowed'
+                              }`}
+                            >
+                              {item.image_url ? (
+                                <img
+                                  src={item.image_url}
+                                  alt={item.name}
+                                  className="w-full h-24 rounded-lg object-cover mb-2"
+                                />
+                              ) : (
+                                <div className="w-full h-24 rounded-lg bg-slate-200 mb-2 flex items-center justify-center">
+                                  <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                  </svg>
+                                </div>
+                              )}
+                              <p className="font-medium text-slate-800 text-sm line-clamp-2">{item.name}</p>
+                              {item.description && (
+                                <p className="text-xs text-slate-500 line-clamp-2 mt-1">{item.description}</p>
+                              )}
+                              <div className="mt-auto pt-2 flex items-center justify-between">
+                                <span className="font-semibold text-[#6262bd]">£{item.price.toFixed(2)}</span>
+                                {!item.available && (
+                                  <span className="text-xs text-red-500">{t('orderModal.unavailable')}</span>
+                                )}
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )
+                    })()}
                   </div>
                 )}
               </div>
