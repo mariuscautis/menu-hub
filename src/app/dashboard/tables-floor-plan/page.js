@@ -1077,11 +1077,8 @@ export default function StaffFloorPlanPage() {
     // ========== STEP 5: Process existing order and merge offline data ==========
     if (existingOrder) {
       console.log('STEP 5: Processing existing order:', existingOrder.id)
-      console.log('Raw order_items from DB:', existingOrder.order_items?.map(i => ({
-        menu_item_id: i.menu_item_id,
-        name: i.name,
-        quantity: i.quantity
-      })))
+      console.log('DEBUG: Raw order_items from DB (FULL):', JSON.stringify(existingOrder.order_items, null, 2))
+      console.log('DEBUG: order_items count from DB:', existingOrder.order_items?.length)
 
       // Use a map to consolidate items by menu_item_id
       // This prevents duplicates and allows easy merging of quantities
@@ -1178,7 +1175,8 @@ export default function StaffFloorPlanPage() {
 
       // Convert map back to array
       const normalizedItems = Object.values(itemsMap)
-      console.log('STEP 5 COMPLETE: Final orderItems:', normalizedItems.map(i => `${i.name} x${i.quantity}`))
+      console.log('DEBUG STEP 5 COMPLETE: Final orderItems to set:', normalizedItems.map(i => `${i.name} x${i.quantity} (menuItemId: ${i.menu_item_id})`))
+      console.log('DEBUG: normalizedItems length:', normalizedItems.length)
 
       // ========== STEP 6: Set state with merged data ==========
       // CRITICAL: Update currentOrder.order_items to include ALL merged items
@@ -1315,9 +1313,11 @@ export default function StaffFloorPlanPage() {
     if (orderItems.length === 0) return
 
     console.log('========== FLOOR PLAN: SUBMITTING ORDER ==========')
+    console.log('DEBUG: Raw orderItems BEFORE consolidation:', orderItems.map(i => `${i.name} x${i.quantity} (menuItemId: ${i.menu_item_id})`))
+    console.log('DEBUG: orderItems length:', orderItems.length)
     const consolidatedItems = consolidateOrderItems(orderItems)
     const total = consolidatedItems.reduce((sum, item) => sum + (item.price_at_time * item.quantity), 0)
-    console.log('Consolidated items:', consolidatedItems.map(i => `${i.name} x${i.quantity}`))
+    console.log('DEBUG: Consolidated items AFTER consolidation:', consolidatedItems.map(i => `${i.name} x${i.quantity}`))
     console.log('Total:', total)
 
     try {
