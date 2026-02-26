@@ -17,6 +17,7 @@ import {
   addPendingOrderUpdate,
   getPendingOrderUpdatesForTable,
   clearPendingOrderUpdates,
+  clearAllOfflineOrdersForTable,
   updatePendingOrder,
 } from '@/lib/offlineQueue'
 
@@ -1420,6 +1421,19 @@ export default function StaffFloorPlanPage() {
         if (tableError) {
           console.error('Error updating table status:', tableError)
         }
+      }
+
+      // ========== CRITICAL: Clear all offline data for this table ==========
+      // After a successful ONLINE submit, we must clear any pending offline data
+      // (orders and order updates) to prevent them from being merged on next load.
+      // This is the ROOT CAUSE of the duplication bug: stale offline data was being
+      // merged with fresh Supabase data on each load!
+      console.log('Clearing all offline data for table:', selectedTable.id)
+      try {
+        await clearAllOfflineOrdersForTable(selectedTable.id)
+        console.log('Cleared offline orders and updates for table')
+      } catch (err) {
+        console.warn('Failed to clear offline data:', err)
       }
 
       // Close modal and reset state
