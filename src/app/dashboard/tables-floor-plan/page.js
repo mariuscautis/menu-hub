@@ -1108,17 +1108,17 @@ export default function StaffFloorPlanPage() {
       })
 
       // ========== MERGE PENDING ORDER UPDATES ==========
-      // These are items added to THIS specific order while offline
-      // Stored in IndexedDB pending_order_updates table
-      // Example: User adds pizza offline to an existing wine order
-      if (existingOrder.id) {
+      // DISABLED: This was causing duplication issues. When online, we should
+      // only use fresh Supabase data - no merging needed.
+      // The offline data should only be used when actually OFFLINE.
+      if (!navigator.onLine && existingOrder.id) {
         try {
           const pendingUpdates = await getPendingOrderUpdatesForTable(selectedTable.id)
           // Filter to only updates for THIS order
           const orderUpdates = pendingUpdates.filter(u => u.order_id === existingOrder.id)
 
           if (orderUpdates.length > 0) {
-            console.log('Merging', orderUpdates.length, 'pending order updates for order:', existingOrder.id)
+            console.log('OFFLINE: Merging', orderUpdates.length, 'pending order updates for order:', existingOrder.id)
             for (const update of orderUpdates) {
               if (update.items) {
                 for (const item of update.items) {
@@ -1150,12 +1150,10 @@ export default function StaffFloorPlanPage() {
       }
 
       // ========== MERGE PENDING OFFLINE ORDERS ==========
-      // These are FULL orders created while offline (not updates to existing orders)
-      // This handles legacy data and edge cases where offline orders exist alongside online ones
-      // NOTE: This should be rare - normally offline orders are separate from online orders
-      if (pendingOfflineOrders.length > 0) {
-        console.log('Merging', pendingOfflineOrders.length, 'pending offline orders into existing online order')
-        console.log('WARNING: This indicates offline orders exist alongside online order - may cause duplication')
+      // DISABLED when ONLINE: Only merge offline orders when actually offline.
+      // When online, we have fresh data from Supabase - no merging needed.
+      if (!navigator.onLine && pendingOfflineOrders.length > 0) {
+        console.log('OFFLINE: Merging', pendingOfflineOrders.length, 'pending offline orders into existing online order')
         for (const offlineOrder of pendingOfflineOrders) {
           const offlineItems = offlineOrder.items || offlineOrder.order_items || []
           for (const item of offlineItems) {

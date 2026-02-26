@@ -1054,40 +1054,43 @@ export default function Tables() {
       })
 
       // ALSO merge any pending order updates (items added offline to this order)
-      try {
-        const pendingUpdates = await getPendingOrderUpdatesForTable(table.id)
-        const orderUpdates = pendingUpdates.filter(u => u.order_id === existingOrder.id)
-        if (orderUpdates.length > 0) {
-          console.log('Found pending order updates:', orderUpdates.length)
-          for (const update of orderUpdates) {
-            for (const item of update.items || []) {
-              if (itemsMap[item.menu_item_id]) {
-                // Add to existing item quantity
-                itemsMap[item.menu_item_id].quantity += item.quantity
-                // ALSO update existingQuantity so these aren't treated as "new" on next submit
-                itemsMap[item.menu_item_id].existingQuantity += item.quantity
-              } else {
-                // New item from offline update
-                itemsMap[item.menu_item_id] = {
-                  menu_item_id: item.menu_item_id,
-                  name: item.name,
-                  price_at_time: item.price_at_time,
-                  quantity: item.quantity,
-                  isExisting: true, // Mark as existing so staff can't reduce
-                  existingQuantity: item.quantity
+      // ONLY do this when OFFLINE - when online, Supabase has the source of truth
+      if (!navigator.onLine) {
+        try {
+          const pendingUpdates = await getPendingOrderUpdatesForTable(table.id)
+          const orderUpdates = pendingUpdates.filter(u => u.order_id === existingOrder.id)
+          if (orderUpdates.length > 0) {
+            console.log('OFFLINE: Found pending order updates:', orderUpdates.length)
+            for (const update of orderUpdates) {
+              for (const item of update.items || []) {
+                if (itemsMap[item.menu_item_id]) {
+                  // Add to existing item quantity
+                  itemsMap[item.menu_item_id].quantity += item.quantity
+                  // ALSO update existingQuantity so these aren't treated as "new" on next submit
+                  itemsMap[item.menu_item_id].existingQuantity += item.quantity
+                } else {
+                  // New item from offline update
+                  itemsMap[item.menu_item_id] = {
+                    menu_item_id: item.menu_item_id,
+                    name: item.name,
+                    price_at_time: item.price_at_time,
+                    quantity: item.quantity,
+                    isExisting: true, // Mark as existing so staff can't reduce
+                    existingQuantity: item.quantity
+                  }
                 }
               }
             }
           }
+        } catch (err) {
+          console.warn('Failed to get pending order updates:', err)
         }
-      } catch (err) {
-        console.warn('Failed to get pending order updates:', err)
       }
 
       // ALSO merge any pending offline ORDERS (full orders created while offline)
-      // This handles legacy data created before the order update fix
-      if (pendingOfflineOrders.length > 0) {
-        console.log('Merging pending offline orders into existing online order:', pendingOfflineOrders.length)
+      // ONLY do this when OFFLINE - when online, Supabase has the source of truth
+      if (!navigator.onLine && pendingOfflineOrders.length > 0) {
+        console.log('OFFLINE: Merging pending offline orders into existing online order:', pendingOfflineOrders.length)
         for (const offlineOrder of pendingOfflineOrders) {
           for (const item of offlineOrder.order_items || []) {
             if (itemsMap[item.menu_item_id]) {
