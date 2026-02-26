@@ -2159,6 +2159,16 @@ export default function Tables() {
         // Delete old order items FIRST (with error checking!)
         // CRITICAL FIX: Use .select() to get deleted rows and verify deletion
         console.log('Deleting old order items for order:', currentOrder.id)
+
+        // First, count existing items to verify delete worked
+        const { data: existingItems, error: countError } = await supabase
+          .from('order_items')
+          .select('id, name, menu_item_id')
+          .eq('order_id', currentOrder.id)
+
+        const existingCount = existingItems?.length || 0
+        console.log('Existing items before delete:', existingCount, existingItems?.map(i => i.name))
+
         const { data: deletedItems, error: deleteError } = await supabase
           .from('order_items')
           .delete()
@@ -2171,6 +2181,81 @@ export default function Tables() {
         }
         console.log('Deleted items count:', deletedItems?.length || 0)
         console.log('Deleted items:', deletedItems?.map(i => `${i.name} (id: ${i.id})`))
+
+        // CRITICAL: Check if RLS blocked the delete (staff might not have delete permission)
+        if (existingCount > 0 && (!deletedItems || deletedItems.length === 0)) {
+          console.error('⚠️ RLS ISSUE: Delete returned 0 rows but items existed. Staff may not have delete permission.')
+          console.error('Will use UPSERT strategy instead of DELETE+INSERT')
+
+          // Use UPSERT strategy: Update existing items, insert new ones
+          for (const item of consolidatedItems) {
+            const existingItem = existingItems.find(e => e.menu_item_id === item.menu_item_id)
+            if (existingItem) {
+              // Update existing item
+              await supabase
+                .from('order_items')
+                .update({
+                  quantity: item.quantity,
+                  price_at_time: item.price_at_time,
+                  special_instructions: itemNotes[item.menu_item_id] || null
+                })
+                .eq('id', existingItem.id)
+              console.log(`Updated existing item: ${item.name} to qty ${item.quantity}`)
+            } else {
+              // Insert new item
+              await supabase
+                .from('order_items')
+                .insert({
+                  order_id: currentOrder.id,
+                  menu_item_id: item.menu_item_id,
+                  quantity: item.quantity,
+                  price_at_time: item.price_at_time,
+                  name: item.name,
+                  special_instructions: itemNotes[item.menu_item_id] || null
+                })
+              console.log(`Inserted new item: ${item.name}`)
+            }
+          }
+
+          // Skip the normal insert flow
+          console.log('UPSERT complete - skipping normal insert')
+
+          // Cache orders for this table
+          try {
+            const { data: ordersData } = await supabase
+              .from('orders')
+              .select('*, order_items(*)')
+              .eq('table_id', selectedTable.id)
+              .is('paid', false)
+              .neq('status', 'cancelled')
+              .order('created_at', { ascending: true })
+
+            if (ordersData && ordersData.length > 0) {
+              const cacheKey = `table_orders_${selectedTable.id}`
+              localStorage.setItem(cacheKey, JSON.stringify(ordersData))
+            }
+          } catch (e) {
+            console.warn('Failed to cache orders:', e)
+          }
+
+          // Clear offline data
+          try {
+            await clearAllOfflineOrdersForTable(selectedTable.id)
+          } catch (err) {
+            console.warn('Failed to clear offline data:', err)
+          }
+
+          // Close modal and reset
+          setShowOrderModal(false)
+          setSelectedTable(null)
+          setCurrentOrder(null)
+          setOrderItems([])
+          setItemNotes({})
+
+          await fetchTableOrderInfo(restaurant.id)
+          showNotification('success', t('notifications.orderUpdated'))
+          return  // Exit early - we used UPSERT instead
+        }
 
         // CRITICAL: Verify all items were deleted before inserting
         // This prevents race conditions where delete hasn't fully propagated
