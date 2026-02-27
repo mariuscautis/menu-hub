@@ -1776,55 +1776,6 @@ export default function Tables() {
       // Get order IDs - filter out offline-only orders that don't have real IDs
       const orderIds = unpaidOrders.filter(order => order.id && !order.id.toString().startsWith('offline_')).map(order => order.id)
 
-      // Apply discount to orders if a discount is selected
-      // We update the discount_total directly on the order for reporting
-      if (selectedDiscount && discountAmount > 0 && orderIds.length > 0) {
-        try {
-          // First try the RPC function (if migration has been run)
-          const { error: rpcError } = await supabase.rpc('apply_order_discount', {
-            p_order_id: orderIds[0],
-            p_discount_id: selectedDiscount.id,
-            p_discount_name: selectedDiscount.name,
-            p_discount_type: selectedDiscount.type,
-            p_discount_value: selectedDiscount.value,
-            p_reason: `Applied at payment - ${selectedDiscount.name}`,
-            p_applied_by_name: userName,
-            p_applied_by_id: userId
-          })
-
-          if (rpcError) {
-            console.warn('RPC apply_order_discount failed, falling back to direct update:', rpcError)
-            // Fallback: Update discount_total directly on the order
-            // This works even if the RPC function doesn't exist
-            const { error: updateError } = await supabase
-              .from('orders')
-              .update({
-                discount_total: discountAmount,
-                updated_at: new Date().toISOString()
-              })
-              .eq('id', orderIds[0])
-
-            if (updateError) {
-              console.warn('Failed to update order discount_total:', updateError)
-            }
-          }
-        } catch (discountErr) {
-          console.warn('Error applying discount, trying fallback:', discountErr)
-          // Fallback: Update discount_total directly
-          try {
-            await supabase
-              .from('orders')
-              .update({
-                discount_total: discountAmount,
-                updated_at: new Date().toISOString()
-              })
-              .eq('id', orderIds[0])
-          } catch (fallbackErr) {
-            console.warn('Fallback discount update also failed:', fallbackErr)
-          }
-        }
-      }
-
       // Use RPC function to process payment (bypasses RLS)
       // This function also marks the table as needs cleaning
       const { data, error } = await supabase.rpc('process_table_payment', {
@@ -1838,6 +1789,28 @@ export default function Tables() {
 
       if (data && !data.success) {
         throw new Error(data.error || 'Failed to process payment')
+      }
+
+      // Apply discount AFTER payment processing to ensure it's not overwritten
+      // This updates the discount_total on the first order
+      if (selectedDiscount && discountAmount > 0 && orderIds.length > 0) {
+        console.log('Setting discount_total after payment:', {
+          orderId: orderIds[0],
+          discountAmount
+        })
+
+        const { error: discountUpdateError } = await supabase
+          .from('orders')
+          .update({
+            discount_total: discountAmount
+          })
+          .eq('id', orderIds[0])
+
+        if (discountUpdateError) {
+          console.error('Failed to set discount_total after payment:', discountUpdateError)
+        } else {
+          console.log('Successfully set discount_total:', discountAmount)
+        }
       }
 
       // Close payment modal
