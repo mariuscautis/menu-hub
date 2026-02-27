@@ -569,6 +569,16 @@
       "unavailable": "Indisponible",
       "cannotReduceExisting": "Impossible de réduire les articles existants"
     },
+    "tableDetailsModal": {
+      "title": "Table {tableNumber}",
+      "activeOrders": "Commandes Actives:",
+      "status": "Statut:",
+      "occupied": "Occupée",
+      "available": "Disponible",
+      "viewAllOrders": "Voir Toutes les Commandes ({count})",
+      "activeOrdersTitle": "Commandes Actives",
+      "orderNumber": "Commande #{id}"
+    },
     "paymentModal": {
       "title": "Payer l'Addition - Table {tableNumber}",
       "noUnpaidOrders": "Aucune commande impayée pour cette table",
@@ -577,7 +587,9 @@
       "status": "Statut",
       "totalToPay": "Total à Payer",
       "payWithCash": "Payer en Espèces",
-      "payWithCard": "Payer par Carte"
+      "payWithCard": "Payer par Carte",
+      "or": "ou",
+      "splitBill": "Diviser l'Addition"
     },
     "splitBillModal": {
       "title": "Diviser l'Addition - Table {tableNumber}",
@@ -622,7 +634,7 @@
       "confirmArrival": "Marquer {name} comme arrivé?"
     },
     "createReservationModal": {
-      "title": "Créer une Réservation - Table {number}",
+      "title": "Créer une Réservation - Table {tableNumber}",
       "date": "Date",
       "time": "Heure",
       "partySize": "Taille du Groupe",
@@ -630,11 +642,24 @@
       "customerNamePlaceholder": "Jean Dupont",
       "email": "Email",
       "emailPlaceholder": "jean@exemple.com",
+      "phone": "Téléphone (Optionnel)",
       "phoneOptional": "Téléphone (Optionnel)",
       "phonePlaceholder": "+33 1 23 45 67 89",
+      "specialRequests": "Demandes Spéciales (Optionnel)",
       "specialRequestsOptional": "Demandes Spéciales (Optionnel)",
       "specialRequestsPlaceholder": "Toute restriction alimentaire ou demande spéciale...",
-      "createReservation": "Créer la Réservation"
+      "createReservation": "Créer la Réservation",
+      "selectTime": "Sélectionner l'heure...",
+      "cancel": "Annuler"
+    },
+    "timeSlotModal": {
+      "title": "Sélectionner un Créneau Horaire",
+      "tableInfo": "Table {tableNumber} - {date}",
+      "infoTitle": "Informations sur les Créneaux",
+      "redSlots": "Créneaux rouges",
+      "redSlotsBooked": "sont déjà réservés",
+      "availableSlotsWhite": "Les créneaux disponibles sont affichés en blanc",
+      "reservationDuration": "Chaque réservation dure 2 heures par défaut"
     },
     "cancelBookingModal": {
       "title": "Annuler la Réservation",

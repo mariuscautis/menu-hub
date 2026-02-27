@@ -24,9 +24,9 @@ import {
 
 // Read-only Table Component for Staff
 function FloorPlanTable({ table, orderInfo, reservations, waiterCalls, onClick, onMarkCleaned, onMarkDelivered, onViewReservations }) {
-  // Show badge if there are orders with unpaid amounts
-  // Hide only when total is explicitly 0 (not undefined/null)
-  const hasOpenOrders = orderInfo && orderInfo.count > 0 && (orderInfo.total === undefined || orderInfo.total === null || orderInfo.total > 0)
+  // Show yellow if there are any unpaid orders (count > 0)
+  // The total check was causing issues - if count > 0, table should be yellow regardless of total
+  const hasOpenOrders = orderInfo && orderInfo.count > 0
   const needsCleaning = table.status === 'needs_cleaning'
   const hasReservationsToday = reservations && reservations.length > 0
   const hasWaiterCall = waiterCalls && waiterCalls.length > 0
@@ -439,12 +439,21 @@ export default function StaffFloorPlanPage() {
       )
       .subscribe()
 
+    // Polling fallback: Refresh order info every 15 seconds as a safety net
+    // This ensures table indicators update even if real-time subscriptions fail
+    // or when orders are placed from other pages (e.g., /dashboard/tables)
+    const pollingInterval = setInterval(() => {
+      console.log('🔵 TABLES FLOOR PLAN - Polling fallback: refreshing table order info')
+      fetchTableOrderInfo(restaurantId)
+    }, 15000) // 15 seconds
+
     return () => {
       supabase.removeChannel(tablesChannel)
       supabase.removeChannel(ordersChannel)
       supabase.removeChannel(orderItemsChannel)
       supabase.removeChannel(splitBillsChannel)
       supabase.removeChannel(waiterCallsChannel)
+      clearInterval(pollingInterval)
     }
   }, [restaurant, currentFloor])
 
@@ -661,6 +670,7 @@ export default function StaffFloorPlanPage() {
       console.warn('Failed to get pending order updates for merge:', err)
     }
 
+    console.log('🔵 TABLES FLOOR PLAN - Setting tableOrderInfo:', JSON.stringify(orderInfo, null, 2))
     setTableOrderInfo(orderInfo)
   }
 
@@ -1448,6 +1458,7 @@ export default function StaffFloorPlanPage() {
           setOrderItems([])
           setItemNotes({})
           await loadFloorData(currentFloor.id, restaurant.id)
+          await fetchTableOrderInfo(restaurant.id)
 
           // Cache orders
           try {
@@ -1578,6 +1589,7 @@ export default function StaffFloorPlanPage() {
 
       // Refresh floor data to update table badges/indicators
       await loadFloorData(currentFloor.id, restaurant.id)
+      await fetchTableOrderInfo(restaurant.id)
 
       // ========== CACHE ORDERS FOR OFFLINE SUPPORT ==========
       // After successfully submitting an order online, cache the updated orders
@@ -2075,6 +2087,7 @@ export default function StaffFloorPlanPage() {
 
       // Refresh floor data immediately after each split bill payment
       await loadFloorData(currentFloor.id, restaurant.id)
+      await fetchTableOrderInfo(restaurant.id)
 
       // Check if all original items have been paid (all items have 0 quantity available and no unpaid split bills)
       const remainingQuantity = availableItems.reduce((sum, item) => sum + item.quantity, 0)
@@ -2119,6 +2132,7 @@ export default function StaffFloorPlanPage() {
 
           // Refresh data
           await loadFloorData(currentFloor.id, restaurant.id)
+          await fetchTableOrderInfo(restaurant.id)
 
           showNotificationMessage('success', 'All bills paid! You can now generate invoices for each bill.')
           // Don't show post payment modal since we're staying in split bill modal
@@ -2607,7 +2621,7 @@ export default function StaffFloorPlanPage() {
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">
-                Table {selectedTable.table_number}
+                {t('tableDetailsModal.title')?.replace('{tableNumber}', selectedTable.table_number) || `Table ${selectedTable.table_number}`}
               </h2>
               <button
                 onClick={() => setSelectedTable(null)}
@@ -2623,19 +2637,19 @@ export default function StaffFloorPlanPage() {
             <div className="space-y-3 mb-6 p-4 bg-slate-50 dark:bg-slate-900 rounded-xl">
               
               <div className="flex justify-between text-sm">
-                <span className="text-slate-600 dark:text-slate-400">Active Orders:</span>
+                <span className="text-slate-600 dark:text-slate-400">{t('tableDetailsModal.activeOrders') || 'Active Orders:'}</span>
                 <span className="font-semibold text-slate-800 dark:text-slate-200">
                   {tableOrderInfo[selectedTable.id]?.count || 0}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-slate-600 dark:text-slate-400">Status:</span>
+                <span className="text-slate-600 dark:text-slate-400">{t('tableDetailsModal.status') || 'Status:'}</span>
                 <span className={`font-semibold ${
                   tableOrderInfo[selectedTable.id]?.count > 0
                     ? 'text-amber-600 dark:text-amber-400'
                     : 'text-green-600 dark:text-green-400'
                 }`}>
-                  {tableOrderInfo[selectedTable.id]?.count > 0 ? 'Occupied' : 'Available'}
+                  {tableOrderInfo[selectedTable.id]?.count > 0 ? (t('tableDetailsModal.occupied') || 'Occupied') : (t('tableDetailsModal.available') || 'Available')}
                 </span>
               </div>
             </div>
@@ -2646,14 +2660,14 @@ export default function StaffFloorPlanPage() {
                 onClick={handleNewOrder}
                 className="w-full px-4 py-3 bg-primary hover:bg-primary-hover text-white rounded-xl font-medium transition-all hover:scale-[1.02] active:scale-[0.98]"
               >
-                {tableOrderInfo[selectedTable.id]?.count > 0 ? 'Update Order' : 'Place Order'}
+                {tableOrderInfo[selectedTable.id]?.count > 0 ? (t('updateOrder') || 'Update Order') : (t('placeOrder') || 'Place Order')}
               </button>
 
               <button
                 onClick={handlePayBill}
                 className="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium transition-all hover:scale-[1.02] active:scale-[0.98]"
               >
-                Pay Bill
+                {t('payBill') || 'Pay Bill'}
               </button>
 
               <button
@@ -2663,7 +2677,7 @@ export default function StaffFloorPlanPage() {
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM12 13h5v5h-5z"/>
                 </svg>
-                New Reservation
+                {t('newReservation') || 'New Reservation'}
               </button>
 
               {tableOrderInfo[selectedTable.id]?.count > 0 && (
@@ -2671,7 +2685,7 @@ export default function StaffFloorPlanPage() {
                   onClick={handleViewOrders}
                   className="w-full px-4 py-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-xl font-medium transition-all hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  View All Orders ({tableOrderInfo[selectedTable.id]?.count})
+                  {t('tableDetailsModal.viewAllOrders')?.replace('{count}', tableOrderInfo[selectedTable.id]?.count) || `View All Orders (${tableOrderInfo[selectedTable.id]?.count})`}
                 </button>
               )}
             </div>
@@ -2680,7 +2694,7 @@ export default function StaffFloorPlanPage() {
             {tableOrderInfo[selectedTable.id]?.count > 0 && (
               <div>
                 <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-3 text-sm uppercase tracking-wide">
-                  Active Orders
+                  {t('tableDetailsModal.activeOrdersTitle') || 'Active Orders'}
                 </h3>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {orders
@@ -2692,7 +2706,7 @@ export default function StaffFloorPlanPage() {
                       >
                         <div className="flex justify-between items-start mb-2">
                           <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-                            Order #{order.id.slice(0, 8)}
+                            {t('tableDetailsModal.orderNumber')?.replace('{id}', order.id.slice(0, 8)) || `Order #${order.id.slice(0, 8)}`}
                           </span>
                           <span className={`text-xs px-2 py-1 rounded-full font-medium ${
                             order.status === 'pending' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200' :
@@ -2852,14 +2866,14 @@ export default function StaffFloorPlanPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-6">
-              Create Reservation - Table {selectedTable.table_number}
+              {(t('createReservationModal.title') || 'Create Reservation - Table {tableNumber}').replace('{tableNumber}', selectedTable.table_number)}
             </h2>
 
             <form onSubmit={submitReservation} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Date
+                    {t('createReservationModal.date') || 'Date'}
                   </label>
                   <input
                     type="date"
@@ -2871,21 +2885,21 @@ export default function StaffFloorPlanPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Time
+                    {t('createReservationModal.time') || 'Time'}
                   </label>
                   <button
                     type="button"
                     onClick={() => setShowTimeSlotModal(true)}
                     className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 dark:bg-slate-700 text-left hover:border-[#6262bd] transition-colors"
                   >
-                    {reservationForm.time || 'Select time...'}
+                    {reservationForm.time || (t('createReservationModal.selectTime') || 'Select time...')}
                   </button>
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Party Size
+                  {t('createReservationModal.partySize') || 'Party Size'}
                 </label>
                 <input
                   type="number"
@@ -2900,7 +2914,7 @@ export default function StaffFloorPlanPage() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Customer Name
+                  {t('createReservationModal.customerName') || 'Customer Name'}
                 </label>
                 <input
                   type="text"
@@ -2914,7 +2928,7 @@ export default function StaffFloorPlanPage() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Email
+                  {t('createReservationModal.email') || 'Email'}
                 </label>
                 <input
                   type="email"
@@ -2928,7 +2942,7 @@ export default function StaffFloorPlanPage() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Phone (Optional)
+                  {t('createReservationModal.phone') || 'Phone (Optional)'}
                 </label>
                 <input
                   type="tel"
@@ -2941,14 +2955,14 @@ export default function StaffFloorPlanPage() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Special Requests (Optional)
+                  {t('createReservationModal.specialRequests') || 'Special Requests (Optional)'}
                 </label>
                 <textarea
                   value={reservationForm.specialRequests}
                   onChange={(e) => setReservationForm({ ...reservationForm, specialRequests: e.target.value })}
                   className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 dark:bg-slate-700 resize-none"
                   rows="3"
-                  placeholder="Any dietary restrictions or special requests..."
+                  placeholder={t('createReservationModal.specialRequestsPlaceholder') || 'Any dietary restrictions or special requests...'}
                 />
               </div>
 
@@ -2961,13 +2975,13 @@ export default function StaffFloorPlanPage() {
                   }}
                   className="flex-1 border-2 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 py-3 rounded-xl font-medium hover:bg-slate-50 dark:hover:bg-slate-700"
                 >
-                  Cancel
+                  {t('createReservationModal.cancel') || 'Cancel'}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 bg-[#6262bd] text-white py-3 rounded-xl font-medium hover:bg-[#5252a3]"
                 >
-                  Create Reservation
+                  {t('createReservationModal.createReservation') || 'Create Reservation'}
                 </button>
               </div>
             </form>
@@ -2987,7 +3001,7 @@ export default function StaffFloorPlanPage() {
           >
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">
-                Select Time Slot
+                {t('timeSlotModal.title') || 'Select Time Slot'}
               </h2>
               <button
                 onClick={() => setShowTimeSlotModal(false)}
@@ -3006,7 +3020,7 @@ export default function StaffFloorPlanPage() {
             ) : (
               <>
                 <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
-                  Table {selectedTable?.table_number} - {new Date(reservationForm.date).toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                  {(t('timeSlotModal.tableInfo') || 'Table {tableNumber} - {date}').replace('{tableNumber}', selectedTable?.table_number).replace('{date}', new Date(reservationForm.date).toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }))}
                 </p>
 
                 <div className="grid grid-cols-4 gap-3">
@@ -3035,11 +3049,11 @@ export default function StaffFloorPlanPage() {
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                     </svg>
                     <div className="text-sm text-blue-800 dark:text-blue-300">
-                      <p className="font-semibold mb-1">Time Slot Information</p>
+                      <p className="font-semibold mb-1">{t('timeSlotModal.infoTitle') || 'Time Slot Information'}</p>
                       <ul className="space-y-1 text-xs">
-                        <li>• <span className="line-through text-red-600 dark:text-red-400">Red slots</span> are already booked</li>
-                        <li>• Available slots are shown in white</li>
-                        <li>• Each reservation lasts 2 hours by default</li>
+                        <li>• <span className="line-through text-red-600 dark:text-red-400">{t('timeSlotModal.redSlots') || 'Red slots'}</span> {t('timeSlotModal.redSlotsBooked') || 'are already booked'}</li>
+                        <li>• {t('timeSlotModal.availableSlotsWhite') || 'Available slots are shown in white'}</li>
+                        <li>• {t('timeSlotModal.reservationDuration') || 'Each reservation lasts 2 hours by default'}</li>
                       </ul>
                     </div>
                   </div>
@@ -3056,7 +3070,7 @@ export default function StaffFloorPlanPage() {
           <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md animate-zoom-in">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">
-                Pay Bill - Table {selectedTable.table_number}
+                {(t('paymentModal.title') || 'Pay Bill - Table {tableNumber}').replace('{tableNumber}', selectedTable.table_number)}
               </h2>
               <button
                 onClick={() => {
@@ -3074,18 +3088,18 @@ export default function StaffFloorPlanPage() {
 
             {unpaidOrders.length === 0 ? (
               <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-8 text-center mb-6">
-                <p className="text-slate-500 dark:text-slate-400">No unpaid orders for this table</p>
+                <p className="text-slate-500 dark:text-slate-400">{t('paymentModal.noUnpaidOrders') || 'No unpaid orders for this table'}</p>
               </div>
             ) : (
               <>
                 {/* Order Summary */}
                 <div className="mb-6">
-                  <h3 className="font-semibold text-slate-700 dark:text-slate-300 mb-3">Orders Summary</h3>
+                  <h3 className="font-semibold text-slate-700 dark:text-slate-300 mb-3">{t('paymentModal.ordersSummary') || 'Orders Summary'}</h3>
                   <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-4 space-y-3 max-h-64 overflow-y-auto">
                     {unpaidOrders.map((order, index) => (
                       <div key={order.id} className="border-b border-slate-200 dark:border-slate-700 pb-3 last:border-0 last:pb-0">
                         <div className="flex justify-between items-start mb-2">
-                          <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Order #{index + 1}</span>
+                          <span className="text-sm font-medium text-slate-600 dark:text-slate-400">{(t('paymentModal.orderNumber') || 'Order #{number}').replace('{number}', index + 1)}</span>
                           <span className="text-sm font-semibold text-primary">£{order.total?.toFixed(2)}</span>
                         </div>
                         <div className="text-xs text-slate-500 dark:text-slate-400 space-y-1">
@@ -3096,7 +3110,7 @@ export default function StaffFloorPlanPage() {
                           ))}
                         </div>
                         <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-                          Status: <span className="capitalize">{order.status}</span>
+                          {t('paymentModal.status') || 'Status:'} <span className="capitalize">{order.status}</span>
                         </div>
                       </div>
                     ))}
@@ -3106,7 +3120,7 @@ export default function StaffFloorPlanPage() {
                 {/* Total */}
                 <div className="bg-primary/10 rounded-xl p-4 mb-6">
                   <div className="flex justify-between items-center">
-                    <span className="font-semibold text-slate-700 dark:text-slate-300">Total to Pay</span>
+                    <span className="font-semibold text-slate-700 dark:text-slate-300">{t('paymentModal.totalToPay') || 'Total to Pay'}</span>
                     <span className="text-2xl font-bold text-primary">£{calculateTableTotal().toFixed(2)}</span>
                   </div>
                 </div>
@@ -3120,7 +3134,7 @@ export default function StaffFloorPlanPage() {
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
                     </svg>
-                    Pay with Cash
+                    {t('paymentModal.payWithCash') || 'Pay with Cash'}
                   </button>
                   <button
                     onClick={() => processPayment('card')}
@@ -3129,7 +3143,7 @@ export default function StaffFloorPlanPage() {
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
                     </svg>
-                    Pay with Card
+                    {t('paymentModal.payWithCard') || 'Pay with Card'}
                   </button>
 
                   {/* Split Bill Option */}
@@ -3138,7 +3152,7 @@ export default function StaffFloorPlanPage() {
                       <div className="w-full border-t border-slate-300 dark:border-slate-600"></div>
                     </div>
                     <div className="relative flex justify-center text-xs">
-                      <span className="px-2 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400">or</span>
+                      <span className="px-2 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400">{t('paymentModal.or') || 'or'}</span>
                     </div>
                   </div>
 
@@ -3204,7 +3218,7 @@ export default function StaffFloorPlanPage() {
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
                     </svg>
-                    Split Bill
+                    {t('paymentModal.splitBill') || 'Split Bill'}
                   </button>
                 </div>
               </>

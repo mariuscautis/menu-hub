@@ -569,6 +569,16 @@
       "unavailable": "Indisponibil",
       "cannotReduceExisting": "Nu poți reduce produsele existente"
     },
+    "tableDetailsModal": {
+      "title": "Masa {tableNumber}",
+      "activeOrders": "Comenzi Active:",
+      "status": "Status:",
+      "occupied": "Ocupată",
+      "available": "Disponibilă",
+      "viewAllOrders": "Vezi Toate Comenzile ({count})",
+      "activeOrdersTitle": "Comenzi Active",
+      "orderNumber": "Comanda #{id}"
+    },
     "paymentModal": {
       "title": "Plătește Nota - Masa {tableNumber}",
       "noUnpaidOrders": "Nu există comenzi neachitate pentru această masă",
@@ -577,7 +587,9 @@
       "status": "Status",
       "totalToPay": "Total de Plată",
       "payWithCash": "Plătește Cash",
-      "payWithCard": "Plătește cu Cardul"
+      "payWithCard": "Plătește cu Cardul",
+      "or": "sau",
+      "splitBill": "Împarte Nota"
     },
     "splitBillModal": {
       "title": "Împarte Nota - Masa {tableNumber}",
@@ -622,7 +634,7 @@
       "confirmArrival": "Marchează {name} ca sosit?"
     },
     "createReservationModal": {
-      "title": "Creează Rezervare - Masa {number}",
+      "title": "Creează Rezervare - Masa {tableNumber}",
       "date": "Data",
       "time": "Ora",
       "partySize": "Mărime Grup",
@@ -630,11 +642,24 @@
       "customerNamePlaceholder": "Ion Popescu",
       "email": "Email",
       "emailPlaceholder": "ion@exemplu.com",
+      "phone": "Telefon (Opțional)",
       "phoneOptional": "Telefon (Opțional)",
       "phonePlaceholder": "+40 123 456 7890",
+      "specialRequests": "Cerințe Speciale (Opțional)",
       "specialRequestsOptional": "Cerințe Speciale (Opțional)",
       "specialRequestsPlaceholder": "Orice restricții alimentare sau cerințe speciale...",
-      "createReservation": "Creează Rezervarea"
+      "createReservation": "Creează Rezervarea",
+      "selectTime": "Selectează ora...",
+      "cancel": "Anulează"
+    },
+    "timeSlotModal": {
+      "title": "Selectează Intervalul Orar",
+      "tableInfo": "Masa {tableNumber} - {date}",
+      "infoTitle": "Informații Interval Orar",
+      "redSlots": "Intervalele roșii",
+      "redSlotsBooked": "sunt deja rezervate",
+      "availableSlotsWhite": "Intervalele disponibile sunt afișate în alb",
+      "reservationDuration": "Fiecare rezervare durează 2 ore implicit"
     },
     "cancelBookingModal": {
       "title": "Anulează Rezervarea",

@@ -38,6 +38,22 @@ export default function Orders() {
   // Offline orders state
   const [offlineOrders, setOfflineOrders] = useState([])
 
+  // Refund modal state
+  const [showRefundModal, setShowRefundModal] = useState(false)
+  const [refundOrder, setRefundOrder] = useState(null)
+  const [refundAmount, setRefundAmount] = useState('')
+  const [refundReason, setRefundReason] = useState('')
+  const [refundMethod, setRefundMethod] = useState('cash')
+  const [processingRefund, setProcessingRefund] = useState(false)
+
+  // Void modal state
+  const [showVoidModal, setShowVoidModal] = useState(false)
+  const [voidItem, setVoidItem] = useState(null)
+  const [voidOrder, setVoidOrder] = useState(null)
+  const [voidReason, setVoidReason] = useState('')
+  const [voidQuantity, setVoidQuantity] = useState(1)
+  const [processingVoid, setProcessingVoid] = useState(false)
+
   // Sound notifications
   const { playNewOrderSound, resumeAudio, soundSettings } = useOrderSounds(restaurant?.id)
   const knownOrderIdsRef = useRef(new Set())
@@ -526,6 +542,159 @@ export default function Orders() {
     setShowInvoiceModal(true)
   }
 
+  /**
+   * Process a refund for a paid order
+   * Uses the process_refund RPC function to atomically create the refund record
+   * and update the order's refund_total
+   */
+  const processRefund = async () => {
+    if (!refundOrder || !refundAmount || !refundReason.trim()) {
+      showNotification('error', t('refundValidationError') || 'Please fill in all refund fields')
+      return
+    }
+
+    const amount = parseFloat(refundAmount)
+    if (isNaN(amount) || amount <= 0) {
+      showNotification('error', t('invalidRefundAmount') || 'Please enter a valid refund amount')
+      return
+    }
+
+    // Calculate max refundable amount (order total minus any existing refunds)
+    const orderTotal = refundOrder.total || 0
+    const existingRefunds = refundOrder.refund_total || 0
+    const maxRefundable = orderTotal - existingRefunds
+
+    if (amount > maxRefundable) {
+      showNotification('error', t('refundExceedsMax') || `Refund cannot exceed £${maxRefundable.toFixed(2)}`)
+      return
+    }
+
+    setProcessingRefund(true)
+
+    try {
+      // Get staff info for the refund record
+      let staffName = 'Unknown'
+      let staffId = null
+
+      const staffSessionData = localStorage.getItem('staff_session')
+      if (staffSessionData) {
+        const staffSession = JSON.parse(staffSessionData)
+        staffName = staffSession.name || staffSession.email || 'Staff'
+        staffId = staffSession.staff_id || null
+      } else {
+        const { data: userData } = await supabase.auth.getUser()
+        staffName = userData.user?.user_metadata?.name || userData.user?.email || 'Unknown'
+        staffId = userData.user?.id || null
+      }
+
+      // Call the process_refund RPC function
+      const { data, error } = await supabase.rpc('process_refund', {
+        p_order_id: refundOrder.id,
+        p_amount: amount,
+        p_reason: refundReason.trim(),
+        p_refund_method: refundMethod,
+        p_processed_by_id: staffId,
+        p_processed_by_name: staffName
+      })
+
+      if (error) throw error
+
+      if (data && !data.success) {
+        throw new Error(data.error || 'Failed to process refund')
+      }
+
+      showNotification('success', t('refundSuccess') || `Refund of £${amount.toFixed(2)} processed successfully`)
+
+      // Close modal and reset state
+      setShowRefundModal(false)
+      setRefundOrder(null)
+      setRefundAmount('')
+      setRefundReason('')
+      setRefundMethod('cash')
+
+      // Refresh orders to show updated refund_total
+      if (restaurant) {
+        fetchOrders(restaurant.id)
+      }
+    } catch (error) {
+      console.error('Refund error:', error)
+      showNotification('error', error.message || t('refundFailed') || 'Failed to process refund')
+    } finally {
+      setProcessingRefund(false)
+    }
+  }
+
+  /**
+   * Process a void for an order item (before payment)
+   * Uses the void_order_item RPC function to mark the item as voided
+   * and record the void in the voids table for reporting
+   */
+  const processVoid = async () => {
+    if (!voidItem || !voidOrder || !voidReason.trim()) {
+      showNotification('error', t('voidValidationError') || 'Please enter a reason for voiding')
+      return
+    }
+
+    if (voidQuantity < 1 || voidQuantity > voidItem.quantity) {
+      showNotification('error', t('invalidVoidQuantity') || 'Invalid void quantity')
+      return
+    }
+
+    setProcessingVoid(true)
+
+    try {
+      // Get staff info for the void record
+      let staffName = 'Unknown'
+      let staffId = null
+
+      const staffSessionData = localStorage.getItem('staff_session')
+      if (staffSessionData) {
+        const staffSession = JSON.parse(staffSessionData)
+        staffName = staffSession.name || staffSession.email || 'Staff'
+        staffId = staffSession.staff_id || null
+      } else {
+        const { data: userData } = await supabase.auth.getUser()
+        staffName = userData.user?.user_metadata?.name || userData.user?.email || 'Unknown'
+        staffId = userData.user?.id || null
+      }
+
+      // Call the void_order_item RPC function
+      const { data, error } = await supabase.rpc('void_order_item', {
+        p_order_item_id: voidItem.id,
+        p_quantity: voidQuantity,
+        p_reason: voidReason.trim(),
+        p_voided_by_id: staffId,
+        p_voided_by_name: staffName
+      })
+
+      if (error) throw error
+
+      if (data && !data.success) {
+        throw new Error(data.error || 'Failed to void item')
+      }
+
+      const itemValue = (voidItem.price_at_time * voidQuantity).toFixed(2)
+      showNotification('success', t('voidSuccess') || `Voided ${voidQuantity}x ${voidItem.name} (£${itemValue})`)
+
+      // Close modal and reset state
+      setShowVoidModal(false)
+      setVoidItem(null)
+      setVoidOrder(null)
+      setVoidReason('')
+      setVoidQuantity(1)
+
+      // Refresh orders to show updated item
+      if (restaurant) {
+        fetchOrders(restaurant.id)
+      }
+    } catch (error) {
+      console.error('Void error:', error)
+      showNotification('error', error.message || t('voidFailed') || 'Failed to void item')
+    } finally {
+      setProcessingVoid(false)
+    }
+  }
+
   // Mark takeaway order as ready for pickup
   const markReadyForPickup = async (orderId) => {
     setMarkingReady(orderId)
@@ -912,14 +1081,20 @@ export default function Orders() {
               <div className="bg-slate-50 rounded-xl p-4 mb-4">
                 {filteredItems.map((item, index) => {
                   const department = getItemDepartment(item.menu_item_id)
+                  const isVoided = item.voided === true
                   return (
-                    <div key={index} className="py-1">
+                    <div key={index} className={`py-1 ${isVoided ? 'opacity-50' : ''}`}>
                       <div className="flex justify-between items-center">
                         <div className="flex items-center gap-2">
-                          <span className="text-slate-700">
+                          <span className={`text-slate-700 ${isVoided ? 'line-through' : ''}`}>
                             {item.quantity}x {item.name}
                           </span>
-                          {(userType === 'owner' || staffDepartment === 'universal') && (
+                          {isVoided && (
+                            <span className="px-2 py-0.5 text-xs rounded-full font-medium bg-red-100 text-red-700">
+                              VOIDED
+                            </span>
+                          )}
+                          {!isVoided && (userType === 'owner' || staffDepartment === 'universal') && (
                             <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${
                               department === 'bar'
                                 ? 'bg-orange-100 text-orange-700'
@@ -929,7 +1104,29 @@ export default function Orders() {
                             </span>
                           )}
                         </div>
-                        <span className="text-slate-500">£{(item.price_at_time * item.quantity).toFixed(2)}</span>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-slate-500 ${isVoided ? 'line-through' : ''}`}>
+                            £{(item.price_at_time * item.quantity).toFixed(2)}
+                          </span>
+                          {/* Void Button - Only for unpaid orders and owners/admins, not for already voided items */}
+                          {!order.paid && !isVoided && (userType === 'owner' || userType === 'staff-admin') && (
+                            <button
+                              onClick={() => {
+                                setVoidItem(item)
+                                setVoidOrder(order)
+                                setVoidQuantity(item.quantity)
+                                setVoidReason('')
+                                setShowVoidModal(true)
+                              }}
+                              className="p-1 text-red-500 hover:bg-red-100 rounded-lg transition-colors"
+                              title={t('voidItem') || 'Void Item'}
+                            >
+                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                              </svg>
+                            </button>
+                          )}
+                        </div>
                       </div>
                       {/* Special Instructions for this item */}
                       {item.special_instructions && (
@@ -979,6 +1176,25 @@ export default function Orders() {
                         <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
                       </svg>
                       {t('generateInvoice')}
+                    </button>
+                  )}
+
+                  {/* Refund Button - Only for owners and admin staff, not kitchen */}
+                  {(userType === 'owner' || userType === 'staff-admin') && staffDepartment !== 'kitchen' && (
+                    <button
+                      onClick={() => {
+                        setRefundOrder(order)
+                        setRefundAmount('')
+                        setRefundReason('')
+                        setRefundMethod(order.payment_method || 'cash')
+                        setShowRefundModal(true)
+                      }}
+                      className="w-full bg-orange-500 text-white px-4 py-2.5 rounded-xl font-medium hover:bg-orange-600 flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12.5 6.9c1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-.53.12-1.03.3-1.48.54l1.47 1.47c.41-.17.91-.27 1.51-.27zM5.33 4.06L4.06 5.33 7.5 8.77c0 2.08 1.56 3.22 3.91 3.91l3.51 3.51c-.34.49-1.05.91-2.42.91-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c.96-.18 1.83-.55 2.46-1.12l2.22 2.22 1.27-1.27L5.33 4.06z"/>
+                      </svg>
+                      {t('refund') || 'Issue Refund'}
                     </button>
                   )}
                 </div>
@@ -1297,6 +1513,343 @@ export default function Orders() {
           }}
           isGenerating={generatingInvoice}
         />
+      )}
+
+      {/* Refund Modal */}
+      {showRefundModal && refundOrder && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => {
+            setShowRefundModal(false)
+            setRefundOrder(null)
+          }}
+        >
+          <div
+            className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
+                <svg className="w-6 h-6 text-orange-600 dark:text-orange-400" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12.5 6.9c1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-.53.12-1.03.3-1.48.54l1.47 1.47c.41-.17.91-.27 1.51-.27zM5.33 4.06L4.06 5.33 7.5 8.77c0 2.08 1.56 3.22 3.91 3.91l3.51 3.51c-.34.49-1.05.91-2.42.91-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c.96-.18 1.83-.55 2.46-1.12l2.22 2.22 1.27-1.27L5.33 4.06z"/>
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+                  {t('refundTitle') || 'Issue Refund'}
+                </h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  {t('refundOrderNumber') || 'Order'} #{refundOrder.id?.slice(-8).toUpperCase()}
+                </p>
+              </div>
+            </div>
+
+            {/* Order Info */}
+            <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 mb-4">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm text-slate-600 dark:text-slate-400">{t('orderTotal') || 'Order Total'}</span>
+                <span className="font-bold text-slate-800 dark:text-slate-100">£{(refundOrder.total || 0).toFixed(2)}</span>
+              </div>
+              {(refundOrder.refund_total || 0) > 0 && (
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-orange-600 dark:text-orange-400">{t('alreadyRefunded') || 'Already Refunded'}</span>
+                  <span className="font-bold text-orange-600 dark:text-orange-400">-£{(refundOrder.refund_total || 0).toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between items-center pt-2 border-t border-slate-200 dark:border-slate-600">
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('maxRefundable') || 'Max Refundable'}</span>
+                <span className="font-bold text-green-600 dark:text-green-400">
+                  £{((refundOrder.total || 0) - (refundOrder.refund_total || 0)).toFixed(2)}
+                </span>
+              </div>
+            </div>
+
+            {/* Refund Amount */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                {t('refundAmount') || 'Refund Amount'} *
+              </label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-medium">£</span>
+                <input
+                  type="number"
+                  value={refundAmount}
+                  onChange={(e) => setRefundAmount(e.target.value)}
+                  step="0.01"
+                  min="0.01"
+                  max={(refundOrder.total || 0) - (refundOrder.refund_total || 0)}
+                  className="w-full pl-8 pr-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
+                  placeholder="0.00"
+                />
+              </div>
+              <div className="flex gap-2 mt-2">
+                <button
+                  onClick={() => setRefundAmount(((refundOrder.total || 0) - (refundOrder.refund_total || 0)).toFixed(2))}
+                  className="text-xs px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600"
+                >
+                  {t('fullRefund') || 'Full Refund'}
+                </button>
+                <button
+                  onClick={() => setRefundAmount((((refundOrder.total || 0) - (refundOrder.refund_total || 0)) / 2).toFixed(2))}
+                  className="text-xs px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600"
+                >
+                  {t('halfRefund') || '50%'}
+                </button>
+              </div>
+            </div>
+
+            {/* Refund Method */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                {t('refundMethod') || 'Refund Method'} *
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => setRefundMethod('cash')}
+                  className={`py-3 px-4 rounded-xl font-medium border-2 flex items-center justify-center gap-2 transition-colors ${
+                    refundMethod === 'cash'
+                      ? 'border-green-500 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                      : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
+                  </svg>
+                  {t('cash') || 'Cash'}
+                </button>
+                <button
+                  onClick={() => setRefundMethod('card')}
+                  className={`py-3 px-4 rounded-xl font-medium border-2 flex items-center justify-center gap-2 transition-colors ${
+                    refundMethod === 'card'
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                      : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+                  </svg>
+                  {t('card') || 'Card'}
+                </button>
+              </div>
+            </div>
+
+            {/* Refund Reason */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                {t('refundReason') || 'Reason for Refund'} *
+              </label>
+              <textarea
+                value={refundReason}
+                onChange={(e) => setRefundReason(e.target.value)}
+                rows={3}
+                className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 resize-none"
+                placeholder={t('refundReasonPlaceholder') || 'e.g., Customer complaint, wrong order, quality issue...'}
+              />
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowRefundModal(false)
+                  setRefundOrder(null)
+                }}
+                disabled={processingRefund}
+                className="flex-1 border-2 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 py-3 rounded-xl font-medium hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50"
+              >
+                {tc('cancel') || 'Cancel'}
+              </button>
+              <button
+                onClick={processRefund}
+                disabled={processingRefund || !refundAmount || !refundReason.trim()}
+                className="flex-1 bg-orange-500 text-white py-3 rounded-xl font-medium hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {processingRefund ? (
+                  <>
+                    <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    {t('processing') || 'Processing...'}
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12.5 6.9c1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-.53.12-1.03.3-1.48.54l1.47 1.47c.41-.17.91-.27 1.51-.27zM5.33 4.06L4.06 5.33 7.5 8.77c0 2.08 1.56 3.22 3.91 3.91l3.51 3.51c-.34.49-1.05.91-2.42.91-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c.96-.18 1.83-.55 2.46-1.12l2.22 2.22 1.27-1.27L5.33 4.06z"/>
+                    </svg>
+                    {t('processRefund') || 'Process Refund'}
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Void Modal */}
+      {showVoidModal && voidItem && voidOrder && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => {
+            setShowVoidModal(false)
+            setVoidItem(null)
+            setVoidOrder(null)
+          }}
+        >
+          <div
+            className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center">
+                <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+                  {t('voidTitle') || 'Void Item'}
+                </h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  {t('voidSubtitle') || 'Remove item from order before payment'}
+                </p>
+              </div>
+            </div>
+
+            {/* Item Info */}
+            <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 mb-4">
+              <div className="flex justify-between items-center mb-2">
+                <span className="font-medium text-slate-800 dark:text-slate-100">{voidItem.name}</span>
+                <span className="text-slate-600 dark:text-slate-300">
+                  £{voidItem.price_at_time?.toFixed(2)} each
+                </span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-slate-500 dark:text-slate-400">
+                  {t('voidCurrentQuantity') || 'Current quantity'}: {voidItem.quantity}
+                </span>
+                <span className="font-medium text-slate-700 dark:text-slate-200">
+                  {t('voidTotalValue') || 'Total'}: £{(voidItem.price_at_time * voidItem.quantity).toFixed(2)}
+                </span>
+              </div>
+            </div>
+
+            {/* Void Quantity */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                {t('voidQuantity') || 'Quantity to Void'}
+              </label>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setVoidQuantity(Math.max(1, voidQuantity - 1))}
+                  className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 flex items-center justify-center font-bold text-lg"
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  value={voidQuantity}
+                  onChange={(e) => setVoidQuantity(Math.min(voidItem.quantity, Math.max(1, parseInt(e.target.value) || 1)))}
+                  min="1"
+                  max={voidItem.quantity}
+                  className="w-20 text-center px-4 py-2 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-lg"
+                />
+                <button
+                  onClick={() => setVoidQuantity(Math.min(voidItem.quantity, voidQuantity + 1))}
+                  className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 flex items-center justify-center font-bold text-lg"
+                >
+                  +
+                </button>
+                {voidItem.quantity > 1 && (
+                  <button
+                    onClick={() => setVoidQuantity(voidItem.quantity)}
+                    className="text-xs px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50"
+                  >
+                    {t('voidAll') || 'Void All'}
+                  </button>
+                )}
+              </div>
+              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                {t('voidValueLabel') || 'Value to void'}: <span className="font-bold text-red-600 dark:text-red-400">
+                  £{(voidItem.price_at_time * voidQuantity).toFixed(2)}
+                </span>
+              </p>
+            </div>
+
+            {/* Void Reason */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                {t('voidReason') || 'Reason for Void'} *
+              </label>
+              <textarea
+                value={voidReason}
+                onChange={(e) => setVoidReason(e.target.value)}
+                rows={3}
+                className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 resize-none"
+                placeholder={t('voidReasonPlaceholder') || 'e.g., Customer changed mind, wrong item ordered, out of stock...'}
+              />
+              <div className="flex flex-wrap gap-2 mt-2">
+                <button
+                  onClick={() => setVoidReason(t('voidReasonChanged') || 'Customer changed mind')}
+                  className="text-xs px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600"
+                >
+                  {t('voidReasonChanged') || 'Customer changed mind'}
+                </button>
+                <button
+                  onClick={() => setVoidReason(t('voidReasonWrong') || 'Wrong item ordered')}
+                  className="text-xs px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600"
+                >
+                  {t('voidReasonWrong') || 'Wrong item'}
+                </button>
+                <button
+                  onClick={() => setVoidReason(t('voidReasonStock') || 'Out of stock')}
+                  className="text-xs px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600"
+                >
+                  {t('voidReasonStock') || 'Out of stock'}
+                </button>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowVoidModal(false)
+                  setVoidItem(null)
+                  setVoidOrder(null)
+                }}
+                disabled={processingVoid}
+                className="flex-1 border-2 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 py-3 rounded-xl font-medium hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50"
+              >
+                {tc('cancel') || 'Cancel'}
+              </button>
+              <button
+                onClick={processVoid}
+                disabled={processingVoid || !voidReason.trim()}
+                className="flex-1 bg-red-500 text-white py-3 rounded-xl font-medium hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {processingVoid ? (
+                  <>
+                    <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    {t('processing') || 'Processing...'}
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                    {t('confirmVoid') || 'Void Item'}
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
       </div>
   )

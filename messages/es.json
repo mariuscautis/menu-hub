@@ -569,6 +569,16 @@
       "unavailable": "No disponible",
       "cannotReduceExisting": "No se pueden reducir artículos existentes"
     },
+    "tableDetailsModal": {
+      "title": "Mesa {tableNumber}",
+      "activeOrders": "Pedidos Activos:",
+      "status": "Estado:",
+      "occupied": "Ocupada",
+      "available": "Disponible",
+      "viewAllOrders": "Ver Todos los Pedidos ({count})",
+      "activeOrdersTitle": "Pedidos Activos",
+      "orderNumber": "Pedido #{id}"
+    },
     "paymentModal": {
       "title": "Pagar Cuenta - Mesa {tableNumber}",
       "noUnpaidOrders": "No hay pedidos sin pagar para esta mesa",
@@ -577,7 +587,9 @@
       "status": "Estado",
       "totalToPay": "Total a Pagar",
       "payWithCash": "Pagar en Efectivo",
-      "payWithCard": "Pagar con Tarjeta"
+      "payWithCard": "Pagar con Tarjeta",
+      "or": "o",
+      "splitBill": "Dividir Cuenta"
     },
     "splitBillModal": {
       "title": "Dividir Cuenta - Mesa {tableNumber}",
@@ -622,7 +634,7 @@
       "confirmArrival": "¿Marcar {name} como llegado?"
     },
     "createReservationModal": {
-      "title": "Crear Reserva - Mesa {number}",
+      "title": "Crear Reserva - Mesa {tableNumber}",
       "date": "Fecha",
       "time": "Hora",
       "partySize": "Tamaño del Grupo",
@@ -630,11 +642,24 @@
       "customerNamePlaceholder": "Juan Pérez",
       "email": "Email",
       "emailPlaceholder": "juan@ejemplo.com",
+      "phone": "Teléfono (Opcional)",
       "phoneOptional": "Teléfono (Opcional)",
       "phonePlaceholder": "+34 123 456 7890",
+      "specialRequests": "Solicitudes Especiales (Opcional)",
       "specialRequestsOptional": "Solicitudes Especiales (Opcional)",
       "specialRequestsPlaceholder": "Cualquier restricción dietética o solicitudes especiales...",
-      "createReservation": "Crear Reserva"
+      "createReservation": "Crear Reserva",
+      "selectTime": "Seleccionar hora...",
+      "cancel": "Cancelar"
+    },
+    "timeSlotModal": {
+      "title": "Seleccionar Franja Horaria",
+      "tableInfo": "Mesa {tableNumber} - {date}",
+      "infoTitle": "Información de Franja Horaria",
+      "redSlots": "Franjas rojas",
+      "redSlotsBooked": "ya están reservadas",
+      "availableSlotsWhite": "Las franjas disponibles se muestran en blanco",
+      "reservationDuration": "Cada reserva dura 2 horas por defecto"
     },
     "cancelBookingModal": {
       "title": "Cancelar Reserva",

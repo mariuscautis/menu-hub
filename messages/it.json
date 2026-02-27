@@ -569,6 +569,16 @@
       "unavailable": "Non disponibile",
       "cannotReduceExisting": "Impossibile ridurre gli articoli esistenti"
     },
+    "tableDetailsModal": {
+      "title": "Tavolo {tableNumber}",
+      "activeOrders": "Ordini Attivi:",
+      "status": "Stato:",
+      "occupied": "Occupato",
+      "available": "Disponibile",
+      "viewAllOrders": "Vedi Tutti gli Ordini ({count})",
+      "activeOrdersTitle": "Ordini Attivi",
+      "orderNumber": "Ordine #{id}"
+    },
     "paymentModal": {
       "title": "Paga Conto - Tavolo {tableNumber}",
       "noUnpaidOrders": "Nessun ordine non pagato per questo tavolo",
@@ -577,7 +587,9 @@
       "status": "Stato",
       "totalToPay": "Totale da Pagare",
       "payWithCash": "Paga in Contanti",
-      "payWithCard": "Paga con Carta"
+      "payWithCard": "Paga con Carta",
+      "or": "oppure",
+      "splitBill": "Dividi Conto"
     },
     "splitBillModal": {
       "title": "Dividi Conto - Tavolo {tableNumber}",
@@ -622,7 +634,7 @@
       "confirmArrival": "Segnare {name} come arrivato?"
     },
     "createReservationModal": {
-      "title": "Crea Prenotazione - Tavolo {number}",
+      "title": "Crea Prenotazione - Tavolo {tableNumber}",
       "date": "Data",
       "time": "Ora",
       "partySize": "Dimensione Gruppo",
@@ -630,11 +642,24 @@
       "customerNamePlaceholder": "Mario Rossi",
       "email": "Email",
       "emailPlaceholder": "mario@esempio.com",
+      "phone": "Telefono (Opzionale)",
       "phoneOptional": "Telefono (Opzionale)",
       "phonePlaceholder": "+39 123 456 7890",
+      "specialRequests": "Richieste Speciali (Opzionale)",
       "specialRequestsOptional": "Richieste Speciali (Opzionale)",
       "specialRequestsPlaceholder": "Eventuali restrizioni dietetiche o richieste speciali...",
-      "createReservation": "Crea Prenotazione"
+      "createReservation": "Crea Prenotazione",
+      "selectTime": "Seleziona orario...",
+      "cancel": "Annulla"
+    },
+    "timeSlotModal": {
+      "title": "Seleziona Fascia Oraria",
+      "tableInfo": "Tavolo {tableNumber} - {date}",
+      "infoTitle": "Informazioni Fascia Oraria",
+      "redSlots": "Fasce rosse",
+      "redSlotsBooked": "sono già prenotate",
+      "availableSlotsWhite": "Le fasce disponibili sono mostrate in bianco",
+      "reservationDuration": "Ogni prenotazione dura 2 ore di default"
     },
     "cancelBookingModal": {
       "title": "Annulla Prenotazione",

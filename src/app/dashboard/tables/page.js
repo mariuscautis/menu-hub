@@ -87,6 +87,11 @@ export default function Tables() {
   const [availableItems, setAvailableItems] = useState([])
   const [splitBillTableId, setSplitBillTableId] = useState(null)
 
+  // Discount state for payment
+  const [availableDiscounts, setAvailableDiscounts] = useState([])
+  const [selectedDiscount, setSelectedDiscount] = useState(null)
+  const [discountAmount, setDiscountAmount] = useState(0)
+
   // Order modal UX state - category navigation and search
   const [selectedCategory, setSelectedCategory] = useState(null)
   const [productSearch, setProductSearch] = useState('')
@@ -1336,6 +1341,30 @@ export default function Tables() {
       }
 
       setUnpaidOrders(filteredOrders || [])
+
+      // Reset discount state
+      setSelectedDiscount(null)
+      setDiscountAmount(0)
+
+      // Fetch available discounts for this restaurant
+      if (restaurant && navigator.onLine) {
+        try {
+          const { data: discountsData } = await supabase
+            .from('discounts')
+            .select('*')
+            .eq('restaurant_id', restaurant.id)
+            .eq('is_active', true)
+            .order('name')
+
+          setAvailableDiscounts(discountsData || [])
+        } catch (discountErr) {
+          console.warn('Failed to fetch discounts:', discountErr)
+          setAvailableDiscounts([])
+        }
+      } else {
+        setAvailableDiscounts([])
+      }
+
       setShowPaymentModal(true)
     } catch (err) {
       console.error('Error opening payment modal:', err)
@@ -1657,7 +1686,8 @@ export default function Tables() {
       }
     }
 
-    const totalAmount = calculateTableTotal()
+    const subtotalAmount = calculateTableTotal()
+    const totalAmount = calculateFinalTotal() // After discount
 
     // OFFLINE CASH PAYMENT HANDLING
     if (!navigator.onLine) {
@@ -1740,6 +1770,31 @@ export default function Tables() {
       // Get order IDs - filter out offline-only orders that don't have real IDs
       const orderIds = unpaidOrders.filter(order => order.id && !order.id.toString().startsWith('offline_')).map(order => order.id)
 
+      // Apply discount to the first order if a discount is selected
+      // The discount is applied to the first order for simplicity in tracking
+      if (selectedDiscount && discountAmount > 0 && orderIds.length > 0) {
+        try {
+          const { error: discountError } = await supabase.rpc('apply_order_discount', {
+            p_order_id: orderIds[0],
+            p_discount_id: selectedDiscount.id,
+            p_discount_name: selectedDiscount.name,
+            p_discount_type: selectedDiscount.type,
+            p_discount_value: selectedDiscount.value,
+            p_reason: `Applied at payment - ${selectedDiscount.name}`,
+            p_applied_by_name: userName,
+            p_applied_by_id: userId
+          })
+
+          if (discountError) {
+            console.warn('Failed to apply discount:', discountError)
+            // Continue with payment even if discount fails
+          }
+        } catch (discountErr) {
+          console.warn('Error applying discount:', discountErr)
+          // Continue with payment even if discount fails
+        }
+      }
+
       // Use RPC function to process payment (bypasses RLS)
       // This function also marks the table as needs cleaning
       const { data, error } = await supabase.rpc('process_table_payment', {
@@ -1759,6 +1814,10 @@ export default function Tables() {
       setShowPaymentModal(false)
       setUnpaidOrders([])
 
+      // Reset discount state
+      setSelectedDiscount(null)
+      setDiscountAmount(0)
+
       // Store completed order IDs for invoice generation
       setCompletedOrderIds(orderIds)
 
@@ -1775,7 +1834,8 @@ export default function Tables() {
       await fetchTableOrderInfo(restaurant.id)
       await fetchData()
 
-      showNotification('success', `Payment of £${totalAmount.toFixed(2)} processed successfully via ${paymentMethod}!`)
+      const discountText = discountAmount > 0 ? ` (£${discountAmount.toFixed(2)} discount applied)` : ''
+      showNotification('success', `Payment of £${totalAmount.toFixed(2)} processed successfully via ${paymentMethod}!${discountText}`)
 
       // Show post-payment modal (with invoice option)
       setShowPostPaymentModal(true)
@@ -1795,6 +1855,49 @@ export default function Tables() {
       // Fall back to order.total if no items (shouldn't happen, but safety first)
       return orderSum + (orderItemsTotal > 0 ? orderItemsTotal : (order.total || 0))
     }, 0)
+  }
+
+  /**
+   * Calculate discount amount based on selected discount
+   * Returns the calculated discount amount
+   */
+  const calculateDiscountAmount = (subtotal, discount) => {
+    if (!discount) return 0
+
+    if (discount.type === 'percentage') {
+      return Math.round((subtotal * discount.value / 100) * 100) / 100
+    } else {
+      // Fixed amount - cap at subtotal
+      return Math.min(discount.value, subtotal)
+    }
+  }
+
+  /**
+   * Handle discount selection change
+   * Recalculates the discount amount when a discount is selected
+   */
+  const handleDiscountChange = (discountId) => {
+    if (!discountId || discountId === 'none') {
+      setSelectedDiscount(null)
+      setDiscountAmount(0)
+      return
+    }
+
+    const discount = availableDiscounts.find(d => d.id === discountId)
+    if (discount) {
+      const subtotal = calculateTableTotal()
+      const amount = calculateDiscountAmount(subtotal, discount)
+      setSelectedDiscount(discount)
+      setDiscountAmount(amount)
+    }
+  }
+
+  /**
+   * Calculate final total after discount
+   */
+  const calculateFinalTotal = () => {
+    const subtotal = calculateTableTotal()
+    return Math.max(0, subtotal - discountAmount)
   }
 
   const processSplitBillPayment = async (bill, paymentMethod) => {
@@ -3218,6 +3321,8 @@ export default function Tables() {
                   setShowPaymentModal(false)
                   setSelectedTable(null)
                   setUnpaidOrders([])
+                  setSelectedDiscount(null)
+                  setDiscountAmount(0)
                 }}
                 className="text-slate-400 hover:text-slate-600"
               >
@@ -3265,11 +3370,49 @@ export default function Tables() {
                   </div>
                 </div>
 
-                {/* Total */}
+                {/* Discount Selector - Only show if discounts are available and user is owner/admin */}
+                {availableDiscounts.length > 0 && (userType === 'owner' || userType === 'staff-admin') && (
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      {t('paymentModal.applyDiscount') || 'Apply Discount'}
+                    </label>
+                    <select
+                      value={selectedDiscount?.id || 'none'}
+                      onChange={(e) => handleDiscountChange(e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 bg-white"
+                    >
+                      <option value="none">{t('paymentModal.noDiscount') || 'No discount'}</option>
+                      {availableDiscounts.map((discount) => (
+                        <option key={discount.id} value={discount.id}>
+                          {discount.name} ({discount.type === 'percentage' ? `${discount.value}%` : `£${discount.value.toFixed(2)}`})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Total with Discount Breakdown */}
                 <div className="bg-[#6262bd]/10 rounded-xl p-4 mb-6">
-                  <div className="flex justify-between items-center">
+                  {/* Subtotal */}
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm text-slate-600">{t('paymentModal.subtotal') || 'Subtotal'}</span>
+                    <span className="text-sm font-medium text-slate-700">£{calculateTableTotal().toFixed(2)}</span>
+                  </div>
+
+                  {/* Discount (if applied) */}
+                  {selectedDiscount && discountAmount > 0 && (
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm text-green-600">
+                        {selectedDiscount.name} ({selectedDiscount.type === 'percentage' ? `${selectedDiscount.value}%` : `£${selectedDiscount.value.toFixed(2)}`})
+                      </span>
+                      <span className="text-sm font-medium text-green-600">-£{discountAmount.toFixed(2)}</span>
+                    </div>
+                  )}
+
+                  {/* Final Total */}
+                  <div className="flex justify-between items-center pt-2 border-t border-[#6262bd]/20">
                     <span className="font-semibold text-slate-700">{t('paymentModal.totalToPay')}</span>
-                    <span className="text-2xl font-bold text-[#6262bd]">£{calculateTableTotal().toFixed(2)}</span>
+                    <span className="text-2xl font-bold text-[#6262bd]">£{calculateFinalTotal().toFixed(2)}</span>
                   </div>
                 </div>
 
