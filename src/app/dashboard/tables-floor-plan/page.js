@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { supabase, clearOrdersCacheForTable, clearAllOrdersCache, clearTableOrdersLocalCache, wasTablePaidOffline, clearTablePaidOfflineStatus, markTableCleanedOffline } from '@/lib/supabase'
 import InvoiceClientModal from '@/components/invoices/InvoiceClientModal'
 import { generateInvoicePdfBase64, downloadInvoicePdf } from '@/lib/invoicePdfGenerator'
@@ -239,6 +240,7 @@ function FloorPlanElement({ element }) {
 // Main Staff Floor Plan View
 export default function StaffFloorPlanPage() {
   const router = useRouter()
+  const t = useTranslations('tables')
   const [restaurant, setRestaurant] = useState(null)
   const [staff, setStaff] = useState(null)
   const [floors, setFloors] = useState([])
@@ -2619,10 +2621,7 @@ export default function StaffFloorPlanPage() {
 
             {/* Table Info */}
             <div className="space-y-3 mb-6 p-4 bg-slate-50 dark:bg-slate-900 rounded-xl">
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-600 dark:text-slate-400">Capacity:</span>
-                <span className="font-semibold text-slate-800 dark:text-slate-200">{selectedTable.capacity} seats</span>
-              </div>
+              
               <div className="flex justify-between text-sm">
                 <span className="text-slate-600 dark:text-slate-400">Active Orders:</span>
                 <span className="font-semibold text-slate-800 dark:text-slate-200">
@@ -3613,10 +3612,10 @@ export default function StaffFloorPlanPage() {
             <div className="flex justify-between items-center mb-6">
               <div>
                 <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">
-                  {currentOrder ? 'Update Order' : 'Place Order'} - Table {selectedTable.table_number}
+                  {currentOrder ? t('orderModal.titleUpdate') : t('orderModal.titlePlace')} - {t('orderModal.tableTitle')?.replace('{tableNumber}', selectedTable.table_number) || `Table ${selectedTable.table_number}`}
                 </h2>
                 {currentOrder && (
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Order #{(currentOrder.id || currentOrder.client_id || 'new').slice(0, 8)}</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">{t('orderModal.orderNumber')?.replace('{id}', (currentOrder.id || currentOrder.client_id || 'new').slice(0, 8)) || `Order #${(currentOrder.id || currentOrder.client_id || 'new').slice(0, 8)}`}</p>
                 )}
               </div>
               <button
@@ -3645,9 +3644,9 @@ export default function StaffFloorPlanPage() {
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                   </svg>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-blue-900 dark:text-blue-200">Updating Existing Order</p>
+                    <p className="text-sm font-medium text-blue-900 dark:text-blue-200">{t('orderModal.updatingExistingOrder') || 'Updating Existing Order'}</p>
                     <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-                      You can add more items or increase quantities, but cannot remove items or reduce quantities. Only restaurant owners can modify placed orders.
+                      {t('orderModal.staffEditingInfo') || 'You can add more items or increase quantities, but cannot remove items or reduce quantities. Only restaurant owners can modify placed orders.'}
                     </p>
                   </div>
                 </div>
@@ -3665,7 +3664,7 @@ export default function StaffFloorPlanPage() {
                     </svg>
                     <input
                       type="text"
-                      placeholder="Search products..."
+                      placeholder={t('orderModal.searchProducts') || 'Search products...'}
                       value={productSearch}
                       onChange={(e) => setProductSearch(e.target.value)}
                       className="w-full pl-10 pr-10 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6262bd]/50 focus:border-[#6262bd] text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 bg-white dark:bg-slate-700 transition-colors"
@@ -3685,13 +3684,13 @@ export default function StaffFloorPlanPage() {
 
                 {menuItems.length === 0 ? (
                   <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-8 text-center">
-                    <p className="text-slate-500 dark:text-slate-400">No menu items available</p>
-                    <p className="text-sm text-slate-400 dark:text-slate-500 mt-2">Add items in the Menu tab first</p>
+                    <p className="text-slate-500 dark:text-slate-400">{t('orderModal.noMenuItems') || 'No menu items available'}</p>
+                    <p className="text-sm text-slate-400 dark:text-slate-500 mt-2">{t('orderModal.addItemsFirst') || 'Add items in the Menu tab first'}</p>
                   </div>
                 ) : productSearch ? (
                   /* Search Results View */
                   <div className="flex-1 overflow-y-auto pr-2">
-                    <h3 className="font-semibold text-slate-700 dark:text-slate-300 mb-3">Search Results</h3>
+                    <h3 className="font-semibold text-slate-700 dark:text-slate-300 mb-3">{t('orderModal.searchResults') || 'Search Results'}</h3>
                     {(() => {
                       const searchLower = productSearch.toLowerCase()
                       const filteredItems = menuItems.filter(item =>
@@ -3701,7 +3700,7 @@ export default function StaffFloorPlanPage() {
                       if (filteredItems.length === 0) {
                         return (
                           <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-6 text-center">
-                            <p className="text-slate-500 dark:text-slate-400">No products found</p>
+                            <p className="text-slate-500 dark:text-slate-400">{t('orderModal.noProductsFound') || 'No products found'}</p>
                           </div>
                         )
                       }
@@ -3735,7 +3734,7 @@ export default function StaffFloorPlanPage() {
                               <div className="mt-auto pt-2 flex items-center justify-between">
                                 <span className="font-semibold text-[#6262bd]">£{item.price.toFixed(2)}</span>
                                 {!item.available && (
-                                  <span className="text-xs text-red-500">Unavailable</span>
+                                  <span className="text-xs text-red-500">{t('orderModal.unavailable') || 'Unavailable'}</span>
                                 )}
                               </div>
                             </button>
@@ -3747,7 +3746,7 @@ export default function StaffFloorPlanPage() {
                 ) : !selectedCategory ? (
                   /* Categories Grid View */
                   <div className="flex-1 overflow-y-auto pr-2">
-                    <h3 className="font-semibold text-slate-700 dark:text-slate-300 mb-3">Select a Category</h3>
+                    <h3 className="font-semibold text-slate-700 dark:text-slate-300 mb-3">{t('orderModal.selectCategory') || 'Select a Category'}</h3>
                     {categories.length > 0 ? (
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         {categories.map(category => {
@@ -3765,7 +3764,7 @@ export default function StaffFloorPlanPage() {
                                 </svg>
                               </div>
                               <span className="font-semibold text-slate-700 dark:text-slate-200 text-center">{category.name}</span>
-                              <span className="text-xs text-slate-500 dark:text-slate-400 mt-1">{categoryItems.length} {categoryItems.length === 1 ? 'item' : 'items'}</span>
+                              <span className="text-xs text-slate-500 dark:text-slate-400 mt-1">{categoryItems.length} {categoryItems.length === 1 ? (t('orderModal.item') || 'item') : (t('orderModal.items') || 'items')}</span>
                             </button>
                           )
                         })}
@@ -3775,7 +3774,7 @@ export default function StaffFloorPlanPage() {
                           if (uncategorizedItems.length === 0) return null
                           return (
                             <button
-                              onClick={() => setSelectedCategory({ id: 'uncategorized', name: 'Other' })}
+                              onClick={() => setSelectedCategory({ id: 'uncategorized', name: t('orderModal.uncategorized') || 'Other' })}
                               className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800 hover:from-[#6262bd]/10 hover:to-[#6262bd]/5 dark:hover:from-[#6262bd]/20 dark:hover:to-[#6262bd]/10 rounded-xl transition-all hover:shadow-md border border-slate-200 dark:border-slate-600 hover:border-[#6262bd]/30"
                             >
                               <div className="w-12 h-12 rounded-full bg-slate-200 dark:bg-slate-600 flex items-center justify-center mb-3">
@@ -3783,8 +3782,8 @@ export default function StaffFloorPlanPage() {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                                 </svg>
                               </div>
-                              <span className="font-semibold text-slate-700 dark:text-slate-200 text-center">Other</span>
-                              <span className="text-xs text-slate-500 dark:text-slate-400 mt-1">{uncategorizedItems.length} {uncategorizedItems.length === 1 ? 'item' : 'items'}</span>
+                              <span className="font-semibold text-slate-700 dark:text-slate-200 text-center">{t('orderModal.uncategorized') || 'Other'}</span>
+                              <span className="text-xs text-slate-500 dark:text-slate-400 mt-1">{uncategorizedItems.length} {uncategorizedItems.length === 1 ? (t('orderModal.item') || 'item') : (t('orderModal.items') || 'items')}</span>
                             </button>
                           )
                         })()}
@@ -3820,7 +3819,7 @@ export default function StaffFloorPlanPage() {
                               <div className="mt-auto pt-2 flex items-center justify-between">
                                 <span className="font-semibold text-[#6262bd]">£{item.price.toFixed(2)}</span>
                                 {!item.available && (
-                                  <span className="text-xs text-red-500">Unavailable</span>
+                                  <span className="text-xs text-red-500">{t('orderModal.unavailable') || 'Unavailable'}</span>
                                 )}
                               </div>
                             </button>
@@ -3839,7 +3838,7 @@ export default function StaffFloorPlanPage() {
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                         </svg>
-                        Back
+                        {t('orderModal.back') || 'Back'}
                       </button>
                       <h3 className="font-semibold text-slate-700 dark:text-slate-300">{selectedCategory.name}</h3>
                     </div>
@@ -3881,7 +3880,7 @@ export default function StaffFloorPlanPage() {
                               <div className="mt-auto pt-2 flex items-center justify-between">
                                 <span className="font-semibold text-[#6262bd]">£{item.price.toFixed(2)}</span>
                                 {!item.available && (
-                                  <span className="text-xs text-red-500">Unavailable</span>
+                                  <span className="text-xs text-red-500">{t('orderModal.unavailable') || 'Unavailable'}</span>
                                 )}
                               </div>
                             </button>
@@ -3895,10 +3894,10 @@ export default function StaffFloorPlanPage() {
 
               {/* Order Summary */}
               <div>
-                <h3 className="font-semibold text-slate-700 dark:text-slate-300 mb-4">Order Summary</h3>
+                <h3 className="font-semibold text-slate-700 dark:text-slate-300 mb-4">{t('orderModal.orderSummary') || 'Order Summary'}</h3>
                 {orderItems.length === 0 ? (
                   <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-6 text-center">
-                    <p className="text-slate-500 dark:text-slate-400">No items added yet</p>
+                    <p className="text-slate-500 dark:text-slate-400">{t('orderModal.noItemsAdded') || 'No items added yet'}</p>
                   </div>
                 ) : (
                   <>
@@ -3915,11 +3914,11 @@ export default function StaffFloorPlanPage() {
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1">
                                 <p className="font-medium text-slate-800 dark:text-slate-200 text-sm">{item.quantity}x {item.name}</p>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">£{item.price_at_time.toFixed(2)} each</p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">£{item.price_at_time.toFixed(2)} {t('orderModal.each') || 'each'}</p>
 
                                 {item.isExisting && hasNewItems && (
                                   <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                                    {item.existingQuantity} existing + {newQuantity} new
+                                    {t('orderModal.quantityBreakdown')?.replace('{existing}', item.existingQuantity).replace('{new}', newQuantity) || `${item.existingQuantity} existing + ${newQuantity} new`}
                                   </p>
                                 )}
 
@@ -3982,7 +3981,7 @@ export default function StaffFloorPlanPage() {
 
                     <div className="bg-primary/10 rounded-xl p-4 mb-4">
                       <div className="flex justify-between items-center">
-                        <span className="font-semibold text-slate-700 dark:text-slate-300">Total</span>
+                        <span className="font-semibold text-slate-700 dark:text-slate-300">{t('orderModal.total') || 'Total'}</span>
                         <span className="text-xl font-bold text-primary">£{calculateTotal().toFixed(2)}</span>
                       </div>
                     </div>
@@ -3991,7 +3990,7 @@ export default function StaffFloorPlanPage() {
                       onClick={submitOrder}
                       className="w-full bg-primary text-white py-3 rounded-xl font-semibold hover:bg-primary-hover"
                     >
-                      {currentOrder ? 'Update Order' : 'Place Order'}
+                      {currentOrder ? (t('orderModal.updateOrder') || 'Update Order') : (t('orderModal.placeOrder') || 'Place Order')}
                     </button>
                   </>
                 )}
