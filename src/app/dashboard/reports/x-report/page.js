@@ -403,7 +403,7 @@ export default function XReportPage() {
       {/* Report Content - Reusing Z-Report structure */}
       <div className="space-y-6">
         {/* Quick Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
             <p className="text-sm text-slate-500 dark:text-slate-400">{tZ('netSales') || 'Net Sales'}</p>
             <p className="text-2xl font-bold text-[#6262bd]">{formatCurrency(reportData.netSales)}</p>
@@ -411,6 +411,10 @@ export default function XReportPage() {
           <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
             <p className="text-sm text-slate-500 dark:text-slate-400">{tZ('totalOrders') || 'Total Orders'}</p>
             <p className="text-2xl font-bold text-slate-800 dark:text-slate-200">{reportData.totalOrders}</p>
+          </div>
+          <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
+            <p className="text-sm text-slate-500 dark:text-slate-400">{tZ('discounts') || 'Discounts'}</p>
+            <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{formatCurrency(reportData.discountTotal)}</p>
           </div>
           <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
             <p className="text-sm text-slate-500 dark:text-slate-400">{tZ('totalTips') || 'Total Tips'}</p>

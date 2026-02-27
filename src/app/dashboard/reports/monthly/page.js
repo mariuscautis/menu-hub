@@ -383,6 +383,14 @@ export default function MonthlyReportPage() {
                   {formatCurrency(reportData.totalRevenue)}
                 </span>
               </div>
+              {reportData.totalDiscounts > 0 && (
+                <div className="flex justify-between items-center py-3 border-b border-slate-100 dark:border-slate-800">
+                  <span className="text-slate-600 dark:text-slate-400">{t('totalDiscounts') || 'Total Discounts'}</span>
+                  <span className="text-xl font-bold text-orange-600 dark:text-orange-400">
+                    -{formatCurrency(reportData.totalDiscounts)}
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between items-center py-3 border-b border-slate-100 dark:border-slate-800">
                 <span className="text-slate-600 dark:text-slate-400">{t('totalCosts') || 'Total Costs'}</span>
                 <span className="text-xl font-bold text-red-600 dark:text-red-400">
@@ -426,6 +434,18 @@ export default function MonthlyReportPage() {
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
               <p className="text-sm text-slate-500 dark:text-slate-400">Total Orders</p>
               <p className="text-xl font-bold text-slate-800 dark:text-slate-200">{reportData.totalOrders}</p>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t('totalDiscounts') || 'Discounts Given'}</p>
+              <p className="text-xl font-bold text-orange-600 dark:text-orange-400">
+                {formatCurrency(reportData.totalDiscounts)}
+              </p>
+              {reportData.totalRevenue > 0 && reportData.totalDiscounts > 0 && (
+                <p className="text-sm text-slate-500 mt-1">
+                  {((reportData.totalDiscounts / (reportData.totalRevenue + reportData.totalDiscounts)) * 100).toFixed(1)}% of gross
+                </p>
+              )}
             </div>
 
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
