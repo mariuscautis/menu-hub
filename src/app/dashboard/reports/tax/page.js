@@ -46,6 +46,13 @@ export default function TaxReportPage() {
     fetchRestaurant();
   }, []);
 
+  // Auto-fetch report when restaurant or dates change
+  useEffect(() => {
+    if (restaurant?.id) {
+      fetchReportData();
+    }
+  }, [restaurant?.id, startDate, endDate]);
+
   const fetchRestaurant = async () => {
     try {
       const staffSessionData = localStorage.getItem('staff_session');
@@ -97,73 +104,53 @@ export default function TaxReportPage() {
 
       if (error) throw error;
 
+      // Get restaurant's default tax rate for calculating VAT when not stored
+      const defaultTaxRate = parseFloat(restaurant.menu_sales_tax_rate || 20);
+
       // Calculate tax totals
       let totalTax = 0;
       let totalSales = 0;
-      let zeroRatedAmount = 0;
-      let reducedRateAmount = 0;
       let standardRateAmount = 0;
-      let zeroRatedTax = 0;
-      let reducedRateTax = 0;
       let standardRateTax = 0;
 
       orders?.forEach(order => {
         const orderTotal = parseFloat(order.total || 0);
-        const orderTax = parseFloat(order.tax_amount || 0);
         const orderSubtotal = parseFloat(order.subtotal || order.total || 0);
+
+        // Calculate tax: use stored tax_amount if available, otherwise calculate from total
+        let orderTax = parseFloat(order.tax_amount || 0);
+        if (orderTax === 0 && orderTotal > 0 && defaultTaxRate > 0) {
+          // Calculate VAT included in the total price
+          orderTax = orderTotal - (orderTotal / (1 + defaultTaxRate / 100));
+        }
 
         totalSales += orderTotal;
         totalTax += orderTax;
 
-        // If we have explicit tax amounts, use them
-        // Otherwise, estimate based on typical breakdown
-        // Note: This is a simplified model - real implementation would
-        // need to track tax per item based on product tax categories
+        // Track amounts for standard rate
         if (orderTax > 0) {
-          // Assume all collected tax is standard rate for now
           standardRateAmount += orderSubtotal;
           standardRateTax += orderTax;
-        } else {
-          // If no tax recorded, treat as potentially zero-rated
-          zeroRatedAmount += orderTotal;
         }
       });
 
       // Build tax breakdown
       const taxBreakdown = [];
 
-      if (zeroRatedAmount > 0) {
+      if (standardRateTax > 0) {
         taxBreakdown.push({
-          rate: '0%',
-          name: t('zeroRated') || 'Zero Rated (0%)',
-          taxableAmount: zeroRatedAmount,
-          taxCollected: 0
-        });
-      }
-
-      if (reducedRateAmount > 0) {
-        taxBreakdown.push({
-          rate: '5%',
-          name: t('reducedRate') || 'Reduced Rate (5%)',
-          taxableAmount: reducedRateAmount,
-          taxCollected: reducedRateTax
-        });
-      }
-
-      if (standardRateAmount > 0 || standardRateTax > 0) {
-        taxBreakdown.push({
-          rate: '20%',
-          name: t('standardRate') || 'Standard Rate (20%)',
+          rate: `${defaultTaxRate}%`,
+          name: `${restaurant.menu_sales_tax_name || 'VAT'} (${defaultTaxRate}%)`,
           taxableAmount: standardRateAmount,
           taxCollected: standardRateTax
         });
       }
 
-      // If no breakdown but we have tax, show total
-      if (taxBreakdown.length === 0 && totalTax > 0) {
+      // If no breakdown but we have sales, show calculated total
+      if (taxBreakdown.length === 0 && totalSales > 0) {
         taxBreakdown.push({
-          rate: 'Mixed',
-          name: 'All Sales',
+          rate: `${defaultTaxRate}%`,
+          name: `${restaurant.menu_sales_tax_name || 'VAT'} (${defaultTaxRate}%)`,
           taxableAmount: totalSales,
           taxCollected: totalTax
         });

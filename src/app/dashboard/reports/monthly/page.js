@@ -103,29 +103,57 @@ export default function MonthlyReportPage() {
       const prevMonthStart = new Date(year, month - 2, 1);
       const prevMonthEnd = new Date(year, month - 1, 0);
 
-      // Fetch orders for selected month with order_items
+      // Fetch orders for selected month
       const { data: orders, error } = await supabase
         .from('orders')
-        .select(`
-          *,
-          order_items (
-            id,
-            quantity,
-            price,
-            menu_item_id,
-            menu_items (
-              id,
-              name,
-              base_cost
-            )
-          )
-        `)
+        .select('*')
         .eq('restaurant_id', restaurant.id)
         .eq('paid', true)
         .gte('created_at', monthStart.toISOString())
         .lte('created_at', `${monthEnd.toISOString().split('T')[0]}T23:59:59.999Z`);
 
       if (error) throw error;
+
+      // Fetch order_items with menu_items for cost calculation (separate query to avoid join issues)
+      let orderItemsMap = {};
+      if (orders && orders.length > 0) {
+        const orderIds = orders.map(o => o.id);
+        try {
+          const { data: orderItems } = await supabase
+            .from('order_items')
+            .select('order_id, quantity, menu_item_id')
+            .in('order_id', orderIds);
+
+          // Get unique menu item IDs
+          const menuItemIds = [...new Set((orderItems || []).map(oi => oi.menu_item_id).filter(Boolean))];
+
+          // Fetch menu items with base_cost
+          let menuItemsMap = {};
+          if (menuItemIds.length > 0) {
+            const { data: menuItems } = await supabase
+              .from('menu_items')
+              .select('id, base_cost')
+              .in('id', menuItemIds);
+
+            (menuItems || []).forEach(mi => {
+              menuItemsMap[mi.id] = mi;
+            });
+          }
+
+          // Build order items map with costs
+          (orderItems || []).forEach(oi => {
+            if (!orderItemsMap[oi.order_id]) {
+              orderItemsMap[oi.order_id] = [];
+            }
+            orderItemsMap[oi.order_id].push({
+              ...oi,
+              menu_items: menuItemsMap[oi.menu_item_id] || null
+            });
+          });
+        } catch (e) {
+          console.warn('Could not fetch order items for cost calculation:', e);
+        }
+      }
 
       // Fetch previous month orders
       const { data: prevOrders } = await supabase
@@ -162,7 +190,8 @@ export default function MonthlyReportPage() {
 
         // Calculate material costs from order items (COGS - Cost of Goods Sold)
         let orderMaterialCost = 0;
-        order.order_items?.forEach(item => {
+        const orderItems = orderItemsMap[order.id] || [];
+        orderItems.forEach(item => {
           const baseCost = parseFloat(item.menu_items?.base_cost || 0);
           const quantity = parseInt(item.quantity || 1);
           orderMaterialCost += baseCost * quantity;
