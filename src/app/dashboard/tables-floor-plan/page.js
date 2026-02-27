@@ -292,6 +292,11 @@ export default function StaffFloorPlanPage() {
   const [availableItems, setAvailableItems] = useState([])
   const [splitBillTableId, setSplitBillTableId] = useState(null) // Store table ID for split bill session
 
+  // Discount state for payment
+  const [availableDiscounts, setAvailableDiscounts] = useState([])
+  const [selectedDiscount, setSelectedDiscount] = useState(null)
+  const [discountAmount, setDiscountAmount] = useState(0)
+
   // Order modal state
   const [showOrderModal, setShowOrderModal] = useState(false)
   const [menuItems, setMenuItems] = useState([])
@@ -1860,6 +1865,36 @@ export default function StaffFloorPlanPage() {
       }
 
       setUnpaidOrders(allOrders)
+
+      // Reset discount state
+      setSelectedDiscount(null)
+      setDiscountAmount(0)
+
+      // Fetch available discounts for this restaurant
+      if (restaurant && navigator.onLine) {
+        try {
+          const { data: discountsData, error: discountsError } = await supabase
+            .from('discounts')
+            .select('*')
+            .eq('restaurant_id', restaurant.id)
+            .eq('active', true)
+            .order('name')
+
+          if (discountsError) {
+            console.error('Error fetching discounts:', discountsError)
+            setAvailableDiscounts([])
+          } else {
+            console.log('Fetched discounts:', discountsData?.length || 0, 'items')
+            setAvailableDiscounts(discountsData || [])
+          }
+        } catch (discountErr) {
+          console.warn('Failed to fetch discounts:', discountErr)
+          setAvailableDiscounts([])
+        }
+      } else {
+        setAvailableDiscounts([])
+      }
+
       setShowPaymentModal(true)
     } catch (err) {
       console.error('Error fetching orders:', err)
@@ -1869,6 +1904,32 @@ export default function StaffFloorPlanPage() {
 
   const calculateTableTotal = () => {
     return unpaidOrders.reduce((sum, order) => sum + (order.total || 0), 0)
+  }
+
+  const calculateFinalTotal = () => {
+    const subtotal = calculateTableTotal()
+    return Math.max(0, subtotal - discountAmount)
+  }
+
+  const handleDiscountChange = (discountId) => {
+    if (discountId === 'none') {
+      setSelectedDiscount(null)
+      setDiscountAmount(0)
+      return
+    }
+
+    const discount = availableDiscounts.find(d => d.id === discountId)
+    if (!discount) return
+
+    setSelectedDiscount(discount)
+
+    const subtotal = calculateTableTotal()
+    if (discount.type === 'percentage') {
+      setDiscountAmount(subtotal * (discount.value / 100))
+    } else {
+      // Fixed amount
+      setDiscountAmount(Math.min(discount.value, subtotal))
+    }
   }
 
   const processPayment = async (paymentMethod) => {
@@ -1893,7 +1954,8 @@ export default function StaffFloorPlanPage() {
       }
     }
 
-    const totalAmount = calculateTableTotal()
+    const subtotalAmount = calculateTableTotal()
+    const finalAmount = calculateFinalTotal()
 
     // OFFLINE CASH PAYMENT HANDLING
     if (!navigator.onLine) {
@@ -1907,13 +1969,15 @@ export default function StaffFloorPlanPage() {
         const orderIds = unpaidOrders.filter(o => o.id && !o.client_id).map(o => o.id)
         const orderClientIds = unpaidOrders.filter(o => o.client_id).map(o => o.client_id)
 
-        // Store payment locally for later sync
+        // Store payment locally for later sync (with discount info)
         await addPendingPayment({
           restaurant_id: restaurant.id,
           table_id: selectedTable.id,
           order_ids: orderIds,
           order_client_ids: orderClientIds,
-          total_amount: totalAmount,
+          total_amount: finalAmount,
+          discount_amount: discountAmount,
+          discount_id: selectedDiscount?.id || null,
           payment_method: 'cash',
           staff_name: userName,
           user_id: userId,
@@ -1955,7 +2019,7 @@ export default function StaffFloorPlanPage() {
         // This prevents stale cached orders from appearing when placing new orders
         clearOrdersCacheForTable(selectedTable.id)
 
-        showNotificationMessage('success', `Cash payment of £${totalAmount.toFixed(2)} saved offline. Will sync when internet is restored.`)
+        showNotificationMessage('success', `Cash payment of £${finalAmount.toFixed(2)} saved offline. Will sync when internet is restored.`)
 
         // Don't show post-payment modal for offline payments (invoice generation needs internet)
         return
@@ -1989,6 +2053,27 @@ export default function StaffFloorPlanPage() {
       setUnpaidOrders([])
       setCompletedOrderIds(orderIds)
 
+      // Apply discount AFTER payment processing to ensure it's not overwritten
+      if (selectedDiscount && discountAmount > 0 && orderIds.length > 0) {
+        console.log('Setting discount_total after payment:', {
+          orderId: orderIds[0],
+          discountAmount
+        })
+
+        const { error: discountUpdateError } = await supabase
+          .from('orders')
+          .update({
+            discount_total: discountAmount
+          })
+          .eq('id', orderIds[0])
+
+        if (discountUpdateError) {
+          console.error('Failed to set discount_total after payment:', discountUpdateError)
+        } else {
+          console.log('Successfully set discount_total:', discountAmount)
+        }
+      }
+
       // Clean up any stale offline orders for this table
       await clearPaidOfflineOrders(selectedTable.id)
 
@@ -1999,7 +2084,7 @@ export default function StaffFloorPlanPage() {
       await loadFloorData(currentFloor.id, restaurant.id)
       await fetchTableOrderInfo(restaurant.id)
 
-      showNotificationMessage('success', `Payment of £${totalAmount.toFixed(2)} processed successfully via ${paymentMethod}!`)
+      showNotificationMessage('success', `Payment of £${finalAmount.toFixed(2)} processed successfully via ${paymentMethod}!`)
 
       // Show post-payment modal (with invoice option)
       setShowPostPaymentModal(true)
@@ -3077,6 +3162,9 @@ export default function StaffFloorPlanPage() {
                   setShowPaymentModal(false)
                   setSelectedTable(null)
                   setUnpaidOrders([])
+                  setSelectedDiscount(null)
+                  setDiscountAmount(0)
+                  setAvailableDiscounts([])
                 }}
                 className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
               >
@@ -3117,11 +3205,49 @@ export default function StaffFloorPlanPage() {
                   </div>
                 </div>
 
-                {/* Total */}
+                {/* Discount Selector - Show to all staff if discounts are available */}
+                {availableDiscounts.length > 0 && (
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      {t('paymentModal.applyDiscount') || 'Apply Discount'}
+                    </label>
+                    <select
+                      value={selectedDiscount?.id || 'none'}
+                      onChange={(e) => handleDiscountChange(e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-primary text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800"
+                    >
+                      <option value="none">{t('paymentModal.noDiscount') || 'No discount'}</option>
+                      {availableDiscounts.map((discount) => (
+                        <option key={discount.id} value={discount.id}>
+                          {discount.name} ({discount.type === 'percentage' ? `${discount.value}%` : `£${discount.value.toFixed(2)}`})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Total with Discount Breakdown */}
                 <div className="bg-primary/10 rounded-xl p-4 mb-6">
-                  <div className="flex justify-between items-center">
+                  {/* Subtotal */}
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm text-slate-600 dark:text-slate-400">{t('paymentModal.subtotal') || 'Subtotal'}</span>
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">£{calculateTableTotal().toFixed(2)}</span>
+                  </div>
+
+                  {/* Discount (if applied) */}
+                  {selectedDiscount && discountAmount > 0 && (
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm text-green-600 dark:text-green-400">
+                        {selectedDiscount.name} ({selectedDiscount.type === 'percentage' ? `${selectedDiscount.value}%` : `£${selectedDiscount.value.toFixed(2)}`})
+                      </span>
+                      <span className="text-sm font-medium text-green-600 dark:text-green-400">-£{discountAmount.toFixed(2)}</span>
+                    </div>
+                  )}
+
+                  {/* Final Total */}
+                  <div className="flex justify-between items-center pt-2 border-t border-primary/20">
                     <span className="font-semibold text-slate-700 dark:text-slate-300">{t('paymentModal.totalToPay') || 'Total to Pay'}</span>
-                    <span className="text-2xl font-bold text-primary">£{calculateTableTotal().toFixed(2)}</span>
+                    <span className="text-2xl font-bold text-primary">£{calculateFinalTotal().toFixed(2)}</span>
                   </div>
                 </div>
 
