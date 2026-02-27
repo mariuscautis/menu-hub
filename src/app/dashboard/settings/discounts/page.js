@@ -113,7 +113,7 @@ export default function DiscountsSettings() {
       .from('discounts')
       .select('*')
       .eq('restaurant_id', restaurantId)
-      .eq('is_active', true)
+      .eq('active', true)
       .order('name')
 
     if (error) {
@@ -271,7 +271,7 @@ export default function DiscountsSettings() {
     try {
       const { error } = await supabase
         .from('discounts')
-        .update({ is_active: false, updated_at: new Date().toISOString() })
+        .update({ active: false, updated_at: new Date().toISOString() })
         .eq('id', id)
 
       if (error) throw error

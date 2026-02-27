@@ -1353,7 +1353,7 @@ export default function Tables() {
             .from('discounts')
             .select('*')
             .eq('restaurant_id', restaurant.id)
-            .eq('is_active', true)
+            .eq('active', true)
             .order('name')
 
           setAvailableDiscounts(discountsData || [])
