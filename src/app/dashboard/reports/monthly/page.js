@@ -39,7 +39,8 @@ export default function MonthlyReportPage() {
     profitMargin: 0,
     totalOrders: 0,
     totalDiscounts: 0,
-    totalRefunds: 0,
+    totalTaxCollected: 0,
+    totalMaterialCosts: 0,
     laborCost: 0,
     weeklyBreakdown: []
   });
@@ -102,10 +103,23 @@ export default function MonthlyReportPage() {
       const prevMonthStart = new Date(year, month - 2, 1);
       const prevMonthEnd = new Date(year, month - 1, 0);
 
-      // Fetch orders for selected month
+      // Fetch orders for selected month with order_items
       const { data: orders, error } = await supabase
         .from('orders')
-        .select('*')
+        .select(`
+          *,
+          order_items (
+            id,
+            quantity,
+            price,
+            menu_item_id,
+            menu_items (
+              id,
+              name,
+              base_cost
+            )
+          )
+        `)
         .eq('restaurant_id', restaurant.id)
         .eq('paid', true)
         .gte('created_at', monthStart.toISOString())
@@ -122,10 +136,15 @@ export default function MonthlyReportPage() {
         .gte('created_at', prevMonthStart.toISOString())
         .lte('created_at', `${prevMonthEnd.toISOString().split('T')[0]}T23:59:59.999Z`);
 
+      // Get restaurant's default tax rate for calculating VAT
+      const defaultTaxRate = parseFloat(restaurant.menu_sales_tax_rate || 20);
+
       // Calculate totals
       let totalRevenue = 0;
       let totalOrders = 0;
       let totalDiscounts = 0;
+      let totalTaxCollected = 0;
+      let totalMaterialCosts = 0;
 
       // Weekly breakdown initialization
       const weeklyData = {};
@@ -135,9 +154,25 @@ export default function MonthlyReportPage() {
         const orderDiscount = parseFloat(order.discount_total || 0);
         const orderDate = new Date(order.created_at);
 
+        // Calculate tax from order if available, otherwise estimate from total
+        let orderTax = parseFloat(order.tax_amount || 0);
+        if (orderTax === 0 && orderTotal > 0 && defaultTaxRate > 0) {
+          orderTax = orderTotal - (orderTotal / (1 + defaultTaxRate / 100));
+        }
+
+        // Calculate material costs from order items (COGS - Cost of Goods Sold)
+        let orderMaterialCost = 0;
+        order.order_items?.forEach(item => {
+          const baseCost = parseFloat(item.menu_items?.base_cost || 0);
+          const quantity = parseInt(item.quantity || 1);
+          orderMaterialCost += baseCost * quantity;
+        });
+
         totalRevenue += orderTotal;
         totalOrders++;
         totalDiscounts += orderDiscount;
+        totalTaxCollected += orderTax;
+        totalMaterialCosts += orderMaterialCost;
 
         // Determine week number within month
         const dayOfMonth = orderDate.getDate();
@@ -155,6 +190,7 @@ export default function MonthlyReportPage() {
         }
         weeklyData[weekKey].revenue += orderTotal;
         weeklyData[weekKey].orders++;
+        weeklyData[weekKey].costs += orderMaterialCost;
       });
 
       // Previous month revenue
@@ -165,8 +201,10 @@ export default function MonthlyReportPage() {
         ? ((totalRevenue - previousMonthRevenue) / previousMonthRevenue) * 100
         : 0;
 
-      // Fetch costs (from stock purchases/invoices)
-      let totalCosts = 0;
+      // Total costs includes material costs from recipes
+      let totalCosts = totalMaterialCosts;
+
+      // Also add purchasing invoices if available (overhead costs)
       try {
         const { data: invoices } = await supabase
           .from('purchasing_invoices')
@@ -175,7 +213,7 @@ export default function MonthlyReportPage() {
           .gte('invoice_date', monthStart.toISOString().split('T')[0])
           .lte('invoice_date', monthEnd.toISOString().split('T')[0]);
 
-        totalCosts = invoices?.reduce((sum, inv) => sum + parseFloat(inv.total_amount || 0), 0) || 0;
+        totalCosts += invoices?.reduce((sum, inv) => sum + parseFloat(inv.total_amount || 0), 0) || 0;
       } catch (e) {
         console.warn('Could not fetch invoices:', e);
       }
@@ -224,21 +262,25 @@ export default function MonthlyReportPage() {
       const grossProfit = totalRevenue - totalCosts;
       const profitMargin = totalRevenue > 0 ? (grossProfit / totalRevenue) * 100 : 0;
 
-      // Finalize weekly breakdown
+      // Finalize weekly breakdown - add labor costs proportionally
       const weeklyBreakdown = Object.values(weeklyData).sort((a, b) => {
         const weekA = parseInt(a.week.split(' ')[1]);
         const weekB = parseInt(b.week.split(' ')[1]);
         return weekA - weekB;
       });
 
-      // Estimate weekly costs (proportional)
-      if (totalCosts > 0 && totalOrders > 0) {
+      // Add proportional labor costs to weekly material costs
+      if (laborCost > 0 && totalOrders > 0) {
         weeklyBreakdown.forEach(week => {
           const proportion = week.orders / totalOrders;
-          week.costs = totalCosts * proportion;
-          week.profit = week.revenue - week.costs;
+          week.costs += laborCost * proportion;
         });
       }
+
+      // Calculate profit for each week
+      weeklyBreakdown.forEach(week => {
+        week.profit = week.revenue - week.costs;
+      });
 
       setReportData({
         totalRevenue,
@@ -249,6 +291,8 @@ export default function MonthlyReportPage() {
         profitMargin,
         totalOrders,
         totalDiscounts,
+        totalTaxCollected,
+        totalMaterialCosts,
         laborCost,
         weeklyBreakdown
       });
@@ -385,7 +429,7 @@ export default function MonthlyReportPage() {
               </div>
               {reportData.totalDiscounts > 0 && (
                 <div className="flex justify-between items-center py-3 border-b border-slate-100 dark:border-slate-800">
-                  <span className="text-slate-600 dark:text-slate-400">{t('totalDiscounts') || 'Total Discounts'}</span>
+                  <span className="text-slate-600 dark:text-slate-400">Total Discounts</span>
                   <span className="text-xl font-bold text-orange-600 dark:text-orange-400">
                     -{formatCurrency(reportData.totalDiscounts)}
                   </span>
@@ -437,7 +481,7 @@ export default function MonthlyReportPage() {
             </div>
 
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
-              <p className="text-sm text-slate-500 dark:text-slate-400">{t('totalDiscounts') || 'Discounts Given'}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Discounts Given</p>
               <p className="text-xl font-bold text-orange-600 dark:text-orange-400">
                 {formatCurrency(reportData.totalDiscounts)}
               </p>
@@ -449,12 +493,32 @@ export default function MonthlyReportPage() {
             </div>
 
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
+              <p className="text-sm text-slate-500 dark:text-slate-400">Material Costs</p>
+              <p className="text-xl font-bold text-red-600 dark:text-red-400">
+                {formatCurrency(reportData.totalMaterialCosts)}
+              </p>
+              <p className="text-sm text-slate-500 mt-1">
+                {reportData.totalRevenue > 0 ? ((reportData.totalMaterialCosts / reportData.totalRevenue) * 100).toFixed(1) : 0}% of revenue
+              </p>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
               <p className="text-sm text-slate-500 dark:text-slate-400">Labor Cost</p>
               <p className="text-xl font-bold text-amber-600 dark:text-amber-400">
                 {formatCurrency(reportData.laborCost)}
               </p>
               <p className="text-sm text-slate-500 mt-1">
                 {reportData.totalRevenue > 0 ? ((reportData.laborCost / reportData.totalRevenue) * 100).toFixed(1) : 0}% of revenue
+              </p>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
+              <p className="text-sm text-slate-500 dark:text-slate-400">Tax Collected</p>
+              <p className="text-xl font-bold text-purple-600 dark:text-purple-400">
+                {formatCurrency(reportData.totalTaxCollected)}
+              </p>
+              <p className="text-sm text-slate-500 mt-1">
+                {reportData.totalRevenue > 0 ? ((reportData.totalTaxCollected / reportData.totalRevenue) * 100).toFixed(1) : 0}% of revenue
               </p>
             </div>
 

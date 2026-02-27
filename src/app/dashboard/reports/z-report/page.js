@@ -163,13 +163,24 @@ export default function ZReportPage() {
       // Staff tracking
       const staffStats = {};
 
+      // Get restaurant's default tax rate for calculating VAT when not stored on order
+      const defaultTaxRate = parseFloat(restaurant.menu_sales_tax_rate || 20);
+
       orders?.forEach(order => {
         // Calculate gross sales (subtotal if available, otherwise total + discount)
         const orderSubtotal = parseFloat(order.subtotal || order.total || 0);
         const orderDiscount = parseFloat(order.discount_total || 0);
-        const orderTax = parseFloat(order.tax_amount || 0);
         const orderTotal = parseFloat(order.total || 0);
         const orderTip = parseFloat(order.tip_amount || 0);
+
+        // Calculate tax: use stored tax_amount if available, otherwise calculate from total
+        // VAT formula: tax = total - (total / (1 + rate/100))
+        // This extracts the VAT already included in the price
+        let orderTax = parseFloat(order.tax_amount || 0);
+        if (orderTax === 0 && orderTotal > 0 && defaultTaxRate > 0) {
+          // Calculate VAT included in the total price
+          orderTax = orderTotal - (orderTotal / (1 + defaultTaxRate / 100));
+        }
 
         grossSales += orderSubtotal;
         discountTotal += orderDiscount;

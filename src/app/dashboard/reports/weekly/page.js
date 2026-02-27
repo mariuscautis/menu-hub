@@ -42,6 +42,8 @@ export default function WeeklyReportPage() {
     totalOrders: 0,
     totalDiscounts: 0,
     totalRefunds: 0,
+    totalTaxCollected: 0,
+    totalMaterialCosts: 0,
     avgOrderValue: 0,
     busiestDay: null,
     dailyBreakdown: [],
@@ -118,16 +120,32 @@ export default function WeeklyReportPage() {
       const prevWeekEnd = new Date(weekStart);
       prevWeekEnd.setDate(prevWeekEnd.getDate() - 1);
 
-      // Fetch orders for selected week
+      // Fetch orders for selected week with order_items for cost calculation
       const { data: orders, error } = await supabase
         .from('orders')
-        .select('*')
+        .select(`
+          *,
+          order_items (
+            id,
+            quantity,
+            price,
+            menu_item_id,
+            menu_items (
+              id,
+              name,
+              base_cost
+            )
+          )
+        `)
         .eq('restaurant_id', restaurant.id)
         .eq('paid', true)
         .gte('created_at', weekStart.toISOString())
         .lte('created_at', `${weekEnd.toISOString().split('T')[0]}T23:59:59.999Z`);
 
       if (error) throw error;
+
+      // Get restaurant's default tax rate for calculating VAT
+      const defaultTaxRate = parseFloat(restaurant.menu_sales_tax_rate || 20);
 
       // Fetch orders for previous week (for comparison)
       const { data: prevOrders } = await supabase
@@ -158,15 +176,33 @@ export default function WeeklyReportPage() {
       let totalRevenue = 0;
       let totalOrders = 0;
       let totalDiscounts = 0;
+      let totalTaxCollected = 0;
+      let totalMaterialCosts = 0;
 
       orders?.forEach(order => {
         const orderDate = order.created_at.split('T')[0];
         const orderTotal = parseFloat(order.total || 0);
         const orderDiscount = parseFloat(order.discount_total || 0);
 
+        // Calculate tax from order if available, otherwise estimate from total
+        let orderTax = parseFloat(order.tax_amount || 0);
+        if (orderTax === 0 && orderTotal > 0 && defaultTaxRate > 0) {
+          orderTax = orderTotal - (orderTotal / (1 + defaultTaxRate / 100));
+        }
+
+        // Calculate material costs from order items (COGS)
+        let orderMaterialCost = 0;
+        order.order_items?.forEach(item => {
+          const baseCost = parseFloat(item.menu_items?.base_cost || 0);
+          const quantity = parseInt(item.quantity || 1);
+          orderMaterialCost += baseCost * quantity;
+        });
+
         totalRevenue += orderTotal;
         totalOrders++;
         totalDiscounts += orderDiscount;
+        totalTaxCollected += orderTax;
+        totalMaterialCosts += orderMaterialCost;
 
         if (dailyData[orderDate]) {
           dailyData[orderDate].revenue += orderTotal;
@@ -256,6 +292,8 @@ export default function WeeklyReportPage() {
         totalOrders,
         totalDiscounts,
         totalRefunds,
+        totalTaxCollected,
+        totalMaterialCosts,
         avgOrderValue: totalOrders > 0 ? totalRevenue / totalOrders : 0,
         busiestDay,
         dailyBreakdown,
@@ -453,6 +491,48 @@ export default function WeeklyReportPage() {
               </p>
               <p className="text-sm text-slate-500 mt-1">
                 {formatCurrency(reportData.laborCost)} total
+              </p>
+            </div>
+          </div>
+
+          {/* Secondary Metrics Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
+              <p className="text-sm text-slate-500 dark:text-slate-400">Tax Collected</p>
+              <p className="text-xl font-bold text-purple-600 dark:text-purple-400">
+                {formatCurrency(reportData.totalTaxCollected)}
+              </p>
+              <p className="text-sm text-slate-500 mt-1">
+                {reportData.totalRevenue > 0 ? ((reportData.totalTaxCollected / reportData.totalRevenue) * 100).toFixed(1) : 0}% of revenue
+              </p>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
+              <p className="text-sm text-slate-500 dark:text-slate-400">Material Costs</p>
+              <p className="text-xl font-bold text-red-600 dark:text-red-400">
+                {formatCurrency(reportData.totalMaterialCosts)}
+              </p>
+              <p className="text-sm text-slate-500 mt-1">
+                {reportData.totalRevenue > 0 ? ((reportData.totalMaterialCosts / reportData.totalRevenue) * 100).toFixed(1) : 0}% of revenue
+              </p>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
+              <p className="text-sm text-slate-500 dark:text-slate-400">Discounts Given</p>
+              <p className="text-xl font-bold text-orange-600 dark:text-orange-400">
+                {formatCurrency(reportData.totalDiscounts)}
+              </p>
+              {reportData.totalRevenue > 0 && reportData.totalDiscounts > 0 && (
+                <p className="text-sm text-slate-500 mt-1">
+                  {((reportData.totalDiscounts / (reportData.totalRevenue + reportData.totalDiscounts)) * 100).toFixed(1)}% of gross
+                </p>
+              )}
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
+              <p className="text-sm text-slate-500 dark:text-slate-400">Refunds</p>
+              <p className="text-xl font-bold text-red-600 dark:text-red-400">
+                {formatCurrency(reportData.totalRefunds)}
               </p>
             </div>
           </div>
