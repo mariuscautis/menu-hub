@@ -1,26 +1,16 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { loadTranslations, createTranslator } from '@/lib/clientTranslations';
+import { useTranslations } from '@/lib/i18n/LanguageContext';
 
 export default function WorkHistory({ staff, restaurant }) {
-  const [translations, setTranslations] = useState({});
-  const t = createTranslator(translations);
+  const t = useTranslations('myRota.workHistory');
   const [attendance, setAttendance] = useState([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('this_week'); // this_week, last_week, this_month, last_month, custom
   const [customDateFrom, setCustomDateFrom] = useState('');
   const [customDateTo, setCustomDateTo] = useState('');
   const [showCustom, setShowCustom] = useState(false);
-
-  // Load translations
-  useEffect(() => {
-    if (restaurant) {
-      const locale = restaurant.email_language || 'en';
-      const workHistoryTranslations = loadTranslations(locale, 'myRota.workHistory');
-      setTranslations(workHistoryTranslations);
-    }
-  }, [restaurant]);
 
   const getDateRange = useCallback(() => {
     const now = new Date();

@@ -2,25 +2,15 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
-import { loadTranslations, createTranslator } from '@/lib/clientTranslations';
+import { useTranslations } from '@/lib/i18n/LanguageContext';
 
 export default function ClockInOut({ staff, restaurant }) {
-  const [translations, setTranslations] = useState({});
-  const t = createTranslator(translations);
+  const t = useTranslations('myRota.clockInOut');
   const [currentAttendance, setCurrentAttendance] = useState(null);
   const [todayShift, setTodayShift] = useState(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [message, setMessage] = useState(null);
-
-  // Load translations
-  useEffect(() => {
-    if (restaurant) {
-      const locale = restaurant.email_language || 'en';
-      const clockInOutTranslations = loadTranslations(locale, 'myRota.clockInOut');
-      setTranslations(clockInOutTranslations);
-    }
-  }, [restaurant]);
 
   const fetchCurrentStatus = useCallback(async (showLoadingSpinner = true) => {
     if (showLoadingSpinner) {

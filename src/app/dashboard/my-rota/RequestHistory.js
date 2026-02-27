@@ -1,23 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { loadTranslations, createTranslator } from '@/lib/clientTranslations';
+import { useTranslations } from '@/lib/i18n/LanguageContext';
 
 export default function RequestHistory({ staff, restaurant }) {
-  const [translations, setTranslations] = useState({});
-  const t = createTranslator(translations);
+  const t = useTranslations('myRota.requestHistory');
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // 'all', 'pending', 'approved', 'rejected'
-
-  // Load translations
-  useEffect(() => {
-    if (restaurant) {
-      const locale = restaurant.email_language || 'en';
-      const requestHistoryTranslations = loadTranslations(locale, 'myRota.requestHistory');
-      setTranslations(requestHistoryTranslations);
-    }
-  }, [restaurant]);
 
   useEffect(() => {
     fetchRequests();

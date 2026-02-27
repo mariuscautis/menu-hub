@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
-import { loadTranslations, createTranslator } from '@/lib/clientTranslations';
+import { useTranslations } from '@/lib/i18n/LanguageContext';
 import ClockInOut from './ClockInOut';
 import WorkHistory from './WorkHistory';
 import TimeOffRequestModal from './TimeOffRequestModal';
@@ -17,8 +17,7 @@ export default function MyRotaPage() {
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [requestType, setRequestType] = useState('time_off');
   const [leaveBalance, setLeaveBalance] = useState(null);
-  const [translations, setTranslations] = useState({});
-  const t = createTranslator(translations);
+  const t = useTranslations('myRota');
 
   useEffect(() => {
     // Check for staff session (PIN login)
@@ -49,14 +48,6 @@ export default function MyRotaPage() {
     }
   }, []);
 
-  // Load translations when restaurant is loaded
-  useEffect(() => {
-    if (restaurant) {
-      const locale = restaurant.email_language || 'en';
-      const myRotaTranslations = loadTranslations(locale, 'myRota');
-      setTranslations(myRotaTranslations);
-    }
-  }, [restaurant]);
 
   const fetchShifts = useCallback(async () => {
     if (!restaurant || !staff) return;
@@ -270,7 +261,7 @@ export default function MyRotaPage() {
 
       {/* Clock In/Out Widget */}
       <div className="mb-8">
-        <ClockInOut staff={staff} restaurant={restaurant} translations={translations} />
+        <ClockInOut staff={staff} restaurant={restaurant} />
       </div>
 
       {/* Work History */}
@@ -408,7 +399,6 @@ export default function MyRotaPage() {
           staff={staff}
           restaurant={restaurant}
           leaveBalance={leaveBalance}
-          translations={translations}
           onClose={() => setShowRequestModal(false)}
           onSubmit={handleTimeOffSubmit}
         />

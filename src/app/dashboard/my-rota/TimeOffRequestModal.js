@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createTranslator } from '@/lib/clientTranslations';
+import { useTranslations } from '@/lib/i18n/LanguageContext';
 
-export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, translations, onClose, onSubmit }) {
-  const t = createTranslator(translations.timeOffRequest || {});
+export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, onClose, onSubmit }) {
+  const t = useTranslations('myRota.timeOffRequest');
   const [formData, setFormData] = useState({
     leave_type: 'annual_holiday',
     date_from: '',
