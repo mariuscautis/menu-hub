@@ -2781,10 +2781,10 @@ export default function Tables() {
             <div className="flex justify-between items-center mb-6">
               <div>
                 <h2 className="text-xl font-bold text-slate-800">
-                  {currentOrder ? 'Update Order' : 'Place Order'} - Table {selectedTable.table_number}
+                  {currentOrder ? (t('orderModal.titleUpdate') || 'Update Order') : (t('orderModal.titlePlace') || 'Place Order')} - {t('orderModal.tableTitle')?.replace('{tableNumber}', selectedTable.table_number) || `Table ${selectedTable.table_number}`}
                 </h2>
                 {currentOrder && (
-                  <p className="text-sm text-slate-500">Order #{(currentOrder.id || currentOrder.client_id || 'new').slice(0, 8)}</p>
+                  <p className="text-sm text-slate-500">{t('orderModal.orderNumber')?.replace('{id}', (currentOrder.id || currentOrder.client_id || 'new').slice(0, 8)) || `Order #${(currentOrder.id || currentOrder.client_id || 'new').slice(0, 8)}`}</p>
                 )}
               </div>
               <button
@@ -2833,7 +2833,7 @@ export default function Tables() {
                     </svg>
                     <input
                       type="text"
-                      placeholder="Search products..."
+                      placeholder={t('orderModal.searchProducts') || 'Search products...'}
                       value={productSearch}
                       onChange={(e) => setProductSearch(e.target.value)}
                       className="w-full pl-10 pr-10 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6262bd]/50 focus:border-[#6262bd] text-slate-800 placeholder-slate-400 transition-colors"
@@ -2859,7 +2859,7 @@ export default function Tables() {
                 ) : productSearch ? (
                   /* Search Results View */
                   <div className="flex-1 overflow-y-auto pr-2">
-                    <h3 className="font-semibold text-slate-700 mb-3">Search Results</h3>
+                    <h3 className="font-semibold text-slate-700 mb-3">{t('orderModal.searchResults') || 'Search Results'}</h3>
                     {(() => {
                       const searchLower = productSearch.toLowerCase()
                       const filteredItems = menuItems.filter(item =>
@@ -2869,7 +2869,7 @@ export default function Tables() {
                       if (filteredItems.length === 0) {
                         return (
                           <div className="bg-slate-50 rounded-xl p-6 text-center">
-                            <p className="text-slate-500">No products found</p>
+                            <p className="text-slate-500">{t('orderModal.noProductsFound') || 'No products found'}</p>
                           </div>
                         )
                       }
@@ -2915,7 +2915,7 @@ export default function Tables() {
                 ) : !selectedCategory ? (
                   /* Categories Grid View */
                   <div className="flex-1 overflow-y-auto pr-2">
-                    <h3 className="font-semibold text-slate-700 mb-3">Select a Category</h3>
+                    <h3 className="font-semibold text-slate-700 mb-3">{t('orderModal.selectCategory') || 'Select a Category'}</h3>
                     {categories.length > 0 ? (
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         {categories.map(category => {
@@ -2933,7 +2933,7 @@ export default function Tables() {
                                 </svg>
                               </div>
                               <span className="font-semibold text-slate-700 text-center">{category.name}</span>
-                              <span className="text-xs text-slate-500 mt-1">{categoryItems.length} {categoryItems.length === 1 ? 'item' : 'items'}</span>
+                              <span className="text-xs text-slate-500 mt-1">{categoryItems.length} {categoryItems.length === 1 ? (t('orderModal.item') || 'item') : (t('orderModal.items') || 'items')}</span>
                             </button>
                           )
                         })}
@@ -2952,7 +2952,7 @@ export default function Tables() {
                                 </svg>
                               </div>
                               <span className="font-semibold text-slate-700 text-center">{t('orderModal.uncategorized') || 'Other'}</span>
-                              <span className="text-xs text-slate-500 mt-1">{uncategorizedItems.length} {uncategorizedItems.length === 1 ? 'item' : 'items'}</span>
+                              <span className="text-xs text-slate-500 mt-1">{uncategorizedItems.length} {uncategorizedItems.length === 1 ? (t('orderModal.item') || 'item') : (t('orderModal.items') || 'items')}</span>
                             </button>
                           )
                         })()}
@@ -3007,7 +3007,7 @@ export default function Tables() {
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                         </svg>
-                        Back
+                        {t('orderModal.back') || 'Back'}
                       </button>
                       <h3 className="font-semibold text-slate-700">{selectedCategory.name}</h3>
                     </div>
@@ -3083,7 +3083,7 @@ export default function Tables() {
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1">
                                 <p className="font-medium text-slate-800 text-sm">{item.quantity}x {item.name}</p>
-                                <p className="text-xs text-slate-500">£{(item.price_at_time || 0).toFixed(2)} each</p>
+                                <p className="text-xs text-slate-500">£{(item.price_at_time || 0).toFixed(2)} {t('orderModal.each') || 'each'}</p>
 
                                 {/* Show breakdown if item has both existing and new quantities */}
                                 {item.isExisting && hasNewItems && (
