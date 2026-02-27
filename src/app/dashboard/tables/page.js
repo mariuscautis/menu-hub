@@ -3373,8 +3373,8 @@ export default function Tables() {
                   </div>
                 </div>
 
-                {/* Discount Selector - Only show if discounts are available and user is owner/admin */}
-                {availableDiscounts.length > 0 && (userType === 'owner' || userType === 'staff-admin') && (
+                {/* Discount Selector - Show to all staff if discounts are available */}
+                {availableDiscounts.length > 0 && (
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-slate-700 mb-2">
                       {t('paymentModal.applyDiscount') || 'Apply Discount'}
