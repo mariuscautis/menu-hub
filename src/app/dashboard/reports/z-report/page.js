@@ -17,14 +17,12 @@
  * This report is designed to be printed or exported as PDF at the end of each day.
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
 
 export default function ZReportPage() {
   const t = useTranslations('zReport');
-  const printRef = useRef(null);
-
   // Restaurant state
   const [restaurant, setRestaurant] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -329,10 +327,128 @@ export default function ZReportPage() {
   };
 
   /**
-   * Handles print functionality
+   * Opens a formatted PDF-ready report in a new tab for print-to-PDF
    */
-  const handlePrint = () => {
-    window.print();
+  const handleExportPDF = () => {
+    const date = formatDate(selectedDate);
+    const generated = new Date().toLocaleString('en-GB');
+
+    const staffRows = reportData.staffSummary.map(staff => `
+      <tr>
+        <td>${staff.name}</td>
+        <td class="center">${staff.paymentsProcessed}</td>
+        <td class="right">£${staff.totalProcessed.toFixed(2)}</td>
+      </tr>
+    `).join('');
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>Z-Report – ${restaurant.name} – ${selectedDate}</title>
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: #1a1a2e; background: #fff; padding: 40px; }
+          .header { text-align: center; border-bottom: 3px solid #6262bd; padding-bottom: 20px; margin-bottom: 30px; }
+          .header h1 { font-size: 22px; font-weight: 700; color: #6262bd; letter-spacing: 1px; }
+          .header h2 { font-size: 16px; font-weight: 600; margin-top: 4px; }
+          .header p { font-size: 12px; color: #666; margin-top: 4px; }
+          .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+          .section { border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
+          .section.full { grid-column: 1 / -1; }
+          .section-title { background: #6262bd; color: #fff; font-weight: 700; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; padding: 8px 14px; }
+          .section table { width: 100%; border-collapse: collapse; }
+          .section table tr { border-bottom: 1px solid #f1f5f9; }
+          .section table tr:last-child { border-bottom: none; }
+          .section table td { padding: 9px 14px; }
+          .section table td.right { text-align: right; font-weight: 600; }
+          .section table td.center { text-align: center; }
+          .section table thead td { font-weight: 700; font-size: 11px; text-transform: uppercase; color: #64748b; background: #f8fafc; }
+          .highlight { background: #f5f5ff; }
+          .highlight td { font-weight: 700 !important; font-size: 14px !important; color: #6262bd !important; }
+          .negative { color: #dc2626 !important; }
+          .footer { text-align: center; margin-top: 40px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #94a3b8; }
+          @media print { body { padding: 20px; } }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>${restaurant.name}</h1>
+          <h2>Z-Report &mdash; Daily Closeout</h2>
+          <p>${date}</p>
+          <p>Generated: ${generated}</p>
+        </div>
+
+        <div class="grid">
+          <div class="section">
+            <div class="section-title">Sales Summary</div>
+            <table>
+              <tr><td>Gross Sales</td><td class="right">£${reportData.grossSales.toFixed(2)}</td></tr>
+              <tr><td>Discounts</td><td class="right negative">-£${reportData.discountTotal.toFixed(2)}</td></tr>
+              <tr><td>Tax Collected</td><td class="right">£${reportData.taxCollected.toFixed(2)}</td></tr>
+              <tr class="highlight"><td>Net Sales</td><td class="right">£${reportData.netSales.toFixed(2)}</td></tr>
+            </table>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Payment Breakdown</div>
+            <table>
+              <tr><td>Cash</td><td class="right">£${reportData.cashTotal.toFixed(2)}</td></tr>
+              <tr><td>Card</td><td class="right">£${reportData.cardTotal.toFixed(2)}</td></tr>
+              <tr><td>Split Bills</td><td class="right">£${reportData.splitBillsTotal.toFixed(2)}</td></tr>
+            </table>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Tips Summary</div>
+            <table>
+              <tr><td>Total Tips</td><td class="right">£${reportData.totalTips.toFixed(2)}</td></tr>
+              <tr><td>Cash Tips</td><td class="right">£${reportData.cashTips.toFixed(2)}</td></tr>
+              <tr><td>Card Tips</td><td class="right">£${reportData.cardTips.toFixed(2)}</td></tr>
+            </table>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Voids &amp; Refunds</div>
+            <table>
+              <tr><td>Total Voids (${reportData.voidsCount} items)</td><td class="right negative">£${reportData.voidsTotal.toFixed(2)}</td></tr>
+              <tr><td>Total Refunds (${reportData.refundsCount} transactions)</td><td class="right negative">£${reportData.refundsTotal.toFixed(2)}</td></tr>
+            </table>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Order Summary</div>
+            <table>
+              <tr><td>Total Orders</td><td class="right">${reportData.totalOrders}</td></tr>
+              <tr><td>Dine-in</td><td class="right">${reportData.dineInOrders}</td></tr>
+              <tr><td>Takeaway</td><td class="right">${reportData.takeawayOrders}</td></tr>
+              <tr><td>Avg Order Value</td><td class="right">£${reportData.avgOrderValue.toFixed(2)}</td></tr>
+            </table>
+          </div>
+
+          ${reportData.staffSummary.length > 0 ? `
+          <div class="section full">
+            <div class="section-title">Staff Summary</div>
+            <table>
+              <thead><tr><td>Staff Member</td><td class="center">Payments Processed</td><td class="right">Total</td></tr></thead>
+              ${staffRows}
+            </table>
+          </div>` : ''}
+        </div>
+
+        <div class="footer">
+          <p>--- End of Z-Report &mdash; Generated by VenoApp ---</p>
+        </div>
+
+        <script>window.onload = () => window.print();</script>
+      </body>
+      </html>
+    `;
+
+    const win = window.open('', '_blank');
+    win.document.write(html);
+    win.document.close();
   };
 
   /**
@@ -362,8 +478,7 @@ export default function ZReportPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-4 md:p-8">
-      {/* Header - Hidden when printing */}
-      <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
+      <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200">
             {t('title') || 'Z-Report'}
@@ -383,26 +498,16 @@ export default function ZReportPage() {
             className="px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-[#6262bd]"
           />
 
-          {/* Print Button */}
+          {/* Export PDF Button */}
           <button
-            onClick={handlePrint}
+            onClick={handleExportPDF}
             className="px-6 py-2 bg-[#6262bd] hover:bg-[#5252ad] text-white font-medium rounded-xl transition-colors flex items-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
-            {t('printReport') || 'Print Report'}
+            Export PDF
           </button>
-        </div>
-      </div>
-
-      {/* Print Header - Only visible when printing */}
-      <div className="hidden print:block mb-6">
-        <div className="text-center border-b-2 border-black pb-4 mb-4">
-          <h1 className="text-2xl font-bold">{restaurant.name}</h1>
-          <h2 className="text-xl font-semibold mt-2">Z-REPORT (Daily Closeout)</h2>
-          <p className="text-sm mt-1">{formatDate(selectedDate)}</p>
-          <p className="text-xs mt-1">Generated: {new Date().toLocaleString('en-GB')}</p>
         </div>
       </div>
 
@@ -416,7 +521,7 @@ export default function ZReportPage() {
 
       {/* Report Content */}
       {!loading && (
-        <div ref={printRef} className="space-y-6 print:space-y-4">
+        <div className="space-y-6">
           {/* No Data State */}
           {reportData.totalOrders === 0 && (
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-8 text-center print:border print:rounded-none">
@@ -684,44 +789,8 @@ export default function ZReportPage() {
             </>
           )}
 
-          {/* Print Footer */}
-          <div className="hidden print:block mt-8 pt-4 border-t border-black text-center text-xs">
-            <p>--- End of Z-Report ---</p>
-            <p className="mt-1">Generated by Menu Hub</p>
-          </div>
         </div>
       )}
-
-      {/* Print Styles */}
-      <style jsx global>{`
-        @media print {
-          body {
-            background: white !important;
-            color: black !important;
-            font-size: 12px !important;
-          }
-          .print\\:hidden {
-            display: none !important;
-          }
-          .print\\:block {
-            display: block !important;
-          }
-          .dark\\:bg-slate-900,
-          .dark\\:bg-slate-800,
-          .dark\\:bg-slate-950 {
-            background: white !important;
-          }
-          .dark\\:text-slate-200,
-          .dark\\:text-slate-300,
-          .dark\\:text-slate-400 {
-            color: black !important;
-          }
-          .dark\\:border-slate-800,
-          .dark\\:border-slate-700 {
-            border-color: #ccc !important;
-          }
-        }
-      `}</style>
     </div>
   );
 }

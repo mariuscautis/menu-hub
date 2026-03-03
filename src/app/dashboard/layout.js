@@ -564,18 +564,6 @@ export default function DashboardLayout({ children }) {
       })
     }
 
-    // Cash Drawer - Only for owners and admin staff (manages cash sessions)
-    if (userType === 'owner' || userType === 'staff-admin') {
-      items.push({
-        href: '/dashboard/cash-drawer',
-        label: 'Cash Drawer',
-        icon: (
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M21 7H3c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm0 8H3V9h18v6zM5 10h3v4H5zm5 0h4v4h-4zm6 0h3v4h-3z"/>
-          </svg>
-        )
-      })
-    }
 
     // Tables - Check 'tables' permission
     if (hasPermission('tables')) {
@@ -867,15 +855,6 @@ export default function DashboardLayout({ children }) {
             icon: (
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-              </svg>
-            )
-          },
-          {
-            href: '/dashboard/reports/x-report',
-            label: 'X-Report',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
               </svg>
             )
           },

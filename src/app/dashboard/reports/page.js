@@ -37,25 +37,13 @@ export default function ReportsPage() {
           color: 'bg-[#6262bd]',
           lightColor: 'bg-[#6262bd]/10'
         },
-        {
-          title: 'X-Report',
-          description: t('xReportDesc') || 'Current shift summary without closing the day',
-          href: '/dashboard/reports/x-report',
-          icon: (
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          ),
-          color: 'bg-green-500',
-          lightColor: 'bg-green-50 dark:bg-green-900/30'
-        }
       ]
     },
     {
       category: 'periodic',
       items: [
         {
-          title: 'Weekly Summary',
+          title: t('weeklySummary') || 'Weekly Summary',
           description: t('weeklyDesc') || 'Week-by-week performance comparison',
           href: '/dashboard/reports/weekly',
           icon: (
@@ -67,7 +55,7 @@ export default function ReportsPage() {
           lightColor: 'bg-blue-50 dark:bg-blue-900/30'
         },
         {
-          title: 'Monthly Summary',
+          title: t('monthlySummary') || 'Monthly Summary',
           description: t('monthlyDesc') || 'Monthly P&L and performance overview',
           href: '/dashboard/reports/monthly',
           icon: (
@@ -79,7 +67,7 @@ export default function ReportsPage() {
           lightColor: 'bg-purple-50 dark:bg-purple-900/30'
         },
         {
-          title: 'Tax Report',
+          title: t('taxReport') || 'Tax Report',
           description: t('taxDesc') || 'Tax summary for accounting and filing',
           href: '/dashboard/reports/tax',
           icon: (
@@ -174,7 +162,7 @@ export default function ReportsPage() {
       {/* Quick Actions */}
       <div className="mt-8 bg-slate-100 dark:bg-slate-800/50 rounded-2xl p-6">
         <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
-          Quick Actions
+          {t('quickActions') || 'Quick Actions'}
         </h3>
         <div className="flex flex-wrap gap-3">
           <Link
@@ -184,7 +172,7 @@ export default function ReportsPage() {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
-            Cash Drawer
+            {t('cashDrawer') || 'Cash Drawer'}
           </Link>
           <Link
             href="/dashboard/analytics"
@@ -193,7 +181,7 @@ export default function ReportsPage() {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
-            Analytics Dashboard
+            {t('analyticsDashboard') || 'Analytics Dashboard'}
           </Link>
           <Link
             href="/dashboard/analytics/losses"
@@ -202,7 +190,7 @@ export default function ReportsPage() {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
-            Loss Reports
+            {t('lossReports') || 'Loss Reports'}
           </Link>
         </div>
       </div>
