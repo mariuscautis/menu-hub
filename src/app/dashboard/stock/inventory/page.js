@@ -522,7 +522,7 @@ export default function InventoryManagement() {
               {filteredProducts.map((product) => (
                 <div
                   key={product.id}
-                  className="bg-white border-2 border-slate-100 rounded-2xl p-6 flex justify-between items-center"
+                  className={`bg-white border-2 rounded-2xl p-6 flex justify-between items-center ${product.current_stock <= 0 ? 'border-red-300 bg-red-50' : 'border-slate-100'}`}
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
@@ -532,7 +532,11 @@ export default function InventoryManagement() {
                           {product.brand}
                         </span>
                       )}
-                      {product.current_stock < product.min_stock_level && (
+                      {product.current_stock <= 0 ? (
+                        <span className="px-2 py-1 bg-red-100 text-red-600 text-xs rounded-full font-medium">
+                          ⚠ Out of Stock
+                        </span>
+                      ) : product.current_stock < product.min_stock_level && (
                         <span className="px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded-full font-medium">
                           Low Stock
                         </span>
@@ -540,7 +544,7 @@ export default function InventoryManagement() {
                     </div>
                     <div className="flex items-center gap-4 text-sm text-slate-600">
                       <span>
-                        {t('currentStock')}: <strong className={`${product.current_stock < product.min_stock_level ? 'text-amber-600' : 'text-[#6262bd]'}`}>
+                        {t('currentStock')}: <strong className={`${product.current_stock <= 0 ? 'text-red-500' : product.current_stock < product.min_stock_level ? 'text-amber-600' : 'text-[#6262bd]'}`}>
                           {product.current_stock} {product.unit_type}
                         </strong>
                       </span>

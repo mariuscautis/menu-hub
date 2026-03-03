@@ -7,7 +7,7 @@ import { useCurrency } from '@/lib/CurrencyContext'
 
 export default function StockManagement() {
   const t = useTranslations('stock')
-  const { currencySymbol, formatCurrency } = useCurrency()
+  const { currencySymbol } = useCurrency()
   const [products, setProducts] = useState([])
   const [entries, setEntries] = useState([])
   const [restaurant, setRestaurant] = useState(null)
@@ -717,13 +717,18 @@ export default function StockManagement() {
               {filteredProducts.map((product) => (
                 <div
                   key={product.id}
-                  className="bg-white border-2 border-slate-100 rounded-2xl p-6 flex justify-between items-center"
+                  className={`bg-white border-2 rounded-2xl p-6 flex justify-between items-center ${product.current_stock <= 0 ? 'border-red-300 bg-red-50' : 'border-slate-100'}`}
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-lg font-semibold text-slate-800">
                         {product.name}
                       </h3>
+                      {product.current_stock <= 0 && (
+                        <span className="px-2 py-1 bg-red-100 text-red-600 text-xs rounded-full font-medium">
+                          ⚠ Out of Stock
+                        </span>
+                      )}
                       {product.brand && (
                         <span className="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-full font-medium">
                           {product.brand}
@@ -739,7 +744,7 @@ export default function StockManagement() {
                     </div>
                     <div className="flex items-center gap-4 text-sm text-slate-600">
                       <span>
-                        {t('currentStock')}: <strong className="text-[#6262bd]">{formatStock(product.current_stock, product.base_unit)}</strong>
+                        {t('currentStock')}: <strong className={product.current_stock <= 0 ? 'text-red-500' : 'text-[#6262bd]'}>{formatStock(product.current_stock, product.base_unit)}</strong>
                       </span>
                       <span className="text-slate-300">•</span>
                       <span>
@@ -1173,7 +1178,7 @@ export default function StockManagement() {
                         <strong>{t('totalStock')}:</strong> {(parseFloat(stockForm.quantity) * products.find(p => p.id === stockForm.product_id)?.units_to_base_multiplier).toFixed(2)} {products.find(p => p.id === stockForm.product_id)?.base_unit}
                       </p>
                       <p className="text-sm text-slate-700">
-                        <strong>{t('costPerUnit').replace('{unit}', products.find(p => p.id === stockForm.product_id)?.base_unit)}:</strong> {formatCurrency(parseFloat(stockForm.purchase_price) / (parseFloat(stockForm.quantity) * products.find(p => p.id === stockForm.product_id)?.units_to_base_multiplier))}
+                        <strong>{t('costPerUnit').replace('{unit}', products.find(p => p.id === stockForm.product_id)?.base_unit)}:</strong> {(() => { const v = parseFloat(stockForm.purchase_price) / (parseFloat(stockForm.quantity) * products.find(p => p.id === stockForm.product_id)?.units_to_base_multiplier); return `${currencySymbol}${v < 0.1 ? v.toFixed(4) : v.toFixed(2)}`; })()}
                       </p>
                     </div>
                   )}
