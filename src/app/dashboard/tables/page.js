@@ -5,6 +5,7 @@ import { supabase, clearOrdersCacheForTable, clearTableOrdersLocalCache, clearAl
 import QRCode from 'qrcode'
 import InvoiceClientModal from '@/components/invoices/InvoiceClientModal'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import { useCurrency } from '@/lib/CurrencyContext'
 import { generateInvoicePdfBase64, downloadInvoicePdf } from '@/lib/invoicePdfGenerator'
 import {
   addPendingOrder,
@@ -25,6 +26,7 @@ import {
 
 export default function Tables() {
   const t = useTranslations('tables')
+  const { currencySymbol, formatCurrency } = useCurrency()
   const [tables, setTables] = useState([])
   const [restaurant, setRestaurant] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -1760,7 +1762,7 @@ export default function Tables() {
         // This prevents stale cached orders from appearing when placing new orders
         clearOrdersCacheForTable(selectedTable.id)
 
-        showNotification('success', `Cash payment of £${totalAmount.toFixed(2)} saved offline. Will sync when internet is restored.`)
+        showNotification('success', `Cash payment of ${formatCurrency(totalAmount)} saved offline. Will sync when internet is restored.`)
 
         // Don't show post-payment modal for offline payments (invoice generation needs internet)
         return
@@ -1837,8 +1839,8 @@ export default function Tables() {
       await fetchTableOrderInfo(restaurant.id)
       await fetchData()
 
-      const discountText = discountAmount > 0 ? ` (£${discountAmount.toFixed(2)} discount applied)` : ''
-      showNotification('success', `Payment of £${totalAmount.toFixed(2)} processed successfully via ${paymentMethod}!${discountText}`)
+      const discountText = discountAmount > 0 ? ` (${formatCurrency(discountAmount)} discount applied)` : ''
+      showNotification('success', `Payment of ${formatCurrency(totalAmount)} processed successfully via ${paymentMethod}!${discountText}`)
 
       // Show post-payment modal (with invoice option)
       setShowPostPaymentModal(true)
@@ -1954,7 +1956,7 @@ export default function Tables() {
         return updatedSplitBills
       })
 
-      showNotification('success', `${bill.name} paid successfully: £${bill.total.toFixed(2)} via ${paymentMethod}`)
+      showNotification('success', `${bill.name} paid successfully: ${formatCurrency(bill.total)} via ${paymentMethod}`)
 
       // Refresh table order info immediately after each split bill payment
       await fetchTableOrderInfo(restaurant.id)
@@ -3007,7 +3009,7 @@ export default function Tables() {
                               )}
                               <p className="font-medium text-slate-800 text-sm line-clamp-2">{item.name}</p>
                               <div className="mt-auto pt-2 flex items-center justify-between">
-                                <span className="font-semibold text-[#6262bd]">£{item.price.toFixed(2)}</span>
+                                <span className="font-semibold text-[#6262bd]">{formatCurrency(item.price)}</span>
                                 {!item.available && (
                                   <span className="text-xs text-red-500">{t('orderModal.unavailable')}</span>
                                 )}
@@ -3092,7 +3094,7 @@ export default function Tables() {
                             )}
                             <p className="font-medium text-slate-800 text-sm line-clamp-2">{item.name}</p>
                             <div className="mt-auto pt-2 flex items-center justify-between">
-                              <span className="font-semibold text-[#6262bd]">£{item.price.toFixed(2)}</span>
+                              <span className="font-semibold text-[#6262bd]">{formatCurrency(item.price)}</span>
                               {!item.available && (
                                 <span className="text-xs text-red-500">{t('orderModal.unavailable')}</span>
                               )}
@@ -3153,7 +3155,7 @@ export default function Tables() {
                                 <p className="text-xs text-slate-500 line-clamp-2 mt-1">{item.description}</p>
                               )}
                               <div className="mt-auto pt-2 flex items-center justify-between">
-                                <span className="font-semibold text-[#6262bd]">£{item.price.toFixed(2)}</span>
+                                <span className="font-semibold text-[#6262bd]">{formatCurrency(item.price)}</span>
                                 {!item.available && (
                                   <span className="text-xs text-red-500">{t('orderModal.unavailable')}</span>
                                 )}
@@ -3189,7 +3191,7 @@ export default function Tables() {
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1">
                                 <p className="font-medium text-slate-800 text-sm">{item.quantity}x {item.name}</p>
-                                <p className="text-xs text-slate-500">£{(item.price_at_time || 0).toFixed(2)} {t('orderModal.each') || 'each'}</p>
+                                <p className="text-xs text-slate-500">{formatCurrency(item.price_at_time || 0)} {t('orderModal.each') || 'each'}</p>
 
                                 {/* Show breakdown if item has both existing and new quantities */}
                                 {item.isExisting && hasNewItems && (
@@ -3293,7 +3295,7 @@ export default function Tables() {
                     <div className="bg-[#6262bd]/10 rounded-xl p-4 mb-4">
                       <div className="flex justify-between items-center">
                         <span className="font-semibold text-slate-700">{t('orderModal.total')}</span>
-                        <span className="text-xl font-bold text-[#6262bd]">£{calculateTotal().toFixed(2)}</span>
+                        <span className="text-xl font-bold text-[#6262bd]">{formatCurrency(calculateTotal())}</span>
                       </div>
                     </div>
 
@@ -3354,13 +3356,13 @@ export default function Tables() {
                       <div key={order.id} className="border-b border-slate-200 pb-3 last:border-0 last:pb-0">
                         <div className="flex justify-between items-start mb-2">
                           <span className="text-sm font-medium text-slate-600">{t('paymentModal.orderNumber').replace('{number}', index + 1)}</span>
-                          <span className="text-sm font-semibold text-[#6262bd]">£{orderTotal.toFixed(2)}</span>
+                          <span className="text-sm font-semibold text-[#6262bd]">{formatCurrency(orderTotal)}</span>
                         </div>
                         <div className="text-xs text-slate-500 space-y-1">
                           {order.order_items?.map((item, idx) => (
                             <div key={idx} className="flex justify-between items-center">
                               <span>{item.quantity}x {item.name}</span>
-                              <span className="text-slate-600 font-medium">£{((item.price_at_time || 0) * (item.quantity || 1)).toFixed(2)}</span>
+                              <span className="text-slate-600 font-medium">{formatCurrency((item.price_at_time || 0) * (item.quantity || 1))}</span>
                             </div>
                           ))}
                         </div>
@@ -3387,7 +3389,7 @@ export default function Tables() {
                       <option value="none">{t('paymentModal.noDiscount') || 'No discount'}</option>
                       {availableDiscounts.map((discount) => (
                         <option key={discount.id} value={discount.id}>
-                          {discount.name} ({discount.type === 'percentage' ? `${discount.value}%` : `£${discount.value.toFixed(2)}`})
+                          {discount.name} ({discount.type === 'percentage' ? `${discount.value}%` : formatCurrency(discount.value)})
                         </option>
                       ))}
                     </select>
@@ -3399,23 +3401,23 @@ export default function Tables() {
                   {/* Subtotal */}
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm text-slate-600">{t('paymentModal.subtotal') || 'Subtotal'}</span>
-                    <span className="text-sm font-medium text-slate-700">£{calculateTableTotal().toFixed(2)}</span>
+                    <span className="text-sm font-medium text-slate-700">{formatCurrency(calculateTableTotal())}</span>
                   </div>
 
                   {/* Discount (if applied) */}
                   {selectedDiscount && discountAmount > 0 && (
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-sm text-green-600">
-                        {selectedDiscount.name} ({selectedDiscount.type === 'percentage' ? `${selectedDiscount.value}%` : `£${selectedDiscount.value.toFixed(2)}`})
+                        {selectedDiscount.name} ({selectedDiscount.type === 'percentage' ? `${selectedDiscount.value}%` : formatCurrency(selectedDiscount.value)})
                       </span>
-                      <span className="text-sm font-medium text-green-600">-£{discountAmount.toFixed(2)}</span>
+                      <span className="text-sm font-medium text-green-600">-{formatCurrency(discountAmount)}</span>
                     </div>
                   )}
 
                   {/* Final Total */}
                   <div className="flex justify-between items-center pt-2 border-t border-[#6262bd]/20">
                     <span className="font-semibold text-slate-700">{t('paymentModal.totalToPay')}</span>
-                    <span className="text-2xl font-bold text-[#6262bd]">£{calculateFinalTotal().toFixed(2)}</span>
+                    <span className="text-2xl font-bold text-[#6262bd]">{formatCurrency(calculateFinalTotal())}</span>
                   </div>
                 </div>
 
@@ -3487,7 +3489,7 @@ export default function Tables() {
                             {t('splitBillModal.quantityAvailable').replace('{quantity}', item.quantity).replace('{price}', item.price.toFixed(2))}
                           </p>
                         </div>
-                        <span className="font-bold text-slate-800">£{(item.quantity * item.price).toFixed(2)}</span>
+                        <span className="font-bold text-slate-800">{formatCurrency(item.quantity * item.price)}</span>
                       </div>
 
                       {/* Bill Assignment Buttons - Only show unpaid bills */}
@@ -3566,7 +3568,7 @@ export default function Tables() {
                               <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
                             </svg>
                             <span className="font-semibold text-slate-800">{bill.name}</span>
-                            <span className="text-slate-600">£{bill.total.toFixed(2)}</span>
+                            <span className="text-slate-600">{formatCurrency(bill.total)}</span>
                           </div>
                           <button
                             onClick={() => {
@@ -3621,11 +3623,11 @@ export default function Tables() {
                                 <div className="flex-1">
                                   <div className="font-medium text-slate-800">{item.name}</div>
                                   <div className="text-xs text-slate-600">
-                                    {item.quantity} × £{item.price.toFixed(2)}
+                                    {item.quantity} × {formatCurrency(item.price)}
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <span className="font-semibold text-slate-800">£{item.total.toFixed(2)}</span>
+                                  <span className="font-semibold text-slate-800">{formatCurrency(item.total)}</span>
                                   <button
                                     onClick={() => {
                                       // Return 1 quantity back to available
@@ -3667,7 +3669,7 @@ export default function Tables() {
                           <div className="border-t-2 border-slate-200 pt-3">
                             <div className="flex justify-between items-center mb-3">
                               <span className="font-bold text-slate-700">{t('splitBillModal.total')}</span>
-                              <span className="text-xl font-bold text-[#6262bd]">£{bill.total.toFixed(2)}</span>
+                              <span className="text-xl font-bold text-[#6262bd]">{formatCurrency(bill.total)}</span>
                             </div>
 
                             {/* Payment buttons */}
@@ -3740,18 +3742,18 @@ export default function Tables() {
                 <div className="mt-4 bg-[#6262bd]/10 rounded-xl p-4">
                   <div className="flex justify-between items-center mb-2">
                     <span className="font-semibold text-slate-700">{t('splitBillModal.originalTotal')}</span>
-                    <span className="font-bold text-slate-800">£{calculateTableTotal().toFixed(2)}</span>
+                    <span className="font-bold text-slate-800">{formatCurrency(calculateTableTotal())}</span>
                   </div>
                   <div className="flex justify-between items-center mb-2">
                     <span className="font-semibold text-slate-700">{t('splitBillModal.assignedToBills')}</span>
                     <span className="font-bold text-[#6262bd]">
-                      £{splitBills.reduce((sum, b) => sum + b.total, 0).toFixed(2)}
+                      {formatCurrency(splitBills.reduce((sum, b) => sum + b.total, 0))}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="font-semibold text-slate-700">{t('splitBillModal.remaining')}</span>
                     <span className="font-bold text-orange-600">
-                      £{(calculateTableTotal() - splitBills.reduce((sum, b) => sum + b.total, 0)).toFixed(2)}
+                      {formatCurrency(calculateTableTotal() - splitBills.reduce((sum, b) => sum + b.total, 0))}
                     </span>
                   </div>
                 </div>
@@ -3801,7 +3803,7 @@ export default function Tables() {
                             <span className="capitalize ml-1">{order.status}</span>
                           </p>
                         </div>
-                        <span className="font-semibold text-[#6262bd]">£{order.total?.toFixed(2)}</span>
+                        <span className="font-semibold text-[#6262bd]">{formatCurrency(order.total ?? 0)}</span>
                       </div>
 
                       {/* Order Items */}
@@ -3812,7 +3814,7 @@ export default function Tables() {
                               {item.quantity}x {item.name}
                             </span>
                             <span className="text-slate-600">
-                              £{((item.price_at_time || 0) * (item.quantity || 0)).toFixed(2)}
+                              {formatCurrency((item.price_at_time || 0) * (item.quantity || 0))}
                             </span>
                           </div>
                         ))}
@@ -3826,12 +3828,12 @@ export default function Tables() {
                   <div className="flex justify-between items-center">
                     <span className="font-semibold text-slate-700">Total Unpaid</span>
                     <span className="text-2xl font-bold text-[#6262bd]">
-                      £{tableOrderDetails.reduce((orderSum, order) => {
+                      {formatCurrency(tableOrderDetails.reduce((orderSum, order) => {
                         const orderItemsTotal = (order.order_items || []).reduce((itemSum, item) => {
                           return itemSum + ((item.price_at_time || 0) * (item.quantity || 0))
                         }, 0)
                         return orderSum + (orderItemsTotal > 0 ? orderItemsTotal : (order.total || 0))
-                      }, 0).toFixed(2)}
+                      }, 0))}
                     </span>
                   </div>
                 </div>
@@ -4410,6 +4412,7 @@ export default function Tables() {
 
 function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDownload, onDelete, onPlaceOrder, onPayBill, onSplitBill, onViewOrders, onMarkCleaned, onMarkDelivered, onViewReservations, onCreateReservation, onAcknowledgeWaiterCall }) {
   const t = useTranslations('tables')
+  const { currencySymbol, formatCurrency } = useCurrency()
 
   // Show badge if there are any unpaid orders (count > 0)
   // This handles both cases: orders with totals and orders where total might be 0 but items exist
@@ -4537,7 +4540,7 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
       {hasOpenOrders && (
         <div className="mb-4">
           <p className="text-sm text-amber-700 font-semibold">
-            Unpaid: £{orderInfo.total.toFixed(2)}
+            Unpaid: {formatCurrency(orderInfo.total)}
           </p>
         </div>
       )}

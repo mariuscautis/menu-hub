@@ -210,10 +210,15 @@ const CompactDetailedTemplate = ({ invoice, restaurant, t }) => {
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-GB', {
+    const currency = restaurant?.invoice_settings?.currency || 'EUR'
+    const localeMap = { EUR: 'de-DE', USD: 'en-US', GBP: 'en-GB', RON: 'ro-RO', JPY: 'ja-JP', AUD: 'en-AU', CAD: 'en-CA' }
+    const locale = localeMap[currency] || 'en-GB'
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: currency,
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    }).format(amount);
+    }).format(Number(amount) || 0)
   };
 
   return (
@@ -320,10 +325,10 @@ const CompactDetailedTemplate = ({ invoice, restaurant, t }) => {
               </View>
               <Text style={styles.col2}>{item.quantity}</Text>
               <Text style={styles.col3}>
-                {formatCurrency(item.unit_price)} {invoice.currency}
+                {formatCurrency(item.unit_price)}
               </Text>
               <Text style={styles.col4}>
-                {formatCurrency(item.line_total)} {invoice.currency}
+                {formatCurrency(item.line_total)}
               </Text>
             </View>
           ))}
@@ -368,15 +373,15 @@ const CompactDetailedTemplate = ({ invoice, restaurant, t }) => {
           <View style={styles.totalsBox}>
             <View style={styles.totalRow}>
               <Text>{t.subtotal}</Text>
-              <Text>{formatCurrency(invoice.subtotal)} {invoice.currency}</Text>
+              <Text>{formatCurrency(invoice.subtotal)}</Text>
             </View>
             <View style={styles.totalRow}>
               <Text>{invoice.tax_name || 'Tax'}:</Text>
-              <Text>{formatCurrency(invoice.total_tax)} {invoice.currency}</Text>
+              <Text>{formatCurrency(invoice.total_tax)}</Text>
             </View>
             <View style={styles.grandTotalRow}>
               <Text>{t.grandTotal}</Text>
-              <Text>{formatCurrency(invoice.total)} {invoice.currency}</Text>
+              <Text>{formatCurrency(invoice.total)}</Text>
             </View>
           </View>
         </View>

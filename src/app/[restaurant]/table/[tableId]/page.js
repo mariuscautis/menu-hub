@@ -3,6 +3,7 @@ export const runtime = 'edge'
 
 import { useState, useEffect, use } from 'react'
 import { supabase } from '@/lib/supabase'
+import { CURRENCY_SYMBOLS } from '@/lib/currencyUtils'
 
 export default function CustomerMenu({ params }) {
   const { restaurant: slug, tableId } = use(params)
@@ -21,6 +22,8 @@ export default function CustomerMenu({ params }) {
   const [waiterCalled, setWaiterCalled] = useState(false)
   const [expandedCategories, setExpandedCategories] = useState({})
   const [itemNotes, setItemNotes] = useState({}) // Track notes for items requiring special instructions
+
+  const currencySymbol = CURRENCY_SYMBOLS[restaurant?.invoice_settings?.currency] || '€'
 
   useEffect(() => {
     fetchData()
@@ -478,7 +481,7 @@ export default function CustomerMenu({ params }) {
                               <p className="text-slate-500 text-sm mt-1">{item.description}</p>
                             )}
                             <div className="flex items-center gap-2 mt-2">
-                              <p className="text-[#6262bd] font-bold">£{item.price.toFixed(2)}</p>
+                              <p className="text-[#6262bd] font-bold">{currencySymbol}{item.price.toFixed(2)}</p>
                               {showLimitedStock && (
                                 <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full font-medium">
                                   Only {availableServings} left
@@ -560,7 +563,7 @@ export default function CustomerMenu({ params }) {
                 </span>
                 View Order
               </span>
-              <span>£{getCartTotal().toFixed(2)}</span>
+              <span>{currencySymbol}{getCartTotal().toFixed(2)}</span>
             </button>
           </div>
         </div>
@@ -596,7 +599,7 @@ export default function CustomerMenu({ params }) {
                     <div className="flex justify-between items-center">
                       <div className="flex-1">
                         <p className="font-medium text-slate-800">{item.name}</p>
-                        <p className="text-slate-500 text-sm">£{item.price.toFixed(2)} each</p>
+                        <p className="text-slate-500 text-sm">{currencySymbol}{item.price.toFixed(2)} each</p>
                       </div>
                       <div className="flex items-center gap-3">
                         <button
@@ -617,7 +620,7 @@ export default function CustomerMenu({ params }) {
                           </svg>
                         </button>
                         <span className="font-semibold text-slate-800 w-16 text-right">
-                          £{(item.price * item.quantity).toFixed(2)}
+                          {currencySymbol}{(item.price * item.quantity).toFixed(2)}
                         </span>
                       </div>
                     </div>
@@ -665,7 +668,7 @@ export default function CustomerMenu({ params }) {
               <div className="border-t-2 border-slate-100 pt-4 mb-6">
                 <div className="flex justify-between text-lg font-bold text-slate-800">
                   <span>Total</span>
-                  <span>£{getCartTotal().toFixed(2)}</span>
+                  <span>{currencySymbol}{getCartTotal().toFixed(2)}</span>
                 </div>
               </div>
 

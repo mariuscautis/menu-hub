@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import { useCurrency } from '@/lib/CurrencyContext'
 
 export default function PurchasingInvoices() {
   const t = useTranslations('purchasingInvoices')
+  const { currencySymbol, formatCurrency } = useCurrency()
   const [invoices, setInvoices] = useState([])
   const [restaurant, setRestaurant] = useState(null)
   const [userEmail, setUserEmail] = useState('')
@@ -466,7 +468,7 @@ export default function PurchasingInvoices() {
                     <>
                       <span className="text-slate-300">•</span>
                       <span>
-                        {t('amount')}: <strong className="text-green-600">£{parseFloat(invoice.total_amount).toFixed(2)}</strong>
+                        {t('amount')}: <strong className="text-green-600">{formatCurrency(parseFloat(invoice.total_amount))}</strong>
                       </span>
                     </>
                   )}
@@ -569,7 +571,7 @@ export default function PurchasingInvoices() {
                     {t('totalAmount')}
                   </label>
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-medium">£</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-medium">{currencySymbol}</span>
                     <input
                       type="number"
                       step="0.01"
@@ -700,7 +702,7 @@ export default function PurchasingInvoices() {
               <div>
                 <p className="text-sm text-slate-500">{t('amount')}</p>
                 <p className="font-medium text-green-600">
-                  {viewingInvoice.total_amount ? `£${parseFloat(viewingInvoice.total_amount).toFixed(2)}` : '-'}
+                  {viewingInvoice.total_amount ? formatCurrency(parseFloat(viewingInvoice.total_amount)) : '-'}
                 </p>
               </div>
               <div>
@@ -781,7 +783,7 @@ export default function PurchasingInvoices() {
                             {item.quantity} {item.unit_used || 'units'}
                           </td>
                           <td className="px-4 py-3 text-slate-700">
-                            {item.purchase_price ? `£${parseFloat(item.purchase_price).toFixed(2)}` : '-'}
+                            {item.purchase_price ? formatCurrency(parseFloat(item.purchase_price)) : '-'}
                           </td>
                           <td className="px-4 py-3 text-slate-500 text-sm">
                             {new Date(item.created_at).toLocaleDateString()}

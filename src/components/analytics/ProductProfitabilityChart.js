@@ -3,9 +3,11 @@
 import { useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import { useCurrency } from '@/lib/CurrencyContext'
 
 export default function ProductProfitabilityChart({ data }) {
   const t = useTranslations('analytics')
+  const { currencySymbol } = useCurrency()
   const [searchQuery, setSearchQuery] = useState('')
   const [displayCount, setDisplayCount] = useState(3)
 
@@ -33,13 +35,13 @@ export default function ProductProfitabilityChart({ data }) {
         <div className="bg-white p-4 border-2 border-slate-200 rounded-xl shadow-lg">
           <p className="font-semibold text-slate-800 mb-2">{item.menu_item_name}</p>
           <p className="text-sm text-green-600">
-            {t('revenue')}: £{item.revenue.toFixed(2)}
+            {t('revenue')}: {currencySymbol}{item.revenue.toFixed(2)}
           </p>
           <p className="text-sm text-amber-600">
-            {t('cost')}: £{item.cost.toFixed(2)}
+            {t('cost')}: {currencySymbol}{item.cost.toFixed(2)}
           </p>
           <p className="text-sm text-[#6262bd] font-semibold">
-            {t('profit')}: £{item.profit.toFixed(2)}
+            {t('profit')}: {currencySymbol}{item.profit.toFixed(2)}
           </p>
           <p className="text-xs text-slate-500 mt-1">
             {t('profitMargin').replace('{percent}', item.profit_margin.toFixed(1))}
@@ -106,7 +108,7 @@ export default function ProductProfitabilityChart({ data }) {
                   <div>
                     <div className="flex items-center justify-between text-xs text-slate-600 mb-1">
                       <span>{t('revenue')}</span>
-                      <span className="font-semibold">£{item.revenue.toFixed(2)}</span>
+                      <span className="font-semibold">{currencySymbol}{item.revenue.toFixed(2)}</span>
                     </div>
                     <div className="h-6 bg-slate-200 rounded-lg overflow-hidden">
                       <div
@@ -122,7 +124,7 @@ export default function ProductProfitabilityChart({ data }) {
                   <div>
                     <div className="flex items-center justify-between text-xs text-slate-600 mb-1">
                       <span>{t('cost')}</span>
-                      <span className="font-semibold">£{item.cost.toFixed(2)}</span>
+                      <span className="font-semibold">{currencySymbol}{item.cost.toFixed(2)}</span>
                     </div>
                     <div className="h-6 bg-slate-200 rounded-lg overflow-hidden">
                       <div
@@ -138,7 +140,7 @@ export default function ProductProfitabilityChart({ data }) {
                   <div>
                     <div className="flex items-center justify-between text-xs text-slate-600 mb-1">
                       <span>{t('profit')}</span>
-                      <span className="font-semibold">£{item.profit.toFixed(2)}</span>
+                      <span className="font-semibold">{currencySymbol}{item.profit.toFixed(2)}</span>
                     </div>
                     <div className="h-6 bg-slate-200 rounded-lg overflow-hidden">
                       <div
@@ -154,7 +156,7 @@ export default function ProductProfitabilityChart({ data }) {
                 {/* Stats Summary */}
                 <div className="mt-3 pt-3 border-t border-slate-300 flex items-center justify-between text-xs text-slate-600">
                   <span>{t('qtySold')}: {item.quantity_sold}</span>
-                  <span>{t('profitPerUnit')}: £{(item.profit / item.quantity_sold).toFixed(2)}</span>
+                  <span>{t('profitPerUnit')}: {currencySymbol}{(item.profit / item.quantity_sold).toFixed(2)}</span>
                 </div>
               </div>
             ))}

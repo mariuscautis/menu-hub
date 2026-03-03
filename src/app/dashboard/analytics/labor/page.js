@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
+import { useCurrency } from '@/lib/CurrencyContext';
 
 export default function LaborAnalyticsPage() {
   const t = useTranslations('laborAnalytics');
+  const { currencySymbol, formatCurrency } = useCurrency();
   const [restaurant, setRestaurant] = useState(null);
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState('week'); // 'week', 'month', 'custom'
@@ -281,13 +283,6 @@ export default function LaborAnalyticsPage() {
       dailyBreakdown,
       staffPerformance
     });
-  };
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP'
-    }).format(amount);
   };
 
   const formatHours = (hours) => {

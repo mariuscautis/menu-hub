@@ -9,6 +9,7 @@ import ThemeToggle from '@/components/ThemeToggle'
 import OfflineIndicator from '@/components/OfflineIndicator'
 import HubConnectionStatus from '@/components/HubConnectionStatus'
 import { LanguageProvider } from '@/lib/i18n/LanguageContext'
+import { CurrencyProvider } from '@/lib/CurrencyContext'
 import LanguageSelector from '@/components/LanguageSelector'
 import { useSessionValidator } from '@/hooks/useSessionValidator'
 import PlatformLogo from '@/components/PlatformLogo'
@@ -148,7 +149,7 @@ export default function DashboardLayout({ children }) {
           try {
             const { data: freshRestaurant } = await supabase
               .from('restaurants')
-              .select('id, name, slug, logo_url')
+              .select('id, name, slug, logo_url, invoice_settings')
               .eq('id', staffSession.restaurant_id)
               .single()
 
@@ -1023,8 +1024,10 @@ export default function DashboardLayout({ children }) {
   const navItems = getNavItems()
   const userLabel = getUserLabel()
   const departmentLabel = getDepartmentLabel()
+  const restaurantCurrency = restaurant?.invoice_settings?.currency || 'EUR'
 
   return (
+    <CurrencyProvider currency={restaurantCurrency}>
     <LanguageProvider>
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex relative">
 
@@ -1323,5 +1326,6 @@ export default function DashboardLayout({ children }) {
       <OfflineIndicator />
       </div>
     </LanguageProvider>
+    </CurrencyProvider>
   )
 }

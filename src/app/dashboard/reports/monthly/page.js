@@ -15,9 +15,11 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
+import { useCurrency } from '@/lib/CurrencyContext';
 
 export default function MonthlyReportPage() {
   const t = useTranslations('monthlyReport');
+  const { currencySymbol, formatCurrency } = useCurrency();
 
   // Restaurant state
   const [restaurant, setRestaurant] = useState(null);
@@ -356,13 +358,6 @@ export default function MonthlyReportPage() {
     return selectedMonth === `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
   };
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP'
-    }).format(amount || 0);
-  };
-
   const formatMonth = (monthStr) => {
     const [year, month] = monthStr.split('-');
     const date = new Date(year, month - 1);
@@ -411,7 +406,7 @@ export default function MonthlyReportPage() {
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          Previous
+          {t('previous') || 'Previous'}
         </button>
 
         <p className="font-bold text-slate-800 dark:text-slate-200">
@@ -427,7 +422,7 @@ export default function MonthlyReportPage() {
               : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300'
           }`}
         >
-          Next
+          {t('next') || 'Next'}
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
@@ -447,7 +442,7 @@ export default function MonthlyReportPage() {
           {/* P&L Summary */}
           <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6">
             <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4">
-              Profit & Loss Summary
+              {t('profitAndLoss') || 'Profit & Loss Summary'}
             </h2>
             <div className="space-y-4">
               <div className="flex justify-between items-center py-3 border-b border-slate-100 dark:border-slate-800">
@@ -458,7 +453,7 @@ export default function MonthlyReportPage() {
               </div>
               {reportData.totalDiscounts > 0 && (
                 <div className="flex justify-between items-center py-3 border-b border-slate-100 dark:border-slate-800">
-                  <span className="text-slate-600 dark:text-slate-400">Total Discounts</span>
+                  <span className="text-slate-600 dark:text-slate-400">{t('totalDiscounts') || 'Total Discounts'}</span>
                   <span className="text-xl font-bold text-orange-600 dark:text-orange-400">
                     -{formatCurrency(reportData.totalDiscounts)}
                   </span>
@@ -478,7 +473,7 @@ export default function MonthlyReportPage() {
                       ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'
                       : 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300'
                   }`}>
-                    {reportData.profitMargin.toFixed(1)}% margin
+                    {reportData.profitMargin.toFixed(1)}% {t('margin') || 'margin'}
                   </span>
                 </div>
                 <span className={`text-2xl font-bold ${
@@ -505,49 +500,49 @@ export default function MonthlyReportPage() {
             </div>
 
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
-              <p className="text-sm text-slate-500 dark:text-slate-400">Total Orders</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t('totalOrders') || 'Total Orders'}</p>
               <p className="text-xl font-bold text-slate-800 dark:text-slate-200">{reportData.totalOrders}</p>
             </div>
 
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
-              <p className="text-sm text-slate-500 dark:text-slate-400">Discounts Given</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t('discountsGiven') || 'Discounts Given'}</p>
               <p className="text-xl font-bold text-orange-600 dark:text-orange-400">
                 {formatCurrency(reportData.totalDiscounts)}
               </p>
               {reportData.totalRevenue > 0 && reportData.totalDiscounts > 0 && (
                 <p className="text-sm text-slate-500 mt-1">
-                  {((reportData.totalDiscounts / (reportData.totalRevenue + reportData.totalDiscounts)) * 100).toFixed(1)}% of gross
+                  {((reportData.totalDiscounts / (reportData.totalRevenue + reportData.totalDiscounts)) * 100).toFixed(1)}% {t('ofGross') || 'of gross'}
                 </p>
               )}
             </div>
 
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
-              <p className="text-sm text-slate-500 dark:text-slate-400">Material Costs</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t('materialCosts') || 'Material Costs'}</p>
               <p className="text-xl font-bold text-red-600 dark:text-red-400">
                 {formatCurrency(reportData.totalMaterialCosts)}
               </p>
               <p className="text-sm text-slate-500 mt-1">
-                {reportData.totalRevenue > 0 ? ((reportData.totalMaterialCosts / reportData.totalRevenue) * 100).toFixed(1) : 0}% of revenue
+                {reportData.totalRevenue > 0 ? ((reportData.totalMaterialCosts / reportData.totalRevenue) * 100).toFixed(1) : 0}% {t('ofRevenue') || 'of revenue'}
               </p>
             </div>
 
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
-              <p className="text-sm text-slate-500 dark:text-slate-400">Labor Cost</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t('laborCost') || 'Labor Cost'}</p>
               <p className="text-xl font-bold text-amber-600 dark:text-amber-400">
                 {formatCurrency(reportData.laborCost)}
               </p>
               <p className="text-sm text-slate-500 mt-1">
-                {reportData.totalRevenue > 0 ? ((reportData.laborCost / reportData.totalRevenue) * 100).toFixed(1) : 0}% of revenue
+                {reportData.totalRevenue > 0 ? ((reportData.laborCost / reportData.totalRevenue) * 100).toFixed(1) : 0}% {t('ofRevenue') || 'of revenue'}
               </p>
             </div>
 
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
-              <p className="text-sm text-slate-500 dark:text-slate-400">Tax Collected</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t('taxCollected') || 'Tax Collected'}</p>
               <p className="text-xl font-bold text-purple-600 dark:text-purple-400">
                 {formatCurrency(reportData.totalTaxCollected)}
               </p>
               <p className="text-sm text-slate-500 mt-1">
-                {reportData.totalRevenue > 0 ? ((reportData.totalTaxCollected / reportData.totalRevenue) * 100).toFixed(1) : 0}% of revenue
+                {reportData.totalRevenue > 0 ? ((reportData.totalTaxCollected / reportData.totalRevenue) * 100).toFixed(1) : 0}% {t('ofRevenue') || 'of revenue'}
               </p>
             </div>
 
@@ -583,8 +578,8 @@ export default function MonthlyReportPage() {
                     {reportData.weeklyBreakdown.map((week) => (
                       <tr key={week.week} className="border-b border-slate-50 dark:border-slate-800">
                         <td className="py-3 px-4 text-sm font-medium text-slate-800 dark:text-slate-200">
-                          {week.week}
-                          <span className="text-slate-500 ml-2">({week.orders} orders)</span>
+                          {t('week') || 'Week'} {week.week.split(' ')[1]}
+                          <span className="text-slate-500 ml-2">({week.orders} {t('orders') || 'orders'})</span>
                         </td>
                         <td className="py-3 px-4 text-sm font-semibold text-green-600 dark:text-green-400 text-right">
                           {formatCurrency(week.revenue)}
@@ -602,7 +597,7 @@ export default function MonthlyReportPage() {
                   </tbody>
                   <tfoot>
                     <tr className="border-t-2 border-slate-200 dark:border-slate-700 font-bold">
-                      <td className="py-3 px-4 text-sm text-slate-800 dark:text-slate-200">Total</td>
+                      <td className="py-3 px-4 text-sm text-slate-800 dark:text-slate-200">{t('total') || 'Total'}</td>
                       <td className="py-3 px-4 text-sm text-green-600 dark:text-green-400 text-right">
                         {formatCurrency(reportData.totalRevenue)}
                       </td>
@@ -625,17 +620,17 @@ export default function MonthlyReportPage() {
           {reportData.previousMonthRevenue > 0 && (
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6">
               <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4">
-                Month-over-Month Revenue
+                {t('monthOverMonth') || 'Month-over-Month Revenue'}
               </h2>
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4">
-                  <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Last Month</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">{t('lastMonth') || 'Last Month'}</p>
                   <p className="text-xl font-bold text-slate-600 dark:text-slate-400">
                     {formatCurrency(reportData.previousMonthRevenue)}
                   </p>
                 </div>
                 <div className="bg-[#6262bd]/10 dark:bg-[#6262bd]/30 rounded-xl p-4">
-                  <p className="text-sm text-[#6262bd] mb-1">This Month</p>
+                  <p className="text-sm text-[#6262bd] mb-1">{t('thisMonth') || 'This Month'}</p>
                   <p className="text-xl font-bold text-[#6262bd]">
                     {formatCurrency(reportData.totalRevenue)}
                   </p>

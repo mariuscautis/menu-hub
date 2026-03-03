@@ -16,9 +16,11 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
+import { useCurrency } from '@/lib/CurrencyContext';
 
 export default function WeeklyReportPage() {
   const t = useTranslations('weeklyReport');
+  const { currencySymbol, formatCurrency } = useCurrency();
 
   // Restaurant state
   const [restaurant, setRestaurant] = useState(null);
@@ -51,8 +53,16 @@ export default function WeeklyReportPage() {
     laborPercent: 0
   });
 
-  // Day names for display
-  const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  // Day names for display (translated)
+  const dayNames = [
+    t('monday') || 'Monday',
+    t('tuesday') || 'Tuesday',
+    t('wednesday') || 'Wednesday',
+    t('thursday') || 'Thursday',
+    t('friday') || 'Friday',
+    t('saturday') || 'Saturday',
+    t('sunday') || 'Sunday'
+  ];
 
   // Fetch restaurant on mount
   useEffect(() => {
@@ -369,13 +379,6 @@ export default function WeeklyReportPage() {
     setSelectedWeekStart(monday.toISOString().split('T')[0]);
   };
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP'
-    }).format(amount || 0);
-  };
-
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-GB', {
       day: 'numeric',
@@ -527,39 +530,39 @@ export default function WeeklyReportPage() {
           {/* Secondary Metrics Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
-              <p className="text-sm text-slate-500 dark:text-slate-400">Tax Collected</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t('taxCollected') || 'Tax Collected'}</p>
               <p className="text-xl font-bold text-purple-600 dark:text-purple-400">
                 {formatCurrency(reportData.totalTaxCollected)}
               </p>
               <p className="text-sm text-slate-500 mt-1">
-                {reportData.totalRevenue > 0 ? ((reportData.totalTaxCollected / reportData.totalRevenue) * 100).toFixed(1) : 0}% of revenue
+                {reportData.totalRevenue > 0 ? ((reportData.totalTaxCollected / reportData.totalRevenue) * 100).toFixed(1) : 0}% {t('ofRevenue') || 'of revenue'}
               </p>
             </div>
 
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
-              <p className="text-sm text-slate-500 dark:text-slate-400">Material Costs</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t('materialCosts') || 'Material Costs'}</p>
               <p className="text-xl font-bold text-red-600 dark:text-red-400">
                 {formatCurrency(reportData.totalMaterialCosts)}
               </p>
               <p className="text-sm text-slate-500 mt-1">
-                {reportData.totalRevenue > 0 ? ((reportData.totalMaterialCosts / reportData.totalRevenue) * 100).toFixed(1) : 0}% of revenue
+                {reportData.totalRevenue > 0 ? ((reportData.totalMaterialCosts / reportData.totalRevenue) * 100).toFixed(1) : 0}% {t('ofRevenue') || 'of revenue'}
               </p>
             </div>
 
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
-              <p className="text-sm text-slate-500 dark:text-slate-400">Discounts Given</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t('discountsGiven') || 'Discounts Given'}</p>
               <p className="text-xl font-bold text-orange-600 dark:text-orange-400">
                 {formatCurrency(reportData.totalDiscounts)}
               </p>
               {reportData.totalRevenue > 0 && reportData.totalDiscounts > 0 && (
                 <p className="text-sm text-slate-500 mt-1">
-                  {((reportData.totalDiscounts / (reportData.totalRevenue + reportData.totalDiscounts)) * 100).toFixed(1)}% of gross
+                  {((reportData.totalDiscounts / (reportData.totalRevenue + reportData.totalDiscounts)) * 100).toFixed(1)}% {t('ofGross') || 'of gross'}
                 </p>
               )}
             </div>
 
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
-              <p className="text-sm text-slate-500 dark:text-slate-400">Refunds</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t('refunds') || 'Refunds'}</p>
               <p className="text-xl font-bold text-red-600 dark:text-red-400">
                 {formatCurrency(reportData.totalRefunds)}
               </p>
@@ -600,7 +603,7 @@ export default function WeeklyReportPage() {
                           </span>
                           {day === reportData.busiestDay && (
                             <span className="text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">
-                              Busiest
+                              {t('busiest') || 'Busiest'}
                             </span>
                           )}
                         </div>
@@ -622,7 +625,7 @@ export default function WeeklyReportPage() {
                 </tbody>
                 <tfoot>
                   <tr className="border-t-2 border-slate-200 dark:border-slate-700 font-bold">
-                    <td className="py-3 px-4 text-sm text-slate-800 dark:text-slate-200">Total</td>
+                    <td className="py-3 px-4 text-sm text-slate-800 dark:text-slate-200">{t('total') || 'Total'}</td>
                     <td className="py-3 px-4 text-sm text-[#6262bd] text-right">
                       {formatCurrency(reportData.totalRevenue)}
                     </td>

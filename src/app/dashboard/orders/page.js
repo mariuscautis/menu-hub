@@ -8,10 +8,12 @@ import { generateInvoicePdfBase64, downloadInvoicePdf } from '@/lib/invoicePdfGe
 import { getPendingOrders, getOrderItems as getOfflineOrderItems } from '@/lib/offlineQueue'
 import { onSyncEvent, initAutoSync } from '@/lib/syncManager'
 import { useOrderSounds } from '@/hooks/useOrderSounds'
+import { useCurrency } from '@/lib/CurrencyContext'
 
 export default function Orders() {
   const t = useTranslations('orders')
   const tc = useTranslations('common')
+  const { currencySymbol, formatCurrency } = useCurrency()
   const [orders, setOrders] = useState([])
   const [restaurant, setRestaurant] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -565,7 +567,7 @@ export default function Orders() {
     const maxRefundable = orderTotal - existingRefunds
 
     if (amount > maxRefundable) {
-      showNotification('error', t('refundExceedsMax') || `Refund cannot exceed £${maxRefundable.toFixed(2)}`)
+      showNotification('error', t('refundExceedsMax') || `Refund cannot exceed ${formatCurrency(maxRefundable)}`)
       return
     }
 
@@ -603,7 +605,7 @@ export default function Orders() {
         throw new Error(data.error || 'Failed to process refund')
       }
 
-      showNotification('success', t('refundSuccess') || `Refund of £${amount.toFixed(2)} processed successfully`)
+      showNotification('success', t('refundSuccess') || `Refund of ${formatCurrency(amount)} processed successfully`)
 
       // Close modal and reset state
       setShowRefundModal(false)
@@ -674,7 +676,7 @@ export default function Orders() {
       }
 
       const itemValue = (voidItem.price_at_time * voidQuantity).toFixed(2)
-      showNotification('success', t('voidSuccess') || `Voided ${voidQuantity}x ${voidItem.name} (£${itemValue})`)
+      showNotification('success', t('voidSuccess') || `Voided ${voidQuantity}x ${voidItem.name} (${currencySymbol}${itemValue})`)
 
       // Close modal and reset state
       setShowVoidModal(false)
@@ -1074,7 +1076,7 @@ export default function Orders() {
                     <p className="text-slate-400 text-xs mt-1">{order.customer_email}</p>
                   )}
                 </div>
-                <p className="text-xl font-bold text-slate-800">£{order.total?.toFixed(2)}</p>
+                <p className="text-xl font-bold text-slate-800">{formatCurrency(order.total)}</p>
               </div>
 
               {/* Order Items */}
@@ -1106,7 +1108,7 @@ export default function Orders() {
                         </div>
                         <div className="flex items-center gap-2">
                           <span className={`text-slate-500 ${isVoided ? 'line-through' : ''}`}>
-                            £{(item.price_at_time * item.quantity).toFixed(2)}
+                            {formatCurrency(item.price_at_time * item.quantity)}
                           </span>
                           {/* Void Button - Only for unpaid orders and owners/admins, not for already voided items */}
                           {!order.paid && !isVoided && (userType === 'owner' || userType === 'staff-admin') && (
@@ -1471,7 +1473,7 @@ export default function Orders() {
                   <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
                     <div className="flex justify-between items-center">
                       <span className="text-amber-700 font-medium">{t('totalToPay') || 'Total to collect (Cash)'}</span>
-                      <span className="text-xl font-bold text-amber-800">£{order.total?.toFixed(2)}</span>
+                      <span className="text-xl font-bold text-amber-800">{formatCurrency(order.total)}</span>
                     </div>
                   </div>
                 </div>
@@ -1549,18 +1551,18 @@ export default function Orders() {
             <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 mb-4">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm text-slate-600 dark:text-slate-400">{t('orderTotal') || 'Order Total'}</span>
-                <span className="font-bold text-slate-800 dark:text-slate-100">£{(refundOrder.total || 0).toFixed(2)}</span>
+                <span className="font-bold text-slate-800 dark:text-slate-100">{formatCurrency(refundOrder.total || 0)}</span>
               </div>
               {(refundOrder.refund_total || 0) > 0 && (
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm text-orange-600 dark:text-orange-400">{t('alreadyRefunded') || 'Already Refunded'}</span>
-                  <span className="font-bold text-orange-600 dark:text-orange-400">-£{(refundOrder.refund_total || 0).toFixed(2)}</span>
+                  <span className="font-bold text-orange-600 dark:text-orange-400">-{formatCurrency(refundOrder.refund_total || 0)}</span>
                 </div>
               )}
               <div className="flex justify-between items-center pt-2 border-t border-slate-200 dark:border-slate-600">
                 <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('maxRefundable') || 'Max Refundable'}</span>
                 <span className="font-bold text-green-600 dark:text-green-400">
-                  £{((refundOrder.total || 0) - (refundOrder.refund_total || 0)).toFixed(2)}
+                  {formatCurrency((refundOrder.total || 0) - (refundOrder.refund_total || 0))}
                 </span>
               </div>
             </div>
@@ -1571,7 +1573,7 @@ export default function Orders() {
                 {t('refundAmount') || 'Refund Amount'} *
               </label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-medium">£</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-medium">{currencySymbol}</span>
                 <input
                   type="number"
                   value={refundAmount}
@@ -1723,7 +1725,7 @@ export default function Orders() {
               <div className="flex justify-between items-center mb-2">
                 <span className="font-medium text-slate-800 dark:text-slate-100">{voidItem.name}</span>
                 <span className="text-slate-600 dark:text-slate-300">
-                  £{voidItem.price_at_time?.toFixed(2)} each
+                  {formatCurrency(voidItem.price_at_time)} each
                 </span>
               </div>
               <div className="flex justify-between items-center text-sm">
@@ -1731,7 +1733,7 @@ export default function Orders() {
                   {t('voidCurrentQuantity') || 'Current quantity'}: {voidItem.quantity}
                 </span>
                 <span className="font-medium text-slate-700 dark:text-slate-200">
-                  {t('voidTotalValue') || 'Total'}: £{(voidItem.price_at_time * voidItem.quantity).toFixed(2)}
+                  {t('voidTotalValue') || 'Total'}: {formatCurrency(voidItem.price_at_time * voidItem.quantity)}
                 </span>
               </div>
             </div>
@@ -1773,7 +1775,7 @@ export default function Orders() {
               </div>
               <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
                 {t('voidValueLabel') || 'Value to void'}: <span className="font-bold text-red-600 dark:text-red-400">
-                  £{(voidItem.price_at_time * voidQuantity).toFixed(2)}
+                  {formatCurrency(voidItem.price_at_time * voidQuantity)}
                 </span>
               </p>
             </div>

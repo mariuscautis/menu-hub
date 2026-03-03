@@ -3,10 +3,12 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import { useCurrency } from '@/lib/CurrencyContext'
 
 export default function Menu() {
   const t = useTranslations('menu')
   const tc = useTranslations('common')
+  const { currencySymbol } = useCurrency()
   const [menuItems, setMenuItems] = useState([])
   const [categories, setCategories] = useState([])
   const [stockProducts, setStockProducts] = useState([])
@@ -775,9 +777,9 @@ export default function Menu() {
                       </div>
                     )}
                     <div className="flex items-center gap-2">
-                      <p className="text-lg font-bold text-[#6262bd]">£{item.price?.toFixed(2)}</p>
+                      <p className="text-lg font-bold text-[#6262bd]">{currencySymbol}{item.price?.toFixed(2)}</p>
                       {item.dynamic_pricing_enabled && (
-                        <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full font-medium" title={`Base cost: £${item.base_cost?.toFixed(2)} + ${item.profit_margin_percentage}% margin`}>
+                        <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full font-medium" title={`Base cost: ${currencySymbol}${item.base_cost?.toFixed(2)} + ${item.profit_margin_percentage}% margin`}>
                           {t('autoPriced')}
                         </span>
                       )}
@@ -1050,7 +1052,7 @@ export default function Menu() {
                           </div>
                           <div className="text-right">
                             <p className="text-2xl font-bold text-slate-800">
-                              £{calculateBaseCost().toFixed(2)}
+                              {currencySymbol}{calculateBaseCost().toFixed(2)}
                             </p>
                           </div>
                         </div>
@@ -1065,7 +1067,7 @@ export default function Menu() {
                               return (
                                 <div key={idx} className="flex justify-between text-xs text-slate-600">
                                   <span>{product.name}</span>
-                                  <span>£{cost.toFixed(2)}</span>
+                                  <span>{currencySymbol}{cost.toFixed(2)}</span>
                                 </div>
                               )
                             })}
@@ -1127,7 +1129,7 @@ export default function Menu() {
                           <div>
                             <p className="text-sm font-medium text-slate-600 mb-1">{t('calculatedPrice')}</p>
                             <p className="text-xs text-slate-500">
-                              £{calculateBaseCost().toFixed(2)} + ({formData.profit_margin_percentage}% margin)
+                              {currencySymbol}{calculateBaseCost().toFixed(2)} + ({formData.profit_margin_percentage}% margin)
                             </p>
                             {formData.price_rounding_mode !== 'none' && (
                               <p className="text-xs text-slate-400 mt-1">
@@ -1137,7 +1139,7 @@ export default function Menu() {
                           </div>
                           <div className="text-right">
                             <p className="text-3xl font-bold text-[#6262bd]">
-                              £{calculateDynamicPrice().toFixed(2)}
+                              {currencySymbol}{calculateDynamicPrice().toFixed(2)}
                             </p>
                             {formData.price_rounding_mode !== 'none' && (
                               <p className="text-xs text-green-600 font-medium mt-1">
@@ -1155,7 +1157,7 @@ export default function Menu() {
                         <br />
                         Selling Price = Base Cost + (Base Cost × Profit Margin %)
                         <br />
-                        Example: £0.50 cost with 200% margin = £0.50 + (£0.50 × 2) = £1.50
+                        Example: {currencySymbol}0.50 cost with 200% margin = {currencySymbol}0.50 + ({currencySymbol}0.50 × 2) = {currencySymbol}1.50
                       </p>
                     </div>
                   </div>

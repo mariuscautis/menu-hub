@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import { useCurrency } from '@/lib/CurrencyContext'
 export default function LossesAnalytics() {
   const t = useTranslations('lossesAnalytics')
+  const { currencySymbol, formatCurrency } = useCurrency()
   const [restaurant, setRestaurant] = useState(null)
   const [loading, setLoading] = useState(true)
   const [lossesData, setLossesData] = useState(null)
@@ -219,8 +221,8 @@ export default function LossesAnalytics() {
                 {lossesData.summary.by_department?.bar?.items || 0}
               </p>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                {t('cost')}: £{lossesData.summary.by_department?.bar?.restaurant_cost?.toFixed(2) || '0.00'} •
-                {t('revenue')}: £{lossesData.summary.by_department?.bar?.selling_cost?.toFixed(2) || '0.00'}
+                {t('cost')}: {formatCurrency(lossesData.summary.by_department?.bar?.restaurant_cost || 0)} •
+                {t('revenue')}: {formatCurrency(lossesData.summary.by_department?.bar?.selling_cost || 0)}
               </p>
             </div>
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-xl p-4">
@@ -229,8 +231,8 @@ export default function LossesAnalytics() {
                 {lossesData.summary.by_department?.kitchen?.items || 0}
               </p>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                {t('cost')}: £{lossesData.summary.by_department?.kitchen?.restaurant_cost?.toFixed(2) || '0.00'} •
-                {t('revenue')}: £{lossesData.summary.by_department?.kitchen?.selling_cost?.toFixed(2) || '0.00'}
+                {t('cost')}: {formatCurrency(lossesData.summary.by_department?.kitchen?.restaurant_cost || 0)} •
+                {t('revenue')}: {formatCurrency(lossesData.summary.by_department?.kitchen?.selling_cost || 0)}
               </p>
             </div>
           </div>
@@ -258,10 +260,10 @@ export default function LossesAnalytics() {
                       </span>
                     </div>
                     <div className="text-right">
-                      <p className="text-xl font-bold text-red-600">£{item.selling_cost?.toFixed(2) || '0.00'}</p>
+                      <p className="text-xl font-bold text-red-600">{formatCurrency(item.selling_cost || 0)}</p>
                       <p className="text-xs text-slate-500 dark:text-slate-400">{t('lostRevenue')}</p>
                       <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-                        {t('cost')}: £{item.restaurant_cost?.toFixed(2) || '0.00'}
+                        {t('cost')}: {formatCurrency(item.restaurant_cost || 0)}
                       </p>
                     </div>
                   </div>
@@ -312,12 +314,12 @@ export default function LossesAnalytics() {
                         </td>
                         <td className="py-3 px-4">
                           <span className="font-semibold text-amber-700 dark:text-amber-500">
-                            £{loss.restaurant_cost?.toFixed(2) || '0.00'}
+                            {formatCurrency(loss.restaurant_cost || 0)}
                           </span>
                         </td>
                         <td className="py-3 px-4">
                           <span className="font-semibold text-red-700 dark:text-red-500">
-                            £{loss.selling_cost?.toFixed(2) || '0.00'}
+                            {formatCurrency(loss.selling_cost || 0)}
                           </span>
                         </td>
                         <td className="py-3 px-4">
@@ -374,12 +376,12 @@ export default function LossesAnalytics() {
                       </td>
                       <td className="py-4 px-4">
                         <span className="font-bold text-amber-700 dark:text-amber-500 text-lg">
-                          £{lossesData.summary.total_restaurant_cost?.toFixed(2) || '0.00'}
+                          {formatCurrency(lossesData.summary.total_restaurant_cost || 0)}
                         </span>
                       </td>
                       <td className="py-4 px-4">
                         <span className="font-bold text-red-700 dark:text-red-500 text-lg">
-                          £{lossesData.summary.total_selling_cost?.toFixed(2) || '0.00'}
+                          {formatCurrency(lossesData.summary.total_selling_cost || 0)}
                         </span>
                       </td>
                       <td colSpan="4"></td>

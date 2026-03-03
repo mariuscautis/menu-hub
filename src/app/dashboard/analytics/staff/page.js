@@ -5,9 +5,11 @@ import { supabase } from '@/lib/supabase'
 import DateRangeSelector from '@/components/analytics/DateRangeSelector'
 import Link from 'next/link'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import { useCurrency } from '@/lib/CurrencyContext'
 
 export default function StaffAnalyticsPage() {
   const t = useTranslations('staffAnalytics')
+  const { currencySymbol, formatCurrency } = useCurrency()
   const [loading, setLoading] = useState(true)
   const [restaurant, setRestaurant] = useState(null)
   const [dateRange, setDateRange] = useState({
@@ -150,7 +152,7 @@ export default function StaffAnalyticsPage() {
                 <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
                   <p className="text-slate-500 text-sm font-medium mb-1">{t('overallRevenue')}</p>
                   <p className="text-3xl font-bold text-green-600">
-                    £{summary.total_revenue.toFixed(2)}
+                    {formatCurrency(summary.total_revenue)}
                   </p>
                 </div>
                 <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
@@ -160,7 +162,7 @@ export default function StaffAnalyticsPage() {
                 <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
                   <p className="text-slate-500 text-sm font-medium mb-1">{t('avgRevenuePerStaff')}</p>
                   <p className="text-3xl font-bold text-slate-700">
-                    £{summary.avg_revenue_per_staff.toFixed(2)}
+                    {formatCurrency(summary.avg_revenue_per_staff)}
                   </p>
                 </div>
                 <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
@@ -296,7 +298,7 @@ export default function StaffAnalyticsPage() {
                     <div className="text-right">
                       <p className="text-sm text-slate-500">{t('totalRevenue')}</p>
                       <p className="text-2xl font-bold text-[#6262bd]">
-                        £{staff.total_revenue.toFixed(2)}
+                        {formatCurrency(staff.total_revenue)}
                       </p>
                     </div>
                   </div>
@@ -310,13 +312,13 @@ export default function StaffAnalyticsPage() {
                     <div className="bg-slate-50 rounded-xl p-4">
                       <p className="text-xs text-slate-500 font-medium mb-1">{t('avgOrderValue')}</p>
                       <p className="text-lg font-bold text-slate-700">
-                        £{staff.avg_order_value.toFixed(2)}
+                        {formatCurrency(staff.avg_order_value)}
                       </p>
                     </div>
                     <div className="bg-green-50 rounded-xl p-4">
                       <p className="text-xs text-green-600 font-medium mb-1">{t('tipsCollected')}</p>
                       <p className="text-lg font-bold text-green-700">
-                        £{staff.total_tips.toFixed(2)}
+                        {formatCurrency(staff.total_tips)}
                       </p>
                     </div>
                     <div className="bg-blue-50 rounded-xl p-4">

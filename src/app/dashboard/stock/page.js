@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import { useCurrency } from '@/lib/CurrencyContext'
 
 export default function StockManagement() {
   const t = useTranslations('stock')
+  const { currencySymbol, formatCurrency } = useCurrency()
   const [products, setProducts] = useState([])
   const [entries, setEntries] = useState([])
   const [restaurant, setRestaurant] = useState(null)
@@ -1149,7 +1151,7 @@ export default function StockManagement() {
                       </label>
                       <div className="relative">
                         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-medium">
-                          £
+                          {currencySymbol}
                         </span>
                         <input
                           type="number"
@@ -1171,7 +1173,7 @@ export default function StockManagement() {
                         <strong>{t('totalStock')}:</strong> {(parseFloat(stockForm.quantity) * products.find(p => p.id === stockForm.product_id)?.units_to_base_multiplier).toFixed(2)} {products.find(p => p.id === stockForm.product_id)?.base_unit}
                       </p>
                       <p className="text-sm text-slate-700">
-                        <strong>{t('costPerUnit').replace('{unit}', products.find(p => p.id === stockForm.product_id)?.base_unit)}:</strong> £{(parseFloat(stockForm.purchase_price) / (parseFloat(stockForm.quantity) * products.find(p => p.id === stockForm.product_id)?.units_to_base_multiplier)).toFixed(4)}
+                        <strong>{t('costPerUnit').replace('{unit}', products.find(p => p.id === stockForm.product_id)?.base_unit)}:</strong> {formatCurrency(parseFloat(stockForm.purchase_price) / (parseFloat(stockForm.quantity) * products.find(p => p.id === stockForm.product_id)?.units_to_base_multiplier))}
                       </p>
                     </div>
                   )}

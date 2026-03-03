@@ -20,10 +20,12 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
+import { useCurrency } from '@/lib/CurrencyContext';
 
 export default function XReportPage() {
   const t = useTranslations('xReport');
   const tZ = useTranslations('zReport'); // Reuse Z-Report translations for common terms
+  const { currencySymbol, formatCurrency } = useCurrency();
 
   // Restaurant state
   const [restaurant, setRestaurant] = useState(null);
@@ -271,13 +273,6 @@ export default function XReportPage() {
    */
   const handleRefresh = () => {
     setLastRefresh(new Date());
-  };
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP'
-    }).format(amount || 0);
   };
 
   const formatTime = (date) => {

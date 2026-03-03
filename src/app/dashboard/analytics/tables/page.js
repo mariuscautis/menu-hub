@@ -5,9 +5,11 @@ import { supabase } from '@/lib/supabase'
 import DateRangeSelector from '@/components/analytics/DateRangeSelector'
 import Link from 'next/link'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import { useCurrency } from '@/lib/CurrencyContext'
 
 export default function TableAnalyticsPage() {
   const t = useTranslations('tableAnalytics')
+  const { currencySymbol, formatCurrency } = useCurrency()
   const [loading, setLoading] = useState(true)
   const [restaurant, setRestaurant] = useState(null)
   const [dateRange, setDateRange] = useState({
@@ -150,13 +152,13 @@ export default function TableAnalyticsPage() {
               <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
                 <p className="text-slate-500 text-sm font-medium mb-1">{t('totalRevenue')}</p>
                 <p className="text-3xl font-bold text-green-600">
-                  £{summary.total_revenue.toFixed(2)}
+                  {formatCurrency(summary.total_revenue)}
                 </p>
               </div>
               <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
                 <p className="text-slate-500 text-sm font-medium mb-1">{t('avgRevenuePerTable')}</p>
                 <p className="text-3xl font-bold text-slate-700">
-                  £{summary.avg_revenue_per_table.toFixed(2)}
+                  {formatCurrency(summary.avg_revenue_per_table)}
                 </p>
               </div>
               <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
@@ -232,7 +234,7 @@ export default function TableAnalyticsPage() {
                     <div className="text-right">
                       <p className="text-sm text-slate-500">{t('totalRevenueLabel')}</p>
                       <p className="text-2xl font-bold text-[#6262bd]">
-                        £{table.total_revenue.toFixed(2)}
+                        {formatCurrency(table.total_revenue)}
                       </p>
                     </div>
                   </div>
@@ -242,16 +244,16 @@ export default function TableAnalyticsPage() {
                     <div className="bg-slate-50 dark:!bg-slate-800 rounded-xl p-4">
                       <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1">{t('avgRevenuePerOrder')}</p>
                       <p className="text-lg font-bold text-slate-700 dark:text-slate-200">
-                        £{table.avg_revenue_per_order.toFixed(2)}
+                        {formatCurrency(table.avg_revenue_per_order)}
                       </p>
                       <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1">{t('avgSpendPerPerson')}</p>
                       <p className="text-lg font-bold text-slate-700 dark:text-slate-200">
-                        £{table.avg_spend_per_person.toFixed(2)}
+                        {formatCurrency(table.avg_spend_per_person)}
                       </p>
                       <p className="text-xs text-slate-400 mt-1">{t('estGuestsPerOrder')}</p>
                       <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1">{t('revenuePerHour')}</p>
                       <p className="text-lg font-bold text-slate-700 dark:text-slate-200">
-                        £{table.revenue_per_hour.toFixed(2)}
+                        {formatCurrency(table.revenue_per_hour)}
                       </p>
                       <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1">{t('totalOrders')}</p>
                       <p className="text-lg font-bold text-slate-700 dark:text-slate-200">{table.total_orders}</p>
@@ -278,7 +280,7 @@ export default function TableAnalyticsPage() {
                     <div className="bg-green-50 dark:!bg-green-950 rounded-xl p-4">
                       <p className="text-xs text-green-600 dark:text-green-400 font-medium mb-1">{t('tipsCollected')}</p>
                       <p className="text-lg font-bold text-green-700 dark:text-green-300">
-                        £{table.total_tips.toFixed(2)}
+                        {formatCurrency(table.total_tips)}
                       </p>
                       {table.tip_percentage > 0 && (
                         <p className="text-xs text-green-600 dark:text-green-400 mt-1">

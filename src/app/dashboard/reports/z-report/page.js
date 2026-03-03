@@ -20,9 +20,11 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
+import { useCurrency } from '@/lib/CurrencyContext';
 
 export default function ZReportPage() {
   const t = useTranslations('zReport');
+  const { currencySymbol, formatCurrency } = useCurrency();
   // Restaurant state
   const [restaurant, setRestaurant] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -305,16 +307,6 @@ export default function ZReportPage() {
   };
 
   /**
-   * Formats a number as currency (GBP)
-   */
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP'
-    }).format(amount || 0);
-  };
-
-  /**
    * Formats the selected date for display
    */
   const formatDate = (dateString) => {
@@ -337,7 +329,7 @@ export default function ZReportPage() {
       <tr>
         <td>${staff.name}</td>
         <td class="center">${staff.paymentsProcessed}</td>
-        <td class="right">£${staff.totalProcessed.toFixed(2)}</td>
+        <td class="right">${currencySymbol}${staff.totalProcessed.toFixed(2)}</td>
       </tr>
     `).join('');
 
@@ -384,36 +376,36 @@ export default function ZReportPage() {
           <div class="section">
             <div class="section-title">Sales Summary</div>
             <table>
-              <tr><td>Gross Sales</td><td class="right">£${reportData.grossSales.toFixed(2)}</td></tr>
-              <tr><td>Discounts</td><td class="right negative">-£${reportData.discountTotal.toFixed(2)}</td></tr>
-              <tr><td>Tax Collected</td><td class="right">£${reportData.taxCollected.toFixed(2)}</td></tr>
-              <tr class="highlight"><td>Net Sales</td><td class="right">£${reportData.netSales.toFixed(2)}</td></tr>
+              <tr><td>Gross Sales</td><td class="right">${currencySymbol}${reportData.grossSales.toFixed(2)}</td></tr>
+              <tr><td>Discounts</td><td class="right negative">-${currencySymbol}${reportData.discountTotal.toFixed(2)}</td></tr>
+              <tr><td>Tax Collected</td><td class="right">${currencySymbol}${reportData.taxCollected.toFixed(2)}</td></tr>
+              <tr class="highlight"><td>Net Sales</td><td class="right">${currencySymbol}${reportData.netSales.toFixed(2)}</td></tr>
             </table>
           </div>
 
           <div class="section">
             <div class="section-title">Payment Breakdown</div>
             <table>
-              <tr><td>Cash</td><td class="right">£${reportData.cashTotal.toFixed(2)}</td></tr>
-              <tr><td>Card</td><td class="right">£${reportData.cardTotal.toFixed(2)}</td></tr>
-              <tr><td>Split Bills</td><td class="right">£${reportData.splitBillsTotal.toFixed(2)}</td></tr>
+              <tr><td>Cash</td><td class="right">${currencySymbol}${reportData.cashTotal.toFixed(2)}</td></tr>
+              <tr><td>Card</td><td class="right">${currencySymbol}${reportData.cardTotal.toFixed(2)}</td></tr>
+              <tr><td>Split Bills</td><td class="right">${currencySymbol}${reportData.splitBillsTotal.toFixed(2)}</td></tr>
             </table>
           </div>
 
           <div class="section">
             <div class="section-title">Tips Summary</div>
             <table>
-              <tr><td>Total Tips</td><td class="right">£${reportData.totalTips.toFixed(2)}</td></tr>
-              <tr><td>Cash Tips</td><td class="right">£${reportData.cashTips.toFixed(2)}</td></tr>
-              <tr><td>Card Tips</td><td class="right">£${reportData.cardTips.toFixed(2)}</td></tr>
+              <tr><td>Total Tips</td><td class="right">${currencySymbol}${reportData.totalTips.toFixed(2)}</td></tr>
+              <tr><td>Cash Tips</td><td class="right">${currencySymbol}${reportData.cashTips.toFixed(2)}</td></tr>
+              <tr><td>Card Tips</td><td class="right">${currencySymbol}${reportData.cardTips.toFixed(2)}</td></tr>
             </table>
           </div>
 
           <div class="section">
             <div class="section-title">Voids &amp; Refunds</div>
             <table>
-              <tr><td>Total Voids (${reportData.voidsCount} items)</td><td class="right negative">£${reportData.voidsTotal.toFixed(2)}</td></tr>
-              <tr><td>Total Refunds (${reportData.refundsCount} transactions)</td><td class="right negative">£${reportData.refundsTotal.toFixed(2)}</td></tr>
+              <tr><td>Total Voids (${reportData.voidsCount} items)</td><td class="right negative">${currencySymbol}${reportData.voidsTotal.toFixed(2)}</td></tr>
+              <tr><td>Total Refunds (${reportData.refundsCount} transactions)</td><td class="right negative">${currencySymbol}${reportData.refundsTotal.toFixed(2)}</td></tr>
             </table>
           </div>
 
@@ -423,7 +415,7 @@ export default function ZReportPage() {
               <tr><td>Total Orders</td><td class="right">${reportData.totalOrders}</td></tr>
               <tr><td>Dine-in</td><td class="right">${reportData.dineInOrders}</td></tr>
               <tr><td>Takeaway</td><td class="right">${reportData.takeawayOrders}</td></tr>
-              <tr><td>Avg Order Value</td><td class="right">£${reportData.avgOrderValue.toFixed(2)}</td></tr>
+              <tr><td>Avg Order Value</td><td class="right">${currencySymbol}${reportData.avgOrderValue.toFixed(2)}</td></tr>
             </table>
           </div>
 

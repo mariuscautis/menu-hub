@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import { useCurrency } from '@/lib/CurrencyContext'
 
 /**
  * Discounts Settings Page
@@ -19,6 +20,7 @@ import { useTranslations } from '@/lib/i18n/LanguageContext'
 export default function DiscountsSettings() {
   const t = useTranslations('discounts')
   const tc = useTranslations('common')
+  const { currencySymbol, formatCurrency } = useCurrency()
 
   // State for restaurant and loading
   const [restaurant, setRestaurant] = useState(null)
@@ -291,9 +293,7 @@ export default function DiscountsSettings() {
     if (discount.type === 'percentage') {
       return `${discount.value}%`
     } else {
-      // Get currency from restaurant settings or default to £
-      const currency = restaurant?.currency || '£'
-      return `${currency}${discount.value.toFixed(2)}`
+      return `${currencySymbol}${discount.value.toFixed(2)}`
     }
   }
 
@@ -360,7 +360,7 @@ export default function DiscountsSettings() {
                 {t('infoTitle') || 'How Discounts Work'}
               </p>
               <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                {t('infoText') || 'Create discount templates here, then apply them to orders during the payment process. Discounts can be percentage-based (e.g., 10% off for loyalty members) or fixed amounts (e.g., £5 off promotion). All applied discounts are tracked in reports.'}
+                {t('infoText') || `Create discount templates here, then apply them to orders during the payment process. Discounts can be percentage-based (e.g., 10% off for loyalty members) or fixed amounts (e.g., ${currencySymbol}5 off promotion). All applied discounts are tracked in reports.`}
               </p>
             </div>
           </div>
@@ -521,7 +521,7 @@ export default function DiscountsSettings() {
                     placeholder={newDiscount.type === 'percentage' ? '10' : '5.00'}
                   />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 font-medium">
-                    {newDiscount.type === 'percentage' ? '%' : restaurant?.currency || '£'}
+                    {newDiscount.type === 'percentage' ? '%' : currencySymbol}
                   </span>
                 </div>
               </div>
@@ -564,7 +564,7 @@ export default function DiscountsSettings() {
             <li>• <strong>{t('examples.staff') || 'Staff Discount'}:</strong> 15% {t('examples.staffDesc') || 'for employee meals'}</li>
             <li>• <strong>{t('examples.loyalty') || 'Loyalty 10%'}:</strong> 10% {t('examples.loyaltyDesc') || 'for repeat customers'}</li>
             <li>• <strong>{t('examples.happyHour') || 'Happy Hour'}:</strong> 20% {t('examples.happyHourDesc') || 'for drinks during 4-6pm'}</li>
-            <li>• <strong>{t('examples.promo') || 'Launch Promo'}:</strong> £5 {t('examples.promoDesc') || 'off orders over £30'}</li>
+            <li>• <strong>{t('examples.promo') || 'Launch Promo'}:</strong> {currencySymbol}5 {t('examples.promoDesc') || `off orders over ${currencySymbol}30`}</li>
             <li>• <strong>{t('examples.senior') || 'Senior Discount'}:</strong> 10% {t('examples.seniorDesc') || 'for customers 65+'}</li>
           </ul>
         </div>

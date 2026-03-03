@@ -16,9 +16,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
+import { useCurrency } from '@/lib/CurrencyContext';
 
 export default function CashDrawerPage() {
   const t = useTranslations('cashDrawer');
+  const { currencySymbol, formatCurrency } = useCurrency();
 
   // Restaurant and user state
   const [restaurant, setRestaurant] = useState(null);
@@ -317,16 +319,6 @@ export default function CashDrawerPage() {
   };
 
   /**
-   * Formats a number as currency (GBP)
-   */
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP'
-    }).format(amount || 0);
-  };
-
-  /**
    * Formats a date/time for display
    */
   const formatDateTime = (dateString) => {
@@ -606,7 +598,7 @@ export default function CashDrawerPage() {
                 {t('openingAmount') || 'Opening Amount'} *
               </label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">£</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">{currencySymbol}</span>
                 <input
                   type="number"
                   step="0.01"
@@ -674,7 +666,7 @@ export default function CashDrawerPage() {
                 {t('countedAmount') || 'Counted Amount'} *
               </label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">£</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">{currencySymbol}</span>
                 <input
                   type="number"
                   step="0.01"

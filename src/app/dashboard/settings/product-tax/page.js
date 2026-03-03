@@ -2,7 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useTranslations } from '@/lib/i18n/LanguageContext'
+import { useCurrency } from '@/lib/CurrencyContext'
+
 export default function ProductTaxSettings() {
+  const t = useTranslations('productTax')
+  const tc = useTranslations('common')
+  const { currencySymbol, formatCurrency } = useCurrency()
   const [restaurant, setRestaurant] = useState(null)
   const [taxCategories, setTaxCategories] = useState([])
   const [loading, setLoading] = useState(true)
@@ -225,7 +231,7 @@ export default function ProductTaxSettings() {
     return (
       <div className="p-8">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center text-slate-500">Loading...</div>
+          <div className="text-center text-slate-500 dark:text-slate-400">{t('loading') || tc('loading') || 'Loading...'}</div>
         </div>
       </div>
     )
@@ -234,7 +240,7 @@ export default function ProductTaxSettings() {
     return (
       <div className="p-8">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center text-red-500">Access denied - Restaurant owners only</div>
+          <div className="text-center text-red-500">{t('accessDenied') || 'Access denied - Restaurant owners only'}</div>
         </div>
       </div>
     )
@@ -244,9 +250,9 @@ export default function ProductTaxSettings() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-slate-800">Product Tax Categories</h1>
-          <p className="text-sm text-slate-500 mt-2">
-            Create tax categories for your stock products. Tax will be applied when purchasing products.
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{t('title') || 'Product Tax Categories'}</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            {t('subtitle') || 'Create tax categories for your stock products. Tax will be applied when purchasing products.'}
           </p>
         </div>
         {/* Message Alert */}
@@ -262,53 +268,52 @@ export default function ProductTaxSettings() {
           </div>
         )}
         {/* Info Box */}
-        <div className="mb-6 bg-blue-50 border-2 border-blue-100 rounded-xl p-4">
+        <div className="mb-6 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-100 dark:border-blue-800 rounded-xl p-4">
           <div className="flex items-start gap-3">
             <svg className="w-5 h-5 text-blue-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
             </svg>
             <div>
-              <p className="text-sm text-blue-800 font-medium">How Product Tax Works</p>
-              <p className="text-sm text-blue-700 mt-1">
-                <strong>Menu Sales Tax:</strong> Configure a single tax (VAT, GST, etc.) that applies to all menu items using tax-inclusive pricing.
+              <p className="text-sm text-blue-800 dark:text-blue-200 font-medium">{t('howItWorks') || 'How Product Tax Works'}</p>
+              <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                <strong>{t('menuSalesTax') || 'Menu Sales Tax'}:</strong> {t('menuSalesTaxInfo') || 'Configure a single tax (VAT, GST, etc.) that applies to all menu items using tax-inclusive pricing.'}
                 <br />
-                <strong>Stock Product Tax:</strong> Assign different tax categories to stock products for purchase taxes (e.g., import duties, excise tax).
+                <strong>{t('stockProductTax') || 'Stock Product Tax'}:</strong> {t('stockProductTaxInfo') || 'Assign different tax categories to stock products for purchase taxes (e.g., import duties, excise tax).'}
               </p>
             </div>
           </div>
         </div>
         {/* Menu Sales Tax */}
-        <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
-          <h2 className="text-lg font-bold text-slate-700 mb-2">Menu Sales Tax</h2>
-          <p className="text-sm text-slate-500 mb-2">
-            Configure the tax applied to menu items with <strong>tax-inclusive pricing</strong>
+        <div className="bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl p-6 mb-6">
+          <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-2">{t('menuSalesTax') || 'Menu Sales Tax'}</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">
+            {t('menuSalesTaxDesc') || 'Configure the tax applied to menu items with tax-inclusive pricing'}
           </p>
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-            <p className="text-sm text-blue-800">
-              <strong>Important:</strong> Your menu prices already include tax. Customers pay exactly what's shown on the menu.
-              Invoices will show the breakdown (net amount + tax) for accounting purposes.
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-4">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
+              <strong>{t('important') || 'Important'}:</strong> {t('taxInclusiveInfo') || 'Your menu prices already include tax. Customers pay exactly what\'s shown on the menu. Invoices will show the breakdown (net amount + tax) for accounting purposes.'}
             </p>
-            <p className="text-xs text-blue-700 mt-2">
-              Example: Menu price £5.00 with 21% VAT → Customer pays £5.00 → Invoice shows: Net £4.13 + VAT £0.87 = Total £5.00
+            <p className="text-xs text-blue-700 dark:text-blue-300 mt-2">
+              {t('example') || `Example: Menu price ${currencySymbol}5.00 with 21% VAT → Customer pays ${currencySymbol}5.00 → Invoice shows: Net ${currencySymbol}4.13 + VAT ${currencySymbol}0.87 = Total ${currencySymbol}5.00`}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Tax Name
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                {t('taxName') || 'Tax Name'}
               </label>
               <input
                 type="text"
                 value={menuSalesTaxName}
                 onChange={(e) => setMenuSalesTaxName(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
-                placeholder="VAT"
+                className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800"
+                placeholder={t('taxNamePlaceholder') || 'VAT'}
               />
-              <p className="text-xs text-slate-500 mt-1">e.g., VAT, GST, Sales Tax</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t('taxNameHint') || 'e.g., VAT, GST, Sales Tax'}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Tax Rate (%)
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                {t('taxRate') || 'Tax Rate (%)'}
               </label>
               <div className="flex items-center gap-2">
                 <input
@@ -318,10 +323,10 @@ export default function ProductTaxSettings() {
                   step="0.01"
                   min="0"
                   max="100"
-                  className="flex-1 px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  className="flex-1 px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800"
                   placeholder="20.00"
                 />
-                <span className="text-slate-600 font-medium text-lg">%</span>
+                <span className="text-slate-600 dark:text-slate-400 font-medium text-lg">%</span>
               </div>
             </div>
             <div className="flex items-end">
@@ -330,24 +335,24 @@ export default function ProductTaxSettings() {
                 disabled={saving}
                 className="w-full px-6 py-3 bg-[#6262bd] text-white rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {saving ? 'Saving...' : 'Save Tax Settings'}
+                {saving ? (tc('saving') || 'Saving...') : (t('saveTaxSettings') || 'Save Tax Settings')}
               </button>
             </div>
           </div>
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
-            <p className="text-sm text-slate-600">
-              <strong>Current Settings:</strong> {restaurant?.menu_sales_tax_name || 'VAT'} at {restaurant?.menu_sales_tax_rate || 20}%
-              <span className="ml-2 text-slate-500">
-                (This rate will be applied to all menu items on invoices)
+          <div className="bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg p-3">
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              <strong>{t('currentSettings') || 'Current Settings'}:</strong> {restaurant?.menu_sales_tax_name || 'VAT'} at {restaurant?.menu_sales_tax_rate || 20}%
+              <span className="ml-2 text-slate-500 dark:text-slate-400">
+                ({t('thisRateApplied') || 'This rate will be applied to all menu items on invoices'})
               </span>
             </p>
           </div>
         </div>
         {/* Stock Product Tax Categories */}
-        <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
-          <h2 className="text-lg font-bold text-slate-700 mb-2">Stock Product Tax Categories</h2>
-          <p className="text-sm text-slate-500 mb-4">
-            Create tax categories for stock products (applied when purchasing ingredients)
+        <div className="bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl p-6 mb-6">
+          <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-2">{t('stockProductTax') || 'Stock Product Tax Categories'}</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+            {t('stockProductTaxDesc') || 'Create tax categories for stock products (applied when purchasing ingredients)'}
           </p>
           {/* Existing Categories */}
           {taxCategories.length > 0 ? (
@@ -386,13 +391,13 @@ export default function ProductTaxSettings() {
                         disabled={saving}
                         className="px-4 py-2 bg-[#6262bd] text-white rounded-lg hover:bg-[#5252a3] disabled:opacity-50"
                       >
-                        Save
+                        {tc('save') || 'Save'}
                       </button>
                       <button
                         onClick={() => setEditingId(null)}
                         className="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 disabled:opacity-50"
                       >
-                        Cancel
+                        {tc('cancel') || 'Cancel'}
                       </button>
                     </>
                   ) : (
@@ -407,13 +412,13 @@ export default function ProductTaxSettings() {
                         onClick={() => setEditingId(category.id)}
                         className="px-3 py-1.5 text-sm bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 disabled:opacity-50 dark:bg-slate-600 dark:text-white dark:hover:bg-slate-500"
                       >
-                        Edit
+                        {tc('edit') || 'Edit'}
                       </button>
                       <button
                         onClick={() => handleDeleteCategory(category.id, category.name)}
                         className="px-3 py-1.5 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 disabled:opacity-50 dark:bg-red-600 dark:text-white dark:hover:bg-red-700"
                       >
-                        Delete
+                        {tc('delete') || 'Delete'}
                       </button>
                     </>
                   )}
@@ -422,19 +427,19 @@ export default function ProductTaxSettings() {
             </div>
           ) : (
             <div className="text-center py-8 text-slate-500 mb-6">
-              No tax categories yet. Add one below to get started.
+              {t('noCategories') || 'No tax categories yet. Add one below to get started.'}
             </div>
           )}
           {/* Add New Category */}
           <div className="border-t-2 border-slate-100 dark:border-slate-800 pt-6">
-            <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">Add New Tax Category</h3>
+            <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">{t('addNewCategory') || 'Add New Tax Category'}</h3>
             <div className="flex items-center gap-3">
               <input
                 type="text"
                 value={newCategory.name}
                 onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
                 className="flex-1 px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
-                placeholder="e.g., Base Products, Alcohol, Sugary Products"
+                placeholder={t('categoryNamePlaceholder') || 'e.g., Base Products, Alcohol, Sugary Products'}
               />
               <input
                 type="number"
@@ -452,19 +457,19 @@ export default function ProductTaxSettings() {
                 disabled={saving || !newCategory.name || !newCategory.rate}
                 className="px-6 py-3 bg-[#6262bd] text-white rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {saving ? 'Adding...' : 'Add Category'}
+                {saving ? (t('adding') || 'Adding...') : (t('addCategory') || 'Add Category')}
               </button>
             </div>
           </div>
         </div>
         {/* Examples */}
-        <div className="bg-slate-50 border-2 border-slate-100 rounded-xl p-4">
-          <h3 className="text-sm font-medium text-slate-700 mb-2">Example Tax Categories</h3>
-          <ul className="text-sm text-slate-600 space-y-1">
-            <li>• <strong>Base Products:</strong> 10% (bread, vegetables, basic ingredients)</li>
-            <li>• <strong>Sugary Products:</strong> 17% (desserts, sodas, candy)</li>
-            <li>• <strong>Alcohol:</strong> 21% (wine, beer, spirits)</li>
-            <li>• <strong>Luxury Items:</strong> 25% (premium ingredients, specialty items)</li>
+        <div className="bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-xl p-4">
+          <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('exampleCategories') || 'Example Tax Categories'}</h3>
+          <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-1">
+            <li>• <strong>{t('exampleBase') || 'Base Products'}:</strong> 10% ({t('exampleBaseDesc') || 'bread, vegetables, basic ingredients'})</li>
+            <li>• <strong>{t('exampleSugary') || 'Sugary Products'}:</strong> 17% ({t('exampleSugaryDesc') || 'desserts, sodas, candy'})</li>
+            <li>• <strong>{t('exampleAlcohol') || 'Alcohol'}:</strong> 21% ({t('exampleAlcoholDesc') || 'wine, beer, spirits'})</li>
+            <li>• <strong>{t('exampleLuxury') || 'Luxury Items'}:</strong> 25% ({t('exampleLuxuryDesc') || 'premium ingredients, specialty items'})</li>
           </ul>
         </div>
       </div>

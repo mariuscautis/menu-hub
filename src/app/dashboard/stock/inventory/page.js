@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import { useCurrency } from '@/lib/CurrencyContext'
 
 export default function InventoryManagement() {
   const t = useTranslations('inventory')
+  const { currencySymbol, formatCurrency } = useCurrency()
   const [products, setProducts] = useState([])
   const [entries, setEntries] = useState([])
   const [restaurant, setRestaurant] = useState(null)
@@ -550,7 +552,7 @@ export default function InventoryManagement() {
                         <>
                           <span className="text-slate-300">•</span>
                           <span>
-                            Last Price: <strong className="text-green-600">£{parseFloat(product.last_purchase_price).toFixed(2)}</strong>
+                            Last Price: <strong className="text-green-600">{formatCurrency(parseFloat(product.last_purchase_price))}</strong>
                           </span>
                         </>
                       )}
@@ -863,7 +865,7 @@ export default function InventoryManagement() {
                         {t('purchasePrice')}
                       </label>
                       <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-medium">£</span>
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-medium">{currencySymbol}</span>
                         <input
                           type="number"
                           value={stockForm.purchase_price}

@@ -15,9 +15,11 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
+import { useCurrency } from '@/lib/CurrencyContext';
 
 export default function TaxReportPage() {
   const t = useTranslations('taxReport');
+  const { currencySymbol, formatCurrency } = useCurrency();
 
   // Restaurant state
   const [restaurant, setRestaurant] = useState(null);
@@ -208,13 +210,6 @@ export default function TaxReportPage() {
     link.click();
   };
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP'
-    }).format(amount || 0);
-  };
-
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-GB', {
       day: 'numeric',
@@ -289,7 +284,7 @@ export default function TaxReportPage() {
             disabled={loading}
             className="px-6 py-2 bg-[#6262bd] hover:bg-[#5252ad] text-white font-medium rounded-xl transition-colors disabled:opacity-50"
           >
-            {loading ? 'Loading...' : (t('generateReport') || 'Generate Report')}
+            {loading ? (t('loading') || 'Loading...') : (t('generateReport') || 'Generate Report')}
           </button>
         </div>
       </div>
@@ -376,19 +371,19 @@ export default function TaxReportPage() {
           {/* Summary Stats */}
           <div className="grid grid-cols-3 gap-4">
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4 text-center">
-              <p className="text-sm text-slate-500 dark:text-slate-400">Total Sales</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t('totalSales') || 'Total Sales'}</p>
               <p className="text-xl font-bold text-slate-800 dark:text-slate-200">
                 {formatCurrency(reportData.totalSales)}
               </p>
             </div>
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4 text-center">
-              <p className="text-sm text-slate-500 dark:text-slate-400">Orders</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t('orders') || 'Orders'}</p>
               <p className="text-xl font-bold text-slate-800 dark:text-slate-200">
                 {reportData.orderCount}
               </p>
             </div>
             <div className="bg-[#6262bd]/10 dark:bg-[#6262bd]/30 rounded-2xl p-4 text-center">
-              <p className="text-sm text-[#6262bd]">Tax Collected</p>
+              <p className="text-sm text-[#6262bd]">{t('taxCollectedLabel') || 'Tax Collected'}</p>
               <p className="text-xl font-bold text-[#6262bd]">
                 {formatCurrency(reportData.totalTaxCollected)}
               </p>
@@ -403,12 +398,10 @@ export default function TaxReportPage() {
               </svg>
               <div>
                 <p className="text-sm text-blue-700 dark:text-blue-300 font-medium mb-1">
-                  Note for Accountants
+                  {t('noteForAccountants') || 'Note for Accountants'}
                 </p>
                 <p className="text-sm text-blue-600 dark:text-blue-400">
-                  This report shows tax collected based on order data. For accurate VAT returns,
-                  please reconcile with your accounting system and verify tax categories are correctly
-                  applied to all menu items.
+                  {t('accountantNote') || 'This report shows tax collected based on order data. For accurate VAT returns, please reconcile with your accounting system and verify tax categories are correctly applied to all menu items.'}
                 </p>
               </div>
             </div>
@@ -425,10 +418,10 @@ export default function TaxReportPage() {
             </svg>
           </div>
           <p className="text-slate-600 dark:text-slate-400 mb-2">
-            Select a date range and click "Generate Report" to view tax data
+            {t('emptyStateTitle') || 'Select a date range and click "Generate Report" to view tax data'}
           </p>
           <p className="text-sm text-slate-500">
-            The report will show tax breakdown by rate for the selected period
+            {t('emptyStateDesc') || 'The report will show tax breakdown by rate for the selected period'}
           </p>
         </div>
       )}

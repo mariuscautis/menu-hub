@@ -2,6 +2,7 @@ export const runtime = 'edge'
 
 import { createClient } from '@supabase/supabase-js'
 import { getEmailTranslations, t } from '@/lib/email-translations'
+import { getCurrencySymbol } from '@/lib/currencyUtils'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -89,6 +90,8 @@ export async function POST(request) {
       )
     }
 
+    const currencySymbol = getCurrencySymbol(restaurant?.invoice_settings?.currency)
+
     // Get translations for the order's locale
     const locale = order.locale || 'en'
     const tr = getEmailTranslations(locale)
@@ -98,7 +101,7 @@ export async function POST(request) {
       `<tr>
         <td style="padding: 8px; border-bottom: 1px solid #e2e8f0;">${item.name}</td>
         <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: center;">${item.quantity}</td>
-        <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: right;">£${(item.price_at_time * item.quantity).toFixed(2)}</td>
+        <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: right;">${currencySymbol}${(item.price_at_time * item.quantity).toFixed(2)}</td>
       </tr>`
     ).join('')
 
@@ -156,7 +159,7 @@ export async function POST(request) {
                     ${itemsList}
                     <tr class="total-row">
                       <td colspan="2" style="padding: 15px 8px 8px 8px;">${tr.totalCash}</td>
-                      <td style="padding: 15px 8px 8px 8px; text-align: right;">£${order.total.toFixed(2)}</td>
+                      <td style="padding: 15px 8px 8px 8px; text-align: right;">${currencySymbol}${order.total.toFixed(2)}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -190,9 +193,9 @@ ${tr.yourPickupCode.toUpperCase()}: ${order.pickup_code}
 (${tr.showCodeToCollect})
 
 ${tr.yourOrder.toUpperCase()}
-${order.order_items.map(item => `${item.quantity}x ${item.name} - £${(item.price_at_time * item.quantity).toFixed(2)}`).join('\n')}
+${order.order_items.map(item => `${item.quantity}x ${item.name} - ${currencySymbol}${(item.price_at_time * item.quantity).toFixed(2)}`).join('\n')}
 
-${tr.totalCash}: £${order.total.toFixed(2)}
+${tr.totalCash}: ${currencySymbol}${order.total.toFixed(2)}
 
 ${tr.pickupLocation.toUpperCase()}
 ${restaurant.name}

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import { useCurrency } from '@/lib/CurrencyContext'
 import { supabase, clearOrdersCacheForTable, clearAllOrdersCache, clearTableOrdersLocalCache, wasTablePaidOffline, clearTablePaidOfflineStatus, markTableCleanedOffline } from '@/lib/supabase'
 import InvoiceClientModal from '@/components/invoices/InvoiceClientModal'
 import { generateInvoicePdfBase64, downloadInvoicePdf } from '@/lib/invoicePdfGenerator'
@@ -241,6 +242,7 @@ function FloorPlanElement({ element }) {
 export default function StaffFloorPlanPage() {
   const router = useRouter()
   const t = useTranslations('tables')
+  const { currencySymbol, formatCurrency } = useCurrency()
   const [restaurant, setRestaurant] = useState(null)
   const [staff, setStaff] = useState(null)
   const [floors, setFloors] = useState([])
@@ -2019,7 +2021,7 @@ export default function StaffFloorPlanPage() {
         // This prevents stale cached orders from appearing when placing new orders
         clearOrdersCacheForTable(selectedTable.id)
 
-        showNotificationMessage('success', `Cash payment of £${finalAmount.toFixed(2)} saved offline. Will sync when internet is restored.`)
+        showNotificationMessage('success', `Cash payment of ${formatCurrency(finalAmount)} saved offline. Will sync when internet is restored.`)
 
         // Don't show post-payment modal for offline payments (invoice generation needs internet)
         return
@@ -2084,7 +2086,7 @@ export default function StaffFloorPlanPage() {
       await loadFloorData(currentFloor.id, restaurant.id)
       await fetchTableOrderInfo(restaurant.id)
 
-      showNotificationMessage('success', `Payment of £${finalAmount.toFixed(2)} processed successfully via ${paymentMethod}!`)
+      showNotificationMessage('success', `Payment of ${formatCurrency(finalAmount)} processed successfully via ${paymentMethod}!`)
 
       // Show post-payment modal (with invoice option)
       setShowPostPaymentModal(true)
@@ -2168,7 +2170,7 @@ export default function StaffFloorPlanPage() {
       // Don't remove items from available since they're tracked by quantity now
       // Items with quantity 0 won't show in the UI
 
-      showNotificationMessage('success', `${bill.name} paid successfully: £${bill.total.toFixed(2)} via ${paymentMethod}`)
+      showNotificationMessage('success', `${bill.name} paid successfully: ${formatCurrency(bill.total)} via ${paymentMethod}`)
 
       // Refresh floor data immediately after each split bill payment
       await loadFloorData(currentFloor.id, restaurant.id)
@@ -2802,7 +2804,7 @@ export default function StaffFloorPlanPage() {
                           </span>
                         </div>
                         <div className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                          £{order.total?.toFixed(2)}
+                          {formatCurrency(order.total)}
                         </div>
                       </div>
                     ))}
@@ -3188,7 +3190,7 @@ export default function StaffFloorPlanPage() {
                       <div key={order.id} className="border-b border-slate-200 dark:border-slate-700 pb-3 last:border-0 last:pb-0">
                         <div className="flex justify-between items-start mb-2">
                           <span className="text-sm font-medium text-slate-600 dark:text-slate-400">{(t('paymentModal.orderNumber') || 'Order #{number}').replace('{number}', index + 1)}</span>
-                          <span className="text-sm font-semibold text-primary">£{order.total?.toFixed(2)}</span>
+                          <span className="text-sm font-semibold text-primary">{formatCurrency(order.total)}</span>
                         </div>
                         <div className="text-xs text-slate-500 dark:text-slate-400 space-y-1">
                           {order.order_items?.map((item, idx) => (
@@ -3219,7 +3221,7 @@ export default function StaffFloorPlanPage() {
                       <option value="none">{t('paymentModal.noDiscount') || 'No discount'}</option>
                       {availableDiscounts.map((discount) => (
                         <option key={discount.id} value={discount.id}>
-                          {discount.name} ({discount.type === 'percentage' ? `${discount.value}%` : `£${discount.value.toFixed(2)}`})
+                          {discount.name} ({discount.type === 'percentage' ? `${discount.value}%` : formatCurrency(discount.value)})
                         </option>
                       ))}
                     </select>
@@ -3231,23 +3233,23 @@ export default function StaffFloorPlanPage() {
                   {/* Subtotal */}
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm text-slate-600 dark:text-slate-400">{t('paymentModal.subtotal') || 'Subtotal'}</span>
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">£{calculateTableTotal().toFixed(2)}</span>
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{formatCurrency(calculateTableTotal())}</span>
                   </div>
 
                   {/* Discount (if applied) */}
                   {selectedDiscount && discountAmount > 0 && (
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-sm text-green-600 dark:text-green-400">
-                        {selectedDiscount.name} ({selectedDiscount.type === 'percentage' ? `${selectedDiscount.value}%` : `£${selectedDiscount.value.toFixed(2)}`})
+                        {selectedDiscount.name} ({selectedDiscount.type === 'percentage' ? `${selectedDiscount.value}%` : formatCurrency(selectedDiscount.value)})
                       </span>
-                      <span className="text-sm font-medium text-green-600 dark:text-green-400">-£{discountAmount.toFixed(2)}</span>
+                      <span className="text-sm font-medium text-green-600 dark:text-green-400">-{formatCurrency(discountAmount)}</span>
                     </div>
                   )}
 
                   {/* Final Total */}
                   <div className="flex justify-between items-center pt-2 border-t border-primary/20">
                     <span className="font-semibold text-slate-700 dark:text-slate-300">{t('paymentModal.totalToPay') || 'Total to Pay'}</span>
-                    <span className="text-2xl font-bold text-primary">£{calculateFinalTotal().toFixed(2)}</span>
+                    <span className="text-2xl font-bold text-primary">{formatCurrency(calculateFinalTotal())}</span>
                   </div>
                 </div>
 
@@ -3395,11 +3397,11 @@ export default function StaffFloorPlanPage() {
                         <div className="flex-1">
                           <h4 className="font-semibold text-slate-800 dark:text-slate-200">{item.name}</h4>
                           <p className="text-sm text-slate-600 dark:text-slate-400">
-                            {item.quantity} available × £{item.price.toFixed(2)}
+                            {item.quantity} available × {formatCurrency(item.price)}
                           </p>
                         </div>
                         <span className="font-bold text-slate-800 dark:text-slate-200">
-                          £{(item.quantity * item.price).toFixed(2)}
+                          {formatCurrency(item.quantity * item.price)}
                         </span>
                       </div>
 
@@ -3479,7 +3481,7 @@ export default function StaffFloorPlanPage() {
                               <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
                             </svg>
                             <span className="font-semibold text-slate-800 dark:text-slate-200">{bill.name}</span>
-                            <span className="text-slate-600 dark:text-slate-400">£{bill.total.toFixed(2)}</span>
+                            <span className="text-slate-600 dark:text-slate-400">{formatCurrency(bill.total)}</span>
                           </div>
                           <button
                             onClick={() => {
@@ -3548,12 +3550,12 @@ export default function StaffFloorPlanPage() {
                                 <div className="flex-1">
                                   <div className="font-medium text-slate-800 dark:text-slate-200">{item.name}</div>
                                   <div className="text-xs text-slate-600 dark:text-slate-400">
-                                    {item.quantity} × £{item.price.toFixed(2)}
+                                    {item.quantity} × {formatCurrency(item.price)}
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <span className="font-semibold text-slate-800 dark:text-slate-200">
-                                    £{item.total.toFixed(2)}
+                                    {formatCurrency(item.total)}
                                   </span>
                                   <button
                                     onClick={() => {
@@ -3596,7 +3598,7 @@ export default function StaffFloorPlanPage() {
                           <div className="border-t-2 border-slate-200 dark:border-slate-600 pt-3">
                             <div className="flex justify-between items-center mb-3">
                               <span className="font-bold text-slate-700 dark:text-slate-300">Total</span>
-                              <span className="text-xl font-bold text-primary">£{bill.total.toFixed(2)}</span>
+                              <span className="text-xl font-bold text-primary">{formatCurrency(bill.total)}</span>
                             </div>
 
                             {/* Payment buttons */}
@@ -3608,7 +3610,7 @@ export default function StaffFloorPlanPage() {
                                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
                                 </svg>
-                                Pay £{bill.total.toFixed(2)} Cash
+                                Pay {formatCurrency(bill.total)} Cash
                               </button>
                               <button
                                 onClick={() => processSplitBillPayment(bill, 'card')}
@@ -3617,7 +3619,7 @@ export default function StaffFloorPlanPage() {
                                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                   <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
                                 </svg>
-                                Pay £{bill.total.toFixed(2)} Card
+                                Pay {formatCurrency(bill.total)} Card
                               </button>
                             </div>
                           </div>
@@ -3656,18 +3658,18 @@ export default function StaffFloorPlanPage() {
                 <div className="mt-4 bg-primary/10 rounded-xl p-4">
                   <div className="flex justify-between items-center mb-2">
                     <span className="font-semibold text-slate-700 dark:text-slate-300">Original Total</span>
-                    <span className="font-bold text-slate-800 dark:text-slate-200">£{calculateTableTotal().toFixed(2)}</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">{formatCurrency(calculateTableTotal())}</span>
                   </div>
                   <div className="flex justify-between items-center mb-2">
                     <span className="font-semibold text-slate-700 dark:text-slate-300">Assigned to Bills</span>
                     <span className="font-bold text-primary">
-                      £{splitBills.reduce((sum, b) => sum + b.total, 0).toFixed(2)}
+                      {formatCurrency(splitBills.reduce((sum, b) => sum + b.total, 0))}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="font-semibold text-slate-700 dark:text-slate-300">Remaining</span>
                     <span className="font-bold text-orange-600">
-                      £{(calculateTableTotal() - splitBills.reduce((sum, b) => sum + b.total, 0)).toFixed(2)}
+                      {formatCurrency(calculateTableTotal() - splitBills.reduce((sum, b) => sum + b.total, 0))}
                     </span>
                   </div>
                 </div>
@@ -3872,7 +3874,7 @@ export default function StaffFloorPlanPage() {
                               )}
                               <p className="font-medium text-slate-800 dark:text-slate-200 text-sm line-clamp-2">{item.name}</p>
                               <div className="mt-auto pt-2 flex items-center justify-between">
-                                <span className="font-semibold text-[#6262bd]">£{item.price.toFixed(2)}</span>
+                                <span className="font-semibold text-[#6262bd]">{formatCurrency(item.price)}</span>
                                 {!item.available && (
                                   <span className="text-xs text-red-500">{t('orderModal.unavailable') || 'Unavailable'}</span>
                                 )}
@@ -3957,7 +3959,7 @@ export default function StaffFloorPlanPage() {
                               )}
                               <p className="font-medium text-slate-800 dark:text-slate-200 text-sm line-clamp-2">{item.name}</p>
                               <div className="mt-auto pt-2 flex items-center justify-between">
-                                <span className="font-semibold text-[#6262bd]">£{item.price.toFixed(2)}</span>
+                                <span className="font-semibold text-[#6262bd]">{formatCurrency(item.price)}</span>
                                 {!item.available && (
                                   <span className="text-xs text-red-500">{t('orderModal.unavailable') || 'Unavailable'}</span>
                                 )}
@@ -4018,7 +4020,7 @@ export default function StaffFloorPlanPage() {
                                 <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1">{item.description}</p>
                               )}
                               <div className="mt-auto pt-2 flex items-center justify-between">
-                                <span className="font-semibold text-[#6262bd]">£{item.price.toFixed(2)}</span>
+                                <span className="font-semibold text-[#6262bd]">{formatCurrency(item.price)}</span>
                                 {!item.available && (
                                   <span className="text-xs text-red-500">{t('orderModal.unavailable') || 'Unavailable'}</span>
                                 )}
@@ -4054,7 +4056,7 @@ export default function StaffFloorPlanPage() {
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1">
                                 <p className="font-medium text-slate-800 dark:text-slate-200 text-sm">{item.quantity}x {item.name}</p>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">£{item.price_at_time.toFixed(2)} {t('orderModal.each') || 'each'}</p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">{formatCurrency(item.price_at_time)} {t('orderModal.each') || 'each'}</p>
 
                                 {item.isExisting && hasNewItems && (
                                   <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
@@ -4122,7 +4124,7 @@ export default function StaffFloorPlanPage() {
                     <div className="bg-primary/10 rounded-xl p-4 mb-4">
                       <div className="flex justify-between items-center">
                         <span className="font-semibold text-slate-700 dark:text-slate-300">{t('orderModal.total') || 'Total'}</span>
-                        <span className="text-xl font-bold text-primary">£{calculateTotal().toFixed(2)}</span>
+                        <span className="text-xl font-bold text-primary">{formatCurrency(calculateTotal())}</span>
                       </div>
                     </div>
 

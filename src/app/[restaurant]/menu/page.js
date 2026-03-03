@@ -4,6 +4,7 @@ export const runtime = 'edge'
 import { useState, useEffect, use } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
+import { CURRENCY_SYMBOLS } from '@/lib/currencyUtils'
 
 export default function PublicMenu({ params }) {
   const { restaurant: slug } = use(params)
@@ -14,6 +15,8 @@ export default function PublicMenu({ params }) {
   const [error, setError] = useState(null)
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
+
+  const currencySymbol = CURRENCY_SYMBOLS[restaurant?.invoice_settings?.currency] || '€'
 
   useEffect(() => {
     fetchData()
@@ -177,7 +180,7 @@ export default function PublicMenu({ params }) {
                 )}
                 <div className="space-y-4">
                   {items.map((item) => (
-                    <MenuItem key={item.id} item={item} />
+                    <MenuItem key={item.id} item={item} currencySymbol={currencySymbol} />
                   ))}
                 </div>
               </div>
@@ -192,7 +195,7 @@ export default function PublicMenu({ params }) {
               </div>
             ) : (
               filteredItems.map((item) => (
-                <MenuItem key={item.id} item={item} />
+                <MenuItem key={item.id} item={item} currencySymbol={currencySymbol} />
               ))
             )}
           </div>
@@ -211,7 +214,7 @@ export default function PublicMenu({ params }) {
   )
 }
 
-function MenuItem({ item }) {
+function MenuItem({ item, currencySymbol }) {
   return (
     <div className="bg-white rounded-2xl border-2 border-slate-100 p-6 hover:border-[#6262bd] transition-all">
       <div className="flex gap-4">
@@ -232,7 +235,7 @@ function MenuItem({ item }) {
             </div>
             <div className="text-right flex-shrink-0">
               <p className="text-xl font-bold text-[#6262bd]">
-                £{item.price.toFixed(2)}
+                {currencySymbol}{item.price.toFixed(2)}
               </p>
             </div>
           </div>

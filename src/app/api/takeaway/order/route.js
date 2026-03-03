@@ -2,6 +2,7 @@ export const runtime = 'edge'
 
 import { createClient } from '@supabase/supabase-js'
 import { getEmailTranslations, t } from '@/lib/email-translations'
+import { getCurrencySymbol } from '@/lib/currencyUtils'
 
 // Takeaway order confirmation email API with Brevo REST API
 
@@ -66,6 +67,8 @@ export async function POST(request) {
       )
     }
 
+    const currencySymbol = getCurrencySymbol(restaurant?.invoice_settings?.currency)
+
     // Get translations for the order's locale (from request or stored in order)
     const locale = requestLocale || order.locale || 'en'
     const tr = getEmailTranslations(locale)
@@ -75,7 +78,7 @@ export async function POST(request) {
       `<tr>
         <td style="padding: 8px; border-bottom: 1px solid #e2e8f0;">${item.name}</td>
         <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: center;">${item.quantity}</td>
-        <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: right;">£${(item.price_at_time * item.quantity).toFixed(2)}</td>
+        <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: right;">${currencySymbol}${(item.price_at_time * item.quantity).toFixed(2)}</td>
       </tr>`
     ).join('')
 
@@ -130,7 +133,7 @@ export async function POST(request) {
                     ${itemsList}
                     <tr class="total-row">
                       <td colspan="2" style="padding: 15px 8px 8px 8px;">${tr.total}</td>
-                      <td style="padding: 15px 8px 8px 8px; text-align: right;">£${order.total.toFixed(2)}</td>
+                      <td style="padding: 15px 8px 8px 8px; text-align: right;">${currencySymbol}${order.total.toFixed(2)}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -185,9 +188,9 @@ ${tr.yourPickupCode.toUpperCase()}: ${order.pickup_code}
 ${tr.orderDetails.toUpperCase()}
 ${tr.orderNumber} #${orderId.slice(0, 8).toUpperCase()}
 
-${order.order_items.map(item => `${item.quantity}x ${item.name} - £${(item.price_at_time * item.quantity).toFixed(2)}`).join('\n')}
+${order.order_items.map(item => `${item.quantity}x ${item.name} - ${currencySymbol}${(item.price_at_time * item.quantity).toFixed(2)}`).join('\n')}
 
-${tr.total}: £${order.total.toFixed(2)}
+${tr.total}: ${currencySymbol}${order.total.toFixed(2)}
 
 ${order.notes ? `${tr.specialRequests}: ${order.notes}\n` : ''}
 ${tr.whatsNext.toUpperCase()}
