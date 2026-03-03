@@ -618,8 +618,8 @@ export default function DashboardLayout({ children }) {
       })
     }
 
-    // Menu and Stock - Only for owners and admins (always show for them)
-    if (userType === 'owner' || userType === 'staff-admin') {
+    // Menu - Owners/admins always, or staff with 'menu' permission
+    if (userType === 'owner' || userType === 'staff-admin' || hasPermission('menu')) {
       items.push({
         href: '/dashboard/menu',
         label: 'Menu',
@@ -650,7 +650,50 @@ export default function DashboardLayout({ children }) {
           }
         ]
       })
+    }
 
+    // Stock - Owners/admins always, or staff with 'stock' permission (handled in else-if below)
+    if (userType === 'owner' || userType === 'staff-admin') {
+      items.push({
+        href: '/dashboard/stock',
+        label: 'Stock',
+        icon: (
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z"/>
+          </svg>
+        ),
+        id: 'stock',
+        children: [
+          {
+            href: '/dashboard/stock',
+            label: 'Food Stock',
+            icon: (
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M18.06 22.99h1.66c.84 0 1.53-.64 1.63-1.46L23 5.05l-5 1V1h-1.97v5.05l-5-1 1.13 9.35c-.78.22-1.45.7-1.92 1.32L8.94 8.94c-.27-.54-.91-.91-1.59-.91-.97 0-1.76.77-1.76 1.72 0 .16.02.32.07.47l1.9 6.23c.31 1.04.97 1.9 1.85 2.44-.37.47-.59 1.06-.59 1.7v.42c-.13.03-.27.05-.41.05-.7 0-1.35-.29-1.82-.75l-.59-.65c-.36-.39-.77-.71-1.23-.95l-.28 1.51c.34.2.65.45.93.73l.61.66c.75.78 1.79 1.24 2.89 1.24.26 0 .51-.03.76-.08v.5c0 1.1.9 2 2 2h6.76c1.1 0 2-.9 2-2v-3.76c0-1.1-.9-2-2-2h-1.8l.47-3.89c.49.28 1.04.45 1.63.45 1.83 0 3.3-1.49 3.3-3.32 0-1.69-1.26-3.08-2.9-3.29l-.67 5.48c-.16.55-.42 1.04-.77 1.44l-.59-4.87-2.67.35"/>
+              </svg>
+            )
+          },
+          {
+            href: '/dashboard/stock/inventory',
+            label: 'Inventory',
+            icon: (
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-1-2-2-2zm-5 12H9v-2h6v2zm5-7H4V4h16v3z"/>
+              </svg>
+            )
+          },
+          {
+            href: '/dashboard/stock/purchasing-invoices',
+            label: 'Invoices',
+            icon: (
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+              </svg>
+            )
+          }
+        ]
+      })
+    } else if (hasPermission('stock')) {
       items.push({
         href: '/dashboard/stock',
         label: 'Stock',
@@ -705,7 +748,7 @@ export default function DashboardLayout({ children }) {
       })
     }
 
-    // Staff & Rota - Manager view (owners and admin staff only)
+    // Staff & Rota - Manager view (owners and admin staff only), or staff with staff_rota permission
     if (userType === 'owner' || userType === 'staff-admin') {
       items.push({
         href: '/dashboard/staff',
@@ -750,6 +793,37 @@ export default function DashboardLayout({ children }) {
             icon: (
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+            )
+          }
+        ]
+      })
+    } else if (hasPermission('staff_rota')) {
+      items.push({
+        href: '/dashboard/staff',
+        label: 'Staff & Rota',
+        icon: (
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+          </svg>
+        ),
+        id: 'staff-rota',
+        children: [
+          {
+            href: '/dashboard/staff',
+            label: 'Staff Members',
+            icon: (
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+              </svg>
+            )
+          },
+          {
+            href: '/dashboard/rota',
+            label: 'Rota',
+            icon: (
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/>
               </svg>
             )
           }
@@ -887,6 +961,73 @@ export default function DashboardLayout({ children }) {
             )
           }
         ]
+      })
+    } else if (hasPermission('reports') || hasPermission('z_report')) {
+      // Staff with reports or z_report permission
+      const reportChildren = []
+      if (hasPermission('reports')) {
+        reportChildren.push({
+          href: '/dashboard/reports',
+          label: 'Reports Overview',
+          icon: (
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+            </svg>
+          )
+        })
+      }
+      if (hasPermission('z_report') || hasPermission('reports')) {
+        reportChildren.push({
+          href: '/dashboard/reports/z-report',
+          label: 'Z-Report',
+          icon: (
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+            </svg>
+          )
+        })
+      }
+      if (hasPermission('reports_weekly') || hasPermission('reports')) {
+        reportChildren.push({
+          href: '/dashboard/reports/weekly',
+          label: 'Weekly Summary',
+          icon: (
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/>
+            </svg>
+          )
+        })
+      }
+      if (hasPermission('reports_financial') || hasPermission('reports')) {
+        reportChildren.push({
+          href: '/dashboard/reports/monthly',
+          label: 'Monthly Summary',
+          icon: (
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+            </svg>
+          )
+        })
+        reportChildren.push({
+          href: '/dashboard/reports/tax',
+          label: 'Tax Report',
+          icon: (
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
+            </svg>
+          )
+        })
+      }
+      items.push({
+        href: '/dashboard/reports',
+        label: 'Reports',
+        icon: (
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+          </svg>
+        ),
+        id: 'reports',
+        children: reportChildren
       })
     }
 

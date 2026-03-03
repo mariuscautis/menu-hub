@@ -46,13 +46,9 @@ export default function PurchasingInvoices() {
   }, [])
 
   const fetchData = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-
-    setUserEmail(user.email)
     let restaurantData = null
 
-    // Check for staff session (PIN login)
+    // Check for staff session (PIN login) first — before any auth call
     const staffSessionData = localStorage.getItem('staff_session')
     if (staffSessionData) {
       try {
@@ -65,6 +61,9 @@ export default function PurchasingInvoices() {
     }
 
     if (!restaurantData) {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      setUserEmail(user.email)
       // Check if owner
       const { data: ownedRestaurant } = await supabase
         .from('restaurants')
@@ -95,6 +94,20 @@ export default function PurchasingInvoices() {
     }
 
     setRestaurant(restaurantData)
+
+    // Use API route (bypasses RLS) so staff with PIN login can read invoice data
+    const isStaffSession = !!localStorage.getItem('staff_session')
+    if (isStaffSession) {
+      try {
+        const res = await fetch(`/api/stock/purchasing-invoices?restaurantId=${restaurantData.id}`)
+        const json = await res.json()
+        setInvoices(json.invoices || [])
+        setLoading(false)
+        return
+      } catch (err) {
+        // Fall through to direct Supabase queries below
+      }
+    }
 
     // Fetch invoices
     const { data: invoicesData } = await supabase

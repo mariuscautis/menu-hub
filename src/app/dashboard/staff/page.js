@@ -55,15 +55,29 @@ export default function Staff() {
   }, [restaurant])
 
   const fetchData = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    let restaurantData = null
 
-    // Only get restaurant where user is the OWNER
-    const { data: restaurantData } = await supabase
-      .from('restaurants')
-      .select('*')
-      .eq('owner_id', user.id)
-      .single()
+    // Check for staff session (PIN login) first — before any auth call
+    const staffSession = localStorage.getItem('staff_session')
+    if (staffSession) {
+      try {
+        restaurantData = JSON.parse(staffSession).restaurant
+      } catch {
+        localStorage.removeItem('staff_session')
+      }
+    }
+
+    // Fallback: query by owner_id for owner users
+    if (!restaurantData) {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data } = await supabase
+        .from('restaurants')
+        .select('*')
+        .eq('owner_id', user.id)
+        .single()
+      restaurantData = data
+    }
 
     if (!restaurantData) {
       setLoading(false)

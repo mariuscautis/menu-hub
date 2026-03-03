@@ -22,32 +22,43 @@ export default function MenuCategories() {
   }, [])
 
   const fetchData = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-
     let restaurantData = null
 
-    // Check if owner
-    const { data: ownedRestaurant } = await supabase
-      .from('restaurants')
-      .select('*')
-      .eq('owner_id', user.id)
-      .maybeSingle()
+    // Check for staff session (PIN login) first — before any auth call
+    const staffSessionData = localStorage.getItem('staff_session')
+    if (staffSessionData) {
+      try {
+        restaurantData = JSON.parse(staffSessionData).restaurant
+      } catch {
+        localStorage.removeItem('staff_session')
+      }
+    }
 
-    if (ownedRestaurant) {
-      restaurantData = ownedRestaurant
-    } else {
-      // Check if staff
-      const { data: staffRecords } = await supabase
-        .from('staff')
-        .select('*, restaurants(*)')
-        .or(`user_id.eq.${user.id},email.eq.${user.email}`)
-        .eq('status', 'active')
+    if (!restaurantData) {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      // Check if owner
+      const { data: ownedRestaurant } = await supabase
+        .from('restaurants')
+        .select('*')
+        .eq('owner_id', user.id)
+        .maybeSingle()
 
-      const staffRecord = staffRecords && staffRecords.length > 0 ? staffRecords[0] : null
+      if (ownedRestaurant) {
+        restaurantData = ownedRestaurant
+      } else {
+        // Check if staff
+        const { data: staffRecords } = await supabase
+          .from('staff')
+          .select('*, restaurants(*)')
+          .or(`user_id.eq.${user.id},email.eq.${user.email}`)
+          .eq('status', 'active')
 
-      if (staffRecord && staffRecord.restaurants) {
-        restaurantData = staffRecord.restaurants
+        const staffRecord = staffRecords && staffRecords.length > 0 ? staffRecords[0] : null
+
+        if (staffRecord && staffRecord.restaurants) {
+          restaurantData = staffRecord.restaurants
+        }
       }
     }
 

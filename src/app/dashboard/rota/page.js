@@ -74,11 +74,9 @@ export default function RotaPage() {
   }, []);
 
   const fetchRestaurantData = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return setLoading(false);
-
     let restaurantData = null;
 
+    // Check for staff session (PIN login) first — before any auth call
     const staffSession = localStorage.getItem('staff_session');
     if (staffSession) {
       try {
@@ -89,6 +87,8 @@ export default function RotaPage() {
     }
 
     if (!restaurantData) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return setLoading(false);
       const { data } = await supabase
         .from('restaurants')
         .select('*')

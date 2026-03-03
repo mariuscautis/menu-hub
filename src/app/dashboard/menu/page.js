@@ -95,27 +95,40 @@ export default function Menu() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
   const fetchData = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
     let restaurantData = null
-    // Check if owner
-    const { data: ownedRestaurant } = await supabase
-      .from('restaurants')
-      .select('*')
-      .eq('owner_id', user.id)
-      .maybeSingle()
-    if (ownedRestaurant) {
-      restaurantData = ownedRestaurant
-    } else {
-      // Check if staff by user_id (preferred) or email (fallback)
-      const { data: staffRecords } = await supabase
-        .from('staff')
-        .select('*, restaurants(*)')
-        .or(`user_id.eq.${user.id},email.eq.${user.email}`)
-        .eq('status', 'active')
-      const staffRecord = staffRecords && staffRecords.length > 0 ? staffRecords[0] : null
-      if (staffRecord && staffRecord.restaurants) {
-        restaurantData = staffRecord.restaurants
+
+    // Check for staff session (PIN login) first — before any auth call
+    const staffSessionData = localStorage.getItem('staff_session')
+    if (staffSessionData) {
+      try {
+        restaurantData = JSON.parse(staffSessionData).restaurant
+      } catch {
+        localStorage.removeItem('staff_session')
+      }
+    }
+
+    if (!restaurantData) {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      // Check if owner
+      const { data: ownedRestaurant } = await supabase
+        .from('restaurants')
+        .select('*')
+        .eq('owner_id', user.id)
+        .maybeSingle()
+      if (ownedRestaurant) {
+        restaurantData = ownedRestaurant
+      } else {
+        // Check if staff by user_id (preferred) or email (fallback)
+        const { data: staffRecords } = await supabase
+          .from('staff')
+          .select('*, restaurants(*)')
+          .or(`user_id.eq.${user.id},email.eq.${user.email}`)
+          .eq('status', 'active')
+        const staffRecord = staffRecords && staffRecords.length > 0 ? staffRecords[0] : null
+        if (staffRecord && staffRecord.restaurants) {
+          restaurantData = staffRecord.restaurants
+        }
       }
     }
     if (!restaurantData) {

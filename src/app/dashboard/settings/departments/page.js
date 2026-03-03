@@ -8,6 +8,7 @@ export default function DepartmentsSettingsPage() {
   const t = useTranslations('departmentsSettings');
 
   // Define all available permissions with descriptions
+  // child: true = indented under the previous parent
   const AVAILABLE_PERMISSIONS = [
     { id: 'overview', label: t('permissions.overview'), description: t('permissions.overviewDesc') },
     { id: 'orders_kitchen', label: t('permissions.ordersKitchen'), description: t('permissions.ordersKitchenDesc') },
@@ -15,9 +16,12 @@ export default function DepartmentsSettingsPage() {
     { id: 'reservations', label: t('permissions.reservations'), description: t('permissions.reservationsDesc') },
     { id: 'floor_plan', label: t('permissions.floorPlan'), description: t('permissions.floorPlanDesc') },
     { id: 'menu', label: t('permissions.menu'), description: t('permissions.menuDesc') },
+    { id: 'z_report', label: t('permissions.zReport'), description: t('permissions.zReportDesc') },
+    { id: 'reports', label: t('permissions.reports'), description: t('permissions.reportsDesc') },
+    { id: 'staff_rota', label: t('permissions.staffRota'), description: t('permissions.staffRotaDesc') },
+    { id: 'stock', label: t('permissions.stock'), description: t('permissions.stockDesc') },
     { id: 'staff', label: t('permissions.staff'), description: t('permissions.staffDesc') },
     { id: 'rota', label: t('permissions.rota'), description: t('permissions.rotaDesc') },
-    { id: 'settings', label: t('permissions.settings'), description: t('permissions.settingsDesc') },
   ];
   const [restaurant, setRestaurant] = useState(null);
   const [departments, setDepartments] = useState([]);
@@ -241,10 +245,12 @@ export default function DepartmentsSettingsPage() {
                 return (
                   <label
                     key={permission.id}
-                    className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${permission.child ? 'ml-6' : ''} ${
                       isChecked
                         ? 'bg-[#6262bd]/10 border-[#6262bd]'
-                        : 'bg-slate-50 border-slate-200 hover:border-slate-300'
+                        : permission.parent
+                          ? 'bg-slate-100 border-slate-300 hover:border-slate-400'
+                          : 'bg-slate-50 border-slate-200 hover:border-slate-300'
                     }`}
                   >
                     <input
@@ -254,7 +260,7 @@ export default function DepartmentsSettingsPage() {
                       className="mt-1 w-5 h-5 text-[#6262bd] border-2 border-slate-300 rounded focus:ring-[#6262bd] focus:ring-2"
                     />
                     <div className="flex-1">
-                      <div className="font-medium text-slate-800">{permission.label}</div>
+                      <div className={`font-medium text-slate-800 ${permission.parent ? 'text-sm uppercase tracking-wide text-slate-500' : ''}`}>{permission.label}</div>
                       <div className="text-xs text-slate-600 mt-0.5">{permission.description}</div>
                     </div>
                   </label>
