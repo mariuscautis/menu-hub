@@ -870,7 +870,7 @@ export default function Menu() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    {t('price')}
+                    {t('price').replace('{currency}', currencySymbol)}
                     {formData.dynamic_pricing_enabled && (
                       <span className="text-xs text-purple-600 ml-2">{t('autoCalculated')}</span>
                     )}
@@ -1100,7 +1100,7 @@ export default function Menu() {
                           placeholder="150"
                         />
                         <p className="text-xs text-slate-500 mt-1">
-                          {t('profitMarginExample')}
+                          {t('profitMarginExample').replace(/{currency}/g, currencySymbol)}
                         </p>
                       </div>
                       <div>
@@ -1114,8 +1114,8 @@ export default function Menu() {
                           className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                         >
                           <option value="none">{t('noRounding')}</option>
-                          <option value="half">{t('roundHalf')}</option>
-                          <option value="whole">{t('roundWhole')}</option>
+                          <option value="half">{t('roundHalf').replace('{currency}', currencySymbol)}</option>
+                          <option value="whole">{t('roundWhole').replace('{currency}', currencySymbol)}</option>
                         </select>
                         <p className="text-xs text-slate-500 mt-1">
                           {t('makeCustomerFriendly')}
@@ -1133,7 +1133,7 @@ export default function Menu() {
                             </p>
                             {formData.price_rounding_mode !== 'none' && (
                               <p className="text-xs text-slate-400 mt-1">
-                                {t('beforeRounding').replace('{price}', calculateDynamicPriceBeforeRounding().toFixed(2))}
+                                {t('beforeRounding').replace('{currency}', currencySymbol).replace('{price}', calculateDynamicPriceBeforeRounding().toFixed(2))}
                               </p>
                             )}
                           </div>
@@ -1143,7 +1143,7 @@ export default function Menu() {
                             </p>
                             {formData.price_rounding_mode !== 'none' && (
                               <p className="text-xs text-green-600 font-medium mt-1">
-                                {formData.price_rounding_mode === 'whole' ? t('roundedWhole') : t('roundedHalf')}
+                                {(formData.price_rounding_mode === 'whole' ? t('roundedWhole') : t('roundedHalf')).replace('{currency}', currencySymbol)}
                               </p>
                             )}
                           </div>
