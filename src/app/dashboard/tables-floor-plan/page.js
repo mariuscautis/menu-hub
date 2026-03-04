@@ -320,6 +320,28 @@ export default function StaffFloorPlanPage() {
   const canvasWidth = currentFloor?.width || 1200
   const canvasHeight = currentFloor?.height || 800
 
+  // Zoom state — starts at 1, computed to fit on first render
+  const [zoom, setZoom] = useState(1)
+  const containerRef = useCallback(node => {
+    if (node) {
+      const { width, height } = node.getBoundingClientRect()
+      const fitScale = Math.min((width - 64) / canvasWidth, (height - 64) / canvasHeight, 1)
+      setZoom(fitScale)
+    }
+  }, [canvasWidth, canvasHeight])
+
+  const fitToScreen = useCallback(() => {
+    const node = document.getElementById('floor-plan-container')
+    if (node) {
+      const { width, height } = node.getBoundingClientRect()
+      setZoom(Math.min((width - 64) / canvasWidth, (height - 64) / canvasHeight, 1))
+    }
+  }, [canvasWidth, canvasHeight])
+
+  const adjustZoom = (delta) => {
+    setZoom(prev => Math.min(Math.max(prev + delta, 0.3), 2))
+  }
+
   // Detect dark mode for canvas background
   const [isDarkMode, setIsDarkMode] = useState(false)
 
@@ -2585,82 +2607,106 @@ export default function StaffFloorPlanPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-slate-50 dark:bg-slate-950">
+    <div className="flex flex-col h-screen bg-slate-100 dark:bg-slate-950">
       {/* Header */}
-      <div className="bg-white dark:bg-slate-900 border-b-2 border-slate-100 dark:border-slate-800">
-        <div className="flex items-center justify-between px-4 pt-4 pb-2">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200">Floor Plan</h1>
-            <p className="text-sm text-slate-600 dark:text-slate-400">{restaurant?.name}</p>
+      <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shrink-0">
+        <div className="flex items-center justify-between px-4 py-3 gap-4">
+          <div className="min-w-0">
+            <h1 className="text-xl font-bold text-slate-800 dark:text-slate-200 leading-tight">Floor Plan</h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{restaurant?.name}</p>
           </div>
-          <div className="flex items-center gap-2 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-green-500 rounded"></div>
-                <span className="text-slate-600 dark:text-slate-400">Available</span>
-              </div>
-              <div className="flex items-center gap-2 ml-4">
-                <div className="w-4 h-4 bg-amber-500 rounded"></div>
-                <span className="text-slate-600 dark:text-slate-400">Has Orders</span>
-              </div>
-            </div>
-        </div>
 
-        {/* Floor Tabs */}
-        {floors.length > 1 && (
-          <div className="px-4 flex gap-2 overflow-x-auto pb-0">
-            {floors.map(floor => (
-              <button
-                key={floor.id}
-                onClick={() => {
-                  setCurrentFloor(floor)
-                  loadFloorData(floor.id, restaurant.id)
-                  setSelectedTable(null)
-                }}
-                className={`px-6 py-3 font-medium text-sm whitespace-nowrap transition-all border-b-2 ${
-                  currentFloor?.id === floor.id
-                    ? 'text-primary border-primary bg-primary/5'
-                    : 'text-slate-600 dark:text-slate-400 border-transparent hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'
-                }`}
-              >
-                {floor.name}
-              </button>
-            ))}
+          {/* Floor picker — always visible, pill style */}
+          {floors.length > 0 && (
+            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-xl p-1 overflow-x-auto shrink-0 max-w-xs">
+              {floors.map(floor => (
+                <button
+                  key={floor.id}
+                  onClick={() => {
+                    setCurrentFloor(floor)
+                    loadFloorData(floor.id, restaurant.id)
+                    setSelectedTable(null)
+                  }}
+                  className={`px-4 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap transition-all ${
+                    currentFloor?.id === floor.id
+                      ? 'bg-white dark:bg-slate-700 text-[#6262bd] shadow-sm'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                  }`}
+                >
+                  {floor.name}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Zoom controls */}
+          <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-xl p-1 shrink-0">
+            <button
+              onClick={() => adjustZoom(-0.1)}
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-700 hover:bg-white dark:hover:bg-slate-700 transition-all font-bold text-lg"
+              title="Zoom out"
+            >−</button>
+            <button
+              onClick={fitToScreen}
+              className="px-2 h-8 text-xs font-semibold text-slate-500 hover:text-slate-700 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-all min-w-[44px]"
+              title="Fit to screen"
+            >{Math.round(zoom * 100)}%</button>
+            <button
+              onClick={() => adjustZoom(0.1)}
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-700 hover:bg-white dark:hover:bg-slate-700 transition-all font-bold text-lg"
+              title="Zoom in"
+            >+</button>
           </div>
-        )}
+        </div>
       </div>
 
-      <div className="flex flex-1 overflow-hidden">
-        {/* Canvas */}
-        <div className="flex-1 overflow-auto p-8">
-          <div
-            style={{
-              width: canvasWidth,
-              height: canvasHeight,
-              position: 'relative',
-              backgroundColor: isDarkMode ? '#1e293b' : (currentFloor?.background_color || '#ffffff'),
-            }}
-            className="mx-auto shadow-2xl rounded-2xl border-4 border-slate-200 dark:border-slate-700"
-          >
-            {/* Decorative Elements */}
-            {elements.map((element) => (
-              <FloorPlanElement key={element.id} element={element} />
-            ))}
+      {/* Canvas area */}
+      <div
+        id="floor-plan-container"
+        ref={containerRef}
+        className="flex-1 overflow-auto relative"
+        style={{ padding: `${Math.max(16, 32 * zoom)}px` }}
+      >
+        {/* Floating legend */}
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border border-slate-200 dark:border-slate-700 rounded-full px-4 py-2 shadow-md text-xs text-slate-600 dark:text-slate-400 pointer-events-none">
+          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-green-400 inline-block"></span>Available</span>
+          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-amber-400 inline-block"></span>Has orders</span>
+          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-red-400 inline-block"></span>Needs cleaning</span>
+        </div>
 
-            {/* Tables */}
-            {tables.map((table) => (
-              <FloorPlanTable
-                key={table.id}
-                table={table}
-                orderInfo={tableOrderInfo[table.id]}
-                reservations={todayReservations[table.id]}
-                waiterCalls={waiterCalls[table.id]}
-                onClick={() => handleTableClick(table)}
-                onMarkCleaned={handleMarkCleaned}
-                onMarkDelivered={handleMarkDelivered}
-                onViewReservations={handleViewReservations}
-              />
-            ))}
-          </div>
+        <div
+          style={{
+            width: canvasWidth,
+            height: canvasHeight,
+            position: 'relative',
+            backgroundColor: isDarkMode ? '#1e293b' : (currentFloor?.background_color || '#ffffff'),
+            transform: `scale(${zoom})`,
+            transformOrigin: 'top left',
+            // Ensure the parent scrollable area sizes to the scaled canvas
+            marginRight: canvasWidth * (zoom - 1),
+            marginBottom: canvasHeight * (zoom - 1),
+          }}
+          className="shadow-2xl rounded-2xl border-2 border-slate-200 dark:border-slate-700"
+        >
+          {/* Decorative Elements */}
+          {elements.map((element) => (
+            <FloorPlanElement key={element.id} element={element} />
+          ))}
+
+          {/* Tables */}
+          {tables.map((table) => (
+            <FloorPlanTable
+              key={table.id}
+              table={table}
+              orderInfo={tableOrderInfo[table.id]}
+              reservations={todayReservations[table.id]}
+              waiterCalls={waiterCalls[table.id]}
+              onClick={() => handleTableClick(table)}
+              onMarkCleaned={handleMarkCleaned}
+              onMarkDelivered={handleMarkDelivered}
+              onViewReservations={handleViewReservations}
+            />
+          ))}
         </div>
       </div>
 

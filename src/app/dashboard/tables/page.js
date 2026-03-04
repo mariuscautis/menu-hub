@@ -85,6 +85,23 @@ export default function Tables() {
   const [showPostPaymentModal, setShowPostPaymentModal] = useState(false)
   const [completedOrderIds, setCompletedOrderIds] = useState([])
 
+  // Grid density preference (persisted)
+  const [gridDensity, setGridDensity] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('tables_grid_density') || 'default'
+    }
+    return 'default'
+  })
+  const updateGridDensity = (density) => {
+    setGridDensity(density)
+    localStorage.setItem('tables_grid_density', density)
+  }
+  const gridClass = {
+    compact: 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4',
+    default: 'grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6',
+    large:   'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6',
+  }[gridDensity]
+
   // Split bill state
   const [showSplitBillModal, setShowSplitBillModal] = useState(false)
   const [splitBills, setSplitBills] = useState([])
@@ -2689,7 +2706,45 @@ export default function Tables() {
           <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
           <p className="text-slate-500">{t('subtitle')}</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 items-center">
+          {/* Grid density toggle */}
+          {tables.length > 0 && (
+            <div className="flex items-center gap-0.5 bg-slate-100 rounded-xl p-1">
+              {/* Compact — many small squares */}
+              <button
+                onClick={() => updateGridDensity('compact')}
+                title="Compact view"
+                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${gridDensity === 'compact' ? 'bg-white shadow text-[#6262bd]' : 'text-slate-400 hover:text-slate-600'}`}
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <rect x="2" y="2" width="4.5" height="4.5" rx="0.8"/><rect x="9.75" y="2" width="4.5" height="4.5" rx="0.8"/><rect x="17.5" y="2" width="4.5" height="4.5" rx="0.8"/>
+                  <rect x="2" y="9.75" width="4.5" height="4.5" rx="0.8"/><rect x="9.75" y="9.75" width="4.5" height="4.5" rx="0.8"/><rect x="17.5" y="9.75" width="4.5" height="4.5" rx="0.8"/>
+                  <rect x="2" y="17.5" width="4.5" height="4.5" rx="0.8"/><rect x="9.75" y="17.5" width="4.5" height="4.5" rx="0.8"/><rect x="17.5" y="17.5" width="4.5" height="4.5" rx="0.8"/>
+                </svg>
+              </button>
+              {/* Default — 4-grid */}
+              <button
+                onClick={() => updateGridDensity('default')}
+                title="Default view"
+                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${gridDensity === 'default' ? 'bg-white shadow text-[#6262bd]' : 'text-slate-400 hover:text-slate-600'}`}
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <rect x="2" y="2" width="9" height="9" rx="1.2"/><rect x="13" y="2" width="9" height="9" rx="1.2"/>
+                  <rect x="2" y="13" width="9" height="9" rx="1.2"/><rect x="13" y="13" width="9" height="9" rx="1.2"/>
+                </svg>
+              </button>
+              {/* Large — 2-grid */}
+              <button
+                onClick={() => updateGridDensity('large')}
+                title="Large view"
+                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${gridDensity === 'large' ? 'bg-white shadow text-[#6262bd]' : 'text-slate-400 hover:text-slate-600'}`}
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <rect x="2" y="2" width="20" height="9" rx="1.5"/><rect x="2" y="13" width="20" height="9" rx="1.5"/>
+                </svg>
+              </button>
+            </div>
+          )}
           {userType === 'owner' && tables.length > 0 && (
             <button
               onClick={downloadAllQR}
@@ -2732,7 +2787,7 @@ export default function Tables() {
           </button>
         </div>
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className={gridClass}>
           {tables.map((table) => (
             <TableCard
               key={table.id}
@@ -4427,7 +4482,7 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
               ) : hasOpenOrders ? (
                 <button onClick={onViewOrders} className="inline-flex items-center gap-1 text-xs font-semibold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full hover:bg-amber-200 transition-colors">
                   <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
-                  Open · £{orderInfo.total.toFixed(2)}
+                  Open · {formatCurrency(orderInfo.total)}
                 </button>
               ) : (
                 <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
