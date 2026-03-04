@@ -4386,164 +4386,230 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
     return labels[dept] || dept.toUpperCase()
   }
 
+  const [showOwnerMenu, setShowOwnerMenu] = useState(false)
+
   return (
-    <div className={`bg-white border-2 rounded-2xl p-6 text-center hover:border-[#6262bd]/30 transition-colors relative ${
-      needsCleaning ? 'border-red-300 bg-red-50/30' :
-      hasOpenOrders ? 'border-amber-300 bg-amber-50/30' : 'border-slate-100'
+    <div className={`bg-white border-2 rounded-2xl overflow-visible transition-all duration-200 relative flex flex-col ${
+      needsCleaning ? 'border-red-200 shadow-red-100 shadow-md' :
+      hasWaiterCall ? 'border-orange-300 shadow-orange-100 shadow-md' :
+      hasOpenOrders ? 'border-amber-200 shadow-amber-100 shadow-md' :
+      'border-slate-100 hover:border-slate-200 hover:shadow-sm'
     }`}>
-      {/* Waiter Call Indicator Badge (top center) */}
-      {hasWaiterCall && (
-        <button
-          onClick={() => onAcknowledgeWaiterCall(waiterCalls[0].id)}
-          className="absolute -top-3 left-1/2 -translate-x-1/2 bg-orange-500 text-white rounded-full px-3 py-1.5 text-xs font-bold shadow-lg hover:bg-orange-600 transition-all cursor-pointer flex items-center gap-1 animate-pulse"
-          title="Customer requesting waiter - click to acknowledge"
-        >
-          <span className="text-base">👋</span>
-          <span>WAITER NEEDED</span>
-        </button>
-      )}
 
-      {/* Department-Specific Order Ready Badges (bottom center) */}
-      {readyDepartments.length > 0 && !needsCleaning && (
-        <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
-          {readyDepartments.map((dept, idx) => (
-            <button
-              key={dept}
-              onClick={() => onMarkDelivered(dept)}
-              className={`${getDepartmentColor(dept)} text-white rounded-full px-3 py-1.5 text-xs font-bold shadow-lg transition-all cursor-pointer flex items-center gap-1.5 animate-pulse`}
-              title={`${getDepartmentLabel(dept)} items ready - click to mark as delivered`}
-            >
-              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-              </svg>
-              <span>{getDepartmentLabel(dept)} READY!</span>
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Reservation Indicator Badge (top left) */}
-      {hasReservationsToday && (
-        <button
-          onClick={onViewReservations}
-          className="absolute -top-3 -left-3 bg-[#6262bd] text-white rounded-full px-3 py-1.5 text-xs font-bold shadow-lg hover:bg-[#5252a3] transition-colors cursor-pointer flex items-center gap-1"
-          title="Click to view today's reservations"
-        >
-          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"/>
-          </svg>
-          {reservations.length}
-        </button>
-      )}
-
-      {/* Status Badges (top right) */}
-      {needsCleaning && (
-        <button
-          onClick={onViewOrders}
-          className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full px-3 py-1.5 text-xs font-bold shadow-lg uppercase tracking-wide hover:bg-red-600 transition-colors cursor-pointer"
-          title={t('needsCleaningTooltip')}
-        >
-          {t('needsCleaning')}
-        </button>
-      )}
-      {hasOpenOrders && !needsCleaning && (
-        <button
-          onClick={onViewOrders}
-          className="absolute -top-3 -right-3 bg-amber-500 text-white rounded-full px-3 py-1.5 text-xs font-bold shadow-lg uppercase tracking-wide hover:bg-amber-600 transition-colors cursor-pointer"
-          title="Click to view order details"
-        >
-          OPEN
-        </button>
-      )}
-
-      {/* Table Icon */}
-      <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 ${
-        needsCleaning ? 'bg-red-100' :
-        hasOpenOrders ? 'bg-amber-100' : 'bg-[#6262bd]/10'
+      {/* Card Header — status-tinted top strip */}
+      <div className={`rounded-t-2xl px-4 pt-4 pb-3 ${
+        needsCleaning ? 'bg-red-50' :
+        hasWaiterCall ? 'bg-orange-50' :
+        hasOpenOrders ? 'bg-amber-50' : 'bg-slate-50'
       }`}>
-        <svg className={`w-10 h-10 ${
-          needsCleaning ? 'text-red-600' :
-          hasOpenOrders ? 'text-amber-600' : 'text-[#6262bd]'
-        }`} fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2H7z"/>
-          <circle cx="12" cy="12" r="1.5"/>
-        </svg>
+        <div className="flex items-start justify-between gap-2">
+
+          {/* Table number + status pill */}
+          <div>
+            <p className="text-xs font-medium text-slate-400 uppercase tracking-widest leading-none mb-1">Table</p>
+            <h3 className={`text-3xl font-black leading-none ${
+              needsCleaning ? 'text-red-700' :
+              hasWaiterCall ? 'text-orange-700' :
+              hasOpenOrders ? 'text-amber-700' : 'text-slate-800'
+            }`}>{table.table_number}</h3>
+
+            {/* Status pill */}
+            <div className="mt-2">
+              {needsCleaning ? (
+                <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-700 bg-red-100 px-2 py-0.5 rounded-full">
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                  {t('needsCleaning')}
+                </span>
+              ) : hasWaiterCall ? (
+                <span className="inline-flex items-center gap-1 text-xs font-semibold text-orange-700 bg-orange-100 px-2 py-0.5 rounded-full animate-pulse">
+                  👋 Waiter needed
+                </span>
+              ) : hasOpenOrders ? (
+                <button onClick={onViewOrders} className="inline-flex items-center gap-1 text-xs font-semibold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full hover:bg-amber-200 transition-colors">
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+                  Open · £{orderInfo.total.toFixed(2)}
+                </button>
+              ) : (
+                <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                  Available
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Top-right: reservation badge + owner menu */}
+          <div className="flex flex-col items-end gap-1.5 shrink-0">
+            {hasReservationsToday && (
+              <button
+                onClick={onViewReservations}
+                title="Click to view today's reservations"
+                className="flex items-center gap-1 text-xs font-semibold text-[#6262bd] bg-[#6262bd]/10 px-2 py-0.5 rounded-full hover:bg-[#6262bd]/20 transition-colors"
+              >
+                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"/>
+                </svg>
+                {reservations.length}
+              </button>
+            )}
+
+            {userType === 'owner' && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowOwnerMenu(v => !v)}
+                  className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition-colors"
+                  title="Table options"
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                  </svg>
+                </button>
+                {showOwnerMenu && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setShowOwnerMenu(false)} />
+                    <div className="absolute right-0 top-8 z-20 bg-white border border-slate-200 rounded-xl shadow-lg py-1 min-w-[148px]">
+                      <button
+                        onClick={() => { onDownload(); setShowOwnerMenu(false) }}
+                        className="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 flex items-center gap-2"
+                      >
+                        <svg className="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                        </svg>
+                        {t('downloadQR')}
+                      </button>
+                      <div className="my-1 border-t border-slate-100" />
+                      <button
+                        onClick={() => { onDelete(); setShowOwnerMenu(false) }}
+                        className="w-full text-left px-3 py-2 text-sm text-red-500 hover:bg-red-50 flex items-center gap-2"
+                      >
+                        <svg className="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                        </svg>
+                        {t('deleteTable')}
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
-      <h3 className="text-lg font-bold text-slate-800 mb-2">Table {table.table_number}</h3>
+      {/* Card Body — actions */}
+      <div className="p-3 flex flex-col gap-2">
 
-      {/* Order Total */}
-      {hasOpenOrders && (
-        <div className="mb-4">
-          <p className="text-sm text-amber-700 font-semibold">
-            Unpaid: {formatCurrency(orderInfo.total)}
-          </p>
-        </div>
-      )}
+        {/* Department ready badges */}
+        {readyDepartments.length > 0 && !needsCleaning && (
+          <div className="flex flex-wrap gap-1.5">
+            {readyDepartments.map((dept) => (
+              <button
+                key={dept}
+                onClick={() => onMarkDelivered(dept)}
+                className={`${getDepartmentColor(dept)} text-white rounded-lg px-3 py-1.5 text-xs font-bold flex-1 flex items-center justify-center gap-1.5 animate-pulse`}
+                title={`${getDepartmentLabel(dept)} items ready - click to mark as delivered`}
+              >
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+                {getDepartmentLabel(dept)} READY!
+              </button>
+            ))}
+          </div>
+        )}
 
-      <div className="space-y-2">
         {needsCleaning ? (
+          /* Needs cleaning state — single full-width CTA */
           <button
             onClick={onMarkCleaned}
-            className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 text-sm flex items-center justify-center gap-2"
+            className="w-full bg-blue-600 text-white py-2.5 rounded-xl font-semibold hover:bg-blue-700 text-sm flex items-center justify-center gap-2 transition-colors"
           >
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
               <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
             </svg>
             {t('markAsCleaned')}
           </button>
-        ) : (
+        ) : hasOpenOrders ? (
+          /* Open order state — Pay is primary, rest are secondary */
           <>
-            <button
-              onClick={onPlaceOrder}
-              className="w-full bg-[#6262bd] text-white py-2.5 rounded-xl font-medium hover:bg-[#5252a3] text-sm"
-            >
-              {hasOpenOrders ? t('updateOrder') : t('placeOrder')}
-            </button>
+            {hasWaiterCall && (
+              <button
+                onClick={() => onAcknowledgeWaiterCall(waiterCalls[0].id)}
+                className="w-full bg-orange-500 text-white py-2 rounded-xl font-semibold hover:bg-orange-600 text-xs flex items-center justify-center gap-1.5 transition-colors"
+              >
+                👋 Acknowledge waiter call
+              </button>
+            )}
             <button
               onClick={onPayBill}
-              className="w-full bg-green-600 text-white py-2.5 rounded-xl font-medium hover:bg-green-700 text-sm"
-            >
-              {t('payBill')}
-            </button>
-            <button
-              onClick={onSplitBill}
-              className="w-full bg-orange-600 text-white py-2.5 rounded-xl font-medium hover:bg-orange-700 text-sm flex items-center justify-center gap-2"
+              className="w-full bg-green-600 text-white py-2.5 rounded-xl font-semibold hover:bg-green-700 text-sm flex items-center justify-center gap-2 transition-colors"
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
+                <path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
               </svg>
-              {t('splitBill')}
+              {t('payBill')}
+            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={onPlaceOrder}
+                className="flex-1 bg-[#6262bd] text-white py-2 rounded-xl font-medium hover:bg-[#5252a3] text-xs flex items-center justify-center gap-1.5 transition-colors"
+              >
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                </svg>
+                {t('updateOrder')}
+              </button>
+              <button
+                onClick={onSplitBill}
+                className="flex-1 bg-slate-100 text-slate-700 py-2 rounded-xl font-medium hover:bg-slate-200 text-xs flex items-center justify-center gap-1.5 transition-colors"
+              >
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
+                </svg>
+                {t('splitBill')}
+              </button>
+            </div>
+            <button
+              onClick={onCreateReservation}
+              className="w-full border border-slate-200 text-slate-500 py-2 rounded-xl font-medium hover:bg-slate-50 text-xs flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM12 13h5v5h-5z"/>
+              </svg>
+              {t('newReservation')}
+            </button>
+          </>
+        ) : (
+          /* Available state — Place Order is primary */
+          <>
+            {hasWaiterCall && (
+              <button
+                onClick={() => onAcknowledgeWaiterCall(waiterCalls[0].id)}
+                className="w-full bg-orange-500 text-white py-2 rounded-xl font-semibold hover:bg-orange-600 text-xs flex items-center justify-center gap-1.5 transition-colors"
+              >
+                👋 Acknowledge waiter call
+              </button>
+            )}
+            <button
+              onClick={onPlaceOrder}
+              className="w-full bg-[#6262bd] text-white py-2.5 rounded-xl font-semibold hover:bg-[#5252a3] text-sm flex items-center justify-center gap-2 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+              </svg>
+              {t('placeOrder')}
             </button>
             <button
               onClick={onCreateReservation}
-              className="w-full border-2 border-[#6262bd] text-[#6262bd] py-2.5 rounded-xl font-medium hover:bg-[#6262bd]/5 text-sm flex items-center justify-center gap-2"
+              className="w-full border border-slate-200 text-slate-500 py-2 rounded-xl font-medium hover:bg-slate-50 text-sm flex items-center justify-center gap-1.5 transition-colors"
             >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM12 13h5v5h-5z"/>
               </svg>
               {t('newReservation')}
             </button>
           </>
         )}
-        {userType === 'owner' && (
-          <>
-            <button
-              onClick={onDownload}
-              className="w-full border-2 border-slate-200 text-slate-600 py-2.5 rounded-xl font-medium hover:bg-slate-50 text-sm"
-            >
-              {t('downloadQR')}
-            </button>
-            <button
-              onClick={onDelete}
-              className="w-full p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 text-sm font-medium"
-            >
-              {t('deleteTable')}
-            </button>
-          </>
-        )}
       </div>
-      </div>
-
+    </div>
   )
 }
