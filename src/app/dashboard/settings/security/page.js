@@ -2,11 +2,18 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useRestaurant } from '@/lib/RestaurantContext'
 import PWAInstallButton from '@/components/PWAInstallButton'
 import QRCode from 'qrcode'
 import ConnectedDevicesPanel from '@/components/ConnectedDevicesPanel'
+import { useTranslations } from '@/lib/i18n/LanguageContext'
+import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 
 export default function Security() {
+  const t = useTranslations('security')
+  const tc = useTranslations('common')
+  const restaurantCtx = useRestaurant()
+  const supabase = useAdminSupabase()
   const [restaurant, setRestaurant] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -24,25 +31,12 @@ export default function Security() {
   const installCanvasRef = useRef(null)
 
   useEffect(() => {
-    const fetchRestaurant = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      // Get restaurant (owners only)
-      const { data: ownedRestaurant } = await supabase
-        .from('restaurants')
-        .select('*')
-        .eq('owner_id', user.id)
-        .maybeSingle()
-
-      if (ownedRestaurant) {
-        setRestaurant(ownedRestaurant)
-        setStaffLoginPassword(ownedRestaurant.staff_login_password || '')
-      }
-      setLoading(false)
-    }
-    fetchRestaurant()
-  }, [])
+    if (!restaurantCtx?.restaurant) return
+    const r = restaurantCtx.restaurant
+    setRestaurant(r)
+    setStaffLoginPassword(r.staff_login_password || '')
+    setLoading(false)
+  }, [restaurantCtx])
 
   // Generate QR codes for staff login and app install
   useEffect(() => {
@@ -186,7 +180,7 @@ export default function Security() {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="text-slate-500">Loading...</div>
+        <div className="text-slate-500">{tc('loading') || 'Loading...'}</div>
       </div>
     )
   }
@@ -195,7 +189,7 @@ export default function Security() {
     return (
       <div className="p-8">
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-600">
-          Only restaurant owners can access settings.
+          {t('accessDenied') || 'Only restaurant owners can access settings.'}
         </div>
       </div>
     )
@@ -204,8 +198,8 @@ export default function Security() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800">Security & Authentication</h1>
-        <p className="text-slate-500">Manage staff login security and access control</p>
+        <h1 className="text-2xl font-bold text-slate-800">{t('title') || 'Security & Authentication'}</h1>
+        <p className="text-slate-500">{t('subtitle') || 'Manage staff login security and access control'}</p>
       </div>
 
       {message && (
@@ -225,17 +219,16 @@ export default function Security() {
       <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
         <div className="flex items-start justify-between mb-6">
           <div>
-            <h2 className="text-lg font-bold text-slate-700 mb-2">Staff Login Security</h2>
+            <h2 className="text-lg font-bold text-slate-700 mb-2">{t('staffLoginSecurity') || 'Staff Login Security'}</h2>
             <p className="text-sm text-slate-500">
-              Set a password that staff members must enter before using their PIN codes.
-              This prevents unauthorized access to your staff login page.
+              {t('staffLoginSecurityDesc') || 'Set a password that staff members must enter before using their PIN codes. This prevents unauthorized access to your staff login page.'}
             </p>
           </div>
           <div className="flex items-center gap-2 px-3 py-1 bg-green-100 text-green-700 rounded-lg text-sm font-medium">
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
             </svg>
-            <span>Secure</span>
+            <span>{t('secure') || 'Secure'}</span>
           </div>
         </div>
 
@@ -243,7 +236,7 @@ export default function Security() {
           {/* Staff Login URL */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Staff Login URL
+              {t('staffLoginUrl') || 'Staff Login URL'}
             </label>
             <div className="flex gap-2">
               <div className="flex-1 p-3 bg-slate-50 rounded-xl border border-slate-200">
@@ -255,18 +248,18 @@ export default function Security() {
                 onClick={() => copyToClipboard(getStaffLoginUrl())}
                 className="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl font-medium text-slate-700 transition-colors"
               >
-                Copy
+                {tc('copy') || 'Copy'}
               </button>
             </div>
             <p className="text-xs text-slate-500 mt-2">
-              Share this URL with your staff. They'll need the password below to access it.
+              {t('staffLoginUrlDesc') || "Share this URL with your staff. They'll need the password below to access it."}
             </p>
           </div>
 
           {/* Staff Login Password */}
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Staff Login Password
+              {t('staffLoginPassword') || 'Staff Login Password'}
             </label>
             <div className="flex gap-2">
               <div className="flex-1 relative">
@@ -274,7 +267,7 @@ export default function Security() {
                   type={showPassword ? 'text' : 'password'}
                   value={staffLoginPassword}
                   onChange={(e) => setStaffLoginPassword(e.target.value)}
-                  placeholder="Enter password (min 6 characters)"
+                  placeholder={t('passwordPlaceholder') || 'Enter password (min 6 characters)'}
                   className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] font-mono bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 />
                 <button
@@ -297,11 +290,11 @@ export default function Security() {
                 onClick={generatePassword}
                 className="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl font-medium text-slate-700 transition-colors whitespace-nowrap"
               >
-                Generate
+                {t('generate') || 'Generate'}
               </button>
             </div>
             <p className="text-xs text-slate-500 mt-2">
-              Staff must enter this password before they can use their PIN codes to log in.
+              {t('passwordHint') || 'Staff must enter this password before they can use their PIN codes to log in.'}
             </p>
           </div>
 
@@ -312,7 +305,7 @@ export default function Security() {
               disabled={saving || !staffLoginPassword || staffLoginPassword.length < 6}
               className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
-              {saving ? 'Saving...' : 'Save Password'}
+              {saving ? (tc('saving') || 'Saving...') : (t('savePassword') || 'Save Password')}
             </button>
           </div>
         </div>
@@ -322,8 +315,8 @@ export default function Security() {
       <div className="mb-6">
         <div>
           <div className="bg-gradient-to-r from-[#8b5cf6] to-[#a78bfa] text-white rounded-t-2xl p-4">
-            <h3 className="font-bold text-lg">Staff App</h3>
-            <p className="text-sm opacity-90">Share with your team to install their app</p>
+            <h3 className="font-bold text-lg">{t('staffApp') || 'Staff App'}</h3>
+            <p className="text-sm opacity-90">{t('staffAppDesc') || 'Share with your team to install their app'}</p>
           </div>
           <div className="bg-white border-2 border-slate-100 border-t-0 rounded-b-2xl p-6">
             <div className="space-y-6">
@@ -336,13 +329,13 @@ export default function Security() {
                     <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
                     </svg>
-                    <p className="text-sm font-bold text-green-800">Install App</p>
+                    <p className="text-sm font-bold text-green-800">{t('installApp') || 'Install App'}</p>
                   </div>
                   <div className="bg-white p-2 rounded-lg shadow-sm">
                     <canvas ref={installCanvasRef} />
                   </div>
                   <p className="text-xs text-green-700 mt-2 text-center font-medium">
-                    Scan to download & install
+                    {t('scanToInstall') || 'Scan to download & install'}
                   </p>
                 </div>
 
@@ -352,13 +345,13 @@ export default function Security() {
                     <svg className="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                     </svg>
-                    <p className="text-sm font-bold text-purple-800">Login Page</p>
+                    <p className="text-sm font-bold text-purple-800">{t('loginPage') || 'Login Page'}</p>
                   </div>
                   <div className="bg-white p-2 rounded-lg shadow-sm">
                     <canvas ref={loginCanvasRef} />
                   </div>
                   <p className="text-xs text-purple-700 mt-2 text-center font-medium">
-                    Scan to open login in browser
+                    {t('scanToLogin') || 'Scan to open login in browser'}
                   </p>
                 </div>
               </div>
@@ -370,19 +363,19 @@ export default function Security() {
                     <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
                   </svg>
                   <div className="flex-1">
-                    <h4 className="font-semibold text-green-900 mb-2">Direct Install Link</h4>
+                    <h4 className="font-semibold text-green-900 mb-2">{t('directInstallLink') || 'Direct Install Link'}</h4>
                     <p className="text-xs text-green-700 mb-2">
-                      Share this link to download and install the app as a standalone application:
+                      {t('directInstallLinkDesc') || 'Share this link to download and install the app as a standalone application:'}
                     </p>
                     <div className="flex gap-2">
                       <div className="flex-1 bg-white border border-green-300 rounded-lg p-3 font-mono text-xs break-all">
-                        {installQrUrl || 'Loading...'}
+                        {installQrUrl || (tc('loading') || 'Loading...')}
                       </div>
                       <button
                         onClick={copyInstallLink}
                         className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors whitespace-nowrap text-sm font-medium"
                       >
-                        {copiedInstall ? 'Copied!' : 'Copy'}
+                        {copiedInstall ? (tc('copied') || 'Copied!') : (tc('copy') || 'Copy')}
                       </button>
                     </div>
                   </div>
@@ -396,19 +389,19 @@ export default function Security() {
                     <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
                   </svg>
                   <div className="flex-1">
-                    <h4 className="font-semibold text-blue-900 mb-2">Browser Login Link</h4>
+                    <h4 className="font-semibold text-blue-900 mb-2">{t('browserLoginLink') || 'Browser Login Link'}</h4>
                     <p className="text-xs text-blue-700 mb-2">
-                      Share this link to open the login page in a web browser:
+                      {t('browserLoginLinkDesc') || 'Share this link to open the login page in a web browser:'}
                     </p>
                     <div className="flex gap-2">
                       <div className="flex-1 bg-white border border-blue-300 rounded-lg p-3 font-mono text-xs break-all">
-                        {loginQrUrl || 'Loading...'}
+                        {loginQrUrl || (tc('loading') || 'Loading...')}
                       </div>
                       <button
                         onClick={copyLoginLink}
                         className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm font-medium"
                       >
-                        {copiedLogin ? 'Copied!' : 'Copy'}
+                        {copiedLogin ? (tc('copied') || 'Copied!') : (tc('copy') || 'Copy')}
                       </button>
                     </div>
                   </div>
@@ -422,7 +415,7 @@ export default function Security() {
                     <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
                   </svg>
                   <div>
-                    <h5 className="font-semibold text-slate-700 text-xs">View Rota</h5>
+                    <h5 className="font-semibold text-slate-700 text-xs">{t('features.viewRota') || t('viewRota') || 'View Rota'}</h5>
                   </div>
                 </div>
                 <div className="flex flex-col items-center gap-2 p-3 bg-slate-50 rounded-xl text-center">
@@ -430,7 +423,7 @@ export default function Security() {
                     <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z"/>
                   </svg>
                   <div>
-                    <h5 className="font-semibold text-slate-700 text-xs">Time Off</h5>
+                    <h5 className="font-semibold text-slate-700 text-xs">{t('features.timeOff') || t('timeOff') || 'Time Off'}</h5>
                   </div>
                 </div>
                 <div className="flex flex-col items-center gap-2 p-3 bg-slate-50 rounded-xl text-center">
@@ -438,7 +431,7 @@ export default function Security() {
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                   </svg>
                   <div>
-                    <h5 className="font-semibold text-slate-700 text-xs">Availability</h5>
+                    <h5 className="font-semibold text-slate-700 text-xs">{t('features.availability') || t('availability') || 'Availability'}</h5>
                   </div>
                 </div>
               </div>
@@ -451,16 +444,16 @@ export default function Security() {
       <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
         <div className="flex items-start justify-between mb-6">
           <div>
-            <h2 className="text-lg font-bold text-slate-700 mb-2">Takeaway Menu Link</h2>
+            <h2 className="text-lg font-bold text-slate-700 mb-2">{t('takeawayMenu') || 'Takeaway Menu Link'}</h2>
             <p className="text-sm text-slate-500">
-              Share this link on your website or social media to let customers browse your takeaway menu and place orders.
+              {t('takeawayMenuDesc') || 'Share this link on your website or social media to let customers browse your takeaway menu and place orders.'}
             </p>
           </div>
           <div className="flex items-center gap-2 px-3 py-1 bg-orange-100 text-orange-700 rounded-lg text-sm font-medium">
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
               <path d="M18.06 22.99h1.66c.84 0 1.53-.64 1.63-1.46L23 5.05l-5 2V1h-1.97v6.05l-5-2-1.66 15.48c-.1.82.59 1.46 1.43 1.46h1.66l.57-2.68H17.5l.56 2.68zM9.65 11.58L9 13.67l-.65-2.09H5.93l1.3.96-.5 1.54 1.3-.96 1.3.96-.5-1.54 1.3-.96z"/>
             </svg>
-            <span>Takeaway</span>
+            <span>{t('takeaway') || 'Takeaway'}</span>
           </div>
         </div>
 
@@ -470,23 +463,23 @@ export default function Security() {
               <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
             </svg>
             <div className="flex-1">
-              <h4 className="font-semibold text-orange-900 mb-2">Your Takeaway Menu URL</h4>
+              <h4 className="font-semibold text-orange-900 mb-2">{t('yourTakeawayUrl') || 'Your Takeaway Menu URL'}</h4>
               <p className="text-xs text-orange-700 mb-2">
-                Customers can browse your menu and place takeaway orders at this link:
+                {t('takeawayUrlDesc') || 'Customers can browse your menu and place takeaway orders at this link:'}
               </p>
               <div className="flex gap-2">
                 <div className="flex-1 bg-white border border-orange-300 rounded-lg p-3 font-mono text-xs break-all text-orange-800">
-                  {getTakeawayMenuUrl() || 'Loading...'}
+                  {getTakeawayMenuUrl() || (tc('loading') || 'Loading...')}
                 </div>
                 <button
                   onClick={copyTakeawayLink}
                   className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors whitespace-nowrap text-sm font-medium"
                 >
-                  {copiedTakeaway ? 'Copied!' : 'Copy'}
+                  {copiedTakeaway ? (tc('copied') || 'Copied!') : (tc('copy') || 'Copy')}
                 </button>
               </div>
               <p className="text-xs text-orange-600 mt-3">
-                <strong>Tip:</strong> Add this link to your website, Google Business Profile, or social media pages to increase takeaway orders.
+                <strong>{t('tip') || 'Tip'}:</strong> {t('takeawayTip') || 'Add this link to your website, Google Business Profile, or social media pages to increase takeaway orders.'}
               </p>
             </div>
           </div>
@@ -497,16 +490,16 @@ export default function Security() {
       <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
         <div className="flex items-start justify-between mb-6">
           <div>
-            <h2 className="text-lg font-bold text-slate-700 mb-2">Dine-In Menu Link</h2>
+            <h2 className="text-lg font-bold text-slate-700 mb-2">{t('dineInMenu') || 'Dine-In Menu Link'}</h2>
             <p className="text-sm text-slate-500">
-              Share this link to let customers browse your full menu online. Great for your website or social media.
+              {t('dineInMenuDesc') || 'Share this link to let customers browse your full menu online. Great for your website or social media.'}
             </p>
           </div>
           <div className="flex items-center gap-2 px-3 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-sm font-medium">
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
               <path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/>
             </svg>
-            <span>Dine-In</span>
+            <span>{t('dineIn') || 'Dine-In'}</span>
           </div>
         </div>
 
@@ -516,23 +509,23 @@ export default function Security() {
               <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
             </svg>
             <div className="flex-1">
-              <h4 className="font-semibold text-emerald-900 mb-2">Your Dine-In Menu URL</h4>
+              <h4 className="font-semibold text-emerald-900 mb-2">{t('yourDineInUrl') || 'Your Dine-In Menu URL'}</h4>
               <p className="text-xs text-emerald-700 mb-2">
-                Customers can view your full menu at this link:
+                {t('dineInUrlDesc') || 'Customers can view your full menu at this link:'}
               </p>
               <div className="flex gap-2">
                 <div className="flex-1 bg-white border border-emerald-300 rounded-lg p-3 font-mono text-xs break-all text-emerald-800">
-                  {getDineInMenuUrl() || 'Loading...'}
+                  {getDineInMenuUrl() || (tc('loading') || 'Loading...')}
                 </div>
                 <button
                   onClick={copyDineInLink}
                   className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors whitespace-nowrap text-sm font-medium"
                 >
-                  {copiedDineIn ? 'Copied!' : 'Copy'}
+                  {copiedDineIn ? (tc('copied') || 'Copied!') : (tc('copy') || 'Copy')}
                 </button>
               </div>
               <p className="text-xs text-emerald-600 mt-3">
-                <strong>Tip:</strong> This is your main menu page. Customers scanning table QR codes will see a version of this with table-specific features.
+                <strong>{t('tip') || 'Tip'}:</strong> {t('dineInTip') || 'This is your main menu page. Customers scanning table QR codes will see a version of this with table-specific features.'}
               </p>
             </div>
           </div>
@@ -543,16 +536,16 @@ export default function Security() {
       <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
         <div className="flex items-start justify-between mb-6">
           <div>
-            <h2 className="text-lg font-bold text-slate-700 mb-2">Reservation Booking Link</h2>
+            <h2 className="text-lg font-bold text-slate-700 mb-2">{t('bookingPage') || 'Reservation Booking Link'}</h2>
             <p className="text-sm text-slate-500">
-              Share this link to let customers book tables online. Perfect for your website, Google Business Profile, or social media.
+              {t('bookingPageDesc') || 'Share this link to let customers book tables online. Perfect for your website, Google Business Profile, or social media.'}
             </p>
           </div>
           <div className="flex items-center gap-2 px-3 py-1 bg-purple-100 text-purple-700 rounded-lg text-sm font-medium">
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
               <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5z"/>
             </svg>
-            <span>Reservations</span>
+            <span>{t('reservations') || 'Reservations'}</span>
           </div>
         </div>
 
@@ -562,23 +555,23 @@ export default function Security() {
               <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
             </svg>
             <div className="flex-1">
-              <h4 className="font-semibold text-purple-900 mb-2">Your Booking Page URL</h4>
+              <h4 className="font-semibold text-purple-900 mb-2">{t('yourBookingUrl') || 'Your Booking Page URL'}</h4>
               <p className="text-xs text-purple-700 mb-2">
-                Customers can book a table at your restaurant using this link:
+                {t('bookingUrlDesc') || 'Customers can book a table at your restaurant using this link:'}
               </p>
               <div className="flex gap-2">
                 <div className="flex-1 bg-white border border-purple-300 rounded-lg p-3 font-mono text-xs break-all text-purple-800">
-                  {getBookingUrl() || 'Loading...'}
+                  {getBookingUrl() || (tc('loading') || 'Loading...')}
                 </div>
                 <button
                   onClick={copyBookingLink}
                   className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors whitespace-nowrap text-sm font-medium"
                 >
-                  {copiedBooking ? 'Copied!' : 'Copy'}
+                  {copiedBooking ? (tc('copied') || 'Copied!') : (tc('copy') || 'Copy')}
                 </button>
               </div>
               <p className="text-xs text-purple-600 mt-3">
-                <strong>Tip:</strong> Add this link to your website and Google Business Profile to make it easy for customers to book tables online.
+                <strong>{t('tip') || 'Tip'}:</strong> {t('bookingTip') || 'Add this link to your website and Google Business Profile to make it easy for customers to book tables online.'}
               </p>
             </div>
           </div>
@@ -592,16 +585,16 @@ export default function Security() {
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
           </svg>
           <div>
-            <h3 className="font-bold text-blue-900 mb-2">How Staff Login Works</h3>
+            <h3 className="font-bold text-blue-900 mb-2">{t('howStaffLoginWorks') || 'How Staff Login Works'}</h3>
             <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
-              <li>Staff scan the <strong>Install App</strong> QR code to download the app</li>
-              <li>Or they scan the <strong>Login Page</strong> QR code to use in browser</li>
-              <li>They enter the restaurant password (one-time per session)</li>
-              <li>They enter their personal 3-digit PIN code</li>
-              <li>They access their dashboard</li>
+              <li>{t('loginSteps.step1') || 'Staff scan the Install App QR code to download the app'}</li>
+              <li>{t('loginSteps.step2') || 'Or they scan the Login Page QR code to use in browser'}</li>
+              <li>{t('loginSteps.step3') || 'They enter the restaurant password (one-time per session)'}</li>
+              <li>{t('loginSteps.step4') || 'They enter their personal 3-digit PIN code'}</li>
+              <li>{t('loginSteps.step5') || 'They access their dashboard'}</li>
             </ol>
             <p className="text-sm text-blue-800 mt-3">
-              <strong>Security tip:</strong> Change this password regularly and only share it with trusted staff members.
+              {t('securityTip') || 'Security tip: Change this password regularly and only share it with trusted staff members.'}
             </p>
           </div>
         </div>

@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useCurrency } from '@/lib/CurrencyContext'
 export default function LossesAnalytics() {
   const t = useTranslations('lossesAnalytics')
   const { currencySymbol, formatCurrency } = useCurrency()
+  const restaurantCtx = useRestaurant()
   const [restaurant, setRestaurant] = useState(null)
   const [loading, setLoading] = useState(true)
   const [lossesData, setLossesData] = useState(null)
@@ -18,62 +20,20 @@ export default function LossesAnalytics() {
   const [showNotesModal, setShowNotesModal] = useState(false)
   const [selectedNote, setSelectedNote] = useState(null)
   useEffect(() => {
-    initData()
-  }, [])
+    if (!restaurantCtx?.restaurant) return
+    setRestaurant(restaurantCtx.restaurant)
+    // Set default date range (last 30 days)
+    const today = new Date()
+    const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000)
+    setEndDate(today.toISOString().split('T')[0])
+    setStartDate(thirtyDaysAgo.toISOString().split('T')[0])
+    setLoading(false)
+  }, [restaurantCtx])
   useEffect(() => {
     if (restaurant) {
       fetchLosses()
     }
   }, [restaurant, startDate, endDate, departmentFilter, reasonFilter, staffFilter])
-  const initData = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-    let restaurantData = null
-    // Check for staff session
-    const staffSessionData = localStorage.getItem('staff_session')
-    if (staffSessionData) {
-      try {
-        const staffSession = JSON.parse(staffSessionData)
-        const { data: freshRestaurant } = await supabase
-          .from('restaurants')
-          .select('*')
-          .eq('id', staffSession.restaurant_id)
-          .single()
-        restaurantData = freshRestaurant
-      } catch (err) {
-        localStorage.removeItem('staff_session')
-      }
-    }
-    if (!restaurantData) {
-      const { data: ownedRestaurant } = await supabase
-        .from('restaurants')
-        .select('*')
-        .eq('owner_id', user.id)
-        .maybeSingle()
-      if (ownedRestaurant) {
-        restaurantData = ownedRestaurant
-      } else {
-        const { data: staffRecords } = await supabase
-          .from('staff')
-          .select('*, restaurants(*)')
-          .or(`user_id.eq.${user.id},email.eq.${user.email}`)
-          .eq('status', 'active')
-        const staffRecord = staffRecords && staffRecords.length > 0 ? staffRecords[0] : null
-        if (staffRecord?.restaurants) {
-          restaurantData = staffRecord.restaurants
-        }
-      }
-    }
-    if (restaurantData) {
-      setRestaurant(restaurantData)
-      // Set default date range (last 30 days)
-      const today = new Date()
-      const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000)
-      setEndDate(today.toISOString().split('T')[0])
-      setStartDate(thirtyDaysAgo.toISOString().split('T')[0])
-    }
-    setLoading(false)
-  }
   const fetchLosses = async () => {
     if (!startDate || !endDate) return
     const params = new URLSearchParams({

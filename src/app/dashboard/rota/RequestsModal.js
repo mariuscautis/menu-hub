@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useRestaurant } from '@/lib/RestaurantContext';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
 
 export default function RequestsModal({ onClose, onRequestUpdated }) {
   const t = useTranslations('rota.requestsModal');
   const tCommon = useTranslations('common');
+  const restaurantCtx = useRestaurant();
 
   const [restaurant, setRestaurant] = useState(null);
   const [requests, setRequests] = useState([]);
@@ -25,43 +27,10 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
   });
 
   useEffect(() => {
-    fetchRestaurantData();
-  }, []);
-
-  const fetchRestaurantData = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    let restaurantData = null;
-
-    // Check for staff session (PIN login)
-    const staffSessionData = localStorage.getItem('staff_session');
-    if (staffSessionData) {
-      try {
-        const staffSession = JSON.parse(staffSessionData);
-        restaurantData = staffSession.restaurant;
-      } catch (err) {
-        localStorage.removeItem('staff_session');
-      }
+    if (restaurantCtx?.restaurant) {
+      setRestaurant(restaurantCtx.restaurant);
     }
-
-    if (!restaurantData) {
-      // Check if owner
-      const { data: restaurants } = await supabase
-        .from('restaurants')
-        .select('*')
-        .eq('owner_id', user.id)
-        .single();
-
-      if (restaurants) {
-        restaurantData = restaurants;
-      }
-    }
-
-    if (restaurantData) {
-      setRestaurant(restaurantData);
-    }
-  };
+  }, [restaurantCtx]);
 
   useEffect(() => {
     if (restaurant) {

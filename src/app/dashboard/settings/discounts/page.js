@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useCurrency } from '@/lib/CurrencyContext'
+import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 
 /**
  * Discounts Settings Page
@@ -21,6 +23,8 @@ export default function DiscountsSettings() {
   const t = useTranslations('discounts')
   const tc = useTranslations('common')
   const { currencySymbol, formatCurrency } = useCurrency()
+  const restaurantCtx = useRestaurant()
+  const supabase = useAdminSupabase()
 
   // State for restaurant and loading
   const [restaurant, setRestaurant] = useState(null)
@@ -41,71 +45,11 @@ export default function DiscountsSettings() {
   })
 
   useEffect(() => {
-    fetchData()
-  }, [])
-
-  /**
-   * Fetch restaurant data and existing discounts
-   */
-  const fetchData = async () => {
-    try {
-      setLoading(true)
-
-      // Check for staff session first (admin staff can manage discounts)
-      const staffSessionData = localStorage.getItem('staff_session')
-      let restaurantData = null
-
-      if (staffSessionData) {
-        try {
-          const staffSession = JSON.parse(staffSessionData)
-          // Only admin staff can manage discounts
-          if (staffSession.role === 'admin') {
-            restaurantData = staffSession.restaurant
-          } else {
-            setMessage({ type: 'error', text: 'Only restaurant owners and admins can manage discounts' })
-            setLoading(false)
-            return
-          }
-        } catch (err) {
-          localStorage.removeItem('staff_session')
-        }
-      }
-
-      // If not staff session, check for owner auth
-      if (!restaurantData) {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
-          window.location.href = '/auth/login'
-          return
-        }
-
-        // Get restaurant owned by user
-        const { data: ownedRestaurant } = await supabase
-          .from('restaurants')
-          .select('*')
-          .eq('owner_id', user.id)
-          .maybeSingle()
-
-        if (!ownedRestaurant) {
-          setMessage({ type: 'error', text: 'Restaurant not found or you do not have permission' })
-          setLoading(false)
-          return
-        }
-
-        restaurantData = ownedRestaurant
-      }
-
-      setRestaurant(restaurantData)
-
-      // Fetch existing discounts
-      await fetchDiscounts(restaurantData.id)
-    } catch (error) {
-      console.error('Error fetching data:', error)
-      setMessage({ type: 'error', text: 'Failed to load data' })
-    } finally {
-      setLoading(false)
-    }
-  }
+    if (!restaurantCtx?.restaurant) return
+    const r = restaurantCtx.restaurant
+    setRestaurant(r)
+    fetchDiscounts(r.id).finally(() => setLoading(false))
+  }, [restaurantCtx])
 
   /**
    * Fetch all active discounts for the restaurant

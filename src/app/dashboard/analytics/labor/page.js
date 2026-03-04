@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useRestaurant } from '@/lib/RestaurantContext';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
 import { useCurrency } from '@/lib/CurrencyContext';
 
 export default function LaborAnalyticsPage() {
   const t = useTranslations('laborAnalytics');
   const { currencySymbol, formatCurrency } = useCurrency();
+  const restaurantCtx = useRestaurant();
   const [restaurant, setRestaurant] = useState(null);
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState('week'); // 'week', 'month', 'custom'
@@ -30,51 +32,10 @@ export default function LaborAnalyticsPage() {
   });
 
   useEffect(() => {
-    fetchRestaurantData();
-  }, []);
-
-  const fetchRestaurantData = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      console.error('No authenticated user');
-      setLoading(false);
-      return;
+    if (restaurantCtx?.restaurant) {
+      setRestaurant(restaurantCtx.restaurant);
     }
-
-    let restaurantData = null;
-
-    // Check for staff session (PIN login)
-    const staffSessionData = localStorage.getItem('staff_session');
-    if (staffSessionData) {
-      try {
-        const staffSession = JSON.parse(staffSessionData);
-        restaurantData = staffSession.restaurant;
-      } catch (err) {
-        console.error('Error parsing staff session:', err);
-        localStorage.removeItem('staff_session');
-      }
-    }
-
-    if (!restaurantData) {
-      // Check if owner - fetch restaurant
-      const { data: restaurants } = await supabase
-        .from('restaurants')
-        .select('*')
-        .eq('owner_id', user.id)
-        .single();
-
-      if (restaurants) {
-        restaurantData = restaurants;
-      }
-    }
-
-    if (restaurantData) {
-      setRestaurant(restaurantData);
-    } else {
-      console.error('No restaurant found for this user');
-      setLoading(false);
-    }
-  };
+  }, [restaurantCtx]);
 
   useEffect(() => {
     if (restaurant) {

@@ -2,10 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useRestaurant } from '@/lib/RestaurantContext';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
+import { useAdminSupabase } from '@/hooks/useAdminSupabase';
 
 export default function DepartmentsSettingsPage() {
   const t = useTranslations('departmentsSettings');
+  const restaurantCtx = useRestaurant();
+  const supabase = useAdminSupabase();
 
   // Define all available permissions with descriptions
   // child: true = indented under the previous parent
@@ -30,41 +34,30 @@ export default function DepartmentsSettingsPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
   useEffect(() => {
-    fetchData();
-  }, []);
-  const fetchData = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      setLoading(false);
-      return;
-    }
-    const { data: restaurantData, error: restaurantError } = await supabase
-      .from('restaurants')
+    if (!restaurantCtx?.restaurant) return
+    fetchData(restaurantCtx.restaurant);
+  }, [restaurantCtx]);
+  const fetchData = async (restaurantData) => {
+    setRestaurant(restaurantData);
+    // Fetch department permissions
+    const { data: deptPerms } = await supabase
+      .from('department_permissions')
       .select('*')
-      .eq('owner_id', user.id)
-      .single();
-    if (restaurantData) {
-      setRestaurant(restaurantData);
-      // Fetch department permissions
-      const { data: deptPerms, error: deptError } = await supabase
-        .from('department_permissions')
-        .select('*')
-        .eq('restaurant_id', restaurantData.id)
-        .order('department_name');
-      if (deptPerms && deptPerms.length > 0) {
-        setDepartments(deptPerms.map(dept => ({
-          id: dept.id,
-          name: dept.department_name,
-          permissions: dept.permissions || []
-        })));
-      } else {
-        // Initialize with default departments if none exist
-        setDepartments([
-          { name: 'kitchen', permissions: ['orders_kitchen'], isNew: true },
-          { name: 'bar', permissions: ['orders_bar', 'tables', 'reservations', 'report_loss'], isNew: true },
-          { name: 'universal', permissions: ['overview', 'orders_kitchen', 'orders_bar', 'tables', 'reservations', 'report_loss', 'my_rota'], isNew: true }
-        ]);
-      }
+      .eq('restaurant_id', restaurantData.id)
+      .order('department_name');
+    if (deptPerms && deptPerms.length > 0) {
+      setDepartments(deptPerms.map(dept => ({
+        id: dept.id,
+        name: dept.department_name,
+        permissions: dept.permissions || []
+      })));
+    } else {
+      // Initialize with default departments if none exist
+      setDepartments([
+        { name: 'kitchen', permissions: ['orders_kitchen'], isNew: true },
+        { name: 'bar', permissions: ['orders_bar', 'tables', 'reservations', 'report_loss'], isNew: true },
+        { name: 'universal', permissions: ['overview', 'orders_kitchen', 'orders_bar', 'tables', 'reservations', 'report_loss', 'my_rota'], isNew: true }
+      ]);
     }
     setLoading(false);
   };

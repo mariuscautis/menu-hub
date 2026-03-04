@@ -2,8 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useRestaurant } from '@/lib/RestaurantContext';
+import { useAdminSupabase } from '@/hooks/useAdminSupabase';
 
 export default function StaffLeaveSettings() {
+  const restaurantCtx = useRestaurant();
+  const supabase = useAdminSupabase();
   const [restaurant, setRestaurant] = useState(null);
   const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -12,32 +16,13 @@ export default function StaffLeaveSettings() {
   const [editingStaff, setEditingStaff] = useState(null);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (!restaurantCtx?.restaurant) return;
+    fetchData(restaurantCtx.restaurant);
+  }, [restaurantCtx]);
 
-  const fetchData = async () => {
+  const fetchData = async (restaurantData) => {
     try {
       setLoading(true);
-
-      // Get current user and restaurant
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        window.location.href = '/auth/login';
-        return;
-      }
-
-      // Get restaurant owned by user
-      const { data: restaurantData } = await supabase
-        .from('restaurants')
-        .select('*')
-        .eq('owner_id', user.id)
-        .maybeSingle();
-
-      if (!restaurantData) {
-        setMessage({ type: 'error', text: 'Restaurant not found or you do not have permission' });
-        return;
-      }
-
       setRestaurant(restaurantData);
 
       // Fetch staff with their leave balances

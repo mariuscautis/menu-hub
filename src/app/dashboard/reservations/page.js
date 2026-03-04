@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useOrderSounds } from '@/hooks/useOrderSounds'
 
@@ -33,6 +34,7 @@ export default function Reservations() {
   const [notification, setNotification] = useState(null)
 
   const realtimeChannelRef = useRef(null)
+  const restaurantCtx = useRestaurant()
 
   // Sound notifications
   const { playNewReservationSound, resumeAudio, soundSettings } = useOrderSounds(restaurant?.id)
@@ -84,24 +86,19 @@ export default function Reservations() {
   }, [])
 
   const fetchData = useCallback(async () => {
-    let restaurantData = null
+    if (!restaurantCtx?.restaurant) return
+
+    const restaurantData = restaurantCtx.restaurant
+
+    // Check for staff session for userInfo (name/id)
     let userEmail = null
     let userName = 'Unknown'
     let userId = null
 
     const staffSessionData = localStorage.getItem('staff_session')
-
     if (staffSessionData) {
       try {
         const staffSession = JSON.parse(staffSessionData)
-
-        const { data: freshRestaurant } = await supabase
-          .from('restaurants')
-          .select('*')
-          .eq('id', staffSession.restaurant_id)
-          .single()
-
-        restaurantData = freshRestaurant
         userEmail = staffSession.email
         userName = staffSession.name
         userId = staffSession.id
@@ -110,57 +107,21 @@ export default function Reservations() {
       }
     }
 
-    if (!restaurantData) {
-      const { data: { user } } = await supabase.auth.getUser()
+    setRestaurant(restaurantData)
+    setUserInfo({ email: userEmail, name: userName, id: userId })
 
-      if (user) {
-        userEmail = user.email
-        userId = user.id
+    await Promise.all([
+      fetchReservations(restaurantData.id),
+      fetchTables(restaurantData.id)
+    ])
 
-        const { data: ownedRestaurant } = await supabase
-          .from('restaurants')
-          .select('*')
-          .eq('owner_id', user.id)
-          .maybeSingle()
-
-        if (ownedRestaurant) {
-          restaurantData = ownedRestaurant
-          userName = user.email.split('@')[0]
-        } else {
-          const { data: staffRecords } = await supabase
-            .from('staff')
-            .select('*, restaurants(*)')
-            .or(`user_id.eq.${user.id},email.eq.${user.email}`)
-            .eq('status', 'active')
-
-          const staffRecord = staffRecords?.[0]
-
-          if (staffRecord?.restaurants) {
-            restaurantData = staffRecord.restaurants
-            userName = staffRecord.name
-            userEmail = staffRecord.email
-          }
-        }
-      }
-    }
-
-    if (restaurantData) {
-      setRestaurant(restaurantData)
-      setUserInfo({ email: userEmail, name: userName, id: userId })
-
-      await Promise.all([
-        fetchReservations(restaurantData.id),
-        fetchTables(restaurantData.id)
-      ])
-
-      // Mark initial load complete after a short delay
-      setTimeout(() => {
-        isInitialLoadRef.current = false
-      }, 2000)
-    }
+    // Mark initial load complete after a short delay
+    setTimeout(() => {
+      isInitialLoadRef.current = false
+    }, 2000)
 
     setLoading(false)
-  }, [fetchReservations, fetchTables])
+  }, [restaurantCtx, fetchReservations, fetchTables])
 
   useEffect(() => {
     fetchData()

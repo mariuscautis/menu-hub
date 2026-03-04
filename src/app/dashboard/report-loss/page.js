@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 
 export default function ReportLoss() {
   const t = useTranslations('reportLoss')
+  const restaurantCtx = useRestaurant()
   const [restaurant, setRestaurant] = useState(null)
   const [menuItems, setMenuItems] = useState([])
   const [loading, setLoading] = useState(true)
@@ -34,7 +36,7 @@ export default function ReportLoss() {
   ]
   useEffect(() => {
     fetchData()
-  }, [])
+  }, [restaurantCtx])
   // Click outside to close menu item dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -46,60 +48,26 @@ export default function ReportLoss() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [showMenuDropdown])
   const fetchData = async () => {
-    let restaurantData = null
+    if (!restaurantCtx?.restaurant) return
+    const restaurantData = restaurantCtx.restaurant
+    const department = restaurantCtx.staffDepartment
+
+    // Get userInfo from staff session if available
     let userEmail = null
     let userName = 'Unknown'
     let staffId = null
-    let department = null
-    // Check for staff session FIRST (PIN-based authentication)
     const staffSessionData = localStorage.getItem('staff_session')
     if (staffSessionData) {
       try {
         const staffSession = JSON.parse(staffSessionData)
-        const { data: freshRestaurant } = await supabase
-          .from('restaurants')
-          .select('*')
-          .eq('id', staffSession.restaurant_id)
-          .single()
-        restaurantData = freshRestaurant
         userEmail = staffSession.email
         userName = staffSession.name
         staffId = staffSession.id
-        department = staffSession.department
-      } catch (err) {
+      } catch {
         localStorage.removeItem('staff_session')
       }
     }
-    // If no staff session, check for regular Supabase auth user
-    if (!restaurantData) {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        userEmail = user.email
-        const { data: ownedRestaurant } = await supabase
-          .from('restaurants')
-          .select('*')
-          .eq('owner_id', user.id)
-          .maybeSingle()
-        if (ownedRestaurant) {
-          restaurantData = ownedRestaurant
-          userName = user.email.split('@')[0]
-        } else {
-          const { data: staffRecords } = await supabase
-            .from('staff')
-            .select('*, restaurants(*)')
-            .or(`user_id.eq.${user.id},email.eq.${user.email}`)
-            .eq('status', 'active')
-          const staffRecord = staffRecords && staffRecords.length > 0 ? staffRecords[0] : null
-          if (staffRecord?.restaurants) {
-            restaurantData = staffRecord.restaurants
-            userName = staffRecord.name
-            userEmail = staffRecord.email
-            staffId = staffRecord.id
-            department = staffRecord.department
-          }
-        }
-      }
-    }
+
     if (restaurantData) {
       setRestaurant(restaurantData)
       setUserInfo({ email: userEmail, name: userName, id: staffId })

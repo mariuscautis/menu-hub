@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
 export default function AdminRestaurants() {
+  const router = useRouter()
   const [restaurants, setRestaurants] = useState([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
@@ -29,6 +31,14 @@ export default function AdminRestaurants() {
       .eq('id', id)
 
     fetchRestaurants()
+  }
+
+  const handleImpersonate = (restaurant) => {
+    sessionStorage.setItem('impersonation_session', JSON.stringify({
+      restaurantId: restaurant.id,
+      restaurantName: restaurant.name
+    }))
+    router.push('/dashboard')
   }
 
   const deleteRestaurant = async (id, name) => {
@@ -173,6 +183,12 @@ export default function AdminRestaurants() {
                           Reactivate
                         </button>
                       )}
+                      <button
+                        onClick={() => handleImpersonate(restaurant)}
+                        className="px-3 py-1.5 bg-[#6262bd]/10 text-[#6262bd] rounded-lg text-sm font-medium hover:bg-[#6262bd]/20"
+                      >
+                        Login as
+                      </button>
                       <button
                         onClick={() => deleteRestaurant(restaurant.id, restaurant.name)}
                         className="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-200"

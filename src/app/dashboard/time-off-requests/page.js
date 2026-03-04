@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import moment from 'moment'
+import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 
 export default function TimeOffRequestsPage() {
   const router = useRouter()
   const t = useTranslations('timeOffRequests')
+  const restaurantCtx = useRestaurant()
   const [user, setUser] = useState(null)
   const [restaurantData, setRestaurantData] = useState(null)
   const [timeOffRequests, setTimeOffRequests] = useState([])
@@ -23,46 +25,36 @@ export default function TimeOffRequestsPage() {
   const [rejectionReason, setRejectionReason] = useState('')
 
   useEffect(() => {
-    checkAuth()
-  }, [])
+    if (!restaurantCtx?.restaurant) return
+    const restaurant = restaurantCtx.restaurant
+    setRestaurantData(restaurant)
+
+    // Get current auth user (needed for approved_by field)
+    supabase.auth.getUser().then(({ data: { user: authUser } }) => {
+      if (authUser) setUser(authUser)
+    })
+
+    // Fetch staff members via API route to bypass RLS (works for both owners and impersonating admins)
+    fetch(`/api/rota/staff?restaurantId=${restaurant.id}`)
+      .then(res => res.ok ? res.json() : { staff: [] })
+      .then(json => setStaffMembers(json.staff || []))
+      .catch(() => {
+        // Fallback to direct Supabase if API route doesn't exist
+        supabase
+          .from('staff')
+          .select('id, name, role')
+          .eq('restaurant_id', restaurant.id)
+          .eq('status', 'active')
+          .order('name')
+          .then(({ data: staff }) => setStaffMembers(staff || []))
+      })
+  }, [restaurantCtx])
 
   useEffect(() => {
     if (restaurantData) {
       fetchTimeOffRequests()
     }
   }, [restaurantData, selectedStaff, selectedStatus, dateFrom, dateTo])
-
-  const checkAuth = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      router.push('/login')
-      return
-    }
-    setUser(user)
-
-    const { data: restaurant } = await supabase
-      .from('restaurants')
-      .select('*')
-      .eq('owner_id', user.id)
-      .single()
-
-    if (!restaurant) {
-      router.push('/onboarding')
-      return
-    }
-
-    setRestaurantData(restaurant)
-
-    // Fetch staff members for filter
-    const { data: staff } = await supabase
-      .from('staff')
-      .select('id, name, role')
-      .eq('restaurant_id', restaurant.id)
-      .eq('status', 'active')
-      .order('name')
-
-    setStaffMembers(staff || [])
-  }
 
   const fetchTimeOffRequests = async () => {
     setLoading(true)

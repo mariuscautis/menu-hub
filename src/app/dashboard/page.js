@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useRestaurant } from '@/lib/RestaurantContext'
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
@@ -12,50 +13,15 @@ export default function Dashboard() {
   })
   const [restaurant, setRestaurant] = useState(null)
   const [userType, setUserType] = useState(null)
+  const restaurantCtx = useRestaurant()
 
   useEffect(() => {
+    if (!restaurantCtx?.restaurant) return
+
     const fetchData = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      let restaurantData = null
-
-      // Check if owner
-      const { data: ownedRestaurant } = await supabase
-        .from('restaurants')
-        .select('*')
-        .eq('owner_id', user.id)
-        .maybeSingle()
-
-      if (ownedRestaurant) {
-        restaurantData = ownedRestaurant
-        setUserType('owner')
-      } else {
-        // Check if staff by user_id (preferred) or email (fallback)
-        const { data: staffRecords } = await supabase
-          .from('staff')
-          .select('*, restaurants(*)')
-          .or(`user_id.eq.${user.id},email.eq.${user.email}`)
-          .eq('status', 'active')
-
-        const staffRecord = staffRecords && staffRecords.length > 0 ? staffRecords[0] : null
-
-        if (staffRecord && staffRecord.restaurants) {
-          // Update user_id if missing
-          if (!staffRecord.user_id) {
-            await supabase
-              .from('staff')
-              .update({ user_id: user.id })
-              .eq('id', staffRecord.id)
-          }
-
-          restaurantData = staffRecord.restaurants
-          setUserType(staffRecord.role === 'admin' ? 'staff-admin' : 'staff')
-        }
-      }
-
-      if (!restaurantData) return
+      const restaurantData = restaurantCtx.restaurant
       setRestaurant(restaurantData)
+      setUserType(restaurantCtx.userType)
 
       // Get today's orders
       const today = new Date().toISOString().split('T')[0]
@@ -93,7 +59,7 @@ export default function Dashboard() {
     }
 
     fetchData()
-  }, [])
+  }, [restaurantCtx])
 
   const canSeeAdminStats = userType === 'owner' || userType === 'staff-admin'
 

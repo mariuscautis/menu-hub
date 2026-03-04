@@ -2,11 +2,15 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 
 export default function Staff() {
   const t = useTranslations('staff')
   const tc = useTranslations('common')
+  const restaurantCtx = useRestaurant()
+  const supabase = useAdminSupabase()
   const [staff, setStaff] = useState([])
   const [restaurant, setRestaurant] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -32,7 +36,7 @@ export default function Staff() {
 
   useEffect(() => {
     fetchData()
-  }, [])
+  }, [restaurantCtx])
 
   // Real-time subscription for department changes
   useEffect(() => {
@@ -55,34 +59,8 @@ export default function Staff() {
   }, [restaurant])
 
   const fetchData = async () => {
-    let restaurantData = null
-
-    // Check for staff session (PIN login) first — before any auth call
-    const staffSession = localStorage.getItem('staff_session')
-    if (staffSession) {
-      try {
-        restaurantData = JSON.parse(staffSession).restaurant
-      } catch {
-        localStorage.removeItem('staff_session')
-      }
-    }
-
-    // Fallback: query by owner_id for owner users
-    if (!restaurantData) {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-      const { data } = await supabase
-        .from('restaurants')
-        .select('*')
-        .eq('owner_id', user.id)
-        .single()
-      restaurantData = data
-    }
-
-    if (!restaurantData) {
-      setLoading(false)
-      return
-    }
+    if (!restaurantCtx?.restaurant) return
+    const restaurantData = restaurantCtx.restaurant
     setRestaurant(restaurantData)
 
     // Fetch departments from department_permissions table

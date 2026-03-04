@@ -36,6 +36,12 @@ export async function GET(request) {
         .eq('user_id', session.user.id)
         .maybeSingle()
 
+      // Block admins from using the normal OAuth callback — sign out silently
+      if (admin) {
+        await supabase.auth.signOut()
+        return NextResponse.redirect(new URL('/auth/login?error=use-admin-portal', request.url))
+      }
+
       // Check if staff is deactivated
       if (staffMember && staffMember.status === 'inactive') {
         await supabase.auth.signOut()
@@ -44,9 +50,7 @@ export async function GET(request) {
 
       const isActiveStaff = staffMember && staffMember.status === 'active'
 
-      if (admin && !restaurant) {
-        return NextResponse.redirect(new URL('/admin', request.url))
-      } else if (restaurant) {
+      if (restaurant) {
         return NextResponse.redirect(new URL('/dashboard', request.url))
       } else if (isActiveStaff) {
         return NextResponse.redirect(new URL('/dashboard', request.url))

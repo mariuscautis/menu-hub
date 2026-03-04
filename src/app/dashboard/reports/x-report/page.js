@@ -19,6 +19,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { useRestaurant } from '@/lib/RestaurantContext';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
 import { useCurrency } from '@/lib/CurrencyContext';
 
@@ -26,6 +27,7 @@ export default function XReportPage() {
   const t = useTranslations('xReport');
   const tZ = useTranslations('zReport'); // Reuse Z-Report translations for common terms
   const { currencySymbol, formatCurrency } = useCurrency();
+  const restaurantCtx = useRestaurant();
 
   // Restaurant state
   const [restaurant, setRestaurant] = useState(null);
@@ -60,10 +62,13 @@ export default function XReportPage() {
     staffSummary: []
   });
 
-  // Fetch restaurant on mount
+  // Fetch restaurant from context
   useEffect(() => {
-    fetchRestaurant();
-  }, []);
+    if (restaurantCtx?.restaurant) {
+      setRestaurant(restaurantCtx.restaurant);
+      setLoading(false);
+    }
+  }, [restaurantCtx]);
 
   // Fetch data when restaurant is loaded
   useEffect(() => {
@@ -78,41 +83,6 @@ export default function XReportPage() {
       fetchReportData();
     }
   }, [currentSession, lastRefresh]);
-
-  /**
-   * Fetches the current user's restaurant
-   */
-  const fetchRestaurant = async () => {
-    try {
-      const staffSessionData = localStorage.getItem('staff_session');
-      if (staffSessionData) {
-        const staffSession = JSON.parse(staffSessionData);
-        setRestaurant(staffSession.restaurant);
-        setLoading(false);
-        return;
-      }
-
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-
-      const { data: ownedRestaurant } = await supabase
-        .from('restaurants')
-        .select('*')
-        .eq('owner_id', user.id)
-        .maybeSingle();
-
-      if (ownedRestaurant) {
-        setRestaurant(ownedRestaurant);
-      }
-    } catch (error) {
-      console.error('Error fetching restaurant:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   /**
    * Fetches the current open cash drawer session

@@ -15,12 +15,16 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useRestaurant } from '@/lib/RestaurantContext';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
 import { useCurrency } from '@/lib/CurrencyContext';
+import { useAdminSupabase } from '@/hooks/useAdminSupabase';
 
 export default function CashDrawerPage() {
   const t = useTranslations('cashDrawer');
   const { currencySymbol, formatCurrency } = useCurrency();
+  const restaurantCtx = useRestaurant();
+  const supabase = useAdminSupabase();
 
   // Restaurant and user state
   const [restaurant, setRestaurant] = useState(null);
@@ -45,10 +49,10 @@ export default function CashDrawerPage() {
   const [closeNotes, setCloseNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fetch restaurant data on mount
+  // Fetch restaurant data when context changes
   useEffect(() => {
     fetchRestaurantAndUser();
-  }, []);
+  }, [restaurantCtx]);
 
   // Fetch cash drawer data when restaurant is loaded
   useEffect(() => {
@@ -64,40 +68,17 @@ export default function CashDrawerPage() {
    */
   const fetchRestaurantAndUser = async () => {
     try {
-      // Check for staff session (PIN login)
+      if (!restaurantCtx?.restaurant) return;
+      setRestaurant(restaurantCtx.restaurant);
+
+      // Get user info from staff session if available
       const staffSessionData = localStorage.getItem('staff_session');
       if (staffSessionData) {
         const staffSession = JSON.parse(staffSessionData);
-        setRestaurant(staffSession.restaurant);
         setCurrentUser({
           name: staffSession.name,
           email: staffSession.email,
           id: staffSession.staff_id
-        });
-        setLoading(false);
-        return;
-      }
-
-      // Check for Supabase auth (owner)
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-
-      // Fetch restaurant where user is owner
-      const { data: ownedRestaurant } = await supabase
-        .from('restaurants')
-        .select('*')
-        .eq('owner_id', user.id)
-        .maybeSingle();
-
-      if (ownedRestaurant) {
-        setRestaurant(ownedRestaurant);
-        setCurrentUser({
-          name: user.email?.split('@')[0] || 'Owner',
-          email: user.email,
-          id: user.id
         });
       }
     } catch (error) {

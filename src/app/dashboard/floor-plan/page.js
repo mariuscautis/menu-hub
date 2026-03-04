@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { DndContext, useDraggable, useDroppable, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { supabase } from '@/lib/supabase'
+import { useRestaurant } from '@/lib/RestaurantContext'
+import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 
 // Draggable Table Component
 function DraggableTable({ table, isSelected, onClick }) {
@@ -119,6 +121,8 @@ function DecorativeElement({ element, isSelected, onClick }) {
 
 // Main Floor Plan Editor
 export default function FloorPlanPage() {
+  const restaurantCtx = useRestaurant()
+  const supabase = useAdminSupabase()
   const [restaurant, setRestaurant] = useState(null)
   const [floors, setFloors] = useState([])
   const [currentFloor, setCurrentFloor] = useState(null)
@@ -175,21 +179,13 @@ export default function FloorPlanPage() {
 
   useEffect(() => {
     fetchData()
-  }, [])
+  }, [restaurantCtx])
 
   const fetchData = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!restaurantCtx?.restaurant) return
 
-      const { data: rest } = await supabase
-        .from('restaurants')
-        .select('*')
-        .eq('owner_id', user.id)
-        .single()
-
-      if (!rest) return
-
+      const rest = restaurantCtx.restaurant
       setRestaurant(rest)
 
       const { data: floorsData } = await supabase

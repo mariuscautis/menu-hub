@@ -2,8 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useRestaurant } from '@/lib/RestaurantContext'
+import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 
 export default function Settings() {
+  const restaurantCtx = useRestaurant()
+  const supabase = useAdminSupabase()
   const [restaurant, setRestaurant] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -37,50 +41,37 @@ export default function Settings() {
   const [savingInvoiceSettings, setSavingInvoiceSettings] = useState(false)
 
   useEffect(() => {
-    const fetchRestaurant = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+    if (!restaurantCtx?.restaurant) return
 
-      // Get restaurant (owners only)
-      const { data: ownedRestaurant } = await supabase
-        .from('restaurants')
-        .select('*')
-        .eq('owner_id', user.id)
-        .maybeSingle()
+    const r = restaurantCtx.restaurant
+    setRestaurant(r)
+    setStaffLoginPassword(r.staff_login_password || '')
+    setLogoPreview(r.logo_url || null)
+    setRestaurantPhone(r.phone || '')
 
-      if (ownedRestaurant) {
-        setRestaurant(ownedRestaurant)
-        setStaffLoginPassword(ownedRestaurant.staff_login_password || '')
-        setLogoPreview(ownedRestaurant.logo_url || null)
-        setRestaurantPhone(ownedRestaurant.phone || '')
-
-        // Initialize invoice settings
-        if (ownedRestaurant.invoice_settings) {
-          setInvoiceSettings({
-            enabled: ownedRestaurant.invoice_settings.enabled || false,
-            tax_system: ownedRestaurant.invoice_settings.tax_system || 'VAT',
-            tax_rates: ownedRestaurant.invoice_settings.tax_rates || [{ name: 'Standard', rate: 20, is_default: true }],
-            vat_number: ownedRestaurant.invoice_settings.vat_number || '',
-            tax_id: ownedRestaurant.invoice_settings.tax_id || '',
-            company_registration: ownedRestaurant.invoice_settings.company_registration || '',
-            invoice_prefix: ownedRestaurant.invoice_settings.invoice_prefix || 'INV',
-            invoice_format: ownedRestaurant.invoice_settings.invoice_format || '{PREFIX}-{YEAR}-{NUMBER}',
-            next_invoice_number: ownedRestaurant.invoice_settings.next_invoice_number || 1,
-            reset_yearly: ownedRestaurant.invoice_settings.reset_yearly !== undefined ? ownedRestaurant.invoice_settings.reset_yearly : true,
-            currency: ownedRestaurant.invoice_settings.currency || 'EUR',
-            locale: ownedRestaurant.invoice_settings.locale || 'en-GB',
-            footer_text: ownedRestaurant.invoice_settings.footer_text || '',
-            require_customer_vat: ownedRestaurant.invoice_settings.require_customer_vat || false,
-            require_sequential: ownedRestaurant.invoice_settings.require_sequential !== undefined ? ownedRestaurant.invoice_settings.require_sequential : true
-          })
-        }
-      }
-
-      setLoading(false)
+    // Initialize invoice settings
+    if (r.invoice_settings) {
+      setInvoiceSettings({
+        enabled: r.invoice_settings.enabled || false,
+        tax_system: r.invoice_settings.tax_system || 'VAT',
+        tax_rates: r.invoice_settings.tax_rates || [{ name: 'Standard', rate: 20, is_default: true }],
+        vat_number: r.invoice_settings.vat_number || '',
+        tax_id: r.invoice_settings.tax_id || '',
+        company_registration: r.invoice_settings.company_registration || '',
+        invoice_prefix: r.invoice_settings.invoice_prefix || 'INV',
+        invoice_format: r.invoice_settings.invoice_format || '{PREFIX}-{YEAR}-{NUMBER}',
+        next_invoice_number: r.invoice_settings.next_invoice_number || 1,
+        reset_yearly: r.invoice_settings.reset_yearly !== undefined ? r.invoice_settings.reset_yearly : true,
+        currency: r.invoice_settings.currency || 'EUR',
+        locale: r.invoice_settings.locale || 'en-GB',
+        footer_text: r.invoice_settings.footer_text || '',
+        require_customer_vat: r.invoice_settings.require_customer_vat || false,
+        require_sequential: r.invoice_settings.require_sequential !== undefined ? r.invoice_settings.require_sequential : true
+      })
     }
 
-    fetchRestaurant()
-  }, [])
+    setLoading(false)
+  }, [restaurantCtx])
 
   const generatePassword = () => {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useRestaurant } from '@/lib/RestaurantContext'
 import DateRangeSelector from '@/components/analytics/DateRangeSelector'
 import Link from 'next/link'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
@@ -10,6 +11,7 @@ import { useCurrency } from '@/lib/CurrencyContext'
 export default function StaffAnalyticsPage() {
   const t = useTranslations('staffAnalytics')
   const { currencySymbol, formatCurrency } = useCurrency()
+  const restaurantCtx = useRestaurant()
   const [loading, setLoading] = useState(true)
   const [restaurant, setRestaurant] = useState(null)
   const [dateRange, setDateRange] = useState({
@@ -22,43 +24,16 @@ export default function StaffAnalyticsPage() {
   const [sortBy, setSortBy] = useState('revenue') // revenue, orders, avgOrder
 
   useEffect(() => {
-    fetchRestaurant()
-  }, [])
+    if (restaurantCtx?.restaurant) {
+      setRestaurant(restaurantCtx.restaurant)
+    }
+  }, [restaurantCtx])
 
   useEffect(() => {
     if (restaurant) {
       fetchStaffAnalytics()
     }
   }, [restaurant, dateRange])
-
-  const fetchRestaurant = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-
-    // Check if owner
-    const { data: ownedRestaurant } = await supabase
-      .from('restaurants')
-      .select('*')
-      .eq('owner_id', user.id)
-      .maybeSingle()
-
-    if (ownedRestaurant) {
-      setRestaurant(ownedRestaurant)
-    } else {
-      // Check if staff
-      const { data: staffRecords } = await supabase
-        .from('staff')
-        .select('*, restaurants(*)')
-        .or(`user_id.eq.${user.id},email.eq.${user.email}`)
-        .eq('status', 'active')
-
-      const staffRecord = staffRecords && staffRecords.length > 0 ? staffRecords[0] : null
-
-      if (staffRecord && staffRecord.restaurants) {
-        setRestaurant(staffRecord.restaurants)
-      }
-    }
-  }
 
   const fetchStaffAnalytics = async () => {
     setLoading(true)

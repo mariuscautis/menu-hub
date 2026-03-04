@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useAdminSupabase } from '@/hooks/useAdminSupabase';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 export default function MyAvailabilityPage() {
+  const supabase = useAdminSupabase();
   const [staff, setStaff] = useState(null);
   const [availability, setAvailability] = useState({});
   const [saving, setSaving] = useState(false);

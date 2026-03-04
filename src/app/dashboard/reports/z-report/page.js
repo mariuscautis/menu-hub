@@ -19,12 +19,14 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useRestaurant } from '@/lib/RestaurantContext';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
 import { useCurrency } from '@/lib/CurrencyContext';
 
 export default function ZReportPage() {
   const t = useTranslations('zReport');
   const { currencySymbol, formatCurrency } = useCurrency();
+  const restaurantCtx = useRestaurant();
   // Restaurant state
   const [restaurant, setRestaurant] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -73,10 +75,13 @@ export default function ZReportPage() {
     new Date().toISOString().split('T')[0]
   );
 
-  // Fetch restaurant on mount
+  // Fetch restaurant from context
   useEffect(() => {
-    fetchRestaurant();
-  }, []);
+    if (restaurantCtx?.restaurant) {
+      setRestaurant(restaurantCtx.restaurant);
+      setLoading(false);
+    }
+  }, [restaurantCtx]);
 
   // Fetch report data when restaurant or date changes
   useEffect(() => {
@@ -84,44 +89,6 @@ export default function ZReportPage() {
       fetchReportData();
     }
   }, [restaurant?.id, selectedDate]);
-
-  /**
-   * Fetches the current user's restaurant
-   */
-  const fetchRestaurant = async () => {
-    try {
-      // Check for staff session (PIN login)
-      const staffSessionData = localStorage.getItem('staff_session');
-      if (staffSessionData) {
-        const staffSession = JSON.parse(staffSessionData);
-        setRestaurant(staffSession.restaurant);
-        setLoading(false);
-        return;
-      }
-
-      // Check for Supabase auth (owner)
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-
-      // Fetch restaurant where user is owner
-      const { data: ownedRestaurant } = await supabase
-        .from('restaurants')
-        .select('*')
-        .eq('owner_id', user.id)
-        .maybeSingle();
-
-      if (ownedRestaurant) {
-        setRestaurant(ownedRestaurant);
-      }
-    } catch (error) {
-      console.error('Error fetching restaurant:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   /**
    * Fetches all data needed for the Z-Report

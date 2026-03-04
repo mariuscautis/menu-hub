@@ -14,12 +14,14 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useRestaurant } from '@/lib/RestaurantContext';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
 import { useCurrency } from '@/lib/CurrencyContext';
 
 export default function TaxReportPage() {
   const t = useTranslations('taxReport');
   const { currencySymbol, formatCurrency } = useCurrency();
+  const restaurantCtx = useRestaurant();
 
   // Restaurant state
   const [restaurant, setRestaurant] = useState(null);
@@ -43,10 +45,13 @@ export default function TaxReportPage() {
     orderCount: 0
   });
 
-  // Fetch restaurant on mount
+  // Set restaurant from context
   useEffect(() => {
-    fetchRestaurant();
-  }, []);
+    if (restaurantCtx?.restaurant) {
+      setRestaurant(restaurantCtx.restaurant);
+      setLoading(false);
+    }
+  }, [restaurantCtx]);
 
   // Auto-fetch report when restaurant or dates change
   useEffect(() => {
@@ -54,38 +59,6 @@ export default function TaxReportPage() {
       fetchReportData();
     }
   }, [restaurant?.id, startDate, endDate]);
-
-  const fetchRestaurant = async () => {
-    try {
-      const staffSessionData = localStorage.getItem('staff_session');
-      if (staffSessionData) {
-        const staffSession = JSON.parse(staffSessionData);
-        setRestaurant(staffSession.restaurant);
-        setLoading(false);
-        return;
-      }
-
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-
-      const { data: ownedRestaurant } = await supabase
-        .from('restaurants')
-        .select('*')
-        .eq('owner_id', user.id)
-        .maybeSingle();
-
-      if (ownedRestaurant) {
-        setRestaurant(ownedRestaurant);
-      }
-    } catch (error) {
-      console.error('Error fetching restaurant:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   /**
    * Fetches tax report data for the selected date range

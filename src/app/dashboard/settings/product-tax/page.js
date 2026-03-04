@@ -2,13 +2,17 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useCurrency } from '@/lib/CurrencyContext'
+import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 
 export default function ProductTaxSettings() {
   const t = useTranslations('productTax')
   const tc = useTranslations('common')
   const { currencySymbol, formatCurrency } = useCurrency()
+  const restaurantCtx = useRestaurant()
+  const supabase = useAdminSupabase()
   const [restaurant, setRestaurant] = useState(null)
   const [taxCategories, setTaxCategories] = useState([])
   const [loading, setLoading] = useState(true)
@@ -19,39 +23,14 @@ export default function ProductTaxSettings() {
   const [menuSalesTaxRate, setMenuSalesTaxRate] = useState('20')
   const [menuSalesTaxName, setMenuSalesTaxName] = useState('VAT')
   useEffect(() => {
-    fetchData()
-  }, [])
-  const fetchData = async () => {
-    try {
-      setLoading(true)
-      // Get current user and restaurant
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        window.location.href = '/auth/login'
-        return
-      }
-      // Get restaurant owned by user
-      const { data: restaurantData } = await supabase
-        .from('restaurants')
-        .select('*')
-        .eq('owner_id', user.id)
-        .maybeSingle()
-      if (!restaurantData) {
-        setMessage({ type: 'error', text: 'Restaurant not found or you do not have permission' })
-        return
-      }
-      setRestaurant(restaurantData)
-      setMenuSalesTaxRate(String(restaurantData.menu_sales_tax_rate || 20))
-      setMenuSalesTaxName(restaurantData.menu_sales_tax_name || 'VAT')
-      // Fetch tax categories
-      await fetchTaxCategories(restaurantData.id)
-    } catch (error) {
-      console.error('Error fetching data:', error)
-      setMessage({ type: 'error', text: 'Failed to load data' })
-    } finally {
-      setLoading(false)
-    }
-  }
+    if (!restaurantCtx?.restaurant) return
+    const r = restaurantCtx.restaurant
+    setRestaurant(r)
+    setMenuSalesTaxRate(String(r.menu_sales_tax_rate || 20))
+    setMenuSalesTaxName(r.menu_sales_tax_name || 'VAT')
+    fetchTaxCategories(r.id)
+    setLoading(false)
+  }, [restaurantCtx])
   const fetchTaxCategories = async (restaurantId) => {
     const { data, error } = await supabase
       .from('product_tax_categories')

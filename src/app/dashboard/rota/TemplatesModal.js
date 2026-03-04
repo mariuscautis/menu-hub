@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
+import { useAdminSupabase } from '@/hooks/useAdminSupabase';
 
 export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemplate }) {
   const t = useTranslations('rota.templatesModal');
+  const supabase = useAdminSupabase();
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedTemplate, setSelectedTemplate] = useState(null);

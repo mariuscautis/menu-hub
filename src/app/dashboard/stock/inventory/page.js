@@ -2,12 +2,16 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useCurrency } from '@/lib/CurrencyContext'
+import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 
 export default function InventoryManagement() {
   const t = useTranslations('inventory')
   const { currencySymbol, formatCurrency } = useCurrency()
+  const restaurantCtx = useRestaurant()
+  const supabase = useAdminSupabase()
   const [products, setProducts] = useState([])
   const [entries, setEntries] = useState([])
   const [restaurant, setRestaurant] = useState(null)
@@ -52,7 +56,7 @@ export default function InventoryManagement() {
 
   useEffect(() => {
     fetchData()
-  }, [])
+  }, [restaurantCtx])
 
   // Click outside to close dropdowns
   useEffect(() => {
@@ -108,56 +112,13 @@ export default function InventoryManagement() {
   }, [restaurant])
 
   const fetchData = async () => {
-    let restaurantData = null
-
-    // Check for staff session (PIN login) first — before any auth call
-    const staffSessionData = localStorage.getItem('staff_session')
-    if (staffSessionData) {
-      try {
-        const staffSession = JSON.parse(staffSessionData)
-        restaurantData = staffSession.restaurant
-        setUserEmail(staffSession.email)
-      } catch (err) {
-        localStorage.removeItem('staff_session')
-      }
-    }
-
-    if (!restaurantData) {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-      setUserEmail(user.email)
-      const { data: ownedRestaurant } = await supabase
-        .from('restaurants')
-        .select('*')
-        .eq('owner_id', user.id)
-        .maybeSingle()
-
-      if (ownedRestaurant) {
-        restaurantData = ownedRestaurant
-      } else {
-        const { data: staffRecords } = await supabase
-          .from('staff')
-          .select('*, restaurants(*)')
-          .or(`user_id.eq.${user.id},email.eq.${user.email}`)
-          .eq('status', 'active')
-
-        const staffRecord = staffRecords && staffRecords.length > 0 ? staffRecords[0] : null
-        if (staffRecord?.restaurants) {
-          restaurantData = staffRecord.restaurants
-        }
-      }
-    }
-
-    if (!restaurantData) {
-      setLoading(false)
-      return
-    }
-
+    if (!restaurantCtx?.restaurant) return
+    const restaurantData = restaurantCtx.restaurant
     setRestaurant(restaurantData)
 
-    // Use API route (bypasses RLS) so staff with PIN login can read inventory data
+    // Use API route (bypasses RLS) for staff PIN sessions and impersonating admins
     const isStaffSession = !!localStorage.getItem('staff_session')
-    if (isStaffSession) {
+    if (isStaffSession || restaurantCtx?.isPlatformAdmin) {
       try {
         const res = await fetch(`/api/stock/inventory?restaurantId=${restaurantData.id}`)
         const json = await res.json()

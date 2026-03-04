@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useCurrency } from '@/lib/CurrencyContext'
 import { supabase, clearOrdersCacheForTable, clearAllOrdersCache, clearTableOrdersLocalCache, wasTablePaidOffline, clearTablePaidOfflineStatus, markTableCleanedOffline } from '@/lib/supabase'
+import { useRestaurant } from '@/lib/RestaurantContext'
+import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import InvoiceClientModal from '@/components/invoices/InvoiceClientModal'
 import { generateInvoicePdfBase64, downloadInvoicePdf } from '@/lib/invoicePdfGenerator'
 import {
@@ -243,6 +245,8 @@ export default function StaffFloorPlanPage() {
   const router = useRouter()
   const t = useTranslations('tables')
   const { currencySymbol, formatCurrency } = useCurrency()
+  const restaurantCtx = useRestaurant()
+  const supabase = useAdminSupabase()
   const [restaurant, setRestaurant] = useState(null)
   const [staff, setStaff] = useState(null)
   const [floors, setFloors] = useState([])
@@ -339,7 +343,7 @@ export default function StaffFloorPlanPage() {
 
   useEffect(() => {
     fetchData()
-  }, [])
+  }, [restaurantCtx])
 
   // Refresh floor data when refresh trigger changes
   useEffect(() => {
@@ -473,48 +477,13 @@ export default function StaffFloorPlanPage() {
 
   const fetchData = async () => {
     try {
-      let restaurantId = null
+      if (!restaurantCtx?.restaurant) return
 
-      // Check for staff session first (PIN-based login)
-      const staffSessionData = localStorage.getItem('staff_session')
-      if (staffSessionData) {
-        const staffSession = JSON.parse(staffSessionData)
-        setRestaurant(staffSession.restaurant)
-        restaurantId = staffSession.restaurant_id
-        setCurrentUser({ email: staffSession.staff_name || 'Staff' })
-        setUserType('staff')
-      } else {
-        // Check for regular auth user (owner/admin staff)
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
-          router.push('/dashboard')
-          return
-        }
+      const restaurantData = restaurantCtx.restaurant
+      const restaurantId = restaurantData.id
 
-        setCurrentUser(user)
-
-        // Get staff member info
-        const { data: staffData } = await supabase
-          .from('staff')
-          .select('*, restaurants(*)')
-          .eq('user_id', user.id)
-          .single()
-
-        if (!staffData) {
-          router.push('/dashboard')
-          return
-        }
-
-        setStaff(staffData)
-        setRestaurant(staffData.restaurants)
-        restaurantId = staffData.restaurant_id
-        setUserType(staffData.role === 'admin' ? 'owner' : 'staff')
-      }
-
-      if (!restaurantId) {
-        router.push('/dashboard')
-        return
-      }
+      setRestaurant(restaurantData)
+      setUserType(restaurantCtx.userType)
 
       // Get floors
       const { data: floorsData } = await supabase

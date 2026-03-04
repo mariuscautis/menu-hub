@@ -17,7 +17,7 @@ export default function AdminLayout({ children }) {
       const { data: { user } } = await supabase.auth.getUser()
       
       if (!user) {
-        router.push('/auth/login')
+        router.push('/superadmin-login-portal')
         return
       }
 
@@ -41,7 +41,7 @@ export default function AdminLayout({ children }) {
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
-    router.push('/')
+    router.push('/superadmin-login-portal')
   }
 
   const navItems = [

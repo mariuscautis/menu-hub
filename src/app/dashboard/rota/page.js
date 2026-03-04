@@ -12,6 +12,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 
 import { supabase } from '@/lib/supabase';
+import { useRestaurant } from '@/lib/RestaurantContext';
 import { useTranslations, useLanguage } from '@/lib/i18n/LanguageContext';
 
 import ShiftModal from './ShiftModal';
@@ -44,6 +45,7 @@ export default function RotaPage() {
     agenda: t('calendar.agenda')
   }), [t]);
 
+  const restaurantCtx = useRestaurant();
   const [restaurant, setRestaurant] = useState(null);
   const [shifts, setShifts] = useState([]);
   const [staff, setStaff] = useState([]);
@@ -70,37 +72,11 @@ export default function RotaPage() {
   /* -------------------- Fetch Restaurant -------------------- */
 
   useEffect(() => {
-    fetchRestaurantData();
-  }, []);
-
-  const fetchRestaurantData = async () => {
-    let restaurantData = null;
-
-    // Check for staff session (PIN login) first — before any auth call
-    const staffSession = localStorage.getItem('staff_session');
-    if (staffSession) {
-      try {
-        restaurantData = JSON.parse(staffSession).restaurant;
-      } catch {
-        localStorage.removeItem('staff_session');
-      }
+    if (restaurantCtx?.restaurant) {
+      setRestaurant(restaurantCtx.restaurant);
+      setLoading(false);
     }
-
-    if (!restaurantData) {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return setLoading(false);
-      const { data } = await supabase
-        .from('restaurants')
-        .select('*')
-        .eq('owner_id', user.id)
-        .single();
-
-      restaurantData = data;
-    }
-
-    setRestaurant(restaurantData);
-    setLoading(false);
-  };
+  }, [restaurantCtx]);
 
   /* -------------------- Fetch Data -------------------- */
 

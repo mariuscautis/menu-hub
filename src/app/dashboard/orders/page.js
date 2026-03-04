@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useRestaurant } from '@/lib/RestaurantContext'
 import InvoiceClientModal from '@/components/invoices/InvoiceClientModal'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { generateInvoicePdfBase64, downloadInvoicePdf } from '@/lib/invoicePdfGenerator'
@@ -9,6 +10,7 @@ import { getPendingOrders, getOrderItems as getOfflineOrderItems } from '@/lib/o
 import { onSyncEvent, initAutoSync } from '@/lib/syncManager'
 import { useOrderSounds } from '@/hooks/useOrderSounds'
 import { useCurrency } from '@/lib/CurrencyContext'
+import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 
 export default function Orders() {
   const t = useTranslations('orders')
@@ -62,6 +64,8 @@ export default function Orders() {
   const isInitialLoadRef = useRef(true)
   const menuItemsRef = useRef([])
   const playNewOrderSoundRef = useRef(playNewOrderSound)
+  const restaurantCtx = useRestaurant()
+  const supabase = useAdminSupabase()
 
   // Keep sound function ref updated
   useEffect(() => {
@@ -69,74 +73,19 @@ export default function Orders() {
   }, [playNewOrderSound])
 
   useEffect(() => {
+    if (!restaurantCtx?.restaurant) return
+
     const fetchData = async () => {
-      let restaurantData = null
-      let userTypeData = null
-      let departmentData = null
+      const restaurantData = restaurantCtx.restaurant
+      const userTypeData = restaurantCtx.userType
+      const departmentData = restaurantCtx.staffDepartment
 
-      // Check for staff session first (PIN-based login)
-      const staffSessionData = localStorage.getItem('staff_session')
-      if (staffSessionData) {
-        try {
-          const staffSession = JSON.parse(staffSessionData)
-          restaurantData = staffSession.restaurant
-          userTypeData = staffSession.role === 'admin' ? 'owner' : 'staff'
-          departmentData = staffSession.department || 'universal'
-          setUserType(userTypeData)
-          setStaffDepartment(departmentData)
-        } catch (err) {
-          console.error('Error parsing staff session:', err)
-          localStorage.removeItem('staff_session')
-        }
-      }
-
-      // If not staff session, check for owner auth session
-      if (!restaurantData) {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
-          setLoading(false)
-          return
-        }
-
-        // Check if owner
-        const { data: ownedRestaurant } = await supabase
-          .from('restaurants')
-          .select('*')
-          .eq('owner_id', user.id)
-          .maybeSingle()
-
-        if (ownedRestaurant) {
-          restaurantData = ownedRestaurant
-          userTypeData = 'owner'
-          departmentData = null // Owners see all
-          setUserType(userTypeData)
-          setStaffDepartment(departmentData)
-        } else {
-          // Check if staff by user_id (preferred) or email (fallback)
-          const { data: staffRecords } = await supabase
-            .from('staff')
-            .select('*, restaurants(*)')
-            .or(`user_id.eq.${user.id},email.eq.${user.email}`)
-            .eq('status', 'active')
-
-          const staffRecord = staffRecords && staffRecords.length > 0 ? staffRecords[0] : null
-
-          if (staffRecord && staffRecord.restaurants) {
-            restaurantData = staffRecord.restaurants
-            userTypeData = 'staff'
-            departmentData = staffRecord.department || 'universal'
-            setUserType(userTypeData)
-            setStaffDepartment(departmentData)
-          }
-        }
-      }
-
-      if (!restaurantData) {
-        setLoading(false)
-        return
-      }
-
+      setUserType(userTypeData)
+      setStaffDepartment(departmentData)
       setRestaurant(restaurantData)
+      if (restaurantCtx.departmentPermissions) {
+        setDepartmentPermissions(restaurantCtx.departmentPermissions)
+      }
 
       // Fetch menu items to get departments
       const { data: items } = await supabase
@@ -146,18 +95,6 @@ export default function Orders() {
 
       setMenuItems(items || [])
       menuItemsRef.current = items || []
-
-      // Fetch department permissions for regular staff
-      if (userTypeData === 'staff' && departmentData) {
-        const { data: deptPerms } = await supabase
-          .from('department_permissions')
-          .select('permissions')
-          .eq('restaurant_id', restaurantData.id)
-          .eq('department_name', departmentData)
-          .single()
-
-        setDepartmentPermissions(deptPerms?.permissions || [])
-      }
 
       await fetchOrders(restaurantData.id)
       setLoading(false)
@@ -170,7 +107,7 @@ export default function Orders() {
 
     fetchData()
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [restaurantCtx])
 
   // Real-time subscription for orders - separate useEffect for proper cleanup
   useEffect(() => {

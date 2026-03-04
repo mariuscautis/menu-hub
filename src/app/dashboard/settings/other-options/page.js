@@ -2,9 +2,16 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useRestaurant } from '@/lib/RestaurantContext'
 import { useOrderSounds, soundOptions } from '@/hooks/useOrderSounds'
+import { useTranslations } from '@/lib/i18n/LanguageContext'
+import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 
 export default function OtherOptionsSettings() {
+  const t = useTranslations('otherOptions')
+  const tc = useTranslations('common')
+  const restaurantCtx = useRestaurant()
+  const supabase = useAdminSupabase()
   const [restaurant, setRestaurant] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -21,36 +28,22 @@ export default function OtherOptionsSettings() {
   const { testSound, resumeAudio } = useOrderSounds(restaurant?.id)
 
   useEffect(() => {
-    const fetchRestaurant = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+    if (!restaurantCtx?.restaurant) return
+    const r = restaurantCtx.restaurant
+    setRestaurant(r)
 
-      // Get restaurant (owners only)
-      const { data: ownedRestaurant } = await supabase
-        .from('restaurants')
-        .select('*')
-        .eq('owner_id', user.id)
-        .maybeSingle()
-
-      if (ownedRestaurant) {
-        setRestaurant(ownedRestaurant)
-
-        // Initialize sound settings
-        if (ownedRestaurant.sound_settings) {
-          setSoundEnabled(ownedRestaurant.sound_settings.enabled || false)
-          setKitchenSound(ownedRestaurant.sound_settings.kitchenSound || 'bell')
-          setBarSound(ownedRestaurant.sound_settings.barSound || 'chime')
-          setTakeawaySound(ownedRestaurant.sound_settings.takeawaySound || 'ding')
-          setReservationSound(ownedRestaurant.sound_settings.reservationSound || 'doorbell')
-          setVolume(ownedRestaurant.sound_settings.volume || 0.7)
-        }
-      }
-
-      setLoading(false)
+    // Initialize sound settings
+    if (r.sound_settings) {
+      setSoundEnabled(r.sound_settings.enabled || false)
+      setKitchenSound(r.sound_settings.kitchenSound || 'bell')
+      setBarSound(r.sound_settings.barSound || 'chime')
+      setTakeawaySound(r.sound_settings.takeawaySound || 'ding')
+      setReservationSound(r.sound_settings.reservationSound || 'doorbell')
+      setVolume(r.sound_settings.volume || 0.7)
     }
 
-    fetchRestaurant()
-  }, [])
+    setLoading(false)
+  }, [restaurantCtx])
 
   const handleSaveSoundSettings = async () => {
     if (!restaurant) return
@@ -102,7 +95,7 @@ export default function OtherOptionsSettings() {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="text-slate-500">Loading...</div>
+        <div className="text-slate-500">{tc('loading') || 'Loading...'}</div>
       </div>
     )
   }
@@ -111,7 +104,7 @@ export default function OtherOptionsSettings() {
     return (
       <div className="p-8">
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-600">
-          Only restaurant owners can access settings.
+          {t('accessDenied') || 'Only restaurant owners can access settings.'}
         </div>
       </div>
     )
@@ -120,8 +113,8 @@ export default function OtherOptionsSettings() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800">Other Options</h1>
-        <p className="text-slate-500">Configure additional restaurant features and notifications</p>
+        <h1 className="text-2xl font-bold text-slate-800">{t('title') || 'Other Options'}</h1>
+        <p className="text-slate-500">{t('subtitle') || 'Configure additional restaurant features and notifications'}</p>
       </div>
 
       {message && (
@@ -143,10 +136,10 @@ export default function OtherOptionsSettings() {
                 <svg className="w-6 h-6 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
                 </svg>
-                Order Sound Notifications
+                {t('orderSoundNotifications') || 'Order Sound Notifications'}
               </h2>
               <p className="text-sm text-slate-500">
-                Play distinct sounds when new orders arrive for kitchen, bar, or takeaway.
+                {t('orderSoundNotificationsDesc') || 'Play distinct sounds when new orders arrive for kitchen, bar, or takeaway.'}
               </p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
@@ -158,7 +151,7 @@ export default function OtherOptionsSettings() {
               />
               <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#6262bd]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#6262bd]"></div>
               <span className="ml-3 text-sm font-medium text-slate-700">
-                {soundEnabled ? 'Enabled' : 'Disabled'}
+                {soundEnabled ? (t('enabled') || 'Enabled') : (t('disabled') || 'Disabled')}
               </span>
             </label>
           </div>
@@ -169,7 +162,7 @@ export default function OtherOptionsSettings() {
             {/* Volume Control */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-3">
-                Volume
+                {t('volume') || 'Volume'}
               </label>
               <div className="flex items-center gap-4">
                 <svg className="w-5 h-5 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
@@ -197,8 +190,8 @@ export default function OtherOptionsSettings() {
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">🍳</span>
                   <div>
-                    <h3 className="font-semibold text-green-800">Kitchen Orders</h3>
-                    <p className="text-xs text-green-600">Sound for food/kitchen items</p>
+                    <h3 className="font-semibold text-green-800">{t('kitchenOrders') || 'Kitchen Orders'}</h3>
+                    <p className="text-xs text-green-600">{t('kitchenOrdersDesc') || 'Sound for food/kitchen items'}</p>
                   </div>
                 </div>
                 <button
@@ -209,7 +202,7 @@ export default function OtherOptionsSettings() {
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z"/>
                   </svg>
-                  Test
+                  {t('test') || 'Test'}
                 </button>
               </div>
               <select
@@ -229,8 +222,8 @@ export default function OtherOptionsSettings() {
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">🍸</span>
                   <div>
-                    <h3 className="font-semibold text-orange-800">Bar Orders</h3>
-                    <p className="text-xs text-orange-600">Sound for drink/bar items</p>
+                    <h3 className="font-semibold text-orange-800">{t('barOrders') || 'Bar Orders'}</h3>
+                    <p className="text-xs text-orange-600">{t('barOrdersDesc') || 'Sound for drink/bar items'}</p>
                   </div>
                 </div>
                 <button
@@ -241,7 +234,7 @@ export default function OtherOptionsSettings() {
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z"/>
                   </svg>
-                  Test
+                  {t('test') || 'Test'}
                 </button>
               </div>
               <select
@@ -261,8 +254,8 @@ export default function OtherOptionsSettings() {
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">🥡</span>
                   <div>
-                    <h3 className="font-semibold text-cyan-800">Takeaway Orders</h3>
-                    <p className="text-xs text-cyan-600">Sound for takeaway/pickup orders</p>
+                    <h3 className="font-semibold text-cyan-800">{t('takeawayOrders') || 'Takeaway Orders'}</h3>
+                    <p className="text-xs text-cyan-600">{t('takeawayOrdersDesc') || 'Sound for takeaway/pickup orders'}</p>
                   </div>
                 </div>
                 <button
@@ -273,7 +266,7 @@ export default function OtherOptionsSettings() {
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z"/>
                   </svg>
-                  Test
+                  {t('test') || 'Test'}
                 </button>
               </div>
               <select
@@ -293,8 +286,8 @@ export default function OtherOptionsSettings() {
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">📅</span>
                   <div>
-                    <h3 className="font-semibold text-purple-800">Reservations</h3>
-                    <p className="text-xs text-purple-600">Sound for new reservations</p>
+                    <h3 className="font-semibold text-purple-800">{t('reservationOrders') || 'Reservations'}</h3>
+                    <p className="text-xs text-purple-600">{t('reservationOrdersDesc') || 'Sound for new reservations'}</p>
                   </div>
                 </div>
                 <button
@@ -305,7 +298,7 @@ export default function OtherOptionsSettings() {
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z"/>
                   </svg>
-                  Test
+                  {t('test') || 'Test'}
                 </button>
               </div>
               <select
@@ -326,14 +319,14 @@ export default function OtherOptionsSettings() {
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                 </svg>
                 <div className="text-sm text-blue-800">
-                  <p className="font-medium mb-1">How it works</p>
+                  <p className="font-medium mb-1">{t('howItWorks') || 'How it works'}</p>
                   <ul className="text-xs text-blue-700 space-y-1 list-disc list-inside">
-                    <li>Sounds play when new orders arrive on the Orders page</li>
-                    <li>Reservation sounds play on the Reservations page</li>
-                    <li>Different sounds help staff identify event types quickly</li>
-                    <li>Set any sound to &quot;Silent&quot; to disable it individually</li>
-                    <li>Kitchen, bar, takeaway, and reservations can each have unique sounds</li>
-                    <li>Make sure your device volume is turned up</li>
+                    <li>{t('soundInfo.info1') || 'Sounds play when new orders arrive on the Orders page'}</li>
+                    <li>{t('soundInfo.info2') || 'Reservation sounds play on the Reservations page'}</li>
+                    <li>{t('soundInfo.info3') || 'Different sounds help staff identify event types quickly'}</li>
+                    <li>{t('soundInfo.info4') || 'Set any sound to "Silent" to disable it individually'}</li>
+                    <li>{t('soundInfo.info5') || 'Kitchen, bar, takeaway, and reservations can each have unique sounds'}</li>
+                    <li>{t('soundInfo.info6') || 'Make sure your device volume is turned up'}</li>
                   </ul>
                 </div>
               </div>
@@ -346,7 +339,7 @@ export default function OtherOptionsSettings() {
                 disabled={saving}
                 className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
-                {saving ? 'Saving...' : 'Save Sound Settings'}
+                {saving ? (tc('saving') || 'Saving...') : (t('saveSoundSettings') || 'Save Sound Settings')}
               </button>
             </div>
           </div>
@@ -358,8 +351,8 @@ export default function OtherOptionsSettings() {
               <svg className="w-12 h-12 mx-auto mb-3 opacity-50" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
               </svg>
-              <p>Sound notifications are disabled</p>
-              <p className="text-sm mt-1">Toggle the switch above to enable and configure alerts</p>
+              <p>{t('soundDisabledMessage') || 'Sound notifications are disabled'}</p>
+              <p className="text-sm mt-1">{t('soundDisabledHint') || 'Toggle the switch above to enable and configure alerts'}</p>
             </div>
             {/* Save Button - always show to allow saving disabled state */}
             <div className="pt-4">
@@ -368,7 +361,7 @@ export default function OtherOptionsSettings() {
                 disabled={saving}
                 className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
-                {saving ? 'Saving...' : 'Save Sound Settings'}
+                {saving ? (tc('saving') || 'Saving...') : (t('saveSoundSettings') || 'Save Sound Settings')}
               </button>
             </div>
           </div>
@@ -380,8 +373,8 @@ export default function OtherOptionsSettings() {
         <svg className="w-12 h-12 mx-auto mb-3 text-slate-300" fill="currentColor" viewBox="0 0 24 24">
           <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
         </svg>
-        <p className="text-slate-400 font-medium">More options coming soon</p>
-        <p className="text-sm text-slate-300 mt-1">Additional features will be added here</p>
+        <p className="text-slate-400 font-medium">{t('moreOptionsSoon') || 'More options coming soon'}</p>
+        <p className="text-sm text-slate-300 mt-1">{t('moreOptionsHint') || 'Additional features will be added here'}</p>
       </div>
     </div>
   )

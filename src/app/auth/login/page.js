@@ -22,7 +22,12 @@ export default function Login() {
       const { data: { user } } = await supabase.auth.getUser()
 
       if (user) {
-        await redirectUser(user.id)
+        try {
+          await redirectUser(user.id)
+        } catch {
+          // Admin tried to access normal login while already signed in — sign out silently
+          setCheckingSession(false)
+        }
       } else {
         setCheckingSession(false)
       }
@@ -34,6 +39,8 @@ export default function Login() {
     const errorParam = urlParams.get('error')
     if (errorParam === 'deactivated') {
       setError('This account has been deactivated. Please contact the restaurant owner.')
+    } else if (errorParam === 'use-admin-portal') {
+      setError('Please login via the admin portal.')
     }
   }, [])
 
@@ -69,8 +76,9 @@ export default function Login() {
 
     const isActiveStaff = staffMember && staffMember.status === 'active'
 
-    if (isAdmin && !hasRestaurant) {
-      router.push('/admin')
+    if (isAdmin) {
+      await supabase.auth.signOut()
+      throw new Error('Please login via the admin portal.')
     } else if (hasRestaurant) {
       router.push('/dashboard')
     } else if (isActiveStaff) {

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useRestaurant } from '@/lib/RestaurantContext';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
 import ClockInOut from './ClockInOut';
 import WorkHistory from './WorkHistory';
@@ -9,6 +10,7 @@ import TimeOffRequestModal from './TimeOffRequestModal';
 import RequestHistory from './RequestHistory';
 
 export default function MyRotaPage() {
+  const restaurantCtx = useRestaurant();
   const [restaurant, setRestaurant] = useState(null);
   const [staff, setStaff] = useState(null);
   const [shifts, setShifts] = useState([]);
@@ -45,8 +47,11 @@ export default function MyRotaPage() {
         console.error('Error parsing staff session:', err);
         localStorage.removeItem('staff_session');
       }
+    } else if (restaurantCtx?.restaurant) {
+      // Fallback to context for owner/admin users
+      setRestaurant(restaurantCtx.restaurant);
     }
-  }, []);
+  }, [restaurantCtx]);
 
 
   const fetchShifts = useCallback(async () => {

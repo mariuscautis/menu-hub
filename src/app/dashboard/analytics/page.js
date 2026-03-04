@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import RevenueChart from '@/components/analytics/RevenueChart'
 import PeakHoursChart from '@/components/analytics/PeakHoursChart'
@@ -13,6 +14,7 @@ import ExportButton from '@/components/analytics/ExportButton'
 
 export default function AnalyticsPage() {
   const t = useTranslations('analytics')
+  const restaurantCtx = useRestaurant()
   const [loading, setLoading] = useState(true)
   const [restaurant, setRestaurant] = useState(null)
   const [dateRange, setDateRange] = useState({
@@ -31,10 +33,13 @@ export default function AnalyticsPage() {
   const [departmentBreakdown, setDepartmentBreakdown] = useState([])
   const [productProfitability, setProductProfitability] = useState([])
 
-  // Fetch restaurant on mount
+  // Fetch restaurant from context
   useEffect(() => {
-    fetchRestaurant()
-  }, [])
+    if (restaurantCtx?.restaurant) {
+      setRestaurant(restaurantCtx.restaurant)
+      setLoading(false)
+    }
+  }, [restaurantCtx])
 
   // Fetch analytics when restaurant, dateRange, or groupBy changes
   useEffect(() => {
@@ -42,44 +47,6 @@ export default function AnalyticsPage() {
       fetchAllAnalytics()
     }
   }, [restaurant?.id, dateRange.startDate, dateRange.endDate, groupBy])
-
-  const fetchRestaurant = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      console.error('No user logged in')
-      setLoading(false)
-      return
-    }
-
-    try {
-      // Check if owner
-      const { data: ownedRestaurant } = await supabase
-        .from('restaurants')
-        .select('*')
-        .eq('owner_id', user.id)
-        .maybeSingle()
-
-      if (ownedRestaurant) {
-        setRestaurant(ownedRestaurant)
-      } else {
-        // Check if staff
-        const { data: staffRecords } = await supabase
-          .from('staff')
-          .select('*, restaurants(*)')
-          .or(`user_id.eq.${user.id},email.eq.${user.email}`)
-          .eq('status', 'active')
-
-        const staffRecord = staffRecords && staffRecords.length > 0 ? staffRecords[0] : null
-        if (staffRecord && staffRecord.restaurants) {
-          setRestaurant(staffRecord.restaurants)
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching restaurant:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const fetchAllAnalytics = async () => {
     if (!restaurant?.id) return

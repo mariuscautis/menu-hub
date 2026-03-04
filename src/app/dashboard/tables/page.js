@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { supabase, clearOrdersCacheForTable, clearTableOrdersLocalCache, clearAllOrdersCache, wasTablePaidOffline, clearTablePaidOfflineStatus } from '@/lib/supabase'
+import { useRestaurant } from '@/lib/RestaurantContext'
+import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import QRCode from 'qrcode'
 import InvoiceClientModal from '@/components/invoices/InvoiceClientModal'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
@@ -104,9 +106,12 @@ export default function Tables() {
     setTimeout(() => setNotification(null), 4000) // Auto-dismiss after 4 seconds
   }
 
+  const restaurantCtx = useRestaurant()
+  const supabase = useAdminSupabase()
+
   useEffect(() => {
     fetchData()
-  }, [])
+  }, [restaurantCtx])
 
   // Debug: Log when orderItems changes to detect duplicates
   useEffect(() => {
@@ -320,81 +325,12 @@ export default function Tables() {
   }, [restaurant])
 
   const fetchData = async () => {
-    let restaurantData = null
-    let userTypeData = null
-    let user = null
+    if (!restaurantCtx?.restaurant) return
 
-    // Check for staff session first (PIN-based login)
-    const staffSessionData = localStorage.getItem('staff_session')
-    if (staffSessionData) {
-      try {
-        const staffSession = JSON.parse(staffSessionData)
-        console.log('🔍 Staff session found:', {
-          role: staffSession.role,
-          email: staffSession.email
-        })
-        restaurantData = staffSession.restaurant
-        userTypeData = staffSession.role === 'admin' ? 'owner' : 'staff'
-        console.log('🔍 Setting userType to:', userTypeData, '(based on role:', staffSession.role, ')')
-        setUserType(userTypeData)
-        setStaffDepartment(staffSession.department || 'universal')
-        // Create a pseudo user object for compatibility
-        user = { id: staffSession.id, email: staffSession.email }
-        setCurrentUser(user)
-      } catch (err) {
-        console.error('Error parsing staff session:', err)
-        localStorage.removeItem('staff_session')
-      }
-    }
-
-    // If not staff session, check for owner auth session
-    if (!restaurantData) {
-      const { data: { user: authUser } } = await supabase.auth.getUser()
-      if (!authUser) {
-        setLoading(false)
-        return
-      }
-
-      user = authUser
-      setCurrentUser(user)
-
-      // Check if owner
-      const { data: ownedRestaurant } = await supabase
-        .from('restaurants')
-        .select('*')
-        .eq('owner_id', user.id)
-        .maybeSingle()
-
-      if (ownedRestaurant) {
-        restaurantData = ownedRestaurant
-        userTypeData = 'owner'
-        setUserType(userTypeData)
-        setStaffDepartment(null) // Owners see all
-      } else {
-        // Check if staff by user_id (preferred) or email (fallback)
-        const { data: staffRecords } = await supabase
-          .from('staff')
-          .select('*, restaurants(*)')
-          .or(`user_id.eq.${user.id},email.eq.${user.email}`)
-          .eq('status', 'active')
-
-        const staffRecord = staffRecords && staffRecords.length > 0 ? staffRecords[0] : null
-
-        if (staffRecord && staffRecord.restaurants) {
-          restaurantData = staffRecord.restaurants
-          userTypeData = 'staff'
-          setUserType(userTypeData)
-          setStaffDepartment(staffRecord.department || 'universal')
-        }
-      }
-    }
-
-    if (!restaurantData) {
-      setLoading(false)
-      return
-    }
-
+    const restaurantData = restaurantCtx.restaurant
     setRestaurant(restaurantData)
+    setUserType(restaurantCtx.userType)
+    setStaffDepartment(restaurantCtx.staffDepartment)
 
     const { data: tablesData } = await supabase
       .from('tables')

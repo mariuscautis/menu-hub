@@ -2,10 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 
 export default function MenuCategories() {
   const t = useTranslations('menuCategories')
+  const restaurantCtx = useRestaurant()
+  const supabase = useAdminSupabase()
   const [categories, setCategories] = useState([])
   const [restaurant, setRestaurant] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -19,54 +23,11 @@ export default function MenuCategories() {
 
   useEffect(() => {
     fetchData()
-  }, [])
+  }, [restaurantCtx])
 
   const fetchData = async () => {
-    let restaurantData = null
-
-    // Check for staff session (PIN login) first — before any auth call
-    const staffSessionData = localStorage.getItem('staff_session')
-    if (staffSessionData) {
-      try {
-        restaurantData = JSON.parse(staffSessionData).restaurant
-      } catch {
-        localStorage.removeItem('staff_session')
-      }
-    }
-
-    if (!restaurantData) {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-      // Check if owner
-      const { data: ownedRestaurant } = await supabase
-        .from('restaurants')
-        .select('*')
-        .eq('owner_id', user.id)
-        .maybeSingle()
-
-      if (ownedRestaurant) {
-        restaurantData = ownedRestaurant
-      } else {
-        // Check if staff
-        const { data: staffRecords } = await supabase
-          .from('staff')
-          .select('*, restaurants(*)')
-          .or(`user_id.eq.${user.id},email.eq.${user.email}`)
-          .eq('status', 'active')
-
-        const staffRecord = staffRecords && staffRecords.length > 0 ? staffRecords[0] : null
-
-        if (staffRecord && staffRecord.restaurants) {
-          restaurantData = staffRecord.restaurants
-        }
-      }
-    }
-
-    if (!restaurantData) {
-      setLoading(false)
-      return
-    }
-
+    if (!restaurantCtx?.restaurant) return
+    const restaurantData = restaurantCtx.restaurant
     setRestaurant(restaurantData)
 
     // Fetch categories with menu item counts

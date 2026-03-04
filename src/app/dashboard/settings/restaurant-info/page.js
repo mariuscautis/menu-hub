@@ -2,10 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 
 export default function RestaurantInfo() {
   const t = useTranslations('restaurantInfo')
+  const restaurantCtx = useRestaurant()
+  const supabase = useAdminSupabase()
   const [restaurant, setRestaurant] = useState(null)
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState(null)
@@ -19,26 +23,15 @@ export default function RestaurantInfo() {
   const [restaurantAddress, setRestaurantAddress] = useState('')
   const [savingAddress, setSavingAddress] = useState(false)
   useEffect(() => {
-    const fetchRestaurant = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-      // Get restaurant (owners only)
-      const { data: ownedRestaurant } = await supabase
-        .from('restaurants')
-        .select('*')
-        .eq('owner_id', user.id)
-        .maybeSingle()
-      if (ownedRestaurant) {
-        setRestaurant(ownedRestaurant)
-        setLogoPreview(ownedRestaurant.logo_url || null)
-        setRestaurantPhone(ownedRestaurant.phone || '')
-        setEmailLanguage(ownedRestaurant.email_language || 'en')
-        setRestaurantAddress(ownedRestaurant.address || '')
-      }
-      setLoading(false)
-    }
-    fetchRestaurant()
-  }, [])
+    if (!restaurantCtx?.restaurant) return
+    const r = restaurantCtx.restaurant
+    setRestaurant(r)
+    setLogoPreview(r.logo_url || null)
+    setRestaurantPhone(r.phone || '')
+    setEmailLanguage(r.email_language || 'en')
+    setRestaurantAddress(r.address || '')
+    setLoading(false)
+  }, [restaurantCtx])
   const handleLogoChange = (e) => {
     const file = e.target.files?.[0]
     if (file) {

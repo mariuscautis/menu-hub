@@ -13,6 +13,7 @@ import { CurrencyProvider } from '@/lib/CurrencyContext'
 import LanguageSelector from '@/components/LanguageSelector'
 import { useSessionValidator } from '@/hooks/useSessionValidator'
 import PlatformLogo from '@/components/PlatformLogo'
+import { RestaurantProvider } from '@/lib/RestaurantContext'
 
 export default function DashboardLayout({ children }) {
   const pathname = usePathname()
@@ -20,6 +21,8 @@ export default function DashboardLayout({ children }) {
   const [restaurant, setRestaurant] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isPlatformAdmin, setIsPlatformAdmin] = useState(false)
+  const [isImpersonating, setIsImpersonating] = useState(false)
+  const [impersonatedRestaurantName, setImpersonatedRestaurantName] = useState('')
   const [userType, setUserType] = useState(null)
   const [userEmail, setUserEmail] = useState('')
   const [staffDepartment, setStaffDepartment] = useState(null)
@@ -204,6 +207,32 @@ export default function DashboardLayout({ children }) {
       const isPlatAdmin = admin && admin.length > 0
       setIsPlatformAdmin(isPlatAdmin)
       debugText += `Platform Admin: ${isPlatAdmin}\n\n`
+
+      // Check for impersonation session (platform admin only)
+      if (isPlatAdmin) {
+        try {
+          const impersonationData = sessionStorage.getItem('impersonation_session')
+          if (impersonationData) {
+            const { restaurantId, restaurantName } = JSON.parse(impersonationData)
+            const { data: targetRestaurant } = await supabase
+              .from('restaurants')
+              .select('*')
+              .eq('id', restaurantId)
+              .single()
+            if (targetRestaurant) {
+              setRestaurant(targetRestaurant)
+              setUserType('owner')
+              setIsImpersonating(true)
+              setImpersonatedRestaurantName(restaurantName)
+              setLoading(false)
+              return
+            }
+          }
+        } catch {
+          // Malformed impersonation data — ignore and continue normal flow
+          sessionStorage.removeItem('impersonation_session')
+        }
+      }
 
       // Check if restaurant owner
       const { data: ownedRestaurant, error: ownedError } = await supabase
@@ -468,6 +497,11 @@ export default function DashboardLayout({ children }) {
       // This will be called when component unmounts (e.g., on logout)
     }
   }, [])
+
+  const handleReturnToAdmin = () => {
+    sessionStorage.removeItem('impersonation_session')
+    router.push('/admin/restaurants')
+  }
 
   const handleLogout = async () => {
     // Check if staff session exists to redirect to restaurant-specific login
@@ -1095,6 +1129,15 @@ export default function DashboardLayout({ children }) {
                 <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
               </svg>
             )
+          },
+          {
+            href: '/dashboard/settings/data-migration',
+            label: 'Data Migration',
+            icon: (
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 3L5 6.99h3V14h2V6.99h3L9 3zm7 14.01V10h-2v7.01h-3L15 21l4-3.99h-3z"/>
+              </svg>
+            )
           }
         ]
       })
@@ -1170,7 +1213,20 @@ export default function DashboardLayout({ children }) {
   return (
     <CurrencyProvider currency={restaurantCurrency}>
     <LanguageProvider>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex relative">
+      <div className={`min-h-screen bg-slate-50 dark:bg-slate-950 flex relative${isImpersonating ? ' pt-10' : ''}`}>
+
+      {/* Impersonation banner */}
+      {isImpersonating && (
+        <div className="fixed top-0 left-0 right-0 z-[9999] bg-amber-400 text-amber-900 flex items-center justify-between px-6 py-2 text-sm font-semibold shadow-md">
+          <span>⚠ Impersonating: <strong>{impersonatedRestaurantName}</strong> · Viewing as Owner</span>
+          <button
+            onClick={handleReturnToAdmin}
+            className="bg-amber-900 text-amber-100 px-4 py-1 rounded-lg text-xs font-semibold hover:bg-amber-800 transition-colors"
+          >
+            Return to Admin
+          </button>
+        </div>
+      )}
 
       {/* Overlay when sidebar is open (for closing by clicking outside) */}
       {sidebarOpen && !fullWidthMode && (
@@ -1459,7 +1515,9 @@ export default function DashboardLayout({ children }) {
       `}>
         {/* Full-width wrapper for the content */}
         <div className={`${fullWidthMode ? 'h-[calc(100vh-4rem)] overflow-auto' : ''}`}>
-          {children}
+          <RestaurantProvider value={{ restaurant, userType, staffDepartment, departmentPermissions, isPlatformAdmin }}>
+            {children}
+          </RestaurantProvider>
         </div>
       </main>
 
