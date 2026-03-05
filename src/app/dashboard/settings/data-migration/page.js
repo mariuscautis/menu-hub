@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { useRestaurant } from '@/lib/RestaurantContext'
+import { useTranslations } from '@/lib/i18n/LanguageContext'
 
 // --- CSV helpers ---
 
@@ -86,6 +87,7 @@ function validateStockRows(rows) {
 // --- Main component ---
 
 export default function DataMigration() {
+  const t = useTranslations('dataMigration')
   const restaurantCtx = useRestaurant()
   const restaurant = restaurantCtx?.restaurant
 
@@ -104,7 +106,7 @@ export default function DataMigration() {
     return (
       <div className="p-8">
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-600">
-          Only restaurant owners can access data migration.
+          {t('accessDenied')}
         </div>
       </div>
     )
@@ -115,7 +117,7 @@ export default function DataMigration() {
 
   function handleFile(file) {
     if (!file || !file.name.endsWith('.csv')) {
-      alert('Please upload a CSV file.')
+      alert(t('csvOnly'))
       return
     }
     setFileName(file.name)
@@ -149,7 +151,7 @@ export default function DataMigration() {
       const res = await fetch(endpoint)
       if (!res.ok) {
         const data = await res.json()
-        alert(data.error || 'Export failed')
+        alert(data.error || t('exportFailed'))
         return
       }
       const blob = await res.blob()
@@ -160,7 +162,7 @@ export default function DataMigration() {
       a.click()
       URL.revokeObjectURL(url)
     } catch (err) {
-      alert('Export failed. Please try again.')
+      alert(t('exportFailedRetry'))
     } finally {
       setExportingType(null)
     }
@@ -185,13 +187,13 @@ export default function DataMigration() {
       const data = await res.json()
 
       if (!res.ok) {
-        setResults({ success: false, error: data.error || 'Import failed' })
+        setResults({ success: false, error: data.error || t('importFailed') })
       } else {
         setResults({ success: true, ...data })
       }
       setStep(3)
     } catch (err) {
-      setResults({ success: false, error: 'Network error, please try again.' })
+      setResults({ success: false, error: t('networkError') })
       setStep(3)
     } finally {
       setImporting(false)
@@ -211,16 +213,16 @@ export default function DataMigration() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800">Data Migration</h1>
-        <p className="text-slate-500">Import your existing menu items or stock products from a CSV file.</p>
+        <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
+        <p className="text-slate-500">{t('subtitle')}</p>
       </div>
 
       {/* Step 1 — Choose what to import */}
       {step === 1 && (
         <div className="space-y-6">
           <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-            <h2 className="text-lg font-bold text-slate-700 mb-1">What would you like to import?</h2>
-            <p className="text-sm text-slate-500 mb-6">Choose a data type to get started. You can run this tool multiple times.</p>
+            <h2 className="text-lg font-bold text-slate-700 mb-1">{t('chooseType')}</h2>
+            <p className="text-sm text-slate-500 mb-6">{t('chooseTypeDesc')}</p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <button
@@ -238,11 +240,11 @@ export default function DataMigration() {
                     </svg>
                   </div>
                   <div>
-                    <div className="font-bold text-slate-800">Menu Items</div>
+                    <div className="font-bold text-slate-800">{t('menuItems')}</div>
                     <div className="text-xs text-slate-500">name, price, category, department</div>
                   </div>
                 </div>
-                <p className="text-sm text-slate-600">Import your full menu with prices and categories. Categories will be created automatically if they don't exist.</p>
+                <p className="text-sm text-slate-600">{t('menuItemsDesc')}</p>
               </button>
 
               <button
@@ -260,11 +262,11 @@ export default function DataMigration() {
                     </svg>
                   </div>
                   <div>
-                    <div className="font-bold text-slate-800">Stock Products</div>
+                    <div className="font-bold text-slate-800">{t('stockProducts')}</div>
                     <div className="text-xs text-slate-500">name, brand, category, unit, cost</div>
                   </div>
                 </div>
-                <p className="text-sm text-slate-600">Import your inventory products with costs and current stock levels. Useful when switching from another stock management system.</p>
+                <p className="text-sm text-slate-600">{t('stockProductsDesc')}</p>
               </button>
             </div>
           </div>
@@ -273,14 +275,14 @@ export default function DataMigration() {
             <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold text-slate-700">
-                  Step 1 — Download the template
+                  {t('step1Title')}
                 </h2>
                 <span className="text-xs bg-[#6262bd]/10 text-[#6262bd] font-medium px-3 py-1 rounded-full">
-                  {importType === 'menu' ? 'Menu Items' : 'Stock Products'}
+                  {importType === 'menu' ? t('menuItems') : t('stockProducts')}
                 </span>
               </div>
               <p className="text-sm text-slate-500 mb-4">
-                Download our CSV template, fill it in with your data, then upload it below. All columns except <strong>name</strong> {importType === 'menu' ? 'and <strong>price</strong>' : ''} are optional.
+                {t('step1Desc')} {importType === 'menu' ? t('step1DescMenu') : t('step1DescStock')}
               </p>
 
               <div className="bg-slate-50 rounded-xl p-4 mb-4 overflow-x-auto">
@@ -294,21 +296,21 @@ export default function DataMigration() {
               <div className="space-y-2 mb-6 text-sm text-slate-600">
                 {importType === 'menu' ? (
                   <ul className="space-y-1 list-disc list-inside">
-                    <li><strong>name</strong> — required</li>
-                    <li><strong>price</strong> — required, numeric (e.g. 12.50)</li>
-                    <li><strong>category</strong> — optional, created automatically if new</li>
-                    <li><strong>department</strong> — kitchen or bar (defaults to kitchen)</li>
-                    <li><strong>description</strong> — optional</li>
-                    <li><strong>available</strong> — true or false (defaults to true)</li>
+                    <li><strong>name</strong> — {t('required')}</li>
+                    <li><strong>price</strong> — {t('menuPriceDesc')}</li>
+                    <li><strong>category</strong> — {t('menuCategoryDesc')}</li>
+                    <li><strong>department</strong> — {t('menuDepartmentDesc')}</li>
+                    <li><strong>description</strong> — {t('optional')}</li>
+                    <li><strong>available</strong> — {t('menuAvailableDesc')}</li>
                   </ul>
                 ) : (
                   <ul className="space-y-1 list-disc list-inside">
-                    <li><strong>name</strong> — required</li>
-                    <li><strong>brand</strong> — optional</li>
-                    <li><strong>category</strong> — kitchen or bar (defaults to kitchen)</li>
-                    <li><strong>base_unit</strong> — <code>ml</code> for liquids, <code>grams</code> for solids (defaults to grams)</li>
-                    <li><strong>cost_per_base_unit</strong> — optional, numeric (e.g. 0.008)</li>
-                    <li><strong>current_stock</strong> — optional, numeric quantity in base units</li>
+                    <li><strong>name</strong> — {t('required')}</li>
+                    <li><strong>brand</strong> — {t('optional')}</li>
+                    <li><strong>category</strong> — {t('stockCategoryDesc')}</li>
+                    <li><strong>base_unit</strong> — {t('stockBaseUnitDesc')}</li>
+                    <li><strong>cost_per_base_unit</strong> — {t('stockCostDesc')}</li>
+                    <li><strong>current_stock</strong> — {t('stockCurrentDesc')}</li>
                   </ul>
                 )}
               </div>
@@ -324,12 +326,12 @@ export default function DataMigration() {
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
                   </svg>
-                  Download Template
+                  {t('downloadTemplate')}
                 </button>
               </div>
 
               <div className="mt-6 border-t border-slate-100 pt-6">
-                <h3 className="text-sm font-bold text-slate-700 mb-3">Step 2 — Upload your CSV</h3>
+                <h3 className="text-sm font-bold text-slate-700 mb-3">{t('step2Title')}</h3>
 
                 <div
                   onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
@@ -343,8 +345,8 @@ export default function DataMigration() {
                   <svg className="w-10 h-10 text-slate-300 mx-auto mb-3" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
                   </svg>
-                  <p className="text-slate-500 font-medium">Drag & drop your CSV here</p>
-                  <p className="text-slate-400 text-sm mt-1">or click to browse</p>
+                  <p className="text-slate-500 font-medium">{t('dragDrop')}</p>
+                  <p className="text-slate-400 text-sm mt-1">{t('orClick')}</p>
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -365,13 +367,13 @@ export default function DataMigration() {
           <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-lg font-bold text-slate-700">Preview Import</h2>
+                <h2 className="text-lg font-bold text-slate-700">{t('previewTitle')}</h2>
                 <p className="text-sm text-slate-500 mt-1">
-                  {fileName} — {parsedRows.length} rows parsed
+                  {fileName} — {t('rowsParsed').replace('{n}', parsedRows.length)}
                 </p>
               </div>
               <button onClick={reset} className="text-sm text-slate-500 hover:text-slate-700 underline">
-                Start over
+                {t('startOver')}
               </button>
             </div>
 
@@ -379,19 +381,19 @@ export default function DataMigration() {
             <div className="flex flex-wrap gap-3 mb-6">
               <div className="flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 rounded-xl">
                 <div className="w-2 h-2 rounded-full bg-green-500" />
-                <span className="text-sm font-medium text-green-700">{validRows.length} ready to import</span>
+                <span className="text-sm font-medium text-green-700">{t('readyToImport').replace('{n}', validRows.length)}</span>
               </div>
               {errorRows.length > 0 && (
                 <div className="flex items-center gap-2 px-4 py-2 bg-red-50 border border-red-200 rounded-xl">
                   <div className="w-2 h-2 rounded-full bg-red-500" />
-                  <span className="text-sm font-medium text-red-700">{errorRows.length} rows with errors (will be skipped)</span>
+                  <span className="text-sm font-medium text-red-700">{t('rowsWithErrors').replace('{n}', errorRows.length)}</span>
                 </div>
               )}
             </div>
 
             {/* Duplicate handling */}
             <div className="mb-6 p-4 bg-slate-50 rounded-xl">
-              <p className="text-sm font-medium text-slate-700 mb-3">If an item with the same name already exists:</p>
+              <p className="text-sm font-medium text-slate-700 mb-3">{t('duplicateHandling')}</p>
               <div className="flex gap-4">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -402,7 +404,7 @@ export default function DataMigration() {
                     onChange={() => setMode('skip')}
                     className="text-[#6262bd] focus:ring-[#6262bd]"
                   />
-                  <span className="text-sm text-slate-700">Skip it (safe)</span>
+                  <span className="text-sm text-slate-700">{t('skipDuplicate')}</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -413,7 +415,7 @@ export default function DataMigration() {
                     onChange={() => setMode('overwrite')}
                     className="text-[#6262bd] focus:ring-[#6262bd]"
                   />
-                  <span className="text-sm text-slate-700">Import anyway (creates duplicate)</span>
+                  <span className="text-sm text-slate-700">{t('importAnyway')}</span>
                 </label>
               </div>
             </div>
@@ -421,14 +423,14 @@ export default function DataMigration() {
             {/* Error rows */}
             {errorRows.length > 0 && (
               <div className="mb-6">
-                <h3 className="text-sm font-bold text-red-600 mb-2">Rows with errors (will not be imported)</h3>
+                <h3 className="text-sm font-bold text-red-600 mb-2">{t('errorRowsTitle')}</h3>
                 <div className="rounded-xl border border-red-100 overflow-hidden">
                   <table className="w-full text-sm">
                     <thead className="bg-red-50">
                       <tr>
-                        <th className="text-left px-4 py-2 text-red-700 font-medium">Row</th>
-                        <th className="text-left px-4 py-2 text-red-700 font-medium">Name</th>
-                        <th className="text-left px-4 py-2 text-red-700 font-medium">Error</th>
+                        <th className="text-left px-4 py-2 text-red-700 font-medium">{t('colRow')}</th>
+                        <th className="text-left px-4 py-2 text-red-700 font-medium">{t('colName')}</th>
+                        <th className="text-left px-4 py-2 text-red-700 font-medium">{t('colError')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -449,7 +451,7 @@ export default function DataMigration() {
             {validRows.length > 0 && (
               <div className="mb-6">
                 <h3 className="text-sm font-bold text-slate-700 mb-2">
-                  Rows to import {validRows.length > 5 ? `(showing first 5 of ${validRows.length})` : ''}
+                  {t('rowsToImport')}{validRows.length > 5 ? ` (${t('showingFirst5').replace('{n}', validRows.length)})` : ''}
                 </h3>
                 <div className="rounded-xl border border-slate-100 overflow-hidden overflow-x-auto">
                   <table className="w-full text-sm">
@@ -457,18 +459,18 @@ export default function DataMigration() {
                       <tr>
                         {importType === 'menu' ? (
                           <>
-                            <th className="text-left px-4 py-2 text-slate-600 font-medium">Name</th>
-                            <th className="text-left px-4 py-2 text-slate-600 font-medium">Price</th>
-                            <th className="text-left px-4 py-2 text-slate-600 font-medium">Category</th>
-                            <th className="text-left px-4 py-2 text-slate-600 font-medium">Department</th>
+                            <th className="text-left px-4 py-2 text-slate-600 font-medium">{t('colName')}</th>
+                            <th className="text-left px-4 py-2 text-slate-600 font-medium">{t('colPrice')}</th>
+                            <th className="text-left px-4 py-2 text-slate-600 font-medium">{t('colCategory')}</th>
+                            <th className="text-left px-4 py-2 text-slate-600 font-medium">{t('colDepartment')}</th>
                           </>
                         ) : (
                           <>
-                            <th className="text-left px-4 py-2 text-slate-600 font-medium">Name</th>
-                            <th className="text-left px-4 py-2 text-slate-600 font-medium">Brand</th>
-                            <th className="text-left px-4 py-2 text-slate-600 font-medium">Category</th>
-                            <th className="text-left px-4 py-2 text-slate-600 font-medium">Unit</th>
-                            <th className="text-left px-4 py-2 text-slate-600 font-medium">Cost</th>
+                            <th className="text-left px-4 py-2 text-slate-600 font-medium">{t('colName')}</th>
+                            <th className="text-left px-4 py-2 text-slate-600 font-medium">{t('colBrand')}</th>
+                            <th className="text-left px-4 py-2 text-slate-600 font-medium">{t('colCategory')}</th>
+                            <th className="text-left px-4 py-2 text-slate-600 font-medium">{t('colUnit')}</th>
+                            <th className="text-left px-4 py-2 text-slate-600 font-medium">{t('colCost')}</th>
                           </>
                         )}
                       </tr>
@@ -502,7 +504,7 @@ export default function DataMigration() {
 
             {validRows.length === 0 ? (
               <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-yellow-700 text-sm">
-                No valid rows to import. Please fix the errors above and try again.
+                {t('noValidRows')}
               </div>
             ) : (
               <button
@@ -511,8 +513,8 @@ export default function DataMigration() {
                 className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 {importing
-                  ? 'Importing...'
-                  : `Import ${validRows.length} ${importType === 'menu' ? 'menu item' : 'stock product'}${validRows.length !== 1 ? 's' : ''}`}
+                  ? t('importing')
+                  : t('importBtn').replace('{n}', validRows.length).replace('{type}', importType === 'menu' ? t('menuItems') : t('stockProducts'))}
               </button>
             )}
           </div>
@@ -532,31 +534,31 @@ export default function DataMigration() {
                     </svg>
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold text-slate-800">Import complete</h2>
-                    <p className="text-sm text-slate-500">Your data has been imported successfully.</p>
+                    <h2 className="text-lg font-bold text-slate-800">{t('importComplete')}</h2>
+                    <p className="text-sm text-slate-500">{t('importCompleteDesc')}</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                   <div className="bg-green-50 border border-green-100 rounded-xl p-4 text-center">
                     <div className="text-3xl font-bold text-green-700">{results.imported}</div>
-                    <div className="text-sm text-green-600 mt-1">Imported</div>
+                    <div className="text-sm text-green-600 mt-1">{t('imported')}</div>
                   </div>
                   <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 text-center">
                     <div className="text-3xl font-bold text-slate-500">{results.skipped}</div>
-                    <div className="text-sm text-slate-500 mt-1">Skipped (duplicates)</div>
+                    <div className="text-sm text-slate-500 mt-1">{t('skipped')}</div>
                   </div>
                   {results.errors?.length > 0 && (
                     <div className="bg-red-50 border border-red-100 rounded-xl p-4 text-center">
                       <div className="text-3xl font-bold text-red-600">{results.errors.length}</div>
-                      <div className="text-sm text-red-500 mt-1">Errors</div>
+                      <div className="text-sm text-red-500 mt-1">{t('errors')}</div>
                     </div>
                   )}
                 </div>
 
                 {results.skippedNames?.length > 0 && (
                   <div className="mb-4 p-4 bg-slate-50 rounded-xl">
-                    <p className="text-sm font-medium text-slate-700 mb-2">Skipped (already exist):</p>
+                    <p className="text-sm font-medium text-slate-700 mb-2">{t('skippedAlreadyExist')}</p>
                     <p className="text-sm text-slate-500">{results.skippedNames.join(', ')}</p>
                   </div>
                 )}
@@ -566,13 +568,13 @@ export default function DataMigration() {
                     href={importType === 'menu' ? '/dashboard/menu' : '/dashboard/stock'}
                     className="flex-1 text-center bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] transition-all"
                   >
-                    View {importType === 'menu' ? 'Menu' : 'Stock'}
+                    {t('view')} {importType === 'menu' ? t('menuItems') : t('stockProducts')}
                   </a>
                   <button
                     onClick={reset}
                     className="flex-1 bg-slate-100 text-slate-700 py-3 rounded-xl font-semibold hover:bg-slate-200 transition-all"
                   >
-                    Import More
+                    {t('importMore')}
                   </button>
                 </div>
               </>
@@ -585,7 +587,7 @@ export default function DataMigration() {
                     </svg>
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold text-slate-800">Import failed</h2>
+                    <h2 className="text-lg font-bold text-slate-800">{t('importFailed')}</h2>
                     <p className="text-sm text-red-600">{results.error}</p>
                   </div>
                 </div>
@@ -593,7 +595,7 @@ export default function DataMigration() {
                   onClick={() => setStep(2)}
                   className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] transition-all"
                 >
-                  Try Again
+                  {t('tryAgain')}
                 </button>
               </>
             )}
@@ -604,8 +606,8 @@ export default function DataMigration() {
       {/* Export section */}
       {step === 1 && (
         <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mt-6">
-          <h2 className="text-lg font-bold text-slate-700 mb-1">Export your data</h2>
-          <p className="text-sm text-slate-500 mb-5">Download your existing menu items or stock products as a CSV — useful for backups or migrating to another system.</p>
+          <h2 className="text-lg font-bold text-slate-700 mb-1">{t('exportTitle')}</h2>
+          <p className="text-sm text-slate-500 mb-5">{t('exportDesc')}</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <button
               onClick={() => handleExport('menu')}
@@ -619,7 +621,7 @@ export default function DataMigration() {
               </div>
               <div>
                 <div className="font-semibold text-slate-800">
-                  {exportingType === 'menu' ? 'Exporting...' : 'Export Menu Items'}
+                  {exportingType === 'menu' ? t('exporting') : t('exportMenuItems')}
                 </div>
                 <div className="text-xs text-slate-500 mt-0.5">name, price, category, department, description</div>
               </div>
@@ -637,7 +639,7 @@ export default function DataMigration() {
               </div>
               <div>
                 <div className="font-semibold text-slate-800">
-                  {exportingType === 'stock' ? 'Exporting...' : 'Export Stock Products'}
+                  {exportingType === 'stock' ? t('exporting') : t('exportStockProducts')}
                 </div>
                 <div className="text-xs text-slate-500 mt-0.5">name, brand, category, base_unit, cost, stock</div>
               </div>
@@ -654,9 +656,9 @@ export default function DataMigration() {
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
             </svg>
             <div>
-              <h3 className="font-bold text-blue-900 mb-2">What's not included</h3>
+              <h3 className="font-bold text-blue-900 mb-2">{t('infoTitle')}</h3>
               <p className="text-sm text-blue-800">
-                This tool imports menu items and stock products only. Historical orders, staff accounts, and floor plans are not migrated — those are set up fresh in Menu Hub. Ingredient recipes (linking stock to menu items) can be added manually after import from the Menu page.
+                {t('infoDesc')}
               </p>
             </div>
           </div>

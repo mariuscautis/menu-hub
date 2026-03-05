@@ -28,12 +28,7 @@ export default function DashboardLayout({ children }) {
   const [staffDepartment, setStaffDepartment] = useState(null)
   const [departmentPermissions, setDepartmentPermissions] = useState([])
   const [debug, setDebug] = useState('')
-  const [expandedMenus, setExpandedMenus] = useState({
-    analytics: true, // Analytics menu starts expanded
-    reports: true, // Reports menu starts expanded
-    menu: true, // Menu menu starts expanded
-    stock: true // Stock menu starts expanded
-  })
+  const [expandedMenus, setExpandedMenus] = useState({})
   const [pendingReservationsCount, setPendingReservationsCount] = useState(0)
   const [pendingOrdersCount, setPendingOrdersCount] = useState(0)
 

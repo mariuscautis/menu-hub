@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useTranslations } from '@/lib/i18n/LanguageContext'
 
 // Threshold for considering a session as "online" (30 minutes)
 const ONLINE_THRESHOLD_MS = 30 * 60 * 1000
 
 // Helper function to format relative time
-function formatRelativeTime(dateString) {
+function formatRelativeTime(dateString, t) {
   const date = new Date(dateString)
   const now = new Date()
   const diffMs = now - date
@@ -15,10 +16,10 @@ function formatRelativeTime(dateString) {
   const diffHours = Math.floor(diffMs / 3600000)
   const diffDays = Math.floor(diffMs / 86400000)
 
-  if (diffMins < 1) return 'Just now'
-  if (diffMins < 60) return `${diffMins} min ago`
-  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`
-  if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`
+  if (diffMins < 1) return t('justNow')
+  if (diffMins < 60) return t('minAgo').replace('{n}', diffMins)
+  if (diffHours < 24) return t('hourAgo').replace('{n}', diffHours)
+  if (diffDays < 7) return t('dayAgo').replace('{n}', diffDays)
 
   return date.toLocaleDateString()
 }
@@ -83,6 +84,7 @@ function getDeviceIcon(deviceName) {
 }
 
 export default function ConnectedDevicesPanel({ restaurantId }) {
+  const t = useTranslations('connectedDevices')
   const [sessions, setSessions] = useState([])
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(null) // Track which session is being acted upon
@@ -151,13 +153,13 @@ export default function ConnectedDevicesPanel({ restaurantId }) {
       const data = await response.json()
 
       if (data.success) {
-        setMessage({ type: 'success', text: 'Device signed out successfully' })
+        setMessage({ type: 'success', text: t('signedOutSuccess') })
         fetchSessions()
       } else {
-        setMessage({ type: 'error', text: data.error || 'Failed to sign out device' })
+        setMessage({ type: 'error', text: data.error || t('signedOutError') })
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'An error occurred' })
+      setMessage({ type: 'error', text: t('errorOccurred') })
     } finally {
       setActionLoading(null)
       setTimeout(() => setMessage(null), 3000)
@@ -180,14 +182,14 @@ export default function ConnectedDevicesPanel({ restaurantId }) {
       if (data.success) {
         setMessage({
           type: 'success',
-          text: currentlyBlocked ? 'Device unblocked' : 'Device blocked'
+          text: currentlyBlocked ? t('deviceUnblocked') : t('deviceBlocked')
         })
         fetchSessions()
       } else {
-        setMessage({ type: 'error', text: data.error || 'Failed to update device' })
+        setMessage({ type: 'error', text: data.error || t('updateError') })
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'An error occurred' })
+      setMessage({ type: 'error', text: t('errorOccurred') })
     } finally {
       setActionLoading(null)
       setTimeout(() => setMessage(null), 3000)
@@ -207,13 +209,13 @@ export default function ConnectedDevicesPanel({ restaurantId }) {
       const data = await response.json()
 
       if (data.success) {
-        setMessage({ type: 'success', text: 'All other devices signed out' })
+        setMessage({ type: 'success', text: t('allSignedOut') })
         fetchSessions()
       } else {
-        setMessage({ type: 'error', text: data.error || 'Failed to sign out devices' })
+        setMessage({ type: 'error', text: data.error || t('signOutAllError') })
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'An error occurred' })
+      setMessage({ type: 'error', text: t('errorOccurred') })
     } finally {
       setActionLoading(null)
       setTimeout(() => setMessage(null), 3000)
@@ -238,16 +240,16 @@ export default function ConnectedDevicesPanel({ restaurantId }) {
             </svg>
           </div>
           <div>
-            <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200">Connected Devices</h2>
+            <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200">{t('title')}</h2>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              {loading ? 'Loading...' : (
+              {loading ? t('loading') : (
                 <>
-                  <span className="text-green-600 dark:text-green-400 font-medium">{onlineSessionsCount} online</span>
+                  <span className="text-green-600 dark:text-green-400 font-medium">{onlineSessionsCount} {t('online')}</span>
                   {inactiveSessionsCount > 0 && (
-                    <span className="text-slate-500 dark:text-slate-400 ml-2">{inactiveSessionsCount} inactive</span>
+                    <span className="text-slate-500 dark:text-slate-400 ml-2">{inactiveSessionsCount} {t('inactive')}</span>
                   )}
                   {blockedSessionsCount > 0 && (
-                    <span className="text-red-500 dark:text-red-400 ml-2">({blockedSessionsCount} blocked)</span>
+                    <span className="text-red-500 dark:text-red-400 ml-2">({blockedSessionsCount} {t('blocked')})</span>
                   )}
                 </>
               )}
@@ -264,7 +266,7 @@ export default function ConnectedDevicesPanel({ restaurantId }) {
               disabled={actionLoading === 'all'}
               className="px-3 py-1.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors disabled:opacity-50"
             >
-              {actionLoading === 'all' ? 'Signing out...' : 'Sign out all others'}
+              {actionLoading === 'all' ? t('signingOut') : t('signOutAllOthers')}
             </button>
           )}
           <svg
@@ -292,15 +294,15 @@ export default function ConnectedDevicesPanel({ restaurantId }) {
       <div className={`transition-all duration-300 ${expanded ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'} overflow-hidden`}>
         {loading ? (
           <div className="p-6 text-center text-slate-500 dark:text-slate-400">
-            Loading devices...
+            {t('loadingDevices')}
           </div>
         ) : sessions.length === 0 ? (
           <div className="p-6 text-center text-slate-500 dark:text-slate-400">
             <svg className="w-12 h-12 mx-auto mb-3 text-slate-300 dark:text-slate-600" fill="currentColor" viewBox="0 0 24 24">
               <path d="M4 6h18V4H4c-1.1 0-2 .9-2 2v11H0v3h14v-3H4V6zm19 2h-6c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h6c.55 0 1-.45 1-1V9c0-.55-.45-1-1-1zm-1 9h-4v-7h4v7z"/>
             </svg>
-            <p>No active sessions found</p>
-            <p className="text-xs mt-1">Sessions will appear here when staff log in</p>
+            <p>{t('noSessions')}</p>
+            <p className="text-xs mt-1">{t('noSessionsHint')}</p>
           </div>
         ) : (
           <div className="divide-y divide-slate-100 dark:divide-slate-800 max-h-[400px] overflow-y-auto">
@@ -328,26 +330,26 @@ export default function ConnectedDevicesPanel({ restaurantId }) {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-medium text-slate-700 dark:text-slate-200 truncate">
-                            {session.device_name || 'Unknown Device'}
+                            {session.device_name || t('unknownDevice')}
                           </span>
                           {isCurrentSession && (
                             <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs rounded-full font-medium">
-                              This device
+                              {t('thisDevice')}
                             </span>
                           )}
                           {!isCurrentSession && !isBlocked && isOnline && (
                             <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs rounded-full font-medium">
-                              Online
+                              {t('online')}
                             </span>
                           )}
                           {!isCurrentSession && !isBlocked && !isOnline && (
                             <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-xs rounded-full font-medium">
-                              Inactive
+                              {t('inactive')}
                             </span>
                           )}
                           {isBlocked && (
                             <span className="px-2 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs rounded-full font-medium">
-                              Blocked
+                              {t('blocked')}
                             </span>
                           )}
                         </div>
@@ -366,7 +368,7 @@ export default function ConnectedDevicesPanel({ restaurantId }) {
                           )}
                         </div>
                         <div className="flex items-center gap-3 mt-1 text-xs text-slate-400 dark:text-slate-500">
-                          <span>Last active: {formatRelativeTime(session.last_active_at)}</span>
+                          <span>{t('lastActive')}: {formatRelativeTime(session.last_active_at, t)}</span>
                           <span>IP: {maskIpAddress(session.ip_address)}</span>
                         </div>
                       </div>
@@ -383,7 +385,7 @@ export default function ConnectedDevicesPanel({ restaurantId }) {
                               ? 'text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30'
                               : 'text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30'
                           } disabled:opacity-50`}
-                          title={isBlocked ? 'Unblock device' : 'Block device'}
+                          title={isBlocked ? t('unblockDevice') : t('blockDevice')}
                         >
                           {actionLoading === session.id ? (
                             <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -404,7 +406,7 @@ export default function ConnectedDevicesPanel({ restaurantId }) {
                           onClick={() => handleSignOut(session.id)}
                           disabled={actionLoading === session.id}
                           className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors disabled:opacity-50"
-                          title="Sign out device"
+                          title={t('signOutDevice')}
                         >
                           {actionLoading === session.id ? (
                             <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -430,7 +432,7 @@ export default function ConnectedDevicesPanel({ restaurantId }) {
         {!loading && sessions.length > 0 && (
           <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800">
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              <strong>Tip:</strong> Devices are shown as "Online" if active in the last 30 minutes. Block suspicious devices to immediately prevent access. Blocked devices cannot log in again until unblocked.
+              <strong>{t('tip')}:</strong> {t('footerTip')}
             </p>
           </div>
         )}

@@ -95,7 +95,7 @@ export default function Dashboard() {
           ))}
       </div>
 
-      <div className={`grid ${canSeeAdminStats ? 'lg:grid-cols-2' : ''} gap-6`}>
+      <div className="gap-6">
         <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
           <h2 className="text-lg font-bold text-slate-700 mb-4">Quick Actions</h2>
           <div className="space-y-3">
@@ -123,20 +123,6 @@ export default function Dashboard() {
             )}
           </div>
         </div>
-
-        {canSeeAdminStats && (
-          <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-            <h2 className="text-lg font-bold text-slate-700 mb-4">Your Menu Link</h2>
-            {restaurant && (
-              <div className="p-4 bg-slate-50 rounded-xl">
-                <p className="text-sm text-slate-500 mb-2">Share this link with customers:</p>
-                <code className="text-[#6262bd] font-medium break-all">
-                  {typeof window !== 'undefined' ? window.location.origin : ''}/{restaurant.slug}
-                </code>
-              </div>
-            )}
-          </div>
-        )}
       </div>
       </div>
   )
