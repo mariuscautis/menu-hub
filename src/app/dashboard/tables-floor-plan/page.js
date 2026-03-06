@@ -303,6 +303,10 @@ export default function StaffFloorPlanPage() {
   const [selectedDiscount, setSelectedDiscount] = useState(null)
   const [discountAmount, setDiscountAmount] = useState(0)
 
+  // Transfer table modal state
+  const [showTransferModal, setShowTransferModal] = useState(false)
+  const [transferring, setTransferring] = useState(false)
+
   // Order modal state
   const [showOrderModal, setShowOrderModal] = useState(false)
   const [menuItems, setMenuItems] = useState([])
@@ -1741,6 +1745,36 @@ export default function StaffFloorPlanPage() {
     }
   }
 
+  const handleTransfer = async (destinationTable) => {
+    if (!selectedTable || selectedTable.id === destinationTable.id) return
+    setTransferring(true)
+
+    try {
+      const { data, error } = await supabase.rpc('transfer_table_order', {
+        p_source_table_id: selectedTable.id,
+        p_destination_table_id: destinationTable.id
+      })
+
+      if (error) throw error
+      if (data && !data.success) throw new Error(data.error || 'Transfer failed')
+
+      clearOrdersCacheForTable(selectedTable.id)
+      clearOrdersCacheForTable(destinationTable.id)
+      clearTableOrdersLocalCache(selectedTable.id)
+      clearTableOrdersLocalCache(destinationTable.id)
+
+      setShowTransferModal(false)
+      setSelectedTable(null)
+      await fetchTableOrderInfo(restaurant.id)
+      showNotificationMessage('success', `Order transferred from Table ${selectedTable.table_number} to Table ${destinationTable.table_number}`)
+    } catch (err) {
+      console.error('Transfer error:', err)
+      showNotificationMessage('error', err.message || 'Failed to transfer order')
+    } finally {
+      setTransferring(false)
+    }
+  }
+
   const handlePayBill = async () => {
     if (!selectedTable) return
 
@@ -2783,12 +2817,23 @@ export default function StaffFloorPlanPage() {
               </button>
 
               {tableOrderInfo[selectedTable.id]?.count > 0 && (
-                <button
-                  onClick={handleViewOrders}
-                  className="w-full px-4 py-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-xl font-medium transition-all hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  {t('tableDetailsModal.viewAllOrders')?.replace('{count}', tableOrderInfo[selectedTable.id]?.count) || `View All Orders (${tableOrderInfo[selectedTable.id]?.count})`}
-                </button>
+                <>
+                  <button
+                    onClick={handleViewOrders}
+                    className="w-full px-4 py-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-xl font-medium transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    {t('tableDetailsModal.viewAllOrders')?.replace('{count}', tableOrderInfo[selectedTable.id]?.count) || `View All Orders (${tableOrderInfo[selectedTable.id]?.count})`}
+                  </button>
+                  <button
+                    onClick={() => setShowTransferModal(true)}
+                    className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 rounded-xl font-medium transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/>
+                    </svg>
+                    {t('transferTable') || 'Transfer Table'}
+                  </button>
+                </>
               )}
             </div>
 
@@ -2826,6 +2871,74 @@ export default function StaffFloorPlanPage() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Transfer Table Modal */}
+      {showTransferModal && selectedTable && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fade-in"
+          onClick={() => setShowTransferModal(false)}
+        >
+          <div
+            className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-lg max-h-[80vh] flex flex-col animate-zoom-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">
+                {t('transferModal.title') || 'Transfer Order'} — Table {selectedTable.table_number}
+              </h2>
+              <button
+                onClick={() => setShowTransferModal(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+              >
+                <svg className="w-5 h-5 text-slate-600 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+              {t('transferModal.subtitle') || 'Select the table to move this order to. If the destination already has an open order, items will be merged.'}
+            </p>
+            <div className="overflow-y-auto flex-1 space-y-2">
+              {tables
+                .filter((tbl) => tbl.id !== selectedTable.id)
+                .map((destTable) => {
+                  const destInfo = tableOrderInfo[destTable.id]
+                  const destHasOrders = destInfo && destInfo.count > 0
+                  return (
+                    <button
+                      key={destTable.id}
+                      onClick={() => handleTransfer(destTable)}
+                      disabled={transferring}
+                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 text-left transition-colors ${
+                        transferring
+                          ? 'opacity-50 cursor-not-allowed border-slate-100 bg-slate-50 dark:border-slate-700 dark:bg-slate-900'
+                          : destHasOrders
+                          ? 'border-amber-200 bg-amber-50 hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-900/20 dark:hover:bg-amber-900/40'
+                          : 'border-slate-200 bg-white hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600'
+                      }`}
+                    >
+                      <div>
+                        <span className="font-semibold text-slate-800 dark:text-slate-200">Table {destTable.table_number}</span>
+                        {destHasOrders ? (
+                          <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
+                            {t('transferModal.hasExistingOrder') || 'Has existing order'} — {formatCurrency(destInfo.total)}
+                          </p>
+                        ) : (
+                          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                            {t('transferModal.emptyTable') || 'Empty — order will be moved here'}
+                          </p>
+                        )}
+                      </div>
+                      <svg className="w-5 h-5 text-slate-400 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                      </svg>
+                    </button>
+                  )
+                })}
+            </div>
           </div>
         </div>
       )}

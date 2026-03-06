@@ -85,6 +85,11 @@ export default function Tables() {
   const [showPostPaymentModal, setShowPostPaymentModal] = useState(false)
   const [completedOrderIds, setCompletedOrderIds] = useState([])
 
+  // Transfer table modal state
+  const [showTransferModal, setShowTransferModal] = useState(false)
+  const [transferSourceTable, setTransferSourceTable] = useState(null)
+  const [transferring, setTransferring] = useState(false)
+
   // Grid density preference (persisted)
   const [gridDensity, setGridDensity] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -2150,6 +2155,42 @@ export default function Tables() {
     }))
   }
 
+  const openTransferModal = (table) => {
+    setTransferSourceTable(table)
+    setShowTransferModal(true)
+  }
+
+  const transferTable = async (destinationTable) => {
+    if (!transferSourceTable || transferSourceTable.id === destinationTable.id) return
+    setTransferring(true)
+
+    try {
+      const { data, error } = await supabase.rpc('transfer_table_order', {
+        p_source_table_id: transferSourceTable.id,
+        p_destination_table_id: destinationTable.id
+      })
+
+      if (error) throw error
+      if (data && !data.success) throw new Error(data.error || 'Transfer failed')
+
+      // Clear caches for both tables
+      clearOrdersCacheForTable(transferSourceTable.id)
+      clearOrdersCacheForTable(destinationTable.id)
+      clearTableOrdersLocalCache(transferSourceTable.id)
+      clearTableOrdersLocalCache(destinationTable.id)
+
+      setShowTransferModal(false)
+      setTransferSourceTable(null)
+      await fetchTableOrderInfo(restaurant.id)
+      showNotification('success', `Order transferred from Table ${transferSourceTable.table_number} to Table ${destinationTable.table_number}`)
+    } catch (err) {
+      console.error('Transfer error:', err)
+      showNotification('error', err.message || 'Failed to transfer order')
+    } finally {
+      setTransferring(false)
+    }
+  }
+
   // Consolidate duplicate items in the array (safety measure)
   const consolidateOrderItems = (items) => {
     const consolidated = {}
@@ -2804,6 +2845,7 @@ export default function Tables() {
               onViewOrders={() => openOrderDetailsModal(table)}
               onMarkCleaned={() => markTableAsCleaned(table)}
               onMarkDelivered={(department) => markOrderDelivered(table, department)}
+              onTransfer={() => openTransferModal(table)}
               onViewReservations={() => openViewReservationsModal(table)}
               onCreateReservation={() => openCreateReservationModal(table)}
               onAcknowledgeWaiterCall={acknowledgeWaiterCall}
@@ -4384,6 +4426,69 @@ export default function Tables() {
         </div>
       )}
 
+      {/* Transfer Table Modal */}
+      {showTransferModal && transferSourceTable && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => { setShowTransferModal(false); setTransferSourceTable(null) }}
+        >
+          <div
+            className="bg-white rounded-2xl p-6 w-full max-w-lg max-h-[80vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="text-xl font-bold text-slate-800">
+                {t('transferModal.title')} — Table {transferSourceTable.table_number}
+              </h2>
+              <button
+                onClick={() => { setShowTransferModal(false); setTransferSourceTable(null) }}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </button>
+            </div>
+            <p className="text-sm text-slate-500 mb-4">{t('transferModal.subtitle')}</p>
+
+            <div className="overflow-y-auto flex-1 space-y-2">
+              {tables
+                .filter((t) => t.id !== transferSourceTable.id)
+                .map((destTable) => {
+                  const destInfo = tableOrderInfo[destTable.id]
+                  const destHasOrders = destInfo && destInfo.count > 0
+                  return (
+                    <button
+                      key={destTable.id}
+                      onClick={() => transferTable(destTable)}
+                      disabled={transferring}
+                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 text-left transition-colors ${
+                        transferring
+                          ? 'opacity-50 cursor-not-allowed border-slate-100 bg-slate-50'
+                          : destHasOrders
+                          ? 'border-amber-200 bg-amber-50 hover:bg-amber-100'
+                          : 'border-slate-200 bg-white hover:bg-slate-50'
+                      }`}
+                    >
+                      <div>
+                        <span className="font-semibold text-slate-800">Table {destTable.table_number}</span>
+                        {destHasOrders ? (
+                          <p className="text-xs text-amber-700 mt-0.5">{t('transferModal.hasExistingOrder')} — {formatCurrency(destInfo.total)}</p>
+                        ) : (
+                          <p className="text-xs text-slate-400 mt-0.5">{t('transferModal.emptyTable')}</p>
+                        )}
+                      </div>
+                      <svg className="w-5 h-5 text-slate-400 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                      </svg>
+                    </button>
+                  )
+                })}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Invoice Client Modal */}
       {showInvoiceModal && restaurant && (
         <InvoiceClientModal
@@ -4401,7 +4506,7 @@ export default function Tables() {
   )
 }
 
-function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDownload, onDelete, onPlaceOrder, onPayBill, onSplitBill, onViewOrders, onMarkCleaned, onMarkDelivered, onViewReservations, onCreateReservation, onAcknowledgeWaiterCall }) {
+function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDownload, onDelete, onPlaceOrder, onPayBill, onSplitBill, onViewOrders, onMarkCleaned, onMarkDelivered, onTransfer, onViewReservations, onCreateReservation, onAcknowledgeWaiterCall }) {
   const t = useTranslations('tables')
   const { currencySymbol, formatCurrency } = useCurrency()
 
@@ -4623,6 +4728,15 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
                 {t('splitBill')}
               </button>
             </div>
+            <button
+              onClick={onTransfer}
+              className="w-full border border-slate-200 text-slate-600 py-2 rounded-xl font-medium hover:bg-slate-50 text-xs flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/>
+              </svg>
+              {t('transferTable')}
+            </button>
             <button
               onClick={onCreateReservation}
               className="w-full border border-slate-200 text-slate-500 py-2 rounded-xl font-medium hover:bg-slate-50 text-xs flex items-center justify-center gap-1.5 transition-colors"
