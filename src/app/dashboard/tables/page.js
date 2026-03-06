@@ -1333,7 +1333,41 @@ export default function Tables() {
             setAvailableDiscounts([])
           } else {
             console.log('Fetched discounts:', discountsData?.length || 0, 'items')
-            setAvailableDiscounts(discountsData || [])
+            const discounts = discountsData || []
+            setAvailableDiscounts(discounts)
+
+            // Auto-apply a promotion if it is active today and matches an item in the order
+            const today = new Date()
+            today.setHours(0, 0, 0, 0)
+            const todayDay = today.getDay()
+
+            const activePromo = discounts.find(d => {
+              if (!d.is_promotion) return false
+              // Check date range
+              if (d.promo_start_date && new Date(d.promo_start_date) > today) return false
+              if (d.promo_end_date && new Date(d.promo_end_date) < today) return false
+              // Check day of week (null = every day)
+              if (d.promo_days && d.promo_days.length > 0 && !d.promo_days.includes(todayDay)) return false
+              // Check if the linked product is in the order
+              if (!d.product_id) return false
+              return filteredOrders.some(order =>
+                order.order_items?.some(item => item.menu_item_id === d.product_id)
+              )
+            })
+
+            if (activePromo) {
+              // Only discount the matched product's items, not the whole table
+              const promoBase = filteredOrders.reduce((sum, o) =>
+                sum + (o.order_items || [])
+                  .filter(i => i.menu_item_id === activePromo.product_id)
+                  .reduce((s, i) => s + ((i.price_at_time || i.price || 0) * (i.quantity || 1)), 0)
+              , 0)
+              const amount = activePromo.type === 'percentage'
+                ? Math.round((promoBase * activePromo.value / 100) * 100) / 100
+                : Math.min(activePromo.value, promoBase)
+              setSelectedDiscount(activePromo)
+              setDiscountAmount(amount)
+            }
           }
         } catch (discountErr) {
           console.warn('Failed to fetch discounts:', discountErr)
@@ -1833,6 +1867,23 @@ export default function Tables() {
   }
 
   /**
+   * For promotions tied to a specific product, return only the subtotal
+   * of that product's items across the unpaid orders.
+   * For regular discounts (no product_id), return the full table subtotal.
+   */
+  const calculateDiscountBase = (discount, orders) => {
+    const orderList = orders || unpaidOrders
+    if (discount?.is_promotion && discount.product_id) {
+      return orderList.reduce((sum, o) =>
+        sum + (o.order_items || [])
+          .filter(i => i.menu_item_id === discount.product_id)
+          .reduce((s, i) => s + ((i.price_at_time || i.price || 0) * (i.quantity || 1)), 0)
+      , 0)
+    }
+    return calculateTableTotal()
+  }
+
+  /**
    * Calculate discount amount based on selected discount
    * Returns the calculated discount amount
    */
@@ -1860,8 +1911,8 @@ export default function Tables() {
 
     const discount = availableDiscounts.find(d => d.id === discountId)
     if (discount) {
-      const subtotal = calculateTableTotal()
-      const amount = calculateDiscountAmount(subtotal, discount)
+      const base = calculateDiscountBase(discount)
+      const amount = calculateDiscountAmount(base, discount)
       setSelectedDiscount(discount)
       setDiscountAmount(amount)
     }
@@ -3459,6 +3510,14 @@ export default function Tables() {
                     <label className="block text-sm font-medium text-slate-700 mb-2">
                       {t('paymentModal.applyDiscount') || 'Apply Discount'}
                     </label>
+                    {selectedDiscount?.is_promotion && (
+                      <div className="mb-2 flex items-center gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-lg text-xs text-orange-700 font-medium">
+                        <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                        </svg>
+                        Promotion auto-applied
+                      </div>
+                    )}
                     <select
                       value={selectedDiscount?.id || 'none'}
                       onChange={(e) => handleDiscountChange(e.target.value)}
@@ -3467,7 +3526,7 @@ export default function Tables() {
                       <option value="none">{t('paymentModal.noDiscount') || 'No discount'}</option>
                       {availableDiscounts.map((discount) => (
                         <option key={discount.id} value={discount.id}>
-                          {discount.name} ({discount.type === 'percentage' ? `${discount.value}%` : formatCurrency(discount.value)})
+                          {discount.name} ({discount.type === 'percentage' ? `${discount.value}%` : formatCurrency(discount.value)}){discount.is_promotion ? ' 🏷️' : ''}
                         </option>
                       ))}
                     </select>
@@ -3487,6 +3546,10 @@ export default function Tables() {
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-sm text-green-600">
                         {selectedDiscount.name} ({selectedDiscount.type === 'percentage' ? `${selectedDiscount.value}%` : formatCurrency(selectedDiscount.value)})
+                        {selectedDiscount.is_promotion && selectedDiscount.product_id && (() => {
+                          const promoItem = unpaidOrders.flatMap(o => o.order_items || []).find(i => i.menu_item_id === selectedDiscount.product_id)
+                          return promoItem ? <span className="text-xs text-green-500 ml-1">· {promoItem.name}</span> : null
+                        })()}
                       </span>
                       <span className="text-sm font-medium text-green-600">-{formatCurrency(discountAmount)}</span>
                     </div>

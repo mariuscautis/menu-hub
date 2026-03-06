@@ -1782,6 +1782,7 @@ export default function StaffFloorPlanPage() {
 
     try {
       let orders = []
+      let existingSplitBills = []
 
       if (navigator.onLine) {
         // Online: fetch from Supabase and cache
@@ -1789,14 +1790,16 @@ export default function StaffFloorPlanPage() {
           .from('orders')
           .select('*, order_items(*)')
           .eq('table_id', selectedTable.id)
-          .eq('paid', false)
-          .order('created_at', { ascending: false })
+          .is('paid', false)
+          .neq('status', 'cancelled')
+          .order('created_at', { ascending: true })
 
         if (error) {
           throw error
         }
 
-        orders = ordersData || []
+        // Filter to only orders that actually belong to this table (prevents cache pollution)
+        orders = (ordersData || []).filter(order => order.table_id === selectedTable.id)
 
         // Cache the orders for offline use
         if (orders.length > 0) {
@@ -1805,13 +1808,28 @@ export default function StaffFloorPlanPage() {
           } catch (e) {
             console.warn('Failed to cache orders:', e)
           }
+        } else {
+          localStorage.removeItem(cacheKey)
+        }
+
+        // Fetch completed split bills so we can deduct already-paid items
+        try {
+          const { data: splitBillsData } = await supabase
+            .from('split_bills')
+            .select('*, split_bill_items(*)')
+            .eq('table_id', selectedTable.id)
+            .eq('payment_status', 'completed')
+          existingSplitBills = splitBillsData || []
+        } catch {
+          // Non-critical — ignore
         }
       } else {
         // Offline: try to use cached data
         try {
           const cached = localStorage.getItem(cacheKey)
           if (cached) {
-            orders = JSON.parse(cached)
+            const cachedOrders = JSON.parse(cached)
+            orders = cachedOrders.filter(order => order.table_id === selectedTable.id)
           }
         } catch (e) {
           console.warn('Failed to load cached orders:', e)
@@ -1840,18 +1858,17 @@ export default function StaffFloorPlanPage() {
         })) || []
       }))
 
-      // Deduplicate: filter out offline orders that were already synced to Supabase
-      // (their client_id will match an order in Supabase)
+      // Deduplicate: filter out offline orders already synced to Supabase
       const supabaseClientIds = new Set(orders.filter(o => o.client_id).map(o => o.client_id))
-      const uniqueOfflineOrders = formattedOfflineOrders.filter(o => !supabaseClientIds.has(o.client_id))
+      const uniqueOfflineOrders = formattedOfflineOrders.filter(o =>
+        !supabaseClientIds.has(o.client_id) && o.table_id === selectedTable.id
+      )
 
       // Merge pending order updates into their parent orders
-      // This handles items added to existing orders while offline
       const ordersWithUpdates = orders.map(order => {
         const updates = pendingUpdates.filter(u => u.order_id === order.id)
         if (updates.length === 0) return order
 
-        // Merge all update items into this order
         const mergedItems = [...(order.order_items || [])]
         let additionalTotal = 0
 
@@ -1883,15 +1900,37 @@ export default function StaffFloorPlanPage() {
         }
       })
 
-      // Combine online orders (with updates merged) and unique offline orders
+      // Combine online (with updates) and unique offline orders
       const allOrders = [...ordersWithUpdates, ...uniqueOfflineOrders]
 
-      if (allOrders.length === 0) {
+      // Deduct items already paid via split bills
+      const paidQuantities = {}
+      existingSplitBills?.forEach(splitBill => {
+        splitBill.split_bill_items?.forEach(item => {
+          paidQuantities[item.order_item_id] = (paidQuantities[item.order_item_id] || 0) + item.quantity
+        })
+      })
+
+      const filteredOrders = allOrders.map(order => {
+        const filteredItems = (order.order_items || []).map(item => {
+          const alreadyPaid = paidQuantities[item.id] || 0
+          const remainingQuantity = item.quantity - alreadyPaid
+          if (remainingQuantity <= 0) return null
+          return { ...item, quantity: remainingQuantity }
+        }).filter(Boolean)
+
+        const newTotal = filteredItems.reduce((sum, item) =>
+          sum + ((item.quantity || 0) * (item.price_at_time || 0)), 0)
+
+        return { ...order, order_items: filteredItems, total: newTotal }
+      }).filter(order => order.order_items.length > 0)
+
+      if (filteredOrders.length === 0) {
         showNotificationMessage('info', 'No unpaid orders found for this table.')
         return
       }
 
-      setUnpaidOrders(allOrders)
+      setUnpaidOrders(filteredOrders)
 
       // Reset discount state
       setSelectedDiscount(null)
@@ -1912,7 +1951,37 @@ export default function StaffFloorPlanPage() {
             setAvailableDiscounts([])
           } else {
             console.log('Fetched discounts:', discountsData?.length || 0, 'items')
-            setAvailableDiscounts(discountsData || [])
+            const discounts = discountsData || []
+            setAvailableDiscounts(discounts)
+
+            // Auto-apply a promotion if active today and matches an item in the order
+            const today = new Date()
+            today.setHours(0, 0, 0, 0)
+            const todayDay = today.getDay()
+
+            const activePromo = discounts.find(d => {
+              if (!d.is_promotion) return false
+              if (d.promo_start_date && new Date(d.promo_start_date) > today) return false
+              if (d.promo_end_date && new Date(d.promo_end_date) < today) return false
+              if (d.promo_days && d.promo_days.length > 0 && !d.promo_days.includes(todayDay)) return false
+              if (!d.product_id) return false
+              return allOrders.some(order =>
+                order.order_items?.some(item => item.menu_item_id === d.product_id)
+              )
+            })
+
+            if (activePromo) {
+              const promoBase = allOrders.reduce((sum, o) =>
+                sum + (o.order_items || [])
+                  .filter(i => i.menu_item_id === activePromo.product_id)
+                  .reduce((s, i) => s + ((i.price_at_time || 0) * (i.quantity || 1)), 0)
+              , 0)
+              const amount = activePromo.type === 'percentage'
+                ? Math.round((promoBase * activePromo.value / 100) * 100) / 100
+                : Math.min(activePromo.value, promoBase)
+              setSelectedDiscount(activePromo)
+              setDiscountAmount(amount)
+            }
           }
         } catch (discountErr) {
           console.warn('Failed to fetch discounts:', discountErr)
@@ -1938,6 +2007,17 @@ export default function StaffFloorPlanPage() {
     return Math.max(0, subtotal - discountAmount)
   }
 
+  const calculateDiscountBase = (discount) => {
+    if (discount?.is_promotion && discount.product_id) {
+      return unpaidOrders.reduce((sum, o) =>
+        sum + (o.order_items || [])
+          .filter(i => i.menu_item_id === discount.product_id)
+          .reduce((s, i) => s + ((i.price_at_time || 0) * (i.quantity || 1)), 0)
+      , 0)
+    }
+    return calculateTableTotal()
+  }
+
   const handleDiscountChange = (discountId) => {
     if (discountId === 'none') {
       setSelectedDiscount(null)
@@ -1950,12 +2030,11 @@ export default function StaffFloorPlanPage() {
 
     setSelectedDiscount(discount)
 
-    const subtotal = calculateTableTotal()
+    const base = calculateDiscountBase(discount)
     if (discount.type === 'percentage') {
-      setDiscountAmount(subtotal * (discount.value / 100))
+      setDiscountAmount(Math.round((base * discount.value / 100) * 100) / 100)
     } else {
-      // Fixed amount
-      setDiscountAmount(Math.min(discount.value, subtotal))
+      setDiscountAmount(Math.min(discount.value, base))
     }
   }
 
@@ -3341,6 +3420,14 @@ export default function StaffFloorPlanPage() {
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       {t('paymentModal.applyDiscount') || 'Apply Discount'}
                     </label>
+                    {selectedDiscount?.is_promotion && (
+                      <div className="mb-2 flex items-center gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-lg text-xs text-orange-700 font-medium">
+                        <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                        </svg>
+                        Promotion auto-applied
+                      </div>
+                    )}
                     <select
                       value={selectedDiscount?.id || 'none'}
                       onChange={(e) => handleDiscountChange(e.target.value)}
@@ -3349,7 +3436,7 @@ export default function StaffFloorPlanPage() {
                       <option value="none">{t('paymentModal.noDiscount') || 'No discount'}</option>
                       {availableDiscounts.map((discount) => (
                         <option key={discount.id} value={discount.id}>
-                          {discount.name} ({discount.type === 'percentage' ? `${discount.value}%` : formatCurrency(discount.value)})
+                          {discount.name} ({discount.type === 'percentage' ? `${discount.value}%` : formatCurrency(discount.value)}){discount.is_promotion ? ' 🏷️' : ''}
                         </option>
                       ))}
                     </select>
@@ -3369,6 +3456,10 @@ export default function StaffFloorPlanPage() {
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-sm text-green-600 dark:text-green-400">
                         {selectedDiscount.name} ({selectedDiscount.type === 'percentage' ? `${selectedDiscount.value}%` : formatCurrency(selectedDiscount.value)})
+                        {selectedDiscount.is_promotion && selectedDiscount.product_id && (() => {
+                          const promoItem = unpaidOrders.flatMap(o => o.order_items || []).find(i => i.menu_item_id === selectedDiscount.product_id)
+                          return promoItem ? <span className="text-xs text-green-500 ml-1">· {promoItem.name}</span> : null
+                        })()}
                       </span>
                       <span className="text-sm font-medium text-green-600 dark:text-green-400">-{formatCurrency(discountAmount)}</span>
                     </div>
