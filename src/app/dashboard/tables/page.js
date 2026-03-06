@@ -69,6 +69,10 @@ export default function Tables() {
   // Waiter calls state
   const [waiterCalls, setWaiterCalls] = useState({})
 
+  // Floor filter state
+  const [floors, setFloors] = useState([])
+  const [activeFloorId, setActiveFloorId] = useState(null) // null = all floors
+
   // Cancellation modal state
   const [showCancelModal, setShowCancelModal] = useState(false)
   const [reservationToCancel, setReservationToCancel] = useState(null)
@@ -361,6 +365,14 @@ export default function Tables() {
       .order('table_number')
 
     setTables(tablesData || [])
+
+    // Fetch floors for filter tabs
+    const { data: floorsData } = await supabase
+      .from('floors')
+      .select('id, name, level')
+      .eq('restaurant_id', restaurantData.id)
+      .order('level', { ascending: true })
+    setFloors(floorsData || [])
 
     // Fetch menu items for order placement (only in-stock items)
     const { data: items, error: itemsError } = await supabase
@@ -2683,6 +2695,10 @@ export default function Tables() {
     return <div className="text-slate-500">{t('loading')}</div>
   }
 
+  const visibleTables = activeFloorId === null
+    ? tables
+    : tables.filter(t => t.floor_id === activeFloorId)
+
   return (
 
       <div>
@@ -2742,7 +2758,7 @@ export default function Tables() {
         </div>
       )}
 
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center mb-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
           <p className="text-slate-500">{t('subtitle')}</p>
@@ -2811,6 +2827,35 @@ export default function Tables() {
         </div>
       </div>
 
+      {/* Floor filter tabs — only shown when multiple floors exist */}
+      {floors.length > 1 && (
+        <div className="flex items-center gap-1 bg-slate-100 rounded-xl p-1 mb-6 self-start">
+          <button
+            onClick={() => setActiveFloorId(null)}
+            className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+              activeFloorId === null
+                ? 'bg-white text-slate-800 shadow-sm'
+                : 'text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            All
+          </button>
+          {floors.map(floor => (
+            <button
+              key={floor.id}
+              onClick={() => setActiveFloorId(floor.id)}
+              className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors whitespace-nowrap ${
+                activeFloorId === floor.id
+                  ? 'bg-white text-slate-800 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              {floor.name}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Tables Grid */}
       {tables.length === 0 ? (
         <div className="bg-white border-2 border-slate-100 rounded-2xl p-12 text-center">
@@ -2829,7 +2874,7 @@ export default function Tables() {
         </div>
       ) : (
         <div className={gridClass}>
-          {tables.map((table) => (
+          {visibleTables.map((table) => (
             <TableCard
               key={table.id}
               table={table}

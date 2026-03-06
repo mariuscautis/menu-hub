@@ -14,6 +14,7 @@ function TablesPreview({ restaurantId }) {
   const [floors, setFloors] = useState([])
   const [activeFloorId, setActiveFloorId] = useState(null) // null = show all
   const [orderInfo, setOrderInfo] = useState({})
+  const [waiterCallsByTable, setWaiterCallsByTable] = useState({})
   const supabaseRef = useRef(supabase)
 
   useEffect(() => {
@@ -56,9 +57,23 @@ function TablesPreview({ restaurantId }) {
       }
     }
 
+    const fetchWaiterCalls = async () => {
+      const { data: calls } = await sb
+        .from('waiter_calls')
+        .select('id, table_id')
+        .eq('restaurant_id', restaurantId)
+        .eq('status', 'pending')
+      if (calls) {
+        const byTable = {}
+        calls.forEach(c => { byTable[c.table_id] = true })
+        setWaiterCallsByTable(byTable)
+      }
+    }
+
     fetchFloors()
     fetchTables()
     fetchOrders()
+    fetchWaiterCalls()
 
     // Realtime subscription
     const channel = sb
@@ -66,12 +81,14 @@ function TablesPreview({ restaurantId }) {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `restaurant_id=eq.${restaurantId}` }, fetchOrders)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'tables', filter: `restaurant_id=eq.${restaurantId}` }, fetchTables)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'floors', filter: `restaurant_id=eq.${restaurantId}` }, fetchFloors)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'waiter_calls', filter: `restaurant_id=eq.${restaurantId}` }, fetchWaiterCalls)
       .subscribe()
 
     // Poll every 10 seconds as fallback in case realtime is unavailable on the login page
     const poll = setInterval(() => {
       fetchOrders()
       fetchTables()
+      fetchWaiterCalls()
     }, 10000)
 
     return () => {
@@ -141,28 +158,37 @@ function TablesPreview({ restaurantId }) {
             const info = orderInfo[table.id]
             const hasOrder = info && info.count > 0
             const needsCleaning = table.status === 'needs_cleaning'
+            const hasWaiterCall = !!waiterCallsByTable[table.id]
             return (
               <div
                 key={table.id}
                 className={`bg-white border-2 rounded-2xl overflow-hidden transition-all duration-200 flex flex-col ${
-                  needsCleaning ? 'border-red-200 shadow-red-100 shadow-md'
+                  hasWaiterCall ? 'border-orange-300 shadow-orange-100 shadow-md'
+                  : needsCleaning ? 'border-red-200 shadow-red-100 shadow-md'
                   : hasOrder ? 'border-amber-200 shadow-amber-100 shadow-md'
                   : 'border-slate-100'
                 }`}
               >
                 {/* Status-tinted top strip */}
                 <div className={`px-4 pt-4 pb-3 ${
-                  needsCleaning ? 'bg-red-50'
+                  hasWaiterCall ? 'bg-orange-50'
+                  : needsCleaning ? 'bg-red-50'
                   : hasOrder ? 'bg-amber-50'
                   : 'bg-slate-50'
                 }`}>
                   <p className="text-xs font-medium text-slate-400 uppercase tracking-widest leading-none mb-1">Table</p>
                   <h3 className={`text-3xl font-black leading-none ${
-                    needsCleaning ? 'text-red-700'
+                    hasWaiterCall ? 'text-orange-700'
+                    : needsCleaning ? 'text-red-700'
                     : hasOrder ? 'text-amber-700'
                     : 'text-slate-800'
                   }`}>{table.table_number}</h3>
-                  <div className="mt-2">
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {hasWaiterCall && (
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-orange-700 bg-orange-100 px-2 py-0.5 rounded-full">
+                        👋 Waiter called
+                      </span>
+                    )}
                     {needsCleaning ? (
                       <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-700 bg-red-100 px-2 py-0.5 rounded-full">
                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
@@ -173,7 +199,7 @@ function TablesPreview({ restaurantId }) {
                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
                         Open · {info.count} order{info.count > 1 ? 's' : ''}
                       </span>
-                    ) : (
+                    ) : !hasWaiterCall && (
                       <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
                         Available
                       </span>
