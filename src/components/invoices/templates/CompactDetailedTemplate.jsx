@@ -95,10 +95,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9fafb',
     fontSize: 8,
   },
-  col1: { width: '45%' },
-  col2: { width: '12%', textAlign: 'right' },
-  col3: { width: '18%', textAlign: 'right' },
-  col4: { width: '25%', textAlign: 'right' },
+  col1: { width: '33%' },
+  col2: { width: '10%', textAlign: 'right' },
+  col3: { width: '17%', textAlign: 'right' },
+  col4: { width: '17%', textAlign: 'right' },
+  col5: { width: '23%', textAlign: 'right' },
   itemDescription: {
     color: '#1f2937',
     fontSize: 8,
@@ -313,23 +314,23 @@ const CompactDetailedTemplate = ({ invoice, restaurant, t }) => {
             <Text style={styles.col1}>{t.description}</Text>
             <Text style={styles.col2}>{t.qty}</Text>
             <Text style={styles.col3}>{t.unitPrice}</Text>
-            <Text style={styles.col4}>{t.total}</Text>
+            <Text style={styles.col4}>Tax</Text>
+            <Text style={styles.col5}>{t.total}</Text>
           </View>
           {invoice.items.map((item, index) => (
             <View key={index} style={index % 2 === 0 ? styles.tableRow : styles.tableRowAlt}>
               <View style={styles.col1}>
                 <Text style={styles.itemDescription}>{item.description}</Text>
                 {item.tax_rate > 0 && (
-                  <Text style={styles.itemTax}>{invoice.tax_name || 'Tax'}: {item.tax_rate}%</Text>
+                  <Text style={styles.itemTax}>{item.tax_name || 'Tax'} {item.tax_rate}%</Text>
                 )}
               </View>
               <Text style={styles.col2}>{item.quantity}</Text>
-              <Text style={styles.col3}>
-                {formatCurrency(item.unit_price)}
-              </Text>
+              <Text style={styles.col3}>{formatCurrency(item.unit_price)}</Text>
               <Text style={styles.col4}>
-                {formatCurrency(item.line_total)}
+                {item.tax_rate > 0 ? formatCurrency(item.tax_amount) : '—'}
               </Text>
+              <Text style={styles.col5}>{formatCurrency(item.line_total)}</Text>
             </View>
           ))}
         </View>
@@ -375,10 +376,23 @@ const CompactDetailedTemplate = ({ invoice, restaurant, t }) => {
               <Text>{t.subtotal}</Text>
               <Text>{formatCurrency(invoice.subtotal)}</Text>
             </View>
-            <View style={styles.totalRow}>
-              <Text>{invoice.tax_name || 'Tax'}:</Text>
-              <Text>{formatCurrency(invoice.total_tax)}</Text>
-            </View>
+            {(() => {
+              const rateMap = {};
+              for (const item of invoice.items) {
+                if (item.tax_rate > 0) {
+                  const key = `${item.tax_name || 'Tax'} ${item.tax_rate}%`;
+                  rateMap[key] = (rateMap[key] || 0) + item.tax_amount;
+                }
+              }
+              const entries = Object.entries(rateMap);
+              if (entries.length === 0) return null;
+              return entries.map(([label, amount]) => (
+                <View key={label} style={styles.totalRow}>
+                  <Text>{label}:</Text>
+                  <Text>{formatCurrency(amount)}</Text>
+                </View>
+              ));
+            })()}
             <View style={styles.grandTotalRow}>
               <Text>{t.grandTotal}</Text>
               <Text>{formatCurrency(invoice.total)}</Text>

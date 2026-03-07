@@ -72,10 +72,11 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: '#f9fafb',
   },
-  col1: { width: '45%' },
-  col2: { width: '15%', textAlign: 'right' },
-  col3: { width: '20%', textAlign: 'right' },
-  col4: { width: '20%', textAlign: 'right' },
+  col1: { width: '35%' },
+  col2: { width: '10%', textAlign: 'right' },
+  col3: { width: '18%', textAlign: 'right' },
+  col4: { width: '17%', textAlign: 'right' },
+  col5: { width: '20%', textAlign: 'right' },
   totalsSection: {
     marginTop: 20,
     alignItems: 'flex-end',
@@ -256,7 +257,8 @@ const InvoiceTemplate = ({ invoice, restaurant }) => {
             <Text style={styles.col1}>Description</Text>
             <Text style={styles.col2}>Qty</Text>
             <Text style={styles.col3}>Unit Price</Text>
-            <Text style={styles.col4}>Total</Text>
+            <Text style={styles.col4}>Tax</Text>
+            <Text style={styles.col5}>Total</Text>
           </View>
           {invoice.items.map((item, index) => (
             <View key={index} style={index % 2 === 0 ? styles.tableRow : styles.tableRowAlt}>
@@ -264,17 +266,16 @@ const InvoiceTemplate = ({ invoice, restaurant }) => {
                 <Text>{item.description}</Text>
                 {item.tax_rate > 0 && (
                   <Text style={{ fontSize: 8, color: '#6b7280', marginTop: 2 }}>
-                    Tax: {item.tax_rate}%
+                    {item.tax_name || 'Tax'} {item.tax_rate}%
                   </Text>
                 )}
               </View>
               <Text style={styles.col2}>{item.quantity}</Text>
-              <Text style={styles.col3}>
-                {formatCurrency(item.unit_price)}
-              </Text>
+              <Text style={styles.col3}>{formatCurrency(item.unit_price)}</Text>
               <Text style={styles.col4}>
-                {formatCurrency(item.line_total)}
+                {item.tax_rate > 0 ? formatCurrency(item.tax_amount) : '—'}
               </Text>
+              <Text style={styles.col5}>{formatCurrency(item.line_total)}</Text>
             </View>
           ))}
         </View>
@@ -286,10 +287,23 @@ const InvoiceTemplate = ({ invoice, restaurant }) => {
               <Text>Subtotal:</Text>
               <Text>{formatCurrency(invoice.subtotal)}</Text>
             </View>
-            <View style={styles.subtotalRow}>
-              <Text>Tax ({restaurant.invoice_settings?.tax_system || 'Tax'}):</Text>
-              <Text>{formatCurrency(invoice.total_tax)}</Text>
-            </View>
+            {(() => {
+              const rateMap = {};
+              for (const item of invoice.items) {
+                if (item.tax_rate > 0) {
+                  const key = `${item.tax_name || 'Tax'} ${item.tax_rate}%`;
+                  rateMap[key] = (rateMap[key] || 0) + item.tax_amount;
+                }
+              }
+              const entries = Object.entries(rateMap);
+              if (entries.length === 0) return null;
+              return entries.map(([label, amount]) => (
+                <View key={label} style={styles.subtotalRow}>
+                  <Text>{label}:</Text>
+                  <Text>{formatCurrency(amount)}</Text>
+                </View>
+              ));
+            })()}
             <View style={styles.grandTotalRow}>
               <Text>TOTAL:</Text>
               <Text>{formatCurrency(invoice.total)}</Text>

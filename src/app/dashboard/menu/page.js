@@ -15,6 +15,7 @@ export default function Menu() {
   const [menuItems, setMenuItems] = useState([])
   const [categories, setCategories] = useState([])
   const [stockProducts, setStockProducts] = useState([])
+  const [menuSalesTaxCategories, setMenuSalesTaxCategories] = useState([])
   const [restaurant, setRestaurant] = useState(null)
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -32,7 +33,8 @@ export default function Menu() {
     profit_margin_percentage: 100,
     price_rounding_mode: 'none',
     requires_special_instructions: false,
-    special_instructions_label: ''
+    special_instructions_label: '',
+    sales_tax_category_id: ''
   })
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
@@ -126,9 +128,17 @@ export default function Menu() {
       .from('stock_products')
       .select('*')
       .order('name')
+    // Fetch menu sales tax categories
+    const { data: taxCats } = await supabase
+      .from('menu_sales_tax_categories')
+      .select('id, name, rate, is_default')
+      .eq('restaurant_id', restaurantData.id)
+      .eq('is_active', true)
+      .order('name')
     setMenuItems(items || [])
     setCategories(cats || [])
     setStockProducts(products || [])
+    setMenuSalesTaxCategories(taxCats || [])
     setLoading(false)
   }
   const handleChange = (e) => {
@@ -206,7 +216,8 @@ export default function Menu() {
         profit_margin_percentage: item.profit_margin_percentage || 100,
         price_rounding_mode: item.price_rounding_mode || 'none',
         requires_special_instructions: item.requires_special_instructions || false,
-        special_instructions_label: item.special_instructions_label || ''
+        special_instructions_label: item.special_instructions_label || '',
+        sales_tax_category_id: item.sales_tax_category_id || ''
       })
       setImagePreview(item.image_url || null)
       setImageFile(null)
@@ -226,6 +237,8 @@ export default function Menu() {
       }
     } else {
       setEditingItem(null)
+      // Pick default tax category if one is marked as default
+      const defaultTaxCat = menuSalesTaxCategories.find(c => c.is_default)
       setFormData({
         name: '',
         description: '',
@@ -239,7 +252,8 @@ export default function Menu() {
         profit_margin_percentage: 100,
         price_rounding_mode: 'none',
         requires_special_instructions: false,
-        special_instructions_label: ''
+        special_instructions_label: '',
+        sales_tax_category_id: defaultTaxCat?.id || ''
       })
       setImagePreview(null)
       setRecipeIngredients([])
@@ -329,7 +343,8 @@ export default function Menu() {
       calculated_price: formData.dynamic_pricing_enabled ? calculateDynamicPrice() : null,
       price_rounding_mode: formData.dynamic_pricing_enabled ? formData.price_rounding_mode : 'none',
       requires_special_instructions: formData.requires_special_instructions,
-      special_instructions_label: formData.requires_special_instructions ? (formData.special_instructions_label || null) : null
+      special_instructions_label: formData.requires_special_instructions ? (formData.special_instructions_label || null) : null,
+      sales_tax_category_id: formData.sales_tax_category_id || null
     }
     let menuItemId
     if (editingItem) {
@@ -755,13 +770,21 @@ export default function Menu() {
                         </div>
                       </div>
                     )}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <p className="text-lg font-bold text-[#6262bd]">{currencySymbol}{item.price?.toFixed(2)}</p>
                       {item.dynamic_pricing_enabled && (
                         <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full font-medium" title={`Base cost: ${currencySymbol}${item.base_cost?.toFixed(2)} + ${item.profit_margin_percentage}% margin`}>
                           {t('autoPriced')}
                         </span>
                       )}
+                      {item.sales_tax_category_id && (() => {
+                        const taxCat = menuSalesTaxCategories.find(c => c.id === item.sales_tax_category_id)
+                        return taxCat ? (
+                          <span className="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs rounded-full font-medium">
+                            {taxCat.name} {taxCat.rate}%
+                          </span>
+                        ) : null
+                      })()}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -937,6 +960,30 @@ export default function Menu() {
                   <option value="bar">{t('bar')}</option>
                 </select>
               </div>
+              {/* Sales Tax Category */}
+              {menuSalesTaxCategories.length > 0 && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    {t('salesTaxCategory') || 'Sales Tax Category'}
+                  </label>
+                  <select
+                    name="sales_tax_category_id"
+                    value={formData.sales_tax_category_id}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  >
+                    <option value="">{t('noTaxCategory') || '— No tax category —'}</option>
+                    {menuSalesTaxCategories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name} — {cat.rate}%{cat.is_default ? ` (${t('default') || 'default'})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-slate-500 mt-1">
+                    {t('salesTaxCategoryHint') || 'Assign a sales tax bracket to this item (e.g. Beer, Soft Drinks, Food).'}
+                  </p>
+                </div>
+              )}
               <div className="flex items-center gap-3">
                 <input
                   type="checkbox"

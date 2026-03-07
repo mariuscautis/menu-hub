@@ -26,7 +26,7 @@ export async function POST(request) {
     // Fetch order details with all related data
     const { data: order, error: orderError } = await supabaseAdmin
       .from('orders')
-      .select('*, restaurants(*), tables(table_number), order_items(*, menu_items(*))')
+      .select('*, restaurants(*), tables(table_number), order_items(*, menu_items(id, name))')
       .eq('id', orderId)
       .single();
 
@@ -50,7 +50,7 @@ export async function POST(request) {
       });
     }
 
-    // Fetch FRESH restaurant data to get current tax rate (order.restaurants might be stale)
+    // Fetch FRESH restaurant data
     const { data: freshRestaurant, error: restaurantError } = await supabaseAdmin
       .from('restaurants')
       .select('*')
@@ -63,12 +63,30 @@ export async function POST(request) {
     }
 
     const restaurant = freshRestaurant;
-    console.log('Fresh restaurant data loaded:', {
-      id: restaurant.id,
-      name: restaurant.name,
-      menu_sales_tax_rate: restaurant.menu_sales_tax_rate,
-      menu_sales_tax_name: restaurant.menu_sales_tax_name
-    });
+
+    // Fetch menu sales tax categories for this restaurant
+    const { data: taxCategories } = await supabaseAdmin
+      .from('menu_sales_tax_categories')
+      .select('id, name, rate')
+      .eq('restaurant_id', restaurant.id)
+      .eq('is_active', true);
+
+    // Fetch sales_tax_category_id for each menu item separately.
+    // We cannot use a join because sales_tax_category_id was added via migration
+    // and is not in Supabase's schema cache, so joins always return null for it.
+    const menuItemIds = (order.order_items || [])
+      .map(oi => oi.menu_item_id)
+      .filter(Boolean);
+    let menuItemTaxMap = {};
+    if (menuItemIds.length > 0) {
+      const { data: menuItemRows } = await supabaseAdmin
+        .from('menu_items')
+        .select('id, sales_tax_category_id')
+        .in('id', menuItemIds);
+      for (const row of (menuItemRows || [])) {
+        menuItemTaxMap[row.id] = row.sales_tax_category_id;
+      }
+    }
 
     // Check if invoice settings are enabled
     if (!restaurant.invoice_settings?.enabled) {
@@ -114,34 +132,42 @@ export async function POST(request) {
         );
       }
 
-      // Get sales tax rate from restaurant settings
-      console.log('Restaurant menu_sales_tax_rate from DB:', restaurant.menu_sales_tax_rate);
-      const taxRate = parseFloat(restaurant.menu_sales_tax_rate) || 20;
-      console.log('Final tax rate being used:', taxRate);
+      // Build a lookup map for tax categories
+      const taxCategoryMap = {};
+      for (const cat of (taxCategories || [])) {
+        taxCategoryMap[cat.id] = cat;
+      }
 
-      // Calculate line items with TAX-INCLUSIVE pricing
-      // Menu prices already include tax - we calculate backwards to show the breakdown
+      // Calculate line items with TAX-INCLUSIVE pricing.
+      // Each item uses its own assigned sales_tax_category_id rate.
+      // If no category is assigned, the item is treated as 0% tax (price is the net price).
       const items = order.order_items.map(item => {
         const priceIncludingTax = parseFloat(item.price_at_time || item.price || 0);
         const quantity = item.quantity || 0;
-        const lineTotal = priceIncludingTax * quantity; // This is what customer actually pays
+        const lineTotal = priceIncludingTax * quantity;
 
-        // Calculate tax backwards from the inclusive price
-        // If price is £5.00 with 21% tax:
-        // netAmount = £5.00 / 1.21 = £4.13
-        // taxAmount = £5.00 - £4.13 = £0.87
+        const menuItem = item.menu_items || {};
+        const salesTaxCategoryId = menuItemTaxMap[item.menu_item_id];
+        const taxCat = salesTaxCategoryId
+          ? taxCategoryMap[salesTaxCategoryId]
+          : null;
+        const taxRate = taxCat ? parseFloat(taxCat.rate) : 0;
+        const taxName = taxCat ? taxCat.name : null;
+
+        // Back-calculate net from tax-inclusive price
         const taxMultiplier = 1 + (taxRate / 100);
         const netAmount = lineTotal / taxMultiplier;
         const taxAmount = lineTotal - netAmount;
-        const unitPriceNet = netAmount / quantity;
+        const unitPriceNet = quantity > 0 ? netAmount / quantity : 0;
 
         return {
-          description: item.menu_items?.name || 'Item',
-          quantity: quantity,
-          unit_price: unitPriceNet, // Net price per unit (excluding tax)
+          description: menuItem.name || 'Item',
+          quantity,
+          unit_price: unitPriceNet,
           tax_rate: taxRate,
+          tax_name: taxName,
           tax_amount: taxAmount,
-          line_total: lineTotal // Total including tax (what customer pays)
+          line_total: lineTotal
         };
       });
 
@@ -190,7 +216,7 @@ export async function POST(request) {
         subtotal: subtotal,
         total_tax: totalTax,
         total: total,
-        tax_name: restaurant.menu_sales_tax_name || 'VAT',
+        tax_name: 'Tax',
         currency: restaurant.invoice_settings.currency || 'EUR',
 
         // Payment info

@@ -77,6 +77,30 @@ export default function ReportsPage() {
           ),
           color: 'bg-amber-500',
           lightColor: 'bg-amber-50 dark:bg-amber-900/30'
+        },
+        {
+          title: 'Sales & Tax Balance',
+          description: 'Products sold, recipe ingredient costs, and tax collected vs. purchase tax paid',
+          href: '/dashboard/reports/sales-balance',
+          icon: (
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+            </svg>
+          ),
+          color: 'bg-emerald-500',
+          lightColor: 'bg-emerald-50 dark:bg-emerald-900/30'
+        },
+        {
+          title: 'Stock Movement',
+          description: 'Track stock quantities used, purchased, and remaining across a time period',
+          href: '/dashboard/reports/stock-movement',
+          icon: (
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+          ),
+          color: 'bg-teal-500',
+          lightColor: 'bg-teal-50 dark:bg-teal-900/30'
         }
       ]
     }
@@ -136,7 +160,7 @@ export default function ReportsPage() {
         <h2 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-4">
           {t('periodic') || 'Periodic Reports'}
         </h2>
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid md:grid-cols-3 xl:grid-cols-5 gap-4">
           {reports[1].items.map((report) => (
             <Link
               key={report.href}

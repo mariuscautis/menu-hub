@@ -111,49 +111,65 @@ export default function WeeklyReportPage() {
 
       if (error) throw error;
 
-      // Fetch order_items with menu_items for cost calculation (separate query to avoid join issues)
+      // Fetch order_items with menu_items for cost and tax calculation
       let orderItemsMap = {};
       if (orders && orders.length > 0) {
         const orderIds = orders.map(o => o.id);
         try {
           const { data: orderItems } = await supabase
             .from('order_items')
-            .select('order_id, quantity, menu_item_id')
+            .select('order_id, quantity, menu_item_id, price_at_time')
             .in('order_id', orderIds);
 
           // Get unique menu item IDs
           const menuItemIds = [...new Set((orderItems || []).map(oi => oi.menu_item_id).filter(Boolean))];
 
-          // Fetch menu items with base_cost
+          // Fetch menu items with base_cost and sales tax category
           let menuItemsMap = {};
           if (menuItemIds.length > 0) {
             const { data: menuItems } = await supabase
               .from('menu_items')
-              .select('id, base_cost')
+              .select('id, base_cost, sales_tax_category_id')
               .in('id', menuItemIds);
 
+            // Fetch tax category rates
+            const taxCatIds = [...new Set((menuItems || []).map(mi => mi.sales_tax_category_id).filter(Boolean))];
+            let taxCatRateMap = {};
+            if (taxCatIds.length > 0) {
+              const { data: taxCats } = await supabase
+                .from('menu_sales_tax_categories')
+                .select('id, rate')
+                .in('id', taxCatIds);
+              (taxCats || []).forEach(tc => { taxCatRateMap[tc.id] = parseFloat(tc.rate); });
+            }
+
             (menuItems || []).forEach(mi => {
-              menuItemsMap[mi.id] = mi;
+              menuItemsMap[mi.id] = {
+                ...mi,
+                taxRate: mi.sales_tax_category_id ? (taxCatRateMap[mi.sales_tax_category_id] || 0) : 0,
+              };
             });
           }
 
-          // Build order items map with costs
+          // Build order items map with costs and per-item tax
           (orderItems || []).forEach(oi => {
             if (!orderItemsMap[oi.order_id]) {
               orderItemsMap[oi.order_id] = [];
             }
+            const mi = menuItemsMap[oi.menu_item_id] || null;
+            const taxRate = mi?.taxRate || 0;
+            const lineTotal = parseFloat(oi.price_at_time || 0) * (oi.quantity || 0);
+            const taxLine = taxRate > 0 ? lineTotal - lineTotal / (1 + taxRate / 100) : 0;
             orderItemsMap[oi.order_id].push({
               ...oi,
-              menu_items: menuItemsMap[oi.menu_item_id] || null
+              menu_items: mi,
+              taxLine,
             });
           });
         } catch (e) {
           console.warn('Could not fetch order items for cost calculation:', e);
         }
       }
-
-      // Get restaurant's default tax rate for calculating VAT
-      const defaultTaxRate = parseFloat(restaurant.menu_sales_tax_rate || 20);
 
       // Fetch orders for previous week (for comparison)
       const { data: prevOrders } = await supabase
@@ -192,15 +208,12 @@ export default function WeeklyReportPage() {
         const orderTotal = parseFloat(order.total || 0);
         const orderDiscount = parseFloat(order.discount_total || 0);
 
-        // Calculate tax from order if available, otherwise estimate from total
-        let orderTax = parseFloat(order.tax_amount || 0);
-        if (orderTax === 0 && orderTotal > 0 && defaultTaxRate > 0) {
-          orderTax = orderTotal - (orderTotal / (1 + defaultTaxRate / 100));
-        }
+        // Calculate tax from per-item rates (accurate, matches Sales & Tax Balance report)
+        const orderItems = orderItemsMap[order.id] || [];
+        const orderTax = orderItems.reduce((s, item) => s + (item.taxLine || 0), 0);
 
         // Calculate material costs from order items (COGS)
         let orderMaterialCost = 0;
-        const orderItems = orderItemsMap[order.id] || [];
         orderItems.forEach(item => {
           const baseCost = parseFloat(item.menu_items?.base_cost || 0);
           const quantity = parseInt(item.quantity || 1);

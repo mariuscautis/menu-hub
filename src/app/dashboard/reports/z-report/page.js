@@ -114,6 +114,49 @@ export default function ZReportPage() {
 
       if (ordersError) throw ordersError;
 
+      // Fetch order items for accurate per-item tax calculation
+      const orderIds = (orders || []).map(o => o.id);
+      let orderItemsByOrderId = {};
+      if (orderIds.length > 0) {
+        const { data: orderItems } = await supabase
+          .from('order_items')
+          .select('order_id, menu_item_id, quantity, price_at_time')
+          .in('order_id', orderIds);
+
+        // Fetch menu items with their tax category
+        const menuItemIds = [...new Set((orderItems || []).map(oi => oi.menu_item_id).filter(Boolean))];
+        let menuItemTaxMap = {}; // menuItemId -> taxRate
+        if (menuItemIds.length > 0) {
+          const { data: menuItems } = await supabase
+            .from('menu_items')
+            .select('id, sales_tax_category_id')
+            .in('id', menuItemIds);
+
+          const taxCatIds = [...new Set((menuItems || []).map(mi => mi.sales_tax_category_id).filter(Boolean))];
+          let taxCatRateMap = {}; // taxCatId -> rate
+          if (taxCatIds.length > 0) {
+            const { data: taxCats } = await supabase
+              .from('menu_sales_tax_categories')
+              .select('id, rate')
+              .in('id', taxCatIds);
+            for (const tc of (taxCats || [])) taxCatRateMap[tc.id] = parseFloat(tc.rate);
+          }
+
+          for (const mi of (menuItems || [])) {
+            menuItemTaxMap[mi.id] = mi.sales_tax_category_id ? (taxCatRateMap[mi.sales_tax_category_id] || 0) : 0;
+          }
+        }
+
+        // Group order items by order, and pre-calculate tax per item
+        for (const oi of (orderItems || [])) {
+          if (!orderItemsByOrderId[oi.order_id]) orderItemsByOrderId[oi.order_id] = [];
+          const taxRate = menuItemTaxMap[oi.menu_item_id] || 0;
+          const lineTotal = parseFloat(oi.price_at_time || 0) * (oi.quantity || 0);
+          const taxLine = taxRate > 0 ? lineTotal - lineTotal / (1 + taxRate / 100) : 0;
+          orderItemsByOrderId[oi.order_id].push({ taxLine });
+        }
+      }
+
       // Calculate sales summary from orders
       let grossSales = 0;
       let discountTotal = 0;
@@ -130,9 +173,6 @@ export default function ZReportPage() {
       // Staff tracking
       const staffStats = {};
 
-      // Get restaurant's default tax rate for calculating VAT when not stored on order
-      const defaultTaxRate = parseFloat(restaurant.menu_sales_tax_rate || 20);
-
       orders?.forEach(order => {
         // Calculate gross sales (subtotal if available, otherwise total + discount)
         const orderSubtotal = parseFloat(order.subtotal || order.total || 0);
@@ -140,14 +180,8 @@ export default function ZReportPage() {
         const orderTotal = parseFloat(order.total || 0);
         const orderTip = parseFloat(order.tip_amount || 0);
 
-        // Calculate tax: use stored tax_amount if available, otherwise calculate from total
-        // VAT formula: tax = total - (total / (1 + rate/100))
-        // This extracts the VAT already included in the price
-        let orderTax = parseFloat(order.tax_amount || 0);
-        if (orderTax === 0 && orderTotal > 0 && defaultTaxRate > 0) {
-          // Calculate VAT included in the total price
-          orderTax = orderTotal - (orderTotal / (1 + defaultTaxRate / 100));
-        }
+        // Calculate tax from per-item rates (accurate, matches Sales & Tax Balance report)
+        const orderTax = (orderItemsByOrderId[order.id] || []).reduce((s, item) => s + item.taxLine, 0);
 
         grossSales += orderSubtotal;
         discountTotal += orderDiscount;
