@@ -23,6 +23,7 @@ export default function StockManagement() {
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState('name') // 'name', 'stock-low', 'stock-high'
   const [taxCategories, setTaxCategories] = useState([])
+  const [selectedIds, setSelectedIds] = useState(new Set())
 
   // Modal states
   const [showProductModal, setShowProductModal] = useState(false)
@@ -395,6 +396,30 @@ export default function StockManagement() {
     fetchData()
   }
 
+  const deleteSelected = async () => {
+    if (selectedIds.size === 0) return
+    if (!confirm(`Delete ${selectedIds.size} selected product${selectedIds.size > 1 ? 's' : ''}? This will also delete their stock entries.`)) return
+    await supabase.from('stock_products').delete().in('id', [...selectedIds])
+    setSelectedIds(new Set())
+    fetchData()
+  }
+
+  const toggleSelect = (id) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filteredProducts.length && filteredProducts.length > 0) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(filteredProducts.map(p => p.id)))
+    }
+  }
+
   const formatStock = (amount, unit) => {
     if (amount === 0) return `0 ${unit}`
     if (amount >= 1000 && unit === 'grams') {
@@ -689,11 +714,35 @@ export default function StockManagement() {
             </div>
           ) : (
             <div className="grid gap-4">
+              {/* Select all row */}
+              <div className="flex items-center gap-3 px-2">
+                <input
+                  type="checkbox"
+                  checked={selectedIds.size === filteredProducts.length && filteredProducts.length > 0}
+                  ref={el => { if (el) el.indeterminate = selectedIds.size > 0 && selectedIds.size < filteredProducts.length }}
+                  onChange={toggleSelectAll}
+                  className="w-4 h-4 rounded border-slate-300 accent-[#6262bd] cursor-pointer"
+                />
+                <span className="text-sm text-slate-500">
+                  {selectedIds.size > 0 ? `${selectedIds.size} selected` : `Select all (${filteredProducts.length})`}
+                </span>
+              </div>
+
               {filteredProducts.map((product) => (
                 <div
                   key={product.id}
-                  className={`bg-white border-2 rounded-2xl p-6 flex justify-between items-center ${product.current_stock <= 0 ? 'border-red-300 bg-red-50' : 'border-slate-100'}`}
+                  className={`bg-white border-2 rounded-2xl p-6 flex items-center gap-3 ${
+                    selectedIds.has(product.id) ? 'border-[#6262bd] bg-[#6262bd]/5' :
+                    product.current_stock <= 0 ? 'border-red-300 bg-red-50' : 'border-slate-100'
+                  }`}
                 >
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.has(product.id)}
+                    onChange={() => toggleSelect(product.id)}
+                    className="w-4 h-4 rounded border-slate-300 accent-[#6262bd] cursor-pointer flex-shrink-0"
+                  />
+                  <div className="flex-1 flex justify-between items-center">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-lg font-semibold text-slate-800">
@@ -764,8 +813,31 @@ export default function StockManagement() {
                       </svg>
                     </button>
                   </div>
+                  </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Bulk action bar */}
+          {selectedIds.size > 0 && (
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl">
+              <span className="text-sm font-medium">{selectedIds.size} selected</span>
+              <button
+                onClick={deleteSelected}
+                className="flex items-center gap-2 px-4 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-medium transition-colors"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                </svg>
+                Delete selected
+              </button>
+              <button
+                onClick={() => setSelectedIds(new Set())}
+                className="text-sm text-slate-400 hover:text-white transition-colors"
+              >
+                Cancel
+              </button>
             </div>
           )}
         </div>

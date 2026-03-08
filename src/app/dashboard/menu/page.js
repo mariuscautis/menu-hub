@@ -49,6 +49,7 @@ export default function Menu() {
   const [filterDepartment, setFilterDepartment] = useState('all')
   const [filterAvailability, setFilterAvailability] = useState('all')
   const [sortBy, setSortBy] = useState('name') // 'name', 'price-low', 'price-high', 'stock'
+  const [selectedIds, setSelectedIds] = useState(new Set())
   const restaurantCtx = useRestaurant()
   useEffect(() => {
     fetchData()
@@ -402,6 +403,37 @@ export default function Menu() {
       .from('menu_items')
       .delete()
       .eq('id', id)
+    fetchData()
+  }
+
+  const deleteSelected = async () => {
+    if (selectedIds.size === 0) return
+    if (!confirm(`Delete ${selectedIds.size} selected item${selectedIds.size > 1 ? 's' : ''}? This cannot be undone.`)) return
+    // Delete images for selected items
+    const toDelete = menuItems.filter(i => selectedIds.has(i.id))
+    const imagePaths = toDelete.map(i => i.image_url?.split('/menu-items/')[1]).filter(Boolean)
+    if (imagePaths.length > 0) {
+      await supabase.storage.from('menu-items').remove(imagePaths)
+    }
+    await supabase.from('menu_items').delete().in('id', [...selectedIds])
+    setSelectedIds(new Set())
+    fetchData()
+  }
+
+  const toggleSelect = (id) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filteredMenuItems.length && filteredMenuItems.length > 0) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(filteredMenuItems.map(i => i.id)))
+    }
   }
   const toggleAvailability = async (item) => {
     await supabase
@@ -681,16 +713,37 @@ export default function Menu() {
         </div>
       ) : (
         <div className="grid gap-4">
+          {/* Select all row */}
+          <div className="flex items-center gap-3 px-2">
+            <input
+              type="checkbox"
+              checked={selectedIds.size === filteredMenuItems.length && filteredMenuItems.length > 0}
+              ref={el => { if (el) el.indeterminate = selectedIds.size > 0 && selectedIds.size < filteredMenuItems.length }}
+              onChange={toggleSelectAll}
+              className="w-4 h-4 rounded border-slate-300 accent-[#6262bd] cursor-pointer"
+            />
+            <span className="text-sm text-slate-500">
+              {selectedIds.size > 0 ? `${selectedIds.size} selected` : `Select all (${filteredMenuItems.length})`}
+            </span>
+          </div>
+
           {filteredMenuItems.map((item) => {
             const stockStatus = getStockStatus(item)
             return (
               <div
                 key={item.id}
-                className={`bg-white border-2 rounded-2xl p-6 ${
+                className={`bg-white border-2 rounded-2xl p-6 flex gap-3 items-start ${
+                  selectedIds.has(item.id) ? 'border-[#6262bd] bg-[#6262bd]/5' :
                   item.available ? 'border-slate-100' : 'border-slate-200 bg-slate-50'
                 }`}
               >
-                <div className="flex justify-between items-start gap-4">
+                <input
+                  type="checkbox"
+                  checked={selectedIds.has(item.id)}
+                  onChange={() => toggleSelect(item.id)}
+                  className="w-4 h-4 mt-1 rounded border-slate-300 accent-[#6262bd] cursor-pointer flex-shrink-0"
+                />
+                <div className="flex-1 flex justify-between items-start gap-4">
                   {item.image_url && (
                     <img
                       src={item.image_url}
@@ -841,6 +894,26 @@ export default function Menu() {
           })}
         </div>
       )}
+
+      {/* Bulk action bar */}
+      {selectedIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl">
+          <span className="text-sm font-medium">{selectedIds.size} selected</span>
+          <button
+            onClick={deleteSelected}
+            className="flex items-center gap-2 px-4 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-medium transition-colors"
+          >
+            Delete selected
+          </button>
+          <button
+            onClick={() => setSelectedIds(new Set())}
+            className="text-sm text-slate-400 hover:text-white transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+
       {/* Modal */}
       {showModal && (
         <div
