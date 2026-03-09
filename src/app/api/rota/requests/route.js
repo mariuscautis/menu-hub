@@ -2,6 +2,8 @@ export const runtime = 'edge';
 
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { sendEmail } from '@/lib/services/email-edge';
+import { getEmailTranslations, t, formatDateForLocale } from '@/lib/email-translations';
 
 // Lazy initialization of Supabase client to avoid build-time errors
 function getSupabase() {
@@ -10,6 +12,157 @@ function getSupabase() {
     process.env.SUPABASE_SERVICE_ROLE_KEY
   )
 };
+
+// --- Email helpers ---
+
+const LEAVE_TYPE_LABELS = {
+  annual: { en: 'Annual Leave', ro: 'Concediu Anual', fr: 'Congé Annuel', it: 'Ferie Annuali', es: 'Vacaciones Anuales' },
+  sick: { en: 'Sick Leave', ro: 'Concediu Medical', fr: 'Congé Maladie', it: 'Congedo per Malattia', es: 'Baja por Enfermedad' },
+  emergency: { en: 'Emergency Leave', ro: 'Concediu de Urgență', fr: 'Congé d\'Urgence', it: 'Congedo di Emergenza', es: 'Permiso de Emergencia' },
+  unpaid: { en: 'Unpaid Leave', ro: 'Concediu Fără Plată', fr: 'Congé Sans Solde', it: 'Congedo Non Retribuito', es: 'Permiso Sin Sueldo' },
+  other: { en: 'Other', ro: 'Altele', fr: 'Autre', it: 'Altro', es: 'Otro' }
+}
+
+function generateTimeOffRequestEmail(tr, locale, { staffName, restaurantName, dashboardUrl, dateFrom, dateTo, daysRequested, leaveType, reason }) {
+  const leaveTypeLabel = (LEAVE_TYPE_LABELS[leaveType] || LEAVE_TYPE_LABELS.other)[locale] || leaveType || '—'
+  const formattedFrom = formatDateForLocale(dateFrom, locale)
+  const formattedTo = dateTo && dateTo !== dateFrom ? formatDateForLocale(dateTo, locale) : null
+  const dateRange = formattedTo ? `${formattedFrom} – ${formattedTo}` : formattedFrom
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>${t(tr.timeOffRequestSubject, { staffName, restaurantName })}</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f8;font-family:Arial,Helvetica,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f8;padding:32px 0;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.08);max-width:600px;width:100%;">
+        <!-- Header -->
+        <tr>
+          <td style="background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);padding:40px 32px;text-align:center;">
+            <p style="margin:0 0 8px 0;font-size:13px;color:rgba(255,255,255,0.8);letter-spacing:1px;text-transform:uppercase;">${restaurantName}</p>
+            <h1 style="margin:0;font-size:26px;font-weight:700;color:#ffffff;">🌴 ${tr.timeOffRequestTitle}</h1>
+          </td>
+        </tr>
+        <!-- Body -->
+        <tr>
+          <td style="padding:36px 32px;">
+            <p style="margin:0 0 8px 0;font-size:16px;color:#374151;">${tr.timeOffRequestGreeting}</p>
+            <p style="margin:0 0 28px 0;font-size:15px;color:#6b7280;line-height:1.6;">${tr.timeOffRequestIntro}</p>
+
+            <!-- Details card -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#fef3c7;border-radius:10px;border:1px solid #fde68a;overflow:hidden;margin-bottom:28px;">
+              <tr>
+                <td style="padding:18px 20px;border-bottom:1px solid #fde68a;">
+                  <span style="font-size:12px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:0.5px;">${tr.timeOffRequestFrom}</span>
+                  <p style="margin:4px 0 0 0;font-size:16px;font-weight:600;color:#92400e;">${staffName}</p>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:14px 20px;border-bottom:1px solid #fde68a;">
+                  <span style="font-size:12px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:0.5px;">${tr.timeOffRequestType}</span>
+                  <p style="margin:4px 0 0 0;font-size:15px;color:#374151;">${leaveTypeLabel}</p>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:14px 20px;border-bottom:1px solid #fde68a;">
+                  <span style="font-size:12px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:0.5px;">${tr.timeOffRequestDates}</span>
+                  <p style="margin:4px 0 0 0;font-size:15px;color:#374151;">${dateRange}</p>
+                </td>
+              </tr>
+              ${daysRequested ? `
+              <tr>
+                <td style="padding:14px 20px;${reason ? 'border-bottom:1px solid #fde68a;' : ''}">
+                  <span style="font-size:12px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:0.5px;">${tr.timeOffRequestDays}</span>
+                  <p style="margin:4px 0 0 0;font-size:15px;color:#374151;">${daysRequested} ${tr.timeOffRequestDaysUnit}</p>
+                </td>
+              </tr>` : ''}
+              ${reason ? `
+              <tr>
+                <td style="padding:14px 20px;">
+                  <span style="font-size:12px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:0.5px;">${tr.timeOffRequestReason}</span>
+                  <p style="margin:4px 0 0 0;font-size:15px;color:#374151;font-style:italic;">"${reason}"</p>
+                </td>
+              </tr>` : ''}
+            </table>
+
+            <!-- CTA button -->
+            <div style="text-align:center;margin:8px 0 32px 0;">
+              <a href="${dashboardUrl}" style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);color:#ffffff;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;letter-spacing:0.3px;">${tr.timeOffRequestCta} →</a>
+            </div>
+
+            <p style="margin:0;font-size:14px;color:#9ca3af;line-height:1.6;">${tr.timeOffRequestOutro}</p>
+          </td>
+        </tr>
+        <!-- Footer -->
+        <tr>
+          <td style="background:#f9fafb;padding:20px 32px;text-align:center;border-top:1px solid #e5e7eb;">
+            <p style="margin:0;font-size:12px;color:#9ca3af;">${t(tr.timeOffRequestFooter, { restaurantName })}</p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`
+}
+
+async function sendTimeOffRequestEmail(supabase, { restaurantId, staffName, dateFrom, dateTo, daysRequested, leaveType, reason }) {
+  try {
+    // Fetch restaurant: owner email, name, email_language
+    const { data: restaurant } = await supabase
+      .from('restaurants')
+      .select('name, email_language, email')
+      .eq('id', restaurantId)
+      .single()
+
+    if (!restaurant) return
+
+    const restaurantName = restaurant.name || 'Restaurant'
+    const locale = restaurant.email_language || 'en'
+
+    // Try restaurant's own email first, fall back to the owner's auth email
+    let managerEmail = restaurant.email
+    if (!managerEmail) {
+      const { data: owner } = await supabase
+        .from('restaurants')
+        .select('owner_id')
+        .eq('id', restaurantId)
+        .single()
+      if (owner?.owner_id) {
+        const { data: { user } } = await supabase.auth.admin.getUserById(owner.owner_id)
+        managerEmail = user?.email
+      }
+    }
+
+    if (!managerEmail) return // nowhere to send, skip
+
+    const tr = getEmailTranslations(locale)
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://www.venoapp.com'
+    const dashboardUrl = `${baseUrl}/dashboard/time-off-requests`
+
+    const subject = t(tr.timeOffRequestSubject, { staffName, restaurantName })
+    const html = generateTimeOffRequestEmail(tr, locale, {
+      staffName,
+      restaurantName,
+      dashboardUrl,
+      dateFrom,
+      dateTo,
+      daysRequested,
+      leaveType,
+      reason
+    })
+
+    await sendEmail({ to: managerEmail, subject, htmlContent: html, fromName: restaurantName })
+  } catch (err) {
+    console.error('Failed to send time-off request email:', err)
+  }
+}
+
+// --- End email helpers ---
 
 // GET - Fetch shift requests with filtering
 export async function GET(request) {
@@ -234,6 +387,19 @@ export async function POST(request) {
     } catch (notificationError) {
       // Log notification error but don't fail the request
       console.error('Failed to create notification:', notificationError);
+    }
+
+    // Send email to manager for time-off requests (non-blocking)
+    if (request_type === 'time_off') {
+      sendTimeOffRequestEmail(supabase, {
+        restaurantId: restaurant_id,
+        staffName: shiftRequest.staff.name,
+        dateFrom: date_from,
+        dateTo: date_to,
+        daysRequested: days_requested,
+        leaveType: leave_type,
+        reason
+      });
     }
 
     return NextResponse.json({ request: shiftRequest }, { status: 201 });

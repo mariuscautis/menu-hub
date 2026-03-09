@@ -5,6 +5,22 @@ import { supabase } from '@/lib/supabase';
 import { useRestaurant } from '@/lib/RestaurantContext';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
 
+const STATUS_CONFIG = {
+  pending:  { label: 'Pending',  bg: 'bg-amber-100 dark:bg-amber-900/30',  text: 'text-amber-700 dark:text-amber-400',  dot: 'bg-amber-500' },
+  approved: { label: 'Approved', bg: 'bg-green-100 dark:bg-green-900/30',  text: 'text-green-700 dark:text-green-400',  dot: 'bg-green-500' },
+  rejected: { label: 'Rejected', bg: 'bg-red-100 dark:bg-red-900/30',     text: 'text-red-700 dark:text-red-400',     dot: 'bg-red-500'   },
+  cancelled:{ label: 'Cancelled',bg: 'bg-slate-100 dark:bg-slate-700',    text: 'text-slate-600 dark:text-slate-400', dot: 'bg-slate-400' }
+};
+
+const LEAVE_CONFIG = {
+  annual_holiday:   { emoji: '🏖️', label: 'Annual Holiday',      bg: 'bg-blue-100 text-blue-800'   },
+  sick_self_cert:   { emoji: '🤒', label: 'Sick (Self-cert)',    bg: 'bg-orange-100 text-orange-800' },
+  sick_medical_cert:{ emoji: '🏥', label: 'Sick (Medical)',      bg: 'bg-red-100 text-red-800'     },
+  unpaid:           { emoji: '💰', label: 'Unpaid Leave',        bg: 'bg-slate-100 text-slate-800' },
+  compassionate:    { emoji: '🕊️', label: 'Compassionate',      bg: 'bg-purple-100 text-purple-800'},
+  other:            { emoji: '📋', label: 'Other',               bg: 'bg-slate-100 text-slate-800' }
+};
+
 export default function RequestsModal({ onClose, onRequestUpdated }) {
   const t = useTranslations('rota.requestsModal');
   const tCommon = useTranslations('common');
@@ -17,619 +33,356 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
   const [rejectionReason, setRejectionReason] = useState('');
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [editingRequest, setEditingRequest] = useState(null);
-  const [editForm, setEditForm] = useState({
-    date_from: '',
-    date_to: '',
-    status: '',
-    reason: '',
-    leave_type: '',
-    rejection_reason: ''
-  });
+  const [editForm, setEditForm] = useState({ date_from: '', date_to: '', status: '', reason: '', leave_type: '', rejection_reason: '' });
+  const [expandedId, setExpandedId] = useState(null);
 
   useEffect(() => {
-    if (restaurantCtx?.restaurant) {
-      setRestaurant(restaurantCtx.restaurant);
-    }
+    if (restaurantCtx?.restaurant) setRestaurant(restaurantCtx.restaurant);
   }, [restaurantCtx]);
 
   useEffect(() => {
-    if (restaurant) {
-      fetchRequests();
-    }
+    if (restaurant) fetchRequests();
   }, [restaurant, filter]);
 
-  // Real-time subscription
   useEffect(() => {
     if (!restaurant) return;
-
-    const requestsChannel = supabase
+    const ch = supabase
       .channel(`requests-${restaurant.id}`)
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'shift_requests',
-        filter: `restaurant_id=eq.${restaurant.id}`
-      }, () => {
-        fetchRequests();
-      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'shift_requests', filter: `restaurant_id=eq.${restaurant.id}` }, fetchRequests)
       .subscribe();
-
-    return () => {
-      requestsChannel.unsubscribe();
-    };
+    return () => ch.unsubscribe();
   }, [restaurant, filter]);
 
   const fetchRequests = async () => {
     setLoading(true);
-
-    const params = new URLSearchParams({
-      restaurant_id: restaurant.id
-    });
-
-    if (filter !== 'all') {
-      params.append('status', filter);
-    }
-
+    const params = new URLSearchParams({ restaurant_id: restaurant.id });
+    if (filter !== 'all') params.append('status', filter);
     const response = await fetch(`/api/rota/requests?${params}`);
     const result = await response.json();
-
     if (result.requests) {
-      // Filter out time_off requests - they're managed in the dedicated Time-Off Requests page
-      const filteredRequests = result.requests.filter(req => req.request_type !== 'time_off');
-      setRequests(filteredRequests);
+      setRequests(result.requests.filter(req => req.request_type !== 'time_off'));
     }
-
     setLoading(false);
   };
 
   const handleApprove = async (request) => {
     const staffData = localStorage.getItem('staff');
     const staff = staffData ? JSON.parse(staffData) : null;
-
     try {
       const response = await fetch('/api/rota/requests', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: request.id,
-          status: 'approved',
-          approved_by: staff?.id || restaurant.owner_id
-        })
+        body: JSON.stringify({ id: request.id, status: 'approved', approved_by: staff?.id || restaurant.owner_id })
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to approve request');
-      }
-
+      if (!response.ok) throw new Error('Failed to approve request');
       fetchRequests();
-      if (onRequestUpdated) onRequestUpdated(); // Notify parent to update count
-      alert(t('requestApprovedSuccess'));
+      if (onRequestUpdated) onRequestUpdated();
     } catch (error) {
-      console.error('Error approving request:', error);
       alert(error.message);
     }
   };
 
   const handleReject = async (request) => {
-    if (!rejectionReason.trim()) {
-      alert(t('provideRejectionReason'));
-      return;
-    }
-
+    if (!rejectionReason.trim()) { alert(t('provideRejectionReason')); return; }
     try {
       const response = await fetch('/api/rota/requests', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: request.id,
-          status: 'rejected',
-          rejection_reason: rejectionReason
-        })
+        body: JSON.stringify({ id: request.id, status: 'rejected', rejection_reason: rejectionReason })
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to reject request');
-      }
-
+      if (!response.ok) throw new Error('Failed to reject request');
       setSelectedRequest(null);
       setRejectionReason('');
       fetchRequests();
-      if (onRequestUpdated) onRequestUpdated(); // Notify parent to update count
-      alert(t('requestRejected'));
+      if (onRequestUpdated) onRequestUpdated();
     } catch (error) {
-      console.error('Error rejecting request:', error);
       alert(error.message);
     }
   };
 
   const handleEdit = (request) => {
     setEditingRequest(request);
-    setEditForm({
-      date_from: request.date_from || '',
-      date_to: request.date_to || '',
-      status: request.status || '',
-      reason: request.reason || '',
-      leave_type: request.leave_type || '',
-      rejection_reason: request.rejection_reason || ''
-    });
-  };
-
-  const handleEditFormChange = (e) => {
-    const { name, value } = e.target;
-    setEditForm(prev => ({ ...prev, [name]: value }));
+    setEditForm({ date_from: request.date_from || '', date_to: request.date_to || '', status: request.status || '', reason: request.reason || '', leave_type: request.leave_type || '', rejection_reason: request.rejection_reason || '' });
   };
 
   const handleSaveEdit = async () => {
     if (!editingRequest) return;
-
     try {
       const staffData = localStorage.getItem('staff');
       const staff = staffData ? JSON.parse(staffData) : null;
-
       const response = await fetch('/api/rota/requests', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: editingRequest.id,
-          date_from: editForm.date_from,
-          date_to: editForm.date_to,
-          status: editForm.status,
-          reason: editForm.reason,
-          leave_type: editForm.leave_type,
-          rejection_reason: editForm.rejection_reason,
-          approved_by: editForm.status === 'approved' ? (staff?.id || restaurant.owner_id) : undefined
-        })
+        body: JSON.stringify({ id: editingRequest.id, ...editForm, approved_by: editForm.status === 'approved' ? (staff?.id || restaurant.owner_id) : undefined })
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to update request');
-      }
-
+      if (!response.ok) throw new Error('Failed to update request');
       setEditingRequest(null);
-      setEditForm({
-        date_from: '',
-        date_to: '',
-        status: '',
-        reason: '',
-        leave_type: '',
-        rejection_reason: ''
-      });
       fetchRequests();
       if (onRequestUpdated) onRequestUpdated();
-      alert(t('requestUpdatedSuccess'));
     } catch (error) {
-      console.error('Error updating request:', error);
       alert(error.message);
     }
   };
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-GB', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
-    });
-  };
+  const formatDate = (d) => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
-  const getRequestTypeBadge = (type) => {
-    const badges = {
-      time_off: 'bg-blue-100 text-blue-800',
-      swap: 'bg-purple-100 text-purple-800',
-      cover: 'bg-orange-100 text-orange-800'
-    };
+  const TABS = [
+    { key: 'pending',  label: t('filterPending') },
+    { key: 'approved', label: t('filterApproved') },
+    { key: 'rejected', label: t('filterRejected') },
+    { key: 'all',      label: t('filterAll') }
+  ];
 
-    return (
-      <span className={`px-3 py-1 rounded-full text-xs font-medium ${badges[type] || 'bg-gray-100 text-gray-800'}`}>
-        {t(`requestType.${type}`)}
-      </span>
-    );
-  };
-
-  const getLeaveTypeBadge = (leaveType) => {
-    if (!leaveType) return null;
-
-    const badges = {
-      annual_holiday: 'bg-green-100 text-green-800',
-      sick_self_cert: 'bg-orange-100 text-orange-800',
-      sick_medical_cert: 'bg-red-100 text-red-800',
-      unpaid: 'bg-gray-100 text-gray-800',
-      compassionate: 'bg-purple-100 text-purple-800',
-      other: 'bg-slate-100 text-slate-800'
-    };
-
-    const emojis = {
-      annual_holiday: '🏖️ ',
-      sick_self_cert: '🤒 ',
-      sick_medical_cert: '🏥 ',
-      unpaid: '💰 ',
-      compassionate: '🕊️ ',
-      other: ''
-    };
-
-    return (
-      <span className={`px-3 py-1 rounded-full text-xs font-medium ${badges[leaveType] || 'bg-gray-100 text-gray-800'}`}>
-        {emojis[leaveType]}{t(`leaveType.${leaveType}`)}
-      </span>
-    );
-  };
-
-  const getStatusBadge = (status) => {
-    const badges = {
-      pending: 'bg-yellow-100 text-yellow-800',
-      approved: 'bg-green-100 text-green-800',
-      rejected: 'bg-red-100 text-red-800',
-      cancelled: 'bg-gray-100 text-gray-800'
-    };
-
-    return (
-      <span className={`px-3 py-1 rounded-full text-xs font-medium ${badges[status] || 'bg-gray-100 text-gray-800'}`}>
-        {t(`status.${status}`)}
-      </span>
-    );
-  };
+  const pendingCount = requests.filter(r => r.status === 'pending').length;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div
-        className="bg-white rounded-2xl p-8 max-w-5xl w-full max-h-[90vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-slate-800">{t('title')}</h2>
-          <button
-            onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 text-2xl font-bold"
-          >
-            ×
-          </button>
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-3xl max-h-[92vh] flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-5 border-b-2 border-slate-100 dark:border-slate-700 flex-shrink-0">
+          <div>
+            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">{t('title')}</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Shift swaps and cover requests</p>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 text-xl font-bold transition-colors">×</button>
         </div>
 
-        {/* Filter Tabs */}
-        <div className="flex gap-2 mb-6 border-b-2 border-slate-100">
-          <button
-            onClick={() => setFilter('pending')}
-            className={`px-4 py-2 font-medium transition-colors ${
-              filter === 'pending'
-                ? 'text-[#6262bd] border-b-2 border-[#6262bd] -mb-0.5'
-                : 'text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            {t('filterPending')}
-          </button>
-          <button
-            onClick={() => setFilter('approved')}
-            className={`px-4 py-2 font-medium transition-colors ${
-              filter === 'approved'
-                ? 'text-[#6262bd] border-b-2 border-[#6262bd] -mb-0.5'
-                : 'text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            {t('filterApproved')}
-          </button>
-          <button
-            onClick={() => setFilter('rejected')}
-            className={`px-4 py-2 font-medium transition-colors ${
-              filter === 'rejected'
-                ? 'text-[#6262bd] border-b-2 border-[#6262bd] -mb-0.5'
-                : 'text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            {t('filterRejected')}
-          </button>
-          <button
-            onClick={() => setFilter('all')}
-            className={`px-4 py-2 font-medium transition-colors ${
-              filter === 'all'
-                ? 'text-[#6262bd] border-b-2 border-[#6262bd] -mb-0.5'
-                : 'text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            {t('filterAll')}
-          </button>
+        {/* Filter tabs */}
+        <div className="px-6 pt-4 flex gap-1 flex-shrink-0">
+          {TABS.map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setFilter(tab.key)}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-1.5 ${
+                filter === tab.key
+                  ? 'bg-[#6262bd] text-white'
+                  : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400'
+              }`}
+            >
+              {tab.label}
+              {tab.key === 'pending' && pendingCount > 0 && (
+                <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${filter === 'pending' ? 'bg-white/30' : 'bg-red-500 text-white'}`}>
+                  {pendingCount}
+                </span>
+              )}
+            </button>
+          ))}
         </div>
 
-        {/* Requests List */}
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6262bd] mx-auto mb-4"></div>
-            <p className="text-slate-600">{t('loadingRequests')}</p>
-          </div>
-        ) : requests.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-slate-600">{t('noRequestsFound')}</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {requests.map(request => (
-              <div
-                key={request.id}
-                className="border-2 border-slate-100 rounded-xl p-6 hover:border-slate-200 transition-colors"
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="font-bold text-lg text-slate-800">
-                        {request.staff?.name}
-                      </h3>
-                      {getRequestTypeBadge(request.request_type)}
-                      {request.leave_type && getLeaveTypeBadge(request.leave_type)}
-                      {getStatusBadge(request.status)}
-                    </div>
-                    <p className="text-sm text-slate-500">
-                      {request.staff?.role} • {t('submitted')} {formatDate(request.created_at)}
-                      {request.days_requested && (
-                        <span className="ml-2 font-medium text-[#6262bd]">
-                          • {request.days_requested} {t(request.days_requested === 1 ? 'workingDay' : 'workingDays')}
-                        </span>
-                      )}
-                    </p>
-                  </div>
+        {/* Body */}
+        <div className="overflow-y-auto flex-1 px-6 py-4">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-16">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#6262bd] mb-4"></div>
+              <p className="text-slate-500">{t('loadingRequests')}</p>
+            </div>
+          ) : requests.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-slate-400">
+              <div className="text-5xl mb-4">📭</div>
+              <p className="font-medium text-slate-600 dark:text-slate-300">{t('noRequestsFound')}</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {requests.map(request => {
+                const sc = STATUS_CONFIG[request.status] || STATUS_CONFIG.pending;
+                const lc = request.leave_type ? LEAVE_CONFIG[request.leave_type] : null;
+                const isExpanded = expandedId === request.id;
 
-                  <div className="flex gap-2">
-                    {request.status === 'pending' && (
-                      <>
-                        <button
-                          onClick={() => handleApprove(request)}
-                          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
-                        >
-                          {t('approve')}
-                        </button>
-                        <button
-                          onClick={() => setSelectedRequest(request)}
-                          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
-                        >
-                          {t('reject')}
-                        </button>
-                      </>
-                    )}
-                    <button
-                      onClick={() => handleEdit(request)}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                return (
+                  <div key={request.id} className="border-2 border-slate-100 dark:border-slate-700 rounded-xl overflow-hidden hover:border-slate-200 dark:hover:border-slate-600 transition-colors">
+                    {/* Card header */}
+                    <div
+                      className="flex items-center justify-between px-5 py-4 cursor-pointer"
+                      onClick={() => setExpandedId(isExpanded ? null : request.id)}
                     >
-                      {t('edit')}
-                    </button>
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-9 h-9 rounded-full bg-[#6262bd]/10 flex-shrink-0 flex items-center justify-center text-[#6262bd] font-bold text-sm">
+                          {request.staff?.name?.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-semibold text-slate-800 dark:text-slate-200">{request.staff?.name}</span>
+                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 ${sc.bg} ${sc.text}`}>
+                              <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`}></span>
+                              {sc.label}
+                            </span>
+                            {lc && (
+                              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${lc.bg}`}>{lc.emoji} {lc.label}</span>
+                            )}
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            {request.staff?.role} · {t('submitted')} {formatDate(request.created_at)}
+                            {request.days_requested && <span className="ml-1 text-[#6262bd] font-medium">· {request.days_requested}d</span>}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0 ml-3">
+                        {request.status === 'pending' && (
+                          <>
+                            <button
+                              onClick={e => { e.stopPropagation(); handleApprove(request); }}
+                              className="px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-xs font-semibold"
+                            >✓ {t('approve')}</button>
+                            <button
+                              onClick={e => { e.stopPropagation(); setSelectedRequest(request); }}
+                              className="px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-xs font-semibold"
+                            >✕ {t('reject')}</button>
+                          </>
+                        )}
+                        <button
+                          onClick={e => { e.stopPropagation(); handleEdit(request); }}
+                          className="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors text-xs font-semibold"
+                        >✎ {t('edit')}</button>
+                        <span className={`text-slate-400 text-sm transition-transform ${isExpanded ? 'rotate-180' : ''}`}>▾</span>
+                      </div>
+                    </div>
+
+                    {/* Expanded details */}
+                    {isExpanded && (
+                      <div className="px-5 pb-4 pt-1 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-700">
+                        {request.request_type === 'time_off' && (
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <p className="text-xs text-slate-500 mb-0.5">{t('from')}</p>
+                              <p className="text-sm font-medium text-slate-700 dark:text-slate-300">{formatDate(request.date_from)}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-slate-500 mb-0.5">{t('to')}</p>
+                              <p className="text-sm font-medium text-slate-700 dark:text-slate-300">{formatDate(request.date_to)}</p>
+                            </div>
+                          </div>
+                        )}
+                        {request.request_type === 'swap' && request.shift && (
+                          <p className="text-sm text-slate-600 dark:text-slate-400">
+                            <strong>{t('wantsToSwap')}:</strong> {formatDate(request.shift.date)} {request.shift.shift_start}–{request.shift.shift_end}
+                            {request.swap_with_staff && <span> → with <strong>{request.swap_with_staff.name}</strong></span>}
+                          </p>
+                        )}
+                        {request.request_type === 'cover' && request.shift && (
+                          <p className="text-sm text-slate-600 dark:text-slate-400">
+                            <strong>{t('needsCoverFor')}:</strong> {formatDate(request.shift.date)} {request.shift.shift_start}–{request.shift.shift_end}
+                          </p>
+                        )}
+                        {request.reason && (
+                          <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
+                            <strong>{t('reason')}:</strong> {request.reason}
+                          </p>
+                        )}
+                        {request.status === 'approved' && request.approver && (
+                          <p className="text-xs text-green-600 mt-2">
+                            ✅ {t('approvedBy').replace('{approver}', request.approver.name).replace('{date}', formatDate(request.approved_at))}
+                          </p>
+                        )}
+                        {request.status === 'rejected' && request.rejection_reason && (
+                          <p className="text-xs text-red-600 mt-2">
+                            ✕ {t('rejectedLabel')}: {request.rejection_reason}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
-                </div>
-
-                {/* Request Details */}
-                <div className="bg-slate-50 rounded-lg p-4">
-                  {request.request_type === 'time_off' && (
-                    <div>
-                      <p className="text-sm font-medium text-slate-700 mb-2">{t('timeOffRequestLabel')}</p>
-                      <p className="text-sm text-slate-600">
-                        {t('from')}: {formatDate(request.date_from)} {t('to')} {formatDate(request.date_to)}
-                      </p>
-                      {request.reason && (
-                        <p className="text-sm text-slate-600 mt-2">
-                          {t('reason')}: {request.reason}
-                        </p>
-                      )}
-                    </div>
-                  )}
-
-                  {request.request_type === 'swap' && request.shift && (
-                    <div>
-                      <p className="text-sm font-medium text-slate-700 mb-2">{t('shiftSwapRequestLabel')}</p>
-                      <p className="text-sm text-slate-600">
-                        {t('wantsToSwap')}: {formatDate(request.shift.date)} {request.shift.shift_start} - {request.shift.shift_end}
-                      </p>
-                      {request.swap_with_staff && (
-                        <p className="text-sm text-slate-600 mt-1">
-                          {t('with')}: {request.swap_with_staff.name}
-                        </p>
-                      )}
-                    </div>
-                  )}
-
-                  {request.request_type === 'cover' && request.shift && (
-                    <div>
-                      <p className="text-sm font-medium text-slate-700 mb-2">{t('coverRequestLabel')}</p>
-                      <p className="text-sm text-slate-600">
-                        {t('needsCoverFor')}: {formatDate(request.shift.date)} {request.shift.shift_start} - {request.shift.shift_end}
-                      </p>
-                      {request.reason && (
-                        <p className="text-sm text-slate-600 mt-2">
-                          {t('reason')}: {request.reason}
-                        </p>
-                      )}
-                    </div>
-                  )}
-
-                  {request.status === 'approved' && request.approver && (
-                    <p className="text-sm text-green-600 mt-3">
-                      {t('approvedBy').replace('{approver}', request.approver.name).replace('{date}', formatDate(request.approved_at))}
-                    </p>
-                  )}
-
-                  {request.status === 'rejected' && request.rejection_reason && (
-                    <p className="text-sm text-red-600 mt-3">
-                      {t('rejectedLabel')}: {request.rejection_reason}
-                    </p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Rejection Modal */}
-        {selectedRequest && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60 p-4">
-            <div className="bg-white rounded-xl p-6 max-w-md w-full">
-              <h3 className="text-lg font-bold mb-4">{t('rejectRequestTitle')}</h3>
-              <p className="text-sm text-slate-600 mb-4">
-                {t('provideRejectionReasonPrompt')}
-              </p>
-              <textarea
-                value={rejectionReason}
-                onChange={(e) => setRejectionReason(e.target.value)}
-                rows="4"
-                placeholder={t('rejectionReasonPlaceholder')}
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] resize-none mb-4"
-              />
-              <div className="flex gap-3 justify-end">
-                <button
-                  onClick={() => {
-                    setSelectedRequest(null);
-                    setRejectionReason('');
-                  }}
-                  className="px-4 py-2 border-2 border-slate-200 rounded-lg text-slate-700"
-                >
-                  {tCommon('cancel')}
-                </button>
-                <button
-                  onClick={() => handleReject(selectedRequest)}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-                >
-                  {t('rejectRequestButton')}
-                </button>
-              </div>
+                );
+              })}
             </div>
-          </div>
-        )}
-
-        {/* Edit Request Modal */}
-        {editingRequest && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60 p-4">
-            <div className="bg-white rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <h3 className="text-xl font-bold mb-4">{t('editRequestTitle')}</h3>
-
-              <div className="space-y-4">
-                {/* Staff Info */}
-                <div className="bg-slate-50 border-2 border-slate-200 rounded-lg p-4">
-                  <p className="text-sm font-medium text-slate-700">{t('staff')}: <span className="font-bold">{editingRequest.staff?.name}</span></p>
-                  <p className="text-sm text-slate-600">{t('role')}: {editingRequest.staff?.role}</p>
-                </div>
-
-                {/* Date Range */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      {t('startDate')}
-                    </label>
-                    <input
-                      type="date"
-                      name="date_from"
-                      value={editForm.date_from}
-                      onChange={handleEditFormChange}
-                      className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      {t('endDate')}
-                    </label>
-                    <input
-                      type="date"
-                      name="date_to"
-                      value={editForm.date_to}
-                      onChange={handleEditFormChange}
-                      className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd]"
-                    />
-                  </div>
-                </div>
-
-                {/* Leave Type */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    {t('leaveTypeLabel')}
-                  </label>
-                  <select
-                    name="leave_type"
-                    value={editForm.leave_type}
-                    onChange={handleEditFormChange}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd]"
-                  >
-                    <option value="">{t('selectType')}</option>
-                    <option value="annual_holiday">{t('leaveType.annualHoliday')}</option>
-                    <option value="sick_self_cert">{t('leaveType.sickSelfCert')}</option>
-                    <option value="sick_medical_cert">{t('leaveType.sickMedicalCert')}</option>
-                    <option value="unpaid">{t('leaveType.unpaid')}</option>
-                    <option value="compassionate">{t('leaveType.compassionate')}</option>
-                    <option value="other">{t('leaveType.other')}</option>
-                  </select>
-                </div>
-
-                {/* Status */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    {t('statusLabel')}
-                  </label>
-                  <select
-                    name="status"
-                    value={editForm.status}
-                    onChange={handleEditFormChange}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd]"
-                  >
-                    <option value="pending">{t('status.pending')}</option>
-                    <option value="approved">{t('status.approved')}</option>
-                    <option value="rejected">{t('status.rejected')}</option>
-                    <option value="cancelled">{t('status.cancelled')}</option>
-                  </select>
-                </div>
-
-                {/* Reason */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    {t('reasonLabel')}
-                  </label>
-                  <textarea
-                    name="reason"
-                    value={editForm.reason}
-                    onChange={handleEditFormChange}
-                    rows="3"
-                    placeholder={t('reasonPlaceholder')}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] resize-none"
-                  />
-                </div>
-
-                {/* Rejection Reason (if status is rejected) */}
-                {editForm.status === 'rejected' && (
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      {t('rejectionReasonLabel')}
-                    </label>
-                    <textarea
-                      name="rejection_reason"
-                      value={editForm.rejection_reason}
-                      onChange={handleEditFormChange}
-                      rows="3"
-                      placeholder={t('rejectionReasonEditPlaceholder')}
-                      className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] resize-none"
-                    />
-                  </div>
-                )}
-
-                {/* Action Buttons */}
-                <div className="flex gap-3 justify-end pt-4">
-                  <button
-                    onClick={() => {
-                      setEditingRequest(null);
-                      setEditForm({
-                        date_from: '',
-                        date_to: '',
-                        status: '',
-                        reason: '',
-                        leave_type: '',
-                        rejection_reason: ''
-                      });
-                    }}
-                    className="px-6 py-3 border-2 border-slate-200 rounded-xl text-slate-700 font-medium hover:border-[#6262bd]"
-                  >
-                    {tCommon('cancel')}
-                  </button>
-                  <button
-                    onClick={handleSaveEdit}
-                    className="px-6 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700"
-                  >
-                    {t('saveChanges')}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
+
+      {/* Rejection inline modal */}
+      {selectedRequest && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4" onClick={() => { setSelectedRequest(null); setRejectionReason(''); }}>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-md w-full shadow-2xl" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-1">{t('rejectRequestTitle')}</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+              Rejecting request from <strong>{selectedRequest.staff?.name}</strong>
+            </p>
+            <textarea
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              rows="3"
+              autoFocus
+              placeholder={t('rejectionReasonPlaceholder')}
+              className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] resize-none text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 mb-4"
+            />
+            <div className="flex gap-3">
+              <button onClick={() => { setSelectedRequest(null); setRejectionReason(''); }} className="flex-1 px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                {tCommon('cancel')}
+              </button>
+              <button onClick={() => handleReject(selectedRequest)} className="flex-1 px-4 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition-colors">
+                {t('rejectRequestButton')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit modal */}
+      {editingRequest && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4" onClick={() => setEditingRequest(null)}>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-5 border-b-2 border-slate-100 dark:border-slate-700">
+              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">{t('editRequestTitle')}</h3>
+              <button onClick={() => setEditingRequest(null)} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 text-xl font-bold">×</button>
+            </div>
+            <div className="px-6 py-5 space-y-4">
+              <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
+                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">{editingRequest.staff?.name} <span className="font-normal text-slate-500">({editingRequest.staff?.role})</span></p>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {[['date_from', t('startDate')], ['date_to', t('endDate')]].map(([name, label]) => (
+                  <div key={name}>
+                    <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">{label}</label>
+                    <input type="date" name={name} value={editForm[name]} onChange={e => setEditForm(p => ({ ...p, [name]: e.target.value }))}
+                      className="w-full px-3 py-2.5 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800" />
+                  </div>
+                ))}
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">{t('leaveTypeLabel')}</label>
+                  <select name="leave_type" value={editForm.leave_type} onChange={e => setEditForm(p => ({ ...p, leave_type: e.target.value }))}
+                    className="w-full px-3 py-2.5 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800">
+                    <option value="">{t('selectType')}</option>
+                    <option value="annual_holiday">Annual Holiday</option>
+                    <option value="sick_self_cert">Sick (Self-cert)</option>
+                    <option value="sick_medical_cert">Sick (Medical cert)</option>
+                    <option value="unpaid">Unpaid</option>
+                    <option value="compassionate">Compassionate</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">{t('statusLabel')}</label>
+                  <select name="status" value={editForm.status} onChange={e => setEditForm(p => ({ ...p, status: e.target.value }))}
+                    className="w-full px-3 py-2.5 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800">
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">{t('reasonLabel')}</label>
+                <textarea name="reason" value={editForm.reason} onChange={e => setEditForm(p => ({ ...p, reason: e.target.value }))} rows="2" placeholder={t('reasonPlaceholder')}
+                  className="w-full px-3 py-2.5 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] resize-none text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 placeholder:text-slate-400" />
+              </div>
+              {editForm.status === 'rejected' && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">{t('rejectionReasonLabel')}</label>
+                  <textarea name="rejection_reason" value={editForm.rejection_reason} onChange={e => setEditForm(p => ({ ...p, rejection_reason: e.target.value }))} rows="2" placeholder={t('rejectionReasonEditPlaceholder')}
+                    className="w-full px-3 py-2.5 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] resize-none text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 placeholder:text-slate-400" />
+                </div>
+              )}
+            </div>
+            <div className="px-6 py-4 border-t-2 border-slate-100 dark:border-slate-700 flex gap-3">
+              <button onClick={() => setEditingRequest(null)} className="flex-1 px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{tCommon('cancel')}</button>
+              <button onClick={handleSaveEdit} className="flex-1 px-4 py-3 bg-[#6262bd] text-white rounded-xl font-semibold hover:bg-[#5252a5] transition-colors">{t('saveChanges')}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

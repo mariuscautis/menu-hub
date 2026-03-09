@@ -66,7 +66,37 @@ const emailTranslations = {
     cancellationErrorMessage: "If you believe this cancellation was made in error, please contact us at {phone} as soon as possible.",
     theRestaurantDirectly: "the restaurant directly",
     hopeToSeeYou: "We hope to see you at {restaurantName} in the future!",
-    automatedMessageFrom: "This is an automated message from {restaurantName}"
+    automatedMessageFrom: "This is an automated message from {restaurantName}",
+
+    // Shift Published (staff notification)
+    shiftPublishedSubject: "Your new shifts are now available — {restaurantName}",
+    shiftPublishedTitle: "Your Rota Has Been Updated",
+    shiftPublishedGreeting: "Hi {staffName},",
+    shiftPublishedIntro: "Great news! Your upcoming shifts at {restaurantName} have been published and are now available for you to view.",
+    shiftPublishedDetails: "Shift Details",
+    shiftPublishedDate: "Date",
+    shiftPublishedTime: "Time",
+    shiftPublishedRole: "Role",
+    shiftPublishedBreak: "Break",
+    shiftPublishedMinutes: "min",
+    shiftPublishedCta: "View My Rota",
+    shiftPublishedOutro: "If you have any questions about your schedule, please speak to your manager.",
+    shiftPublishedFooter: "This is an automated message from {restaurantName}. Please do not reply to this email.",
+
+    // Time-Off Request (manager notification)
+    timeOffRequestSubject: "New Time-Off Request from {staffName} — {restaurantName}",
+    timeOffRequestTitle: "New Time-Off Request",
+    timeOffRequestGreeting: "Hello,",
+    timeOffRequestIntro: "A new time-off request has been submitted and is awaiting your review.",
+    timeOffRequestFrom: "Staff Member",
+    timeOffRequestType: "Leave Type",
+    timeOffRequestDates: "Requested Dates",
+    timeOffRequestDays: "Duration",
+    timeOffRequestDaysUnit: "day(s)",
+    timeOffRequestReason: "Reason",
+    timeOffRequestCta: "Review Request",
+    timeOffRequestOutro: "Please log in to your dashboard to approve or decline this request.",
+    timeOffRequestFooter: "This is an automated notification from {restaurantName}."
   },
 
   ro: {
@@ -133,7 +163,37 @@ const emailTranslations = {
     cancellationErrorMessage: "Dacă crezi că această anulare a fost făcută din greșeală, te rugăm să ne contactezi la {phone} cât mai curând posibil.",
     theRestaurantDirectly: "direct restaurantul",
     hopeToSeeYou: "Sperăm să te vedem la {restaurantName} în viitor!",
-    automatedMessageFrom: "Acesta este un mesaj automat de la {restaurantName}"
+    automatedMessageFrom: "Acesta este un mesaj automat de la {restaurantName}",
+
+    // Shift Published (staff notification)
+    shiftPublishedSubject: "Turele tale sunt acum disponibile — {restaurantName}",
+    shiftPublishedTitle: "Programul Tău a Fost Actualizat",
+    shiftPublishedGreeting: "Salut {staffName},",
+    shiftPublishedIntro: "Vești bune! Turele tale viitoare la {restaurantName} au fost publicate și sunt acum disponibile pentru vizualizare.",
+    shiftPublishedDetails: "Detalii Tură",
+    shiftPublishedDate: "Data",
+    shiftPublishedTime: "Ora",
+    shiftPublishedRole: "Rol",
+    shiftPublishedBreak: "Pauză",
+    shiftPublishedMinutes: "min",
+    shiftPublishedCta: "Vezi Programul Meu",
+    shiftPublishedOutro: "Dacă ai întrebări despre programul tău, te rugăm să discuți cu managerul tău.",
+    shiftPublishedFooter: "Acesta este un mesaj automat de la {restaurantName}. Te rugăm să nu răspunzi la acest email.",
+
+    // Time-Off Request (manager notification)
+    timeOffRequestSubject: "Cerere nouă de concediu de la {staffName} — {restaurantName}",
+    timeOffRequestTitle: "Cerere Nouă de Concediu",
+    timeOffRequestGreeting: "Bună ziua,",
+    timeOffRequestIntro: "O nouă cerere de concediu a fost trimisă și așteaptă revizuirea dumneavoastră.",
+    timeOffRequestFrom: "Angajat",
+    timeOffRequestType: "Tip Concediu",
+    timeOffRequestDates: "Date Solicitate",
+    timeOffRequestDays: "Durată",
+    timeOffRequestDaysUnit: "zi(le)",
+    timeOffRequestReason: "Motiv",
+    timeOffRequestCta: "Revizuiește Cererea",
+    timeOffRequestOutro: "Vă rugăm să vă conectați la tabloul de bord pentru a aproba sau respinge această cerere.",
+    timeOffRequestFooter: "Aceasta este o notificare automată de la {restaurantName}."
   },
 
   fr: {
@@ -200,7 +260,37 @@ const emailTranslations = {
     cancellationErrorMessage: "Si vous pensez que cette annulation a été faite par erreur, veuillez nous contacter au {phone} dès que possible.",
     theRestaurantDirectly: "directement le restaurant",
     hopeToSeeYou: "Nous espérons vous voir chez {restaurantName} à l'avenir!",
-    automatedMessageFrom: "Ceci est un message automatique de {restaurantName}"
+    automatedMessageFrom: "Ceci est un message automatique de {restaurantName}",
+
+    // Shift Published (staff notification)
+    shiftPublishedSubject: "Vos nouveaux horaires sont disponibles — {restaurantName}",
+    shiftPublishedTitle: "Votre Planning a Été Mis à Jour",
+    shiftPublishedGreeting: "Bonjour {staffName},",
+    shiftPublishedIntro: "Bonne nouvelle ! Vos prochains horaires chez {restaurantName} ont été publiés et sont maintenant disponibles.",
+    shiftPublishedDetails: "Détails du Service",
+    shiftPublishedDate: "Date",
+    shiftPublishedTime: "Heure",
+    shiftPublishedRole: "Poste",
+    shiftPublishedBreak: "Pause",
+    shiftPublishedMinutes: "min",
+    shiftPublishedCta: "Voir Mon Planning",
+    shiftPublishedOutro: "Si vous avez des questions concernant votre planning, veuillez en parler à votre responsable.",
+    shiftPublishedFooter: "Ceci est un message automatique de {restaurantName}. Merci de ne pas répondre à cet email.",
+
+    // Time-Off Request (manager notification)
+    timeOffRequestSubject: "Nouvelle demande de congé de {staffName} — {restaurantName}",
+    timeOffRequestTitle: "Nouvelle Demande de Congé",
+    timeOffRequestGreeting: "Bonjour,",
+    timeOffRequestIntro: "Une nouvelle demande de congé a été soumise et attend votre examen.",
+    timeOffRequestFrom: "Employé",
+    timeOffRequestType: "Type de Congé",
+    timeOffRequestDates: "Dates Demandées",
+    timeOffRequestDays: "Durée",
+    timeOffRequestDaysUnit: "jour(s)",
+    timeOffRequestReason: "Raison",
+    timeOffRequestCta: "Examiner la Demande",
+    timeOffRequestOutro: "Veuillez vous connecter à votre tableau de bord pour approuver ou refuser cette demande.",
+    timeOffRequestFooter: "Ceci est une notification automatique de {restaurantName}."
   },
 
   it: {
@@ -267,7 +357,37 @@ const emailTranslations = {
     cancellationErrorMessage: "Se ritieni che questa cancellazione sia stata fatta per errore, contattaci al {phone} il prima possibile.",
     theRestaurantDirectly: "direttamente il ristorante",
     hopeToSeeYou: "Speriamo di vederti presso {restaurantName} in futuro!",
-    automatedMessageFrom: "Questo è un messaggio automatico da {restaurantName}"
+    automatedMessageFrom: "Questo è un messaggio automatico da {restaurantName}",
+
+    // Shift Published (staff notification)
+    shiftPublishedSubject: "I tuoi nuovi turni sono ora disponibili — {restaurantName}",
+    shiftPublishedTitle: "Il Tuo Orario È Stato Aggiornato",
+    shiftPublishedGreeting: "Ciao {staffName},",
+    shiftPublishedIntro: "Ottime notizie! I tuoi prossimi turni presso {restaurantName} sono stati pubblicati e sono ora disponibili.",
+    shiftPublishedDetails: "Dettagli del Turno",
+    shiftPublishedDate: "Data",
+    shiftPublishedTime: "Ora",
+    shiftPublishedRole: "Ruolo",
+    shiftPublishedBreak: "Pausa",
+    shiftPublishedMinutes: "min",
+    shiftPublishedCta: "Visualizza il Mio Orario",
+    shiftPublishedOutro: "Se hai domande sul tuo orario, parla con il tuo responsabile.",
+    shiftPublishedFooter: "Questo è un messaggio automatico da {restaurantName}. Si prega di non rispondere a questa email.",
+
+    // Time-Off Request (manager notification)
+    timeOffRequestSubject: "Nuova richiesta di ferie da {staffName} — {restaurantName}",
+    timeOffRequestTitle: "Nuova Richiesta di Ferie",
+    timeOffRequestGreeting: "Salve,",
+    timeOffRequestIntro: "È stata inviata una nuova richiesta di ferie in attesa di revisione.",
+    timeOffRequestFrom: "Dipendente",
+    timeOffRequestType: "Tipo di Congedo",
+    timeOffRequestDates: "Date Richieste",
+    timeOffRequestDays: "Durata",
+    timeOffRequestDaysUnit: "giorno/i",
+    timeOffRequestReason: "Motivo",
+    timeOffRequestCta: "Esamina la Richiesta",
+    timeOffRequestOutro: "Effettua il login alla dashboard per approvare o rifiutare questa richiesta.",
+    timeOffRequestFooter: "Questa è una notifica automatica da {restaurantName}."
   },
 
   es: {
@@ -334,7 +454,37 @@ const emailTranslations = {
     cancellationErrorMessage: "Si crees que esta cancelación fue hecha por error, contáctanos al {phone} lo antes posible.",
     theRestaurantDirectly: "directamente al restaurante",
     hopeToSeeYou: "¡Esperamos verte en {restaurantName} en el futuro!",
-    automatedMessageFrom: "Este es un mensaje automático de {restaurantName}"
+    automatedMessageFrom: "Este es un mensaje automático de {restaurantName}",
+
+    // Shift Published (staff notification)
+    shiftPublishedSubject: "Tus nuevos turnos ya están disponibles — {restaurantName}",
+    shiftPublishedTitle: "Tu Horario Ha Sido Actualizado",
+    shiftPublishedGreeting: "Hola {staffName},",
+    shiftPublishedIntro: "¡Buenas noticias! Tus próximos turnos en {restaurantName} han sido publicados y ya están disponibles para que los consultes.",
+    shiftPublishedDetails: "Detalles del Turno",
+    shiftPublishedDate: "Fecha",
+    shiftPublishedTime: "Hora",
+    shiftPublishedRole: "Puesto",
+    shiftPublishedBreak: "Descanso",
+    shiftPublishedMinutes: "min",
+    shiftPublishedCta: "Ver Mi Horario",
+    shiftPublishedOutro: "Si tienes alguna pregunta sobre tu horario, habla con tu responsable.",
+    shiftPublishedFooter: "Este es un mensaje automático de {restaurantName}. Por favor, no respondas a este email.",
+
+    // Time-Off Request (manager notification)
+    timeOffRequestSubject: "Nueva solicitud de vacaciones de {staffName} — {restaurantName}",
+    timeOffRequestTitle: "Nueva Solicitud de Vacaciones",
+    timeOffRequestGreeting: "Hola,",
+    timeOffRequestIntro: "Se ha enviado una nueva solicitud de tiempo libre y está pendiente de revisión.",
+    timeOffRequestFrom: "Empleado",
+    timeOffRequestType: "Tipo de Permiso",
+    timeOffRequestDates: "Fechas Solicitadas",
+    timeOffRequestDays: "Duración",
+    timeOffRequestDaysUnit: "día(s)",
+    timeOffRequestReason: "Motivo",
+    timeOffRequestCta: "Revisar Solicitud",
+    timeOffRequestOutro: "Por favor, inicia sesión en tu panel de control para aprobar o rechazar esta solicitud.",
+    timeOffRequestFooter: "Esta es una notificación automática de {restaurantName}."
   }
 }
 

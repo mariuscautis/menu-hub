@@ -557,227 +557,253 @@ export default function Staff() {
         </div>
       )}
 
-      {/* Add Staff Modal */}
+      {/* Add / Edit Staff Modal */}
       {showModal && (
         <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
           onClick={() => {
             setShowModal(false)
             setIsEditing(false)
             setSelectedStaff(null)
             setError(null)
-            setFormData({ email: '', name: '', role: 'staff', pin_code: '', department: departments[0] || 'kitchen' })
+            setFormData({ email: '', name: '', role: 'staff', pin_code: '', department: departments[0] || 'kitchen', annual_holiday_days: 28.0, holiday_year_start: new Date().toISOString().split('T')[0], is_hub: false })
           }}
         >
           <div
-            className="bg-white dark:bg-slate-900 rounded-2xl p-8 w-full max-w-md max-h-[90vh] overflow-y-auto"
+            className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-lg max-h-[92vh] flex flex-col shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-6">
-              {isEditing ? t('editStaffMember') : t('addStaffMember')}
-            </h2>
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-5 border-b-2 border-slate-100 dark:border-slate-700 flex-shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#6262bd]/10 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200">
+                    {isEditing ? t('editStaffMember') : t('addStaffMember')}
+                  </h2>
+                  {isEditing && selectedStaff && (
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{selectedStaff.name || selectedStaff.email}</p>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={() => { setShowModal(false); setIsEditing(false); setError(null) }}
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-xl font-bold"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Error banner */}
             {error && (
-              <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-600 dark:text-red-400 text-sm">
+              <div className="mx-6 mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-600 dark:text-red-400 text-sm flex items-start gap-2">
+                <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
                 {error}
               </div>
             )}
-            <form onSubmit={isEditing ? editStaff : addStaff}>
-              <div className="space-y-5">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    {t('nameLabel')}
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 placeholder:text-slate-400 dark:placeholder:text-slate-500"
-                    placeholder={formData.is_hub ? "Hub Device Name" : t('namePlaceholder')}
-                  />
-                </div>
 
-                {/* Hub User Toggle - Moved to top */}
-                <div className="pt-4 border-t-2 border-slate-100 dark:border-slate-700">
-                  <div className="flex items-start gap-3">
+            {/* Scrollable form body */}
+            <div className="overflow-y-auto flex-1 px-6 py-5">
+              <form id="staff-form" onSubmit={isEditing ? editStaff : addStaff}>
+                <div className="space-y-5">
+
+                  {/* Name */}
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                      {t('nameLabel')} <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors"
+                      placeholder={formData.is_hub ? 'Hub Device Name' : t('namePlaceholder')}
+                    />
+                  </div>
+
+                  {/* Hub toggle */}
+                  <label className="flex items-start gap-3 p-4 bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer hover:border-[#6262bd] transition-colors">
                     <input
                       type="checkbox"
                       id="is_hub"
                       checked={formData.is_hub}
                       onChange={(e) => setFormData({ ...formData, is_hub: e.target.checked })}
-                      className="mt-1 w-5 h-5 text-[#6262bd] border-slate-300 rounded focus:ring-[#6262bd]"
+                      className="mt-0.5 w-5 h-5 text-[#6262bd] border-slate-300 rounded focus:ring-[#6262bd]"
                     />
-                    <div className="flex-1">
-                      <label htmlFor="is_hub" className="block text-sm font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
-                        🍽️ Designate as Local Hub
-                      </label>
-                      <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-                        This device will coordinate local network sync between staff devices. Only one hub user allowed per restaurant.
+                    <div>
+                      <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">🍽️ Designate as Local Hub</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        Coordinates local network sync between devices. Only one hub per restaurant.
                       </p>
-                      {formData.is_hub && (
-                        <div className="mt-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                          <p className="text-green-700 dark:text-green-400 text-sm font-medium">
-                            ✅ Hub user only needs a name and PIN code
-                          </p>
-                          <p className="text-green-600 dark:text-green-500 text-xs mt-1">
-                            Other fields are not required for hub coordination
-                          </p>
+                    </div>
+                  </label>
+
+                  {formData.is_hub && (
+                    <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl">
+                      <p className="text-green-700 dark:text-green-400 text-sm font-medium">✅ Hub users only need a name and PIN</p>
+                    </div>
+                  )}
+
+                  {!formData.is_hub && (
+                    <>
+                      {/* Email */}
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                          {t('emailLabel')} <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                          <input
+                            type="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            required
+                            className="w-full pl-10 pr-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors"
+                            placeholder={t('emailPlaceholder')}
+                          />
                         </div>
+                      </div>
+
+                      {/* Role + Department side by side */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                            {t('roleLabel')}
+                          </label>
+                          <select
+                            name="role"
+                            value={formData.role}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 transition-colors"
+                          >
+                            <option value="staff">{t('roleStaff')}</option>
+                            <option value="admin">{t('roleAdmin')}</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                            {t('departmentLabel')}
+                          </label>
+                          <select
+                            name="department"
+                            value={formData.department}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 transition-colors"
+                          >
+                            {departments.map(dept => (
+                              <option key={dept} value={dept}>
+                                {dept.charAt(0).toUpperCase() + dept.slice(1)}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {/* PIN Code */}
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                      {t('pinCodeLabel')} {!isEditing && <span className="text-red-500">*</span>}
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        name="pin_code"
+                        value={formData.pin_code}
+                        onChange={handleChange}
+                        required={!isEditing}
+                        disabled={isEditing}
+                        maxLength={3}
+                        pattern="[0-9]{3}"
+                        className="flex-1 px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 font-mono text-2xl text-center tracking-widest disabled:bg-slate-50 dark:disabled:bg-slate-700 disabled:text-slate-400 placeholder:text-slate-300 dark:placeholder:text-slate-600 transition-colors"
+                        placeholder="•••"
+                      />
+                      {!isEditing && (
+                        <button
+                          type="button"
+                          onClick={generatePinCode}
+                          className="px-4 py-3 bg-slate-100 dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 font-medium text-sm whitespace-nowrap transition-colors"
+                        >
+                          {t('generate')}
+                        </button>
                       )}
                     </div>
+                    <p className="text-slate-400 dark:text-slate-500 text-xs mt-1.5">
+                      {isEditing ? t('pinHintEdit') : t('pinHintAdd')}
+                    </p>
                   </div>
-                </div>
 
-                {!formData.is_hub && (
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      {t('emailLabel')}
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 placeholder:text-slate-400 dark:placeholder:text-slate-500"
-                      placeholder={t('emailPlaceholder')}
-                    />
-                  </div>
-                )}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    {t('pinCodeLabel')}
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      name="pin_code"
-                      value={formData.pin_code}
-                      onChange={handleChange}
-                      required={!isEditing}
-                      disabled={isEditing}
-                      maxLength={3}
-                      pattern="[0-9]{3}"
-                      className="flex-1 px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 font-mono text-lg disabled:bg-slate-50 dark:disabled:bg-slate-700 disabled:text-slate-400 placeholder:text-slate-400 dark:placeholder:text-slate-500"
-                      placeholder={t('pinCodePlaceholder')}
-                    />
-                    {!isEditing && (
-                      <button
-                        type="button"
-                        onClick={generatePinCode}
-                        className="px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 font-medium text-sm whitespace-nowrap bg-white dark:bg-slate-800"
-                      >
-                        {t('generate')}
-                      </button>
-                    )}
-                  </div>
-                  <p className="text-slate-400 text-sm mt-2">
-                    {isEditing ? t('pinHintEdit') : t('pinHintAdd')}
-                  </p>
-                </div>
-
-                {!formData.is_hub && (
-                  <>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                        {t('roleLabel')}
-                      </label>
-                      <select
-                        name="role"
-                        value={formData.role}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800"
-                      >
-                        <option value="staff">{t('roleStaff')}</option>
-                        <option value="admin">{t('roleAdmin')}</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                        {t('departmentLabel')}
-                      </label>
-                      <select
-                        name="department"
-                        value={formData.department}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800"
-                      >
-                        {departments.map(dept => (
-                          <option key={dept} value={dept}>
-                            {dept.charAt(0).toUpperCase() + dept.slice(1)}
-                          </option>
-                        ))}
-                      </select>
-                      <p className="text-slate-400 text-sm mt-2">
-                        {t('departmentHint')}
-                      </p>
-                    </div>
-
-                    {/* Holiday Entitlement Section */}
+                  {/* Holiday Entitlement — only for non-hub staff */}
+                  {!formData.is_hub && (
                     <div className="pt-4 border-t-2 border-slate-100 dark:border-slate-700">
-                  <h3 className="text-sm font-semibold text-slate-700 mb-4">{t('holidayEntitlementTitle')}</h3>
-
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        {t('annualHolidayDays')}
-                      </label>
-                      <input
-                        type="number"
-                        name="annual_holiday_days"
-                        value={formData.annual_holiday_days}
-                        onChange={handleChange}
-                        step="0.5"
-                        min="0"
-                        max="365"
-                        className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
-                      />
-                      <p className="text-slate-400 text-sm mt-2">
-                        {t('annualHolidayDaysHint')}
-                      </p>
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                          <svg className="w-3.5 h-3.5 text-green-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                        </div>
+                        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">{t('holidayEntitlementTitle')}</h3>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
+                            {t('annualHolidayDays')}
+                          </label>
+                          <input
+                            type="number"
+                            name="annual_holiday_days"
+                            value={formData.annual_holiday_days}
+                            onChange={handleChange}
+                            step="0.5"
+                            min="0"
+                            max="365"
+                            className="w-full px-4 py-2.5 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 transition-colors"
+                          />
+                          <p className="text-slate-400 dark:text-slate-500 text-xs mt-1">{t('annualHolidayDaysHint')}</p>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
+                            {t('holidayYearStartDate')}
+                          </label>
+                          <input
+                            type="date"
+                            name="holiday_year_start"
+                            value={formData.holiday_year_start}
+                            onChange={handleChange}
+                            className="w-full px-4 py-2.5 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 transition-colors"
+                          />
+                          <p className="text-slate-400 dark:text-slate-500 text-xs mt-1">{t('holidayYearStartDateHint')}</p>
+                        </div>
+                      </div>
                     </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        {t('holidayYearStartDate')}
-                      </label>
-                      <input
-                        type="date"
-                        name="holiday_year_start"
-                        value={formData.holiday_year_start}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
-                      />
-                      <p className="text-slate-400 text-sm mt-2">
-                        {t('holidayYearStartDateHint')}
-                      </p>
-                    </div>
-                  </div>
+                  )}
                 </div>
-                  </>
-                )}
+              </form>
+            </div>
 
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowModal(false)
-                      setIsEditing(false)
-                      setError(null)
-                    }}
-                    className="flex-1 border-2 border-slate-200 text-slate-600 py-3 rounded-xl font-medium hover:bg-slate-50"
-                  >
-                    {t('cancel')}
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 bg-[#6262bd] text-white py-3 rounded-xl font-medium hover:bg-[#5252a3]"
-                  >
-                    {isEditing ? t('updateStaff') : t('addStaffButton')}
-                  </button>
-                </div>
-              </div>
-            </form>
+            {/* Modal Footer */}
+            <div className="px-6 py-4 border-t-2 border-slate-100 dark:border-slate-700 flex gap-3 flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => { setShowModal(false); setIsEditing(false); setError(null) }}
+                className="flex-1 border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 py-3 rounded-xl font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+              >
+                {t('cancel')}
+              </button>
+              <button
+                type="submit"
+                form="staff-form"
+                className="flex-1 bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] transition-colors shadow-sm"
+              >
+                {isEditing ? t('updateStaff') : t('addStaffButton')}
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -785,58 +811,58 @@ export default function Staff() {
       {/* Change PIN Modal */}
       {showPasswordModal && selectedStaff && (
         <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-          onClick={() => {
-            setShowPasswordModal(false)
-            setPasswordData({ newPassword: '' })
-            setSelectedStaff(null)
-          }}
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
+          onClick={() => { setShowPasswordModal(false); setPasswordData({ newPassword: '' }); setSelectedStaff(null) }}
         >
           <div
-            className="bg-white dark:bg-slate-900 rounded-2xl p-8 w-full max-w-md"
+            className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-sm shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-6">
-              {t('changePinTitle').replace('{name}', selectedStaff.name || selectedStaff.email)}
-            </h2>
-            <form onSubmit={updatePinCode}>
-              <div className="space-y-5">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    {t('newPinCode')}
-                  </label>
-                  <input
-                    type="text"
-                    value={passwordData.newPassword}
-                    onChange={(e) => setPasswordData({ newPassword: e.target.value })}
-                    maxLength={3}
-                    pattern="[0-9]{3}"
-                    className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 font-mono text-2xl text-center placeholder:text-slate-400 dark:placeholder:text-slate-500"
-                    placeholder={t('newPinPlaceholder')}
-                  />
-                  <p className="text-slate-400 text-sm mt-2">
-                    {t('sharePinHint')}
-                  </p>
-                </div>
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowPasswordModal(false)
-                      setSelectedStaff(null)
-                      setPasswordData({ newPassword: '' })
-                    }}
-                    className="flex-1 border-2 border-slate-200 text-slate-600 py-3 rounded-xl font-medium hover:bg-slate-50"
-                  >
-                    {t('cancel')}
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 bg-[#6262bd] text-white py-3 rounded-xl font-medium hover:bg-[#5252a3]"
-                  >
-                    {t('updatePin')}
-                  </button>
-                </div>
+            <div className="flex items-center justify-between px-6 py-5 border-b-2 border-slate-100 dark:border-slate-700">
+              <div>
+                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200">{t('changePinTitle').replace('{name}', selectedStaff.name || selectedStaff.email)}</h2>
+                <p className="text-xs text-slate-500 mt-0.5">{t('sharePinHint')}</p>
+              </div>
+              <button
+                onClick={() => { setShowPasswordModal(false); setSelectedStaff(null); setPasswordData({ newPassword: '' }) }}
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 text-xl font-bold transition-colors"
+              >×</button>
+            </div>
+            <form onSubmit={updatePinCode} className="px-6 py-5">
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">{t('newPinCode')}</label>
+              <div className="flex gap-2 justify-center mb-4">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className={`w-16 h-16 flex items-center justify-center border-2 rounded-xl text-3xl font-mono font-bold transition-colors ${passwordData.newPassword.length === i ? 'border-[#6262bd] bg-[#6262bd]/5 text-[#6262bd]' : passwordData.newPassword[i] ? 'border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-200' : 'border-slate-200 dark:border-slate-700 text-slate-300'}`}>
+                    {passwordData.newPassword[i] || '·'}
+                  </div>
+                ))}
+              </div>
+              <input
+                type="text"
+                value={passwordData.newPassword}
+                onChange={(e) => setPasswordData({ newPassword: e.target.value.replace(/\D/g, '').slice(0, 3) })}
+                maxLength={3}
+                pattern="[0-9]{3}"
+                inputMode="numeric"
+                className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 font-mono text-xl text-center tracking-widest placeholder:text-slate-300 transition-colors"
+                placeholder="Enter 3-digit PIN"
+                autoFocus
+              />
+              <div className="flex gap-3 mt-5">
+                <button
+                  type="button"
+                  onClick={() => { setShowPasswordModal(false); setSelectedStaff(null); setPasswordData({ newPassword: '' }) }}
+                  className="flex-1 border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 py-3 rounded-xl font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                >
+                  {t('cancel')}
+                </button>
+                <button
+                  type="submit"
+                  disabled={passwordData.newPassword.length !== 3}
+                  className="flex-1 bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  {t('updatePin')}
+                </button>
               </div>
             </form>
           </div>
