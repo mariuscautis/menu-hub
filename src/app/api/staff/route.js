@@ -122,3 +122,62 @@ export async function POST(request) {
     )
   }
 }
+
+export async function PUT(request) {
+  const supabaseAdmin = getSupabaseAdmin()
+  try {
+    const { staffId, restaurantId, name, email, role, department, is_hub, annual_holiday_days, holiday_year_start } = await request.json()
+
+    if (!staffId || !restaurantId) {
+      return NextResponse.json({ error: 'staffId and restaurantId are required' }, { status: 400 })
+    }
+
+    // Update staff record
+    const { error: staffError } = await supabaseAdmin
+      .from('staff')
+      .update({ name, email, role, department, is_hub })
+      .eq('id', staffId)
+      .eq('restaurant_id', restaurantId)
+
+    if (staffError) {
+      console.error('Staff update error:', staffError)
+      return NextResponse.json({ error: 'Failed to update staff member' }, { status: 500 })
+    }
+
+    // Upsert leave entitlement (only for non-hub staff)
+    if (!is_hub && annual_holiday_days !== undefined && holiday_year_start) {
+      const { data: existing } = await supabaseAdmin
+        .from('staff_leave_entitlements')
+        .select('id')
+        .eq('staff_id', staffId)
+        .maybeSingle()
+
+      if (existing) {
+        const { error: updateErr } = await supabaseAdmin
+          .from('staff_leave_entitlements')
+          .update({
+            annual_holiday_days: parseFloat(annual_holiday_days),
+            holiday_year_start
+          })
+          .eq('staff_id', staffId)
+        if (updateErr) console.error('Entitlement update error:', updateErr)
+      } else {
+        const { error: insertErr } = await supabaseAdmin
+          .from('staff_leave_entitlements')
+          .insert({
+            restaurant_id: restaurantId,
+            staff_id: staffId,
+            annual_holiday_days: parseFloat(annual_holiday_days),
+            holiday_year_start
+          })
+        if (insertErr) console.error('Entitlement insert error:', insertErr)
+      }
+    }
+
+    return NextResponse.json({ success: true })
+
+  } catch (error) {
+    console.error('Unexpected error in PUT /api/staff:', error)
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 })
+  }
+}

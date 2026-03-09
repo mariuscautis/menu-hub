@@ -288,50 +288,24 @@ export default function Staff() {
           .eq('is_hub', true)
       }
 
-      // Update staff details
-      const { error: staffError } = await supabase
-        .from('staff')
-        .update({
+      // Use the API route (service role key) so RLS doesn't block entitlement writes
+      const response = await fetch('/api/staff', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          staffId: selectedStaff.id,
+          restaurantId: restaurant.id,
           name: formData.name,
           email: formData.is_hub ? `hub_${selectedStaff.id}@menuhub.local` : formData.email,
           role: formData.is_hub ? 'staff' : formData.role,
           department: formData.is_hub ? 'kitchen' : formData.department,
-          is_hub: formData.is_hub
+          is_hub: formData.is_hub,
+          annual_holiday_days: formData.is_hub ? 0 : parseFloat(formData.annual_holiday_days),
+          holiday_year_start: formData.is_hub ? null : formData.holiday_year_start
         })
-        .eq('id', selectedStaff.id)
-      if (staffError) throw staffError
-
-      // Update or create leave entitlement (only for non-hub users)
-      if (!formData.is_hub) {
-        const { data: existingEntitlement } = await supabase
-          .from('staff_leave_entitlements')
-          .select('id')
-          .eq('staff_id', selectedStaff.id)
-          .maybeSingle()
-
-        if (existingEntitlement) {
-          // Update existing entitlement
-          const { error: entitlementError } = await supabase
-            .from('staff_leave_entitlements')
-            .update({
-              annual_holiday_days: parseFloat(formData.annual_holiday_days),
-              holiday_year_start: formData.holiday_year_start
-            })
-            .eq('staff_id', selectedStaff.id)
-          if (entitlementError) throw entitlementError
-        } else {
-          // Create new entitlement
-          const { error: entitlementError } = await supabase
-            .from('staff_leave_entitlements')
-            .insert({
-              restaurant_id: restaurant.id,
-              staff_id: selectedStaff.id,
-              annual_holiday_days: parseFloat(formData.annual_holiday_days),
-              holiday_year_start: formData.holiday_year_start
-            })
-        if (entitlementError) throw entitlementError
-        }
-      }
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Failed to update staff')
 
       setShowModal(false)
       setIsEditing(false)
