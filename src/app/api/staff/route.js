@@ -126,16 +126,38 @@ export async function POST(request) {
 export async function PUT(request) {
   const supabaseAdmin = getSupabaseAdmin()
   try {
-    const { staffId, restaurantId, name, email, role, department, is_hub, annual_holiday_days, holiday_year_start } = await request.json()
+    const { staffId, restaurantId, name, email, role, department, is_hub, pin_code, annual_holiday_days, holiday_year_start } = await request.json()
 
     if (!staffId || !restaurantId) {
       return NextResponse.json({ error: 'staffId and restaurantId are required' }, { status: 400 })
     }
 
+    // Validate PIN if provided
+    if (pin_code !== undefined) {
+      if (pin_code.length !== 3 || !/^\d{3}$/.test(pin_code)) {
+        return NextResponse.json({ error: 'PIN code must be exactly 3 digits' }, { status: 400 })
+      }
+      // Check PIN not already used by another staff member
+      const { data: existingPin } = await supabaseAdmin
+        .from('staff')
+        .select('id')
+        .eq('restaurant_id', restaurantId)
+        .eq('pin_code', pin_code)
+        .neq('id', staffId)
+        .maybeSingle()
+      if (existingPin) {
+        return NextResponse.json({ error: 'This PIN code is already in use by another staff member.' }, { status: 400 })
+      }
+    }
+
+    // Build staff update payload
+    const staffUpdate = { name, email, role, department, is_hub }
+    if (pin_code !== undefined) staffUpdate.pin_code = pin_code
+
     // Update staff record
     const { error: staffError } = await supabaseAdmin
       .from('staff')
-      .update({ name, email, role, department, is_hub })
+      .update(staffUpdate)
       .eq('id', staffId)
       .eq('restaurant_id', restaurantId)
 
@@ -145,7 +167,7 @@ export async function PUT(request) {
     }
 
     // Upsert leave entitlement (only for non-hub staff)
-    if (!is_hub && annual_holiday_days !== undefined && holiday_year_start) {
+    if (!is_hub && annual_holiday_days !== undefined && holiday_year_start != null) {
       const { data: existing } = await supabaseAdmin
         .from('staff_leave_entitlements')
         .select('id')

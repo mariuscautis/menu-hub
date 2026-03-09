@@ -346,7 +346,7 @@
     "pinCodeLabel": "PIN Code (3 digits)",
     "pinCodePlaceholder": "123",
     "generate": "Generate",
-    "pinHintEdit": "Use the \"Change\" button in the table to update the PIN code",
+    "pinHintEdit": "Update the PIN code or generate a new one",
     "pinHintAdd": "Staff will use this PIN to log in quickly",
     "roleLabel": "Role",
     "roleStaff": "Staff (Orders only)",

@@ -300,6 +300,7 @@ export default function Staff() {
           role: formData.is_hub ? 'staff' : formData.role,
           department: formData.is_hub ? 'kitchen' : formData.department,
           is_hub: formData.is_hub,
+          pin_code: formData.pin_code,
           annual_holiday_days: formData.is_hub ? 0 : parseFloat(formData.annual_holiday_days),
           holiday_year_start: formData.is_hub ? null : formData.holiday_year_start
         })
@@ -696,23 +697,21 @@ export default function Staff() {
                         type="text"
                         name="pin_code"
                         value={formData.pin_code}
-                        onChange={handleChange}
+                        onChange={(e) => setFormData({ ...formData, pin_code: e.target.value.replace(/\D/g, '').slice(0, 3) })}
                         required={!isEditing}
-                        disabled={isEditing}
                         maxLength={3}
                         pattern="[0-9]{3}"
-                        className="flex-1 px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 font-mono text-2xl text-center tracking-widest disabled:bg-slate-50 dark:disabled:bg-slate-700 disabled:text-slate-400 placeholder:text-slate-300 dark:placeholder:text-slate-600 transition-colors"
+                        inputMode="numeric"
+                        className="flex-1 px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 font-mono text-2xl text-center tracking-widest placeholder:text-slate-300 dark:placeholder:text-slate-600 transition-colors"
                         placeholder="•••"
                       />
-                      {!isEditing && (
-                        <button
-                          type="button"
-                          onClick={generatePinCode}
-                          className="px-4 py-3 bg-slate-100 dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 font-medium text-sm whitespace-nowrap transition-colors"
-                        >
-                          {t('generate')}
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        onClick={generatePinCode}
+                        className="px-4 py-3 bg-slate-100 dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 font-medium text-sm whitespace-nowrap transition-colors"
+                      >
+                        {t('generate')}
+                      </button>
                     </div>
                     <p className="text-slate-400 dark:text-slate-500 text-xs mt-1.5">
                       {isEditing ? t('pinHintEdit') : t('pinHintAdd')}
