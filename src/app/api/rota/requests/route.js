@@ -125,16 +125,12 @@ async function sendTimeOffRequestEmail(supabase, { restaurantId, staffName, date
     const restaurantName = restaurant.name || 'Restaurant'
     const locale = restaurant.email_language || 'en'
 
-    // Use restaurant's contact email; fall back to owner's auth.users email via service role
+    // Use restaurant's contact email; fall back to owner's auth email via RPC
     let managerEmail = restaurant.email
     if (!managerEmail && restaurant.owner_id) {
-      const { data: ownerUser } = await supabase
-        .schema('auth')
-        .from('users')
-        .select('email')
-        .eq('id', restaurant.owner_id)
-        .maybeSingle()
-      managerEmail = ownerUser?.email
+      const { data: ownerEmail } = await supabase
+        .rpc('get_owner_email', { owner_id: restaurant.owner_id })
+      managerEmail = ownerEmail
     }
 
     if (!managerEmail) return // nowhere to send, skip
