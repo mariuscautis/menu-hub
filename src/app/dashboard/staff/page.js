@@ -256,14 +256,19 @@ export default function Staff() {
   const openEditModal = (member) => {
     setSelectedStaff(member)
     const entitlement = member.staff_leave_entitlements?.[0]
+    // Normalize date: Supabase may return a full timestamp; we only need YYYY-MM-DD
+    const rawDate = entitlement?.holiday_year_start
+    const normalizedDate = rawDate
+      ? rawDate.split('T')[0]
+      : new Date().toISOString().split('T')[0]
     setFormData({
       email: member.email,
       name: member.name,
       role: member.role,
       pin_code: member.pin_code,
       department: member.department,
-      annual_holiday_days: entitlement?.annual_holiday_days || 28.0,
-      holiday_year_start: entitlement?.holiday_year_start || new Date().toISOString().split('T')[0],
+      annual_holiday_days: entitlement?.annual_holiday_days ?? 28.0,
+      holiday_year_start: normalizedDate,
       is_hub: member.is_hub || false
     })
     setIsEditing(true)
@@ -310,8 +315,7 @@ export default function Staff() {
             .from('staff_leave_entitlements')
             .update({
               annual_holiday_days: parseFloat(formData.annual_holiday_days),
-              holiday_year_start: formData.holiday_year_start,
-              updated_at: new Date().toISOString()
+              holiday_year_start: formData.holiday_year_start
             })
             .eq('staff_id', selectedStaff.id)
           if (entitlementError) throw entitlementError

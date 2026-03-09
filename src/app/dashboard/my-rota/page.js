@@ -76,14 +76,21 @@ export default function MyRotaPage() {
     if (!restaurant || !staff) return;
 
     try {
-      // 1. Try the materialized view / computed view
+      // 1. Try the materialized view / computed view — only trust it if it has
+      //    a non-null annual_holiday_days AND a non-null holiday_days_remaining
       const { data: viewData, error: viewError } = await supabase
         .from('staff_leave_balances')
         .select('*')
         .eq('staff_id', staff.id)
         .maybeSingle();
 
-      if (!viewError && viewData && (viewData.annual_holiday_days > 0 || viewData.holiday_days_remaining !== undefined)) {
+      if (
+        !viewError &&
+        viewData &&
+        viewData.annual_holiday_days != null &&
+        viewData.annual_holiday_days > 0 &&
+        viewData.holiday_days_remaining != null
+      ) {
         setLeaveBalance(viewData);
         return;
       }
@@ -130,13 +137,11 @@ export default function MyRotaPage() {
 
       const approvedRequests = requests.filter(r =>
         r.status === 'approved' &&
-        r.leave_type === 'annual_holiday' &&
         new Date(r.date_from) >= effectiveYearStart &&
         new Date(r.date_from) < effectiveYearEnd
       );
       const pendingRequests = requests.filter(r =>
-        r.status === 'pending' &&
-        r.leave_type === 'annual_holiday'
+        r.status === 'pending'
       );
 
       const daysUsed = approvedRequests.reduce((s, r) => s + (r.days_requested || 0), 0);
