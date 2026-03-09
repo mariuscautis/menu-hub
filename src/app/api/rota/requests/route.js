@@ -177,14 +177,17 @@ async function sendRequestStatusEmail(supabase, { requestId, status, rejectionRe
     const rotaUrl = `${baseUrl}/staff-login`
 
     const isApproved = status === 'approved'
-    const accentColor = isApproved ? '#16a34a' : '#dc2626'
+    const headerBg = isApproved ? '#15803d' : '#b91c1c'
     const icon = isApproved ? '✅' : '❌'
-    const heading = isApproved
-      ? (tr.requestApprovedTitle || 'Your Leave Request Has Been Approved')
-      : (tr.requestRejectedTitle || 'Your Leave Request Was Declined')
-    const body = isApproved
-      ? (tr.requestApprovedBody || `Great news! Your time-off request from ${formatDateForLocale(req.date_from, locale)} to ${formatDateForLocale(req.date_to, locale)} has been approved.`)
-      : (tr.requestRejectedBody || `Unfortunately your time-off request from ${formatDateForLocale(req.date_from, locale)} to ${formatDateForLocale(req.date_to, locale)} was declined.`)
+    const dateFrom = formatDateForLocale(req.date_from, locale)
+    const dateTo = formatDateForLocale(req.date_to, locale)
+
+    const heading = isApproved ? tr.requestApprovedTitle : tr.requestRejectedTitle
+    const greeting = t(isApproved ? tr.requestApprovedGreeting : tr.requestRejectedGreeting, { staffName })
+    const body = t(isApproved ? tr.requestApprovedBody : tr.requestRejectedBody, { dateFrom, dateTo })
+    const reasonLabel = isApproved ? '' : (tr.requestRejectedReason || 'Reason')
+    const ctaLabel = isApproved ? tr.requestApprovedCta : tr.requestRejectedCta
+    const footer = t(isApproved ? tr.requestApprovedFooter : tr.requestRejectedFooter, { restaurantName })
 
     const html = `<!DOCTYPE html>
 <html lang="en">
@@ -194,24 +197,24 @@ async function sendRequestStatusEmail(supabase, { requestId, status, rejectionRe
     <tr><td align="center">
       <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.08);max-width:600px;width:100%;">
         <tr>
-          <td style="background:linear-gradient(135deg,${accentColor} 0%,${isApproved ? '#15803d' : '#b91c1c'} 100%);padding:40px 32px;text-align:center;">
-            <p style="margin:0 0 8px 0;font-size:13px;color:rgba(255,255,255,0.75);letter-spacing:1px;text-transform:uppercase;">${restaurantName}</p>
+          <td style="background-color:${headerBg};padding:40px 32px;text-align:center;">
+            <p style="margin:0 0 8px 0;font-size:13px;color:rgba(255,255,255,0.85);letter-spacing:1px;text-transform:uppercase;">${restaurantName}</p>
             <h1 style="margin:0;font-size:26px;font-weight:700;color:#ffffff;">${icon} ${heading}</h1>
           </td>
         </tr>
         <tr>
-          <td style="padding:36px 32px;">
-            <p style="margin:0 0 16px 0;font-size:16px;color:#374151;">${t(tr.shiftPublishedGreeting || 'Hi {staffName},', { staffName })}</p>
-            <p style="margin:0 0 24px 0;font-size:15px;color:#6b7280;line-height:1.6;">${body}</p>
+          <td style="padding:36px 32px;background-color:#ffffff;">
+            <p style="margin:0 0 16px 0;font-size:16px;color:#1f2937;">${greeting}</p>
+            <p style="margin:0 0 24px 0;font-size:15px;color:#4b5563;line-height:1.6;">${body}</p>
             ${!isApproved && rejectionReason ? `
             <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:16px 20px;margin-bottom:24px;">
-              <p style="margin:0 0 4px 0;font-size:12px;font-weight:700;color:#dc2626;text-transform:uppercase;">Reason</p>
+              <p style="margin:0 0 4px 0;font-size:12px;font-weight:700;color:#dc2626;text-transform:uppercase;">${reasonLabel}</p>
               <p style="margin:0;font-size:14px;color:#374151;font-style:italic;">"${rejectionReason}"</p>
             </div>` : ''}
             <div style="text-align:center;margin:8px 0 32px 0;">
-              <a href="${rotaUrl}" style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#6262bd 0%,#4f4fa3 100%);color:#ffffff;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">${tr.shiftPublishedCta || 'View My Rota'} →</a>
+              <a href="${rotaUrl}" style="display:inline-block;padding:14px 32px;background-color:#6262bd;color:#ffffff;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">${ctaLabel} →</a>
             </div>
-            <p style="margin:0;font-size:13px;color:#9ca3af;">${t(tr.shiftPublishedFooter || 'This is an automated message from {restaurantName}.', { restaurantName })}</p>
+            <p style="margin:0;font-size:13px;color:#9ca3af;">${footer}</p>
           </td>
         </tr>
       </table>
@@ -220,9 +223,7 @@ async function sendRequestStatusEmail(supabase, { requestId, status, rejectionRe
 </body>
 </html>`
 
-    const subject = isApproved
-      ? (t(tr.requestApprovedSubject || 'Your leave request has been approved — {restaurantName}', { restaurantName }))
-      : (t(tr.requestRejectedSubject || 'Your leave request was declined — {restaurantName}', { restaurantName }))
+    const subject = t(isApproved ? tr.requestApprovedSubject : tr.requestRejectedSubject, { restaurantName })
 
     await sendEmail({ to: staffEmail, subject, htmlContent: html, fromName: restaurantName })
   } catch (err) {

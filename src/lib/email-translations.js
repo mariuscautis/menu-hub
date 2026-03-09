@@ -96,7 +96,24 @@ const emailTranslations = {
     timeOffRequestReason: "Reason",
     timeOffRequestCta: "Review Request",
     timeOffRequestOutro: "Please log in to your dashboard to approve or decline this request.",
-    timeOffRequestFooter: "This is an automated notification from {restaurantName}."
+    timeOffRequestFooter: "This is an automated notification from {restaurantName}.",
+
+    // Request Approved (staff notification)
+    requestApprovedSubject: "Your leave request has been approved — {restaurantName}",
+    requestApprovedTitle: "Leave Request Approved",
+    requestApprovedGreeting: "Hi {staffName},",
+    requestApprovedBody: "Great news! Your time-off request from {dateFrom} to {dateTo} has been approved.",
+    requestApprovedCta: "View My Rota",
+    requestApprovedFooter: "This is an automated message from {restaurantName}. Please do not reply.",
+
+    // Request Rejected (staff notification)
+    requestRejectedSubject: "Your leave request was declined — {restaurantName}",
+    requestRejectedTitle: "Leave Request Declined",
+    requestRejectedGreeting: "Hi {staffName},",
+    requestRejectedBody: "Unfortunately, your time-off request from {dateFrom} to {dateTo} was declined.",
+    requestRejectedReason: "Reason",
+    requestRejectedCta: "View My Rota",
+    requestRejectedFooter: "This is an automated message from {restaurantName}. Please do not reply."
   },
 
   ro: {
@@ -193,7 +210,22 @@ const emailTranslations = {
     timeOffRequestReason: "Motiv",
     timeOffRequestCta: "Revizuiește Cererea",
     timeOffRequestOutro: "Vă rugăm să vă conectați la tabloul de bord pentru a aproba sau respinge această cerere.",
-    timeOffRequestFooter: "Aceasta este o notificare automată de la {restaurantName}."
+    timeOffRequestFooter: "Aceasta este o notificare automată de la {restaurantName}.",
+
+    requestApprovedSubject: "Cererea ta de concediu a fost aprobată — {restaurantName}",
+    requestApprovedTitle: "Cerere de Concediu Aprobată",
+    requestApprovedGreeting: "Salut {staffName},",
+    requestApprovedBody: "Vești bune! Cererea ta de concediu din {dateFrom} până în {dateTo} a fost aprobată.",
+    requestApprovedCta: "Vezi Programul Meu",
+    requestApprovedFooter: "Acesta este un mesaj automat de la {restaurantName}. Te rugăm să nu răspunzi.",
+
+    requestRejectedSubject: "Cererea ta de concediu a fost respinsă — {restaurantName}",
+    requestRejectedTitle: "Cerere de Concediu Respinsă",
+    requestRejectedGreeting: "Salut {staffName},",
+    requestRejectedBody: "Din păcate, cererea ta de concediu din {dateFrom} până în {dateTo} a fost respinsă.",
+    requestRejectedReason: "Motiv",
+    requestRejectedCta: "Vezi Programul Meu",
+    requestRejectedFooter: "Acesta este un mesaj automat de la {restaurantName}. Te rugăm să nu răspunzi."
   },
 
   fr: {
@@ -290,7 +322,22 @@ const emailTranslations = {
     timeOffRequestReason: "Raison",
     timeOffRequestCta: "Examiner la Demande",
     timeOffRequestOutro: "Veuillez vous connecter à votre tableau de bord pour approuver ou refuser cette demande.",
-    timeOffRequestFooter: "Ceci est une notification automatique de {restaurantName}."
+    timeOffRequestFooter: "Ceci est une notification automatique de {restaurantName}.",
+
+    requestApprovedSubject: "Votre demande de congé a été approuvée — {restaurantName}",
+    requestApprovedTitle: "Demande de Congé Approuvée",
+    requestApprovedGreeting: "Bonjour {staffName},",
+    requestApprovedBody: "Bonne nouvelle ! Votre demande de congé du {dateFrom} au {dateTo} a été approuvée.",
+    requestApprovedCta: "Voir Mon Planning",
+    requestApprovedFooter: "Ceci est un message automatique de {restaurantName}. Merci de ne pas répondre.",
+
+    requestRejectedSubject: "Votre demande de congé a été refusée — {restaurantName}",
+    requestRejectedTitle: "Demande de Congé Refusée",
+    requestRejectedGreeting: "Bonjour {staffName},",
+    requestRejectedBody: "Malheureusement, votre demande de congé du {dateFrom} au {dateTo} a été refusée.",
+    requestRejectedReason: "Raison",
+    requestRejectedCta: "Voir Mon Planning",
+    requestRejectedFooter: "Ceci est un message automatique de {restaurantName}. Merci de ne pas répondre."
   },
 
   it: {
@@ -387,7 +434,22 @@ const emailTranslations = {
     timeOffRequestReason: "Motivo",
     timeOffRequestCta: "Esamina la Richiesta",
     timeOffRequestOutro: "Effettua il login alla dashboard per approvare o rifiutare questa richiesta.",
-    timeOffRequestFooter: "Questa è una notifica automatica da {restaurantName}."
+    timeOffRequestFooter: "Questa è una notifica automatica da {restaurantName}.",
+
+    requestApprovedSubject: "La tua richiesta di ferie è stata approvata — {restaurantName}",
+    requestApprovedTitle: "Richiesta di Ferie Approvata",
+    requestApprovedGreeting: "Ciao {staffName},",
+    requestApprovedBody: "Ottime notizie! La tua richiesta di ferie dal {dateFrom} al {dateTo} è stata approvata.",
+    requestApprovedCta: "Visualizza il Mio Orario",
+    requestApprovedFooter: "Questo è un messaggio automatico da {restaurantName}. Si prega di non rispondere.",
+
+    requestRejectedSubject: "La tua richiesta di ferie è stata rifiutata — {restaurantName}",
+    requestRejectedTitle: "Richiesta di Ferie Rifiutata",
+    requestRejectedGreeting: "Ciao {staffName},",
+    requestRejectedBody: "Purtroppo, la tua richiesta di ferie dal {dateFrom} al {dateTo} è stata rifiutata.",
+    requestRejectedReason: "Motivo",
+    requestRejectedCta: "Visualizza il Mio Orario",
+    requestRejectedFooter: "Questo è un messaggio automatico da {restaurantName}. Si prega di non rispondere."
   },
 
   es: {
@@ -484,7 +546,22 @@ const emailTranslations = {
     timeOffRequestReason: "Motivo",
     timeOffRequestCta: "Revisar Solicitud",
     timeOffRequestOutro: "Por favor, inicia sesión en tu panel de control para aprobar o rechazar esta solicitud.",
-    timeOffRequestFooter: "Esta es una notificación automática de {restaurantName}."
+    timeOffRequestFooter: "Esta es una notificación automática de {restaurantName}.",
+
+    requestApprovedSubject: "Tu solicitud de vacaciones ha sido aprobada — {restaurantName}",
+    requestApprovedTitle: "Solicitud de Vacaciones Aprobada",
+    requestApprovedGreeting: "Hola {staffName},",
+    requestApprovedBody: "¡Buenas noticias! Tu solicitud de vacaciones del {dateFrom} al {dateTo} ha sido aprobada.",
+    requestApprovedCta: "Ver Mi Horario",
+    requestApprovedFooter: "Este es un mensaje automático de {restaurantName}. Por favor, no respondas.",
+
+    requestRejectedSubject: "Tu solicitud de vacaciones ha sido denegada — {restaurantName}",
+    requestRejectedTitle: "Solicitud de Vacaciones Denegada",
+    requestRejectedGreeting: "Hola {staffName},",
+    requestRejectedBody: "Lamentablemente, tu solicitud de vacaciones del {dateFrom} al {dateTo} ha sido denegada.",
+    requestRejectedReason: "Motivo",
+    requestRejectedCta: "Ver Mi Horario",
+    requestRejectedFooter: "Este es un mensaje automático de {restaurantName}. Por favor, no respondas."
   }
 }
 

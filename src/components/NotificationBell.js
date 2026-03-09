@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 
 export default function NotificationBell() {
@@ -9,35 +9,38 @@ export default function NotificationBell() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState(null);
+  const pollRef = useRef(null);
 
   useEffect(() => {
     const initUser = async () => {
-      // Get user from Supabase auth
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUserId(user.id);
-        fetchNotifications(user.id);
-      }
-
-      // Also check staff session
+      // Check staff PIN session first
       const staffSessionData = localStorage.getItem('staff_session');
       if (staffSessionData) {
-        const staffSession = JSON.parse(staffSessionData);
-        if (staffSession.id) {
-          setUserId(staffSession.id);
-          fetchNotifications(staffSession.id);
-        }
+        try {
+          const staffSession = JSON.parse(staffSessionData);
+          if (staffSession.id) {
+            setUserId(staffSession.id);
+            return;
+          }
+        } catch {}
       }
+      // Fall back to Supabase auth user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) setUserId(user.id);
     };
-
     initUser();
   }, []);
 
   useEffect(() => {
     if (!userId) return;
+    fetchNotifications();
+  }, [userId]);
 
-    // Real-time subscription for new notifications
-    const notificationsChannel = supabase
+  // Real-time subscription + 30s poll fallback
+  useEffect(() => {
+    if (!userId) return;
+
+    const channel = supabase
       .channel(`notifications-${userId}`)
       .on('postgres_changes', {
         event: 'INSERT',
@@ -45,98 +48,78 @@ export default function NotificationBell() {
         table: 'notifications',
         filter: `user_id=eq.${userId}`
       }, () => {
-        fetchNotifications(userId);
+        fetchNotifications();
       })
       .subscribe();
 
+    pollRef.current = setInterval(() => fetchNotifications(), 30000);
+
     return () => {
-      notificationsChannel.unsubscribe();
+      channel.unsubscribe();
+      if (pollRef.current) clearInterval(pollRef.current);
     };
   }, [userId]);
 
-  const fetchNotifications = async (id) => {
-    setLoading(true);
+  // Refresh when dropdown is opened
+  useEffect(() => {
+    if (showDropdown && userId) fetchNotifications();
+  }, [showDropdown]);
 
+  const fetchNotifications = async () => {
+    if (!userId) return;
     try {
-      // Use API endpoint instead of direct Supabase query (bypasses RLS for PIN-auth staff)
-      const response = await fetch(`/api/notifications?user_id=${id}&limit=20`);
+      const response = await fetch(`/api/notifications?user_id=${userId}&limit=20`);
       const result = await response.json();
-
-      if (!response.ok) throw new Error(result.error);
-
+      if (!response.ok) return;
       const data = result.notifications || [];
       setNotifications(data);
       setUnreadCount(data.filter(n => !n.read).length);
-    } catch (error) {
-      console.error('Error fetching notifications:', error);
-    }
-
+    } catch {}
     setLoading(false);
   };
 
   const markAsRead = async (notificationId) => {
     try {
-      const response = await fetch('/api/notifications', {
+      await fetch('/api/notifications', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: notificationId, read: true })
       });
-
-      if (!response.ok) {
-        const result = await response.json();
-        throw new Error(result.error);
-      }
-
-      fetchNotifications(userId);
-    } catch (error) {
-      console.error('Error marking notification as read:', error);
-    }
+      setNotifications(prev => prev.map(n => n.id === notificationId ? { ...n, read: true } : n));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch {}
   };
 
   const markAllAsRead = async () => {
     try {
-      const response = await fetch('/api/notifications', {
+      await fetch('/api/notifications', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, read: true })
       });
-
-      if (!response.ok) {
-        const result = await response.json();
-        throw new Error(result.error);
-      }
-
-      fetchNotifications(userId);
-    } catch (error) {
-      console.error('Error marking all as read:', error);
-    }
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      setUnreadCount(0);
+    } catch {}
   };
 
   const getNotificationIcon = (type) => {
     switch (type) {
-      case 'shift_published':
-        return '📅';
-      case 'request_approved':
-        return '✅';
-      case 'request_rejected':
-        return '❌';
-      case 'shift_assigned':
-        return '👤';
-      case 'shift_reminder':
-        return '⏰';
-      default:
-        return '🔔';
+      case 'shift_published': return '📅';
+      case 'request_approved': return '✅';
+      case 'request_rejected': return '❌';
+      case 'shift_assigned': return '👤';
+      case 'new_request': return '📋';
+      case 'shift_reminder': return '⏰';
+      default: return '🔔';
     }
   };
 
   const formatTime = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
-    const diffMs = now - date;
-    const diffMins = Math.floor(diffMs / 60000);
+    const diffMins = Math.floor((now - date) / 60000);
     const diffHours = Math.floor(diffMins / 60);
     const diffDays = Math.floor(diffHours / 24);
-
     if (diffMins < 1) return 'Just now';
     if (diffMins < 60) return `${diffMins}m ago`;
     if (diffHours < 24) return `${diffHours}h ago`;
@@ -148,21 +131,16 @@ export default function NotificationBell() {
 
   return (
     <div className="relative">
-      {/* Bell Icon */}
+      {/* Bell button */}
       <button
         onClick={() => setShowDropdown(!showDropdown)}
         className="relative p-2 text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
+        aria-label="Notifications"
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-          />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
         </svg>
-
-        {/* Unread Badge */}
         {unreadCount > 0 && (
           <span className="absolute top-0 right-0 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full">
             {unreadCount > 9 ? '9+' : unreadCount}
@@ -170,83 +148,93 @@ export default function NotificationBell() {
         )}
       </button>
 
-      {/* Dropdown */}
       {showDropdown && (
         <>
           {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setShowDropdown(false)}
-          ></div>
+          <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)} />
 
-          {/* Dropdown Content */}
-          <div className="absolute left-0 bottom-full mb-2 w-80 md:w-96 bg-white dark:bg-slate-900 rounded-xl shadow-lg border-2 border-slate-100 dark:border-slate-700 z-50 max-h-[80vh] overflow-hidden flex flex-col">
-            {/* Header */}
-            <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
-              <h3 className="font-bold text-slate-800 dark:text-slate-200">Notifications</h3>
-              {unreadCount > 0 && (
-                <button
-                  onClick={markAllAsRead}
-                  className="text-xs text-primary hover:text-primary/80 font-medium"
-                >
-                  Mark all read
-                </button>
-              )}
+          {/* Panel — bottom sheet on mobile, dropdown on desktop */}
+          <div className="fixed inset-x-0 bottom-0 z-50 sm:absolute sm:inset-auto sm:right-0 sm:bottom-auto sm:top-full sm:mt-2 sm:w-96 flex flex-col bg-white dark:bg-slate-900 rounded-t-2xl sm:rounded-xl border-t-2 sm:border-2 border-slate-200 dark:border-slate-700 shadow-2xl max-h-[75vh] sm:max-h-[80vh]">
+
+            {/* Drag handle — mobile only */}
+            <div className="flex justify-center pt-3 pb-1 sm:hidden flex-shrink-0">
+              <div className="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
             </div>
 
-            {/* Notifications List */}
+            {/* Header */}
+            <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between flex-shrink-0">
+              <div className="flex items-center gap-2">
+                <h3 className="font-bold text-base text-slate-800 dark:text-slate-100">Notifications</h3>
+                {unreadCount > 0 && (
+                  <span className="text-xs font-bold bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 px-2 py-0.5 rounded-full">
+                    {unreadCount} new
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                {unreadCount > 0 && (
+                  <button onClick={markAllAsRead}
+                    className="text-xs text-[#6262bd] hover:text-[#4f4fa3] font-semibold px-2 py-1 rounded-lg hover:bg-[#6262bd]/10 transition-colors">
+                    Mark all read
+                  </button>
+                )}
+                <button onClick={() => setShowDropdown(false)}
+                  className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 text-lg font-bold transition-colors">
+                  ×
+                </button>
+              </div>
+            </div>
+
+            {/* List */}
             <div className="overflow-y-auto flex-1">
               {loading ? (
                 <div className="p-8 text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Loading...</p>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6262bd] mx-auto mb-2" />
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Loading...</p>
                 </div>
               ) : notifications.length === 0 ? (
-                <div className="p-8 text-center">
-                  <p className="text-slate-600 dark:text-slate-400">No notifications</p>
+                <div className="p-10 text-center">
+                  <div className="text-4xl mb-3">🔔</div>
+                  <p className="text-sm font-medium text-slate-600 dark:text-slate-300">No notifications yet</p>
                 </div>
               ) : (
-                <div className="divide-y divide-slate-100 dark:divide-slate-700">
+                <div className="divide-y divide-slate-100 dark:divide-slate-800">
                   {notifications.map(notification => (
                     <div
                       key={notification.id}
                       onClick={() => !notification.read && markAsRead(notification.id)}
-                      className={`p-4 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors ${
-                        !notification.read ? 'bg-blue-50 dark:bg-blue-950' : ''
+                      className={`px-4 py-3.5 flex gap-3 cursor-pointer transition-colors active:scale-[0.99] ${
+                        !notification.read
+                          ? 'bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100/70 dark:hover:bg-blue-900/40'
+                          : 'hover:bg-slate-50 dark:hover:bg-slate-800'
                       }`}
                     >
-                      <div className="flex gap-3">
-                        <div className="text-2xl">{getNotificationIcon(notification.type)}</div>
-                        <div className="flex-1">
-                          <p className={`text-sm ${!notification.read ? 'font-semibold' : ''} text-slate-800 dark:text-slate-200`}>
-                            {notification.title}
+                      <div className="text-xl flex-shrink-0 mt-0.5">{getNotificationIcon(notification.type)}</div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm leading-snug break-words ${
+                          !notification.read
+                            ? 'font-semibold text-slate-800 dark:text-slate-100'
+                            : 'text-slate-700 dark:text-slate-300'
+                        }`}>
+                          {notification.title}
+                        </p>
+                        {notification.message && (
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-snug break-words">
+                            {notification.message}
                           </p>
-                          {notification.message && (
-                            <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">{notification.message}</p>
-                          )}
-                          <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">{formatTime(notification.created_at)}</p>
-                        </div>
-                        {!notification.read && (
-                          <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
                         )}
+                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                          {formatTime(notification.created_at)}
+                        </p>
                       </div>
+                      {!notification.read && (
+                        <div className="w-2 h-2 bg-[#6262bd] rounded-full flex-shrink-0 mt-1.5" />
+                      )}
                     </div>
                   ))}
                 </div>
               )}
             </div>
-
-            {/* Footer */}
-            {notifications.length > 0 && (
-              <div className="px-4 py-3 border-t border-slate-100 dark:border-slate-700 text-center">
-                <button
-                  onClick={() => setShowDropdown(false)}
-                  className="text-sm text-primary hover:text-primary/80 font-medium"
-                >
-                  Close
-                </button>
-              </div>
-            )}
           </div>
         </>
       )}
