@@ -17,6 +17,51 @@ function getSupabaseAdmin() {
   )
 }
 
+export async function GET(request) {
+  const supabaseAdmin = getSupabaseAdmin()
+  try {
+    const { searchParams } = new URL(request.url)
+    const restaurantId = searchParams.get('restaurant_id')
+    if (!restaurantId) {
+      return NextResponse.json({ error: 'restaurant_id is required' }, { status: 400 })
+    }
+
+    // Fetch all staff for this restaurant
+    const { data: staffData, error: staffError } = await supabaseAdmin
+      .from('staff')
+      .select('*')
+      .eq('restaurant_id', restaurantId)
+      .order('created_at', { ascending: false })
+
+    if (staffError) {
+      return NextResponse.json({ error: 'Failed to fetch staff' }, { status: 500 })
+    }
+
+    // Fetch entitlements for all staff in one query
+    const staffIds = (staffData || []).map(s => s.id)
+    let entitlementsByStaffId = {}
+    if (staffIds.length > 0) {
+      const { data: entitlements } = await supabaseAdmin
+        .from('staff_leave_entitlements')
+        .select('staff_id, annual_holiday_days, holiday_year_start')
+        .in('staff_id', staffIds)
+      if (entitlements) {
+        entitlements.forEach(e => { entitlementsByStaffId[e.staff_id] = e })
+      }
+    }
+
+    const merged = (staffData || []).map(s => ({
+      ...s,
+      staff_leave_entitlements: entitlementsByStaffId[s.id] ? [entitlementsByStaffId[s.id]] : []
+    }))
+
+    return NextResponse.json({ staff: merged })
+  } catch (error) {
+    console.error('Unexpected error in GET /api/staff:', error)
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 })
+  }
+}
+
 export async function POST(request) {
   const supabaseAdmin = getSupabaseAdmin()
   try {

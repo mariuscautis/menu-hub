@@ -83,19 +83,11 @@ export default function Staff() {
       setFormData(prev => ({ ...prev, department: 'kitchen' }))
     }
 
-    const { data: staffData } = await supabase
-      .from('staff')
-      .select(`
-        *,
-        staff_leave_entitlements (
-          annual_holiday_days,
-          holiday_year_start
-        )
-      `)
-      .eq('restaurant_id', restaurantData.id)
-      .order('created_at', { ascending: false })
+    // Use API route (service role) so RLS doesn't block entitlement reads
+    const staffRes = await fetch(`/api/staff?restaurant_id=${restaurantData.id}`)
+    const staffJson = await staffRes.json()
 
-    setStaff(staffData || [])
+    setStaff(staffJson.staff || [])
     setLoading(false)
   }
 
