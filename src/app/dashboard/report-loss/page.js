@@ -1,29 +1,36 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 
 export default function ReportLoss() {
   const t = useTranslations('reportLoss')
   const restaurantCtx = useRestaurant()
+  const supabase = useAdminSupabase()
   const [restaurant, setRestaurant] = useState(null)
   const [menuItems, setMenuItems] = useState([])
+  const [stockProducts, setStockProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [message, setMessage] = useState(null)
   const [userInfo, setUserInfo] = useState(null)
   const [staffDepartment, setStaffDepartment] = useState(null)
-  // Combo box states
+
+  // Tab: 'menu' | 'stock'
+  const [lossType, setLossType] = useState('menu')
+
+  // Menu item combo box
   const [showMenuDropdown, setShowMenuDropdown] = useState(false)
   const [menuItemSearch, setMenuItemSearch] = useState('')
-  const [formData, setFormData] = useState({
-    menu_item_id: '',
-    quantity: 1,
-    reason: '',
-    notes: ''
-  })
+  const [menuForm, setMenuForm] = useState({ menu_item_id: '', quantity: 1, reason: '', notes: '' })
+
+  // Stock item combo box
+  const [showStockDropdown, setShowStockDropdown] = useState(false)
+  const [stockSearch, setStockSearch] = useState('')
+  const [stockForm, setStockForm] = useState({ stock_product_id: '', quantity: '', reason: '', notes: '' })
+
   const reasons = [
     { value: 'expired', label: t('reasonExpired') },
     { value: 'spoiled', label: t('reasonSpoiled') },
@@ -34,338 +41,387 @@ export default function ReportLoss() {
     { value: 'quality_failure', label: t('reasonQualityFailure') },
     { value: 'customer_complaint', label: t('reasonCustomerComplaint') }
   ]
-  useEffect(() => {
-    fetchData()
-  }, [restaurantCtx])
-  // Click outside to close menu item dropdown
+
+  useEffect(() => { fetchData() }, [restaurantCtx])
+
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (showMenuDropdown && !event.target.closest('.menu-dropdown-container')) {
-        setShowMenuDropdown(false)
-      }
+      if (showMenuDropdown && !event.target.closest('.menu-dropdown-container')) setShowMenuDropdown(false)
+      if (showStockDropdown && !event.target.closest('.stock-dropdown-container')) setShowStockDropdown(false)
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [showMenuDropdown])
+  }, [showMenuDropdown, showStockDropdown])
+
   const fetchData = async () => {
     if (!restaurantCtx?.restaurant) return
     const restaurantData = restaurantCtx.restaurant
     const department = restaurantCtx.staffDepartment
 
-    // Get userInfo from staff session if available
-    let userEmail = null
-    let userName = 'Unknown'
-    let staffId = null
+    let userEmail = null, userName = 'Unknown', staffId = null
     const staffSessionData = localStorage.getItem('staff_session')
     if (staffSessionData) {
       try {
-        const staffSession = JSON.parse(staffSessionData)
-        userEmail = staffSession.email
-        userName = staffSession.name
-        staffId = staffSession.id
-      } catch {
-        localStorage.removeItem('staff_session')
-      }
+        const s = JSON.parse(staffSessionData)
+        userEmail = s.email; userName = s.name; staffId = s.id
+      } catch { localStorage.removeItem('staff_session') }
     }
 
-    if (restaurantData) {
-      setRestaurant(restaurantData)
-      setUserInfo({ email: userEmail, name: userName, id: staffId })
-      setStaffDepartment(department)
-      // Fetch menu items with recipes via API (using admin client)
-      try {
-        const params = new URLSearchParams({
-          restaurantId: restaurantData.id
-        })
-        // Add department filter if staff has specific department
-        if (department && department !== 'universal') {
-          params.append('department', department)
-        }
-        const response = await fetch(`/api/menu-items?${params}`)
-        const result = await response.json()
-        if (result.success) {
-          setMenuItems(result.data || [])
-        } else {
-          console.error('Error fetching menu items:', result.error)
-          setMenuItems([])
-        }
-      } catch (error) {
-        console.error('Error fetching menu items:', error)
-        setMenuItems([])
-      }
-    }
+    setRestaurant(restaurantData)
+    setUserInfo({ email: userEmail, name: userName, id: staffId })
+    setStaffDepartment(department)
+
+    // Fetch menu items
+    try {
+      const params = new URLSearchParams({ restaurantId: restaurantData.id })
+      if (department && department !== 'universal') params.append('department', department)
+      const res = await fetch(`/api/menu-items?${params}`)
+      const result = await res.json()
+      setMenuItems(result.success ? (result.data || []) : [])
+    } catch { setMenuItems([]) }
+
+    // Fetch stock products
+    try {
+      const res = await fetch(`/api/stock/products?restaurantId=${restaurantData.id}`)
+      const result = await res.json()
+      setStockProducts(result.products || [])
+    } catch { setStockProducts([]) }
+
     setLoading(false)
   }
-  const handleSubmit = async (e) => {
+
+  const handleMenuSubmit = async (e) => {
     e.preventDefault()
     setSubmitting(true)
     setMessage(null)
     try {
-      const selectedItem = menuItems.find(item => item.id === formData.menu_item_id)
-      if (!selectedItem) {
-        setMessage({ type: 'error', text: t('selectMenuItem') })
-        setSubmitting(false)
-        return
-      }
+      const selectedItem = menuItems.find(item => item.id === menuForm.menu_item_id)
+      if (!selectedItem) { setMessage({ type: 'error', text: t('selectMenuItem') }); setSubmitting(false); return }
       const hasRecipe = selectedItem.menu_item_ingredients && selectedItem.menu_item_ingredients.length > 0
       const response = await fetch('/api/stock/log-loss', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           restaurantId: restaurant.id,
-          menuItemId: formData.menu_item_id,
-          quantity: parseInt(formData.quantity),
-          reason: formData.reason,
+          menuItemId: menuForm.menu_item_id,
+          quantity: parseInt(menuForm.quantity),
+          reason: menuForm.reason,
           staffName: userInfo.name,
           staffEmail: userInfo.email,
           staffId: userInfo.id,
-          notes: formData.notes || null
+          notes: menuForm.notes || null
         })
       })
       const result = await response.json()
       if (result.success) {
         const successText = hasRecipe
-          ? t('successWithRecipe').replace('{quantity}', formData.quantity).replace('{itemName}', selectedItem.name)
-          : t('successWithoutRecipe').replace('{quantity}', formData.quantity).replace('{itemName}', selectedItem.name)
-        setMessage({
-          type: 'success',
-          text: successText
-        })
-        // Reset form
-        setFormData({
-          menu_item_id: '',
-          quantity: 1,
-          reason: '',
-          notes: ''
-        })
+          ? t('successWithRecipe').replace('{quantity}', menuForm.quantity).replace('{itemName}', selectedItem.name)
+          : t('successWithoutRecipe').replace('{quantity}', menuForm.quantity).replace('{itemName}', selectedItem.name)
+        setMessage({ type: 'success', text: successText })
+        setMenuForm({ menu_item_id: '', quantity: 1, reason: '', notes: '' })
+        setMenuItemSearch('')
       } else {
         setMessage({ type: 'error', text: result.error || t('errorGeneric') })
       }
-    } catch (error) {
-      console.error('Error submitting loss:', error)
-      setMessage({ type: 'error', text: t('errorOccurred') })
-    }
+    } catch { setMessage({ type: 'error', text: t('errorOccurred') }) }
     setSubmitting(false)
   }
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData({ ...formData, [name]: value })
+
+  const handleStockSubmit = async (e) => {
+    e.preventDefault()
+    setSubmitting(true)
+    setMessage(null)
+    try {
+      const product = stockProducts.find(p => p.id === stockForm.stock_product_id)
+      if (!product) { setMessage({ type: 'error', text: 'Please select a stock item' }); setSubmitting(false); return }
+      const qty = parseFloat(stockForm.quantity)
+      if (isNaN(qty) || qty <= 0) { setMessage({ type: 'error', text: 'Please enter a valid quantity' }); setSubmitting(false); return }
+
+      const baseQtyToDeduct = qty * (product.units_to_base_multiplier || 1)
+      const newStock = Math.max(0, (product.current_stock || 0) - baseQtyToDeduct)
+
+      // Record in stock_product_losses (not stock_entries, to avoid purchase triggers)
+      const { error: lossError } = await supabase.from('stock_product_losses').insert({
+        restaurant_id: restaurant.id,
+        product_id: product.id,
+        quantity: qty,
+        unit_used: product.input_unit_type,
+        reason: stockForm.reason,
+        notes: stockForm.notes || null,
+        added_by_email: userInfo.email || 'unknown'
+      })
+
+      if (lossError) { setMessage({ type: 'error', text: lossError.message || t('errorGeneric') }); setSubmitting(false); return }
+
+      // Deduct from current_stock only — cost_per_base_unit is untouched
+      const { error } = await supabase.from('stock_products').update({
+        current_stock: newStock
+      }).eq('id', product.id)
+
+      if (error) { setMessage({ type: 'error', text: error.message || t('errorGeneric') }); setSubmitting(false); return }
+
+      setMessage({ type: 'success', text: `Loss recorded: ${qty} ${product.input_unit_type} of ${product.name} removed from stock.` })
+      setStockForm({ stock_product_id: '', quantity: '', reason: '', notes: '' })
+      setStockSearch('')
+      // Refresh stock product data
+      fetchData()
+    } catch { setMessage({ type: 'error', text: t('errorOccurred') }) }
+    setSubmitting(false)
   }
-  if (loading) {
-    return <div className="text-slate-500">{t('loading')}</div>
-  }
-  if (!restaurant) {
-    return <div className="text-red-600">{t('noRestaurant')}</div>
-  }
+
+  const selectedStock = stockProducts.find(p => p.id === stockForm.stock_product_id)
+
+  if (loading) return <div className="text-slate-500">{t('loading')}</div>
+  if (!restaurant) return <div className="text-red-600">{t('noRestaurant')}</div>
+
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
-        <p className="text-slate-500">{t('subtitle')}</p>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200">{t('title')}</h1>
+        <p className="text-slate-500 dark:text-slate-400">{t('subtitle')}</p>
         {staffDepartment && (
-          <p className="text-sm text-slate-600 mt-1">
+          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
             {t('department')}: <span className={`font-semibold ${
               staffDepartment === 'bar' ? 'text-orange-600' :
-              staffDepartment === 'kitchen' ? 'text-green-600' :
-              'text-[#6262bd]'
+              staffDepartment === 'kitchen' ? 'text-green-600' : 'text-[#6262bd]'
             }`}>
               {staffDepartment === 'bar' ? `🍸 ${t('bar')}` :
-               staffDepartment === 'kitchen' ? `🍳 ${t('kitchen')}` :
-               `🌐 ${t('universal')}`}
+               staffDepartment === 'kitchen' ? `🍳 ${t('kitchen')}` : `🌐 ${t('universal')}`}
             </span>
           </p>
         )}
       </div>
+
       {message && (
         <div className={`mb-6 p-4 rounded-xl border-2 ${
-          message.type === 'success'
-            ? 'bg-green-50 border-green-200 text-green-700'
-            : 'bg-red-50 border-red-200 text-red-700'
+          message.type === 'success' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-700'
         }`}>
           {message.text}
         </div>
       )}
-      <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Menu Item Selection - Searchable Combo Box */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              {t('menuItemLabel')} {t('menuItemRequired')}
-            </label>
-            <div className="relative menu-dropdown-container">
-              {/* Combo Bar Input */}
-              <input
-                type="text"
-                value={showMenuDropdown
-                  ? menuItemSearch
-                  : (formData.menu_item_id
-                      ? (() => {
-                          const selectedItem = menuItems.find(item => item.id === formData.menu_item_id)
-                          return selectedItem
-                            ? `${selectedItem.name} ${selectedItem.department === 'bar' ? '🍸' : '🍳'}`
-                            : ''
-                        })()
-                      : ''
-                    )
-                }
-                onChange={(e) => {
-                  setMenuItemSearch(e.target.value)
-                  setShowMenuDropdown(true)
-                  // Clear selection when typing
-                  if (formData.menu_item_id) {
-                    setFormData({ ...formData, menu_item_id: '' })
+
+      {/* Tab switcher */}
+      <div className="flex gap-1 mb-6 bg-slate-100 dark:bg-slate-800 rounded-xl p-1 w-fit">
+        <button
+          onClick={() => { setLossType('menu'); setMessage(null) }}
+          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-colors ${
+            lossType === 'menu' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+          }`}
+        >
+          Menu Item Loss
+        </button>
+        <button
+          onClick={() => { setLossType('stock'); setMessage(null) }}
+          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-colors ${
+            lossType === 'stock' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+          }`}
+        >
+          Stock Item Loss
+        </button>
+      </div>
+
+      <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6">
+
+        {/* ── MENU ITEM LOSS ── */}
+        {lossType === 'menu' && (
+          <form onSubmit={handleMenuSubmit} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                {t('menuItemLabel')} {t('menuItemRequired')}
+              </label>
+              <div className="relative menu-dropdown-container">
+                <input
+                  type="text"
+                  value={showMenuDropdown
+                    ? menuItemSearch
+                    : (menuForm.menu_item_id
+                        ? (() => {
+                            const s = menuItems.find(i => i.id === menuForm.menu_item_id)
+                            return s ? `${s.name} ${s.department === 'bar' ? '🍸' : '🍳'}` : ''
+                          })()
+                        : '')
                   }
-                }}
-                onFocus={() => {
-                  setMenuItemSearch('')
-                }}
-                placeholder={t('menuItemPlaceholder')}
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
-                required
-              />
-              {/* Dropdown List */}
-              {showMenuDropdown && (
-                <div className="absolute z-10 w-full mt-1 bg-white border-2 border-slate-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
-                  {(() => {
-                    const filteredItems = menuItems.filter(item => {
-                      if (!menuItemSearch) return true
-                      const query = menuItemSearch.toLowerCase()
-                      return item.name.toLowerCase().includes(query)
-                    })
-                    return filteredItems.length > 0 ? (
-                      filteredItems.map((item) => {
+                  onChange={(e) => { setMenuItemSearch(e.target.value); setShowMenuDropdown(true); if (menuForm.menu_item_id) setMenuForm({ ...menuForm, menu_item_id: '' }) }}
+                  onFocus={() => setMenuItemSearch('')}
+                  placeholder={t('menuItemPlaceholder')}
+                  className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800"
+                  required
+                />
+                {showMenuDropdown && (
+                  <div className="absolute z-10 w-full mt-1 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                    {(() => {
+                      const filtered = menuItems.filter(i => !menuItemSearch || i.name.toLowerCase().includes(menuItemSearch.toLowerCase()))
+                      return filtered.length > 0 ? filtered.map(item => {
                         const hasRecipe = item.menu_item_ingredients && item.menu_item_ingredients.length > 0
                         return (
-                          <div
-                            key={item.id}
-                            onClick={() => {
-                              setFormData({ ...formData, menu_item_id: item.id })
-                              setShowMenuDropdown(false)
-                              setMenuItemSearch('')
-                            }}
-                            className="px-4 py-2 hover:bg-[#6262bd] hover:text-white cursor-pointer transition-colors flex justify-between items-center"
-                          >
-                            <span>
-                              {item.name} {item.department === 'bar' ? '🍸' : '🍳'}
-                            </span>
-                            {!hasRecipe && (
-                              <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded">
-                                {t('noRecipeBadge')}
-                              </span>
-                            )}
+                          <div key={item.id} onClick={() => { setMenuForm({ ...menuForm, menu_item_id: item.id }); setShowMenuDropdown(false); setMenuItemSearch('') }}
+                            className="px-4 py-2 hover:bg-[#6262bd] hover:text-white cursor-pointer transition-colors flex justify-between items-center">
+                            <span>{item.name} {item.department === 'bar' ? '🍸' : '🍳'}</span>
+                            {!hasRecipe && <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded">{t('noRecipeBadge')}</span>}
                           </div>
                         )
-                      })
-                    ) : (
-                      <div className="px-4 py-2 text-slate-400 text-sm">
-                        {t('noItemsFound')}
-                      </div>
-                    )
-                  })()}
-                </div>
+                      }) : <div className="px-4 py-2 text-slate-400 text-sm">{t('noItemsFound')}</div>
+                    })()}
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t('helpTextRecipe')}</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                {t('quantityLabel')} {t('quantityRequired')}
+              </label>
+              <div className="flex items-center gap-3">
+                <button type="button" onClick={() => setMenuForm({ ...menuForm, quantity: Math.max(1, menuForm.quantity - 1) })}
+                  className="w-12 h-12 flex items-center justify-center border-2 border-slate-200 dark:border-slate-700 rounded-xl hover:border-[#6262bd] hover:bg-[#6262bd] hover:text-white transition-all text-slate-700 dark:text-slate-300 font-bold text-xl">−</button>
+                <input type="number" value={menuForm.quantity} onChange={e => setMenuForm({ ...menuForm, quantity: parseInt(e.target.value) || 1 })} min="1"
+                  className="w-24 px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 text-center font-semibold" />
+                <button type="button" onClick={() => setMenuForm({ ...menuForm, quantity: menuForm.quantity + 1 })}
+                  className="w-12 h-12 flex items-center justify-center border-2 border-slate-200 dark:border-slate-700 rounded-xl hover:border-[#6262bd] hover:bg-[#6262bd] hover:text-white transition-all text-slate-700 dark:text-slate-300 font-bold text-xl">+</button>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t('quantityHelp')}</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                {t('reasonLabel')} {t('reasonRequired')}
+              </label>
+              <select value={menuForm.reason} onChange={e => setMenuForm({ ...menuForm, reason: e.target.value })} required
+                className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800">
+                <option value="">{t('reasonPlaceholder')}</option>
+                {reasons.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('notesLabel')}</label>
+              <textarea value={menuForm.notes} onChange={e => setMenuForm({ ...menuForm, notes: e.target.value })} rows={3}
+                className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 resize-none"
+                placeholder={t('notesPlaceholder')} />
+            </div>
+
+            <button type="submit" disabled={submitting}
+              className="w-full bg-red-600 text-white py-3 rounded-xl font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+              {submitting ? t('submitting') : t('submitButton')}
+            </button>
+          </form>
+        )}
+
+        {/* ── STOCK ITEM LOSS ── */}
+        {lossType === 'stock' && (
+          <form onSubmit={handleStockSubmit} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Stock Item *
+              </label>
+              <div className="relative stock-dropdown-container">
+                <input
+                  type="text"
+                  value={showStockDropdown
+                    ? stockSearch
+                    : (selectedStock ? `${selectedStock.name}${selectedStock.brand ? ' — ' + selectedStock.brand : ''}` : '')
+                  }
+                  onChange={e => { setStockSearch(e.target.value); setShowStockDropdown(true); if (stockForm.stock_product_id) setStockForm({ ...stockForm, stock_product_id: '' }) }}
+                  onFocus={() => setStockSearch('')}
+                  placeholder="Search or select stock item..."
+                  className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800"
+                  required
+                />
+                {showStockDropdown && (
+                  <div className="absolute z-10 w-full mt-1 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                    {(() => {
+                      const filtered = stockProducts.filter(p => !stockSearch || p.name.toLowerCase().includes(stockSearch.toLowerCase()) || (p.brand || '').toLowerCase().includes(stockSearch.toLowerCase()))
+                      return filtered.length > 0 ? filtered.map(p => (
+                        <div key={p.id} onClick={() => { setStockForm({ ...stockForm, stock_product_id: p.id, quantity: '' }); setShowStockDropdown(false); setStockSearch('') }}
+                          className="px-4 py-2 hover:bg-[#6262bd] hover:text-white cursor-pointer transition-colors flex justify-between items-center">
+                          <span>{p.name}{p.brand ? <span className="opacity-60"> — {p.brand}</span> : ''}</span>
+                          <span className="text-xs opacity-70 ml-2">{p.category} · {p.input_unit_type}</span>
+                        </div>
+                      )) : <div className="px-4 py-2 text-slate-400 text-sm">No stock items found</div>
+                    })()}
+                  </div>
+                )}
+              </div>
+              {selectedStock && (
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  Current stock: <strong>{(selectedStock.current_stock / (selectedStock.units_to_base_multiplier || 1)).toFixed(2)} {selectedStock.input_unit_type}</strong>
+                </p>
               )}
             </div>
-            <p className="text-xs text-slate-500 mt-1">
-              {t('helpTextRecipe')}
-            </p>
-          </div>
-          {/* Quantity with +/- Buttons */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              {t('quantityLabel')} {t('quantityRequired')}
-            </label>
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setFormData({ ...formData, quantity: Math.max(1, formData.quantity - 1) })}
-                className="w-12 h-12 flex items-center justify-center border-2 border-slate-200 rounded-xl hover:border-[#6262bd] hover:bg-[#6262bd] hover:text-white transition-all text-slate-700 font-bold text-xl"
-              >
-                −
-              </button>
-              <input
-                type="number"
-                name="quantity"
-                value={formData.quantity}
-                onChange={handleChange}
-                min="1"
-                className="w-24 px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 text-center font-semibold"
-              />
-              <button
-                type="button"
-                onClick={() => setFormData({ ...formData, quantity: formData.quantity + 1 })}
-                className="w-12 h-12 flex items-center justify-center border-2 border-slate-200 rounded-xl hover:border-[#6262bd] hover:bg-[#6262bd] hover:text-white transition-all text-slate-700 font-bold text-xl"
-              >
-                +
-              </button>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Quantity to Remove *
+              </label>
+              <div className="relative">
+                <input
+                  type="number"
+                  value={stockForm.quantity}
+                  onChange={e => setStockForm({ ...stockForm, quantity: e.target.value })}
+                  min="0.01"
+                  step="0.01"
+                  required
+                  placeholder="0"
+                  className="w-full px-4 py-3 pr-20 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800"
+                />
+                {selectedStock && (
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 font-medium text-sm">
+                    {selectedStock.input_unit_type}
+                  </span>
+                )}
+              </div>
             </div>
-            <p className="text-xs text-slate-500 mt-1">
-              {t('quantityHelp')}
-            </p>
-          </div>
-          {/* Reason */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              {t('reasonLabel')} {t('reasonRequired')}
-            </label>
-            <select
-              name="reason"
-              value={formData.reason}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
-            >
-              <option value="">{t('reasonPlaceholder')}</option>
-              {reasons.map((reason) => (
-                <option key={reason.value} value={reason.value}>
-                  {reason.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          {/* Notes */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              {t('notesLabel')}
-            </label>
-            <textarea
-              name="notes"
-              value={formData.notes}
-              onChange={handleChange}
-              rows={3}
-              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 resize-none"
-              placeholder={t('notesPlaceholder')}
-            />
-          </div>
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full bg-red-600 text-white py-3 rounded-xl font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-          >
-            {submitting ? t('submitting') : t('submitButton')}
-          </button>
-        </form>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                {t('reasonLabel')} {t('reasonRequired')}
+              </label>
+              <select value={stockForm.reason} onChange={e => setStockForm({ ...stockForm, reason: e.target.value })} required
+                className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800">
+                <option value="">{t('reasonPlaceholder')}</option>
+                {reasons.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('notesLabel')}</label>
+              <textarea value={stockForm.notes} onChange={e => setStockForm({ ...stockForm, notes: e.target.value })} rows={3}
+                className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 resize-none"
+                placeholder={t('notesPlaceholder')} />
+            </div>
+
+            <button type="submit" disabled={submitting}
+              className="w-full bg-red-600 text-white py-3 rounded-xl font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+              {submitting ? t('submitting') : 'Report Stock Loss'}
+            </button>
+          </form>
+        )}
+
         {/* Info Box */}
-        <div className="mt-6 bg-blue-50 border-2 border-blue-100 rounded-2xl p-6">
+        <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-100 dark:border-blue-800 rounded-2xl p-6">
           <div className="flex gap-3">
             <svg className="w-6 h-6 text-blue-600 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
             </svg>
             <div>
-              <h3 className="font-bold text-blue-900 mb-2">{t('infoTitle')}</h3>
-            <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
-              <li>{t('infoBullet1')}</li>
-              <li>{t('infoBullet2')}</li>
-              <li>{t('infoBullet3')}</li>
-              <li>{t('infoBullet4')}</li>
-              <li>{t('infoBullet5')}</li>
-            </ul>
-            <div className="mt-3 p-3 bg-blue-100 rounded-lg">
-              <p className="text-xs text-blue-900 font-medium">{t('tipTitle')}</p>
-              <p className="text-xs text-blue-800 mt-1">
-                {t('tipText')}
-              </p>
-            </div>
+              <h3 className="font-bold text-blue-900 dark:text-blue-300 mb-2">{t('infoTitle')}</h3>
+              {lossType === 'menu' ? (
+                <ul className="text-sm text-blue-800 dark:text-blue-400 space-y-1 list-disc list-inside">
+                  <li>{t('infoBullet1')}</li>
+                  <li>{t('infoBullet2')}</li>
+                  <li>{t('infoBullet3')}</li>
+                  <li>{t('infoBullet4')}</li>
+                  <li>{t('infoBullet5')}</li>
+                </ul>
+              ) : (
+                <ul className="text-sm text-blue-800 dark:text-blue-400 space-y-1 list-disc list-inside">
+                  <li>Enter the quantity in the product's input unit (e.g. kg, litres, pieces)</li>
+                  <li>Stock will be immediately deducted from current levels</li>
+                  <li>The loss appears in the Stock Movement Report as Lost/Adj.</li>
+                  <li>All losses are tracked with your name, timestamp, and reason</li>
+                </ul>
+              )}
             </div>
           </div>
         </div>

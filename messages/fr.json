@@ -2090,7 +2090,6 @@
     "menuAvailableDesc": "true ou false (défaut : true)",
     "stockCategoryDesc": "cuisine ou bar (défaut : cuisine)",
     "stockBaseUnitDesc": "ml pour les liquides, grammes pour les solides (défaut : grammes)",
-    "stockCostDesc": "optionnel, numérique (ex. 0.008)",
     "stockCurrentDesc": "optionnel, quantité numérique en unités de base",
     "downloadTemplate": "Télécharger le Modèle",
     "step2Title": "Étape 2 — Télécharger votre CSV",
@@ -2113,7 +2112,6 @@
     "colDepartment": "Département",
     "colBrand": "Marque",
     "colUnit": "Unité",
-    "colCost": "Coût",
     "rowsToImport": "Lignes à importer",
     "showingFirst5": "affichage des 5 premières sur {n}",
     "noValidRows": "Aucune ligne valide à importer. Veuillez corriger les erreurs ci-dessus et réessayer.",
@@ -2134,6 +2132,9 @@
     "exportMenuItems": "Exporter les Articles de Menu",
     "exportStockProducts": "Exporter les Produits de Stock",
     "infoTitle": "Ce qui n'est pas inclus",
-    "infoDesc": "Cet outil importe uniquement les articles de menu et les produits de stock. Les commandes historiques, les comptes du personnel et les plans de salle ne sont pas migrés — ceux-ci sont configurés à nouveau dans Veno App. Les recettes d'ingrédients (liant le stock aux articles de menu) peuvent être ajoutées manuellement après l'importation depuis la page Menu."
+    "infoDesc": "Cet outil importe uniquement les articles de menu et les produits de stock. Les commandes historiques, les comptes du personnel et les plans de salle ne sont pas migrés — ceux-ci sont configurés à nouveau dans Veno App. Les recettes d'ingrédients (liant le stock aux articles de menu) peuvent être ajoutées manuellement après l'importation depuis la page Menu.",
+    "stockValueDesc": "optional, total estimated value of current stock (e.g. 36.00) — used to calculate average cost per unit",
+    "colStock": "Stock",
+    "colStockValue": "Stock Value"
   }
 }

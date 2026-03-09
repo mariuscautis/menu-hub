@@ -2090,7 +2090,6 @@
     "menuAvailableDesc": "true sau false (implicit true)",
     "stockCategoryDesc": "bucătărie sau bar (implicit bucătărie)",
     "stockBaseUnitDesc": "ml pentru lichide, grame pentru solide (implicit grame)",
-    "stockCostDesc": "opțional, numeric (ex. 0.008)",
     "stockCurrentDesc": "opțional, cantitate numerică în unități de bază",
     "downloadTemplate": "Descarcă Șablon",
     "step2Title": "Pasul 2 — Încarcă fișierul CSV",
@@ -2113,7 +2112,6 @@
     "colDepartment": "Departament",
     "colBrand": "Brand",
     "colUnit": "Unitate",
-    "colCost": "Cost",
     "rowsToImport": "Rânduri de importat",
     "showingFirst5": "afișând primele 5 din {n}",
     "noValidRows": "Nu există rânduri valide de importat. Te rugăm să corectezi erorile de mai sus și să încerci din nou.",
@@ -2134,6 +2132,9 @@
     "exportMenuItems": "Exportă Articole Meniu",
     "exportStockProducts": "Exportă Produse Stoc",
     "infoTitle": "Ce nu este inclus",
-    "infoDesc": "Acest instrument importă doar articole de meniu și produse din stoc. Comenzile istorice, conturile personalului și planurile de etaj nu sunt migrate — acestea se configurează din nou în Veno App. Rețetele de ingrediente (legând stocul de articolele din meniu) pot fi adăugate manual după import din pagina de Meniu."
+    "infoDesc": "Acest instrument importă doar articole de meniu și produse din stoc. Comenzile istorice, conturile personalului și planurile de etaj nu sunt migrate — acestea se configurează din nou în Veno App. Rețetele de ingrediente (legând stocul de articolele din meniu) pot fi adăugate manual după import din pagina de Meniu.",
+    "stockValueDesc": "optional, total estimated value of current stock (e.g. 36.00) — used to calculate average cost per unit",
+    "colStock": "Stock",
+    "colStockValue": "Stock Value"
   }
 }

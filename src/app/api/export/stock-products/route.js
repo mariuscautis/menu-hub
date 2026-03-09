@@ -45,17 +45,20 @@ export async function GET(request) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    const header = 'name,brand,category,base_unit,cost_per_base_unit,current_stock'
-    const rows = (products || []).map(p =>
-      toCSVRow([
+    const header = 'name,brand,category,base_unit,current_stock,current_stock_value'
+    const rows = (products || []).map(p => {
+      const qty = p.current_stock ?? 0
+      const cost = p.cost_per_base_unit ?? 0
+      const stockValue = (qty * cost).toFixed(2)
+      return toCSVRow([
         p.name,
         p.brand || '',
         p.category || 'kitchen',
         p.base_unit || 'grams',
-        p.cost_per_base_unit ?? '',
-        p.current_stock ?? ''
+        qty,
+        stockValue
       ])
-    )
+    })
 
     const csv = [header, ...rows].join('\n')
 

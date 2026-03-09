@@ -57,10 +57,10 @@ const MENU_TEMPLATE = `name,price,category,department,description,available
 "Espresso",2.00,"Hot Drinks","bar","Short and strong",true
 "Grilled Salmon",18.00,"Mains","kitchen","Served with seasonal vegetables",true`
 
-const STOCK_TEMPLATE = `name,brand,category,base_unit,cost_per_base_unit,current_stock
-"Olive Oil","Bertolli","kitchen","ml",0.008,5000
-"House Red Wine","","bar","ml",0.005,12000
-"Chicken Breast","","kitchen","grams",0.012,3000`
+const STOCK_TEMPLATE = `name,brand,category,base_unit,current_stock,current_stock_value
+"Olive Oil","Bertolli","kitchen","ml",5000,40.00
+"House Red Wine","","bar","ml",12000,60.00
+"Chicken Breast","","kitchen","grams",3000,36.00`
 
 // --- Validation ---
 
@@ -78,8 +78,8 @@ function validateStockRows(rows) {
   return rows.map((row, i) => {
     const errors = []
     if (!row.name) errors.push('Missing name')
-    if (row.cost_per_base_unit && isNaN(parseFloat(row.cost_per_base_unit))) errors.push('Invalid cost')
     if (row.current_stock && isNaN(parseFloat(row.current_stock))) errors.push('Invalid stock quantity')
+    if (row.current_stock_value && isNaN(parseFloat(row.current_stock_value))) errors.push('Invalid stock value')
     return { ...row, _rowNum: i + 2, _errors: errors, _valid: errors.length === 0 }
   })
 }
@@ -263,7 +263,7 @@ export default function DataMigration() {
                   </div>
                   <div>
                     <div className="font-bold text-slate-800">{t('stockProducts')}</div>
-                    <div className="text-xs text-slate-500">name, brand, category, unit, cost</div>
+                    <div className="text-xs text-slate-500">name, brand, category, unit, stock, value</div>
                   </div>
                 </div>
                 <p className="text-sm text-slate-600">{t('stockProductsDesc')}</p>
@@ -289,7 +289,7 @@ export default function DataMigration() {
                 <code className="text-xs text-slate-600 whitespace-pre">
                   {importType === 'menu'
                     ? 'name, price, category, department, description, available'
-                    : 'name, brand, category, base_unit, cost_per_base_unit, current_stock'}
+                    : 'name, brand, category, base_unit, current_stock, current_stock_value'}
                 </code>
               </div>
 
@@ -309,8 +309,8 @@ export default function DataMigration() {
                     <li><strong>brand</strong> — {t('optional')}</li>
                     <li><strong>category</strong> — {t('stockCategoryDesc')}</li>
                     <li><strong>base_unit</strong> — {t('stockBaseUnitDesc')}</li>
-                    <li><strong>cost_per_base_unit</strong> — {t('stockCostDesc')}</li>
                     <li><strong>current_stock</strong> — {t('stockCurrentDesc')}</li>
+                    <li><strong>current_stock_value</strong> — {t('stockValueDesc')}</li>
                   </ul>
                 )}
               </div>
@@ -470,7 +470,8 @@ export default function DataMigration() {
                             <th className="text-left px-4 py-2 text-slate-600 font-medium">{t('colBrand')}</th>
                             <th className="text-left px-4 py-2 text-slate-600 font-medium">{t('colCategory')}</th>
                             <th className="text-left px-4 py-2 text-slate-600 font-medium">{t('colUnit')}</th>
-                            <th className="text-left px-4 py-2 text-slate-600 font-medium">{t('colCost')}</th>
+                            <th className="text-left px-4 py-2 text-slate-600 font-medium">{t('colStock')}</th>
+                            <th className="text-left px-4 py-2 text-slate-600 font-medium">{t('colStockValue')}</th>
                           </>
                         )}
                       </tr>
@@ -491,7 +492,8 @@ export default function DataMigration() {
                               <td className="px-4 py-2 text-slate-600">{row.brand || '—'}</td>
                               <td className="px-4 py-2 text-slate-600">{row.category || 'kitchen'}</td>
                               <td className="px-4 py-2 text-slate-600">{row.base_unit || 'unit'}</td>
-                              <td className="px-4 py-2 text-slate-600">{row.cost_per_base_unit || '—'}</td>
+                              <td className="px-4 py-2 text-slate-600">{row.current_stock || '0'}</td>
+                              <td className="px-4 py-2 text-slate-600">{row.current_stock_value || '—'}</td>
                             </>
                           )}
                         </tr>
@@ -641,7 +643,7 @@ export default function DataMigration() {
                 <div className="font-semibold text-slate-800">
                   {exportingType === 'stock' ? t('exporting') : t('exportStockProducts')}
                 </div>
-                <div className="text-xs text-slate-500 mt-0.5">name, brand, category, base_unit, cost, stock</div>
+                <div className="text-xs text-slate-500 mt-0.5">name, brand, category, base_unit, stock, value</div>
               </div>
             </button>
           </div>

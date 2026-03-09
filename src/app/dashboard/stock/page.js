@@ -33,6 +33,8 @@ export default function StockManagement() {
   // Stock modal combo box states
   const [showStockDropdown, setShowStockDropdown] = useState(false)
   const [stockProductSearch, setStockProductSearch] = useState('')
+  const [stockModalTab, setStockModalTab] = useState('add') // 'add' | 'adjust'
+  const [adjustForm, setAdjustForm] = useState({ current_stock: '', current_stock_value: '' })
 
   // Invoice dropdown states
   const [purchasingInvoices, setPurchasingInvoices] = useState([])
@@ -275,6 +277,20 @@ export default function StockManagement() {
     setShowStockDropdown(false)
     setInvoiceSearch('')
     setShowInvoiceDropdown(false)
+    setStockModalTab('add')
+    setAdjustForm({ current_stock: '', current_stock_value: '' })
+    setShowStockModal(true)
+  }
+
+  const openAdjustModal = (product) => {
+    setStockForm({ product_id: product.id, quantity: '', purchase_price: '', notes: '', purchasing_invoice_id: '' })
+    setStockProductSearch('')
+    setShowStockDropdown(false)
+    setInvoiceSearch('')
+    setShowInvoiceDropdown(false)
+    setStockModalTab('adjust')
+    const currentInInputUnits = parseFloat(product.current_stock || 0) / parseFloat(product.units_to_base_multiplier || 1)
+    setAdjustForm({ current_stock: currentInInputUnits > 0 ? currentInInputUnits.toFixed(2) : '', current_stock_value: '' })
     setShowStockModal(true)
   }
 
@@ -382,6 +398,40 @@ export default function StockManagement() {
 
     setShowStockModal(false)
     setStockForm({ product_id: '', quantity: '', purchase_price: '', notes: '', purchasing_invoice_id: '' })
+    fetchData()
+  }
+
+  const handleAdjustValue = async (e) => {
+    e.preventDefault()
+    const product = products.find(p => p.id === stockForm.product_id)
+    if (!product) return
+
+    const newStock = parseFloat(adjustForm.current_stock)
+    const newValue = parseFloat(adjustForm.current_stock_value)
+
+    if (isNaN(newStock) || newStock < 0) {
+      alert(t('invalidStockQty'))
+      return
+    }
+    if (isNaN(newValue) || newValue < 0) {
+      alert(t('invalidStockValue'))
+      return
+    }
+
+    const multiplier = parseFloat(product.units_to_base_multiplier || 1)
+    const newStockBase = newStock * multiplier
+    const costPerBaseUnit = newStockBase > 0 && newValue > 0 ? newValue / newStockBase : 0
+
+    await supabase
+      .from('stock_products')
+      .update({
+        current_stock: newStockBase,
+        cost_per_base_unit: costPerBaseUnit
+      })
+      .eq('id', product.id)
+
+    setShowStockModal(false)
+    setAdjustForm({ current_stock: '', current_stock_value: '' })
     fetchData()
   }
 
@@ -753,6 +803,14 @@ export default function StockManagement() {
                           ⚠ Out of Stock
                         </span>
                       )}
+                      {product.current_stock > 0 && !product.cost_per_base_unit && (
+                        <button
+                          onClick={() => openAdjustModal(product)}
+                          className="px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded-full font-medium hover:bg-amber-200 transition-colors"
+                        >
+                          ⚠ Set value
+                        </button>
+                      )}
                       {product.brand && (
                         <span className="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-full font-medium">
                           {product.brand}
@@ -1095,9 +1153,27 @@ export default function StockManagement() {
             className="bg-white rounded-2xl p-8 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold text-slate-800 mb-6">{t('addStock')}</h2>
+            <h2 className="text-xl font-bold text-slate-800 mb-4">{t('addStock')}</h2>
 
-            <form onSubmit={handleStockSubmit} className="space-y-5">
+            {/* Tab toggle */}
+            <div className="flex gap-1 bg-slate-100 rounded-xl p-1 mb-6">
+              <button
+                type="button"
+                onClick={() => setStockModalTab('add')}
+                className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${stockModalTab === 'add' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                {t('addStock')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setStockModalTab('adjust')}
+                className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${stockModalTab === 'adjust' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                {t('adjustStockValue')}
+              </button>
+            </div>
+
+            <form onSubmit={stockModalTab === 'add' ? handleStockSubmit : handleAdjustValue} className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
                   {t('selectProduct')} *
@@ -1173,7 +1249,7 @@ export default function StockManagement() {
                 </div>
               </div>
 
-              {stockForm.product_id && (
+              {stockForm.product_id && stockModalTab === 'add' && (
                 <>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -1342,6 +1418,81 @@ export default function StockManagement() {
                 </>
               )}
 
+              {stockForm.product_id && stockModalTab === 'adjust' && (
+                <>
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-800">
+                    {t('adjustStockValueNote')}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        {t('currentStockQty')} *
+                      </label>
+                      <div className="relative">
+                        {(() => {
+                          const p = products.find(pr => pr.id === stockForm.product_id)
+                          const currentInInputUnit = p ? ((p.current_stock || 0) / (p.units_to_base_multiplier || 1)).toFixed(2) : '0'
+                          return <>
+                            <input
+                              type="number"
+                              value={adjustForm.current_stock}
+                              onChange={(e) => setAdjustForm({ ...adjustForm, current_stock: e.target.value })}
+                              required
+                              step="0.01"
+                              min="0"
+                              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                              placeholder={currentInInputUnit}
+                            />
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 font-medium text-xs">
+                              {p?.input_unit_type}
+                            </span>
+                          </>
+                        })()}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        {t('currentStockValue')} *
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-medium">
+                          {currencySymbol}
+                        </span>
+                        <input
+                          type="number"
+                          value={adjustForm.current_stock_value}
+                          onChange={(e) => setAdjustForm({ ...adjustForm, current_stock_value: e.target.value })}
+                          required
+                          step="0.01"
+                          min="0"
+                          className="w-full pl-8 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                          placeholder="0.00"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {adjustForm.current_stock && adjustForm.current_stock_value && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                      <p className="text-sm text-slate-700">
+                        {(() => {
+                          const p = products.find(pr => pr.id === stockForm.product_id)
+                          const qty = parseFloat(adjustForm.current_stock)
+                          const val = parseFloat(adjustForm.current_stock_value)
+                          if (!qty || !val || !p) return '—'
+                          const multiplier = parseFloat(p.units_to_base_multiplier || 1)
+                          const costPerInputUnit = val / qty
+                          const unit = p.input_unit_type
+                          return <><strong>{t('costPerUnit').replace('{unit}', unit)}:</strong>{' '}{currencySymbol}{costPerInputUnit < 0.1 ? costPerInputUnit.toFixed(4) : costPerInputUnit.toFixed(2)}</>
+                        })()}
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
+
               <div className="flex gap-3 pt-4">
                 <button
                   type="button"
@@ -1353,9 +1504,9 @@ export default function StockManagement() {
                 <button
                   type="submit"
                   disabled={!stockForm.product_id}
-                  className="flex-1 bg-green-600 text-white py-3 rounded-xl font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={`flex-1 text-white py-3 rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${stockModalTab === 'add' ? 'bg-green-600 hover:bg-green-700' : 'bg-[#6262bd] hover:bg-[#5252a3]'}`}
                 >
-                  {t('addStock')}
+                  {stockModalTab === 'add' ? t('addStock') : t('saveAdjustment')}
                 </button>
               </div>
             </form>

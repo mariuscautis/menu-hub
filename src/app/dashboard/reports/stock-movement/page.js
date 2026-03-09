@@ -38,7 +38,7 @@ const PRESETS = [
 ];
 
 export default function StockMovementReport() {
-  const { formatCurrency } = useCurrency();
+  const { formatCurrency, currencySymbol } = useCurrency();
   const restaurantCtx = useRestaurant();
 
   const [restaurant, setRestaurant] = useState(null);
@@ -82,7 +82,7 @@ export default function StockMovementReport() {
       // 1. All stock products for this restaurant
       const { data: stockProducts, error: spErr } = await supabase
         .from('stock_products')
-        .select('id, name, category, base_unit, input_unit_type, current_stock, cost_per_base_unit')
+        .select('id, name, category, base_unit, input_unit_type, units_to_base_multiplier, current_stock, cost_per_base_unit')
         .eq('restaurant_id', restaurant.id)
         .order('name');
       if (spErr) throw new Error('stock_products: ' + (spErr.message || JSON.stringify(spErr)));
@@ -94,18 +94,25 @@ export default function StockMovementReport() {
         return;
       }
 
-      // 2. Stock entries (purchases) in date range — column is 'product_id' not 'stock_product_id'
+      // 2. Stock entries (purchases only — positive qty) in date range
       const { data: stockEntries, error: seErr } = await supabase
         .from('stock_entries')
-        .select('product_id, quantity, purchase_price, created_at')
+        .select('product_id, quantity, unit_used, purchase_price, created_at')
         .eq('restaurant_id', restaurant.id)
         .in('product_id', stockProductIds)
+        .gt('quantity', 0)
         .gte('created_at', start)
         .lte('created_at', end);
       if (seErr) throw new Error('stock_entries: ' + (seErr.message || JSON.stringify(seErr)));
 
-      // Note: stock_losses tracks lost menu items (not direct stock deductions).
-      // Direct stock deductions come from negative-quantity stock_entries (handled below).
+      // 3. Stock product losses (dedicated table, separate from purchase entries)
+      const { data: stockLosses } = await supabase
+        .from('stock_product_losses')
+        .select('product_id, quantity, unit_used, reason, notes, created_at')
+        .eq('restaurant_id', restaurant.id)
+        .in('product_id', stockProductIds)
+        .gte('created_at', start)
+        .lte('created_at', end);
 
       // 4. Sold order items in date range (to compute recipe usage)
       const { data: orders } = await supabase
@@ -167,29 +174,44 @@ export default function StockMovementReport() {
         }
       }
 
-      // 5. Aggregate purchases per product — entries use 'product_id'
-      const purchasedByProduct = {}; // productId -> { qty, cost, entries }
-      for (const entry of (stockEntries || [])) {
-        const pid = entry.product_id;
-        if (!purchasedByProduct[pid]) {
-          purchasedByProduct[pid] = { qty: 0, cost: 0, entries: [] };
-        }
-        purchasedByProduct[pid].qty += parseFloat(entry.quantity || 0);
-        purchasedByProduct[pid].cost += parseFloat(entry.purchase_price || 0);
-        purchasedByProduct[pid].entries.push(entry);
+      // Build a lookup for multipliers
+      const multiplierByProduct = {};
+      const inputUnitByProduct = {};
+      for (const sp of (stockProducts || [])) {
+        multiplierByProduct[sp.id] = parseFloat(sp.units_to_base_multiplier || 1);
+        inputUnitByProduct[sp.id] = sp.input_unit_type;
       }
 
-      // 6. Negative stock entries = direct stock adjustments / losses
-      const directLossByProduct = {};
+      // 5. Aggregate purchases from stock_entries (all positive)
+      const purchasedByProduct = {}; // productId -> { inputQty, baseQty, cost, entries }
       for (const entry of (stockEntries || [])) {
-        const qty = parseFloat(entry.quantity || 0);
-        if (qty < 0) {
-          const pid = entry.product_id;
-          if (!directLossByProduct[pid]) {
-            directLossByProduct[pid] = { qty: 0, entries: [] };
+        const pid = entry.product_id;
+        const multiplier = multiplierByProduct[pid] || 1;
+        const rawQty = parseFloat(entry.quantity || 0);
+        if (rawQty > 0) {
+          if (!purchasedByProduct[pid]) {
+            purchasedByProduct[pid] = { inputQty: 0, baseQty: 0, cost: 0, entries: [] };
           }
-          directLossByProduct[pid].qty += Math.abs(qty);
-          directLossByProduct[pid].entries.push(entry);
+          purchasedByProduct[pid].inputQty += rawQty;
+          purchasedByProduct[pid].baseQty += rawQty * multiplier;
+          purchasedByProduct[pid].cost += parseFloat(entry.purchase_price || 0);
+          purchasedByProduct[pid].entries.push(entry);
+        }
+      }
+
+      // 6. Aggregate losses from stock_product_losses table
+      const directLossByProduct = {}; // productId -> { inputQty, baseQty, entries }
+      for (const loss of (stockLosses || [])) {
+        const pid = loss.product_id;
+        const multiplier = multiplierByProduct[pid] || 1;
+        const inputQty = parseFloat(loss.quantity || 0);
+        if (inputQty > 0) {
+          if (!directLossByProduct[pid]) {
+            directLossByProduct[pid] = { inputQty: 0, baseQty: 0, entries: [] };
+          }
+          directLossByProduct[pid].inputQty += inputQty;
+          directLossByProduct[pid].baseQty += inputQty * multiplier;
+          directLossByProduct[pid].entries.push(loss);
         }
       }
 
@@ -199,16 +221,21 @@ export default function StockMovementReport() {
         const recipe = recipeUsage[sp.id];
         const directLoss = directLossByProduct[sp.id];
 
-        const purchasedQty = purchased ? purchased.entries.filter(e => parseFloat(e.quantity) > 0).reduce((s, e) => s + parseFloat(e.quantity), 0) : 0;
+        const multiplier = parseFloat(sp.units_to_base_multiplier || 1);
+        // purchasedBaseQty: total quantity purchased in base units (positive entries only)
+        const purchasedBaseQty = purchased ? purchased.baseQty : 0;
+        // purchasedInputQty: total quantity in input units (for display in Purchased column)
+        const purchasedInputQty = purchased ? purchased.inputQty : 0;
         const purchasedCost = purchased ? purchased.cost : 0;
         const recipeUsedQty = recipe?.qtyUsed || 0;
         const recipeUsedValue = recipe?.value || 0;
-        const lostQty = directLoss?.qty || 0;
+        const lostBaseQty = directLoss?.baseQty || 0;
+        const lostInputQty = directLoss?.inputQty || 0;
         const currentQty = parseFloat(sp.current_stock || 0);
         const costPerUnit = parseFloat(sp.cost_per_base_unit || 0);
-        const totalUsed = recipeUsedQty + lostQty;
-        // Opening qty estimate: current + used - purchased
-        const openingQty = Math.max(0, currentQty + totalUsed - purchasedQty);
+        const totalUsed = recipeUsedQty + lostBaseQty;
+        // Opening qty estimate: current + used - purchased (all in base units)
+        const openingQty = Math.max(0, currentQty + totalUsed - purchasedBaseQty);
         const totalCurrentValue = currentQty * costPerUnit;
 
         return {
@@ -216,13 +243,17 @@ export default function StockMovementReport() {
           name: sp.name,
           category: sp.category,
           baseUnit: sp.base_unit,
+          inputUnit: sp.input_unit_type,
+          multiplier,
           costPerUnit,
           openingQty,
-          purchasedQty,
+          purchasedBaseQty,
+          purchasedInputQty,
           purchasedCost,
           recipeUsedQty,
           recipeUsedValue,
-          lostQty,
+          lostQty: lostBaseQty,
+          lostInputQty,
           totalUsed,
           currentQty,
           totalCurrentValue,
@@ -235,7 +266,7 @@ export default function StockMovementReport() {
       // 8. Summary
       const summary = {
         totalProducts: items.length,
-        totalPurchasedQty: items.reduce((s, i) => s + i.purchasedQty, 0),
+        totalPurchasedQty: items.reduce((s, i) => s + i.purchasedBaseQty, 0),
         totalPurchasedCost: items.reduce((s, i) => s + i.purchasedCost, 0),
         totalRecipeUsedValue: items.reduce((s, i) => s + i.recipeUsedValue, 0),
         totalCurrentValue: items.reduce((s, i) => s + i.totalCurrentValue, 0),
@@ -258,6 +289,9 @@ export default function StockMovementReport() {
 
   const formatDate = (d) => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   const formatQty = (qty, unit) => `${Number(qty).toLocaleString('en-GB', { maximumFractionDigits: 2 })} ${unit || ''}`.trim();
+  // Cost per unit needs more decimals for small values (e.g. £0.0009/g)
+  const formatCostPerUnit = (cost) => `${currencySymbol}${cost < 0.1 ? cost.toFixed(4) : cost.toFixed(2)}`;
+  const singularUnit = (unit) => unit === 'grams' ? 'gram' : unit;
 
   const filteredItems = (reportData?.items || []).filter(item => {
     if (stockTypeFilter === 'all') return true;
@@ -278,13 +312,13 @@ export default function StockMovementReport() {
       [''],
       ['Product', 'Category', 'Unit', 'Cost/Unit', 'Opening Qty', 'Purchased', 'Used in Recipes', 'Lost/Adjusted', 'Closing Qty', 'Stock Value'],
       ...filteredItems.map(i => [
-        i.name, i.category, i.baseUnit,
-        i.costPerUnit.toFixed(4),
-        i.openingQty.toFixed(2),
-        i.purchasedQty.toFixed(2),
-        i.recipeUsedQty.toFixed(2),
-        i.lostQty.toFixed(2),
-        i.currentQty.toFixed(2),
+        i.name, i.category, i.inputUnit,
+        i.costPerUnit < 0.1 ? i.costPerUnit.toFixed(4) : i.costPerUnit.toFixed(2),
+        (i.openingQty / i.multiplier).toFixed(2),
+        i.purchasedInputQty.toFixed(2),
+        (i.recipeUsedQty / i.multiplier).toFixed(2),
+        (i.lostInputQty).toFixed(2),
+        (i.currentQty / i.multiplier).toFixed(2),
         i.totalCurrentValue.toFixed(2)
       ]),
     ];
@@ -304,13 +338,13 @@ export default function StockMovementReport() {
 
     const productRows = filteredItems.map(item => `<tr>
       <td><strong>${item.name}</strong><br/><span style="font-size:10px;color:#64748b">${item.category || ''}</span></td>
-      <td class="center">${item.baseUnit || ''}</td>
-      <td class="right">${formatCurrency(item.costPerUnit)}</td>
-      <td class="right">${Number(item.openingQty).toFixed(2)}</td>
-      <td class="right" style="color:#2563eb">${item.purchasedQty > 0 ? '+' + Number(item.purchasedQty).toFixed(2) : '—'}</td>
-      <td class="right" style="color:#d97706">${item.recipeUsedQty > 0 ? Number(item.recipeUsedQty).toFixed(2) : '—'}</td>
-      <td class="right" style="color:#dc2626">${item.lostQty > 0 ? Number(item.lostQty).toFixed(2) : '—'}</td>
-      <td class="right"><strong>${Number(item.currentQty).toFixed(2)}</strong></td>
+      <td class="center">${item.inputUnit || ''}</td>
+      <td class="right">${formatCostPerUnit(item.costPerUnit * item.multiplier)}/${item.inputUnit}</td>
+      <td class="right">${(item.openingQty / item.multiplier).toFixed(2)} ${item.inputUnit}</td>
+      <td class="right" style="color:#2563eb">${item.purchasedInputQty > 0 ? '+' + Number(item.purchasedInputQty).toFixed(2) + ' ' + item.inputUnit : '—'}</td>
+      <td class="right" style="color:#d97706">${item.recipeUsedQty > 0 ? (item.recipeUsedQty / item.multiplier).toFixed(2) + ' ' + item.inputUnit : '—'}</td>
+      <td class="right" style="color:#dc2626">${item.lostQty > 0 ? (item.lostInputQty).toFixed(2) + ' ' + item.inputUnit : '—'}</td>
+      <td class="right"><strong>${(item.currentQty / item.multiplier).toFixed(2)} ${item.inputUnit}</strong></td>
       <td class="right" style="color:#059669"><strong>${formatCurrency(item.totalCurrentValue)}</strong></td>
     </tr>`).join('');
 
@@ -644,38 +678,38 @@ export default function StockMovementReport() {
                         {/* Cost per unit */}
                         <div className="lg:text-right text-xs text-slate-500 dark:text-slate-400 lg:block flex justify-between items-center">
                           <span className="lg:hidden text-slate-400">Cost/unit</span>
-                          <span>{item.costPerUnit > 0 ? `${formatCurrency(item.costPerUnit)}/${item.baseUnit}` : '—'}</span>
+                          <span>{item.currentQty > 0 ? `${formatCostPerUnit(item.costPerUnit * item.multiplier)}/${item.inputUnit}` : '—'}</span>
                         </div>
 
                         {/* Opening qty */}
                         <div className="lg:text-right text-sm text-slate-600 dark:text-slate-400 lg:block flex justify-between">
                           <span className="lg:hidden text-xs text-slate-400">Opening</span>
-                          <span>{formatQty(item.openingQty, item.baseUnit)}</span>
+                          <span>{formatQty(item.openingQty / item.multiplier, item.inputUnit)}</span>
                         </div>
 
-                        {/* Purchased */}
+                        {/* Purchased — show in input units (e.g. kg, pieces) */}
                         <div className="lg:text-right text-sm text-blue-600 lg:block flex justify-between">
                           <span className="lg:hidden text-xs text-slate-400">Purchased</span>
-                          <span>{item.purchasedQty > 0 ? `+${formatQty(item.purchasedQty, item.baseUnit)}` : '—'}</span>
+                          <span>{item.purchasedInputQty > 0 ? `+${formatQty(item.purchasedInputQty, item.inputUnit)}` : '—'}</span>
                         </div>
 
                         {/* Used in recipe */}
                         <div className="lg:text-right text-sm text-amber-600 lg:block flex justify-between">
                           <span className="lg:hidden text-xs text-slate-400">Used (recipe)</span>
-                          <span>{item.recipeUsedQty > 0 ? `−${formatQty(item.recipeUsedQty, item.baseUnit)}` : '—'}</span>
+                          <span>{item.recipeUsedQty > 0 ? `−${formatQty(item.recipeUsedQty / item.multiplier, item.inputUnit)}` : '—'}</span>
                         </div>
 
                         {/* Lost / adjusted */}
                         <div className="lg:text-right text-sm text-red-500 lg:block flex justify-between">
                           <span className="lg:hidden text-xs text-slate-400">Lost/Adj.</span>
-                          <span>{item.lostQty > 0 ? `−${formatQty(item.lostQty, item.baseUnit)}` : '—'}</span>
+                          <span>{item.lostQty > 0 ? `−${formatQty(item.lostInputQty, item.inputUnit)}` : '—'}</span>
                         </div>
 
                         {/* Closing / current */}
                         <div className={`lg:text-right text-sm font-semibold lg:block flex justify-between ${isEmpty ? 'text-red-500' : isLow ? 'text-amber-500' : 'text-slate-700 dark:text-slate-300'}`}>
                           <span className="lg:hidden text-xs text-slate-400">Closing</span>
                           <span className="flex items-center lg:justify-end gap-1">
-                            {formatQty(item.currentQty, item.baseUnit)}
+                            {formatQty(item.currentQty / item.multiplier, item.inputUnit)}
                             {isEmpty && <span className="text-xs bg-red-100 dark:bg-red-900/30 text-red-600 px-1 rounded">out</span>}
                             {isLow && !isEmpty && <span className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-600 px-1 rounded">low</span>}
                           </span>
@@ -684,7 +718,7 @@ export default function StockMovementReport() {
                         {/* Stock value */}
                         <div className="lg:text-right text-sm text-slate-600 dark:text-slate-400 lg:block flex justify-between">
                           <span className="lg:hidden text-xs text-slate-400">Value</span>
-                          <span>{item.totalCurrentValue > 0 ? formatCurrency(item.totalCurrentValue) : '—'}</span>
+                          <span>{item.currentQty > 0 ? formatCurrency(item.totalCurrentValue) : '—'}</span>
                         </div>
 
                         {/* Details indicator */}
@@ -710,12 +744,12 @@ export default function StockMovementReport() {
                                 {Object.entries(item.usedIn).sort((a, b) => b[1] - a[1]).map(([dish, qty]) => (
                                   <div key={dish} className="flex justify-between text-xs text-slate-600 dark:text-slate-400">
                                     <span>{dish}</span>
-                                    <span className="font-medium">{formatQty(qty, item.baseUnit)}</span>
+                                    <span className="font-medium">{formatQty(qty / item.multiplier, item.inputUnit)}</span>
                                   </div>
                                 ))}
                                 <div className="flex justify-between text-xs font-semibold text-amber-700 dark:text-amber-400 pt-1 border-t border-slate-200 dark:border-slate-700">
                                   <span>Total recipe usage</span>
-                                  <span>{formatQty(item.recipeUsedQty, item.baseUnit)} ({formatCurrency(item.recipeUsedValue)})</span>
+                                  <span>{formatQty(item.recipeUsedQty / item.multiplier, item.inputUnit)} ({formatCurrency(item.recipeUsedValue)})</span>
                                 </div>
                               </div>
                             </div>
@@ -731,7 +765,7 @@ export default function StockMovementReport() {
                                 {item.purchaseEntries.map((entry, i) => (
                                   <div key={i} className="flex justify-between text-xs text-slate-600 dark:text-slate-400">
                                     <span>{formatDate(entry.created_at)}</span>
-                                    <span className="font-medium text-blue-600">+{formatQty(parseFloat(entry.quantity), item.baseUnit)} ({formatCurrency(parseFloat(entry.purchase_price || 0))})</span>
+                                    <span className="font-medium text-blue-600">+{formatQty(parseFloat(entry.quantity), entry.unit_used || item.inputUnit)} ({formatCurrency(parseFloat(entry.purchase_price || 0))})</span>
                                   </div>
                                 ))}
                               </div>
@@ -748,7 +782,7 @@ export default function StockMovementReport() {
                                 {item.lossEntries.map((entry, i) => (
                                   <div key={i} className="flex justify-between text-xs text-slate-600 dark:text-slate-400">
                                     <span>{formatDate(entry.created_at)}</span>
-                                    <span className="font-medium text-red-500">{formatQty(Math.abs(parseFloat(entry.quantity)), item.baseUnit)}</span>
+                                    <span className="font-medium text-red-500">{formatQty(Math.abs(parseFloat(entry.quantity)), entry.unit_used || item.inputUnit)}</span>
                                   </div>
                                 ))}
                               </div>
@@ -768,7 +802,7 @@ export default function StockMovementReport() {
                 <div></div>
                 <div className="text-right text-blue-600">{formatCurrency(filteredItems.reduce((s, i) => s + i.purchasedCost, 0))}</div>
                 <div className="text-right text-amber-600">{formatCurrency(filteredItems.reduce((s, i) => s + i.recipeUsedValue, 0))}</div>
-                <div className="text-right text-red-500">{filteredItems.reduce((s, i) => s + i.lostQty, 0).toFixed(2)} lost</div>
+                <div className="text-right text-red-500">{formatCurrency(filteredItems.reduce((s, i) => s + i.lostQty * i.costPerUnit, 0))} lost</div>
                 <div></div>
                 <div className="text-right text-emerald-600">{formatCurrency(filteredItems.reduce((s, i) => s + i.totalCurrentValue, 0))}</div>
                 <div></div>
