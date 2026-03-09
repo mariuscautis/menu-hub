@@ -76,32 +76,10 @@ export default function MyRotaPage() {
     if (!restaurant || !staff) return;
 
     try {
-      // 1. Try the materialized view / computed view — only trust it if it has
-      //    a non-null annual_holiday_days AND a non-null holiday_days_remaining
-      const { data: viewData, error: viewError } = await supabase
-        .from('staff_leave_balances')
-        .select('*')
-        .eq('staff_id', staff.id)
-        .maybeSingle();
-
-      if (
-        !viewError &&
-        viewData &&
-        viewData.annual_holiday_days != null &&
-        viewData.annual_holiday_days > 0 &&
-        viewData.holiday_days_remaining != null
-      ) {
-        setLeaveBalance(viewData);
-        return;
-      }
-
-      // 2. Fallback: compute manually from entitlements + requests
-      const [entitlementResult, requestsResult] = await Promise.all([
-        supabase
-          .from('staff_leave_entitlements')
-          .select('*')
-          .eq('staff_id', staff.id)
-          .maybeSingle(),
+      // Compute from entitlements (via service-role API) + shift_requests
+      // Use API route for entitlements to bypass RLS (staff anon session can't read them)
+      const [staffRes, requestsResult] = await Promise.all([
+        fetch(`/api/staff?restaurant_id=${restaurant.id}&staff_id=${staff.id}`),
         supabase
           .from('shift_requests')
           .select('*')
@@ -111,7 +89,9 @@ export default function MyRotaPage() {
           .in('status', ['approved', 'pending'])
       ]);
 
-      const entitlement = entitlementResult.data;
+      const staffJson = await staffRes.json();
+      const staffRecord = staffJson.staff?.[0];
+      const entitlement = staffRecord?.staff_leave_entitlements?.[0] || null;
       const requests = requestsResult.data || [];
 
       if (!entitlement) {

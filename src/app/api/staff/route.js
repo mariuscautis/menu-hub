@@ -26,12 +26,17 @@ export async function GET(request) {
       return NextResponse.json({ error: 'restaurant_id is required' }, { status: 400 })
     }
 
-    // Fetch all staff for this restaurant
-    const { data: staffData, error: staffError } = await supabaseAdmin
+    const staffId = searchParams.get('staff_id')
+
+    // Fetch staff for this restaurant (optionally filtered to a single staff member)
+    let staffQuery = supabaseAdmin
       .from('staff')
       .select('*')
       .eq('restaurant_id', restaurantId)
       .order('created_at', { ascending: false })
+    if (staffId) staffQuery = staffQuery.eq('id', staffId)
+
+    const { data: staffData, error: staffError } = await staffQuery
 
     if (staffError) {
       return NextResponse.json({ error: 'Failed to fetch staff' }, { status: 500 })

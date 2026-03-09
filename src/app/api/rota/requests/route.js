@@ -9,7 +9,8 @@ import { getEmailTranslations, t, formatDateForLocale } from '@/lib/email-transl
 function getSupabase() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+    { auth: { autoRefreshToken: false, persistSession: false } }
   )
 };
 
@@ -112,10 +113,10 @@ function generateTimeOffRequestEmail(tr, locale, { staffName, restaurantName, da
 
 async function sendTimeOffRequestEmail(supabase, { restaurantId, staffName, dateFrom, dateTo, daysRequested, leaveType, reason }) {
   try {
-    // Fetch restaurant: owner email, name, email_language
+    // Fetch restaurant: contact email, name, email_language, owner_id for fallback
     const { data: restaurant } = await supabase
       .from('restaurants')
-      .select('name, email_language, email')
+      .select('name, email_language, email, owner_id')
       .eq('id', restaurantId)
       .single()
 
@@ -124,18 +125,16 @@ async function sendTimeOffRequestEmail(supabase, { restaurantId, staffName, date
     const restaurantName = restaurant.name || 'Restaurant'
     const locale = restaurant.email_language || 'en'
 
-    // Try restaurant's own email first, fall back to the owner's auth email
+    // Use restaurant's contact email; fall back to owner's auth.users email via service role
     let managerEmail = restaurant.email
-    if (!managerEmail) {
-      const { data: owner } = await supabase
-        .from('restaurants')
-        .select('owner_id')
-        .eq('id', restaurantId)
-        .single()
-      if (owner?.owner_id) {
-        const { data: { user } } = await supabase.auth.admin.getUserById(owner.owner_id)
-        managerEmail = user?.email
-      }
+    if (!managerEmail && restaurant.owner_id) {
+      const { data: ownerUser } = await supabase
+        .schema('auth')
+        .from('users')
+        .select('email')
+        .eq('id', restaurant.owner_id)
+        .maybeSingle()
+      managerEmail = ownerUser?.email
     }
 
     if (!managerEmail) return // nowhere to send, skip
