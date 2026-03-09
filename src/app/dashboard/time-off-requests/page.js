@@ -54,13 +54,9 @@ export default function TimeOffRequestsPage() {
       if (authUser) setUser(authUser)
     })
 
-    fetch(`/api/rota/staff?restaurantId=${restaurant.id}`)
+    fetch(`/api/staff?restaurant_id=${restaurant.id}`)
       .then(res => res.ok ? res.json() : { staff: [] })
       .then(json => setStaffMembers(json.staff || []))
-      .catch(() => {
-        supabase.from('staff').select('id, name, role').eq('restaurant_id', restaurant.id).eq('status', 'active').order('name')
-          .then(({ data }) => setStaffMembers(data || []))
-      })
   }, [restaurantCtx])
 
   useEffect(() => {

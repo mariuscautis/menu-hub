@@ -329,8 +329,8 @@ export async function POST(request) {
         read: false
       });
 
-      // Send email notification (non-blocking)
-      sendShiftPublishedEmail(supabase, { staffId: staff_id, restaurantId: restaurant_id, shift });
+      // Send email notification
+      await sendShiftPublishedEmail(supabase, { staffId: staff_id, restaurantId: restaurant_id, shift });
     }
 
     return NextResponse.json({ shift }, { status: 201 });
@@ -499,8 +499,8 @@ export async function PUT(request) {
         read: false
       });
 
-      // Send email notification (non-blocking)
-      sendShiftPublishedEmail(supabase, { staffId: shift.staff_id, restaurantId: existingShift.restaurant_id, shift });
+      // Send email notification
+      await sendShiftPublishedEmail(supabase, { staffId: shift.staff_id, restaurantId: existingShift.restaurant_id, shift });
     } else if (staffAssigned && shift.status === 'published') {
       // Notify staff when assigned to an already published shift
       const formattedDate = new Date(shift.date).toLocaleDateString('en-GB', {
@@ -524,8 +524,8 @@ export async function PUT(request) {
         read: false
       });
 
-      // Send email notification (non-blocking)
-      sendShiftPublishedEmail(supabase, { staffId: staff_id, restaurantId: existingShift.restaurant_id, shift });
+      // Send email notification
+      await sendShiftPublishedEmail(supabase, { staffId: staff_id, restaurantId: existingShift.restaurant_id, shift });
     }
 
     // If shift status changed to completed and attendance doesn't exist, create it

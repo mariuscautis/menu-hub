@@ -157,6 +157,79 @@ async function sendTimeOffRequestEmail(supabase, { restaurantId, staffName, date
   }
 }
 
+async function sendRequestStatusEmail(supabase, { requestId, status, rejectionReason }) {
+  try {
+    // Fetch full request with staff + restaurant in one go
+    const { data: req } = await supabase
+      .from('shift_requests')
+      .select('*, staff:staff_id(name, email), restaurant:restaurant_id(name, email_language)')
+      .eq('id', requestId)
+      .single()
+
+    if (!req || !req.staff?.email) return
+
+    const staffEmail = req.staff.email
+    const staffName = req.staff.name || 'Team Member'
+    const restaurantName = req.restaurant?.name || 'Your Restaurant'
+    const locale = req.restaurant?.email_language || 'en'
+    const tr = getEmailTranslations(locale)
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://www.venoapp.com'
+    const rotaUrl = `${baseUrl}/staff-login`
+
+    const isApproved = status === 'approved'
+    const accentColor = isApproved ? '#16a34a' : '#dc2626'
+    const icon = isApproved ? '✅' : '❌'
+    const heading = isApproved
+      ? (tr.requestApprovedTitle || 'Your Leave Request Has Been Approved')
+      : (tr.requestRejectedTitle || 'Your Leave Request Was Declined')
+    const body = isApproved
+      ? (tr.requestApprovedBody || `Great news! Your time-off request from ${formatDateForLocale(req.date_from, locale)} to ${formatDateForLocale(req.date_to, locale)} has been approved.`)
+      : (tr.requestRejectedBody || `Unfortunately your time-off request from ${formatDateForLocale(req.date_from, locale)} to ${formatDateForLocale(req.date_to, locale)} was declined.`)
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background-color:#f4f4f8;font-family:Arial,Helvetica,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f8;padding:32px 0;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.08);max-width:600px;width:100%;">
+        <tr>
+          <td style="background:linear-gradient(135deg,${accentColor} 0%,${isApproved ? '#15803d' : '#b91c1c'} 100%);padding:40px 32px;text-align:center;">
+            <p style="margin:0 0 8px 0;font-size:13px;color:rgba(255,255,255,0.75);letter-spacing:1px;text-transform:uppercase;">${restaurantName}</p>
+            <h1 style="margin:0;font-size:26px;font-weight:700;color:#ffffff;">${icon} ${heading}</h1>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:36px 32px;">
+            <p style="margin:0 0 16px 0;font-size:16px;color:#374151;">${t(tr.shiftPublishedGreeting || 'Hi {staffName},', { staffName })}</p>
+            <p style="margin:0 0 24px 0;font-size:15px;color:#6b7280;line-height:1.6;">${body}</p>
+            ${!isApproved && rejectionReason ? `
+            <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:16px 20px;margin-bottom:24px;">
+              <p style="margin:0 0 4px 0;font-size:12px;font-weight:700;color:#dc2626;text-transform:uppercase;">Reason</p>
+              <p style="margin:0;font-size:14px;color:#374151;font-style:italic;">"${rejectionReason}"</p>
+            </div>` : ''}
+            <div style="text-align:center;margin:8px 0 32px 0;">
+              <a href="${rotaUrl}" style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#6262bd 0%,#4f4fa3 100%);color:#ffffff;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">${tr.shiftPublishedCta || 'View My Rota'} →</a>
+            </div>
+            <p style="margin:0;font-size:13px;color:#9ca3af;">${t(tr.shiftPublishedFooter || 'This is an automated message from {restaurantName}.', { restaurantName })}</p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`
+
+    const subject = isApproved
+      ? (t(tr.requestApprovedSubject || 'Your leave request has been approved — {restaurantName}', { restaurantName }))
+      : (t(tr.requestRejectedSubject || 'Your leave request was declined — {restaurantName}', { restaurantName }))
+
+    await sendEmail({ to: staffEmail, subject, htmlContent: html, fromName: restaurantName })
+  } catch (err) {
+    console.error('Failed to send request status email:', err)
+  }
+}
+
 // --- End email helpers ---
 
 // GET - Fetch shift requests with filtering
@@ -384,9 +457,9 @@ export async function POST(request) {
       console.error('Failed to create notification:', notificationError);
     }
 
-    // Send email to manager for time-off requests (non-blocking)
+    // Send email to manager for time-off requests
     if (request_type === 'time_off') {
-      sendTimeOffRequestEmail(supabase, {
+      await sendTimeOffRequestEmail(supabase, {
         restaurantId: restaurant_id,
         staffName: shiftRequest.staff.name,
         dateFrom: date_from,
@@ -557,56 +630,13 @@ export async function PUT(request) {
       throw error;
     }
 
-    // Create notifications when request is approved or rejected (non-blocking)
-    try {
-      // Get the staff member's user_id if they have an auth account
-      const { data: staffMember } = await supabase
-        .from('staff')
-        .select('user_id')
-        .eq('id', existingRequest.staff_id)
-        .single();
-
-      // Only create notification if staff has a user_id (auth account)
-      if (staffMember?.user_id) {
-        if (status === 'approved') {
-          const requestTypeLabel = existingRequest.request_type === 'time_off' ? 'time-off' :
-                                    existingRequest.request_type === 'swap' ? 'shift swap' :
-                                    'shift cover';
-
-          await supabase.from('notifications').insert({
-            user_id: staffMember.user_id,
-            type: 'request_approved',
-            title: 'Request approved',
-            message: `Your ${requestTypeLabel} request has been approved`,
-            metadata: {
-              request_id: shiftRequest.id,
-              request_type: existingRequest.request_type,
-              approved_by
-            },
-            read: false
-          });
-        } else if (status === 'rejected') {
-          const requestTypeLabel = existingRequest.request_type === 'time_off' ? 'time-off' :
-                                    existingRequest.request_type === 'swap' ? 'shift swap' :
-                                    'shift cover';
-
-          await supabase.from('notifications').insert({
-            user_id: staffMember.user_id,
-            type: 'request_rejected',
-            title: 'Request declined',
-            message: `Your ${requestTypeLabel} request was declined${rejection_reason ? ': ' + rejection_reason : ''}`,
-            metadata: {
-              request_id: shiftRequest.id,
-              request_type: existingRequest.request_type,
-              rejection_reason
-            },
-            read: false
-          });
-        }
-      }
-    } catch (notificationError) {
-      // Log notification error but don't fail the request
-      console.error('Failed to create notification:', notificationError);
+    // Send email to staff when their request is approved or rejected
+    if (status === 'approved' || status === 'rejected') {
+      await sendRequestStatusEmail(supabase, {
+        requestId: id,
+        status,
+        rejectionReason: rejection_reason
+      });
     }
 
     return NextResponse.json({ request: shiftRequest });
