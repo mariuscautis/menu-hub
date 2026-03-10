@@ -54,7 +54,7 @@ function generateRotaEmail(tr, { staffName, restaurantName, rotaUrl, shifts, per
       <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.08);max-width:600px;width:100%;">
         <!-- Header -->
         <tr>
-          <td style="background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);padding:40px 32px;text-align:center;">
+          <td bgcolor="#f59e0b" style="background-color:#f59e0b;background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);padding:40px 32px;text-align:center;">
             <p style="margin:0 0 8px 0;font-size:13px;color:rgba(255,255,255,0.8);letter-spacing:1px;text-transform:uppercase;">${restaurantName}</p>
             <h1 style="margin:0;font-size:26px;font-weight:700;color:#ffffff;">📅 ${tr.shiftPublishedTitle}</h1>
             ${periodLabel ? `<p style="margin:8px 0 0 0;font-size:14px;color:rgba(255,255,255,0.85);">${periodLabel}</p>` : ''}
