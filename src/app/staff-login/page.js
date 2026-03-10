@@ -32,7 +32,7 @@ function LoginForm() {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.error || 'Invalid email or password')
+        setError((data.error || 'Invalid email or password') + (data.detail ? ` (${data.detail})` : ''))
         setLoading(false)
         return
       }
