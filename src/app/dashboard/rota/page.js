@@ -68,6 +68,9 @@ export default function RotaPage() {
   const [showTemplatesModal, setShowTemplatesModal] = useState(false);
   const [showCurrentlyWorkingModal, setShowCurrentlyWorkingModal] = useState(false);
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
+  const [hasUnnotifiedChanges, setHasUnnotifiedChanges] = useState(false);
+  const [notifying, setNotifying] = useState(false);
+  const [lastNotified, setLastNotified] = useState(null);
 
   /* -------------------- Fetch Restaurant -------------------- */
 
@@ -301,10 +304,41 @@ export default function RotaPage() {
 
   const handleSaveShift = () => {
     fetchShifts();
+    setHasUnnotifiedChanges(true);
   };
 
   const handleDeleteShift = () => {
     fetchShifts();
+    setHasUnnotifiedChanges(true);
+  };
+
+  const handleSendNotifications = async () => {
+    if (!restaurant) return;
+    setNotifying(true);
+    try {
+      const start = moment(selectedDate).startOf(selectedView === 'month' ? 'month' : 'week');
+      const end = moment(selectedDate).endOf(selectedView === 'month' ? 'month' : 'week');
+
+      const res = await fetch('/api/rota/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          restaurant_id: restaurant.id,
+          date_from: start.format('YYYY-MM-DD'),
+          date_to: end.format('YYYY-MM-DD')
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to send notifications');
+
+      setHasUnnotifiedChanges(false);
+      setLastNotified(new Date());
+      alert(`Notifications sent to ${data.sent} staff member${data.sent !== 1 ? 's' : ''}${data.skipped > 0 ? ` (${data.skipped} skipped — no email on file)` : ''}.`);
+    } catch (err) {
+      console.error('Error sending notifications:', err);
+      alert('Failed to send notifications. Please try again.');
+    }
+    setNotifying(false);
   };
 
   /* -------------------- Render -------------------- */
@@ -322,6 +356,25 @@ export default function RotaPage() {
           <p className="text-slate-600 dark:text-slate-400 mt-1">{t('subtitle')}</p>
         </div>
         <div className="flex gap-3">
+          {/* Send Rota Notifications button */}
+          <div className="flex flex-col items-end gap-0.5">
+            <button
+              onClick={handleSendNotifications}
+              disabled={notifying}
+              className={`px-5 py-2.5 rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                hasUnnotifiedChanges
+                  ? 'bg-amber-500 hover:bg-amber-600 text-white animate-pulse'
+                  : 'bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-[#6262bd]'
+              }`}
+            >
+              {notifying ? '⏳ Sending...' : '📧 Send Rota Notifications'}
+            </button>
+            {lastNotified && !hasUnnotifiedChanges && (
+              <span className="text-xs text-slate-400 dark:text-slate-500 pr-1">
+                Last sent: {lastNotified.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            )}
+          </div>
           <button
             onClick={() => setShowTemplatesModal(true)}
             className="px-5 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl hover:border-[#6262bd] transition-colors font-medium"
