@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
+import { useModuleGuard } from '@/hooks/useModuleGuard'
 
 export default function ReportLoss() {
+  useModuleGuard('ordering')
   const t = useTranslations('reportLoss')
   const restaurantCtx = useRestaurant()
   const supabase = useAdminSupabase()

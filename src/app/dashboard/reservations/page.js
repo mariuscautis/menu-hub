@@ -5,8 +5,10 @@ import { supabase } from '@/lib/supabase'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useOrderSounds } from '@/hooks/useOrderSounds'
+import { useModuleGuard } from '@/hooks/useModuleGuard'
 
 export default function Reservations() {
+  useModuleGuard('reservations')
   const t = useTranslations('reservations')
   const tc = useTranslations('common')
   const [restaurant, setRestaurant] = useState(null)

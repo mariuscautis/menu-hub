@@ -4,10 +4,12 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
+import { useModuleGuard } from '@/hooks/useModuleGuard'
 
 export default function Settings() {
   const restaurantCtx = useRestaurant()
   const supabase = useAdminSupabase()
+  const orderingEnabled = restaurantCtx?.enabledModules?.ordering !== false
   const [restaurant, setRestaurant] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -369,8 +371,8 @@ export default function Settings() {
         </div>
       </div>
 
-      {/* Invoice Settings Section */}
-      <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
+      {/* Invoice Settings Section — ordering module only */}
+      {orderingEnabled && <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
         <div className="mb-6">
           <div className="flex items-center justify-between">
             <div>
@@ -657,6 +659,8 @@ export default function Settings() {
         )}
       </div>
 
+      }
+
       {/* Restaurant Logo Section */}
       <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
         <div className="mb-6">
@@ -722,8 +726,8 @@ export default function Settings() {
         </div>
       </div>
 
-      {/* Staff Login Security Section */}
-      <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
+      {/* Staff Login Security + Info — ordering module only */}
+      {orderingEnabled && <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
         <div className="flex items-start justify-between mb-6">
           <div>
             <h2 className="text-lg font-bold text-slate-700 mb-2">Staff Login Security</h2>
@@ -820,7 +824,7 @@ export default function Settings() {
       </div>
 
       {/* Info Box */}
-      <div className="bg-blue-50 border-2 border-blue-100 rounded-2xl p-6">
+      <div className="bg-blue-50 border-2 border-blue-100 rounded-2xl p-6 mb-6">
         <div className="flex gap-3">
           <svg className="w-6 h-6 text-blue-600 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
@@ -839,6 +843,7 @@ export default function Settings() {
           </div>
         </div>
       </div>
+      }
     </div>
   )
 }

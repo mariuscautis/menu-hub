@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRestaurant } from '@/lib/RestaurantContext';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
+import { useModuleGuard } from '@/hooks/useModuleGuard';
 import ClockInOut from './ClockInOut';
 import WorkHistory from './WorkHistory';
 import TimeOffRequestModal from './TimeOffRequestModal';
@@ -12,6 +13,7 @@ import RequestHistory from './RequestHistory';
 const TABS = ['shifts', 'leave', 'history'];
 
 export default function MyRotaPage() {
+  useModuleGuard('rota')
   const restaurantCtx = useRestaurant();
   const [restaurant, setRestaurant] = useState(null);
   const [staff, setStaff] = useState(null);

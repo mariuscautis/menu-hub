@@ -16,8 +16,10 @@
 
 import Link from 'next/link';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
+import { useModuleGuard } from '@/hooks/useModuleGuard';
 
 export default function ReportsPage() {
+  useModuleGuard('reports')
   const t = useTranslations('reports');
 
   // Report cards configuration

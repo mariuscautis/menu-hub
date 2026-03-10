@@ -19,7 +19,10 @@ import { useRestaurant } from '@/lib/RestaurantContext';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
 import { useCurrency } from '@/lib/CurrencyContext';
 
+import { useModuleGuard } from '@/hooks/useModuleGuard'
+
 export default function WeeklyReportPage() {
+  useModuleGuard('reports')
   const t = useTranslations('weeklyReport');
   const { currencySymbol, formatCurrency } = useCurrency();
   const restaurantCtx = useRestaurant();

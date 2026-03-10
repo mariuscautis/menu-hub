@@ -14,6 +14,7 @@ import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import { supabase } from '@/lib/supabase';
 import { useRestaurant } from '@/lib/RestaurantContext';
 import { useTranslations, useLanguage } from '@/lib/i18n/LanguageContext';
+import { useModuleGuard } from '@/hooks/useModuleGuard';
 
 import ShiftModal from './ShiftModal';
 import RequestsModal from './RequestsModal';
@@ -25,6 +26,7 @@ import StaffAvailabilityCalendar from './StaffAvailabilityCalendar';
 const DnDCalendar = withDragAndDrop(Calendar);
 
 export default function RotaPage() {
+  useModuleGuard('rota')
   const t = useTranslations('rota');
   const { locale } = useLanguage();
 

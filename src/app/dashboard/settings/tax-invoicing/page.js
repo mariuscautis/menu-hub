@@ -6,8 +6,10 @@ import { useRestaurant } from '@/lib/RestaurantContext'
 import TemplateSelector from '@/components/invoices/TemplateSelector'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
+import { useModuleGuard } from '@/hooks/useModuleGuard'
 
 export default function TaxInvoicing() {
+  useModuleGuard('ordering')
   const t = useTranslations('taxInvoicing')
   const restaurantCtx = useRestaurant()
   const supabase = useAdminSupabase()

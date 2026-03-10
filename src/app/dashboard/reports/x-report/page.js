@@ -23,7 +23,10 @@ import { useRestaurant } from '@/lib/RestaurantContext';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
 import { useCurrency } from '@/lib/CurrencyContext';
 
+import { useModuleGuard } from '@/hooks/useModuleGuard'
+
 export default function XReportPage() {
+  useModuleGuard('reports')
   const t = useTranslations('xReport');
   const tZ = useTranslations('zReport'); // Reuse Z-Report translations for common terms
   const { currencySymbol, formatCurrency } = useCurrency();

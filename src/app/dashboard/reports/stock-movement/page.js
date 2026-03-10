@@ -37,7 +37,10 @@ const PRESETS = [
   }},
 ];
 
+import { useModuleGuard } from '@/hooks/useModuleGuard'
+
 export default function StockMovementReport() {
+  useModuleGuard('reports')
   const { formatCurrency, currencySymbol } = useCurrency();
   const restaurantCtx = useRestaurant();
 

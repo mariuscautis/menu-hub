@@ -147,7 +147,7 @@ export default function DashboardLayout({ children }) {
           try {
             const { data: freshRestaurant } = await supabase
               .from('restaurants')
-              .select('id, name, slug, logo_url, invoice_settings')
+              .select('id, name, slug, logo_url, invoice_settings, enabled_modules')
               .eq('id', staffSession.restaurant_id)
               .single()
 
@@ -555,6 +555,10 @@ export default function DashboardLayout({ children }) {
 
   const getNavItems = () => {
     const items = []
+    const modules = restaurant?.enabled_modules || {}
+
+    // Default to true when a module key is absent (backwards-compat with restaurants that don't have the column yet)
+    const hasModule = (name) => modules[name] !== false
 
     // Helper function to check if staff has permission
     const hasPermission = (permissionId) => {
@@ -580,8 +584,8 @@ export default function DashboardLayout({ children }) {
       })
     }
 
-    // Orders - Check 'orders_kitchen' OR 'orders_bar' permission
-    if (hasPermission('orders_kitchen') || hasPermission('orders_bar')) {
+    // Orders - Check 'orders_kitchen' OR 'orders_bar' permission and ordering module
+    if (hasModule('ordering') && (hasPermission('orders_kitchen') || hasPermission('orders_bar'))) {
       items.push({
         href: '/dashboard/orders',
         label: 'Orders',
@@ -595,8 +599,8 @@ export default function DashboardLayout({ children }) {
     }
 
 
-    // Tables - Check 'tables' permission
-    if (hasPermission('tables')) {
+    // Tables - Check 'tables' permission and ordering module
+    if (hasModule('ordering') && hasPermission('tables')) {
       items.push({
         href: '/dashboard/tables',
         label: userType === 'owner' || userType === 'staff-admin' ? 'Tables & QR' : 'Tables',
@@ -609,7 +613,7 @@ export default function DashboardLayout({ children }) {
     }
 
     // Floor Plan - staff with permission get view-only page
-    if (hasPermission('floor_plan') && userType !== 'owner' && userType !== 'staff-admin') {
+    if (hasModule('ordering') && hasPermission('floor_plan') && userType !== 'owner' && userType !== 'staff-admin') {
       // Staff with floor_plan permission get the view-only page
       items.push({
         href: '/dashboard/tables-floor-plan',
@@ -622,8 +626,8 @@ export default function DashboardLayout({ children }) {
       })
     }
 
-    // Reservations - Check 'reservations' permission
-    if (hasPermission('reservations')) {
+    // Reservations - Check 'reservations' permission and module
+    if (hasModule('reservations') && hasPermission('reservations')) {
       items.push({
         href: '/dashboard/reservations',
         label: 'Reservations',
@@ -636,8 +640,8 @@ export default function DashboardLayout({ children }) {
       })
     }
 
-    // Menu - Owners/admins always, or staff with 'menu' permission
-    if (userType === 'owner' || userType === 'staff-admin' || hasPermission('menu')) {
+    // Menu - Ordering module required; owners/admins always, or staff with 'menu' permission
+    if (hasModule('ordering') && (userType === 'owner' || userType === 'staff-admin' || hasPermission('menu'))) {
       items.push({
         href: '/dashboard/menu',
         label: 'Menu',
@@ -670,8 +674,8 @@ export default function DashboardLayout({ children }) {
       })
     }
 
-    // Stock - Owners/admins always, or staff with 'stock' permission (handled in else-if below)
-    if (userType === 'owner' || userType === 'staff-admin') {
+    // Stock - Ordering module required; owners/admins always, or staff with 'stock' permission
+    if (hasModule('ordering') && (userType === 'owner' || userType === 'staff-admin')) {
       items.push({
         href: '/dashboard/stock',
         label: 'Stock',
@@ -711,7 +715,7 @@ export default function DashboardLayout({ children }) {
           }
         ]
       })
-    } else if (hasPermission('stock')) {
+    } else if (hasModule('ordering') && hasPermission('stock')) {
       items.push({
         href: '/dashboard/stock',
         label: 'Stock',
@@ -753,8 +757,8 @@ export default function DashboardLayout({ children }) {
       })
     }
 
-    // Report Loss - Check 'report_loss' permission
-    if (hasPermission('report_loss')) {
+    // Report Loss - Check 'report_loss' permission and ordering module
+    if (hasModule('ordering') && hasPermission('report_loss')) {
       items.push({
         href: '/dashboard/report-loss',
         label: 'Report Loss',
@@ -767,7 +771,7 @@ export default function DashboardLayout({ children }) {
     }
 
     // Staff & Rota - Manager view (owners and admin staff only), or staff with staff_rota permission
-    if (userType === 'owner' || userType === 'staff-admin') {
+    if (hasModule('rota') && (userType === 'owner' || userType === 'staff-admin')) {
       items.push({
         href: '/dashboard/staff',
         label: 'Staff & Rota',
@@ -816,7 +820,7 @@ export default function DashboardLayout({ children }) {
           }
         ]
       })
-    } else if (hasPermission('staff_rota')) {
+    } else if (hasModule('rota') && hasPermission('staff_rota')) {
       items.push({
         href: '/dashboard/staff',
         label: 'Staff & Rota',
@@ -850,7 +854,7 @@ export default function DashboardLayout({ children }) {
     }
 
     // My Rota - Check 'my_rota' permission (for staff only)
-    if ((userType === 'staff' || userType === 'staff-admin') && hasPermission('my_rota')) {
+    if (hasModule('rota') && (userType === 'staff' || userType === 'staff-admin') && hasPermission('my_rota')) {
       items.push({
         href: '/dashboard/my-rota',
         label: 'My Rota',
@@ -864,7 +868,7 @@ export default function DashboardLayout({ children }) {
 
     if (userType === 'owner' || userType === 'staff-admin') {
 
-      items.push({
+      if (hasModule('analytics')) items.push({
         href: '/dashboard/analytics',
         label: 'Analytics',
         icon: (
@@ -923,7 +927,7 @@ export default function DashboardLayout({ children }) {
       })
 
       // Reports - Dedicated report pages for quick access (Z-Report, X-Report, Weekly, Monthly, Tax)
-      items.push({
+      if (hasModule('reports')) items.push({
         href: '/dashboard/reports',
         label: 'Reports',
         icon: (
@@ -998,7 +1002,7 @@ export default function DashboardLayout({ children }) {
           }
         ]
       })
-    } else if (hasPermission('reports') || hasPermission('z_report')) {
+    } else if (hasModule('reports') && (hasPermission('reports') || hasPermission('z_report'))) {
       // Staff with reports or z_report permission
       const reportChildren = []
       if (hasPermission('reports')) {
@@ -1105,33 +1109,36 @@ export default function DashboardLayout({ children }) {
               </svg>
             )
           },
-          {
-            href: '/dashboard/settings/tax-invoicing',
-            label: 'Tax & Invoicing',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
-              </svg>
-            )
-          },
-          {
-            href: '/dashboard/settings/product-tax',
-            label: 'Product Tax',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
-              </svg>
-            )
-          },
-          {
-            href: '/dashboard/settings/discounts',
-            label: 'Discounts',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/>
-              </svg>
-            )
-          },
+          // Ordering module only
+          ...(hasModule('ordering') ? [
+            {
+              href: '/dashboard/settings/tax-invoicing',
+              label: 'Tax & Invoicing',
+              icon: (
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                </svg>
+              )
+            },
+            {
+              href: '/dashboard/settings/product-tax',
+              label: 'Product Tax',
+              icon: (
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
+                </svg>
+              )
+            },
+            {
+              href: '/dashboard/settings/discounts',
+              label: 'Discounts',
+              icon: (
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/>
+                </svg>
+              )
+            },
+          ] : []),
           {
             href: '/dashboard/settings/security',
             label: 'Security & Auth',
@@ -1141,24 +1148,27 @@ export default function DashboardLayout({ children }) {
               </svg>
             )
           },
-          {
-            href: '/dashboard/settings/other-options',
-            label: 'Other Options',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-              </svg>
-            )
-          },
-          {
-            href: '/dashboard/settings/data-migration',
-            label: 'Data Migration',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M9 3L5 6.99h3V14h2V6.99h3L9 3zm7 14.01V10h-2v7.01h-3L15 21l4-3.99h-3z"/>
-              </svg>
-            )
-          }
+          // Ordering module only
+          ...(hasModule('ordering') ? [
+            {
+              href: '/dashboard/settings/other-options',
+              label: 'Other Options',
+              icon: (
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                </svg>
+              )
+            },
+            {
+              href: '/dashboard/settings/data-migration',
+              label: 'Data Migration',
+              icon: (
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M9 3L5 6.99h3V14h2V6.99h3L9 3zm7 14.01V10h-2v7.01h-3L15 21l4-3.99h-3z"/>
+                </svg>
+              )
+            }
+          ] : [])
         ]
       })
     }
@@ -1535,7 +1545,7 @@ export default function DashboardLayout({ children }) {
       `}>
         {/* Full-width wrapper for the content */}
         <div className={`${fullWidthMode ? 'h-[calc(100vh-4rem)] overflow-auto' : ''}`}>
-          <RestaurantProvider value={{ restaurant, userType, staffDepartment, departmentPermissions, isPlatformAdmin }}>
+          <RestaurantProvider value={{ restaurant, userType, staffDepartment, departmentPermissions, isPlatformAdmin, enabledModules: restaurant?.enabled_modules || {} }}>
             {children}
           </RestaurantProvider>
         </div>

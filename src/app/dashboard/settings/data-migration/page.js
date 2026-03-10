@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import { useModuleGuard } from '@/hooks/useModuleGuard'
 
 // --- CSV helpers ---
 
@@ -87,6 +88,7 @@ function validateStockRows(rows) {
 // --- Main component ---
 
 export default function DataMigration() {
+  useModuleGuard('ordering')
   const t = useTranslations('dataMigration')
   const restaurantCtx = useRestaurant()
   const restaurant = restaurantCtx?.restaurant

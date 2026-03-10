@@ -14,6 +14,8 @@ export default function Security() {
   const tc = useTranslations('common')
   const restaurantCtx = useRestaurant()
   const supabase = useAdminSupabase()
+  const orderingEnabled = restaurantCtx?.enabledModules?.ordering !== false
+  const reservationsEnabled = restaurantCtx?.enabledModules?.reservations !== false
   const [restaurant, setRestaurant] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -216,7 +218,7 @@ export default function Security() {
       <ConnectedDevicesPanel restaurantId={restaurant.id} />
 
       {/* Staff Login Security Section */}
-      <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
+      {orderingEnabled && <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
         <div className="flex items-start justify-between mb-6">
           <div>
             <h2 className="text-lg font-bold text-slate-700 mb-2">{t('staffLoginSecurity') || 'Staff Login Security'}</h2>
@@ -309,10 +311,10 @@ export default function Security() {
             </button>
           </div>
         </div>
-      </div>
+      </div>}
 
       {/* Staff App Section */}
-      <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
+      {orderingEnabled && <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
         <div className="mb-6">
           <h2 className="text-lg font-bold text-slate-700 mb-1">{t('staffApp') || 'Staff App'}</h2>
           <p className="text-sm text-slate-500">{t('staffAppDesc') || 'Share with your team to install their app or open the login page'}</p>
@@ -367,37 +369,41 @@ export default function Security() {
             <li>{t('loginSteps.step4') || 'They enter their personal 3-digit PIN code'}</li>
           </ol>
         </div>
-      </div>
+      </div>}
 
       {/* Customer Links Section */}
-      <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
+      {(orderingEnabled || reservationsEnabled) && <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
         <div className="mb-5">
           <h2 className="text-lg font-bold text-slate-700 mb-1">{t('customerLinks') || 'Customer Links'}</h2>
           <p className="text-sm text-slate-500">{t('customerLinksDesc') || 'Share these links on your website, social media, or Google Business Profile.'}</p>
         </div>
         <div className="space-y-3">
           {[
-            {
-              label: t('takeawayMenu') || 'Takeaway Menu',
-              url: getTakeawayMenuUrl(),
-              onCopy: copyTakeawayLink,
-              copied: copiedTakeaway,
-              badge: 'bg-orange-100 text-orange-700',
-            },
-            {
-              label: t('dineInMenu') || 'Dine-In Menu',
-              url: getDineInMenuUrl(),
-              onCopy: copyDineInLink,
-              copied: copiedDineIn,
-              badge: 'bg-emerald-100 text-emerald-700',
-            },
-            {
-              label: t('bookingPage') || 'Reservations',
-              url: getBookingUrl(),
-              onCopy: copyBookingLink,
-              copied: copiedBooking,
-              badge: 'bg-purple-100 text-purple-700',
-            },
+            ...(orderingEnabled ? [
+              {
+                label: t('takeawayMenu') || 'Takeaway Menu',
+                url: getTakeawayMenuUrl(),
+                onCopy: copyTakeawayLink,
+                copied: copiedTakeaway,
+                badge: 'bg-orange-100 text-orange-700',
+              },
+              {
+                label: t('dineInMenu') || 'Dine-In Menu',
+                url: getDineInMenuUrl(),
+                onCopy: copyDineInLink,
+                copied: copiedDineIn,
+                badge: 'bg-emerald-100 text-emerald-700',
+              },
+            ] : []),
+            ...(reservationsEnabled ? [
+              {
+                label: t('bookingPage') || 'Reservations',
+                url: getBookingUrl(),
+                onCopy: copyBookingLink,
+                copied: copiedBooking,
+                badge: 'bg-purple-100 text-purple-700',
+              },
+            ] : []),
           ].map(({ label, url, onCopy, copied, badge }) => (
             <div key={label} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
               <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg shrink-0 ${badge}`}>{label}</span>
@@ -411,7 +417,7 @@ export default function Security() {
             </div>
           ))}
         </div>
-      </div>
+      </div>}
     </div>
   )
 }

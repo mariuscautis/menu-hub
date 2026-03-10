@@ -6,8 +6,10 @@ import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useCurrency } from '@/lib/CurrencyContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
+import { useModuleGuard } from '@/hooks/useModuleGuard'
 
 export default function StockManagement() {
+  useModuleGuard('ordering')
   const t = useTranslations('stock')
   const { currencySymbol } = useCurrency()
   const restaurantCtx = useRestaurant()

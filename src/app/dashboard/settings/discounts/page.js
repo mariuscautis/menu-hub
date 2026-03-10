@@ -5,6 +5,7 @@ import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useCurrency } from '@/lib/CurrencyContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
+import { useModuleGuard } from '@/hooks/useModuleGuard'
 
 const DAYS_OF_WEEK = [
   { label: 'Sun', value: 0 },
@@ -29,6 +30,7 @@ const EMPTY_DISCOUNT = {
 }
 
 export default function DiscountsSettings() {
+  useModuleGuard('ordering')
   const t = useTranslations('discounts')
   const tc = useTranslations('common')
   const { currencySymbol } = useCurrency()

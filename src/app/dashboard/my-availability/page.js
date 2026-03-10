@@ -3,10 +3,12 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAdminSupabase } from '@/hooks/useAdminSupabase';
+import { useModuleGuard } from '@/hooks/useModuleGuard';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 export default function MyAvailabilityPage() {
+  useModuleGuard('rota')
   const supabase = useAdminSupabase();
   const [staff, setStaff] = useState(null);
   const [availability, setAvailability] = useState({});

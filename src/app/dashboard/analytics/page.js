@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import { useModuleGuard } from '@/hooks/useModuleGuard'
 import RevenueChart from '@/components/analytics/RevenueChart'
 import PeakHoursChart from '@/components/analytics/PeakHoursChart'
 import CategoryPieChart from '@/components/analytics/CategoryPieChart'
@@ -13,6 +14,7 @@ import DateRangeSelector from '@/components/analytics/DateRangeSelector'
 import ExportButton from '@/components/analytics/ExportButton'
 
 export default function AnalyticsPage() {
+  useModuleGuard('analytics')
   const t = useTranslations('analytics')
   const restaurantCtx = useRestaurant()
   const [loading, setLoading] = useState(true)

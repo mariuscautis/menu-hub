@@ -6,8 +6,10 @@ import { useRestaurant } from '@/lib/RestaurantContext'
 import { useOrderSounds, soundOptions } from '@/hooks/useOrderSounds'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
+import { useModuleGuard } from '@/hooks/useModuleGuard'
 
 export default function OtherOptionsSettings() {
+  useModuleGuard('ordering')
   const t = useTranslations('otherOptions')
   const tc = useTranslations('common')
   const restaurantCtx = useRestaurant()

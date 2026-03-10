@@ -8,7 +8,10 @@ import Link from 'next/link'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useCurrency } from '@/lib/CurrencyContext'
 
+import { useModuleGuard } from '@/hooks/useModuleGuard'
+
 export default function StaffAnalyticsPage() {
+  useModuleGuard('analytics')
   const t = useTranslations('staffAnalytics')
   const { currencySymbol, formatCurrency } = useCurrency()
   const restaurantCtx = useRestaurant()

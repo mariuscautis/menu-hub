@@ -37,7 +37,10 @@ const PRESETS = [
   }},
 ];
 
+import { useModuleGuard } from '@/hooks/useModuleGuard'
+
 export default function SalesBalanceReport() {
+  useModuleGuard('reports')
   const { formatCurrency } = useCurrency();
   const restaurantCtx = useRestaurant();
 

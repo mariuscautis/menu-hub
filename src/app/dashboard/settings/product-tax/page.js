@@ -5,8 +5,10 @@ import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useCurrency } from '@/lib/CurrencyContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
+import { useModuleGuard } from '@/hooks/useModuleGuard'
 
 export default function ProductTaxSettings() {
+  useModuleGuard('ordering')
   const t = useTranslations('productTax')
   const tc = useTranslations('common')
   const { currencySymbol } = useCurrency()

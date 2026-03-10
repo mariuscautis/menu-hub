@@ -19,8 +19,10 @@ import { useRestaurant } from '@/lib/RestaurantContext';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
 import { useCurrency } from '@/lib/CurrencyContext';
 import { useAdminSupabase } from '@/hooks/useAdminSupabase';
+import { useModuleGuard } from '@/hooks/useModuleGuard';
 
 export default function CashDrawerPage() {
+  useModuleGuard('cash_drawer')
   const t = useTranslations('cashDrawer');
   const { currencySymbol, formatCurrency } = useCurrency();
   const restaurantCtx = useRestaurant();
