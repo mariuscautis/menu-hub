@@ -1,7 +1,7 @@
-// Node.js runtime required for bcryptjs
+export const runtime = 'edge'
+
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
-import bcrypt from 'bcryptjs'
 
 function getSupabaseAdmin() {
   return createClient(
@@ -9,6 +9,23 @@ function getSupabaseAdmin() {
     process.env.SUPABASE_SERVICE_ROLE_KEY,
     { auth: { autoRefreshToken: false, persistSession: false } }
   )
+}
+
+// PBKDF2 hash using Web Crypto API (Edge-compatible)
+// Stores as "pbkdf2:iterations:saltHex:hashHex"
+async function hashPassword(password) {
+  const enc = new TextEncoder()
+  const saltBuffer = crypto.getRandomValues(new Uint8Array(16))
+  const iterations = 200_000
+  const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits'])
+  const derived = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: saltBuffer, iterations, hash: 'SHA-256' },
+    keyMaterial,
+    256
+  )
+  const saltHex = Array.from(saltBuffer).map(b => b.toString(16).padStart(2, '0')).join('')
+  const hashHex = Array.from(new Uint8Array(derived)).map(b => b.toString(16).padStart(2, '0')).join('')
+  return `pbkdf2:${iterations}:${saltHex}:${hashHex}`
 }
 
 // POST /api/staff/set-password
@@ -48,8 +65,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Invalid PIN code' }, { status: 401 })
     }
 
-    // Hash the password with bcrypt (cost factor 12)
-    const hashed_password = await bcrypt.hash(password, 12)
+    const hashed_password = await hashPassword(password)
 
     const { error: updateError } = await supabase
       .from('staff')
@@ -68,8 +84,7 @@ export async function POST(request) {
 }
 
 // PUT /api/staff/set-password
-// Body: { staff_id, new_password }  — manager reset (no PIN required, service-role only)
-// Used by the manager dashboard to clear/reset a staff password.
+// Body: { staff_id, reset: true }  — manager reset, clears hashed_password to null
 export async function PUT(request) {
   try {
     const { staff_id, reset } = await request.json()
@@ -78,22 +93,22 @@ export async function PUT(request) {
       return NextResponse.json({ error: 'staff_id is required' }, { status: 400 })
     }
 
-    const supabase = getSupabaseAdmin()
-
-    // Passing reset:true clears the password — staff will be prompted to set a new one on next login
-    if (reset) {
-      const { error } = await supabase
-        .from('staff')
-        .update({ hashed_password: null })
-        .eq('id', staff_id)
-
-      if (error) {
-        return NextResponse.json({ error: 'Failed to reset password' }, { status: 500 })
-      }
-      return NextResponse.json({ success: true })
+    if (!reset) {
+      return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
     }
 
-    return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
+    const supabase = getSupabaseAdmin()
+
+    const { error } = await supabase
+      .from('staff')
+      .update({ hashed_password: null })
+      .eq('id', staff_id)
+
+    if (error) {
+      return NextResponse.json({ error: 'Failed to reset password' }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true })
   } catch (err) {
     console.error('reset-password error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

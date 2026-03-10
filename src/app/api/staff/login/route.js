@@ -1,7 +1,7 @@
-// Node.js runtime required for bcryptjs
+export const runtime = 'edge'
+
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
-import bcrypt from 'bcryptjs'
 
 function getSupabaseAdmin() {
   return createClient(
@@ -9,6 +9,32 @@ function getSupabaseAdmin() {
     process.env.SUPABASE_SERVICE_ROLE_KEY,
     { auth: { autoRefreshToken: false, persistSession: false } }
   )
+}
+
+// PBKDF2 verify using Web Crypto API (Edge-compatible)
+async function verifyPassword(password, stored) {
+  // stored format: "pbkdf2:iterations:saltHex:hashHex"
+  const [, iterStr, saltHex, hashHex] = stored.split(':')
+  const iterations = parseInt(iterStr, 10)
+  const salt = hexToBuffer(saltHex)
+  const enc = new TextEncoder()
+  const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits'])
+  const derived = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt, iterations, hash: 'SHA-256' },
+    keyMaterial,
+    256
+  )
+  return bufferToHex(derived) === hashHex
+}
+
+function hexToBuffer(hex) {
+  const bytes = new Uint8Array(hex.length / 2)
+  for (let i = 0; i < bytes.length; i++) bytes[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16)
+  return bytes
+}
+
+function bufferToHex(buffer) {
+  return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join('')
 }
 
 // POST /api/staff/login
@@ -44,7 +70,7 @@ export async function POST(request) {
       })
     }
 
-    const passwordMatch = await bcrypt.compare(password, staff.hashed_password)
+    const passwordMatch = await verifyPassword(password, staff.hashed_password)
     if (!passwordMatch) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
     }
