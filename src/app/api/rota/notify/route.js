@@ -14,13 +14,33 @@ function getSupabase() {
 }
 
 function generateRotaEmail(tr, { staffName, restaurantName, rotaUrl, shifts, periodLabel }) {
-  const shiftRows = shifts.map(s => `
-    <tr>
-      <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;color:#374151;">${s.date}</td>
-      <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;color:#374151;">${s.time}</td>
-      <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;color:#374151;">${s.role}</td>
-      <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;color:#374151;">${s.breakDuration} ${tr.shiftPublishedMinutes}</td>
-    </tr>
+  const shiftCards = shifts.map((s, i) => `
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#eef2ff;border-radius:10px;border:1px solid #c7d2fe;overflow:hidden;margin-bottom:12px;">
+      <tr>
+        <td style="padding:12px 18px;border-bottom:1px solid #c7d2fe;">
+          <span style="font-size:11px;font-weight:700;color:#4f46e5;text-transform:uppercase;letter-spacing:0.5px;">${tr.shiftPublishedDate}</span>
+          <p style="margin:3px 0 0 0;font-size:15px;font-weight:600;color:#1e1b4b;">${s.date}</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:10px 18px;border-bottom:1px solid #c7d2fe;">
+          <span style="font-size:11px;font-weight:700;color:#4f46e5;text-transform:uppercase;letter-spacing:0.5px;">${tr.shiftPublishedTime}</span>
+          <p style="margin:3px 0 0 0;font-size:15px;color:#374151;">${s.time}</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:10px 18px;border-bottom:1px solid #c7d2fe;">
+          <span style="font-size:11px;font-weight:700;color:#4f46e5;text-transform:uppercase;letter-spacing:0.5px;">${tr.shiftPublishedRole}</span>
+          <p style="margin:3px 0 0 0;font-size:15px;color:#374151;">${s.role}</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:10px 18px;">
+          <span style="font-size:11px;font-weight:700;color:#4f46e5;text-transform:uppercase;letter-spacing:0.5px;">${tr.shiftPublishedBreak}</span>
+          <p style="margin:3px 0 0 0;font-size:15px;color:#374151;">${s.breakDuration} ${tr.shiftPublishedMinutes}</p>
+        </td>
+      </tr>
+    </table>
   `).join('')
 
   return `<!DOCTYPE html>
@@ -48,22 +68,12 @@ function generateRotaEmail(tr, { staffName, restaurantName, rotaUrl, shifts, per
             <p style="margin:0 0 8px 0;font-size:16px;color:#374151;">${t(tr.shiftPublishedGreeting, { staffName })}</p>
             <p style="margin:0 0 28px 0;font-size:15px;color:#6b7280;line-height:1.6;">${t(tr.shiftPublishedIntro, { restaurantName })}</p>
 
-            <!-- Shift table -->
-            <h2 style="margin:0 0 12px 0;font-size:14px;font-weight:700;color:#6262bd;text-transform:uppercase;letter-spacing:0.5px;">${tr.shiftPublishedDetails}</h2>
-            <table width="100%" cellpadding="0" cellspacing="0" style="border-radius:8px;overflow:hidden;border:1px solid #e5e7eb;">
-              <thead>
-                <tr style="background:#f9fafb;">
-                  <th style="padding:10px 14px;text-align:left;font-size:12px;font-weight:700;color:#6262bd;text-transform:uppercase;letter-spacing:0.5px;">${tr.shiftPublishedDate}</th>
-                  <th style="padding:10px 14px;text-align:left;font-size:12px;font-weight:700;color:#6262bd;text-transform:uppercase;letter-spacing:0.5px;">${tr.shiftPublishedTime}</th>
-                  <th style="padding:10px 14px;text-align:left;font-size:12px;font-weight:700;color:#6262bd;text-transform:uppercase;letter-spacing:0.5px;">${tr.shiftPublishedRole}</th>
-                  <th style="padding:10px 14px;text-align:left;font-size:12px;font-weight:700;color:#6262bd;text-transform:uppercase;letter-spacing:0.5px;">${tr.shiftPublishedBreak}</th>
-                </tr>
-              </thead>
-              <tbody>${shiftRows}</tbody>
-            </table>
+            <!-- Shift cards -->
+            <p style="margin:0 0 14px 0;font-size:13px;font-weight:700;color:#6262bd;text-transform:uppercase;letter-spacing:0.5px;">${tr.shiftPublishedDetails}</p>
+            ${shiftCards}
 
             <!-- CTA button -->
-            <div style="text-align:center;margin:32px 0;">
+            <div style="text-align:center;margin:28px 0 32px 0;">
               <a href="${rotaUrl}" style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#6262bd 0%,#4f4fa3 100%);color:#ffffff;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;letter-spacing:0.3px;">${tr.shiftPublishedCta} →</a>
             </div>
 
