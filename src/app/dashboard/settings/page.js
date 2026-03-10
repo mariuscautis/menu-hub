@@ -727,7 +727,8 @@ export default function Settings() {
       </div>
 
       {/* Staff Login Security + Info — ordering module only */}
-      {orderingEnabled && <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
+      {orderingEnabled && <>
+      <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
         <div className="flex items-start justify-between mb-6">
           <div>
             <h2 className="text-lg font-bold text-slate-700 mb-2">Staff Login Security</h2>
@@ -843,7 +844,7 @@ export default function Settings() {
           </div>
         </div>
       </div>
-      }
+      </>}
     </div>
   )
 }
