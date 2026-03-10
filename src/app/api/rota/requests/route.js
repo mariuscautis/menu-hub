@@ -297,6 +297,72 @@ async function sendRequestAmendedEmail(supabase, { requestId }) {
   }
 }
 
+async function sendRequestCancelledEmail(supabase, { requestId }) {
+  try {
+    const { data: req } = await supabase
+      .from('shift_requests')
+      .select('*, staff:staff_id(name, email), restaurant:restaurant_id(name, email_language)')
+      .eq('id', requestId)
+      .single()
+
+    if (!req || !req.staff?.email) return
+
+    const staffEmail = req.staff.email
+    const staffName = req.staff.name || 'Team Member'
+    const restaurantName = req.restaurant?.name || 'Your Restaurant'
+    const locale = req.restaurant?.email_language || 'en'
+    const tr = getEmailTranslations(locale)
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://www.venoapp.com'
+    const rotaUrl = `${baseUrl}/staff-login`
+
+    const dateFrom = formatDateForLocale(req.date_from, locale)
+    const dateTo = formatDateForLocale(req.date_to, locale)
+    const dateRange = req.date_to !== req.date_from ? `${dateFrom} – ${dateTo}` : dateFrom
+
+    const subject = t(tr.requestCancelledSubject, { restaurantName })
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background-color:#f4f4f8;font-family:Arial,Helvetica,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f8;padding:32px 0;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.08);max-width:600px;width:100%;">
+        <tr>
+          <td style="background-color:#64748b;padding:40px 32px;text-align:center;">
+            <p style="margin:0 0 8px 0;font-size:13px;color:rgba(255,255,255,0.85);letter-spacing:1px;text-transform:uppercase;">${restaurantName}</p>
+            <h1 style="margin:0;font-size:26px;font-weight:700;color:#ffffff;">✕ ${tr.requestCancelledTitle}</h1>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:36px 32px;background-color:#ffffff;">
+            <p style="margin:0 0 16px 0;font-size:16px;color:#1f2937;">${t(tr.requestCancelledGreeting, { staffName })}</p>
+            <p style="margin:0 0 24px 0;font-size:15px;color:#4b5563;line-height:1.6;">${tr.requestCancelledBody}</p>
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;border-radius:10px;border:1px solid #e2e8f0;margin-bottom:28px;">
+              <tr>
+                <td style="padding:14px 20px;">
+                  <span style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;">${tr.requestCancelledDates}</span>
+                  <p style="margin:4px 0 0 0;font-size:15px;color:#374151;text-decoration:line-through;">${dateRange}</p>
+                </td>
+              </tr>
+            </table>
+            <div style="text-align:center;margin:8px 0 32px 0;">
+              <a href="${rotaUrl}" style="display:inline-block;padding:14px 32px;background-color:#6262bd;color:#ffffff;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">${tr.requestCancelledCta} →</a>
+            </div>
+            <p style="margin:0;font-size:13px;color:#9ca3af;">${t(tr.requestCancelledFooter, { restaurantName })}</p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`
+
+    await sendEmail({ to: staffEmail, subject, htmlContent: html, fromName: restaurantName })
+  } catch (err) {
+    console.error('Failed to send request cancelled email:', err)
+  }
+}
+
 // --- End email helpers ---
 
 // GET - Fetch shift requests with filtering
@@ -561,7 +627,8 @@ export async function PUT(request) {
       date_to,
       reason,
       leave_type,
-      amended
+      amended,
+      cancelled
     } = body;
 
     if (!id) {
@@ -710,6 +777,11 @@ export async function PUT(request) {
     // Send amendment email when manager edits the request without changing status
     if (amended && !status) {
       await sendRequestAmendedEmail(supabase, { requestId: id });
+    }
+
+    // Send cancellation email when manager cancels an approved request
+    if (cancelled && status === 'cancelled') {
+      await sendRequestCancelledEmail(supabase, { requestId: id });
     }
 
     return NextResponse.json({ request: shiftRequest });

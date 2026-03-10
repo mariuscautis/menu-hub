@@ -123,7 +123,15 @@ const emailTranslations = {
     requestAmendedDates: "Updated Dates",
     requestAmendedLeaveType: "Leave Type",
     requestAmendedCta: "View My Rota",
-    requestAmendedFooter: "This is an automated message from {restaurantName}. Please do not reply."
+    requestAmendedFooter: "This is an automated message from {restaurantName}. Please do not reply.",
+
+    requestCancelledSubject: "Your approved leave has been cancelled — {restaurantName}",
+    requestCancelledTitle: "Leave Request Cancelled",
+    requestCancelledGreeting: "Hi {staffName},",
+    requestCancelledBody: "Your previously approved time-off request has been cancelled by your manager. Please log in to your account for more details.",
+    requestCancelledDates: "Cancelled Dates",
+    requestCancelledCta: "View My Rota",
+    requestCancelledFooter: "This is an automated message from {restaurantName}. Please do not reply."
   },
 
   ro: {
@@ -244,7 +252,15 @@ const emailTranslations = {
     requestAmendedDates: "Date Actualizate",
     requestAmendedLeaveType: "Tip Concediu",
     requestAmendedCta: "Vezi Programul Meu",
-    requestAmendedFooter: "Acesta este un mesaj automat de la {restaurantName}. Te rugăm să nu răspunzi."
+    requestAmendedFooter: "Acesta este un mesaj automat de la {restaurantName}. Te rugăm să nu răspunzi.",
+
+    requestCancelledSubject: "Concediul tău aprobat a fost anulat — {restaurantName}",
+    requestCancelledTitle: "Cerere de Concediu Anulată",
+    requestCancelledGreeting: "Bună {staffName},",
+    requestCancelledBody: "Cererea ta de concediu aprobată anterior a fost anulată de managerul tău. Te rugăm să te conectezi pentru mai multe detalii.",
+    requestCancelledDates: "Date Anulate",
+    requestCancelledCta: "Vezi Programul Meu",
+    requestCancelledFooter: "Acesta este un mesaj automat de la {restaurantName}. Te rugăm să nu răspunzi."
   },
 
   fr: {
@@ -365,7 +381,15 @@ const emailTranslations = {
     requestAmendedDates: "Dates Mises à Jour",
     requestAmendedLeaveType: "Type de Congé",
     requestAmendedCta: "Voir Mon Planning",
-    requestAmendedFooter: "Ceci est un message automatique de {restaurantName}. Merci de ne pas répondre."
+    requestAmendedFooter: "Ceci est un message automatique de {restaurantName}. Merci de ne pas répondre.",
+
+    requestCancelledSubject: "Votre congé approuvé a été annulé — {restaurantName}",
+    requestCancelledTitle: "Demande de Congé Annulée",
+    requestCancelledGreeting: "Bonjour {staffName},",
+    requestCancelledBody: "Votre demande de congé précédemment approuvée a été annulée par votre responsable. Veuillez vous connecter pour plus de détails.",
+    requestCancelledDates: "Dates Annulées",
+    requestCancelledCta: "Voir Mon Planning",
+    requestCancelledFooter: "Ceci est un message automatique de {restaurantName}. Merci de ne pas répondre."
   },
 
   it: {
@@ -486,7 +510,15 @@ const emailTranslations = {
     requestAmendedDates: "Date Aggiornate",
     requestAmendedLeaveType: "Tipo di Congedo",
     requestAmendedCta: "Visualizza il Mio Orario",
-    requestAmendedFooter: "Questo è un messaggio automatico da {restaurantName}. Si prega di non rispondere."
+    requestAmendedFooter: "Questo è un messaggio automatico da {restaurantName}. Si prega di non rispondere.",
+
+    requestCancelledSubject: "Il tuo congedo approvato è stato annullato — {restaurantName}",
+    requestCancelledTitle: "Richiesta di Ferie Annullata",
+    requestCancelledGreeting: "Ciao {staffName},",
+    requestCancelledBody: "La tua richiesta di ferie precedentemente approvata è stata annullata dal tuo responsabile. Accedi al tuo account per maggiori dettagli.",
+    requestCancelledDates: "Date Annullate",
+    requestCancelledCta: "Visualizza il Mio Orario",
+    requestCancelledFooter: "Questo è un messaggio automatico da {restaurantName}. Si prega di non rispondere."
   },
 
   es: {
@@ -607,7 +639,15 @@ const emailTranslations = {
     requestAmendedDates: "Fechas Actualizadas",
     requestAmendedLeaveType: "Tipo de Permiso",
     requestAmendedCta: "Ver Mi Horario",
-    requestAmendedFooter: "Este es un mensaje automático de {restaurantName}. Por favor, no respondas."
+    requestAmendedFooter: "Este es un mensaje automático de {restaurantName}. Por favor, no respondas.",
+
+    requestCancelledSubject: "Tu permiso aprobado ha sido cancelado — {restaurantName}",
+    requestCancelledTitle: "Solicitud de Vacaciones Cancelada",
+    requestCancelledGreeting: "Hola {staffName},",
+    requestCancelledBody: "Tu solicitud de vacaciones previamente aprobada ha sido cancelada por tu responsable. Por favor, inicia sesión para más detalles.",
+    requestCancelledDates: "Fechas Canceladas",
+    requestCancelledCta: "Ver Mi Horario",
+    requestCancelledFooter: "Este es un mensaje automático de {restaurantName}. Por favor, no respondas."
   }
 }
 

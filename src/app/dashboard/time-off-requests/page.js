@@ -7,9 +7,10 @@ import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 
 const STATUS_CONFIG = {
-  pending:  { label: 'Pending',  bg: 'bg-amber-100 dark:bg-amber-900/30', text: 'text-amber-700 dark:text-amber-400', dot: 'bg-amber-500', border: 'border-amber-200 dark:border-amber-800' },
-  approved: { label: 'Approved', bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-700 dark:text-green-400', dot: 'bg-green-500', border: 'border-green-200 dark:border-green-800' },
-  rejected: { label: 'Rejected', bg: 'bg-red-100 dark:bg-red-900/30',    text: 'text-red-700 dark:text-red-400',    dot: 'bg-red-500',   border: 'border-red-200 dark:border-red-800' }
+  pending:   { label: 'Pending',   bg: 'bg-amber-100 dark:bg-amber-900/30',  text: 'text-amber-700 dark:text-amber-400',  dot: 'bg-amber-500',  border: 'border-amber-200 dark:border-amber-800' },
+  approved:  { label: 'Approved',  bg: 'bg-green-100 dark:bg-green-900/30',  text: 'text-green-700 dark:text-green-400',  dot: 'bg-green-500',  border: 'border-green-200 dark:border-green-800' },
+  rejected:  { label: 'Rejected',  bg: 'bg-red-100 dark:bg-red-900/30',      text: 'text-red-700 dark:text-red-400',      dot: 'bg-red-500',    border: 'border-red-200 dark:border-red-800' },
+  cancelled: { label: 'Cancelled', bg: 'bg-slate-100 dark:bg-slate-800',     text: 'text-slate-500 dark:text-slate-400',  dot: 'bg-slate-400',  border: 'border-slate-200 dark:border-slate-700' }
 }
 
 const LEAVE_LABELS = {
@@ -151,6 +152,17 @@ export default function TimeOffRequestsPage() {
   const clearFilters = () => { setSelectedStaff('all'); setSelectedStatus('all'); setSelectedLeaveType('all'); setDateFrom(''); setDateTo('') }
 
   const hasActiveFilters = selectedStaff !== 'all' || selectedStatus !== 'all' || selectedLeaveType !== 'all' || dateFrom || dateTo
+
+  const handleCancel = async (request) => {
+    try {
+      const response = await fetch('/api/rota/requests', {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: request.id, status: 'cancelled', cancelled: true })
+      })
+      if (!response.ok) { const d = await response.json(); throw new Error(d.error || 'Failed to cancel request') }
+      fetchTimeOffRequests()
+    } catch (error) { alert(error.message || 'Failed to cancel request') }
+  }
 
   // Derived stats
   const stats = useMemo(() => ({
@@ -459,13 +471,23 @@ export default function TimeOffRequestsPage() {
                             </div>
                           )}
 
-                          {/* Edit button */}
-                          <button
-                            onClick={e => { e.stopPropagation(); openEdit(request) }}
-                            className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-[#6262bd] hover:text-[#5252a3] px-3 py-1.5 rounded-lg hover:bg-[#6262bd]/10 transition-colors border border-[#6262bd]/30"
-                          >
-                            ✏️ Edit Request
-                          </button>
+                          {/* Action buttons */}
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            <button
+                              onClick={e => { e.stopPropagation(); openEdit(request) }}
+                              className="flex items-center gap-1.5 text-xs font-semibold text-[#6262bd] hover:text-[#5252a3] px-3 py-1.5 rounded-lg hover:bg-[#6262bd]/10 transition-colors border border-[#6262bd]/30"
+                            >
+                              ✏️ Edit Request
+                            </button>
+                            {request.status === 'approved' && (
+                              <button
+                                onClick={e => { e.stopPropagation(); handleCancel(request) }}
+                                className="flex items-center gap-1.5 text-xs font-semibold text-red-600 hover:text-red-700 px-3 py-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors border border-red-200 dark:border-red-800"
+                              >
+                                ✕ Cancel Approval
+                              </button>
+                            )}
+                          </div>
                         </>
                       )}
                     </div>
