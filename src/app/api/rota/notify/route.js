@@ -15,27 +15,27 @@ function getSupabase() {
 
 function generateRotaEmail(tr, { staffName, restaurantName, rotaUrl, shifts, periodLabel }) {
   const shiftCards = shifts.map((s, i) => `
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:#eef2ff;border-radius:10px;border:1px solid #c7d2fe;overflow:hidden;margin-bottom:12px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:12px;border-collapse:collapse;">
       <tr>
-        <td style="padding:12px 18px;border-bottom:1px solid #c7d2fe;">
+        <td bgcolor="#eef2ff" style="background-color:#eef2ff;padding:12px 18px;border-bottom:2px solid #c7d2fe;">
           <span style="font-size:11px;font-weight:700;color:#4f46e5;text-transform:uppercase;letter-spacing:0.5px;">${tr.shiftPublishedDate}</span>
           <p style="margin:3px 0 0 0;font-size:15px;font-weight:600;color:#1e1b4b;">${s.date}</p>
         </td>
       </tr>
       <tr>
-        <td style="padding:10px 18px;border-bottom:1px solid #c7d2fe;">
+        <td bgcolor="#eef2ff" style="background-color:#eef2ff;padding:10px 18px;border-bottom:2px solid #c7d2fe;">
           <span style="font-size:11px;font-weight:700;color:#4f46e5;text-transform:uppercase;letter-spacing:0.5px;">${tr.shiftPublishedTime}</span>
           <p style="margin:3px 0 0 0;font-size:15px;color:#374151;">${s.time}</p>
         </td>
       </tr>
       <tr>
-        <td style="padding:10px 18px;border-bottom:1px solid #c7d2fe;">
+        <td bgcolor="#eef2ff" style="background-color:#eef2ff;padding:10px 18px;border-bottom:2px solid #c7d2fe;">
           <span style="font-size:11px;font-weight:700;color:#4f46e5;text-transform:uppercase;letter-spacing:0.5px;">${tr.shiftPublishedRole}</span>
           <p style="margin:3px 0 0 0;font-size:15px;color:#374151;">${s.role}</p>
         </td>
       </tr>
       <tr>
-        <td style="padding:10px 18px;">
+        <td bgcolor="#eef2ff" style="background-color:#eef2ff;padding:10px 18px 12px 18px;">
           <span style="font-size:11px;font-weight:700;color:#4f46e5;text-transform:uppercase;letter-spacing:0.5px;">${tr.shiftPublishedBreak}</span>
           <p style="margin:3px 0 0 0;font-size:15px;color:#374151;">${s.breakDuration} ${tr.shiftPublishedMinutes}</p>
         </td>
