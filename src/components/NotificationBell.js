@@ -153,11 +153,11 @@ export default function NotificationBell() {
           {/* Backdrop */}
           <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)} />
 
-          {/* Panel — bottom sheet on mobile, dropdown on desktop */}
-          <div className="fixed inset-x-0 bottom-0 z-50 sm:absolute sm:inset-auto sm:right-0 sm:bottom-auto sm:top-full sm:mt-2 sm:w-96 flex flex-col bg-white dark:bg-slate-900 rounded-t-2xl sm:rounded-xl border-t-2 sm:border-2 border-slate-200 dark:border-slate-700 shadow-2xl max-h-[75vh] sm:max-h-[80vh]">
+          {/* Panel — bottom sheet on all screen sizes */}
+          <div className="fixed inset-x-0 bottom-0 z-50 flex flex-col bg-white dark:bg-slate-900 rounded-t-2xl border-t-2 border-slate-200 dark:border-slate-700 shadow-2xl max-h-[75vh]">
 
-            {/* Drag handle — mobile only */}
-            <div className="flex justify-center pt-3 pb-1 sm:hidden flex-shrink-0">
+            {/* Drag handle */}
+            <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
               <div className="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
             </div>
 

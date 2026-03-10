@@ -44,6 +44,9 @@ export default function TimeOffRequestsPage() {
   const [rejectionReason, setRejectionReason] = useState('')
   const [expandedId, setExpandedId] = useState(null)
   const [activeTab, setActiveTab] = useState('all') // 'all' | 'pending' | 'approved' | 'rejected'
+  const [editingId, setEditingId] = useState(null)
+  const [editForm, setEditForm] = useState({})
+  const [editSaving, setEditSaving] = useState(false)
 
   useEffect(() => {
     if (!restaurantCtx?.restaurant) return
@@ -87,16 +90,10 @@ export default function TimeOffRequestsPage() {
   }
 
   const handleApprove = async (request) => {
-    const confirmMsg = t('confirmApprove')
-      .replace('{name}', request.staff.name)
-      .replace('{dateFrom}', moment(request.date_from).format('MMM D, YYYY'))
-      .replace('{dateTo}', moment(request.date_to).format('MMM D, YYYY'))
-      .replace('{days}', request.days_requested)
-    if (!confirm(confirmMsg)) return
     try {
       const response = await fetch('/api/rota/requests', {
         method: 'PUT', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: request.id, status: 'approved', approved_by: user.id })
+        body: JSON.stringify({ id: request.id, status: 'approved', approved_by: user?.id })
       })
       if (!response.ok) { const d = await response.json(); throw new Error(d.error || t('errorApprove')) }
       fetchTimeOffRequests()
@@ -116,6 +113,39 @@ export default function TimeOffRequestsPage() {
       setShowRejectModal(false); setSelectedRequest(null); setRejectionReason('')
       fetchTimeOffRequests()
     } catch (error) { alert(error.message || t('errorReject')) }
+  }
+
+  const openEdit = (request) => {
+    setEditingId(request.id)
+    setEditForm({
+      date_from: request.date_from?.split('T')[0] || '',
+      date_to: request.date_to?.split('T')[0] || '',
+      leave_type: request.leave_type || 'annual_holiday',
+      reason: request.reason || ''
+    })
+  }
+
+  const submitEdit = async (request) => {
+    if (!editForm.date_from || !editForm.date_to) { alert('Please provide both start and end dates.'); return }
+    if (editForm.date_to < editForm.date_from) { alert('End date must be on or after start date.'); return }
+    setEditSaving(true)
+    try {
+      const response = await fetch('/api/rota/requests', {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: request.id,
+          date_from: editForm.date_from,
+          date_to: editForm.date_to,
+          leave_type: editForm.leave_type,
+          reason: editForm.reason,
+          amended: true
+        })
+      })
+      if (!response.ok) { const d = await response.json(); throw new Error(d.error || 'Failed to update request') }
+      setEditingId(null)
+      fetchTimeOffRequests()
+    } catch (error) { alert(error.message || 'Failed to update request') }
+    setEditSaving(false)
   }
 
   const clearFilters = () => { setSelectedStaff('all'); setSelectedStatus('all'); setSelectedLeaveType('all'); setDateFrom(''); setDateTo('') }
@@ -156,7 +186,7 @@ export default function TimeOffRequestsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-6 md:p-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 md:p-8">
       <div className="max-w-5xl mx-auto">
 
         {/* Header */}
@@ -166,15 +196,15 @@ export default function TimeOffRequestsPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mb-6">
           {[
-            { label: t('totalRequests'), value: stats.total, color: 'text-[#6262bd]', border: 'border-[#6262bd]/20' },
-            { label: t('pendingCount'), value: stats.pending, color: 'text-amber-600', border: 'border-amber-200 dark:border-amber-800' },
-            { label: t('approvedCount'), value: stats.approved, color: 'text-green-600', border: 'border-green-200 dark:border-green-800' },
-            { label: t('rejectedCount'), value: stats.rejected, color: 'text-red-600', border: 'border-red-200 dark:border-red-800' },
-            { label: 'Days approved', value: stats.totalDays, color: 'text-blue-600', border: 'border-blue-200 dark:border-blue-800' }
+            { label: t('totalRequests'), value: stats.total, color: 'text-[#6262bd]', border: 'border-[#6262bd]/20', span: '' },
+            { label: t('pendingCount'), value: stats.pending, color: 'text-amber-600', border: 'border-amber-200 dark:border-amber-800', span: '' },
+            { label: t('approvedCount'), value: stats.approved, color: 'text-green-600', border: 'border-green-200 dark:border-green-800', span: '' },
+            { label: t('rejectedCount'), value: stats.rejected, color: 'text-red-600', border: 'border-red-200 dark:border-red-800', span: '' },
+            { label: 'Days approved', value: stats.totalDays, color: 'text-blue-600', border: 'border-blue-200 dark:border-blue-800', span: 'col-span-2 sm:col-span-1' }
           ].map((s, i) => (
-            <div key={i} className={`bg-white dark:bg-slate-900 border-2 ${s.border} rounded-2xl p-4`}>
+            <div key={i} className={`bg-white dark:bg-slate-900 border-2 ${s.border} rounded-2xl p-4 ${s.span}`}>
               <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1">{s.label}</p>
               <p className={`text-3xl font-bold ${s.color}`}>{s.value}</p>
             </div>
@@ -193,7 +223,7 @@ export default function TimeOffRequestsPage() {
               <button onClick={clearFilters} className="text-xs text-[#6262bd] hover:text-[#5252a3] font-semibold">{t('clearAll')}</button>
             )}
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
             <div>
               <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">{t('staffMember')}</label>
               <select value={selectedStaff} onChange={e => setSelectedStaff(e.target.value)}
@@ -224,25 +254,27 @@ export default function TimeOffRequestsPage() {
         </div>
 
         {/* Tab bar + sort */}
-        <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-          <div className="flex gap-1 bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-700 rounded-xl p-1">
-            {TABS.map(tab => (
-              <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-1.5 ${activeTab === tab.key ? 'bg-[#6262bd] text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400'}`}>
-                {tab.label}
-                {tab.count > 0 && (
-                  <span className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${activeTab === tab.key ? 'bg-white/25' : tab.key === 'pending' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400'}`}>
-                    {tab.count}
-                  </span>
-                )}
-              </button>
-            ))}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
+          <div className="overflow-x-auto -mx-1 px-1">
+            <div className="flex gap-1 bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-700 rounded-xl p-1 w-max min-w-full sm:min-w-0">
+              {TABS.map(tab => (
+                <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+                  className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-1.5 whitespace-nowrap ${activeTab === tab.key ? 'bg-[#6262bd] text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400'}`}>
+                  {tab.label}
+                  {tab.count > 0 && (
+                    <span className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${activeTab === tab.key ? 'bg-white/25' : tab.key === 'pending' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400'}`}>
+                      {tab.count}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <label className="text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">Sort by:</label>
             <select value={sortBy} onChange={e => setSortBy(e.target.value)}
-              className="px-3 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:border-[#6262bd] transition-colors">
+              className="flex-1 sm:flex-none px-3 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 focus:outline-none focus:border-[#6262bd] transition-colors">
               <option value="date_desc">Latest first</option>
               <option value="date_asc">Earliest first</option>
               <option value="submitted">Recently submitted</option>
@@ -275,11 +307,11 @@ export default function TimeOffRequestsPage() {
                 <div key={request.id} className={`bg-white dark:bg-slate-900 border-2 rounded-2xl overflow-hidden transition-all ${sc.border}`}>
                   {/* Card row */}
                   <div
-                    className="flex items-center gap-4 px-5 py-4 cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors"
+                    className="flex items-start gap-3 px-4 py-4 cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors"
                     onClick={() => setExpandedId(isExpanded ? null : request.id)}
                   >
                     {/* Avatar */}
-                    <div className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-sm ${sc.bg} ${sc.text}`}>
+                    <div className={`w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-sm mt-0.5 ${sc.bg} ${sc.text}`}>
                       {request.staff?.name?.charAt(0).toUpperCase()}
                     </div>
 
@@ -301,10 +333,23 @@ export default function TimeOffRequestsPage() {
                         )}
                         <span>Submitted {moment(request.created_at).fromNow()}</span>
                       </div>
+                      {/* Actions — inline on mobile below info */}
+                      {request.status === 'pending' && (
+                        <div className="flex gap-2 mt-2 sm:hidden">
+                          <button
+                            onClick={e => { e.stopPropagation(); handleApprove(request) }}
+                            className="px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-xs font-semibold"
+                          >✓ {t('approve')}</button>
+                          <button
+                            onClick={e => { e.stopPropagation(); handleReject(request) }}
+                            className="px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-xs font-semibold"
+                          >✕ {t('reject')}</button>
+                        </div>
+                      )}
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                    {/* Actions — desktop only */}
+                    <div className="hidden sm:flex items-center gap-2 flex-shrink-0">
                       {request.status === 'pending' && (
                         <>
                           <button
@@ -319,46 +364,109 @@ export default function TimeOffRequestsPage() {
                       )}
                       <span className={`text-slate-400 text-sm transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>▾</span>
                     </div>
+                    {/* Chevron — mobile only, always visible */}
+                    <span className={`sm:hidden text-slate-400 text-sm flex-shrink-0 mt-1 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>▾</span>
                   </div>
 
                   {/* Expanded details */}
                   {isExpanded && (
-                    <div className="px-5 pb-5 pt-2 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <div>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">{t('datesRequested')}</p>
-                          <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                            {moment(request.date_from).format('D MMM YYYY')} – {moment(request.date_to).format('D MMM YYYY')}
-                          </p>
-                          <p className="text-xs text-[#6262bd] font-medium mt-0.5">
-                            {request.days_requested} {request.days_requested === 1 ? t('workingDay') : t('workingDays')}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">{t('leaveType')}</p>
-                          <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                            {lc ? `${lc.emoji} ${lc.label}` : (request.leave_type?.replace(/_/g, ' ') || t('annualHoliday'))}
-                          </p>
-                          <p className="text-xs text-slate-400 mt-0.5">{t('requestedOn')} {moment(request.created_at).format('D MMM YYYY')}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">{t('reason')}</p>
-                          <p className="text-sm text-slate-700 dark:text-slate-300">{request.reason || t('noReasonProvided')}</p>
-                        </div>
-                      </div>
+                    <div className="px-4 pb-5 pt-3 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30">
 
-                      {request.status === 'rejected' && request.rejection_reason && (
-                        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-3">
-                          <p className="text-xs font-semibold text-red-700 dark:text-red-400 mb-0.5">✕ {t('rejectionReason')}</p>
-                          <p className="text-sm text-red-600 dark:text-red-400">{request.rejection_reason}</p>
+                      {editingId === request.id ? (
+                        /* ── Edit form ── */
+                        <div>
+                          <p className="text-xs font-semibold text-[#6262bd] uppercase tracking-wide mb-3">Edit Request</p>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                            <div>
+                              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Start Date</label>
+                              <input type="date" value={editForm.date_from}
+                                onChange={e => setEditForm(f => ({ ...f, date_from: e.target.value }))}
+                                className="w-full px-3 py-2 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 focus:outline-none focus:border-[#6262bd]" />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">End Date</label>
+                              <input type="date" value={editForm.date_to}
+                                onChange={e => setEditForm(f => ({ ...f, date_to: e.target.value }))}
+                                className="w-full px-3 py-2 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 focus:outline-none focus:border-[#6262bd]" />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Leave Type</label>
+                              <select value={editForm.leave_type}
+                                onChange={e => setEditForm(f => ({ ...f, leave_type: e.target.value }))}
+                                className="w-full px-3 py-2 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 focus:outline-none focus:border-[#6262bd]">
+                                {Object.entries(LEAVE_LABELS).map(([k, v]) => <option key={k} value={k}>{v.emoji} {v.label}</option>)}
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Reason (optional)</label>
+                              <input type="text" value={editForm.reason}
+                                onChange={e => setEditForm(f => ({ ...f, reason: e.target.value }))}
+                                placeholder="Enter reason..."
+                                className="w-full px-3 py-2 border-2 border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 focus:outline-none focus:border-[#6262bd]" />
+                            </div>
+                          </div>
+                          <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">Saving will notify the staff member by email that their request has been amended.</p>
+                          <div className="flex gap-2">
+                            <button onClick={() => setEditingId(null)}
+                              className="flex-1 border-2 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 py-2 rounded-xl text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                              Cancel
+                            </button>
+                            <button onClick={() => submitEdit(request)} disabled={editSaving}
+                              className="flex-1 bg-[#6262bd] text-white py-2 rounded-xl text-sm font-semibold hover:bg-[#5252a3] transition-colors disabled:opacity-50">
+                              {editSaving ? 'Saving…' : 'Save & Notify Staff'}
+                            </button>
+                          </div>
                         </div>
-                      )}
-                      {request.status === 'approved' && request.approved_at && (
-                        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-3">
-                          <p className="text-sm text-green-700 dark:text-green-400">
-                            ✅ {t('approvedOn')} {moment(request.approved_at).format('D MMM YYYY')}
-                          </p>
-                        </div>
+                      ) : (
+                        /* ── Read-only details ── */
+                        <>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div>
+                              <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">{t('datesRequested')}</p>
+                              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                {moment(request.date_from).format('D MMM YYYY')} – {moment(request.date_to).format('D MMM YYYY')}
+                              </p>
+                              {request.days_requested > 0 && (
+                                <p className="text-xs text-[#6262bd] font-medium mt-0.5">
+                                  {request.days_requested} {request.days_requested === 1 ? t('workingDay') : t('workingDays')}
+                                </p>
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">{t('leaveType')}</p>
+                              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                {lc ? `${lc.emoji} ${lc.label}` : (request.leave_type?.replace(/_/g, ' ') || t('annualHoliday'))}
+                              </p>
+                              <p className="text-xs text-slate-400 mt-0.5">{t('requestedOn')} {moment(request.created_at).format('D MMM YYYY')}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">{t('reason')}</p>
+                              <p className="text-sm text-slate-700 dark:text-slate-300">{request.reason || t('noReasonProvided')}</p>
+                            </div>
+                          </div>
+
+                          {request.status === 'rejected' && request.rejection_reason && (
+                            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-3 mb-3">
+                              <p className="text-xs font-semibold text-red-700 dark:text-red-400 mb-0.5">✕ {t('rejectionReason')}</p>
+                              <p className="text-sm text-red-600 dark:text-red-400">{request.rejection_reason}</p>
+                            </div>
+                          )}
+                          {request.status === 'approved' && request.approved_at && (
+                            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-3 mb-3">
+                              <p className="text-sm text-green-700 dark:text-green-400">
+                                ✅ {t('approvedOn')} {moment(request.approved_at).format('D MMM YYYY')}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Edit button */}
+                          <button
+                            onClick={e => { e.stopPropagation(); openEdit(request) }}
+                            className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-[#6262bd] hover:text-[#5252a3] px-3 py-1.5 rounded-lg hover:bg-[#6262bd]/10 transition-colors border border-[#6262bd]/30"
+                          >
+                            ✏️ Edit Request
+                          </button>
+                        </>
                       )}
                     </div>
                   )}

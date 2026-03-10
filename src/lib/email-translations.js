@@ -113,7 +113,17 @@ const emailTranslations = {
     requestRejectedBody: "Unfortunately, your time-off request from {dateFrom} to {dateTo} was declined.",
     requestRejectedReason: "Reason",
     requestRejectedCta: "View My Rota",
-    requestRejectedFooter: "This is an automated message from {restaurantName}. Please do not reply."
+    requestRejectedFooter: "This is an automated message from {restaurantName}. Please do not reply.",
+
+    // Request Amended (staff notification)
+    requestAmendedSubject: "Your leave request has been updated — {restaurantName}",
+    requestAmendedTitle: "Leave Request Updated",
+    requestAmendedGreeting: "Hi {staffName},",
+    requestAmendedBody: "Your time-off request has been amended by your manager. Please log in to your account to see the updated details.",
+    requestAmendedDates: "Updated Dates",
+    requestAmendedLeaveType: "Leave Type",
+    requestAmendedCta: "View My Rota",
+    requestAmendedFooter: "This is an automated message from {restaurantName}. Please do not reply."
   },
 
   ro: {
@@ -225,7 +235,16 @@ const emailTranslations = {
     requestRejectedBody: "Din păcate, cererea ta de concediu din {dateFrom} până în {dateTo} a fost respinsă.",
     requestRejectedReason: "Motiv",
     requestRejectedCta: "Vezi Programul Meu",
-    requestRejectedFooter: "Acesta este un mesaj automat de la {restaurantName}. Te rugăm să nu răspunzi."
+    requestRejectedFooter: "Acesta este un mesaj automat de la {restaurantName}. Te rugăm să nu răspunzi.",
+
+    requestAmendedSubject: "Cererea ta de concediu a fost actualizată — {restaurantName}",
+    requestAmendedTitle: "Cerere de Concediu Actualizată",
+    requestAmendedGreeting: "Salut {staffName},",
+    requestAmendedBody: "Cererea ta de concediu a fost modificată de managerul tău. Te rugăm să te conectezi în contul tău pentru a vedea detaliile actualizate.",
+    requestAmendedDates: "Date Actualizate",
+    requestAmendedLeaveType: "Tip Concediu",
+    requestAmendedCta: "Vezi Programul Meu",
+    requestAmendedFooter: "Acesta este un mesaj automat de la {restaurantName}. Te rugăm să nu răspunzi."
   },
 
   fr: {
@@ -337,7 +356,16 @@ const emailTranslations = {
     requestRejectedBody: "Malheureusement, votre demande de congé du {dateFrom} au {dateTo} a été refusée.",
     requestRejectedReason: "Raison",
     requestRejectedCta: "Voir Mon Planning",
-    requestRejectedFooter: "Ceci est un message automatique de {restaurantName}. Merci de ne pas répondre."
+    requestRejectedFooter: "Ceci est un message automatique de {restaurantName}. Merci de ne pas répondre.",
+
+    requestAmendedSubject: "Votre demande de congé a été mise à jour — {restaurantName}",
+    requestAmendedTitle: "Demande de Congé Mise à Jour",
+    requestAmendedGreeting: "Bonjour {staffName},",
+    requestAmendedBody: "Votre demande de congé a été modifiée par votre responsable. Veuillez vous connecter à votre compte pour voir les détails mis à jour.",
+    requestAmendedDates: "Dates Mises à Jour",
+    requestAmendedLeaveType: "Type de Congé",
+    requestAmendedCta: "Voir Mon Planning",
+    requestAmendedFooter: "Ceci est un message automatique de {restaurantName}. Merci de ne pas répondre."
   },
 
   it: {
@@ -449,7 +477,16 @@ const emailTranslations = {
     requestRejectedBody: "Purtroppo, la tua richiesta di ferie dal {dateFrom} al {dateTo} è stata rifiutata.",
     requestRejectedReason: "Motivo",
     requestRejectedCta: "Visualizza il Mio Orario",
-    requestRejectedFooter: "Questo è un messaggio automatico da {restaurantName}. Si prega di non rispondere."
+    requestRejectedFooter: "Questo è un messaggio automatico da {restaurantName}. Si prega di non rispondere.",
+
+    requestAmendedSubject: "La tua richiesta di ferie è stata aggiornata — {restaurantName}",
+    requestAmendedTitle: "Richiesta di Ferie Aggiornata",
+    requestAmendedGreeting: "Ciao {staffName},",
+    requestAmendedBody: "La tua richiesta di ferie è stata modificata dal tuo responsabile. Accedi al tuo account per vedere i dettagli aggiornati.",
+    requestAmendedDates: "Date Aggiornate",
+    requestAmendedLeaveType: "Tipo di Congedo",
+    requestAmendedCta: "Visualizza il Mio Orario",
+    requestAmendedFooter: "Questo è un messaggio automatico da {restaurantName}. Si prega di non rispondere."
   },
 
   es: {
@@ -561,7 +598,16 @@ const emailTranslations = {
     requestRejectedBody: "Lamentablemente, tu solicitud de vacaciones del {dateFrom} al {dateTo} ha sido denegada.",
     requestRejectedReason: "Motivo",
     requestRejectedCta: "Ver Mi Horario",
-    requestRejectedFooter: "Este es un mensaje automático de {restaurantName}. Por favor, no respondas."
+    requestRejectedFooter: "Este es un mensaje automático de {restaurantName}. Por favor, no respondas.",
+
+    requestAmendedSubject: "Tu solicitud de vacaciones ha sido actualizada — {restaurantName}",
+    requestAmendedTitle: "Solicitud de Vacaciones Actualizada",
+    requestAmendedGreeting: "Hola {staffName},",
+    requestAmendedBody: "Tu solicitud de vacaciones ha sido modificada por tu responsable. Por favor, inicia sesión en tu cuenta para ver los detalles actualizados.",
+    requestAmendedDates: "Fechas Actualizadas",
+    requestAmendedLeaveType: "Tipo de Permiso",
+    requestAmendedCta: "Ver Mi Horario",
+    requestAmendedFooter: "Este es un mensaje automático de {restaurantName}. Por favor, no respondas."
   }
 }
 
