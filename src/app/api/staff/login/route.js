@@ -60,7 +60,7 @@ export async function POST(request) {
 
     if (staffError) {
       console.error('staff login query error:', staffError)
-      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+      return NextResponse.json({ error: 'Internal server error', detail: staffError?.message || String(staffError) }, { status: 500 })
     }
 
     if (!staff) {
@@ -111,6 +111,6 @@ export async function POST(request) {
     })
   } catch (err) {
     console.error('staff login error:', err)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Internal server error', detail: err?.message || String(err) }, { status: 500 })
   }
 }
