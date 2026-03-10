@@ -171,6 +171,22 @@ export default function Staff() {
     setShowPasswordModal(true)
   }
 
+  const resetStaffPassword = async (member) => {
+    if (!confirm(`Reset password for ${member.name || member.email}? They will be asked to set a new password on their next login.`)) return
+    try {
+      const res = await fetch('/api/staff/set-password', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ staff_id: member.id, reset: true })
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      alert(`Password reset. ${member.name || member.email} will be prompted to set a new password on next login.`)
+    } catch (err) {
+      alert('Failed to reset password: ' + err.message)
+    }
+  }
+
   const updatePinCode = async (e) => {
     e.preventDefault()
     if (!passwordData.newPassword || passwordData.newPassword.length !== 3) {
@@ -489,6 +505,15 @@ export default function Staff() {
                       >
                         {t('edit')}
                       </button>
+                      {!member.is_hub && (
+                        <button
+                          onClick={() => resetStaffPassword(member)}
+                          className="px-3 py-1.5 bg-slate-50 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
+                          title="Reset staff password — they'll set a new one on next login"
+                        >
+                          Reset PW
+                        </button>
+                      )}
                       {member.status === 'pending' && (
                         <button
                           onClick={() => updateStaffStatus(member.id, 'active')}

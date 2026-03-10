@@ -3,52 +3,53 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-function LoginForm() {
+function SetupForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const setupDone = searchParams.get('setup') === 'done'
+  const staffId = searchParams.get('staff_id')
+  const staffName = searchParams.get('name') ? decodeURIComponent(searchParams.get('name')) : ''
 
-  const [formData, setFormData] = useState({ email: '', password: '' })
+  const [pin, setPin] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-  }
+  useEffect(() => {
+    if (!staffId) router.push('/staff-login')
+  }, [staffId, router])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-    setLoading(true)
 
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters')
+      return
+    }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match')
+      return
+    }
+
+    setLoading(true)
     try {
-      const res = await fetch('/api/staff/login', {
+      const res = await fetch('/api/staff/set-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email, password: formData.password })
+        body: JSON.stringify({ staff_id: staffId, pin_code: pin, password, confirm_password: confirmPassword })
       })
       const data = await res.json()
-
       if (!res.ok) {
-        setError(data.error || 'Invalid email or password')
+        setError(data.error || 'Failed to set password')
         setLoading(false)
         return
       }
-
-      // Staff has no password set yet — redirect to setup
-      if (data.needs_setup) {
-        router.push(`/staff-setup-password?staff_id=${data.staff_id}&name=${encodeURIComponent(data.name)}`)
-        return
-      }
-
-      // Store session and go to dashboard
-      localStorage.setItem('staff_session', JSON.stringify(data.staff_session))
-      router.push('/staff-dashboard')
+      // Password set — redirect to login to sign in properly
+      router.push('/staff-login?setup=done')
     } catch (err) {
-      console.error('Login error:', err)
-      setError('An error occurred during login. Please try again.')
+      setError('Something went wrong. Please try again.')
       setLoading(false)
     }
   }
@@ -59,18 +60,15 @@ function LoginForm() {
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-[#6262bd] rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-slate-800">Staff Login</h1>
-          <p className="text-slate-500 mt-2">Access your schedule and time-off requests</p>
+          <h1 className="text-2xl font-bold text-slate-800">Set Your Password</h1>
+          {staffName && <p className="text-slate-500 mt-1">Welcome, {staffName}</p>}
+          <p className="text-slate-500 text-sm mt-2">
+            Create a password to secure your account. You'll use it to log in from now on.
+          </p>
         </div>
-
-        {setupDone && (
-          <div className="mb-6 p-4 bg-green-50 border-2 border-green-200 rounded-xl text-green-700 text-sm">
-            Password set successfully! You can now log in.
-          </div>
-        )}
 
         {error && (
           <div className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-xl text-red-700 text-sm">
@@ -81,34 +79,32 @@ function LoginForm() {
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Email Address
+              Your PIN (to verify it's you)
             </label>
             <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
+              type="password"
+              value={pin}
+              onChange={e => setPin(e.target.value)}
               required
-              autoComplete="email"
+              inputMode="numeric"
+              placeholder="Enter your current PIN"
               className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
-              placeholder="your.email@example.com"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Password
+              New Password
             </label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
                 required
-                autoComplete="current-password"
+                minLength={8}
+                placeholder="Min. 8 characters"
                 className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 pr-12"
-                placeholder="Enter your password"
               />
               <button
                 type="button"
@@ -123,36 +119,57 @@ function LoginForm() {
                 )}
               </button>
             </div>
+            {password.length > 0 && password.length < 8 && (
+              <p className="mt-1 text-xs text-amber-600">{8 - password.length} more character{8 - password.length !== 1 ? 's' : ''} needed</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              Confirm Password
+            </label>
+            <input
+              type={showPassword ? 'text' : 'password'}
+              value={confirmPassword}
+              onChange={e => setConfirmPassword(e.target.value)}
+              required
+              placeholder="Repeat your password"
+              className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 ${
+                confirmPassword && confirmPassword !== password ? 'border-red-300' : 'border-slate-200'
+              }`}
+            />
+            {confirmPassword && confirmPassword !== password && (
+              <p className="mt-1 text-xs text-red-600">Passwords don't match</p>
+            )}
+          </div>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+            <p className="text-xs text-blue-700">
+              <strong>After setting your password</strong>, you'll be redirected to the login page where you can sign in with your email and new password.
+            </p>
           </div>
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || password.length < 8 || password !== confirmPassword || !pin}
             className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Setting password...' : 'Set Password & Continue'}
           </button>
         </form>
-
-        <div className="mt-6 text-center">
-          <p className="text-sm text-slate-500">
-            First time logging in? Your manager will provide your PIN to set up your password.<br />
-            Forgotten your password? Ask your manager to reset it.
-          </p>
-        </div>
       </div>
     </div>
   )
 }
 
-export default function StaffLogin() {
+export default function StaffSetupPassword() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-gradient-to-br from-[#6262bd] to-[#8b5cf6] flex items-center justify-center">
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-white" />
       </div>
     }>
-      <LoginForm />
+      <SetupForm />
     </Suspense>
   )
 }
