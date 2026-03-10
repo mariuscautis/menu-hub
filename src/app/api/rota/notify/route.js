@@ -14,33 +14,31 @@ function getSupabase() {
 }
 
 function generateRotaEmail(tr, { staffName, restaurantName, rotaUrl, shifts, periodLabel }) {
-  const shiftCards = shifts.map((s, i) => `
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:12px;border-collapse:collapse;">
-      <tr>
-        <td bgcolor="#eef2ff" style="background-color:#eef2ff;padding:12px 18px;border-bottom:2px solid #c7d2fe;">
-          <span style="font-size:11px;font-weight:700;color:#4f46e5;text-transform:uppercase;letter-spacing:0.5px;">${tr.shiftPublishedDate}</span>
-          <p style="margin:3px 0 0 0;font-size:15px;font-weight:600;color:#1e1b4b;">${s.date}</p>
-        </td>
-      </tr>
-      <tr>
-        <td bgcolor="#eef2ff" style="background-color:#eef2ff;padding:10px 18px;border-bottom:2px solid #c7d2fe;">
-          <span style="font-size:11px;font-weight:700;color:#4f46e5;text-transform:uppercase;letter-spacing:0.5px;">${tr.shiftPublishedTime}</span>
-          <p style="margin:3px 0 0 0;font-size:15px;color:#374151;">${s.time}</p>
-        </td>
-      </tr>
-      <tr>
-        <td bgcolor="#eef2ff" style="background-color:#eef2ff;padding:10px 18px;border-bottom:2px solid #c7d2fe;">
-          <span style="font-size:11px;font-weight:700;color:#4f46e5;text-transform:uppercase;letter-spacing:0.5px;">${tr.shiftPublishedRole}</span>
-          <p style="margin:3px 0 0 0;font-size:15px;color:#374151;">${s.role}</p>
-        </td>
-      </tr>
-      <tr>
-        <td bgcolor="#eef2ff" style="background-color:#eef2ff;padding:10px 18px 12px 18px;">
-          <span style="font-size:11px;font-weight:700;color:#4f46e5;text-transform:uppercase;letter-spacing:0.5px;">${tr.shiftPublishedBreak}</span>
-          <p style="margin:3px 0 0 0;font-size:15px;color:#374151;">${s.breakDuration} ${tr.shiftPublishedMinutes}</p>
-        </td>
-      </tr>
-    </table>
+  const shiftRows = shifts.map((s, i) => `
+    <tr>
+      <td style="padding:18px 20px;border-bottom:1px solid #fde68a;background-color:#fef3c7;">
+        <span style="font-size:12px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:0.5px;">${tr.shiftPublishedDate}</span>
+        <p style="margin:4px 0 0 0;font-size:16px;font-weight:600;color:#92400e;">${s.date}</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:14px 20px;border-bottom:1px solid #fde68a;background-color:#fef3c7;">
+        <span style="font-size:12px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:0.5px;">${tr.shiftPublishedTime}</span>
+        <p style="margin:4px 0 0 0;font-size:15px;color:#374151;">${s.time}</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:14px 20px;border-bottom:1px solid #fde68a;background-color:#fef3c7;">
+        <span style="font-size:12px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:0.5px;">${tr.shiftPublishedRole}</span>
+        <p style="margin:4px 0 0 0;font-size:15px;color:#374151;">${s.role}</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:14px 20px;${i < shifts.length - 1 ? 'border-bottom:3px solid #d97706;' : ''}background-color:#fef3c7;">
+        <span style="font-size:12px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:0.5px;">${tr.shiftPublishedBreak}</span>
+        <p style="margin:4px 0 0 0;font-size:15px;color:#374151;">${s.breakDuration} ${tr.shiftPublishedMinutes}</p>
+      </td>
+    </tr>
   `).join('')
 
   return `<!DOCTYPE html>
@@ -56,25 +54,26 @@ function generateRotaEmail(tr, { staffName, restaurantName, rotaUrl, shifts, per
       <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.08);max-width:600px;width:100%;">
         <!-- Header -->
         <tr>
-          <td style="background:linear-gradient(135deg,#6262bd 0%,#4f4fa3 100%);padding:40px 32px;text-align:center;">
-            <p style="margin:0 0 8px 0;font-size:13px;color:rgba(255,255,255,0.75);letter-spacing:1px;text-transform:uppercase;">${restaurantName}</p>
+          <td style="background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);padding:40px 32px;text-align:center;">
+            <p style="margin:0 0 8px 0;font-size:13px;color:rgba(255,255,255,0.8);letter-spacing:1px;text-transform:uppercase;">${restaurantName}</p>
             <h1 style="margin:0;font-size:26px;font-weight:700;color:#ffffff;">📅 ${tr.shiftPublishedTitle}</h1>
             ${periodLabel ? `<p style="margin:8px 0 0 0;font-size:14px;color:rgba(255,255,255,0.85);">${periodLabel}</p>` : ''}
           </td>
         </tr>
         <!-- Body -->
         <tr>
-          <td style="padding:36px 32px;">
+          <td style="padding:36px 32px;background-color:#ffffff;">
             <p style="margin:0 0 8px 0;font-size:16px;color:#374151;">${t(tr.shiftPublishedGreeting, { staffName })}</p>
             <p style="margin:0 0 28px 0;font-size:15px;color:#6b7280;line-height:1.6;">${t(tr.shiftPublishedIntro, { restaurantName })}</p>
 
-            <!-- Shift cards -->
-            <p style="margin:0 0 14px 0;font-size:13px;font-weight:700;color:#6262bd;text-transform:uppercase;letter-spacing:0.5px;">${tr.shiftPublishedDetails}</p>
-            ${shiftCards}
+            <!-- Shift details card — same pattern as time-off email -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#fef3c7;border-radius:10px;border:1px solid #fde68a;overflow:hidden;margin-bottom:28px;">
+              ${shiftRows}
+            </table>
 
             <!-- CTA button -->
-            <div style="text-align:center;margin:28px 0 32px 0;">
-              <a href="${rotaUrl}" style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#6262bd 0%,#4f4fa3 100%);color:#ffffff;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;letter-spacing:0.3px;">${tr.shiftPublishedCta} →</a>
+            <div style="text-align:center;margin:8px 0 32px 0;">
+              <a href="${rotaUrl}" style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);color:#ffffff;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;letter-spacing:0.3px;">${tr.shiftPublishedCta} →</a>
             </div>
 
             <p style="margin:0;font-size:14px;color:#9ca3af;line-height:1.6;">${tr.shiftPublishedOutro}</p>
