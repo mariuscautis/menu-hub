@@ -864,425 +864,438 @@ export default function Orders() {
     return menuItem?.department || 'kitchen'
   }
 
+  // Layout mode — grid (default) or list — persisted in localStorage
+  const [layoutMode, setLayoutMode] = useState(() => {
+    if (typeof window !== 'undefined') return localStorage.getItem('orders_layout') || 'grid'
+    return 'grid'
+  })
+  const toggleLayout = () => {
+    const next = layoutMode === 'grid' ? 'list' : 'grid'
+    setLayoutMode(next)
+    if (typeof window !== 'undefined') localStorage.setItem('orders_layout', next)
+  }
+
+  // Which cards have their details panel expanded
+  const [expandedOrders, setExpandedOrders] = useState(new Set())
+  const toggleExpanded = (id) => setExpandedOrders(prev => {
+    const next = new Set(prev)
+    next.has(id) ? next.delete(id) : next.add(id)
+    return next
+  })
+
+  // Elapsed-time urgency colour for active orders
+  const getUrgencyClasses = (createdAt, isActive) => {
+    if (!isActive || !createdAt) return { header: 'bg-slate-100', border: 'border-slate-100' }
+    const mins = Math.floor((Date.now() - new Date(createdAt).getTime()) / 60000)
+    if (mins < 5)  return { header: 'bg-green-500',  border: 'border-green-400'  }
+    if (mins < 10) return { header: 'bg-amber-400',  border: 'border-amber-400'  }
+    if (mins < 20) return { header: 'bg-orange-500', border: 'border-orange-400' }
+    return               { header: 'bg-red-600',     border: 'border-red-500'    }
+  }
+
   if (loading) {
     return <div className="text-slate-500">{t('loadingOrders')}</div>
   }
 
   return (
       <div onClick={resumeAudio}>
-        <div className="flex justify-between items-center mb-8">
+
+        {/* Header */}
+        <div className="flex justify-between items-center mb-4">
           <div>
             <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
-            <p className="text-slate-500">{t('subtitle')}</p>
+            <p className="text-slate-500 text-sm">{t('subtitle')}</p>
           </div>
-          {/* Sound indicator */}
-          {soundSettings?.enabled && (
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
-              </svg>
-              <span>Sound alerts on</span>
+          <div className="flex items-center gap-2">
+            {soundSettings?.enabled && (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-200 rounded-full text-green-700 text-xs font-medium">
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+                </svg>
+                Sound on
+              </div>
+            )}
+            {/* Layout toggle */}
+            <button
+              onClick={toggleLayout}
+              title={layoutMode === 'grid' ? 'Switch to list view' : 'Switch to grid view'}
+              className="p-2 rounded-xl bg-white border-2 border-slate-200 text-slate-500 hover:border-[#6262bd] hover:text-[#6262bd] transition-colors"
+            >
+              {layoutMode === 'grid' ? (
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
+                </svg>
+              ) : (
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M3 3h7v7H3zm0 11h7v7H3zm11-11h7v7h-7zm0 11h7v7h-7z"/>
+                </svg>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Stats Bar */}
+        {(() => {
+          const pendingCount   = allOrders.filter(o => (o._isOffline || o.status === 'pending') && !o.paid).length
+          const preparingCount = allOrders.filter(o => o.status === 'preparing' && !o.paid).length
+          const readyCount     = allOrders.filter(o => o.status === 'ready' && !o.paid).length
+          const pickupCount    = allOrders.filter(o => o.order_type === 'takeaway' && o.ready_for_pickup && !o.picked_up_at && !o.paid).length
+          if (pendingCount + preparingCount + readyCount === 0) return null
+          return (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {pendingCount > 0 && (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-xl">
+                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse inline-block"></span>
+                  <span className="text-sm font-semibold text-amber-700">{pendingCount} {t('status.pending').toLowerCase()}</span>
+                </div>
+              )}
+              {preparingCount > 0 && (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-xl">
+                  <span className="w-2 h-2 rounded-full bg-blue-500 inline-block"></span>
+                  <span className="text-sm font-semibold text-blue-700">{preparingCount} {t('status.preparing').toLowerCase()}</span>
+                </div>
+              )}
+              {readyCount > 0 && (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-200 rounded-xl">
+                  <span className="w-2 h-2 rounded-full bg-green-500 inline-block"></span>
+                  <span className="text-sm font-semibold text-green-700">{readyCount} {t('status.ready').toLowerCase()}</span>
+                </div>
+              )}
+              {pickupCount > 0 && (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-50 border border-cyan-200 rounded-xl">
+                  <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse inline-block"></span>
+                  <span className="text-sm font-semibold text-cyan-700">{pickupCount} awaiting pickup</span>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          )
+        })()}
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        {['active', 'completed', 'all'].map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-4 py-2 rounded-xl font-medium ${
-              filter === f
-                ? 'bg-[#6262bd] text-white'
-                : 'bg-white border-2 border-slate-200 text-slate-600 hover:border-slate-300'
-            }`}
-          >
-            {t(f)}
-          </button>
-        ))}
-
-        <div className="w-px bg-slate-200 mx-2"></div>
-
-        {/* Order Type Filter */}
-        <button
-          onClick={() => setOrderTypeFilter('all')}
-          className={`px-4 py-2 rounded-xl font-medium ${
-            orderTypeFilter === 'all'
-              ? 'bg-slate-700 text-white'
-              : 'bg-white border-2 border-slate-200 text-slate-600 hover:border-slate-300'
-          }`}
-        >
-          {t('allOrders') || 'All Orders'}
-        </button>
-        <button
-          onClick={() => setOrderTypeFilter('dine_in')}
-          className={`px-4 py-2 rounded-xl font-medium ${
-            orderTypeFilter === 'dine_in'
-              ? 'bg-green-600 text-white'
-              : 'bg-white border-2 border-slate-200 text-slate-600 hover:border-slate-300'
-          }`}
-        >
-          🍽️ {t('dineIn') || 'Dine-in'}
-        </button>
-        <button
-          onClick={() => setOrderTypeFilter('takeaway')}
-          className={`px-4 py-2 rounded-xl font-medium ${
-            orderTypeFilter === 'takeaway'
-              ? 'bg-cyan-600 text-white'
-              : 'bg-white border-2 border-slate-200 text-slate-600 hover:border-slate-300'
-          }`}
-        >
-          🥡 {t('takeaway') || 'Takeaway'}
-        </button>
-      </div>
-
-      {/* Orders List */}
-      {filteredOrders.length === 0 ? (
-        <div className="bg-white border-2 border-slate-100 rounded-2xl p-12 text-center">
-          <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l4.59-4.58L18 11l-6 6z"/>
-            </svg>
+        {/* Filters */}
+        <div className="flex flex-wrap items-center gap-4 mb-6">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Status</span>
+            <div className="flex bg-slate-100 rounded-xl p-1 gap-0.5">
+              {['active', 'completed', 'all'].map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setFilter(f)}
+                  className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    filter === f ? 'bg-white text-[#6262bd] shadow-sm font-semibold' : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  {t(f)}
+                </button>
+              ))}
+            </div>
           </div>
-          <p className="text-slate-500">
-            {filter === 'active' ? t('noActiveOrders') : t('noOrders').replace('{filter}', t(filter))}
-          </p>
+          <div className="w-px h-6 bg-slate-200 hidden sm:block"></div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Type</span>
+            <div className="flex bg-slate-100 rounded-xl p-1 gap-0.5">
+              {[
+                { value: 'all',      label: t('allOrders') || 'All' },
+                { value: 'dine_in',  label: `🍽️ ${t('dineIn') || 'Dine-in'}` },
+                { value: 'takeaway', label: `🥡 ${t('takeaway') || 'Takeaway'}` },
+              ].map(({ value, label }) => (
+                <button
+                  key={value}
+                  onClick={() => setOrderTypeFilter(value)}
+                  className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    orderTypeFilter === value ? 'bg-white text-[#6262bd] shadow-sm font-semibold' : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
-      ) : (
-        <div className="space-y-4">
-          {filteredOrders.map((order) => {
-            const filteredItems = filterOrderItems(order.order_items)
 
-            // Debug: Log what filteredItems contains
-            console.log(`📋 Order ${order.id.slice(0, 8)} filteredItems:`, filteredItems.map(i => ({
-              name: i.name,
-              preparing_started_at: i.preparing_started_at,
-              marked_ready_at: i.marked_ready_at
-            })))
+        {/* Orders */}
+        {filteredOrders.length === 0 ? (
+          <div className="bg-white border-2 border-slate-100 rounded-2xl p-12 text-center">
+            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l4.59-4.58L18 11l-6 6z"/>
+              </svg>
+            </div>
+            <p className="text-slate-500">
+              {filter === 'active' ? t('noActiveOrders') : t('noOrders').replace('{filter}', t(filter))}
+            </p>
+          </div>
+        ) : (
+          <div className={layoutMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 items-start' : 'space-y-3'}>
+            {filteredOrders.map((order) => {
+              const filteredItems = filterOrderItems(order.order_items)
 
-            // Skip orders with no relevant items for this department
-            if (filteredItems.length === 0 && staffDepartment && staffDepartment !== 'universal' && userType !== 'owner') {
-              return null
-            }
+              console.log(`📋 Order ${order.id.slice(0, 8)} filteredItems:`, filteredItems.map(i => ({
+                name: i.name,
+                preparing_started_at: i.preparing_started_at,
+                marked_ready_at: i.marked_ready_at
+              })))
 
-            return (
-            <div key={order.id} className={`bg-white border-2 rounded-2xl p-6 ${
-              order._isOffline ? 'border-orange-300 bg-orange-50/30' : order.order_type === 'takeaway' ? 'border-cyan-200' : 'border-slate-100'
-            }`}>
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <div className="flex items-center gap-3 mb-1">
-                    {order.order_type === 'takeaway' ? (
-                      <>
-                        <h3 className="text-lg font-bold text-cyan-700 flex items-center gap-2">
-                          🥡 {t('takeaway') || 'Takeaway'}
-                        </h3>
-                        {order.pickup_code && (
-                          <span className="px-3 py-1 bg-cyan-100 text-cyan-700 rounded-full text-sm font-bold tracking-wider">
-                            {order.pickup_code}
-                          </span>
-                        )}
-                      </>
-                    ) : (
-                      <h3 className="text-lg font-bold text-slate-800">
-                        {t('table')} {order.tables?.table_number || 'N/A'}
-                      </h3>
+              if (filteredItems.length === 0 && staffDepartment && staffDepartment !== 'universal' && userType !== 'owner') {
+                return null
+              }
+
+              const isActive = ['pending','preparing','ready'].includes(order.status) && !order.paid && !order._isOffline
+              const isPaid   = order.paid || order.status === 'completed'
+              const urgency  = getUrgencyClasses(order.created_at, isActive || order._isOffline)
+              const isExpanded = expandedOrders.has(order.id)
+              const elapsedMins = order.created_at ? Math.floor((Date.now() - new Date(order.created_at).getTime()) / 60000) : 0
+
+              return (
+                <div
+                  key={order.id}
+                  className={`bg-white border-2 rounded-2xl overflow-hidden flex flex-col transition-opacity ${
+                    isPaid ? 'opacity-60 border-slate-100' :
+                    order._isOffline ? 'border-orange-300' :
+                    order.order_type === 'takeaway' ? 'border-cyan-200' :
+                    'border-slate-100'
+                  }`}
+                >
+                  {/* Urgency header band */}
+                  <div className={`px-4 py-2.5 flex items-center justify-between gap-2 ${
+                    isPaid ? 'bg-slate-100' : urgency.header
+                  }`}>
+                    <div className="flex items-center gap-2 min-w-0">
+                      {order.order_type === 'takeaway' ? (
+                        <span className="font-black text-white text-base leading-none">🥡 {t('takeaway') || 'Takeaway'}</span>
+                      ) : (
+                        <span className={`font-black text-base leading-none ${isPaid ? 'text-slate-600' : 'text-white'}`}>
+                          {t('table')} {order.tables?.table_number || 'N/A'}
+                        </span>
+                      )}
+                      {order.order_type === 'takeaway' && order.pickup_code && (
+                        <span className={`font-black text-sm tracking-widest ${isPaid ? 'text-slate-500' : 'text-white/90'}`}>
+                          #{order.pickup_code}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {isActive && (
+                        <span className={`text-xs font-bold ${isPaid ? 'text-slate-500' : 'text-white/90'}`}>
+                          {elapsedMins < 1 ? 'Just now' : `${elapsedMins}m`}
+                        </span>
+                      )}
+                      {isPaid && (
+                        <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-bold">
+                          {t('paid')}
+                        </span>
+                      )}
+                      {order._isOffline && (
+                        <span className="px-2 py-0.5 bg-orange-100 text-orange-700 rounded-full text-xs font-semibold animate-pulse">Sync</span>
+                      )}
+                      {order.order_type === 'takeaway' && order.ready_for_pickup && !order.picked_up_at && (
+                        <span className="px-2 py-0.5 bg-white/20 text-white rounded-full text-xs font-bold animate-pulse">Ready</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Meta row */}
+                  <div className="px-4 pt-2 pb-1 flex items-center gap-2 text-xs text-slate-400">
+                    <span className="font-mono">{order.id.slice(0, 8)}</span>
+                    <span>·</span>
+                    <span>{formatTime(order.created_at)}</span>
+                    {order.customer_name && (
+                      <><span>·</span><span className="font-medium text-slate-500 truncate">{order.customer_name}</span></>
                     )}
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
+                    <span className={`ml-auto px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                       {t(`status.${order.status}`)}
                     </span>
-                    {order._isOffline && (
-                      <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium animate-pulse">
-                        Pending sync
-                      </span>
-                    )}
-                    {order.order_type === 'takeaway' && order.ready_for_pickup && !order.picked_up_at && (
-                      <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium animate-pulse">
-                        {t('readyForPickup') || 'Ready for Pickup'}
-                      </span>
-                    )}
                   </div>
-                  <p className="text-slate-500 text-sm">
-                    {t('orderNumber')}{order.id.slice(0, 8)} • {formatTime(order.created_at)}
-                    {order.order_type === 'takeaway' && order.customer_name && (
-                      <> • <span className="font-medium">{order.customer_name}</span></>
-                    )}
-                  </p>
-                  {order.order_type === 'takeaway' && order.customer_email && (
-                    <p className="text-slate-400 text-xs mt-1">{order.customer_email}</p>
-                  )}
-                </div>
-                <p className="text-xl font-bold text-slate-800">{formatCurrency(order.total)}</p>
-              </div>
 
-              {/* Order Items */}
-              <div className="bg-slate-50 rounded-xl p-4 mb-4">
-                {filteredItems.map((item, index) => {
-                  const department = getItemDepartment(item.menu_item_id)
-                  const isVoided = item.voided === true
-                  return (
-                    <div key={index} className={`py-1 ${isVoided ? 'opacity-50' : ''}`}>
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-2">
-                          <span className={`text-slate-700 ${isVoided ? 'line-through' : ''}`}>
-                            {item.quantity}x {item.name}
-                          </span>
-                          {isVoided && (
-                            <span className="px-2 py-0.5 text-xs rounded-full font-medium bg-red-100 text-red-700">
-                              VOIDED
-                            </span>
-                          )}
-                          {!isVoided && (userType === 'owner' || staffDepartment === 'universal') && (
-                            <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${
-                              department === 'bar'
-                                ? 'bg-orange-100 text-orange-700'
-                                : 'bg-green-100 text-green-700'
-                            }`}>
-                              {department === 'bar' ? '🍸' : '🍳'}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className={`text-slate-500 ${isVoided ? 'line-through' : ''}`}>
-                            {formatCurrency(item.price_at_time * item.quantity)}
-                          </span>
-                          {/* Void Button - Only for unpaid orders and owners/admins, not for already voided items */}
-                          {!order.paid && !isVoided && (userType === 'owner' || userType === 'staff-admin') && (
-                            <button
-                              onClick={() => {
-                                setVoidItem(item)
-                                setVoidOrder(order)
-                                setVoidQuantity(item.quantity)
-                                setVoidReason('')
-                                setShowVoidModal(true)
-                              }}
-                              className="p-1 text-red-500 hover:bg-red-100 rounded-lg transition-colors"
-                              title={t('voidItem') || 'Void Item'}
-                            >
-                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                              </svg>
-                            </button>
-                          )}
-                        </div>
+                  {/* Items list */}
+                  <div className="px-4 pb-1 flex-1">
+                    <div className="space-y-0.5">
+                      {filteredItems.map((item, index) => {
+                        const department = getItemDepartment(item.menu_item_id)
+                        const isVoided = item.voided === true
+                        return (
+                          <div key={index} className={`flex items-start justify-between gap-2 py-0.5 ${isVoided ? 'opacity-40' : ''}`}>
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <span className={`text-sm text-slate-700 ${isVoided ? 'line-through' : ''} truncate`}>
+                                <span className="font-semibold">{item.quantity}×</span> {item.name}
+                              </span>
+                              {isVoided && <span className="px-1.5 py-0.5 text-xs rounded-full font-medium bg-red-100 text-red-700 shrink-0">VOID</span>}
+                              {!isVoided && (userType === 'owner' || staffDepartment === 'universal') && (
+                                <span className={`text-xs shrink-0 ${department === 'bar' ? 'text-orange-500' : 'text-green-600'}`}>
+                                  {department === 'bar' ? '🍸' : '🍳'}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0">
+                              <span className={`text-xs text-slate-400 ${isVoided ? 'line-through' : ''}`}>
+                                {formatCurrency(item.price_at_time * item.quantity)}
+                              </span>
+                              {!order.paid && !isVoided && (userType === 'owner' || userType === 'staff-admin') && (
+                                <button
+                                  onClick={() => { setVoidItem(item); setVoidOrder(order); setVoidQuantity(item.quantity); setVoidReason(''); setShowVoidModal(true) }}
+                                  className="p-0.5 text-red-400 hover:bg-red-100 rounded transition-colors"
+                                  title={t('voidItem') || 'Void'}
+                                >
+                                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                                  </svg>
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+
+                    {/* Special instructions inline */}
+                    {filteredItems.some(i => i.special_instructions) && (
+                      <div className="mt-1.5 space-y-1">
+                        {filteredItems.filter(i => i.special_instructions).map((item, idx) => (
+                          <div key={idx} className="px-2.5 py-1 bg-amber-50 border border-amber-200 rounded-lg">
+                            <p className="text-xs text-amber-700">📝 <span className="font-medium">{item.name}:</span> {item.special_instructions}</p>
+                          </div>
+                        ))}
                       </div>
-                      {/* Special Instructions for this item */}
-                      {item.special_instructions && (
-                        <div className="mt-1 ml-4 px-3 py-1.5 bg-amber-100 border border-amber-300 rounded-lg">
-                          <p className="text-xs text-amber-800 font-medium">
-                            📝 {item.special_instructions}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
+                    )}
 
-              {order.notes && (
-                <div className="mb-4 p-3 bg-amber-50 rounded-xl">
-                  <p className="text-sm text-amber-700"><strong>{t('note')}:</strong> {order.notes}</p>
-                </div>
-              )}
-
-              {/* Payment Information */}
-              {order.paid && (
-                <div className="mb-4 space-y-3">
-                  <div className="p-3 bg-green-50 border border-green-200 rounded-xl">
-                    <div className="flex items-center gap-2 mb-1">
-                      <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                      </svg>
-                      <p className="text-sm font-semibold text-green-700">{t('paid')}</p>
-                    </div>
-                    <div className="text-xs text-green-600 space-y-0.5">
-                      <p>{t('paymentMethod')}: <span className="font-medium capitalize">{order.payment_method}</span></p>
-                      <p>{t('processedBy')}: <span className="font-medium">{order.payment_taken_by_name || 'Staff'}</span></p>
-                      {order.payment_taken_at && (
-                        <p>{t('paymentTime')}: {new Date(order.payment_taken_at).toLocaleString()}</p>
-                      )}
-                    </div>
+                    {order.notes && (
+                      <div className="mt-1.5 px-2.5 py-1.5 bg-amber-50 border border-amber-200 rounded-lg">
+                        <p className="text-xs text-amber-700"><strong>{t('note')}:</strong> {order.notes}</p>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Invoice Button */}
-                  {restaurant?.invoice_settings?.enabled && staffDepartment !== 'kitchen' && (
-                    <button
-                      onClick={() => openInvoiceModal(order.id)}
-                      className="w-full bg-purple-600 text-white px-4 py-2.5 rounded-xl font-medium hover:bg-purple-700 flex items-center justify-center gap-2"
-                    >
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
-                      </svg>
-                      {t('generateInvoice')}
-                    </button>
-                  )}
+                  {/* Total + expand toggle */}
+                  <div className="px-4 pt-2 pb-2 flex items-center justify-between border-t border-slate-100 mt-2">
+                    <span className="font-bold text-slate-800">{formatCurrency(order.total)}</span>
+                    {(order.paid || (userType !== 'kitchen' && restaurant?.invoice_settings?.enabled)) && (
+                      <button
+                        onClick={() => toggleExpanded(order.id)}
+                        className="flex items-center gap-1 text-xs text-slate-400 hover:text-[#6262bd] transition-colors"
+                      >
+                        {isExpanded ? 'Hide details' : 'Details'}
+                        <svg className={`w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M7 10l5 5 5-5z"/>
+                        </svg>
+                      </button>
+                    )}
+                  </div>
 
-                  {/* Refund Button - Only for owners and admin staff, not kitchen */}
-                  {(userType === 'owner' || userType === 'staff-admin') && staffDepartment !== 'kitchen' && (
-                    <button
-                      onClick={() => {
-                        setRefundOrder(order)
-                        setRefundAmount('')
-                        setRefundReason('')
-                        setRefundMethod(order.payment_method || 'cash')
-                        setShowRefundModal(true)
-                      }}
-                      className="w-full bg-orange-500 text-white px-4 py-2.5 rounded-xl font-medium hover:bg-orange-600 flex items-center justify-center gap-2"
-                    >
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12.5 6.9c1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-.53.12-1.03.3-1.48.54l1.47 1.47c.41-.17.91-.27 1.51-.27zM5.33 4.06L4.06 5.33 7.5 8.77c0 2.08 1.56 3.22 3.91 3.91l3.51 3.51c-.34.49-1.05.91-2.42.91-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c.96-.18 1.83-.55 2.46-1.12l2.22 2.22 1.27-1.27L5.33 4.06z"/>
-                      </svg>
-                      {t('refund') || 'Issue Refund'}
-                    </button>
-                  )}
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              {!order.paid && (
-                <div className="flex flex-col gap-3">
-                  {/* Group items by department for all statuses */}
-                  {(() => {
-                    const deptGroups = {}
-                    filteredItems.forEach(item => {
-                      const dept = getItemDepartment(item.menu_item_id)
-                      if (!deptGroups[dept]) {
-                        deptGroups[dept] = {
-                          items: [],
-                          hasStartedPreparing: false,
-                          hasMarkedReady: false
-                        }
-                      }
-                      deptGroups[dept].items.push(item)
-
-                      // Check if any item in this department has started preparing
-                      if (item.preparing_started_at) {
-                        deptGroups[dept].hasStartedPreparing = true
-                      }
-
-                      // Check if any item in this department is marked ready
-                      if (item.marked_ready_at) {
-                        deptGroups[dept].hasMarkedReady = true
-                      }
-                    })
-
-                    // Debug logging
-                    console.log('🔍 Order', order.id.slice(0, 8), 'status:', order.status)
-                    console.log('🔍 Dept groups:', Object.keys(deptGroups).map(dept => ({
-                      dept,
-                      hasStarted: deptGroups[dept].hasStartedPreparing,
-                      hasReady: deptGroups[dept].hasMarkedReady,
-                      items: deptGroups[dept].items.map(i => ({
-                        name: i.name,
-                        preparing_started_at: i.preparing_started_at,
-                        marked_ready_at: i.marked_ready_at
-                      }))
-                    })))
-
-                    const buttons = []
-
-                    // For each department, show appropriate button
-                    Object.keys(deptGroups).forEach(dept => {
-                      const deptData = deptGroups[dept]
-                      const deptLabel = dept.charAt(0).toUpperCase() + dept.slice(1)
-                      const deptIcon = dept === 'bar' ? '🍸' : '🍳'
-
-                      // Pending order: Show "Start Preparing" for each department
-                      if (order.status === 'pending' || (order.status === 'preparing' && !deptData.hasStartedPreparing)) {
-                        buttons.push(
-                          <button
-                            key={`start-${dept}`}
-                            onClick={() => startPreparingDepartment(order.id, dept)}
-                            className="bg-[#6262bd] text-white px-4 py-2 rounded-xl font-medium hover:bg-[#5252a3] flex items-center justify-center gap-2"
-                          >
-                            <span>{deptIcon}</span>
-                            <span>{t('startPreparing').replace('{department}', t(dept))}</span>
-                          </button>
-                        )
-                      }
-                      // Department has started but not marked ready: Show "Mark Ready"
-                      else if ((order.status === 'preparing' || order.status === 'ready') && deptData.hasStartedPreparing && !deptData.hasMarkedReady) {
-                        const deptColor = dept === 'bar' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'
-                        buttons.push(
-                          <button
-                            key={`ready-${dept}`}
-                            onClick={() => markDepartmentReady(order.id, dept)}
-                            className={`${deptColor} text-white px-4 py-2 rounded-xl font-medium flex items-center justify-center gap-2`}
-                          >
-                            <span>{deptIcon}</span>
-                            <span>{t('markReady').replace('{department}', t(dept))}</span>
-                          </button>
-                        )
-                      }
-                    })
-
-                    return <div className="space-y-2">{buttons}</div>
-                  })()}
-
-                  {/* Takeaway-specific buttons */}
-                  {order.order_type === 'takeaway' && order.status === 'ready' && !order.ready_for_pickup && (
-                    <button
-                      onClick={() => markReadyForPickup(order.id)}
-                      disabled={markingReady === order.id}
-                      className="bg-cyan-600 text-white px-4 py-2 rounded-xl font-medium hover:bg-cyan-700 disabled:opacity-50 flex items-center justify-center gap-2"
-                    >
-                      {markingReady === order.id ? (
-                        <>
-                          <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-                          </svg>
-                          {t('sendingNotification') || 'Sending...'}
-                        </>
-                      ) : (
-                        <>
-                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
-                          </svg>
-                          {t('notifyReadyForPickup') || 'Notify Ready for Pickup'}
-                        </>
+                  {/* Expanded: payment info + invoice/refund */}
+                  {isExpanded && order.paid && (
+                    <div className="px-4 pb-3 space-y-2 border-t border-slate-100 pt-2">
+                      <div className="p-3 bg-green-50 border border-green-200 rounded-xl text-xs text-green-700 space-y-0.5">
+                        <p className="font-semibold flex items-center gap-1">
+                          <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                          {t('paid')}
+                        </p>
+                        <p>{t('paymentMethod')}: <span className="font-medium capitalize">{order.payment_method}</span></p>
+                        <p>{t('processedBy')}: <span className="font-medium">{order.payment_taken_by_name || 'Staff'}</span></p>
+                        {order.payment_taken_at && <p>{t('paymentTime')}: {new Date(order.payment_taken_at).toLocaleString()}</p>}
+                      </div>
+                      {restaurant?.invoice_settings?.enabled && staffDepartment !== 'kitchen' && (
+                        <button
+                          onClick={() => openInvoiceModal(order.id)}
+                          className="w-full bg-[#6262bd] text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-[#5252a3] flex items-center justify-center gap-2"
+                        >
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                          {t('generateInvoice')}
+                        </button>
                       )}
-                    </button>
+                      {(userType === 'owner' || userType === 'staff-admin') && staffDepartment !== 'kitchen' && (
+                        <button
+                          onClick={() => { setRefundOrder(order); setRefundAmount(''); setRefundReason(''); setRefundMethod(order.payment_method || 'cash'); setShowRefundModal(true) }}
+                          className="w-full bg-orange-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-orange-600 flex items-center justify-center gap-2"
+                        >
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.5 6.9c1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-.53.12-1.03.3-1.48.54l1.47 1.47c.41-.17.91-.27 1.51-.27zM5.33 4.06L4.06 5.33 7.5 8.77c0 2.08 1.56 3.22 3.91 3.91l3.51 3.51c-.34.49-1.05.91-2.42.91-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c.96-.18 1.83-.55 2.46-1.12l2.22 2.22 1.27-1.27L5.33 4.06z"/></svg>
+                          {t('refund') || 'Issue Refund'}
+                        </button>
+                      )}
+                    </div>
                   )}
 
-                  {/* Takeaway: Mark as Picked Up button */}
-                  {order.order_type === 'takeaway' && order.ready_for_pickup && !order.picked_up_at && (
-                    <button
-                      onClick={() => openPickupModal(order.id)}
-                      className="bg-green-600 text-white px-4 py-2 rounded-xl font-medium hover:bg-green-700 flex items-center justify-center gap-2"
-                    >
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                      </svg>
-                      {t('markPickedUp') || 'Mark as Picked Up'}
-                    </button>
-                  )}
+                  {/* Action buttons — only for active/unpaid orders */}
+                  {!order.paid && (
+                    <div className="px-4 pb-4 pt-1 space-y-2">
+                      {(() => {
+                        const deptGroups = {}
+                        filteredItems.forEach(item => {
+                          const dept = getItemDepartment(item.menu_item_id)
+                          if (!deptGroups[dept]) deptGroups[dept] = { items: [], hasStartedPreparing: false, hasMarkedReady: false }
+                          deptGroups[dept].items.push(item)
+                          if (item.preparing_started_at) deptGroups[dept].hasStartedPreparing = true
+                          if (item.marked_ready_at) deptGroups[dept].hasMarkedReady = true
+                        })
 
-                  {/* Dine-in: Complete Order button */}
-                  {order.status === 'ready' && order.order_type !== 'takeaway' && (
-                    <button
-                      onClick={() => updateOrderStatus(order.id, 'completed')}
-                      className="bg-slate-600 text-white px-4 py-2 rounded-xl font-medium hover:bg-slate-700"
-                    >
-                      {t('completeOrder')}
-                    </button>
-                  )}
-                  {userType === 'owner' && ['pending', 'preparing'].includes(order.status) && (
-                    <button
-                      onClick={() => confirmCancelOrder(order)}
-                      className="border-2 border-red-200 text-red-600 px-4 py-2 rounded-xl font-medium hover:bg-red-50"
-                    >
-                      {t('cancel')}
-                    </button>
+                        console.log('🔍 Order', order.id.slice(0, 8), 'status:', order.status)
+                        console.log('🔍 Dept groups:', Object.keys(deptGroups).map(dept => ({
+                          dept,
+                          hasStarted: deptGroups[dept].hasStartedPreparing,
+                          hasReady: deptGroups[dept].hasMarkedReady,
+                          items: deptGroups[dept].items.map(i => ({ name: i.name, preparing_started_at: i.preparing_started_at, marked_ready_at: i.marked_ready_at }))
+                        })))
+
+                        const buttons = []
+                        Object.keys(deptGroups).forEach(dept => {
+                          const deptData = deptGroups[dept]
+                          const deptIcon = dept === 'bar' ? '🍸' : '🍳'
+                          if (order.status === 'pending' || (order.status === 'preparing' && !deptData.hasStartedPreparing)) {
+                            buttons.push(
+                              <button key={`start-${dept}`} onClick={() => startPreparingDepartment(order.id, dept)}
+                                className="flex-1 bg-[#6262bd] text-white px-3 py-2 rounded-xl text-sm font-medium hover:bg-[#5252a3] flex items-center justify-center gap-1.5">
+                                <span>{deptIcon}</span><span>{t('startPreparing').replace('{department}', t(dept))}</span>
+                              </button>
+                            )
+                          } else if ((order.status === 'preparing' || order.status === 'ready') && deptData.hasStartedPreparing && !deptData.hasMarkedReady) {
+                            buttons.push(
+                              <button key={`ready-${dept}`} onClick={() => markDepartmentReady(order.id, dept)}
+                                className={`flex-1 ${dept === 'bar' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'} text-white px-3 py-2 rounded-xl text-sm font-medium flex items-center justify-center gap-1.5`}>
+                                <span>{deptIcon}</span><span>{t('markReady').replace('{department}', t(dept))}</span>
+                              </button>
+                            )
+                          }
+                        })
+                        if (buttons.length > 0) return <div className="flex flex-wrap gap-2">{buttons}</div>
+                        return null
+                      })()}
+
+                      <div className="flex flex-wrap gap-2">
+                        {order.order_type === 'takeaway' && order.status === 'ready' && !order.ready_for_pickup && (
+                          <button onClick={() => markReadyForPickup(order.id)} disabled={markingReady === order.id}
+                            className="flex-1 bg-cyan-600 text-white px-3 py-2 rounded-xl text-sm font-medium hover:bg-cyan-700 disabled:opacity-50 flex items-center justify-center gap-1.5">
+                            {markingReady === order.id ? (
+                              <><svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>{t('sendingNotification') || 'Sending...'}</>
+                            ) : (
+                              <><svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>{t('notifyReadyForPickup') || 'Notify Pickup'}</>
+                            )}
+                          </button>
+                        )}
+                        {order.order_type === 'takeaway' && order.ready_for_pickup && !order.picked_up_at && (
+                          <button onClick={() => openPickupModal(order.id)}
+                            className="flex-1 bg-green-600 text-white px-3 py-2 rounded-xl text-sm font-medium hover:bg-green-700 flex items-center justify-center gap-1.5">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                            {t('markPickedUp') || 'Mark Picked Up'}
+                          </button>
+                        )}
+                        {order.status === 'ready' && order.order_type !== 'takeaway' && (
+                          <button onClick={() => updateOrderStatus(order.id, 'completed')}
+                            className="flex-1 bg-slate-600 text-white px-3 py-2 rounded-xl text-sm font-medium hover:bg-slate-700 flex items-center justify-center gap-1.5">
+                            {t('completeOrder')}
+                          </button>
+                        )}
+                        {userType === 'owner' && ['pending','preparing'].includes(order.status) && (
+                          <button onClick={() => confirmCancelOrder(order)}
+                            className="px-3 py-2 rounded-xl text-sm font-medium border-2 border-red-200 text-red-600 hover:bg-red-50">
+                            {t('cancel')}
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   )}
                 </div>
-              )}
-            </div>
-            )
-          })}
-        </div>
-      )}
+              )
+            })}
+          </div>
+        )}
 
       {/* Cancel Order Confirmation Modal */}
       {showCancelModal && orderToCancel && (
