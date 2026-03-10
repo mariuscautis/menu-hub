@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase'
 const MODULE_CONFIG = [
   {
     key: 'ordering',
+    abbr: 'O&M',
     label: 'Ordering & Menu',
     description: 'Orders, Tables & QR, Menu management, Stock & Inventory, Report Loss, and all Reports',
     includes: ['Orders', 'Tables & QR', 'Menu', 'Stock', 'Report Loss', 'Reports'],
@@ -18,6 +19,7 @@ const MODULE_CONFIG = [
   },
   {
     key: 'reservations',
+    abbr: 'Res',
     label: 'Reservations & Booking',
     description: 'Online table booking page and reservations management dashboard',
     includes: ['Reservations dashboard', 'Public booking page'],
@@ -29,6 +31,7 @@ const MODULE_CONFIG = [
   },
   {
     key: 'rota',
+    abbr: 'Rota',
     label: 'Staff & Rota',
     description: 'Staff management, shift scheduling, time-off requests, clock in/out',
     includes: ['Staff directory', 'Rota calendar', 'Time-off requests'],
@@ -40,6 +43,7 @@ const MODULE_CONFIG = [
   },
   {
     key: 'analytics',
+    abbr: 'Ana',
     label: 'Analytics',
     description: 'Revenue charts, peak hours, product profitability, table and staff analytics',
     includes: ['Analytics dashboards', 'Performance charts'],
@@ -63,6 +67,7 @@ export default function AdminRestaurants() {
   const [restaurants, setRestaurants] = useState([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
+  const [search, setSearch] = useState('')
 
   // Module panel state
   const [modulePanelOpen, setModulePanelOpen] = useState(false)
@@ -156,12 +161,20 @@ export default function AdminRestaurants() {
 
   const enabledCount = (restaurant) => {
     const m = { ...DEFAULT_MODULES, ...(restaurant.enabled_modules || {}) }
-    return Object.values(m).filter(Boolean).length
+    return MODULE_CONFIG.filter(mod => m[mod.key] !== false).length
   }
 
   const filteredRestaurants = restaurants.filter(r => {
-    if (filter === 'all') return true
-    return r.status === filter
+    if (filter !== 'all' && r.status !== filter) return false
+    if (search) {
+      const q = search.toLowerCase()
+      return (
+        r.name?.toLowerCase().includes(q) ||
+        r.email?.toLowerCase().includes(q) ||
+        r.slug?.toLowerCase().includes(q)
+      )
+    }
+    return true
   })
 
   const getStatusBadge = (status) => {
@@ -198,8 +211,8 @@ export default function AdminRestaurants() {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex gap-2 mb-6">
+      {/* Filters + Search */}
+      <div className="flex flex-wrap items-center gap-2 mb-6">
         {['all', 'pending', 'approved', 'rejected'].map((f) => (
           <button
             key={f}
@@ -218,12 +231,36 @@ export default function AdminRestaurants() {
             )}
           </button>
         ))}
+        <div className="relative ml-auto">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+          </svg>
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search by name, email or slug…"
+            className="pl-9 pr-4 py-2 bg-white border-2 border-slate-200 rounded-xl text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-[#6262bd] w-64"
+          />
+          {search && (
+            <button
+              onClick={() => setSearch('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Restaurants List */}
       {filteredRestaurants.length === 0 ? (
         <div className="bg-white border-2 border-slate-100 rounded-2xl p-12 text-center">
-          <p className="text-slate-500">No {filter === 'all' ? '' : filter} restaurants found</p>
+          <p className="text-slate-500">
+            {search ? `No restaurants matching "${search}"` : `No ${filter === 'all' ? '' : filter + ' '}restaurants found`}
+          </p>
         </div>
       ) : (
         <div className="bg-white border-2 border-slate-100 rounded-2xl overflow-hidden">
@@ -262,21 +299,22 @@ export default function AdminRestaurants() {
                       className="flex items-center gap-2 group"
                       title="Manage modules"
                     >
-                      <div className="flex gap-0.5">
-                        {MODULE_CONFIG.map(m => {
-                          const active = { ...DEFAULT_MODULES, ...(restaurant.enabled_modules || {}) }[m.key]
-                          return (
-                            <div
-                              key={m.key}
-                              className={`w-2 h-2 rounded-full transition-colors ${active ? 'bg-[#6262bd]' : 'bg-slate-200'}`}
+                      {MODULE_CONFIG.map((m, i) => {
+                        const active = { ...DEFAULT_MODULES, ...(restaurant.enabled_modules || {}) }[m.key] !== false
+                        return (
+                          <span key={m.key} className="flex items-center gap-2">
+                            {i > 0 && <span className="text-slate-200 select-none">·</span>}
+                            <span
                               title={m.label}
-                            />
-                          )
-                        })}
-                      </div>
-                      <span className="text-xs text-slate-500 group-hover:text-[#6262bd] transition-colors">
-                        {enabledCount(restaurant)}/{MODULE_CONFIG.length}
-                      </span>
+                              className={`text-xs font-medium transition-colors ${
+                                active ? 'text-[#6262bd]' : 'text-slate-300 line-through'
+                              }`}
+                            >
+                              {m.abbr}
+                            </span>
+                          </span>
+                        )
+                      })}
                     </button>
                   </td>
                   <td className="px-6 py-4 text-slate-500">
