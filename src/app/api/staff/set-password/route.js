@@ -16,7 +16,7 @@ function getSupabaseAdmin() {
 async function hashPassword(password) {
   const enc = new TextEncoder()
   const saltBuffer = crypto.getRandomValues(new Uint8Array(16))
-  const iterations = 200_000
+  const iterations = 100_000
   const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits'])
   const derived = await crypto.subtle.deriveBits(
     { name: 'PBKDF2', salt: saltBuffer, iterations, hash: 'SHA-256' },
