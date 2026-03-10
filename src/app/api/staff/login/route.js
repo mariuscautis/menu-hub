@@ -50,14 +50,20 @@ export async function POST(request) {
 
     const supabase = getSupabaseAdmin()
 
-    const { data: staff, error } = await supabase
+    // Fetch staff without join — avoids schema cache issues on Edge
+    const { data: staff, error: staffError } = await supabase
       .from('staff')
-      .select('id, name, email, restaurant_id, department, role, pin_code, hashed_password, status, restaurants(name, email_language)')
+      .select('id, name, email, restaurant_id, department, role, pin_code, hashed_password, status')
       .eq('email', email.toLowerCase().trim())
       .eq('status', 'active')
       .maybeSingle()
 
-    if (error || !staff) {
+    if (staffError) {
+      console.error('staff login query error:', staffError)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    }
+
+    if (!staff) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
     }
 
@@ -75,16 +81,31 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
     }
 
+    // Fetch restaurant separately to get locale
+    let restaurantName = null
+    let locale = 'en'
+    if (staff.restaurant_id) {
+      const { data: restaurant } = await supabase
+        .from('restaurants')
+        .select('name, email_language')
+        .eq('id', staff.restaurant_id)
+        .maybeSingle()
+      if (restaurant) {
+        restaurantName = restaurant.name
+        locale = restaurant.email_language || 'en'
+      }
+    }
+
     return NextResponse.json({
       staff_session: {
         staff_id: staff.id,
         name: staff.name,
         email: staff.email,
         restaurant_id: staff.restaurant_id,
-        restaurant_name: staff.restaurants?.name,
+        restaurant_name: restaurantName,
         department: staff.department,
         role: staff.role,
-        locale: staff.restaurants?.email_language || 'en',
+        locale,
         logged_in_at: new Date().toISOString(),
       }
     })
