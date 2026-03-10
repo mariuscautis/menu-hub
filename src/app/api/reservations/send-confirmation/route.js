@@ -5,6 +5,72 @@ import { NextResponse } from 'next/server'
 import { sendEmail as sendBrevoEmail } from '@/lib/services/email-edge'
 import { getEmailTranslations, t, formatDateForLocale } from '@/lib/email-translations'
 
+function generateManagerNotificationEmail(reservation, dashboardUrl, tr, locale) {
+  const formattedDate = formatDateForLocale(reservation.reservation_date, locale)
+  const guestText = reservation.party_size === 1 ? tr.guest : tr.guests
+
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; background-color: #f8f9fa; }
+        .container { background-color: #ffffff; margin: 20px; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .header { background: #6262bd; color: white; padding: 40px 30px; text-align: center; }
+        .header h1 { margin: 0; font-size: 28px; }
+        .content { padding: 30px; }
+        .details { background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .detail-row { margin: 12px 0; font-size: 16px; }
+        .detail-label { font-weight: bold; color: #6262bd; }
+        .cta-button { display: inline-block; background: #6262bd; color: white; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 20px; }
+        .footer { background: #f9fafb; padding: 20px 30px; text-align: center; font-size: 14px; color: #666; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>📅 ${tr.newBookingTitle}</h1>
+        </div>
+        <div class="content">
+          <p>${tr.newBookingGreeting}</p>
+          <p>${tr.newBookingIntro}</p>
+
+          <div class="details">
+            <div class="detail-row">
+              <span class="detail-label">${tr.newBookingCustomer}:</span> ${reservation.customer_name}
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">${tr.newBookingDate}:</span> ${formattedDate}
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">${tr.newBookingTime}:</span> ${reservation.reservation_time.substring(0, 5)}
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">${tr.newBookingPartySize}:</span> ${reservation.party_size} ${guestText}
+            </div>
+            ${reservation.customer_phone ? `
+            <div class="detail-row">
+              <span class="detail-label">${tr.phone || 'Phone'}:</span> ${reservation.customer_phone}
+            </div>
+            ` : ''}
+            ${reservation.special_requests ? `
+            <div class="detail-row">
+              <span class="detail-label">${tr.newBookingSpecialRequests}:</span> ${reservation.special_requests}
+            </div>
+            ` : ''}
+          </div>
+
+          <a href="${dashboardUrl}" class="cta-button">${tr.newBookingCta}</a>
+        </div>
+        <div class="footer">
+          <p>${t(tr.newBookingFooter, { restaurantName: reservation.restaurants.name })}</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `
+}
+
 function getSupabaseAdmin() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -28,7 +94,7 @@ export async function POST(request) {
     // Fetch reservation details
     const { data: reservation, error: fetchError } = await supabaseAdmin
       .from('reservations')
-      .select('*, restaurants(name, slug, address, phone), tables(table_number)')
+      .select('*, restaurants(name, slug, address, phone, email, owner_id, email_language), tables(table_number)')
       .eq('id', reservationId)
       .single()
 
@@ -77,6 +143,37 @@ export async function POST(request) {
       .from('reservations')
       .update({ confirmation_email_sent: true })
       .eq('id', reservationId)
+
+    // Send manager notification when a new booking is submitted (not on confirmation)
+    if (!isConfirmation) {
+      try {
+        const managerLocale = reservation.restaurants.email_language || 'en'
+        const trManager = getEmailTranslations(managerLocale)
+
+        let managerEmail = reservation.restaurants.email
+        if (!managerEmail && reservation.restaurants.owner_id) {
+          const { data: ownerEmail } = await supabaseAdmin
+            .rpc('get_owner_email', { owner_id: reservation.restaurants.owner_id })
+          managerEmail = ownerEmail
+        }
+
+        if (managerEmail) {
+          const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://www.venoapp.com'
+          const dashboardUrl = `${baseUrl}/dashboard/reservations`
+          const managerSubject = t(trManager.newBookingSubject, { restaurantName: reservation.restaurants.name })
+          const managerHtml = generateManagerNotificationEmail(reservation, dashboardUrl, trManager, managerLocale)
+          await sendBrevoEmail({
+            to: managerEmail,
+            subject: managerSubject,
+            htmlContent: managerHtml,
+            fromName: reservation.restaurants.name
+          })
+        }
+      } catch (managerEmailError) {
+        console.error('Failed to send manager notification email:', managerEmailError)
+        // Non-fatal — customer email already sent successfully
+      }
+    }
 
     return NextResponse.json({ success: true, emailResult })
 

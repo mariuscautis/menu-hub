@@ -131,7 +131,20 @@ const emailTranslations = {
     requestCancelledBody: "Your previously approved time-off request has been cancelled by your manager. Please log in to your account for more details.",
     requestCancelledDates: "Cancelled Dates",
     requestCancelledCta: "View My Rota",
-    requestCancelledFooter: "This is an automated message from {restaurantName}. Please do not reply."
+    requestCancelledFooter: "This is an automated message from {restaurantName}. Please do not reply.",
+
+    // New Booking Notification (manager)
+    newBookingSubject: "New Booking Request — {restaurantName}",
+    newBookingTitle: "New Booking Request",
+    newBookingGreeting: "Hello,",
+    newBookingIntro: "A new reservation request has been submitted and is awaiting your review.",
+    newBookingCustomer: "Customer",
+    newBookingDate: "Date",
+    newBookingTime: "Time",
+    newBookingPartySize: "Party Size",
+    newBookingSpecialRequests: "Special Requests",
+    newBookingCta: "View Reservations",
+    newBookingFooter: "This is an automated notification from {restaurantName}."
   },
 
   ro: {
@@ -260,7 +273,20 @@ const emailTranslations = {
     requestCancelledBody: "Cererea ta de concediu aprobată anterior a fost anulată de managerul tău. Te rugăm să te conectezi pentru mai multe detalii.",
     requestCancelledDates: "Date Anulate",
     requestCancelledCta: "Vezi Programul Meu",
-    requestCancelledFooter: "Acesta este un mesaj automat de la {restaurantName}. Te rugăm să nu răspunzi."
+    requestCancelledFooter: "Acesta este un mesaj automat de la {restaurantName}. Te rugăm să nu răspunzi.",
+
+    // New Booking Notification (manager)
+    newBookingSubject: "Rezervare Nouă — {restaurantName}",
+    newBookingTitle: "Cerere de Rezervare Nouă",
+    newBookingGreeting: "Bună ziua,",
+    newBookingIntro: "A fost trimisă o nouă cerere de rezervare și așteaptă verificarea dumneavoastră.",
+    newBookingCustomer: "Client",
+    newBookingDate: "Data",
+    newBookingTime: "Ora",
+    newBookingPartySize: "Număr Persoane",
+    newBookingSpecialRequests: "Cerințe Speciale",
+    newBookingCta: "Vezi Rezervările",
+    newBookingFooter: "Aceasta este o notificare automată de la {restaurantName}."
   },
 
   fr: {
@@ -389,7 +415,20 @@ const emailTranslations = {
     requestCancelledBody: "Votre demande de congé précédemment approuvée a été annulée par votre responsable. Veuillez vous connecter pour plus de détails.",
     requestCancelledDates: "Dates Annulées",
     requestCancelledCta: "Voir Mon Planning",
-    requestCancelledFooter: "Ceci est un message automatique de {restaurantName}. Merci de ne pas répondre."
+    requestCancelledFooter: "Ceci est un message automatique de {restaurantName}. Merci de ne pas répondre.",
+
+    // New Booking Notification (manager)
+    newBookingSubject: "Nouvelle Réservation — {restaurantName}",
+    newBookingTitle: "Nouvelle Demande de Réservation",
+    newBookingGreeting: "Bonjour,",
+    newBookingIntro: "Une nouvelle demande de réservation a été soumise et attend votre examen.",
+    newBookingCustomer: "Client",
+    newBookingDate: "Date",
+    newBookingTime: "Heure",
+    newBookingPartySize: "Nombre de Personnes",
+    newBookingSpecialRequests: "Demandes Spéciales",
+    newBookingCta: "Voir les Réservations",
+    newBookingFooter: "Ceci est une notification automatique de {restaurantName}."
   },
 
   it: {
@@ -518,7 +557,20 @@ const emailTranslations = {
     requestCancelledBody: "La tua richiesta di ferie precedentemente approvata è stata annullata dal tuo responsabile. Accedi al tuo account per maggiori dettagli.",
     requestCancelledDates: "Date Annullate",
     requestCancelledCta: "Visualizza il Mio Orario",
-    requestCancelledFooter: "Questo è un messaggio automatico da {restaurantName}. Si prega di non rispondere."
+    requestCancelledFooter: "Questo è un messaggio automatico da {restaurantName}. Si prega di non rispondere.",
+
+    // New Booking Notification (manager)
+    newBookingSubject: "Nuova Prenotazione — {restaurantName}",
+    newBookingTitle: "Nuova Richiesta di Prenotazione",
+    newBookingGreeting: "Salve,",
+    newBookingIntro: "È stata inviata una nuova richiesta di prenotazione in attesa di revisione.",
+    newBookingCustomer: "Cliente",
+    newBookingDate: "Data",
+    newBookingTime: "Ora",
+    newBookingPartySize: "Numero di Persone",
+    newBookingSpecialRequests: "Richieste Speciali",
+    newBookingCta: "Visualizza le Prenotazioni",
+    newBookingFooter: "Questa è una notifica automatica da {restaurantName}."
   },
 
   es: {
@@ -647,7 +699,20 @@ const emailTranslations = {
     requestCancelledBody: "Tu solicitud de vacaciones previamente aprobada ha sido cancelada por tu responsable. Por favor, inicia sesión para más detalles.",
     requestCancelledDates: "Fechas Canceladas",
     requestCancelledCta: "Ver Mi Horario",
-    requestCancelledFooter: "Este es un mensaje automático de {restaurantName}. Por favor, no respondas."
+    requestCancelledFooter: "Este es un mensaje automático de {restaurantName}. Por favor, no respondas.",
+
+    // New Booking Notification (manager)
+    newBookingSubject: "Nueva Reserva — {restaurantName}",
+    newBookingTitle: "Nueva Solicitud de Reserva",
+    newBookingGreeting: "Hola,",
+    newBookingIntro: "Se ha enviado una nueva solicitud de reserva y está pendiente de revisión.",
+    newBookingCustomer: "Cliente",
+    newBookingDate: "Fecha",
+    newBookingTime: "Hora",
+    newBookingPartySize: "Número de Personas",
+    newBookingSpecialRequests: "Solicitudes Especiales",
+    newBookingCta: "Ver Reservas",
+    newBookingFooter: "Esta es una notificación automática de {restaurantName}."
   }
 }
 
