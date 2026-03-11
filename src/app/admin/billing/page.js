@@ -17,39 +17,30 @@ const STATUS_COLORS = {
   unpaid:   'bg-red-100 text-red-700',
 }
 
+const PLAN_LABELS = { orders: 'Orders', bookings: 'Bookings', team: 'Team' }
+
 export default function AdminBilling() {
-  const [stats, setStats]     = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [stats, setStats]           = useState(null)
+  const [subscribers, setSubscribers] = useState([])
+  const [loading, setLoading]       = useState(true)
 
   useEffect(() => {
     fetchStats()
   }, [])
 
   const fetchStats = async () => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('restaurants')
-      .select('subscription_plans, subscription_status')
+      .select('id, name, email, subscription_plans, subscription_status, subscription_id, current_period_end, stripe_customer_id')
+      .order('created_at', { ascending: false })
 
-    if (error || !data) {
-      const { data: fallback } = await supabase
-        .from('restaurants')
-        .select('subscription_status')
-
-      const byStatus = {}
-      ;(fallback || []).forEach(r => {
-        const s = r.subscription_status || 'trialing'
-        byStatus[s] = (byStatus[s] || 0) + 1
-      })
-      setStats({ total: (fallback || []).length, byStatus, byPlan: { orders: 0, bookings: 0, team: 0 }, activeRevenue: 0 })
-      setLoading(false)
-      return
-    }
+    const rows = data || []
 
     const byStatus = {}
     const byPlan   = { orders: 0, bookings: 0, team: 0 }
     let activeRevenue = 0
 
-    data.forEach(r => {
+    rows.forEach(r => {
       const status = r.subscription_status || 'trialing'
       byStatus[status] = (byStatus[status] || 0) + 1
 
@@ -59,12 +50,29 @@ export default function AdminBilling() {
       if (status === 'active') {
         const base     = plans.reduce((sum, p) => sum + (PLANS.find(pl => pl.key === p)?.price || 0), 0)
         const discount = plans.length >= 2 ? 0.15 : 0
-        activeRevenue += Math.round(base * (1 - discount))
+        activeRevenue  = parseFloat((activeRevenue + base * (1 - discount)).toFixed(2))
       }
     })
 
-    setStats({ total: data.length, byStatus, byPlan, activeRevenue })
+    setStats({ total: rows.length, byStatus, byPlan, activeRevenue })
+    setSubscribers(rows.filter(r => {
+      const s = r.subscription_status || 'trialing'
+      return s !== 'trialing' || (r.subscription_plans || '')
+    }))
     setLoading(false)
+  }
+
+  const formatDate = (iso) => {
+    if (!iso) return '—'
+    return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+  }
+
+  const planRevenue = (r) => {
+    const plans = (r.subscription_plans || '').split(',').filter(Boolean)
+    if (!plans.length) return 0
+    const base = plans.reduce((sum, p) => sum + (PLANS.find(pl => pl.key === p)?.price || 0), 0)
+    const discount = plans.length >= 2 ? 0.15 : 0
+    return parseFloat((base * (1 - discount)).toFixed(2))
   }
 
   if (loading || !stats) return <div className="text-slate-500">Loading billing stats...</div>
@@ -85,7 +93,7 @@ export default function AdminBilling() {
       <div className="bg-[#6262bd] text-white rounded-2xl p-6 mb-8 flex items-center justify-between">
         <div>
           <p className="text-sm font-medium opacity-80 mb-1">Estimated Monthly Revenue</p>
-          <p className="text-4xl font-bold">£{stats.activeRevenue.toLocaleString()}</p>
+          <p className="text-4xl font-bold">£{stats.activeRevenue.toFixed(2)}</p>
           <p className="text-sm opacity-70 mt-1">from {stats.byStatus.active || 0} active subscribers</p>
         </div>
         <svg className="w-16 h-16 opacity-20" fill="currentColor" viewBox="0 0 24 24">
@@ -128,6 +136,78 @@ export default function AdminBilling() {
         })}
       </div>
 
+      {/* Subscriber list */}
+      <h2 className="text-base font-bold text-slate-700 mb-3">Subscribers</h2>
+      {subscribers.length === 0 ? (
+        <div className="bg-white border-2 border-slate-100 rounded-2xl p-8 text-center text-slate-400 text-sm mb-8">
+          No subscribers yet
+        </div>
+      ) : (
+        <div className="bg-white border-2 border-slate-100 rounded-2xl overflow-hidden mb-8">
+          <table className="w-full text-sm">
+            <thead className="bg-slate-50 border-b-2 border-slate-100">
+              <tr>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Restaurant</th>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Plans</th>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Revenue/mo</th>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Renews</th>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Stripe</th>
+              </tr>
+            </thead>
+            <tbody>
+              {subscribers.map(r => {
+                const plans  = (r.subscription_plans || '').split(',').filter(Boolean)
+                const status = r.subscription_status || 'trialing'
+                const badgeColor = STATUS_COLORS[status] || 'bg-slate-100 text-slate-600'
+                return (
+                  <tr key={r.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+                    <td className="px-5 py-3">
+                      <p className="font-medium text-slate-800">{r.name}</p>
+                      <p className="text-xs text-slate-400">{r.email}</p>
+                    </td>
+                    <td className="px-5 py-3">
+                      {plans.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {plans.map(p => (
+                            <span key={p} className="px-2 py-0.5 rounded-full text-xs font-medium bg-[#6262bd]/10 text-[#6262bd]">
+                              {PLAN_LABELS[p] || p}
+                            </span>
+                          ))}
+                        </div>
+                      ) : <span className="text-slate-300">—</span>}
+                    </td>
+                    <td className="px-5 py-3">
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${badgeColor}`}>
+                        {status.replace('_', ' ')}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3 font-semibold text-slate-700">
+                      {plans.length > 0 ? `£${planRevenue(r)}` : '—'}
+                    </td>
+                    <td className="px-5 py-3 text-slate-500">
+                      {formatDate(r.current_period_end)}
+                    </td>
+                    <td className="px-5 py-3">
+                      {r.stripe_customer_id ? (
+                        <a
+                          href={`https://dashboard.stripe.com/test/customers/${r.stripe_customer_id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-[#6262bd] hover:underline font-mono"
+                        >
+                          {r.stripe_customer_id.slice(0, 14)}…
+                        </a>
+                      ) : <span className="text-slate-300">—</span>}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
       {/* Env checklist */}
       <h2 className="text-base font-bold text-slate-700 mb-3">Stripe Configuration</h2>
       <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
@@ -167,9 +247,9 @@ export default function AdminBilling() {
       <div className="bg-blue-50 border-2 border-blue-100 rounded-2xl p-6">
         <h3 className="font-bold text-blue-900 mb-3">Stripe Setup — 3 products to create</h3>
         <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
-          <li>Create <strong>Orders</strong> product — £39/mo → copy <code className="bg-blue-100 px-1 rounded">STRIPE_PRICE_ORDERS_MONTHLY</code></li>
-          <li>Create <strong>Bookings</strong> product — £19/mo → copy <code className="bg-blue-100 px-1 rounded">STRIPE_PRICE_BOOKINGS_MONTHLY</code></li>
-          <li>Create <strong>Team</strong> product — £29/mo → copy <code className="bg-blue-100 px-1 rounded">STRIPE_PRICE_TEAM_MONTHLY</code></li>
+          <li>Create <strong>Orders</strong> product — £28.99/mo → copy <code className="bg-blue-100 px-1 rounded">STRIPE_PRICE_ORDERS_MONTHLY</code></li>
+          <li>Create <strong>Bookings</strong> product — £11.99/mo → copy <code className="bg-blue-100 px-1 rounded">STRIPE_PRICE_BOOKINGS_MONTHLY</code></li>
+          <li>Create <strong>Team</strong> product — £14.99/mo → copy <code className="bg-blue-100 px-1 rounded">STRIPE_PRICE_TEAM_MONTHLY</code></li>
           <li>Add webhook endpoint → <code className="bg-blue-100 px-1 rounded">/api/billing/webhook</code> → copy signing secret</li>
           <li>Enable the <strong>Customer Portal</strong> in Stripe → Settings → Billing → Customer portal</li>
         </ol>
