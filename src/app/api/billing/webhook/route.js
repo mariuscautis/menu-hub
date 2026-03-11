@@ -58,7 +58,11 @@ async function updateSubscription(supabaseAdmin, restaurantId, sub) {
       subscription_status: sub.status,
       subscription_plans:  plans,
       enabled_modules:     modules,
-      current_period_end:  new Date(sub.current_period_end * 1000).toISOString(),
+      current_period_end:  sub.current_period_end
+        ? new Date(sub.current_period_end * 1000).toISOString()
+        : sub.items?.data?.[0]?.current_period_end
+          ? new Date(sub.items.data[0].current_period_end * 1000).toISOString()
+          : null,
     })
     .eq('id', restaurantId)
 }
@@ -114,7 +118,11 @@ export async function POST(request) {
             subscription_status: 'canceled',
             subscription_plans:  '',
             enabled_modules:     { ordering: false, analytics: false, reservations: false, rota: false },
-            current_period_end:  new Date(sub.current_period_end * 1000).toISOString(),
+            current_period_end: sub.current_period_end
+              ? new Date(sub.current_period_end * 1000).toISOString()
+              : sub.items?.data?.[0]?.current_period_end
+                ? new Date(sub.items.data[0].current_period_end * 1000).toISOString()
+                : null,
           })
           .eq('id', restaurantId)
         break
