@@ -62,19 +62,18 @@ function calcTotal(selectedKeys) {
   const discount = selectedKeys.length >= 2 ? BUNDLE_DISCOUNT : 0
   const totalRaw = base * (1 - discount)
   return {
-    base:    parseFloat(base.toFixed(2)),
-    discount,
-    total:   parseFloat(totalRaw.toFixed(2)),
-    saving:  parseFloat((base - totalRaw).toFixed(2)),
+    base:   parseFloat(base.toFixed(2)),
+    total:  parseFloat(totalRaw.toFixed(2)),
+    saving: parseFloat((base - totalRaw).toFixed(2)),
   }
 }
 
 const STATUS_CONFIG = {
-  trialing: { label: 'Free Trial',  className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' },
-  active:   { label: 'Active',      className: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' },
-  past_due: { label: 'Past Due',    className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' },
-  canceled: { label: 'Canceled',    className: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' },
-  unpaid:   { label: 'Unpaid',      className: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' },
+  trialing: { label: 'Free Trial', className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' },
+  active:   { label: 'Active',     className: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' },
+  past_due: { label: 'Past Due',   className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' },
+  canceled: { label: 'Canceled',   className: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' },
+  unpaid:   { label: 'Unpaid',     className: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' },
 }
 
 function formatDate(iso) {
@@ -91,11 +90,19 @@ export default function BillingPage() {
   const subscriptionPlans  = (restaurant?.subscription_plans || '').split(',').filter(Boolean)
   const trialEndsAt        = restaurant?.trial_ends_at
   const currentPeriodEnd   = restaurant?.current_period_end
+  const isActive           = subscriptionStatus === 'active'
 
   const [selected, setSelected]           = useState([])
   const [loading, setLoading]             = useState(false)
   const [portalLoading, setPortalLoading] = useState(false)
   const [message, setMessage]             = useState(null)
+
+  // When active: pre-select current plans so the user sees their current state
+  useEffect(() => {
+    if (isActive && subscriptionPlans.length > 0) {
+      setSelected(subscriptionPlans)
+    }
+  }, [restaurant?.subscription_plans, subscriptionStatus])
 
   useEffect(() => {
     if (searchParams.get('success') === '1') {
@@ -107,10 +114,46 @@ export default function BillingPage() {
 
   const togglePlan = (key) => {
     setSelected(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key])
+    setMessage(null)
   }
 
+  // Diff between current subscription and selection
+  const toAdd    = selected.filter(k => !subscriptionPlans.includes(k))
+  const toRemove = subscriptionPlans.filter(k => !selected.includes(k))
+  const hasChanges = toAdd.length > 0 || toRemove.length > 0
+
   const { base, total, saving } = calcTotal(selected)
-  const isAlreadySubscribed = (key) => subscriptionPlans.includes(key)
+  const { total: currentTotal } = calcTotal(subscriptionPlans)
+
+  const handleUpdate = async () => {
+    if (!restaurant?.id) return
+    if (selected.length === 0) {
+      setMessage({ type: 'error', text: 'You must keep at least one module. To cancel entirely, use Manage Billing.' })
+      return
+    }
+    setLoading(true)
+    setMessage(null)
+    try {
+      const res  = await fetch('/api/billing/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ restaurantId: restaurant.id, plans: selected }),
+      })
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+      } else if (data.updated || data.added) {
+        setMessage({ type: 'success', text: 'Subscription updated! Your modules have been changed.' })
+        setTimeout(() => window.location.reload(), 1500)
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Failed to update subscription.' })
+        setLoading(false)
+      }
+    } catch {
+      setMessage({ type: 'error', text: 'Something went wrong. Please try again.' })
+      setLoading(false)
+    }
+  }
 
   const handleCheckout = async () => {
     if (!restaurant?.id || selected.length === 0) return
@@ -125,12 +168,6 @@ export default function BillingPage() {
       const data = await res.json()
       if (data.url) {
         window.location.href = data.url
-      } else if (data.added) {
-        // Modules added to existing subscription — refresh to show updated state
-        setMessage({ type: 'success', text: 'Modules added successfully! Your subscription has been updated.' })
-        setSelected([])
-        setLoading(false)
-        setTimeout(() => window.location.reload(), 1500)
       } else {
         setMessage({ type: 'error', text: data.error || 'Failed to start checkout.' })
         setLoading(false)
@@ -207,7 +244,7 @@ export default function BillingPage() {
             {subscriptionStatus === 'trialing' && trialEndsAt && (
               <p className="text-sm text-slate-500 dark:text-slate-400">Free trial ends <strong>{formatDate(trialEndsAt)}</strong></p>
             )}
-            {subscriptionStatus === 'active' && currentPeriodEnd && (
+            {isActive && currentPeriodEnd && (
               <p className="text-sm text-slate-500 dark:text-slate-400">Next billing date: <strong>{formatDate(currentPeriodEnd)}</strong></p>
             )}
             {subscriptionStatus === 'past_due' && (
@@ -233,15 +270,15 @@ export default function BillingPage() {
         </div>
       </div>
 
-      {/* Plan selector */}
+      {/* Plan tiles */}
       <div className="mb-4 flex items-end justify-between flex-wrap gap-2">
         <div>
           <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200">
-            {subscriptionStatus === 'active' ? 'Add or change modules' : 'Select your modules'}
+            {isActive ? 'Your modules' : 'Select your modules'}
           </h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-            {subscriptionStatus === 'active'
-              ? 'Select modules to add. To remove a module or cancel, use the Manage Billing button above.'
+            {isActive
+              ? 'Toggle modules on or off, then click Update plan to apply changes.'
               : 'Pick one or more — 15% bundle discount applies when you choose 2 or more.'}
           </p>
         </div>
@@ -255,29 +292,38 @@ export default function BillingPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
         {PLANS.map(plan => {
           const isSelected = selected.includes(plan.key)
-          const isActive   = isAlreadySubscribed(plan.key)
+          const wasActive  = subscriptionPlans.includes(plan.key)
+          const isAdding   = isActive && isSelected && !wasActive
+          const isRemoving = isActive && !isSelected && wasActive
 
           return (
             <button
               key={plan.key}
-              onClick={() => !isActive && togglePlan(plan.key)}
-              disabled={isActive}
+              onClick={() => togglePlan(plan.key)}
               className={`relative text-left rounded-2xl border-2 p-6 transition-all flex flex-col ${
-                isActive
-                  ? 'border-green-400 bg-green-50 dark:bg-green-900/10 dark:border-green-700 cursor-default opacity-80'
-                  : isSelected
+                isRemoving
+                  ? 'border-red-300 bg-red-50 dark:bg-red-900/10 dark:border-red-700 opacity-60'
+                  : isAdding
                     ? 'border-[#6262bd] bg-[#6262bd]/5 dark:bg-[#6262bd]/10 shadow-md shadow-[#6262bd]/10'
-                    : 'border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'
+                    : isSelected
+                      ? 'border-[#6262bd] bg-[#6262bd]/5 dark:bg-[#6262bd]/10 shadow-md shadow-[#6262bd]/10'
+                      : 'border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'
               }`}
             >
-              {plan.badge && !isActive && (
-                <span className={`absolute -top-3 left-5 text-xs font-bold px-3 py-1 rounded-full ${plan.badgeColor}`}>
-                  {plan.badge}
+              {/* Badge */}
+              {isRemoving && (
+                <span className="absolute -top-3 left-5 text-xs font-bold px-3 py-1 rounded-full bg-red-500 text-white">
+                  Will be removed
                 </span>
               )}
-              {isActive && (
-                <span className="absolute -top-3 left-5 text-xs font-bold px-3 py-1 rounded-full bg-green-500 text-white">
-                  Active
+              {isAdding && (
+                <span className="absolute -top-3 left-5 text-xs font-bold px-3 py-1 rounded-full bg-[#6262bd] text-white">
+                  Will be added
+                </span>
+              )}
+              {!isActive && plan.badge && isSelected === false && (
+                <span className={`absolute -top-3 left-5 text-xs font-bold px-3 py-1 rounded-full ${plan.badgeColor}`}>
+                  {plan.badge}
                 </span>
               )}
 
@@ -286,16 +332,13 @@ export default function BillingPage() {
                   <h3 className="text-lg font-bold text-slate-800 dark:text-white">{plan.name}</h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{plan.description}</p>
                 </div>
-                <div className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
-                  isActive   ? 'bg-green-500 border-green-500' :
-                  isSelected ? 'bg-[#6262bd] border-[#6262bd]' :
-                               'border-slate-300 dark:border-slate-600'
+                {/* Toggle indicator */}
+                <div className={`flex-shrink-0 w-11 h-6 rounded-full transition-colors relative ${
+                  isSelected ? 'bg-[#6262bd]' : 'bg-slate-200 dark:bg-slate-600'
                 }`}>
-                  {(isActive || isSelected) && (
-                    <svg className="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
-                    </svg>
-                  )}
+                  <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                    isSelected ? 'translate-x-5' : 'translate-x-0.5'
+                  }`} />
                 </div>
               </div>
 
@@ -319,47 +362,119 @@ export default function BillingPage() {
         })}
       </div>
 
-      {/* Checkout summary */}
-      {selected.length > 0 && (
-        <div className="bg-white dark:bg-slate-800 border-2 border-[#6262bd]/30 rounded-2xl p-6">
+      {/* Action bar */}
+      {isActive ? (
+        // ── Active subscriber: show diff + Update plan button ──────────────
+        <div className={`bg-white dark:bg-slate-800 border-2 rounded-2xl p-6 transition-all ${
+          hasChanges ? 'border-[#6262bd]/40' : 'border-slate-100 dark:border-slate-700'
+        }`}>
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
-                {selected.map(k => PLANS.find(p => p.key === k)?.name).join(' + ')}
-              </p>
-              <div className="flex items-center gap-3 flex-wrap">
-                {selected.length >= 2 && (
-                  <span className="text-slate-400 dark:text-slate-500 line-through text-sm">£{base}/mo</span>
-                )}
-                <span className="text-2xl font-bold text-slate-800 dark:text-white">
-                  £{total}<span className="text-sm font-normal text-slate-500">/month</span>
-                </span>
-                {selected.length >= 2 && (
-                  <span className="text-green-600 dark:text-green-400 text-sm font-medium">
-                    Save £{saving}/mo
-                  </span>
-                )}
-              </div>
+              {hasChanges ? (
+                <>
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">
+                    {toAdd.length > 0 && (
+                      <span className="text-green-600 dark:text-green-400 mr-3">
+                        + Adding: {toAdd.map(k => PLANS.find(p => p.key === k)?.name).join(', ')}
+                      </span>
+                    )}
+                    {toRemove.length > 0 && (
+                      <span className="text-red-500 dark:text-red-400">
+                        − Removing: {toRemove.map(k => PLANS.find(p => p.key === k)?.name).join(', ')}
+                      </span>
+                    )}
+                  </p>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <span className="text-slate-400 dark:text-slate-500 line-through text-sm">£{currentTotal}/mo</span>
+                    <span className="text-2xl font-bold text-slate-800 dark:text-white">
+                      £{total}<span className="text-sm font-normal text-slate-500">/month</span>
+                    </span>
+                    {selected.length >= 2 && saving > 0 && (
+                      <span className="text-green-600 dark:text-green-400 text-sm font-medium">Save £{saving}/mo</span>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div>
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                    {selected.map(k => PLANS.find(p => p.key === k)?.name).join(' + ') || 'No modules selected'}
+                  </p>
+                  <p className="text-2xl font-bold text-slate-800 dark:text-white mt-0.5">
+                    £{total}<span className="text-sm font-normal text-slate-500">/month</span>
+                    {selected.length >= 2 && saving > 0 && (
+                      <span className="text-green-600 text-sm font-medium ml-3">Save £{saving}/mo</span>
+                    )}
+                  </p>
+                </div>
+              )}
             </div>
             <button
-              onClick={handleCheckout}
-              disabled={loading}
-              className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-md shadow-green-600/20"
+              onClick={handleUpdate}
+              disabled={loading || !hasChanges}
+              className="px-8 py-3 bg-[#6262bd] hover:bg-[#5151a8] text-white rounded-xl font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-md shadow-[#6262bd]/20"
             >
               {loading ? (
                 <>
                   <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
-                  Redirecting…
+                  Updating…
                 </>
               ) : (
                 <>
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
-                  Secure checkout
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                  {hasChanges ? 'Update plan' : 'No changes'}
                 </>
               )}
             </button>
           </div>
+          {hasChanges && toRemove.length > 0 && (
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-3">
+              Removed modules will remain accessible until the end of the current billing period.
+            </p>
+          )}
         </div>
+      ) : (
+        // ── New subscriber: show checkout summary ─────────────────────────
+        selected.length > 0 && (
+          <div className="bg-white dark:bg-slate-800 border-2 border-[#6262bd]/30 rounded-2xl p-6">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+                  {selected.map(k => PLANS.find(p => p.key === k)?.name).join(' + ')}
+                </p>
+                <div className="flex items-center gap-3 flex-wrap">
+                  {selected.length >= 2 && (
+                    <span className="text-slate-400 dark:text-slate-500 line-through text-sm">£{base}/mo</span>
+                  )}
+                  <span className="text-2xl font-bold text-slate-800 dark:text-white">
+                    £{total}<span className="text-sm font-normal text-slate-500">/month</span>
+                  </span>
+                  {selected.length >= 2 && (
+                    <span className="text-green-600 dark:text-green-400 text-sm font-medium">
+                      Save £{saving}/mo
+                    </span>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={handleCheckout}
+                disabled={loading}
+                className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-md shadow-green-600/20"
+              >
+                {loading ? (
+                  <>
+                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
+                    Redirecting…
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                    Secure checkout
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        )
       )}
 
       <p className="text-xs text-slate-400 dark:text-slate-500 text-center mt-5">

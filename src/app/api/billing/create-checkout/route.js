@@ -55,50 +55,65 @@ export async function POST(request) {
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
-    // ── Case 1: Active subscription exists — add new items directly ──────────
+    // ── Case 1: Active subscription exists — add/remove items directly ───────
     if (restaurant.subscription_status === 'active' && restaurant.subscription_id) {
       const sub = await stripeGet(`subscriptions/${restaurant.subscription_id}`)
 
       if (sub.object === 'subscription') {
-        const existingPriceIds = sub.items.data.map(i => i.price.id)
-        const existingPlans    = (restaurant.subscription_plans || '').split(',').filter(Boolean)
+        const existingItems  = sub.items.data  // [{ id, price: { id } }]
+        const existingPlans  = (restaurant.subscription_plans || '').split(',').filter(Boolean)
 
-        // Only add plans not already on the subscription
-        const newPlans = plans.filter(p => !existingPlans.includes(p) && !existingPriceIds.includes(PRICE_IDS[p]))
+        const toAdd    = plans.filter(p => !existingPlans.includes(p))
+        const toRemove = existingPlans.filter(p => !plans.includes(p))
 
-        if (newPlans.length === 0) {
-          return NextResponse.json({ error: 'All selected plans are already active.' }, { status: 400 })
+        if (toAdd.length === 0 && toRemove.length === 0) {
+          return NextResponse.json({ error: 'No changes to apply.' }, { status: 400 })
         }
 
-        // Add each new item to the existing subscription
-        for (const plan of newPlans) {
-          await stripePost(`subscription_items`, {
+        // Add new items
+        for (const plan of toAdd) {
+          await stripePost('subscription_items', {
             subscription: restaurant.subscription_id,
             price: PRICE_IDS[plan],
             quantity: '1',
           })
         }
 
-        // Update subscription metadata to include all plans
-        const allPlans = [...existingPlans, ...newPlans].sort().join(',')
+        // Remove deleted items
+        for (const plan of toRemove) {
+          const item = existingItems.find(i => i.price.id === PRICE_IDS[plan])
+          if (item) {
+            await fetch(`https://api.stripe.com/v1/subscription_items/${item.id}`, {
+              method: 'DELETE',
+              headers: {
+                Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`,
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              body: new URLSearchParams({ proration_behavior: 'create_prorations' }).toString(),
+            })
+          }
+        }
+
+        // Update subscription metadata
+        const newPlansString = plans.sort().join(',')
         await stripePost(`subscriptions/${restaurant.subscription_id}`, {
-          'metadata[plans]': allPlans,
+          'metadata[plans]': newPlansString,
           'metadata[restaurant_id]': restaurantId,
         })
 
-        // Update Supabase immediately (webhook will also fire and confirm)
-        const allModules = {
-          ordering:     allPlans.includes('orders'),
-          analytics:    allPlans.includes('orders'),
-          reservations: allPlans.includes('bookings'),
-          rota:         allPlans.includes('team'),
+        // Update Supabase immediately (webhook will also confirm)
+        const newModules = {
+          ordering:     newPlansString.includes('orders'),
+          analytics:    newPlansString.includes('orders'),
+          reservations: newPlansString.includes('bookings'),
+          rota:         newPlansString.includes('team'),
         }
         await supabaseAdmin
           .from('restaurants')
-          .update({ subscription_plans: allPlans, enabled_modules: allModules })
+          .update({ subscription_plans: newPlansString, enabled_modules: newModules })
           .eq('id', restaurantId)
 
-        return NextResponse.json({ added: true, plans: allPlans })
+        return NextResponse.json({ updated: true, plans: newPlansString })
       }
     }
 
