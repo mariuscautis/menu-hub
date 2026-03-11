@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { sendEmail } from '@/lib/services/email-edge'
 
 export const runtime = 'edge'
 
@@ -45,6 +46,69 @@ function plansToModules(plansString) {
     reservations: plans.includes('bookings'),
     rota:         plans.includes('team'),
   }
+}
+
+const PLAN_LABELS = { orders: 'Orders', bookings: 'Bookings', team: 'Team' }
+
+async function notifyAdminSubscription(action, restaurantName, email, plansString, status) {
+  const adminEmail = process.env.SUPER_ADMIN_EMAIL
+  if (!adminEmail) return
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.venoapp.com'
+  const plans = (plansString || '').split(',').filter(Boolean)
+  const planDisplay = plans.length > 0
+    ? plans.map(p => PLAN_LABELS[p] || p).join(', ')
+    : 'None'
+
+  const actionLabels = {
+    created:   { emoji: '🟢', title: 'New Subscription' },
+    updated:   { emoji: '🔄', title: 'Subscription Updated' },
+    canceled:  { emoji: '🔴', title: 'Subscription Cancelled' },
+    past_due:  { emoji: '⚠️',  title: 'Payment Failed' },
+  }
+  const { emoji, title } = actionLabels[action] || { emoji: '📋', title: 'Subscription Change' }
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+      <head><meta charset="utf-8">
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background-color: #6262bd; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
+          .content { background-color: #f9f9f9; padding: 30px; border-radius: 0 0 5px 5px; }
+          .field { margin-bottom: 12px; }
+          .label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+          .value { font-size: 15px; font-weight: 600; color: #333; }
+          .button { display: inline-block; padding: 12px 24px; background-color: #6262bd; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+          .footer { margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #888; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h2 style="margin:0">${emoji} ${title}</h2>
+          </div>
+          <div class="content">
+            <div class="field"><div class="label">Restaurant</div><div class="value">${restaurantName || 'Unknown'}</div></div>
+            <div class="field"><div class="label">Email</div><div class="value">${email || '—'}</div></div>
+            <div class="field"><div class="label">Plans</div><div class="value">${planDisplay}</div></div>
+            <div class="field"><div class="label">Status</div><div class="value">${status || action}</div></div>
+            <p style="text-align:center">
+              <a href="${appUrl}/admin/billing" class="button">View Billing Dashboard</a>
+            </p>
+            <div class="footer">Veno App — automated notification</div>
+          </div>
+        </div>
+      </body>
+    </html>
+  `
+
+  await sendEmail({
+    to: adminEmail,
+    subject: `${emoji} ${title}: ${restaurantName || email}`,
+    htmlContent,
+  }).catch(err => console.error('Admin subscription notification failed:', err))
 }
 
 async function updateSubscription(supabaseAdmin, restaurantId, sub) {
@@ -105,6 +169,9 @@ export async function POST(request) {
         const restaurantId = sub.metadata?.restaurant_id
         if (!restaurantId) break
         await updateSubscription(supabaseAdmin, restaurantId, sub)
+        const { data: r } = await supabaseAdmin.from('restaurants').select('name, email').eq('id', restaurantId).single()
+        const action = event.type === 'customer.subscription.created' ? 'created' : 'updated'
+        await notifyAdminSubscription(action, r?.name, r?.email, sub.metadata?.plans, sub.status)
         break
       }
 
@@ -125,6 +192,8 @@ export async function POST(request) {
                 : null,
           })
           .eq('id', restaurantId)
+        const { data: r } = await supabaseAdmin.from('restaurants').select('name, email').eq('id', restaurantId).single()
+        await notifyAdminSubscription('canceled', r?.name, r?.email, sub.metadata?.plans, 'canceled')
         break
       }
 
@@ -149,6 +218,8 @@ export async function POST(request) {
             .from('restaurants')
             .update({ subscription_status: 'past_due' })
             .eq('id', restaurantId)
+          const { data: r } = await supabaseAdmin.from('restaurants').select('name, email').eq('id', restaurantId).single()
+          await notifyAdminSubscription('past_due', r?.name, r?.email, sub.metadata?.plans, 'past_due')
         }
         break
       }

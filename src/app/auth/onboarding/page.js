@@ -92,6 +92,17 @@ export default function Onboarding() {
 
       if (dbError) throw dbError
 
+      // Notify super admin (fire-and-forget)
+      fetch('/api/notifications/restaurant-registered', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          restaurantName: formData.restaurantName,
+          email: user.email,
+          phone: formData.phone,
+        }),
+      }).catch(() => {})
+
       router.push('/dashboard')
 
     } catch (err) {
