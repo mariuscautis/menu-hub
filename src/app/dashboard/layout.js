@@ -1148,6 +1148,15 @@ export default function DashboardLayout({ children }) {
               </svg>
             )
           },
+          {
+            href: '/dashboard/settings/billing',
+            label: 'Billing',
+            icon: (
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+              </svg>
+            )
+          },
           // Ordering module only
           ...(hasModule('ordering') ? [
             {
@@ -1257,6 +1266,41 @@ export default function DashboardLayout({ children }) {
           </button>
         </div>
       )}
+
+      {/* Subscription warning banner */}
+      {userType === 'owner' && !isImpersonating && (() => {
+        const status = restaurant?.subscription_status
+        const trialEnd = restaurant?.trial_ends_at
+        const daysLeft = trialEnd
+          ? Math.max(0, Math.ceil((new Date(trialEnd) - new Date()) / (1000 * 60 * 60 * 24)))
+          : null
+
+        if (status === 'past_due' || status === 'unpaid') {
+          return (
+            <div className="fixed top-0 left-0 right-0 z-[9998] bg-red-500 text-white flex items-center justify-between px-6 py-2 text-sm font-semibold shadow-md">
+              <span>Payment failed — please update your payment method to avoid losing access.</span>
+              <a href="/dashboard/settings/billing" className="bg-white text-red-600 px-4 py-1 rounded-lg text-xs font-semibold hover:bg-red-50 transition-colors">Fix Now</a>
+            </div>
+          )
+        }
+        if (status === 'canceled') {
+          return (
+            <div className="fixed top-0 left-0 right-0 z-[9998] bg-slate-700 text-white flex items-center justify-between px-6 py-2 text-sm font-semibold shadow-md">
+              <span>Your subscription has been cancelled. Resubscribe to keep access.</span>
+              <a href="/dashboard/settings/billing" className="bg-white text-slate-700 px-4 py-1 rounded-lg text-xs font-semibold hover:bg-slate-100 transition-colors">Resubscribe</a>
+            </div>
+          )
+        }
+        if (status === 'trialing' && daysLeft !== null && daysLeft <= 7) {
+          return (
+            <div className="fixed top-0 left-0 right-0 z-[9998] bg-amber-400 text-amber-900 flex items-center justify-between px-6 py-2 text-sm font-semibold shadow-md">
+              <span>Your free trial {daysLeft === 0 ? 'expires today' : `ends in ${daysLeft} day${daysLeft === 1 ? '' : 's'}`}. Subscribe to keep access.</span>
+              <a href="/dashboard/settings/billing" className="bg-amber-900 text-amber-100 px-4 py-1 rounded-lg text-xs font-semibold hover:bg-amber-800 transition-colors">Subscribe</a>
+            </div>
+          )
+        }
+        return null
+      })()}
 
       {/* Overlay when sidebar is open (for closing by clicking outside) */}
       {sidebarOpen && !fullWidthMode && (

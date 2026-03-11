@@ -270,6 +270,7 @@ export default function AdminRestaurants() {
                 <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Restaurant</th>
                 <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Contact</th>
                 <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Status</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Subscription</th>
                 <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Modules</th>
                 <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Registered</th>
                 <th className="text-right px-6 py-4 text-sm font-semibold text-slate-600">Actions</th>
@@ -292,6 +293,38 @@ export default function AdminRestaurants() {
                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusBadge(restaurant.status)}`}>
                       {restaurant.status}
                     </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    {(() => {
+                      const sub    = restaurant.subscription_status || 'trialing'
+                      const plans  = (restaurant.subscription_plans || '').split(',').filter(Boolean)
+                      const PLAN_LABELS = { orders: 'Orders', bookings: 'Bookings', team: 'Team' }
+                      const badgeColor = {
+                        trialing: 'bg-blue-100 text-blue-700',
+                        active:   'bg-green-100 text-green-700',
+                        past_due: 'bg-amber-100 text-amber-700',
+                        canceled: 'bg-red-100 text-red-700',
+                        unpaid:   'bg-red-100 text-red-700',
+                      }[sub] || 'bg-slate-100 text-slate-600'
+                      return (
+                        <div className="flex flex-col gap-1">
+                          {plans.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {plans.map(p => (
+                                <span key={p} className="px-2 py-0.5 rounded-full text-xs font-medium bg-[#6262bd]/10 text-[#6262bd]">
+                                  {PLAN_LABELS[p] || p}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-slate-400 text-xs">None</span>
+                          )}
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium w-fit ${badgeColor}`}>
+                            {sub.replace('_', ' ')}
+                          </span>
+                        </div>
+                      )
+                    })()}
                   </td>
                   <td className="px-6 py-4">
                     <button
