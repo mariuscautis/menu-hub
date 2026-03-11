@@ -114,10 +114,6 @@ export default function BillingPage() {
 
   const handleCheckout = async () => {
     if (!restaurant?.id || selected.length === 0) return
-    // If already subscribed, adding modules goes through the portal
-    if (subscriptionStatus === 'active' && restaurant?.stripe_customer_id) {
-      return handleManageBilling()
-    }
     setLoading(true)
     setMessage(null)
     try {
@@ -129,6 +125,12 @@ export default function BillingPage() {
       const data = await res.json()
       if (data.url) {
         window.location.href = data.url
+      } else if (data.added) {
+        // Modules added to existing subscription — refresh to show updated state
+        setMessage({ type: 'success', text: 'Modules added successfully! Your subscription has been updated.' })
+        setSelected([])
+        setLoading(false)
+        setTimeout(() => window.location.reload(), 1500)
       } else {
         setMessage({ type: 'error', text: data.error || 'Failed to start checkout.' })
         setLoading(false)
@@ -239,7 +241,7 @@ export default function BillingPage() {
           </h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
             {subscriptionStatus === 'active'
-              ? 'To remove a module or cancel, use the Manage Billing button above.'
+              ? 'Select modules to add. To remove a module or cancel, use the Manage Billing button above.'
               : 'Pick one or more — 15% bundle discount applies when you choose 2 or more.'}
           </p>
         </div>
