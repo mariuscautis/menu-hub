@@ -28,7 +28,8 @@
     "react-big-calendar": "^1.19.4",
     "react-dom": "19.2.0",
     "recharts": "^3.5.1",
-    "sharp": "^0.34.5"
+    "sharp": "^0.34.5",
+    "stripe": "^17.7.0"
   },
   "devDependencies": {
     "@cloudflare/next-on-pages": "^1.13.16",
