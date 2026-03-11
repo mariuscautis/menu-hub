@@ -8,6 +8,8 @@ EMAIL_FROM = "noreply@venoapp.com"
 EMAIL_FROM_NAME = "Menu Hub"
 NEXT_PUBLIC_SUPABASE_URL = "https://rfquwezkkdyvjftveilf.supabase.co"
 NEXT_PUBLIC_BASE_URL = "https://www.venoapp.com"
+NEXT_PUBLIC_APP_URL = "https://www.venoapp.com"
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = "pk_test_51T9ovOFTYPCNBuGqu6oRevn4bf5f04AN3qOGox1nfe4iiJaSaRPkpwHDKgMmChlsuc4tPtcJQKAjVkqOlF2vgQ9F00tF7ZMj5q"
 
 [env.production]
 compatibility_flags = ["nodejs_compat"]
@@ -17,10 +19,17 @@ EMAIL_FROM = "noreply@venoapp.com"
 EMAIL_FROM_NAME = "Menu Hub"
 NEXT_PUBLIC_SUPABASE_URL = "https://rfquwezkkdyvjftveilf.supabase.co"
 NEXT_PUBLIC_BASE_URL = "https://www.venoapp.com"
+NEXT_PUBLIC_APP_URL = "https://www.venoapp.com"
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = "pk_test_51T9ovOFTYPCNBuGqu6oRevn4bf5f04AN3qOGox1nfe4iiJaSaRPkpwHDKgMmChlsuc4tPtcJQKAjVkqOlF2vgQ9F00tF7ZMj5q"
 
 # Secrets are referenced here but values are set via `wrangler pages secret`
 # BREVO_API_KEY - set via wrangler pages secret
 # SUPABASE_SERVICE_ROLE_KEY - set via wrangler pages secret
+# STRIPE_SECRET_KEY - set via wrangler pages secret
+# STRIPE_WEBHOOK_SECRET - set via wrangler pages secret
+# STRIPE_PRICE_ORDERS_MONTHLY - set via wrangler pages secret
+# STRIPE_PRICE_BOOKINGS_MONTHLY - set via wrangler pages secret
+# STRIPE_PRICE_TEAM_MONTHLY - set via wrangler pages secret
 
 [env.preview]
 compatibility_flags = ["nodejs_compat"]
@@ -30,3 +39,5 @@ EMAIL_FROM = "noreply@venoapp.com"
 EMAIL_FROM_NAME = "Menu Hub"
 NEXT_PUBLIC_SUPABASE_URL = "https://rfquwezkkdyvjftveilf.supabase.co"
 NEXT_PUBLIC_BASE_URL = "https://www.venoapp.com"
+NEXT_PUBLIC_APP_URL = "https://www.venoapp.com"
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = "pk_test_51T9ovOFTYPCNBuGqu6oRevn4bf5f04AN3qOGox1nfe4iiJaSaRPkpwHDKgMmChlsuc4tPtcJQKAjVkqOlF2vgQ9F00tF7ZMj5q"

@@ -144,7 +144,11 @@ export default function AdminBilling() {
             { key: 'STRIPE_PRICE_TEAM_MONTHLY',          label: 'Team Plan Price ID',              pub: false },
             { key: 'NEXT_PUBLIC_APP_URL',                label: 'App Public URL (for redirects)',  pub: true  },
           ].map(({ key, label, pub }) => {
-            const present = pub ? !!process.env[key] : null
+            const pubEnv = {
+              NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+              NEXT_PUBLIC_APP_URL:                process.env.NEXT_PUBLIC_APP_URL,
+            }
+            const present = pub ? !!pubEnv[key] : null
             return (
               <li key={key} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
                 <div>
