@@ -1,14 +1,35 @@
 import { NextResponse } from 'next/server'
-import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 
 export const runtime = 'edge'
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-)
+/**
+ * Verify Stripe webhook signature using Web Crypto API (compatible with Cloudflare edge runtime).
+ * Stripe signs with HMAC-SHA256. The `stripe-signature` header contains:
+ *   t=<timestamp>,v1=<signature>[,v1=<signature2>...]
+ */
+async function verifyStripeSignature(body, sigHeader, secret) {
+  const parts = Object.fromEntries(
+    sigHeader.split(',').map(part => {
+      const [k, ...v] = part.split('=')
+      return [k, v.join('=')]
+    })
+  )
+  const timestamp = parts.t
+  const signatures = sigHeader.split(',').filter(p => p.startsWith('v1=')).map(p => p.slice(3))
 
+  if (!timestamp || signatures.length === 0) return false
+
+  const enc = new TextEncoder()
+  const key = await crypto.subtle.importKey(
+    'raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  )
+  const payload = `${timestamp}.${body}`
+  const buf = await crypto.subtle.sign('HMAC', key, enc.encode(payload))
+  const computed = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('')
+
+  return signatures.some(sig => sig === computed)
+}
 
 /**
  * Plan → modules mapping:
@@ -26,7 +47,7 @@ function plansToModules(plansString) {
   }
 }
 
-async function updateSubscription(restaurantId, sub, stripe) {
+async function updateSubscription(supabaseAdmin, restaurantId, sub) {
   const plans   = sub.metadata?.plans || ''
   const modules = plansToModules(plans)
 
@@ -43,16 +64,33 @@ async function updateSubscription(restaurantId, sub, stripe) {
 }
 
 export async function POST(request) {
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  )
+
   const body = await request.text()
   const sig  = request.headers.get('stripe-signature')
 
+  const valid = await verifyStripeSignature(body, sig || '', process.env.STRIPE_WEBHOOK_SECRET)
+  if (!valid) {
+    console.error('Webhook signature verification failed')
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
+  }
+
   let event
   try {
-    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET)
+    event = JSON.parse(body)
   } catch (err) {
-    console.error('Webhook signature verification failed:', err.message)
-    return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 })
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
+  }
+
+  // Helper to fetch a subscription via Stripe REST API (no SDK needed)
+  async function fetchSubscription(subscriptionId) {
+    const res = await fetch(`https://api.stripe.com/v1/subscriptions/${subscriptionId}`, {
+      headers: { Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}` },
+    })
+    return res.json()
   }
 
   try {
@@ -62,7 +100,7 @@ export async function POST(request) {
         const sub = event.data.object
         const restaurantId = sub.metadata?.restaurant_id
         if (!restaurantId) break
-        await updateSubscription(restaurantId, sub, stripe)
+        await updateSubscription(supabaseAdmin, restaurantId, sub)
         break
       }
 
@@ -85,10 +123,10 @@ export async function POST(request) {
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object
         if (invoice.subscription) {
-          const sub = await stripe.subscriptions.retrieve(invoice.subscription)
+          const sub = await fetchSubscription(invoice.subscription)
           const restaurantId = sub.metadata?.restaurant_id
           if (!restaurantId) break
-          await updateSubscription(restaurantId, sub, stripe)
+          await updateSubscription(supabaseAdmin, restaurantId, sub)
         }
         break
       }
@@ -96,7 +134,7 @@ export async function POST(request) {
       case 'invoice.payment_failed': {
         const invoice = event.data.object
         if (invoice.subscription) {
-          const sub = await stripe.subscriptions.retrieve(invoice.subscription)
+          const sub = await fetchSubscription(invoice.subscription)
           const restaurantId = sub.metadata?.restaurant_id
           if (!restaurantId) break
           await supabaseAdmin
