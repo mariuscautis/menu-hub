@@ -10,6 +10,7 @@ NEXT_PUBLIC_SUPABASE_URL = "https://rfquwezkkdyvjftveilf.supabase.co"
 NEXT_PUBLIC_BASE_URL = "https://www.venoapp.com"
 NEXT_PUBLIC_APP_URL = "https://www.venoapp.com"
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = "pk_test_51T9ovOFTYPCNBuGqu6oRevn4bf5f04AN3qOGox1nfe4iiJaSaRPkpwHDKgMmChlsuc4tPtcJQKAjVkqOlF2vgQ9F00tF7ZMj5q"
+SUPER_ADMIN_EMAIL = "marius.cautis@gmail.com"
 
 [env.production]
 compatibility_flags = ["nodejs_compat"]
@@ -21,6 +22,7 @@ NEXT_PUBLIC_SUPABASE_URL = "https://rfquwezkkdyvjftveilf.supabase.co"
 NEXT_PUBLIC_BASE_URL = "https://www.venoapp.com"
 NEXT_PUBLIC_APP_URL = "https://www.venoapp.com"
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = "pk_test_51T9ovOFTYPCNBuGqu6oRevn4bf5f04AN3qOGox1nfe4iiJaSaRPkpwHDKgMmChlsuc4tPtcJQKAjVkqOlF2vgQ9F00tF7ZMj5q"
+SUPER_ADMIN_EMAIL = "marius.cautis@gmail.com"
 
 # Secrets are referenced here but values are set via `wrangler pages secret`
 # BREVO_API_KEY - set via wrangler pages secret
@@ -41,3 +43,4 @@ NEXT_PUBLIC_SUPABASE_URL = "https://rfquwezkkdyvjftveilf.supabase.co"
 NEXT_PUBLIC_BASE_URL = "https://www.venoapp.com"
 NEXT_PUBLIC_APP_URL = "https://www.venoapp.com"
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = "pk_test_51T9ovOFTYPCNBuGqu6oRevn4bf5f04AN3qOGox1nfe4iiJaSaRPkpwHDKgMmChlsuc4tPtcJQKAjVkqOlF2vgQ9F00tF7ZMj5q"
+SUPER_ADMIN_EMAIL = "marius.cautis@gmail.com"
