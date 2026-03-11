@@ -8,7 +8,7 @@ const PLANS = [
   {
     key: 'orders',
     name: 'Orders',
-    price: 39,
+    price: 28.99,
     description: 'Digital ordering, menus & analytics.',
     features: [
       'QR table ordering',
@@ -24,7 +24,7 @@ const PLANS = [
   {
     key: 'bookings',
     name: 'Bookings',
-    price: 19,
+    price: 11.99,
     description: 'Online reservations & booking management.',
     features: [
       'Public booking page',
@@ -38,7 +38,7 @@ const PLANS = [
   {
     key: 'team',
     name: 'Team',
-    price: 29,
+    price: 14.99,
     description: 'Staff management, rota & scheduling.',
     features: [
       'Staff directory',
@@ -60,7 +60,13 @@ function calcTotal(selectedKeys) {
     return sum + (plan?.price || 0)
   }, 0)
   const discount = selectedKeys.length >= 2 ? BUNDLE_DISCOUNT : 0
-  return { base, discount, total: Math.round(base * (1 - discount)) }
+  const totalRaw = base * (1 - discount)
+  return {
+    base:    parseFloat(base.toFixed(2)),
+    discount,
+    total:   parseFloat(totalRaw.toFixed(2)),
+    saving:  parseFloat((base - totalRaw).toFixed(2)),
+  }
 }
 
 const STATUS_CONFIG = {
@@ -103,7 +109,7 @@ export default function BillingPage() {
     setSelected(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key])
   }
 
-  const { base, total } = calcTotal(selected)
+  const { base, total, saving } = calcTotal(selected)
   const isAlreadySubscribed = (key) => subscriptionPlans.includes(key)
 
   const handleCheckout = async () => {
@@ -322,7 +328,7 @@ export default function BillingPage() {
                 </span>
                 {selected.length >= 2 && (
                   <span className="text-green-600 dark:text-green-400 text-sm font-medium">
-                    Save £{base - total}/mo
+                    Save £{saving}/mo
                   </span>
                 )}
               </div>
@@ -330,7 +336,7 @@ export default function BillingPage() {
             <button
               onClick={handleCheckout}
               disabled={loading}
-              className="px-8 py-3 bg-[#6262bd] text-white rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+              className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-md shadow-green-600/20"
             >
               {loading ? (
                 <>
@@ -339,8 +345,8 @@ export default function BillingPage() {
                 </>
               ) : (
                 <>
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
-                  Subscribe securely
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                  Secure checkout
                 </>
               )}
             </button>
@@ -349,7 +355,7 @@ export default function BillingPage() {
       )}
 
       <p className="text-xs text-slate-400 dark:text-slate-500 text-center mt-5">
-        All modules include a 30-day free trial. Cancel anytime. Prices exclude VAT. Payments processed securely by Stripe.
+        All modules include a 14-day free trial. Cancel anytime. Prices exclude VAT. Payments processed securely by Stripe.
       </p>
     </div>
   )

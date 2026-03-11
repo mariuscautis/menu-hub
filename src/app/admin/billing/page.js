@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 
 const PLANS = [
-  { key: 'orders',   name: 'Orders',   price: 39 },
-  { key: 'bookings', name: 'Bookings', price: 19 },
-  { key: 'team',     name: 'Team',     price: 29 },
+  { key: 'orders',   name: 'Orders',   price: 28.99 },
+  { key: 'bookings', name: 'Bookings', price: 11.99 },
+  { key: 'team',     name: 'Team',     price: 14.99 },
 ]
 
 const STATUS_COLORS = {
