@@ -2,21 +2,20 @@ import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
-
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
-// Each plan key maps to a Stripe Price ID
-const PRICE_IDS = {
-  orders:   process.env.STRIPE_PRICE_ORDERS_MONTHLY,
-  bookings: process.env.STRIPE_PRICE_BOOKINGS_MONTHLY,
-  team:     process.env.STRIPE_PRICE_TEAM_MONTHLY,
-}
-
 export async function POST(request) {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+
+  // Each plan key maps to a Stripe Price ID
+  const PRICE_IDS = {
+    orders:   process.env.STRIPE_PRICE_ORDERS_MONTHLY,
+    bookings: process.env.STRIPE_PRICE_BOOKINGS_MONTHLY,
+    team:     process.env.STRIPE_PRICE_TEAM_MONTHLY,
+  }
   try {
     const { restaurantId, plans } = await request.json()
     // plans is an array, e.g. ['orders'], ['bookings', 'team'], ['orders', 'bookings', 'team']

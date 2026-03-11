@@ -2,8 +2,6 @@ import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
-
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -27,7 +25,7 @@ function plansToModules(plansString) {
   }
 }
 
-async function updateSubscription(restaurantId, sub) {
+async function updateSubscription(restaurantId, sub, stripe) {
   const plans   = sub.metadata?.plans || ''
   const modules = plansToModules(plans)
 
@@ -44,6 +42,7 @@ async function updateSubscription(restaurantId, sub) {
 }
 
 export async function POST(request) {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
   const body = await request.text()
   const sig  = request.headers.get('stripe-signature')
 
@@ -62,7 +61,7 @@ export async function POST(request) {
         const sub = event.data.object
         const restaurantId = sub.metadata?.restaurant_id
         if (!restaurantId) break
-        await updateSubscription(restaurantId, sub)
+        await updateSubscription(restaurantId, sub, stripe)
         break
       }
 
@@ -88,7 +87,7 @@ export async function POST(request) {
           const sub = await stripe.subscriptions.retrieve(invoice.subscription)
           const restaurantId = sub.metadata?.restaurant_id
           if (!restaurantId) break
-          await updateSubscription(restaurantId, sub)
+          await updateSubscription(restaurantId, sub, stripe)
         }
         break
       }
