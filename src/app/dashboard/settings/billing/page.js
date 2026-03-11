@@ -114,6 +114,10 @@ export default function BillingPage() {
 
   const handleCheckout = async () => {
     if (!restaurant?.id || selected.length === 0) return
+    // If already subscribed, adding modules goes through the portal
+    if (subscriptionStatus === 'active' && restaurant?.stripe_customer_id) {
+      return handleManageBilling()
+    }
     setLoading(true)
     setMessage(null)
     try {
@@ -234,7 +238,9 @@ export default function BillingPage() {
             {subscriptionStatus === 'active' ? 'Add or change modules' : 'Select your modules'}
           </h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-            Pick one or more — 15% bundle discount applies when you choose 2 or more.
+            {subscriptionStatus === 'active'
+              ? 'To remove a module or cancel, use the Manage Billing button above.'
+              : 'Pick one or more — 15% bundle discount applies when you choose 2 or more.'}
           </p>
         </div>
         {selected.length >= 2 && (
