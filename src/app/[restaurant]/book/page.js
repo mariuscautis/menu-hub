@@ -58,7 +58,7 @@ export default function BookReservation({ params }) {
         return
       }
 
-      if (!data.reservation_settings?.enabled) {
+      if (!data.enabled_modules?.reservations) {
         setError('Reservations are not currently available for this restaurant')
         setLoading(false)
         return
