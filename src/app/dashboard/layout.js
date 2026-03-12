@@ -486,12 +486,22 @@ export default function DashboardLayout({ children }) {
     setInitialRedirectDone(true)
   }, [loading, userType, departmentPermissions, pathname, router, initialRedirectDone, checkPermission])
 
-  // Clear the redirect flag on logout
+  // Re-fetch restaurant data on tab visibility change so suspensions take effect promptly
   useEffect(() => {
-    return () => {
-      // This will be called when component unmounts (e.g., on logout)
+    if (userType !== 'owner' || isImpersonating) return
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'visible') {
+        const { data } = await supabase
+          .from('restaurants')
+          .select('*')
+          .eq('owner_id', (await supabase.auth.getUser()).data.user?.id)
+          .maybeSingle()
+        if (data) setRestaurant(data)
+      }
     }
-  }, [])
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [userType, isImpersonating])
 
   const handleReturnToAdmin = () => {
     sessionStorage.removeItem('impersonation_session')
@@ -1269,13 +1279,75 @@ export default function DashboardLayout({ children }) {
 
       {/* Subscription warning banner */}
       {userType === 'owner' && !isImpersonating && (() => {
-        const status = restaurant?.subscription_status
+        const accountStatus = restaurant?.status
+        const subStatus = restaurant?.subscription_status
         const trialEnd = restaurant?.trial_ends_at
         const daysLeft = trialEnd
           ? Math.max(0, Math.ceil((new Date(trialEnd) - new Date()) / (1000 * 60 * 60 * 24)))
           : null
 
-        if (status === 'past_due' || status === 'unpaid') {
+        // ── Account suspended by admin ────────────────────────────────────────
+        if (accountStatus === 'rejected') {
+          const msg = restaurant?.suspension_message
+          return (
+            <div className="fixed inset-0 z-[9997] flex items-center justify-center p-6" style={{ backdropFilter: 'blur(6px)', backgroundColor: 'rgba(15,23,42,0.75)' }}>
+              <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl max-w-md w-full p-8 text-center border-2 border-slate-100 dark:border-slate-700">
+                <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-5">
+                  <svg className="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">Account suspended</h2>
+                <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-2">
+                  {msg || 'Your account has been temporarily suspended by our team.'}
+                </p>
+                <p className="text-slate-400 dark:text-slate-500 text-xs mb-7">
+                  If you believe this is a mistake or need more information, please reach out — we're happy to help.
+                </p>
+                <a
+                  href="mailto:support@venoapp.com?subject=Menu Hub - Account suspended"
+                  className="block w-full py-3 px-6 bg-[#6262bd] hover:bg-[#5151a8] text-white rounded-xl font-semibold text-sm transition-colors shadow-md shadow-[#6262bd]/20"
+                >
+                  Get in touch
+                </a>
+              </div>
+            </div>
+          )
+        }
+
+        // ── Trial expired ─────────────────────────────────────────────────────
+        if (subStatus === 'trialing' && daysLeft !== null && daysLeft === 0) {
+          return (
+            <div className="fixed inset-0 z-[9997] flex items-center justify-center p-6" style={{ backdropFilter: 'blur(6px)', backgroundColor: 'rgba(15,23,42,0.7)' }}>
+              <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl max-w-md w-full p-8 text-center border-2 border-slate-100 dark:border-slate-700">
+                <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mx-auto mb-5">
+                  <svg className="w-8 h-8 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">Your free trial has ended</h2>
+                <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-7">
+                  We hope you enjoyed exploring Menu Hub! To continue using the app and keep access to all your modules, choose a plan and subscribe below.
+                </p>
+                <a
+                  href="/dashboard/settings/billing"
+                  className="block w-full py-3 px-6 bg-[#6262bd] hover:bg-[#5151a8] text-white rounded-xl font-semibold text-sm transition-colors shadow-md shadow-[#6262bd]/20 mb-3"
+                >
+                  View plans & subscribe
+                </a>
+                <a
+                  href="mailto:support@venoapp.com?subject=Menu Hub - Trial enquiry"
+                  className="block w-full py-3 px-6 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl font-semibold text-sm transition-colors"
+                >
+                  Get in touch
+                </a>
+              </div>
+            </div>
+          )
+        }
+
+        // ── Subscription warning banners ──────────────────────────────────────
+        if (subStatus === 'past_due' || subStatus === 'unpaid') {
           return (
             <div className="fixed top-0 left-0 right-0 z-[9998] bg-red-500 text-white flex items-center justify-between px-6 py-2 text-sm font-semibold shadow-md">
               <span>Payment failed — please update your payment method to avoid losing access.</span>
@@ -1283,7 +1355,7 @@ export default function DashboardLayout({ children }) {
             </div>
           )
         }
-        if (status === 'canceled') {
+        if (subStatus === 'canceled') {
           return (
             <div className="fixed top-0 left-0 right-0 z-[9998] bg-slate-700 text-white flex items-center justify-between px-6 py-2 text-sm font-semibold shadow-md">
               <span>Your subscription has been cancelled. Resubscribe to keep access.</span>
@@ -1291,7 +1363,7 @@ export default function DashboardLayout({ children }) {
             </div>
           )
         }
-        if (status === 'trialing' && daysLeft !== null && daysLeft <= 7) {
+        if (subStatus === 'trialing' && daysLeft !== null && daysLeft <= 7) {
           return (
             <div className="fixed top-0 left-0 right-0 z-[9998] bg-amber-400 text-amber-900 flex items-center justify-between px-6 py-2 text-sm font-semibold shadow-md">
               <span>Your free trial {daysLeft === 0 ? 'expires today' : `ends in ${daysLeft} day${daysLeft === 1 ? '' : 's'}`}. Subscribe to keep access.</span>

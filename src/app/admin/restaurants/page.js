@@ -69,6 +69,12 @@ export default function AdminRestaurants() {
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
 
+  // Suspension state
+  const [suspendPanelOpen, setSuspendPanelOpen] = useState(false)
+  const [suspendTarget, setSuspendTarget] = useState(null)
+  const [suspensionMessage, setSuspensionMessage] = useState('')
+  const [suspending, setSuspending] = useState(false)
+
   // Module panel state
   const [modulePanelOpen, setModulePanelOpen] = useState(false)
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
@@ -97,6 +103,26 @@ export default function AdminRestaurants() {
       .update({ status })
       .eq('id', id)
 
+    fetchRestaurants()
+  }
+
+  const openSuspendPanel = (restaurant) => {
+    setSuspendTarget(restaurant)
+    setSuspensionMessage(restaurant.suspension_message || '')
+    setSuspendPanelOpen(true)
+  }
+
+  const confirmSuspend = async () => {
+    if (!suspendTarget) return
+    setSuspending(true)
+    await supabase
+      .from('restaurants')
+      .update({ status: 'rejected', suspension_message: suspensionMessage.trim() || null })
+      .eq('id', suspendTarget.id)
+    setSuspending(false)
+    setSuspendPanelOpen(false)
+    setSuspendTarget(null)
+    setSuspensionMessage('')
     fetchRestaurants()
   }
 
@@ -379,19 +405,30 @@ export default function AdminRestaurants() {
                       )}
                       {restaurant.status === 'approved' && (
                         <button
-                          onClick={() => updateStatus(restaurant.id, 'rejected')}
+                          onClick={() => openSuspendPanel(restaurant)}
                           className="px-3 py-1.5 bg-amber-100 text-amber-700 rounded-lg text-sm font-medium hover:bg-amber-200"
                         >
                           Suspend
                         </button>
                       )}
                       {restaurant.status === 'rejected' && (
-                        <button
-                          onClick={() => updateStatus(restaurant.id, 'approved')}
-                          className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200"
-                        >
-                          Reactivate
-                        </button>
+                        <>
+                          <span className="px-3 py-1.5 bg-red-100 text-red-600 rounded-lg text-sm font-medium">
+                            Suspended
+                          </span>
+                          <button
+                            onClick={() => openSuspendPanel(restaurant)}
+                            className="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-200"
+                          >
+                            Edit message
+                          </button>
+                          <button
+                            onClick={() => updateStatus(restaurant.id, 'approved')}
+                            className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200"
+                          >
+                            Reactivate
+                          </button>
+                        </>
                       )}
                       <button
                         onClick={() => openModulePanel(restaurant)}
@@ -572,6 +609,46 @@ export default function AdminRestaurants() {
                   className="flex-1 px-4 py-3 bg-[#6262bd] text-white rounded-xl font-medium hover:bg-[#5151a8] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {savingModules ? 'Saving…' : 'Save Changes'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Suspend confirmation modal */}
+      {suspendPanelOpen && suspendTarget && (
+        <>
+          <div className="fixed inset-0 bg-black/40 z-50" onClick={() => setSuspendPanelOpen(false)} />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-6 pointer-events-none">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 pointer-events-auto">
+              <h3 className="text-lg font-bold text-slate-800 mb-1">Suspend account</h3>
+              <p className="text-sm text-slate-500 mb-5">
+                Suspending <strong>{suspendTarget.name}</strong> will show them a message and block dashboard access.
+              </p>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                Message to show the user <span className="text-slate-400 font-normal">(optional)</span>
+              </label>
+              <textarea
+                value={suspensionMessage}
+                onChange={e => setSuspensionMessage(e.target.value)}
+                rows={3}
+                placeholder="e.g. Your account has been suspended due to unpaid invoices. Please contact us to resolve this."
+                className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-amber-400 resize-none mb-5"
+              />
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setSuspendPanelOpen(false)}
+                  className="flex-1 px-4 py-2.5 border-2 border-slate-200 text-slate-600 rounded-xl font-medium hover:border-slate-300 transition-colors text-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmSuspend}
+                  disabled={suspending}
+                  className="flex-1 px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-medium disabled:opacity-50 transition-colors text-sm"
+                >
+                  {suspending ? 'Suspending…' : 'Confirm suspend'}
                 </button>
               </div>
             </div>
