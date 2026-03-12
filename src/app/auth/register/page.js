@@ -61,6 +61,7 @@ export default function Register() {
         phone: formData.phone,
         status: 'pending',
         trial_ends_at: trialEndsAt,
+        enabled_modules: { ordering: true, analytics: true, reservations: true, rota: true },
       })
 
       if (dbError) throw dbError

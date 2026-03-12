@@ -565,10 +565,10 @@ export default function DashboardLayout({ children }) {
 
   const getNavItems = () => {
     const items = []
-    const modules = restaurant?.enabled_modules || {}
-
-    // Default to true when a module key is absent (backwards-compat with restaurants that don't have the column yet)
-    const hasModule = (name) => modules[name] !== false
+    const modules = restaurant?.enabled_modules
+    // If enabled_modules is not set at all, allow everything (legacy restaurants without the column).
+    // If it is set (even as an empty object), only show explicitly-enabled modules.
+    const hasModule = (name) => modules == null ? true : modules[name] === true
 
     // Helper function to check if staff has permission
     const hasPermission = (permissionId) => {
