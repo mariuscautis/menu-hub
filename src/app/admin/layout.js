@@ -11,11 +11,12 @@ export default function AdminLayout({ children }) {
   const router = useRouter()
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [recoveryRequestCount, setRecoveryRequestCount] = useState(0)
 
   useEffect(() => {
     const checkAdmin = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      
+
       if (!user) {
         router.push('/superadmin-login-portal')
         return
@@ -34,6 +35,14 @@ export default function AdminLayout({ children }) {
 
       setIsAdmin(true)
       setLoading(false)
+
+      // Count pending recovery requests from deleted restaurants
+      const { count } = await supabase
+        .from('restaurants')
+        .select('id', { count: 'exact', head: true })
+        .not('deleted_at', 'is', null)
+        .not('recovery_requested_at', 'is', null)
+      setRecoveryRequestCount(count || 0)
     }
 
     checkAdmin()
@@ -53,6 +62,11 @@ export default function AdminLayout({ children }) {
     { href: '/admin/restaurants', label: 'Restaurants', icon: (
       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
         <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+      </svg>
+    )},
+    { href: '/admin/deleted-restaurants', label: 'Deleted', badge: recoveryRequestCount, icon: (
+      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
       </svg>
     )},
     { href: '/admin/admins', label: 'Admins', icon: (
@@ -102,13 +116,18 @@ export default function AdminLayout({ children }) {
                 <Link
                   href={item.href}
                   className={`flex items-center space-x-3 px-4 py-3 rounded-xl font-medium transition-colors ${
-                    pathname === item.href
+                    pathname === item.href || pathname.startsWith(item.href + '/')
                       ? 'bg-[#6262bd] text-white'
                       : 'text-slate-400 hover:bg-slate-800 hover:text-white'
                   }`}
                 >
                   {item.icon}
-                  <span>{item.label}</span>
+                  <span className="flex-1">{item.label}</span>
+                  {item.badge > 0 && (
+                    <span className="bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full font-semibold">
+                      {item.badge}
+                    </span>
+                  )}
                 </Link>
               </li>
             ))}

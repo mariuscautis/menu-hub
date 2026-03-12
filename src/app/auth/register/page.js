@@ -10,6 +10,7 @@ export default function Register() {
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [emailExists, setEmailExists] = useState(false)
   const [formData, setFormData] = useState({
     restaurantName: '',
     email: '',
@@ -81,7 +82,13 @@ export default function Register() {
       router.push('/dashboard')
 
     } catch (err) {
-      setError(err.message)
+      const msg = err.message || ''
+      // Supabase returns "User already registered" for duplicate email
+      if (msg.toLowerCase().includes('already registered') || msg.toLowerCase().includes('already been registered')) {
+        setEmailExists(true)
+      } else {
+        setError(msg)
+      }
     } finally {
       setLoading(false)
     }
@@ -134,6 +141,18 @@ export default function Register() {
           </div>
 
           <div className="bg-white border-2 border-slate-100 rounded-2xl p-8">
+            {emailExists && (
+              <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-sm">
+                <p className="font-semibold mb-1">This email address is already registered.</p>
+                <p className="mb-3">If you previously had an account, you can reset your password to regain access.</p>
+                <Link
+                  href={`/auth/forgot-password?email=${encodeURIComponent(formData.email)}`}
+                  className="inline-block px-4 py-2 bg-[#6262bd] text-white rounded-lg font-semibold text-xs hover:bg-[#5151a8] transition-colors"
+                >
+                  Reset password
+                </Link>
+              </div>
+            )}
             {error && (
               <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
                 {error}

@@ -92,8 +92,8 @@ export default function AdminRestaurants() {
       .from('restaurants')
       .select('*')
       .order('created_at', { ascending: false })
-
-    setRestaurants(data || [])
+    // Only show non-deleted restaurants here; deleted ones are on the separate page
+    setRestaurants((data || []).filter(r => !r.deleted_at))
     setLoading(false)
   }
 
@@ -135,11 +135,29 @@ export default function AdminRestaurants() {
   }
 
   const deleteRestaurant = async (id, name) => {
-    if (!confirm(`Are you sure you want to delete "${name}"? This will remove all their data including menu items, tables, and orders.`)) {
+    if (!confirm(`Are you sure you want to delete "${name}"? The record will be kept and can be reinstated later.`)) {
       return
     }
+    await supabase
+      .from('restaurants')
+      .update({ deleted_at: new Date().toISOString(), status: 'rejected' })
+      .eq('id', id)
+    fetchRestaurants()
+  }
 
-    await supabase.from('restaurants').delete().eq('id', id)
+  const reinstateRestaurant = async (restaurant) => {
+    if (!confirm(`Reinstate "${restaurant.name}"? They will be redirected to billing to subscribe.`)) return
+    await supabase
+      .from('restaurants')
+      .update({
+        deleted_at: null,
+        recovery_requested_at: null,
+        status: 'approved',
+        subscription_status: 'trialing',
+        subscription_plans: '',
+        enabled_modules: { ordering: false, analytics: false, reservations: false, rota: false },
+      })
+      .eq('id', restaurant.id)
     fetchRestaurants()
   }
 

@@ -30,6 +30,8 @@ export default function DashboardLayout({ children }) {
   const [debug, setDebug] = useState('')
   const [expandedMenus, setExpandedMenus] = useState({})
   const [pendingReservationsCount, setPendingReservationsCount] = useState(0)
+  const [recoveryRequested, setRecoveryRequested] = useState(false)
+  const [recoveryLoading, setRecoveryLoading] = useState(false)
   const [pendingOrdersCount, setPendingOrdersCount] = useState(0)
 
   // Responsive state - works on all devices
@@ -1390,6 +1392,58 @@ export default function DashboardLayout({ children }) {
           ? Math.max(0, Math.ceil((new Date(trialEnd) - new Date()) / (1000 * 60 * 60 * 24)))
           : null
 
+        // ── Account deleted (soft-deleted, awaiting recovery) ─────────────────
+        if (restaurant?.deleted_at) {
+          const alreadyRequested = recoveryRequested || !!restaurant?.recovery_requested_at
+          const handleRecoveryRequest = async () => {
+            if (alreadyRequested || recoveryLoading) return
+            setRecoveryLoading(true)
+            try {
+              await fetch('/api/notifications/recovery-request', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ restaurantId: restaurant.id }),
+              })
+              setRecoveryRequested(true)
+            } catch {}
+            setRecoveryLoading(false)
+          }
+          return (
+            <div className="fixed inset-0 z-[9997] flex items-center justify-center p-6" style={{ backdropFilter: 'blur(6px)', backgroundColor: 'rgba(15,23,42,0.75)' }}>
+              <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl max-w-md w-full p-8 text-center border-2 border-slate-100 dark:border-slate-700">
+                <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-5">
+                  <svg className="w-8 h-8 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">Your account is currently restricted</h2>
+                <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-6">
+                  This account has been deactivated. You can request to recover it — our team will review and get back to you.
+                </p>
+                {alreadyRequested ? (
+                  <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4 mb-4">
+                    <p className="text-green-700 dark:text-green-300 text-sm font-medium">Recovery request sent! Our team has been notified and will be in touch shortly.</p>
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleRecoveryRequest}
+                    disabled={recoveryLoading}
+                    className="block w-full py-3 px-6 bg-[#6262bd] hover:bg-[#5151a8] text-white rounded-xl font-semibold text-sm transition-colors shadow-md shadow-[#6262bd]/20 mb-3 disabled:opacity-60"
+                  >
+                    {recoveryLoading ? 'Sending request…' : 'Request account recovery'}
+                  </button>
+                )}
+                <a
+                  href="mailto:support@venoapp.com?subject=Menu Hub - Account Recovery"
+                  className="block w-full py-3 px-6 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl font-semibold text-sm transition-colors"
+                >
+                  Get in touch
+                </a>
+              </div>
+            </div>
+          )
+        }
+
         // ── Account suspended by admin ────────────────────────────────────────
         if (accountStatus === 'rejected') {
           const msg = restaurant?.suspension_message
@@ -1413,6 +1467,39 @@ export default function DashboardLayout({ children }) {
                   className="block w-full py-3 px-6 bg-[#6262bd] hover:bg-[#5151a8] text-white rounded-xl font-semibold text-sm transition-colors shadow-md shadow-[#6262bd]/20"
                 >
                   {s.getInTouch}
+                </a>
+              </div>
+            </div>
+          )
+        }
+
+        // ── Reinstated account — no modules, needs to subscribe ──────────────
+        // Reinstated users have status=approved, trialing, no trial_ends_at, all modules false
+        if (
+          accountStatus === 'approved' &&
+          subStatus === 'trialing' &&
+          daysLeft === null &&
+          restaurant?.enabled_modules &&
+          !Object.values(restaurant.enabled_modules).some(Boolean) &&
+          pathname !== '/dashboard/settings/billing'
+        ) {
+          return (
+            <div className="fixed inset-0 z-[9997] flex items-center justify-center p-6" style={{ backdropFilter: 'blur(6px)', backgroundColor: 'rgba(15,23,42,0.7)' }}>
+              <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl max-w-md w-full p-8 text-center border-2 border-slate-100 dark:border-slate-700">
+                <div className="w-16 h-16 rounded-full bg-[#6262bd]/10 dark:bg-[#6262bd]/20 flex items-center justify-center mx-auto mb-5">
+                  <svg className="w-8 h-8 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">Welcome back!</h2>
+                <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-7">
+                  Your account has been reinstated. To get started, choose a plan and subscribe below.
+                </p>
+                <a
+                  href="/dashboard/settings/billing"
+                  className="block w-full py-3 px-6 bg-[#6262bd] hover:bg-[#5151a8] text-white rounded-xl font-semibold text-sm transition-colors shadow-md shadow-[#6262bd]/20"
+                >
+                  {s.viewPlans}
                 </a>
               </div>
             </div>
