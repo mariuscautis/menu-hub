@@ -1278,7 +1278,7 @@ export default function DashboardLayout({ children }) {
       )}
 
       {/* Subscription warning banner */}
-      {userType === 'owner' && !isImpersonating && (() => {
+      {userType === 'owner' && !isImpersonating && pathname !== '/dashboard/settings/billing' && (() => {
         const accountStatus = restaurant?.status
         const subStatus = restaurant?.subscription_status
         const trialEnd = restaurant?.trial_ends_at
