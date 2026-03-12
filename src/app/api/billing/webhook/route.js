@@ -272,6 +272,24 @@ export async function POST(request) {
 
   try {
     switch (event.type) {
+      // Checkout session completed — set modules immediately from session metadata
+      // (more reliable than waiting for customer.subscription.created)
+      case 'checkout.session.completed': {
+        const session = event.data.object
+        const restaurantId = session.metadata?.restaurant_id
+        const plansString  = session.metadata?.plans
+        if (!restaurantId || !plansString) break
+        const modules = plansToModules(plansString)
+        await supabaseAdmin
+          .from('restaurants')
+          .update({
+            subscription_plans: plansString,
+            enabled_modules:    modules,
+          })
+          .eq('id', restaurantId)
+        break
+      }
+
       case 'customer.subscription.created':
       case 'customer.subscription.updated': {
         const sub = event.data.object
@@ -324,12 +342,22 @@ export async function POST(request) {
           const sub = await fetchSubscription(invoice.subscription)
           const restaurantId = sub.metadata?.restaurant_id
           if (!restaurantId) break
-          // Clear payment_failed_at on successful payment
+          // Only clear payment_failed_at and refresh billing dates.
+          // subscription_plans / enabled_modules are set by customer.subscription.created/updated
+          // to avoid overwriting with stale Stripe metadata.
+          const periodEnd = sub.current_period_end
+            ? new Date(sub.current_period_end * 1000).toISOString()
+            : sub.items?.data?.[0]?.current_period_end
+              ? new Date(sub.items.data[0].current_period_end * 1000).toISOString()
+              : null
           await supabaseAdmin
             .from('restaurants')
-            .update({ payment_failed_at: null })
+            .update({
+              payment_failed_at:   null,
+              subscription_status: sub.status,
+              current_period_end:  periodEnd,
+            })
             .eq('id', restaurantId)
-          await updateSubscription(supabaseAdmin, restaurantId, sub)
         }
         break
       }
