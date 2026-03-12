@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { sendEmail } from '@/lib/services/email-edge'
+import emailTranslations from '@/lib/email-translations'
 
 export const runtime = 'edge'
 
@@ -111,6 +112,114 @@ async function notifyAdminSubscription(action, restaurantName, email, plansStrin
   }).catch(err => console.error('Admin subscription notification failed:', err))
 }
 
+async function notifyClientSubscription(action, restaurant, plansString, currentPeriodEnd) {
+  if (!restaurant?.email) return
+
+  const lang = restaurant.email_language || 'en'
+  const t = emailTranslations[lang] || emailTranslations.en
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.venoapp.com'
+
+  const PLAN_LABELS_LOCAL = { orders: 'Orders', bookings: 'Bookings', team: 'Team' }
+  const plans = (plansString || '').split(',').filter(Boolean)
+  const planDisplay = plans.length > 0
+    ? plans.map(p => PLAN_LABELS_LOCAL[p] || p).join(', ')
+    : '—'
+
+  const periodEndFmt = currentPeriodEnd
+    ? new Date(currentPeriodEnd).toLocaleDateString(
+        { en: 'en-GB', ro: 'ro-RO', fr: 'fr-FR', it: 'it-IT', es: 'es-ES' }[lang] || 'en-GB',
+        { day: 'numeric', month: 'long', year: 'numeric' }
+      )
+    : null
+
+  const name = restaurant.name || restaurant.email
+
+  const css = `
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; background: #f4f4f8; }
+    .container { max-width: 600px; margin: 30px auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+    .header { background-color: #6262bd; color: white; padding: 30px; text-align: center; }
+    .header h2 { margin: 0; font-size: 22px; }
+    .content { padding: 28px 30px; }
+    .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+    .info-label { color: #888; }
+    .info-value { font-weight: 600; color: #333; }
+    .button { display: block; width: fit-content; margin: 24px auto; padding: 13px 30px; background: #6262bd; color: white !important; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 14px; }
+    .help { text-align: center; font-size: 13px; color: #888; margin-top: 16px; }
+    .help a { color: #6262bd; text-decoration: none; }
+    .footer { background: #f9f9fb; padding: 16px 30px; text-align: center; font-size: 12px; color: #aaa; border-top: 1px solid #eee; }
+  `
+
+  let subject, title, greeting, intro, extraRows = '', extraContent = ''
+
+  if (action === 'created') {
+    subject = t.subCreatedSubject
+    title = t.subCreatedTitle
+    greeting = (t.subCreatedGreeting || '').replace('{restaurantName}', name)
+    intro = t.subCreatedIntro
+    extraRows = `
+      <div class="info-row"><span class="info-label">${t.subPlanLabel}</span><span class="info-value">${planDisplay}</span></div>
+      ${periodEndFmt ? `<div class="info-row"><span class="info-label">${t.subNextBillingLabel}</span><span class="info-value">${periodEndFmt}</span></div>` : ''}
+    `
+  } else if (action === 'updated') {
+    subject = t.subUpdatedSubject
+    title = t.subUpdatedTitle
+    greeting = (t.subUpdatedGreeting || '').replace('{restaurantName}', name)
+    intro = t.subUpdatedIntro
+    extraRows = `
+      <div class="info-row"><span class="info-label">${t.subPlanLabel}</span><span class="info-value">${planDisplay}</span></div>
+      ${periodEndFmt ? `<div class="info-row"><span class="info-label">${t.subNextBillingLabel}</span><span class="info-value">${periodEndFmt}</span></div>` : ''}
+    `
+  } else if (action === 'canceled') {
+    subject = t.subCanceledSubject
+    title = t.subCanceledTitle
+    greeting = (t.subCanceledGreeting || '').replace('{restaurantName}', name)
+    intro = t.subCanceledIntro
+    extraRows = periodEndFmt
+      ? `<div class="info-row"><span class="info-label">${t.subCanceledAccessUntil}</span><span class="info-value">${periodEndFmt}</span></div>`
+      : ''
+    extraContent = `
+      <p style="font-size:13px;color:#888;margin-top:16px;">${t.subCanceledHelp}</p>
+      <a href="${appUrl}/dashboard/settings/billing" class="button">${t.subCanceledResubscribeCta}</a>
+    `
+  } else if (action === 'past_due') {
+    subject = t.subPaymentFailedSubject
+    title = t.subPaymentFailedTitle
+    greeting = (t.subPaymentFailedGreeting || '').replace('{restaurantName}', name)
+    intro = t.subPaymentFailedIntro
+    extraContent = `<a href="${appUrl}/dashboard/settings/billing" class="button">${t.subPaymentFailedCta}</a>`
+  } else {
+    return
+  }
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+      <head><meta charset="utf-8"><style>${css}</style></head>
+      <body>
+        <div class="container">
+          <div class="header"><h2>${title}</h2></div>
+          <div class="content">
+            <p>${greeting}</p>
+            <p>${intro}</p>
+            ${extraRows ? `<div style="margin:20px 0">${extraRows}</div>` : ''}
+            ${action === 'created' || action === 'updated'
+              ? `<a href="${appUrl}/dashboard" class="button">${t.subCta}</a>`
+              : extraContent}
+            <p class="help"><a href="mailto:support@venoapp.com">support@venoapp.com</a></p>
+          </div>
+          <div class="footer">${t.subFooter}</div>
+        </div>
+      </body>
+    </html>
+  `
+
+  await sendEmail({
+    to: restaurant.email,
+    subject,
+    htmlContent,
+  }).catch(err => console.error(`Client billing email (${action}) failed:`, err))
+}
+
 async function updateSubscription(supabaseAdmin, restaurantId, sub) {
   const plans   = sub.metadata?.plans || ''
   const modules = plansToModules(plans)
@@ -169,9 +278,17 @@ export async function POST(request) {
         const restaurantId = sub.metadata?.restaurant_id
         if (!restaurantId) break
         await updateSubscription(supabaseAdmin, restaurantId, sub)
-        const { data: r } = await supabaseAdmin.from('restaurants').select('name, email').eq('id', restaurantId).single()
+        const { data: r } = await supabaseAdmin.from('restaurants').select('name, email, email_language').eq('id', restaurantId).single()
         const action = event.type === 'customer.subscription.created' ? 'created' : 'updated'
-        await notifyAdminSubscription(action, r?.name, r?.email, sub.metadata?.plans, sub.status)
+        const periodEnd = sub.current_period_end
+          ? new Date(sub.current_period_end * 1000).toISOString()
+          : sub.items?.data?.[0]?.current_period_end
+            ? new Date(sub.items.data[0].current_period_end * 1000).toISOString()
+            : null
+        await Promise.all([
+          notifyAdminSubscription(action, r?.name, r?.email, sub.metadata?.plans, sub.status),
+          notifyClientSubscription(action, r, sub.metadata?.plans, periodEnd),
+        ])
         break
       }
 
@@ -179,21 +296,25 @@ export async function POST(request) {
         const sub = event.data.object
         const restaurantId = sub.metadata?.restaurant_id
         if (!restaurantId) break
+        const periodEnd = sub.current_period_end
+          ? new Date(sub.current_period_end * 1000).toISOString()
+          : sub.items?.data?.[0]?.current_period_end
+            ? new Date(sub.items.data[0].current_period_end * 1000).toISOString()
+            : null
         await supabaseAdmin
           .from('restaurants')
           .update({
             subscription_status: 'canceled',
             subscription_plans:  '',
             enabled_modules:     { ordering: false, analytics: false, reservations: false, rota: false },
-            current_period_end: sub.current_period_end
-              ? new Date(sub.current_period_end * 1000).toISOString()
-              : sub.items?.data?.[0]?.current_period_end
-                ? new Date(sub.items.data[0].current_period_end * 1000).toISOString()
-                : null,
+            current_period_end:  periodEnd,
           })
           .eq('id', restaurantId)
-        const { data: r } = await supabaseAdmin.from('restaurants').select('name, email').eq('id', restaurantId).single()
-        await notifyAdminSubscription('canceled', r?.name, r?.email, sub.metadata?.plans, 'canceled')
+        const { data: r } = await supabaseAdmin.from('restaurants').select('name, email, email_language').eq('id', restaurantId).single()
+        await Promise.all([
+          notifyAdminSubscription('canceled', r?.name, r?.email, sub.metadata?.plans, 'canceled'),
+          notifyClientSubscription('canceled', r, sub.metadata?.plans, periodEnd),
+        ])
         break
       }
 
@@ -203,6 +324,11 @@ export async function POST(request) {
           const sub = await fetchSubscription(invoice.subscription)
           const restaurantId = sub.metadata?.restaurant_id
           if (!restaurantId) break
+          // Clear payment_failed_at on successful payment
+          await supabaseAdmin
+            .from('restaurants')
+            .update({ payment_failed_at: null })
+            .eq('id', restaurantId)
           await updateSubscription(supabaseAdmin, restaurantId, sub)
         }
         break
@@ -214,12 +340,16 @@ export async function POST(request) {
           const sub = await fetchSubscription(invoice.subscription)
           const restaurantId = sub.metadata?.restaurant_id
           if (!restaurantId) break
+          const now = new Date().toISOString()
           await supabaseAdmin
             .from('restaurants')
-            .update({ subscription_status: 'past_due' })
+            .update({ subscription_status: 'past_due', payment_failed_at: now })
             .eq('id', restaurantId)
-          const { data: r } = await supabaseAdmin.from('restaurants').select('name, email').eq('id', restaurantId).single()
-          await notifyAdminSubscription('past_due', r?.name, r?.email, sub.metadata?.plans, 'past_due')
+          const { data: r } = await supabaseAdmin.from('restaurants').select('name, email, email_language').eq('id', restaurantId).single()
+          await Promise.all([
+            notifyAdminSubscription('past_due', r?.name, r?.email, sub.metadata?.plans, 'past_due'),
+            notifyClientSubscription('past_due', r, sub.metadata?.plans, null),
+          ])
         }
         break
       }

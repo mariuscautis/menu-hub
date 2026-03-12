@@ -1281,6 +1281,110 @@ export default function DashboardLayout({ children }) {
       {userType === 'owner' && !isImpersonating && pathname !== '/dashboard/settings/billing' && (() => {
         const accountStatus = restaurant?.status
         const subStatus = restaurant?.subscription_status
+        const paymentFailedAt = restaurant?.payment_failed_at
+        const graceDaysLeft = paymentFailedAt
+          ? Math.max(-1, Math.ceil(3 - (new Date() - new Date(paymentFailedAt)) / (1000 * 60 * 60 * 24)))
+          : null
+
+        const lang = (restaurant?.email_language || 'en').split('-')[0].toLowerCase()
+        const ui = {
+          en: {
+            suspended: 'Account suspended',
+            suspendedDefault: 'Your account has been temporarily suspended by our team.',
+            suspendedSub: "If you believe this is a mistake or need more information, please reach out — we're happy to help.",
+            getInTouch: 'Get in touch',
+            trialEnded: 'Your free trial has ended',
+            trialEndedBody: 'We hope you enjoyed exploring Menu Hub! To continue using the app and keep access to all your modules, choose a plan and subscribe below.',
+            viewPlans: 'View plans & subscribe',
+            accessPaused: 'Access paused',
+            accessPausedBody: 'Your payment method could not be charged and the grace period has passed. Please update your payment details to restore access.',
+            updatePayment: 'Update payment method',
+            paymentFailedBanner: (d) => `Payment failed — you have ${d} to update your payment method before access is paused.`,
+            today: 'today', day: '1 day', days: (n) => `${n} days`,
+            fixNow: 'Fix Now',
+            trialBanner: (d) => `Your free trial ${d === 0 ? 'expires today' : `ends in ${d} day${d === 1 ? '' : 's'}`}. Subscribe to keep access.`,
+            subscribe: 'Subscribe',
+            cancelledBanner: 'Your subscription has been cancelled. Resubscribe to keep access.',
+            resubscribe: 'Resubscribe',
+          },
+          ro: {
+            suspended: 'Cont suspendat',
+            suspendedDefault: 'Contul tău a fost suspendat temporar de echipa noastră.',
+            suspendedSub: 'Dacă crezi că este o eroare sau ai nevoie de informații suplimentare, contactează-ne — suntem bucuroși să ajutăm.',
+            getInTouch: 'Contactează-ne',
+            trialEnded: 'Perioada ta de probă s-a încheiat',
+            trialEndedBody: 'Sperăm că ți-a plăcut să explorezi Menu Hub! Pentru a continua să folosești aplicația, alege un plan și abonează-te mai jos.',
+            viewPlans: 'Vezi planuri și abonează-te',
+            accessPaused: 'Acces suspendat',
+            accessPausedBody: 'Metoda ta de plată nu a putut fi debitată și perioada de grație a expirat. Te rugăm să actualizezi detaliile de plată pentru a restabili accesul.',
+            updatePayment: 'Actualizează metoda de plată',
+            paymentFailedBanner: (d) => `Plata a eșuat — mai ai ${d} să actualizezi metoda de plată înainte ca accesul să fie suspendat.`,
+            today: 'astăzi', day: '1 zi', days: (n) => `${n} zile`,
+            fixNow: 'Rezolvă acum',
+            trialBanner: (d) => `Perioada de probă ${d === 0 ? 'expiră astăzi' : `se termină în ${d} ${d === 1 ? 'zi' : 'zile'}`}. Abonează-te pentru a păstra accesul.`,
+            subscribe: 'Abonează-te',
+            cancelledBanner: 'Abonamentul tău a fost anulat. Reabonează-te pentru a păstra accesul.',
+            resubscribe: 'Reabonează-te',
+          },
+          fr: {
+            suspended: 'Compte suspendu',
+            suspendedDefault: 'Votre compte a été temporairement suspendu par notre équipe.',
+            suspendedSub: "Si vous pensez qu'il s'agit d'une erreur ou si vous avez besoin d'informations, contactez-nous — nous sommes là pour vous aider.",
+            getInTouch: 'Nous contacter',
+            trialEnded: "Votre essai gratuit est terminé",
+            trialEndedBody: "Nous espérons que vous avez apprécié Menu Hub ! Pour continuer à utiliser l'application, choisissez un plan et abonnez-vous ci-dessous.",
+            viewPlans: 'Voir les plans et s\'abonner',
+            accessPaused: 'Accès suspendu',
+            accessPausedBody: "Votre moyen de paiement n'a pas pu être débité et la période de grâce est expirée. Veuillez mettre à jour vos coordonnées de paiement pour rétablir l'accès.",
+            updatePayment: 'Mettre à jour le paiement',
+            paymentFailedBanner: (d) => `Paiement échoué — vous avez ${d} pour mettre à jour votre moyen de paiement avant la suspension de l'accès.`,
+            today: "aujourd'hui", day: '1 jour', days: (n) => `${n} jours`,
+            fixNow: 'Résoudre',
+            trialBanner: (d) => `Votre essai gratuit ${d === 0 ? 'expire aujourd\'hui' : `se termine dans ${d} jour${d === 1 ? '' : 's'}`}. Abonnez-vous pour garder l'accès.`,
+            subscribe: "S'abonner",
+            cancelledBanner: 'Votre abonnement a été annulé. Réabonnez-vous pour garder l\'accès.',
+            resubscribe: 'Se réabonner',
+          },
+          it: {
+            suspended: 'Account sospeso',
+            suspendedDefault: 'Il tuo account è stato temporaneamente sospeso dal nostro team.',
+            suspendedSub: "Se ritieni sia un errore o hai domande, contattaci — siamo felici di aiutarti.",
+            getInTouch: 'Contattaci',
+            trialEnded: 'La tua prova gratuita è terminata',
+            trialEndedBody: 'Speriamo che Menu Hub ti sia piaciuto! Per continuare a usare l\'app, scegli un piano e abbonati qui sotto.',
+            viewPlans: 'Vedi piani e abbonati',
+            accessPaused: 'Accesso sospeso',
+            accessPausedBody: 'Il tuo metodo di pagamento non ha potuto essere addebitato e il periodo di grazia è scaduto. Aggiorna i tuoi dati di pagamento per ripristinare l\'accesso.',
+            updatePayment: 'Aggiorna pagamento',
+            paymentFailedBanner: (d) => `Pagamento fallito — hai ${d} per aggiornare il tuo metodo di pagamento prima che l'accesso venga sospeso.`,
+            today: 'oggi', day: '1 giorno', days: (n) => `${n} giorni`,
+            fixNow: 'Risolvi ora',
+            trialBanner: (d) => `La prova gratuita ${d === 0 ? 'scade oggi' : `termina tra ${d} ${d === 1 ? 'giorno' : 'giorni'}`}. Abbonati per mantenere l'accesso.`,
+            subscribe: 'Abbonati',
+            cancelledBanner: 'Il tuo abbonamento è stato annullato. Riabbonati per mantenere l\'accesso.',
+            resubscribe: 'Riabbonati',
+          },
+          es: {
+            suspended: 'Cuenta suspendida',
+            suspendedDefault: 'Tu cuenta ha sido suspendida temporalmente por nuestro equipo.',
+            suspendedSub: 'Si crees que es un error o tienes preguntas, contáctanos — estamos aquí para ayudar.',
+            getInTouch: 'Contactar',
+            trialEnded: 'Tu prueba gratuita ha terminado',
+            trialEndedBody: '¡Esperamos que hayas disfrutado Menu Hub! Para seguir usando la app, elige un plan y suscríbete a continuación.',
+            viewPlans: 'Ver planes y suscribirse',
+            accessPaused: 'Acceso pausado',
+            accessPausedBody: 'Tu método de pago no pudo ser cargado y el período de gracia ha expirado. Actualiza tus datos de pago para restaurar el acceso.',
+            updatePayment: 'Actualizar método de pago',
+            paymentFailedBanner: (d) => `Pago fallido — tienes ${d} para actualizar tu método de pago antes de que el acceso sea pausado.`,
+            today: 'hoy', day: '1 día', days: (n) => `${n} días`,
+            fixNow: 'Solucionar',
+            trialBanner: (d) => `Tu prueba gratuita ${d === 0 ? 'expira hoy' : `termina en ${d} día${d === 1 ? '' : 's'}`}. Suscríbete para mantener el acceso.`,
+            subscribe: 'Suscribirse',
+            cancelledBanner: 'Tu suscripción ha sido cancelada. Vuelve a suscribirte para mantener el acceso.',
+            resubscribe: 'Volver a suscribirse',
+          },
+        }
+        const s = ui[lang] || ui.en
         const trialEnd = restaurant?.trial_ends_at
         const daysLeft = trialEnd
           ? Math.max(0, Math.ceil((new Date(trialEnd) - new Date()) / (1000 * 60 * 60 * 24)))
@@ -1297,18 +1401,18 @@ export default function DashboardLayout({ children }) {
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                   </svg>
                 </div>
-                <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">Account suspended</h2>
+                <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">{s.suspended}</h2>
                 <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-2">
-                  {msg || 'Your account has been temporarily suspended by our team.'}
+                  {msg || s.suspendedDefault}
                 </p>
                 <p className="text-slate-400 dark:text-slate-500 text-xs mb-7">
-                  If you believe this is a mistake or need more information, please reach out — we're happy to help.
+                  {s.suspendedSub}
                 </p>
                 <a
                   href="mailto:support@venoapp.com?subject=Menu Hub - Account suspended"
                   className="block w-full py-3 px-6 bg-[#6262bd] hover:bg-[#5151a8] text-white rounded-xl font-semibold text-sm transition-colors shadow-md shadow-[#6262bd]/20"
                 >
-                  Get in touch
+                  {s.getInTouch}
                 </a>
               </div>
             </div>
@@ -1325,49 +1429,83 @@ export default function DashboardLayout({ children }) {
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                   </svg>
                 </div>
-                <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">Your free trial has ended</h2>
+                <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">{s.trialEnded}</h2>
                 <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-7">
-                  We hope you enjoyed exploring Menu Hub! To continue using the app and keep access to all your modules, choose a plan and subscribe below.
+                  {s.trialEndedBody}
                 </p>
                 <a
                   href="/dashboard/settings/billing"
                   className="block w-full py-3 px-6 bg-[#6262bd] hover:bg-[#5151a8] text-white rounded-xl font-semibold text-sm transition-colors shadow-md shadow-[#6262bd]/20 mb-3"
                 >
-                  View plans & subscribe
+                  {s.viewPlans}
                 </a>
                 <a
                   href="mailto:support@venoapp.com?subject=Menu Hub - Trial enquiry"
                   className="block w-full py-3 px-6 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl font-semibold text-sm transition-colors"
                 >
-                  Get in touch
+                  {s.getInTouch}
                 </a>
               </div>
             </div>
           )
         }
 
-        // ── Subscription warning banners ──────────────────────────────────────
+        // ── Payment failed / grace period ─────────────────────────────────────
         if (subStatus === 'past_due' || subStatus === 'unpaid') {
+          // After 3-day grace: full blocking overlay
+          if (graceDaysLeft !== null && graceDaysLeft < 0) {
+            return (
+              <div className="fixed inset-0 z-[9997] flex items-center justify-center p-6" style={{ backdropFilter: 'blur(6px)', backgroundColor: 'rgba(15,23,42,0.75)' }}>
+                <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl max-w-md w-full p-8 text-center border-2 border-slate-100 dark:border-slate-700">
+                  <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-5">
+                    <svg className="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+                    </svg>
+                  </div>
+                  <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">{s.accessPaused}</h2>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-7">
+                    {s.accessPausedBody}
+                  </p>
+                  <a
+                    href="/dashboard/settings/billing"
+                    className="block w-full py-3 px-6 bg-[#6262bd] hover:bg-[#5151a8] text-white rounded-xl font-semibold text-sm transition-colors shadow-md shadow-[#6262bd]/20 mb-3"
+                  >
+                    {s.updatePayment}
+                  </a>
+                  <a
+                    href="mailto:support@venoapp.com?subject=Menu Hub - Payment issue"
+                    className="block w-full py-3 px-6 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl font-semibold text-sm transition-colors"
+                  >
+                    {s.getInTouch}
+                  </a>
+                </div>
+              </div>
+            )
+          }
+          // Within grace period: amber countdown banner
+          const daysText = graceDaysLeft === 0
+            ? s.today
+            : graceDaysLeft === 1 ? s.day : s.days(graceDaysLeft)
           return (
-            <div className="fixed top-0 left-0 right-0 z-[9998] bg-red-500 text-white flex items-center justify-between px-6 py-2 text-sm font-semibold shadow-md">
-              <span>Payment failed — please update your payment method to avoid losing access.</span>
-              <a href="/dashboard/settings/billing" className="bg-white text-red-600 px-4 py-1 rounded-lg text-xs font-semibold hover:bg-red-50 transition-colors">Fix Now</a>
+            <div className="fixed top-0 left-0 right-0 z-[9998] bg-amber-500 text-white flex items-center justify-between px-6 py-2 text-sm font-semibold shadow-md">
+              <span>{s.paymentFailedBanner(daysText)}</span>
+              <a href="/dashboard/settings/billing" className="bg-white text-amber-600 px-4 py-1 rounded-lg text-xs font-semibold hover:bg-amber-50 transition-colors flex-shrink-0 ml-4">{s.fixNow}</a>
             </div>
           )
         }
         if (subStatus === 'canceled') {
           return (
             <div className="fixed top-0 left-0 right-0 z-[9998] bg-slate-700 text-white flex items-center justify-between px-6 py-2 text-sm font-semibold shadow-md">
-              <span>Your subscription has been cancelled. Resubscribe to keep access.</span>
-              <a href="/dashboard/settings/billing" className="bg-white text-slate-700 px-4 py-1 rounded-lg text-xs font-semibold hover:bg-slate-100 transition-colors">Resubscribe</a>
+              <span>{s.cancelledBanner}</span>
+              <a href="/dashboard/settings/billing" className="bg-white text-slate-700 px-4 py-1 rounded-lg text-xs font-semibold hover:bg-slate-100 transition-colors">{s.resubscribe}</a>
             </div>
           )
         }
         if (subStatus === 'trialing' && daysLeft !== null && daysLeft <= 7) {
           return (
             <div className="fixed top-0 left-0 right-0 z-[9998] bg-amber-400 text-amber-900 flex items-center justify-between px-6 py-2 text-sm font-semibold shadow-md">
-              <span>Your free trial {daysLeft === 0 ? 'expires today' : `ends in ${daysLeft} day${daysLeft === 1 ? '' : 's'}`}. Subscribe to keep access.</span>
-              <a href="/dashboard/settings/billing" className="bg-amber-900 text-amber-100 px-4 py-1 rounded-lg text-xs font-semibold hover:bg-amber-800 transition-colors">Subscribe</a>
+              <span>{s.trialBanner(daysLeft)}</span>
+              <a href="/dashboard/settings/billing" className="bg-amber-900 text-amber-100 px-4 py-1 rounded-lg text-xs font-semibold hover:bg-amber-800 transition-colors">{s.subscribe}</a>
             </div>
           )
         }

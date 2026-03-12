@@ -144,7 +144,52 @@ const emailTranslations = {
     newBookingPartySize: "Party Size",
     newBookingSpecialRequests: "Special Requests",
     newBookingCta: "View Reservations",
-    newBookingFooter: "This is an automated notification from {restaurantName}."
+    newBookingFooter: "This is an automated notification from {restaurantName}.",
+
+    // Welcome / Registration
+    welcomeSubject: "Welcome to Menu Hub — your free trial has started!",
+    welcomeTitle: "Welcome to Menu Hub!",
+    welcomeGreeting: "Hi {restaurantName},",
+    welcomeIntro: "Thank you for joining Menu Hub. Your 14-day free trial is now active — you have full access to all modules until {trialEnd}.",
+    welcomeTrialLabel: "Free trial period",
+    welcomeTrialDates: "{trialStart} → {trialEnd}",
+    welcomeTrialNote: "No payment required during your trial. When it ends, choose a plan to keep access.",
+    welcomeCta: "Go to my dashboard",
+    welcomeHelp: "Questions? We're here to help.",
+    welcomeContact: "Contact support",
+    welcomeFooter: "Menu Hub — Restaurant Management Platform",
+
+    // Subscription purchased (new)
+    subCreatedSubject: "Subscription confirmed — Menu Hub",
+    subCreatedTitle: "You're all set!",
+    subCreatedGreeting: "Hi {restaurantName},",
+    subCreatedIntro: "Your subscription is now active. Here's a summary of your plan:",
+    subPlanLabel: "Plan",
+    subNextBillingLabel: "Next billing date",
+    subCta: "Go to my dashboard",
+    subFooter: "Menu Hub — automated billing notification",
+
+    // Subscription updated
+    subUpdatedSubject: "Subscription updated — Menu Hub",
+    subUpdatedTitle: "Your plan has been updated",
+    subUpdatedGreeting: "Hi {restaurantName},",
+    subUpdatedIntro: "Your subscription has been updated. Here are your new plan details:",
+
+    // Subscription canceled
+    subCanceledSubject: "Subscription cancelled — Menu Hub",
+    subCanceledTitle: "Subscription cancelled",
+    subCanceledGreeting: "Hi {restaurantName},",
+    subCanceledIntro: "Your subscription has been cancelled. You will retain access to your modules until the end of your current billing period.",
+    subCanceledAccessUntil: "Access until",
+    subCanceledResubscribeCta: "Resubscribe",
+    subCanceledHelp: "If this was a mistake or you have questions, don't hesitate to get in touch.",
+
+    // Payment failed
+    subPaymentFailedSubject: "Payment failed — you have 3 days to update your details",
+    subPaymentFailedTitle: "Payment failed",
+    subPaymentFailedGreeting: "Hi {restaurantName},",
+    subPaymentFailedIntro: "We were unable to process your last payment. Don't worry — you still have full access for the next 3 days. Please update your payment method before then to avoid any interruption.",
+    subPaymentFailedCta: "Update payment method"
   },
 
   ro: {
@@ -286,7 +331,48 @@ const emailTranslations = {
     newBookingPartySize: "Număr Persoane",
     newBookingSpecialRequests: "Cerințe Speciale",
     newBookingCta: "Vezi Rezervările",
-    newBookingFooter: "Aceasta este o notificare automată de la {restaurantName}."
+    newBookingFooter: "Aceasta este o notificare automată de la {restaurantName}.",
+
+    // Welcome / Registration
+    welcomeSubject: "Bun venit la Menu Hub — perioada ta de probă a început!",
+    welcomeTitle: "Bun venit la Menu Hub!",
+    welcomeGreeting: "Salut {restaurantName},",
+    welcomeIntro: "Îți mulțumim că ai ales Menu Hub. Perioada ta de probă de 14 zile este acum activă — ai acces complet la toate modulele până pe {trialEnd}.",
+    welcomeTrialLabel: "Perioadă de probă gratuită",
+    welcomeTrialDates: "{trialStart} → {trialEnd}",
+    welcomeTrialNote: "Nu este necesară nicio plată în timpul perioadei de probă. Când se termină, alege un plan pentru a păstra accesul.",
+    welcomeCta: "Mergi la tabloul de bord",
+    welcomeHelp: "Ai întrebări? Suntem aici să ajutăm.",
+    welcomeContact: "Contactează suportul",
+    welcomeFooter: "Menu Hub — Platformă de Management pentru Restaurante",
+
+    subCreatedSubject: "Abonament confirmat — Menu Hub",
+    subCreatedTitle: "Totul este configurat!",
+    subCreatedGreeting: "Salut {restaurantName},",
+    subCreatedIntro: "Abonamentul tău este acum activ. Iată un rezumat al planului tău:",
+    subPlanLabel: "Plan",
+    subNextBillingLabel: "Următoarea dată de facturare",
+    subCta: "Mergi la tabloul de bord",
+    subFooter: "Menu Hub — notificare automată de facturare",
+
+    subUpdatedSubject: "Abonament actualizat — Menu Hub",
+    subUpdatedTitle: "Planul tău a fost actualizat",
+    subUpdatedGreeting: "Salut {restaurantName},",
+    subUpdatedIntro: "Abonamentul tău a fost actualizat. Iată noile detalii ale planului tău:",
+
+    subCanceledSubject: "Abonament anulat — Menu Hub",
+    subCanceledTitle: "Abonament anulat",
+    subCanceledGreeting: "Salut {restaurantName},",
+    subCanceledIntro: "Abonamentul tău a fost anulat. Vei păstra accesul la module până la sfârșitul perioadei de facturare curente.",
+    subCanceledAccessUntil: "Acces până la",
+    subCanceledResubscribeCta: "Reabonează-te",
+    subCanceledHelp: "Dacă aceasta a fost o greșeală sau ai întrebări, nu ezita să ne contactezi.",
+
+    subPaymentFailedSubject: "Plata a eșuat — ai 3 zile să îți actualizezi detaliile",
+    subPaymentFailedTitle: "Plata a eșuat",
+    subPaymentFailedGreeting: "Salut {restaurantName},",
+    subPaymentFailedIntro: "Nu am putut procesa ultima ta plată. Nu-ți face griji — mai ai acces complet timp de 3 zile. Te rugăm să actualizezi metoda de plată înainte de această dată pentru a evita orice întrerupere.",
+    subPaymentFailedCta: "Actualizează metoda de plată"
   },
 
   fr: {
@@ -428,7 +514,48 @@ const emailTranslations = {
     newBookingPartySize: "Nombre de Personnes",
     newBookingSpecialRequests: "Demandes Spéciales",
     newBookingCta: "Voir les Réservations",
-    newBookingFooter: "Ceci est une notification automatique de {restaurantName}."
+    newBookingFooter: "Ceci est une notification automatique de {restaurantName}.",
+
+    // Welcome / Registration
+    welcomeSubject: "Bienvenue sur Menu Hub — votre essai gratuit a commencé !",
+    welcomeTitle: "Bienvenue sur Menu Hub !",
+    welcomeGreeting: "Bonjour {restaurantName},",
+    welcomeIntro: "Merci de rejoindre Menu Hub. Votre essai gratuit de 14 jours est maintenant actif — vous avez un accès complet à tous les modules jusqu'au {trialEnd}.",
+    welcomeTrialLabel: "Période d'essai gratuite",
+    welcomeTrialDates: "{trialStart} → {trialEnd}",
+    welcomeTrialNote: "Aucun paiement requis pendant l'essai. À son terme, choisissez un plan pour conserver l'accès.",
+    welcomeCta: "Accéder à mon tableau de bord",
+    welcomeHelp: "Des questions ? Nous sommes là pour vous aider.",
+    welcomeContact: "Contacter le support",
+    welcomeFooter: "Menu Hub — Plateforme de Gestion de Restaurant",
+
+    subCreatedSubject: "Abonnement confirmé — Menu Hub",
+    subCreatedTitle: "Tout est prêt !",
+    subCreatedGreeting: "Bonjour {restaurantName},",
+    subCreatedIntro: "Votre abonnement est maintenant actif. Voici un récapitulatif de votre plan :",
+    subPlanLabel: "Plan",
+    subNextBillingLabel: "Prochaine date de facturation",
+    subCta: "Accéder à mon tableau de bord",
+    subFooter: "Menu Hub — notification de facturation automatique",
+
+    subUpdatedSubject: "Abonnement mis à jour — Menu Hub",
+    subUpdatedTitle: "Votre plan a été mis à jour",
+    subUpdatedGreeting: "Bonjour {restaurantName},",
+    subUpdatedIntro: "Votre abonnement a été mis à jour. Voici les nouveaux détails de votre plan :",
+
+    subCanceledSubject: "Abonnement annulé — Menu Hub",
+    subCanceledTitle: "Abonnement annulé",
+    subCanceledGreeting: "Bonjour {restaurantName},",
+    subCanceledIntro: "Votre abonnement a été annulé. Vous conserverez l'accès à vos modules jusqu'à la fin de la période de facturation en cours.",
+    subCanceledAccessUntil: "Accès jusqu'au",
+    subCanceledResubscribeCta: "Se réabonner",
+    subCanceledHelp: "Si c'était une erreur ou si vous avez des questions, n'hésitez pas à nous contacter.",
+
+    subPaymentFailedSubject: "Paiement échoué — vous avez 3 jours pour mettre à jour vos coordonnées",
+    subPaymentFailedTitle: "Paiement échoué",
+    subPaymentFailedGreeting: "Bonjour {restaurantName},",
+    subPaymentFailedIntro: "Nous n'avons pas pu traiter votre dernier paiement. Ne vous inquiétez pas — vous conservez un accès complet pendant les 3 prochains jours. Veuillez mettre à jour votre moyen de paiement avant cette date pour éviter toute interruption.",
+    subPaymentFailedCta: "Mettre à jour le moyen de paiement"
   },
 
   it: {
@@ -570,7 +697,48 @@ const emailTranslations = {
     newBookingPartySize: "Numero di Persone",
     newBookingSpecialRequests: "Richieste Speciali",
     newBookingCta: "Visualizza le Prenotazioni",
-    newBookingFooter: "Questa è una notifica automatica da {restaurantName}."
+    newBookingFooter: "Questa è una notifica automatica da {restaurantName}.",
+
+    // Welcome / Registration
+    welcomeSubject: "Benvenuto su Menu Hub — la tua prova gratuita è iniziata!",
+    welcomeTitle: "Benvenuto su Menu Hub!",
+    welcomeGreeting: "Ciao {restaurantName},",
+    welcomeIntro: "Grazie per esserti unito a Menu Hub. La tua prova gratuita di 14 giorni è ora attiva — hai accesso completo a tutti i moduli fino al {trialEnd}.",
+    welcomeTrialLabel: "Periodo di prova gratuito",
+    welcomeTrialDates: "{trialStart} → {trialEnd}",
+    welcomeTrialNote: "Nessun pagamento richiesto durante la prova. Al termine, scegli un piano per mantenere l'accesso.",
+    welcomeCta: "Vai alla mia dashboard",
+    welcomeHelp: "Domande? Siamo qui per aiutarti.",
+    welcomeContact: "Contatta il supporto",
+    welcomeFooter: "Menu Hub — Piattaforma di Gestione Ristorante",
+
+    subCreatedSubject: "Abbonamento confermato — Menu Hub",
+    subCreatedTitle: "Tutto pronto!",
+    subCreatedGreeting: "Ciao {restaurantName},",
+    subCreatedIntro: "Il tuo abbonamento è ora attivo. Ecco un riepilogo del tuo piano:",
+    subPlanLabel: "Piano",
+    subNextBillingLabel: "Prossima data di fatturazione",
+    subCta: "Vai alla mia dashboard",
+    subFooter: "Menu Hub — notifica di fatturazione automatica",
+
+    subUpdatedSubject: "Abbonamento aggiornato — Menu Hub",
+    subUpdatedTitle: "Il tuo piano è stato aggiornato",
+    subUpdatedGreeting: "Ciao {restaurantName},",
+    subUpdatedIntro: "Il tuo abbonamento è stato aggiornato. Ecco i nuovi dettagli del tuo piano:",
+
+    subCanceledSubject: "Abbonamento annullato — Menu Hub",
+    subCanceledTitle: "Abbonamento annullato",
+    subCanceledGreeting: "Ciao {restaurantName},",
+    subCanceledIntro: "Il tuo abbonamento è stato annullato. Manterrai l'accesso ai tuoi moduli fino alla fine del periodo di fatturazione corrente.",
+    subCanceledAccessUntil: "Accesso fino al",
+    subCanceledResubscribeCta: "Riabbonati",
+    subCanceledHelp: "Se è stato un errore o hai domande, non esitare a contattarci.",
+
+    subPaymentFailedSubject: "Pagamento fallito — hai 3 giorni per aggiornare i tuoi dati",
+    subPaymentFailedTitle: "Pagamento fallito",
+    subPaymentFailedGreeting: "Ciao {restaurantName},",
+    subPaymentFailedIntro: "Non siamo riusciti a elaborare il tuo ultimo pagamento. Non preoccuparti — hai ancora accesso completo per i prossimi 3 giorni. Aggiorna il tuo metodo di pagamento entro allora per evitare interruzioni.",
+    subPaymentFailedCta: "Aggiorna metodo di pagamento"
   },
 
   es: {
@@ -712,7 +880,48 @@ const emailTranslations = {
     newBookingPartySize: "Número de Personas",
     newBookingSpecialRequests: "Solicitudes Especiales",
     newBookingCta: "Ver Reservas",
-    newBookingFooter: "Esta es una notificación automática de {restaurantName}."
+    newBookingFooter: "Esta es una notificación automática de {restaurantName}.",
+
+    // Welcome / Registration
+    welcomeSubject: "Bienvenido a Menu Hub — ¡tu prueba gratuita ha comenzado!",
+    welcomeTitle: "¡Bienvenido a Menu Hub!",
+    welcomeGreeting: "Hola {restaurantName},",
+    welcomeIntro: "Gracias por unirte a Menu Hub. Tu prueba gratuita de 14 días está activa — tienes acceso completo a todos los módulos hasta el {trialEnd}.",
+    welcomeTrialLabel: "Período de prueba gratuito",
+    welcomeTrialDates: "{trialStart} → {trialEnd}",
+    welcomeTrialNote: "No se requiere pago durante la prueba. Al finalizar, elige un plan para mantener el acceso.",
+    welcomeCta: "Ir a mi panel",
+    welcomeHelp: "¿Preguntas? Estamos aquí para ayudar.",
+    welcomeContact: "Contactar soporte",
+    welcomeFooter: "Menu Hub — Plataforma de Gestión de Restaurantes",
+
+    subCreatedSubject: "Suscripción confirmada — Menu Hub",
+    subCreatedTitle: "¡Todo listo!",
+    subCreatedGreeting: "Hola {restaurantName},",
+    subCreatedIntro: "Tu suscripción está ahora activa. Aquí tienes un resumen de tu plan:",
+    subPlanLabel: "Plan",
+    subNextBillingLabel: "Próxima fecha de facturación",
+    subCta: "Ir a mi panel",
+    subFooter: "Menu Hub — notificación de facturación automatizada",
+
+    subUpdatedSubject: "Suscripción actualizada — Menu Hub",
+    subUpdatedTitle: "Tu plan ha sido actualizado",
+    subUpdatedGreeting: "Hola {restaurantName},",
+    subUpdatedIntro: "Tu suscripción ha sido actualizada. Aquí están los nuevos detalles de tu plan:",
+
+    subCanceledSubject: "Suscripción cancelada — Menu Hub",
+    subCanceledTitle: "Suscripción cancelada",
+    subCanceledGreeting: "Hola {restaurantName},",
+    subCanceledIntro: "Tu suscripción ha sido cancelada. Mantendrás acceso a tus módulos hasta el final del período de facturación actual.",
+    subCanceledAccessUntil: "Acceso hasta",
+    subCanceledResubscribeCta: "Volver a suscribirse",
+    subCanceledHelp: "Si fue un error o tienes preguntas, no dudes en ponerte en contacto.",
+
+    subPaymentFailedSubject: "Pago fallido — tienes 3 días para actualizar tus datos",
+    subPaymentFailedTitle: "Pago fallido",
+    subPaymentFailedGreeting: "Hola {restaurantName},",
+    subPaymentFailedIntro: "No pudimos procesar tu último pago. No te preocupes — todavía tienes acceso completo durante los próximos 3 días. Actualiza tu método de pago antes de esa fecha para evitar cualquier interrupción.",
+    subPaymentFailedCta: "Actualizar método de pago"
   }
 }
 

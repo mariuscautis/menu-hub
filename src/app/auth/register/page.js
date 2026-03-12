@@ -65,7 +65,7 @@ export default function Register() {
 
       if (dbError) throw dbError
 
-      // Notify super admin (fire-and-forget)
+      // Notify super admin + send welcome email to client (fire-and-forget)
       fetch('/api/notifications/restaurant-registered', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -73,6 +73,7 @@ export default function Register() {
           restaurantName: formData.restaurantName,
           email: formData.email,
           phone: formData.phone,
+          trialEndsAt,
         }),
       }).catch(() => {})
 
