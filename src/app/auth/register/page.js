@@ -52,13 +52,15 @@ export default function Register() {
       if (authError) throw authError
 
       const slug = generateSlug(formData.restaurantName)
+      const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
       const { error: dbError } = await supabase.from('restaurants').insert({
         name: formData.restaurantName,
         slug: slug,
         owner_id: authData.user.id,
         email: formData.email,
         phone: formData.phone,
-        status: 'pending'
+        status: 'pending',
+        trial_ends_at: trialEndsAt,
       })
 
       if (dbError) throw dbError

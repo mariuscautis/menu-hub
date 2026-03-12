@@ -73,6 +73,7 @@ export default function AdminRestaurants() {
   const [modulePanelOpen, setModulePanelOpen] = useState(false)
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
   const [modules, setModules] = useState({})
+  const [trialEndsAt, setTrialEndsAt] = useState('')
   const [savingModules, setSavingModules] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
 
@@ -119,6 +120,8 @@ export default function AdminRestaurants() {
   const openModulePanel = (restaurant) => {
     setSelectedRestaurant(restaurant)
     setModules({ ...DEFAULT_MODULES, ...(restaurant.enabled_modules || {}) })
+    // Convert ISO string to local date string for the date input (YYYY-MM-DD)
+    setTrialEndsAt(restaurant.trial_ends_at ? restaurant.trial_ends_at.substring(0, 10) : '')
     setSaveSuccess(false)
     setModulePanelOpen(true)
   }
@@ -143,17 +146,20 @@ export default function AdminRestaurants() {
     setSavingModules(true)
     setSaveSuccess(false)
 
+    const updates = { enabled_modules: modules }
+    // Save trial_ends_at — store as midnight UTC on the chosen date, or null if cleared
+    updates.trial_ends_at = trialEndsAt ? new Date(trialEndsAt).toISOString() : null
+
     const { error } = await supabase
       .from('restaurants')
-      .update({ enabled_modules: modules })
+      .update(updates)
       .eq('id', selectedRestaurant.id)
 
     setSavingModules(false)
     if (!error) {
       setSaveSuccess(true)
-      // Update local state so the panel reflects current saved state
       setRestaurants(prev => prev.map(r =>
-        r.id === selectedRestaurant.id ? { ...r, enabled_modules: modules } : r
+        r.id === selectedRestaurant.id ? { ...r, enabled_modules: modules, trial_ends_at: updates.trial_ends_at } : r
       ))
       setTimeout(() => setSaveSuccess(false), 3000)
     }
@@ -498,6 +504,48 @@ export default function AdminRestaurants() {
                   </button>
                 )
               })}
+            </div>
+
+            {/* Trial period */}
+            <div className="px-6 pb-4 border-t border-slate-100 pt-5">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Free Trial</p>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                Trial ends on
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="date"
+                  value={trialEndsAt}
+                  onChange={e => setTrialEndsAt(e.target.value)}
+                  className="flex-1 px-3 py-2 border-2 border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#6262bd]"
+                />
+                <button
+                  onClick={() => {
+                    const d = new Date()
+                    d.setDate(d.getDate() + 14)
+                    setTrialEndsAt(d.toISOString().substring(0, 10))
+                  }}
+                  className="px-3 py-2 text-xs font-medium text-[#6262bd] border-2 border-[#6262bd]/30 rounded-xl hover:bg-[#6262bd]/5 whitespace-nowrap"
+                >
+                  +14 days
+                </button>
+                <button
+                  onClick={() => setTrialEndsAt('')}
+                  className="px-3 py-2 text-xs font-medium text-slate-500 border-2 border-slate-200 rounded-xl hover:bg-slate-50 whitespace-nowrap"
+                >
+                  Clear
+                </button>
+              </div>
+              {trialEndsAt && (
+                <p className="text-xs text-slate-400 mt-1.5">
+                  {(() => {
+                    const days = Math.ceil((new Date(trialEndsAt) - new Date()) / (1000 * 60 * 60 * 24))
+                    if (days < 0) return `Expired ${Math.abs(days)} day${Math.abs(days) === 1 ? '' : 's'} ago`
+                    if (days === 0) return 'Expires today'
+                    return `${days} day${days === 1 ? '' : 's'} remaining`
+                  })()}
+                </p>
+              )}
             </div>
 
             {/* Footer */}

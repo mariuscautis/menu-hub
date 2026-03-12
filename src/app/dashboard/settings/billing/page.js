@@ -92,6 +92,11 @@ export default function BillingPage() {
   const currentPeriodEnd   = restaurant?.current_period_end
   const isActive           = subscriptionStatus === 'active'
 
+  const trialDaysLeft = trialEndsAt
+    ? Math.max(0, Math.ceil((new Date(trialEndsAt) - new Date()) / (1000 * 60 * 60 * 24)))
+    : null
+  const isTrialing = subscriptionStatus === 'trialing' && trialEndsAt
+
   const [selected, setSelected]           = useState([])
   const [loading, setLoading]             = useState(false)
   const [portalLoading, setPortalLoading] = useState(false)
@@ -210,6 +215,47 @@ export default function BillingPage() {
         <p className="text-slate-500 dark:text-slate-400">Choose the modules your business needs.</p>
       </div>
 
+      {/* Trial countdown banner */}
+      {isTrialing && (
+        <div className={`mb-6 rounded-2xl border-2 p-5 flex items-center gap-4 ${
+          trialDaysLeft <= 3
+            ? 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20'
+            : trialDaysLeft <= 7
+              ? 'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20'
+              : 'border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20'
+        }`}>
+          {/* Circle countdown */}
+          <div className={`flex-shrink-0 w-14 h-14 rounded-full flex flex-col items-center justify-center font-bold ${
+            trialDaysLeft <= 3
+              ? 'bg-red-500 text-white'
+              : trialDaysLeft <= 7
+                ? 'bg-amber-500 text-white'
+                : 'bg-blue-500 text-white'
+          }`}>
+            <span className="text-xl leading-none">{trialDaysLeft}</span>
+            <span className="text-xs leading-none opacity-80">days</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className={`font-semibold text-sm ${
+              trialDaysLeft <= 3 ? 'text-red-700 dark:text-red-300'
+              : trialDaysLeft <= 7 ? 'text-amber-700 dark:text-amber-300'
+              : 'text-blue-700 dark:text-blue-300'
+            }`}>
+              {trialDaysLeft === 0
+                ? 'Your free trial ends today'
+                : `${trialDaysLeft} day${trialDaysLeft === 1 ? '' : 's'} left on your free trial`}
+            </p>
+            <p className={`text-xs mt-0.5 ${
+              trialDaysLeft <= 3 ? 'text-red-500 dark:text-red-400'
+              : trialDaysLeft <= 7 ? 'text-amber-500 dark:text-amber-400'
+              : 'text-blue-500 dark:text-blue-400'
+            }`}>
+              Trial expires {formatDate(trialEndsAt)}. Subscribe below to keep full access.
+            </p>
+          </div>
+        </div>
+      )}
+
       {message && (
         <div className={`mb-6 p-4 rounded-xl border text-sm font-medium ${
           message.type === 'success' ? 'bg-green-50 border-green-200 text-green-700 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300' :
@@ -241,8 +287,8 @@ export default function BillingPage() {
                 <span className="text-sm text-slate-500 dark:text-slate-400">No active modules yet</span>
               )}
             </div>
-            {subscriptionStatus === 'trialing' && trialEndsAt && (
-              <p className="text-sm text-slate-500 dark:text-slate-400">Free trial ends <strong>{formatDate(trialEndsAt)}</strong></p>
+            {subscriptionStatus === 'trialing' && !trialEndsAt && (
+              <p className="text-sm text-slate-500 dark:text-slate-400">Free trial active — no expiry date set</p>
             )}
             {isActive && currentPeriodEnd && (
               <p className="text-sm text-slate-500 dark:text-slate-400">Next billing date: <strong>{formatDate(currentPeriodEnd)}</strong></p>

@@ -45,7 +45,7 @@ export async function POST(request) {
 
     const { data: restaurant, error: fetchError } = await supabaseAdmin
       .from('restaurants')
-      .select('id, name, email, stripe_customer_id, subscription_id, subscription_plans, subscription_status')
+      .select('id, name, email, stripe_customer_id, subscription_id, subscription_plans, subscription_status, current_period_end')
       .eq('id', restaurantId)
       .single()
 
@@ -70,7 +70,17 @@ export async function POST(request) {
           return NextResponse.json({ error: 'No changes to apply.' }, { status: 400 })
         }
 
-        // Add new items
+        // Block downgrades within 7 days of the renewal date
+        if (toRemove.length > 0 && restaurant.current_period_end) {
+          const daysUntilRenewal = (new Date(restaurant.current_period_end) - new Date()) / (1000 * 60 * 60 * 24)
+          if (daysUntilRenewal < 7) {
+            return NextResponse.json({
+              error: `Plan downgrades are not allowed within 7 days of your renewal date. You can remove modules after your next payment on ${new Date(restaurant.current_period_end).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}.`
+            }, { status: 403 })
+          }
+        }
+
+        // Add new items (prorated — charged immediately for the remainder of the cycle)
         for (const plan of toAdd) {
           await stripePost('subscription_items', {
             subscription: restaurant.subscription_id,
@@ -79,7 +89,8 @@ export async function POST(request) {
           })
         }
 
-        // Remove deleted items
+        // Remove deleted items — no proration credit issued
+        // (modules remain active until end of current period via Stripe)
         for (const plan of toRemove) {
           const item = existingItems.find(i => i.price.id === PRICE_IDS[plan])
           if (item) {
@@ -89,7 +100,7 @@ export async function POST(request) {
                 Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`,
                 'Content-Type': 'application/x-www-form-urlencoded',
               },
-              body: new URLSearchParams({ proration_behavior: 'create_prorations' }).toString(),
+              body: new URLSearchParams({ proration_behavior: 'none' }).toString(),
             })
           }
         }
