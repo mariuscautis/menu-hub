@@ -91,7 +91,42 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'Failed to create customer profile' }, { status: 500 })
     }
 
-    // Insert the reservation now that phone is verified
+    // Check for venue restrictions (block or deposit required)
+    if (restaurantId) {
+      const { data: restriction } = await supabaseAdmin
+        .from('customer_venue_restrictions')
+        .select('type, fee_amount, fee_currency')
+        .eq('customer_id', customer.id)
+        .eq('restaurant_id', restaurantId)
+        .single()
+
+      if (restriction) {
+        if (restriction.type === 'fee_required') {
+          // Customer verified — return fee requirement without inserting the booking yet
+          return NextResponse.json({
+            success: true,
+            requiresFee: true,
+            feeAmount: restriction.fee_amount,
+            feeCurrency: restriction.fee_currency || 'GBP',
+            customer: {
+              id: customer.id,
+              avgRating: customer.avg_rating,
+              totalBookings: customer.total_bookings
+            }
+          })
+        }
+
+        if (restriction.type === 'blocked') {
+          // Generic message — don't reveal the reason
+          return NextResponse.json({
+            success: false,
+            error: 'We are unable to complete this booking. Please contact the venue directly.'
+          }, { status: 403 })
+        }
+      }
+    }
+
+    // No restriction — insert the reservation now that phone is verified
     const { data: reservation, error: reservationError } = await supabaseAdmin
       .from('reservations')
       .insert({

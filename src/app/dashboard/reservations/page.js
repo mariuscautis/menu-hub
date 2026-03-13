@@ -49,6 +49,12 @@ export default function Reservations() {
   const [savingRating, setSavingRating] = useState(false)
   const [customerStats, setCustomerStats] = useState(null) // { venueAvg, venueCount, overallAvg, overallCount }
 
+  // Customer restrictions
+  const [restriction, setRestriction] = useState(null) // { type, fee_amount, fee_currency } | null | 'none'
+  const [restrictionMode, setRestrictionMode] = useState(null) // null | 'blocked' | 'fee_required'
+  const [restrictionFee, setRestrictionFee] = useState('')
+  const [savingRestriction, setSavingRestriction] = useState(false)
+
   // Notifications
   const [notification, setNotification] = useState(null)
 
@@ -174,6 +180,62 @@ export default function Reservations() {
       overallCount: overall.length
     })
   }, [adminSupabase])
+
+  const fetchRestriction = useCallback(async (customerId, restaurantId) => {
+    if (!customerId) { setRestriction('none'); return }
+    const { data } = await adminSupabase
+      .from('customer_venue_restrictions')
+      .select('type, fee_amount, fee_currency')
+      .eq('customer_id', customerId)
+      .eq('restaurant_id', restaurantId)
+      .maybeSingle()
+    setRestriction(data || 'none')
+    if (data) {
+      setRestrictionMode(data.type)
+      setRestrictionFee(data.fee_amount ? String(data.fee_amount) : '')
+    } else {
+      setRestrictionMode(null)
+      setRestrictionFee('')
+    }
+  }, [adminSupabase])
+
+  const saveRestriction = async (customerId, restaurantId, type, feeAmount) => {
+    if (!customerId) return
+    setSavingRestriction(true)
+    try {
+      if (!type) {
+        // Lift restriction
+        await adminSupabase
+          .from('customer_venue_restrictions')
+          .delete()
+          .eq('customer_id', customerId)
+          .eq('restaurant_id', restaurantId)
+        setRestriction('none')
+        setRestrictionMode(null)
+        setRestrictionFee('')
+        showNotification('success', 'Restriction removed.')
+      } else {
+        const payload = {
+          customer_id: customerId,
+          restaurant_id: restaurantId,
+          type,
+          fee_amount: type === 'fee_required' ? parseFloat(feeAmount) || null : null,
+          fee_currency: restaurant?.currency || 'GBP',
+        }
+        const { error } = await adminSupabase
+          .from('customer_venue_restrictions')
+          .upsert(payload, { onConflict: 'customer_id,restaurant_id' })
+        if (error) throw error
+        setRestriction(payload)
+        showNotification('success', type === 'blocked' ? 'Customer blocked from this venue.' : 'Booking deposit requirement saved.')
+      }
+    } catch (err) {
+      console.error('saveRestriction error:', err)
+      showNotification('error', 'Failed to save restriction.')
+    } finally {
+      setSavingRestriction(false)
+    }
+  }
 
   const saveRating = async (reservation, rating, note) => {
     if (!reservation.customer_id) {
@@ -741,7 +803,7 @@ export default function Reservations() {
             return (
               <button
                 key={reservation.id}
-                onClick={() => { setSelectedReservation(reservation); setShowDetailModal(true); fetchCustomerStats(reservation.customer_id, restaurant.id) }}
+                onClick={() => { setSelectedReservation(reservation); setShowDetailModal(true); fetchCustomerStats(reservation.customer_id, restaurant.id); fetchRestriction(reservation.customer_id, restaurant.id) }}
                 className="text-left bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl overflow-hidden hover:border-[#6262bd]/40 hover:shadow-md transition-all group focus:outline-none focus:border-[#6262bd]"
               >
                 {/* Colour bar */}
@@ -814,7 +876,7 @@ export default function Reservations() {
       {showDetailModal && selectedReservation && (
         <div
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4"
-          onClick={() => { setShowDetailModal(false); setSelectedReservation(null); setPendingRating(0); setRatingNote(''); setCustomerStats(null) }}
+          onClick={() => { setShowDetailModal(false); setSelectedReservation(null); setPendingRating(0); setRatingNote(''); setCustomerStats(null); setRestriction(null); setRestrictionMode(null); setRestrictionFee('') }}
         >
           <div
             className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden"
@@ -833,7 +895,7 @@ export default function Reservations() {
                   </span>
                 </div>
                 <button
-                  onClick={() => { setShowDetailModal(false); setSelectedReservation(null); setPendingRating(0); setRatingNote(''); setCustomerStats(null) }}
+                  onClick={() => { setShowDetailModal(false); setSelectedReservation(null); setPendingRating(0); setRatingNote(''); setCustomerStats(null); setRestriction(null); setRestrictionMode(null); setRestrictionFee('') }}
                   className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
                 >
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -1031,6 +1093,102 @@ export default function Reservations() {
                         </>
                       )}
                     </div>
+                  )}
+                </div>
+              )}
+
+              {/* Customer restriction panel — shown for any reservation with a customer_id */}
+              {selectedReservation.customer_id && restriction !== null && (
+                <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-700">
+                  <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Booking restrictions</h3>
+
+                  {/* Current status badge */}
+                  {restriction && restriction !== 'none' && !restrictionMode && (
+                    <div className={`rounded-xl p-3 mb-3 border flex items-center justify-between ${
+                      restriction.type === 'blocked'
+                        ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+                        : 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'
+                    }`}>
+                      <p className={`text-sm font-semibold ${restriction.type === 'blocked' ? 'text-red-700 dark:text-red-400' : 'text-amber-700 dark:text-amber-400'}`}>
+                        {restriction.type === 'blocked' ? '🚫 Blocked' : `💳 Deposit: ${restriction.fee_currency || 'GBP'} ${Number(restriction.fee_amount).toFixed(2)}`}
+                      </p>
+                      <span className="text-xs text-slate-400">Future bookings</span>
+                    </div>
+                  )}
+
+                  {/* Action buttons — always shown, highlight current state */}
+                  <div className="grid grid-cols-2 gap-2 mb-2">
+                    <button
+                      onClick={() => setRestrictionMode(m => m === 'blocked' ? null : 'blocked')}
+                      className={`py-2.5 px-3 rounded-xl text-sm font-medium border-2 transition-colors ${
+                        restrictionMode === 'blocked' || (restriction && restriction !== 'none' && restriction.type === 'blocked' && !restrictionMode)
+                          ? 'bg-red-600 border-red-600 text-white'
+                          : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-red-300 hover:text-red-600'
+                      }`}
+                    >
+                      🚫 Block
+                    </button>
+                    <button
+                      onClick={() => {
+                        setRestrictionMode(m => m === 'fee_required' ? null : 'fee_required')
+                        if (restriction && restriction !== 'none' && restriction.type === 'fee_required') {
+                          setRestrictionFee(String(restriction.fee_amount || ''))
+                        }
+                      }}
+                      className={`py-2.5 px-3 rounded-xl text-sm font-medium border-2 transition-colors ${
+                        restrictionMode === 'fee_required' || (restriction && restriction !== 'none' && restriction.type === 'fee_required' && !restrictionMode)
+                          ? 'bg-amber-500 border-amber-500 text-white'
+                          : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-amber-300 hover:text-amber-600'
+                      }`}
+                    >
+                      💳 Deposit
+                    </button>
+                  </div>
+
+                  {restrictionMode === 'blocked' && (
+                    <div className="space-y-2">
+                      <button
+                        onClick={() => saveRestriction(selectedReservation.customer_id, restaurant.id, 'blocked', null)}
+                        disabled={savingRestriction}
+                        className="w-full bg-red-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-red-700 disabled:opacity-50"
+                      >
+                        {savingRestriction ? 'Saving...' : 'Confirm block'}
+                      </button>
+                    </div>
+                  )}
+
+                  {restrictionMode === 'fee_required' && (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-slate-500 dark:text-slate-400 whitespace-nowrap">Amount</span>
+                        <input
+                          type="number"
+                          min="1"
+                          step="0.01"
+                          value={restrictionFee}
+                          onChange={e => setRestrictionFee(e.target.value)}
+                          placeholder="e.g. 20"
+                          className="flex-1 px-3 py-2 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#6262bd]"
+                        />
+                      </div>
+                      <button
+                        onClick={() => saveRestriction(selectedReservation.customer_id, restaurant.id, 'fee_required', restrictionFee)}
+                        disabled={savingRestriction || !restrictionFee}
+                        className="w-full bg-amber-500 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-amber-600 disabled:opacity-50"
+                      >
+                        {savingRestriction ? 'Saving...' : 'Save deposit'}
+                      </button>
+                    </div>
+                  )}
+
+                  {restriction && restriction !== 'none' && (
+                    <button
+                      onClick={() => saveRestriction(selectedReservation.customer_id, restaurant.id, null)}
+                      disabled={savingRestriction}
+                      className="w-full mt-2 text-xs text-slate-400 hover:text-red-500 underline disabled:opacity-50"
+                    >
+                      Remove all restrictions
+                    </button>
                   )}
                 </div>
               )}

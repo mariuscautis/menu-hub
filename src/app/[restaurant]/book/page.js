@@ -1,10 +1,54 @@
 'use client'
 export const runtime = 'edge'
 
-import { useState, useEffect, use, useCallback } from 'react'
+import { useState, useEffect, use, useCallback, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { loadTranslations, createTranslator } from '@/lib/clientTranslations'
+
+// ─── Stripe fee payment form ───────────────────────────────────────────────────
+
+function FeePaymentForm({ clientSecret, onPay, processing, publishableKey }) {
+  const stripeRef = useRef(null)
+  const elementsRef = useRef(null)
+  const mountedRef = useRef(false)
+
+  useEffect(() => {
+    if (mountedRef.current) return
+    mountedRef.current = true
+
+    const init = async () => {
+      if (!window.Stripe) {
+        const script = document.createElement('script')
+        script.src = 'https://js.stripe.com/v3/'
+        script.async = true
+        document.head.appendChild(script)
+        await new Promise(resolve => { script.onload = resolve })
+      }
+      const stripe = window.Stripe(publishableKey)
+      stripeRef.current = stripe
+      const elements = stripe.elements({ clientSecret })
+      elementsRef.current = elements
+      const paymentElement = elements.create('payment')
+      paymentElement.mount('#stripe-payment-element')
+    }
+
+    init()
+  }, [clientSecret, publishableKey])
+
+  return (
+    <div>
+      <div id="stripe-payment-element" className="mb-4" />
+      <button
+        onClick={() => onPay(stripeRef.current, elementsRef.current)}
+        disabled={processing}
+        className="w-full bg-[#6262bd] text-white py-3.5 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+      >
+        {processing ? 'Processing payment...' : 'Pay deposit & confirm booking'}
+      </button>
+    </div>
+  )
+}
 
 // ─── Phone prefix data ────────────────────────────────────────────────────────
 
@@ -369,6 +413,17 @@ export default function BookReservation({ params }) {
   const [otpError, setOtpError] = useState(null)
   const [otpResendCountdown, setOtpResendCountdown] = useState(0)
 
+  // Fee payment flow (triggered when customer has a deposit restriction)
+  const [feeStep, setFeeStep] = useState(false)
+  const [feeAmount, setFeeAmount] = useState(null)
+  const [feeCurrency, setFeeCurrency] = useState('GBP')
+  const [feeCustomerId, setFeeCustomerId] = useState(null)
+  const [feeClientSecret, setFeeClientSecret] = useState(null)
+  const [feePaymentIntentId, setFeePaymentIntentId] = useState(null)
+  const [processingFee, setProcessingFee] = useState(false)
+  const [feeError, setFeeError] = useState(null)
+  const [verifiedLocale, setVerifiedLocale] = useState('en')
+
   // Form state
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedDuration, setSelectedDuration] = useState(null) // customer-choice mode
@@ -688,6 +743,38 @@ export default function BookReservation({ params }) {
         return
       }
 
+      // Deposit required — move to payment step
+      if (result.requiresFee) {
+        setVerifiedLocale(locale)
+        setFeeAmount(result.feeAmount)
+        setFeeCurrency(result.feeCurrency || 'GBP')
+        setFeeCustomerId(result.customer.id)
+
+        // Create a payment intent
+        const piRes = await fetch('/api/reservations/create-fee-payment-intent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            restaurantId: restaurant.id,
+            customerId: result.customer.id,
+            amount: result.feeAmount,
+            currency: result.feeCurrency || 'GBP',
+          })
+        })
+        const piData = await piRes.json()
+
+        if (!piData.clientSecret) {
+          setOtpError(piData.error || 'Failed to initialise payment. Please try again.')
+          return
+        }
+
+        setFeeClientSecret(piData.clientSecret)
+        setFeePaymentIntentId(piData.paymentIntentId)
+        setOtpStep(false)
+        setFeeStep(true)
+        return
+      }
+
       // Fire-and-forget confirmation email (if email was provided)
       if (customerEmail) {
         fetch('/api/reservations/send-confirmation', {
@@ -703,6 +790,64 @@ export default function BookReservation({ params }) {
       setOtpError('Verification failed. Please try again.')
     } finally {
       setVerifyingOtp(false)
+    }
+  }
+
+  const payFeeAndBook = async (stripe, elements) => {
+    if (!stripe || !elements) return
+    setProcessingFee(true)
+    setFeeError(null)
+
+    try {
+      const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
+        elements,
+        confirmParams: { return_url: window.location.href },
+        redirect: 'if_required',
+      })
+
+      if (stripeError) {
+        setFeeError(stripeError.message || 'Payment failed. Please try again.')
+        return
+      }
+
+      if (paymentIntent?.status !== 'succeeded') {
+        setFeeError('Payment was not completed. Please try again.')
+        return
+      }
+
+      // Payment succeeded — complete the booking
+      const res = await fetch('/api/reservations/complete-with-fee', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          paymentIntentId: feePaymentIntentId,
+          restaurantId: restaurant.id,
+          customerId: feeCustomerId,
+          customerName,
+          customerEmail: customerEmail || null,
+          customerPhone: fullPhone,
+          partySize,
+          reservationDate: selectedDate,
+          reservationTime: selectedTime,
+          specialRequests: specialRequests || null,
+          locale: verifiedLocale,
+          feeAmount,
+          feeCurrency,
+        })
+      })
+      const result = await res.json()
+
+      if (!result.success) {
+        setFeeError(result.error || 'Failed to complete booking. Please contact the venue.')
+        return
+      }
+
+      setBookingSuccess(true)
+    } catch (err) {
+      console.error('payFeeAndBook error:', err)
+      setFeeError('Something went wrong. Please try again.')
+    } finally {
+      setProcessingFee(false)
     }
   }
 
@@ -1095,6 +1240,48 @@ export default function BookReservation({ params }) {
                     </button>
                   )}
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Fee Payment Step */}
+          {feeStep && feeClientSecret && (
+            <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-2xl p-8 w-full max-w-sm shadow-2xl">
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-amber-600" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+                    </svg>
+                  </div>
+                  <h2 className="text-xl font-bold text-slate-800 mb-2">Booking deposit required</h2>
+                  <p className="text-slate-500 text-sm mb-1">
+                    A deposit of <strong>{feeCurrency} {Number(feeAmount).toFixed(2)}</strong> is required to complete your booking at <strong>{restaurant.name}</strong>.
+                  </p>
+                </div>
+
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-5 text-sm text-amber-800">
+                  <p className="font-medium mb-1">💳 About this deposit</p>
+                  <p>This amount will be deducted from your bill on the day. It is <strong>non-refundable</strong> if you do not show up for your reservation.</p>
+                </div>
+
+                {feeError && (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm text-center">{feeError}</div>
+                )}
+
+                <FeePaymentForm
+                  clientSecret={feeClientSecret}
+                  onPay={payFeeAndBook}
+                  processing={processingFee}
+                  publishableKey={process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
+                />
+
+                <button
+                  onClick={() => { setFeeStep(false); setOtpStep(false); setFeeError(null) }}
+                  className="w-full mt-3 text-sm text-slate-500 hover:text-slate-700"
+                >
+                  ← Change details
+                </button>
               </div>
             </div>
           )}
