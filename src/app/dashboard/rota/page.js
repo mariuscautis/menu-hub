@@ -22,6 +22,8 @@ import TemplatesModal from './TemplatesModal';
 import CurrentlyWorkingModal from './CurrentlyWorkingModal';
 import MobileRotaView from './MobileRotaView';
 import StaffAvailabilityCalendar from './StaffAvailabilityCalendar';
+import PageTabs from '@/components/PageTabs'
+import { staffTabs } from '@/components/PageTabsConfig'
 
 const DnDCalendar = withDragAndDrop(Calendar);
 
@@ -351,6 +353,7 @@ export default function RotaPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-8">
+      <PageTabs tabs={staffTabs} />
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>

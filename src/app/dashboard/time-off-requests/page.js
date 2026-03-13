@@ -6,6 +6,8 @@ import moment from 'moment'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
+import PageTabs from '@/components/PageTabs'
+import { staffTabs } from '@/components/PageTabsConfig'
 
 const STATUS_CONFIG = {
   pending:   { label: 'Pending',   bg: 'bg-amber-100 dark:bg-amber-900/30',  text: 'text-amber-700 dark:text-amber-400',  dot: 'bg-amber-500',  border: 'border-amber-200 dark:border-amber-800' },
@@ -201,6 +203,7 @@ export default function TimeOffRequestsPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 md:p-8">
+      <PageTabs tabs={staffTabs} />
       <div className="max-w-5xl mx-auto">
 
         {/* Header */}

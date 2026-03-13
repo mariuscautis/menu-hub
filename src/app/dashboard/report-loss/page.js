@@ -20,8 +20,8 @@ export default function ReportLoss() {
   const [userInfo, setUserInfo] = useState(null)
   const [staffDepartment, setStaffDepartment] = useState(null)
 
-  // Tab: 'menu' | 'stock'
-  const [lossType, setLossType] = useState('menu')
+  // Tab: null | 'menu' | 'stock'
+  const [lossType, setLossType] = useState(null)
 
   // Menu item combo box
   const [showMenuDropdown, setShowMenuDropdown] = useState(false)
@@ -177,8 +177,8 @@ export default function ReportLoss() {
   if (!restaurant) return <div className="text-red-600">{t('noRestaurant')}</div>
 
   return (
-    <div>
-      <div className="mb-8">
+    <div className="max-w-lg mx-auto">
+      <div className="mb-8 text-center">
         <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200">{t('title')}</h1>
         <p className="text-slate-500 dark:text-slate-400">{t('subtitle')}</p>
         {staffDepartment && (
@@ -202,27 +202,48 @@ export default function ReportLoss() {
         </div>
       )}
 
-      {/* Tab switcher */}
-      <div className="flex gap-1 mb-6 bg-slate-100 dark:bg-slate-800 rounded-xl p-1 w-fit">
+      {/* Type selector tiles */}
+      <div className="grid grid-cols-2 gap-4 mb-8">
         <button
           onClick={() => { setLossType('menu'); setMessage(null) }}
-          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-colors ${
-            lossType === 'menu' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+          className={`group flex flex-col items-center text-center gap-3 rounded-2xl border-2 p-5 transition-all ${
+            lossType === 'menu'
+              ? 'bg-[#6262bd] border-[#6262bd] text-white shadow-lg shadow-[#6262bd]/20'
+              : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 hover:border-[#6262bd] dark:hover:border-[#6262bd] hover:shadow-md'
           }`}
         >
-          Menu Item Loss
+          <div className={`p-3 rounded-xl transition-transform group-hover:scale-110 ${lossType === 'menu' ? 'bg-white/20' : 'bg-amber-50 dark:bg-amber-900/30'}`}>
+            <svg className={`w-7 h-7 ${lossType === 'menu' ? 'text-white' : 'text-amber-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+            </svg>
+          </div>
+          <div>
+            <p className={`font-semibold text-sm ${lossType === 'menu' ? 'text-white' : 'text-slate-800 dark:text-slate-200'}`}>Menu Item Loss</p>
+            <p className={`text-xs mt-0.5 ${lossType === 'menu' ? 'text-white/75' : 'text-slate-500 dark:text-slate-400'}`}>Log a prepared dish or drink</p>
+          </div>
         </button>
+
         <button
           onClick={() => { setLossType('stock'); setMessage(null) }}
-          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-colors ${
-            lossType === 'stock' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+          className={`group flex flex-col items-center text-center gap-3 rounded-2xl border-2 p-5 transition-all ${
+            lossType === 'stock'
+              ? 'bg-[#6262bd] border-[#6262bd] text-white shadow-lg shadow-[#6262bd]/20'
+              : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 hover:border-[#6262bd] dark:hover:border-[#6262bd] hover:shadow-md'
           }`}
         >
-          Stock Item Loss
+          <div className={`p-3 rounded-xl transition-transform group-hover:scale-110 ${lossType === 'stock' ? 'bg-white/20' : 'bg-red-50 dark:bg-red-900/30'}`}>
+            <svg className={`w-7 h-7 ${lossType === 'stock' ? 'text-white' : 'text-red-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+          </div>
+          <div>
+            <p className={`font-semibold text-sm ${lossType === 'stock' ? 'text-white' : 'text-slate-800 dark:text-slate-200'}`}>Stock Item Loss</p>
+            <p className={`text-xs mt-0.5 ${lossType === 'stock' ? 'text-white/75' : 'text-slate-500 dark:text-slate-400'}`}>Log an ingredient or raw stock</p>
+          </div>
         </button>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6">
+      {lossType && <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6">
 
         {/* ── MENU ITEM LOSS ── */}
         {lossType === 'menu' && (
@@ -427,7 +448,8 @@ export default function ReportLoss() {
             </div>
           </div>
         </div>
-      </div>
+      </div>}
     </div>
   )
 }
+

@@ -28,7 +28,6 @@ export default function DashboardLayout({ children }) {
   const [staffDepartment, setStaffDepartment] = useState(null)
   const [departmentPermissions, setDepartmentPermissions] = useState([])
   const [debug, setDebug] = useState('')
-  const [expandedMenus, setExpandedMenus] = useState({})
   const [pendingReservationsCount, setPendingReservationsCount] = useState(0)
   const [recoveryRequested, setRecoveryRequested] = useState(false)
   const [recoveryLoading, setRecoveryLoading] = useState(false)
@@ -661,33 +660,12 @@ export default function DashboardLayout({ children }) {
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
           </svg>
-        ),
-        id: 'menu',
-        children: [
-          {
-            href: '/dashboard/menu',
-            label: 'Menu Items',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M11 9h2V6h3V4h-3V1h-2v3H8v2h3v3zm-4 9c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zm-9.83-3.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.86-7.01L19.42 4h-.01l-1.1 2-2.76 5H8.53l-.13-.27L6.16 6l-.95-2-.94-2H1v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.13 0-.25-.11-.25-.25z"/>
-              </svg>
-            )
-          },
-          {
-            href: '/dashboard/menu/categories',
-            label: 'Categories',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2l-5.5 9h11L12 2zm0 3.84L13.93 9h-3.87L12 5.84zM17.5 13c-2.49 0-4.5 2.01-4.5 4.5s2.01 4.5 4.5 4.5 4.5-2.01 4.5-4.5-2.01-4.5-4.5-4.5zm0 7c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5zM3 21.5h8v-8H3v8zm2-6h4v4H5v-4z"/>
-              </svg>
-            )
-          }
-        ]
+        )
       })
     }
 
     // Stock - Ordering module required; owners/admins always, or staff with 'stock' permission
-    if (hasModule('ordering') && (userType === 'owner' || userType === 'staff-admin')) {
+    if (hasModule('ordering') && (userType === 'owner' || userType === 'staff-admin' || hasPermission('stock'))) {
       items.push({
         href: '/dashboard/stock',
         label: 'Stock',
@@ -695,77 +673,7 @@ export default function DashboardLayout({ children }) {
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z"/>
           </svg>
-        ),
-        id: 'stock',
-        children: [
-          {
-            href: '/dashboard/stock',
-            label: 'Food Stock',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M18.06 22.99h1.66c.84 0 1.53-.64 1.63-1.46L23 5.05l-5 1V1h-1.97v5.05l-5-1 1.13 9.35c-.78.22-1.45.7-1.92 1.32L8.94 8.94c-.27-.54-.91-.91-1.59-.91-.97 0-1.76.77-1.76 1.72 0 .16.02.32.07.47l1.9 6.23c.31 1.04.97 1.9 1.85 2.44-.37.47-.59 1.06-.59 1.7v.42c-.13.03-.27.05-.41.05-.7 0-1.35-.29-1.82-.75l-.59-.65c-.36-.39-.77-.71-1.23-.95l-.28 1.51c.34.2.65.45.93.73l.61.66c.75.78 1.79 1.24 2.89 1.24.26 0 .51-.03.76-.08v.5c0 1.1.9 2 2 2h6.76c1.1 0 2-.9 2-2v-3.76c0-1.1-.9-2-2-2h-1.8l.47-3.89c.49.28 1.04.45 1.63.45 1.83 0 3.3-1.49 3.3-3.32 0-1.69-1.26-3.08-2.9-3.29l-.67 5.48c-.16.55-.42 1.04-.77 1.44l-.59-4.87-2.67.35"/>
-              </svg>
-            )
-          },
-          {
-            href: '/dashboard/stock/inventory',
-            label: 'Inventory',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-1-2-2-2zm-5 12H9v-2h6v2zm5-7H4V4h16v3z"/>
-              </svg>
-            )
-          },
-          {
-            href: '/dashboard/stock/purchasing-invoices',
-            label: 'Invoices',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
-              </svg>
-            )
-          }
-        ]
-      })
-    } else if (hasModule('ordering') && hasPermission('stock')) {
-      items.push({
-        href: '/dashboard/stock',
-        label: 'Stock',
-        icon: (
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z"/>
-          </svg>
-        ),
-        id: 'stock',
-        children: [
-          {
-            href: '/dashboard/stock',
-            label: 'Food Stock',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M18.06 22.99h1.66c.84 0 1.53-.64 1.63-1.46L23 5.05l-5 1V1h-1.97v5.05l-5-1 1.13 9.35c-.78.22-1.45.7-1.92 1.32L8.94 8.94c-.27-.54-.91-.91-1.59-.91-.97 0-1.76.77-1.76 1.72 0 .16.02.32.07.47l1.9 6.23c.31 1.04.97 1.9 1.85 2.44-.37.47-.59 1.06-.59 1.7v.42c-.13.03-.27.05-.41.05-.7 0-1.35-.29-1.82-.75l-.59-.65c-.36-.39-.77-.71-1.23-.95l-.28 1.51c.34.2.65.45.93.73l.61.66c.75.78 1.79 1.24 2.89 1.24.26 0 .51-.03.76-.08v.5c0 1.1.9 2 2 2h6.76c1.1 0 2-.9 2-2v-3.76c0-1.1-.9-2-2-2h-1.8l.47-3.89c.49.28 1.04.45 1.63.45 1.83 0 3.3-1.49 3.3-3.32 0-1.69-1.26-3.08-2.9-3.29l-.67 5.48c-.16.55-.42 1.04-.77 1.44l-.59-4.87-2.67.35"/>
-              </svg>
-            )
-          },
-          {
-            href: '/dashboard/stock/inventory',
-            label: 'Inventory',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-1-2-2-2zm-5 12H9v-2h6v2zm5-7H4V4h16v3z"/>
-              </svg>
-            )
-          },
-          {
-            href: '/dashboard/stock/purchasing-invoices',
-            label: 'Invoices',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
-              </svg>
-            )
-          }
-        ]
+        )
       })
     }
 
@@ -783,7 +691,7 @@ export default function DashboardLayout({ children }) {
     }
 
     // Staff & Rota - Manager view (owners and admin staff only), or staff with staff_rota permission
-    if (hasModule('rota') && (userType === 'owner' || userType === 'staff-admin')) {
+    if (hasModule('rota') && (userType === 'owner' || userType === 'staff-admin' || hasPermission('staff_rota'))) {
       items.push({
         href: '/dashboard/staff',
         label: 'Staff & Rota',
@@ -791,77 +699,7 @@ export default function DashboardLayout({ children }) {
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
           </svg>
-        ),
-        id: 'staff-rota',
-        children: [
-          {
-            href: '/dashboard/staff',
-            label: 'Staff Members',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-              </svg>
-            )
-          },
-          {
-            href: '/dashboard/rota',
-            label: 'Rota',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/>
-              </svg>
-            )
-          },
-          {
-            href: '/dashboard/time-off-requests',
-            label: 'Time-Off Requests',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
-              </svg>
-            )
-          },
-          {
-            href: '/dashboard/settings/departments',
-            label: 'Departments',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-            )
-          }
-        ]
-      })
-    } else if (hasModule('rota') && hasPermission('staff_rota')) {
-      items.push({
-        href: '/dashboard/staff',
-        label: 'Staff & Rota',
-        icon: (
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-          </svg>
-        ),
-        id: 'staff-rota',
-        children: [
-          {
-            href: '/dashboard/staff',
-            label: 'Staff Members',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-              </svg>
-            )
-          },
-          {
-            href: '/dashboard/rota',
-            label: 'Rota',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/>
-              </svg>
-            )
-          }
-        ]
+        )
       })
     }
 
@@ -887,55 +725,7 @@ export default function DashboardLayout({ children }) {
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
           </svg>
-        ),
-        id: 'analytics',
-        children: [
-          {
-            href: '/dashboard/analytics',
-            label: 'Overall',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
-              </svg>
-            )
-          },
-          {
-            href: '/dashboard/analytics/tables',
-            label: 'Table Analytics',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M3 5a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm6 0H5v4h4V5zm-6 8a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4zm6 0H5v4h4v-4zm2-8a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2h-4a2 2 0 01-2-2V5zm6 0h-4v4h4V5zm-6 8a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2h-4a2 2 0 01-2-2v-4zm6 0h-4v4h4v-4z"/>
-              </svg>
-            )
-          },
-          {
-            href: '/dashboard/analytics/staff',
-            label: 'Staff Analytics',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-              </svg>
-            )
-          },
-          {
-            href: '/dashboard/analytics/losses',
-            label: 'Losses',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-              </svg>
-            )
-          },
-          {
-            href: '/dashboard/analytics/labor',
-            label: 'Labor Analytics',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-              </svg>
-            )
-          }
-        ]
+        )
       })
 
       // Reports - Dedicated report pages for quick access (Z-Report, X-Report, Weekly, Monthly, Tax)
@@ -946,148 +736,10 @@ export default function DashboardLayout({ children }) {
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
           </svg>
-        ),
-        id: 'reports',
-        children: [
-          {
-            href: '/dashboard/reports',
-            label: 'Reports Overview',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
-              </svg>
-            )
-          },
-          {
-            href: '/dashboard/reports/z-report',
-            label: 'Z-Report',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-              </svg>
-            )
-          },
-          {
-            href: '/dashboard/reports/weekly',
-            label: 'Weekly Summary',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/>
-              </svg>
-            )
-          },
-          {
-            href: '/dashboard/reports/monthly',
-            label: 'Monthly Summary',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
-              </svg>
-            )
-          },
-          {
-            href: '/dashboard/reports/tax',
-            label: 'Tax Report',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
-              </svg>
-            )
-          },
-          {
-            href: '/dashboard/reports/sales-balance',
-            label: 'Sales & Tax Balance',
-            icon: (
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
-              </svg>
-            )
-          },
-          {
-            href: '/dashboard/reports/stock-movement',
-            label: 'Stock Movement',
-            icon: (
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-              </svg>
-            )
-          }
-        ]
+        )
       })
     } else if (hasModule('reports') && (hasPermission('reports') || hasPermission('z_report'))) {
       // Staff with reports or z_report permission
-      const reportChildren = []
-      if (hasPermission('reports')) {
-        reportChildren.push({
-          href: '/dashboard/reports',
-          label: 'Reports Overview',
-          icon: (
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
-            </svg>
-          )
-        })
-      }
-      if (hasPermission('z_report') || hasPermission('reports')) {
-        reportChildren.push({
-          href: '/dashboard/reports/z-report',
-          label: 'Z-Report',
-          icon: (
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-            </svg>
-          )
-        })
-      }
-      if (hasPermission('reports_weekly') || hasPermission('reports')) {
-        reportChildren.push({
-          href: '/dashboard/reports/weekly',
-          label: 'Weekly Summary',
-          icon: (
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/>
-            </svg>
-          )
-        })
-      }
-      if (hasPermission('reports_financial') || hasPermission('reports')) {
-        reportChildren.push({
-          href: '/dashboard/reports/monthly',
-          label: 'Monthly Summary',
-          icon: (
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
-            </svg>
-          )
-        })
-        reportChildren.push({
-          href: '/dashboard/reports/tax',
-          label: 'Tax Report',
-          icon: (
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
-            </svg>
-          )
-        })
-        reportChildren.push({
-          href: '/dashboard/reports/sales-balance',
-          label: 'Sales & Tax Balance',
-          icon: (
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
-            </svg>
-          )
-        })
-        reportChildren.push({
-          href: '/dashboard/reports/stock-movement',
-          label: 'Stock Movement',
-          icon: (
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-            </svg>
-          )
-        })
-      }
       items.push({
         href: '/dashboard/reports',
         label: 'Reports',
@@ -1095,102 +747,19 @@ export default function DashboardLayout({ children }) {
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
           </svg>
-        ),
-        id: 'reports',
-        children: reportChildren
+        )
       })
     }
 
     if (userType === 'owner') {
       items.push({
-        href: '/dashboard/settings/restaurant-info',
+        href: '/dashboard/settings',
         label: 'Settings',
         icon: (
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
           </svg>
-        ),
-        id: 'settings',
-        children: [
-          {
-            href: '/dashboard/settings/restaurant-info',
-            label: 'Restaurant Info',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm0 10c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
-              </svg>
-            )
-          },
-          // Ordering module only
-          ...(hasModule('ordering') ? [
-            {
-              href: '/dashboard/settings/tax-invoicing',
-              label: 'Tax & Invoicing',
-              icon: (
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
-                </svg>
-              )
-            },
-            {
-              href: '/dashboard/settings/product-tax',
-              label: 'Product Tax',
-              icon: (
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
-                </svg>
-              )
-            },
-            {
-              href: '/dashboard/settings/discounts',
-              label: 'Discounts',
-              icon: (
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/>
-                </svg>
-              )
-            },
-          ] : []),
-          {
-            href: '/dashboard/settings/security',
-            label: 'Security & Auth',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM9 8V6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9z"/>
-              </svg>
-            )
-          },
-          {
-            href: '/dashboard/settings/billing',
-            label: 'Billing',
-            icon: (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
-              </svg>
-            )
-          },
-          // Ordering module only
-          ...(hasModule('ordering') ? [
-            {
-              href: '/dashboard/settings/other-options',
-              label: 'Other Options',
-              icon: (
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-                </svg>
-              )
-            },
-            {
-              href: '/dashboard/settings/data-migration',
-              label: 'Data Migration',
-              icon: (
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M9 3L5 6.99h3V14h2V6.99h3L9 3zm7 14.01V10h-2v7.01h-3L15 21l4-3.99h-3z"/>
-                </svg>
-              )
-            }
-          ] : [])
-        ]
+        )
       })
     }
 
@@ -1599,49 +1168,12 @@ export default function DashboardLayout({ children }) {
         return null
       })()}
 
-      {/* Overlay when sidebar is open (for closing by clicking outside) */}
-      {sidebarOpen && !fullWidthMode && (
+      {/* Overlay when sidebar is expanded on mobile */}
+      {sidebarOpen && !fullWidthMode && isSmallScreen && (
         <div
-          className="fixed inset-0 bg-black/30 z-40 transition-opacity lg:hidden"
+          className="fixed inset-0 bg-black/30 z-40 transition-opacity"
           onClick={() => setSidebarOpen(false)}
         />
-      )}
-
-      {/* Top Bar - Show when sidebar is hidden and not in full-width mode */}
-      {!sidebarOpen && !fullWidthMode && (
-        <div className="fixed top-0 left-0 right-0 h-14 bg-white dark:bg-slate-900 border-b-2 border-slate-100 dark:border-slate-800 z-30 flex items-center justify-between px-4">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-          >
-            <svg className="w-6 h-6 text-slate-600 dark:text-slate-400" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-            </svg>
-          </button>
-          <div className="flex items-center gap-2">
-            {restaurant?.logo_url ? (
-              <>
-                <div className="w-8 h-8 rounded-lg overflow-hidden bg-slate-50 dark:bg-slate-800">
-                  <img src={restaurant.logo_url} alt={restaurant.name} className="w-full h-full object-contain" />
-                </div>
-                <span className="font-semibold text-slate-700 dark:text-slate-200 truncate max-w-[200px]">
-                  {restaurant?.name || 'Veno App'}
-                </span>
-              </>
-            ) : (
-              <PlatformLogo size="sm" />
-            )}
-          </div>
-          <button
-            onClick={toggleFullWidth}
-            className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-            title="Enter full-width mode"
-          >
-            <svg className="w-6 h-6 text-slate-600 dark:text-slate-400" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
-            </svg>
-          </button>
-        </div>
       )}
 
       {/* Full-width mode floating buttons */}
@@ -1670,203 +1202,213 @@ export default function DashboardLayout({ children }) {
 
       {/* Sidebar */}
       <aside className={`
-        ${sidebarOpen
-          ? 'fixed inset-y-0 left-0 z-50 w-72 translate-x-0'
-          : 'fixed inset-y-0 left-0 z-50 w-72 -translate-x-full'
-        }
-        transform transition-transform duration-300 ease-in-out
-        bg-white dark:bg-slate-900 border-r-2 border-slate-100 dark:border-slate-800 flex flex-col h-screen
+        fixed inset-y-0 left-0 z-50 flex flex-col h-screen
+        bg-white dark:bg-slate-900 border-r-2 border-slate-100 dark:border-slate-800
+        transition-all duration-300 ease-in-out overflow-hidden
+        ${fullWidthMode ? '-translate-x-full' : 'translate-x-0'}
+        ${sidebarOpen ? 'w-72' : 'w-16'}
       `}>
-        <div className="p-6 border-b-2 border-slate-100 dark:border-slate-800">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 flex-1 min-w-0">
-              {restaurant?.logo_url ? (
-                <>
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800 flex-shrink-0">
-                    <img
-                      src={restaurant.logo_url}
-                      alt={restaurant.name}
-                      className="max-w-full max-h-full object-contain"
-                    />
-                  </div>
-                  <span className="text-xl font-bold text-slate-700 dark:text-slate-200 truncate">
-                    {restaurant?.name || 'Veno App'}
-                  </span>
-                </>
-              ) : (
-                <PlatformLogo size="md" />
-              )}
-            </div>
-            {/* Close button */}
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex-shrink-0"
-            >
-              <svg className="w-5 h-5 text-slate-500" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-              </svg>
-            </button>
+        <div className={`border-b-2 border-slate-100 dark:border-slate-800 ${sidebarOpen ? 'p-6' : 'py-4 px-2'}`}>
+          <div className={`flex items-center ${sidebarOpen ? 'justify-between' : 'justify-center'}`}>
+            {sidebarOpen ? (
+              <div className="flex items-center space-x-2 flex-1 min-w-0">
+                {restaurant?.logo_url ? (
+                  <>
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800 flex-shrink-0">
+                      <img
+                        src={restaurant.logo_url}
+                        alt={restaurant.name}
+                        className="max-w-full max-h-full object-contain"
+                      />
+                    </div>
+                    <span className="text-xl font-bold text-slate-700 dark:text-slate-200 truncate">
+                      {restaurant?.name || 'Veno App'}
+                    </span>
+                  </>
+                ) : (
+                  <PlatformLogo size="md" />
+                )}
+              </div>
+            ) : (
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800">
+                {restaurant?.logo_url ? (
+                  <img src={restaurant.logo_url} alt={restaurant.name} className="max-w-full max-h-full object-contain" />
+                ) : (
+                  <PlatformLogo size="sm" />
+                )}
+              </div>
+            )}
+            {/* Collapse/expand toggle */}
+            {sidebarOpen && (
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex-shrink-0"
+                title="Collapse sidebar"
+              >
+                <svg className="w-5 h-5 text-slate-500" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                </svg>
+              </button>
+            )}
           </div>
         </div>
 
-        <nav className="p-4 flex-1 overflow-y-auto">
+        <nav className={`flex-1 overflow-y-auto ${sidebarOpen ? 'p-4' : 'py-4 px-2'}`}>
           <ul className="space-y-1">
-            {navItems.map((item) => (
+            {navItems.map((item) => {
+              const isActive = item.href === '/dashboard'
+                ? pathname === '/dashboard'
+                : pathname.startsWith(item.href)
+              return (
               <li key={item.href}>
-                {item.children ? (
-                  // Menu item with children (submenu)
-                  <div>
-                    <div
-                      onClick={() => setExpandedMenus(prev => ({
-                        ...prev,
-                        [item.id]: !prev[item.id]
-                      }))}
-                      className={`flex items-center justify-between px-4 py-3 rounded-xl font-medium transition-colors cursor-pointer ${
-                        pathname.startsWith(item.href)
-                          ? 'bg-primary/10 text-primary dark:bg-primary/20'
-                          : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                      }`}
-                    >
+                <Link
+                  href={item.href}
+                  title={!sidebarOpen ? item.label : undefined}
+                  className={`relative flex items-center rounded-xl font-medium transition-colors ${
+                    sidebarOpen ? 'justify-between px-4 py-2.5' : 'justify-center p-3'
+                  } ${
+                    isActive
+                      ? 'bg-primary/10 text-primary dark:bg-primary/20'
+                      : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200'
+                  }`}
+                >
+                  {sidebarOpen ? (
+                    <>
                       <div className="flex items-center space-x-3">
                         {item.icon}
                         <span>{item.label}</span>
                       </div>
-                      <svg
-                        className={`w-4 h-4 transition-transform ${
-                          expandedMenus[item.id] ? 'rotate-180' : ''
-                        }`}
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M7 10l5 5 5-5z"/>
-                      </svg>
-                    </div>
-                    <div
-                      className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                        expandedMenus[item.id] ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-                      }`}
-                    >
-                      <ul className="ml-4 mt-1 space-y-1">
-                        {item.children.map((child) => (
-                          <li key={child.href}>
-                            <Link
-                              href={child.href}
-                              className={`flex items-center space-x-3 px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
-                                pathname === child.href
-                                  ? 'bg-primary/10 text-primary dark:bg-primary/20'
-                                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                              }`}
-                            >
-                              {child.icon}
-                              <span>{child.label}</span>
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                ) : (
-                  // Regular menu item without children
-                  <Link
-                    href={item.href}
-                    className={`flex items-center justify-between px-4 py-3 rounded-xl font-medium transition-colors ${
-                      pathname === item.href
-                        ? 'bg-primary/10 text-primary dark:bg-primary/20'
-                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                    }`}
-                  >
-                    <div className="flex items-center space-x-3">
+                      {item.badge && (
+                        <span className={`text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center ${
+                          item.label === 'Orders' ? 'bg-primary' : 'bg-red-500'
+                        }`}>
+                          {item.badge}
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <div className="relative">
                       {item.icon}
-                      <span>{item.label}</span>
+                      {item.badge && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                          {item.badge}
+                        </span>
+                      )}
                     </div>
-                    {item.badge && (
-                      <span className={`text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center ${
-                        item.label === 'Orders' ? 'bg-primary' : 'bg-red-500'
-                      }`}>
-                        {item.badge}
-                      </span>
-                    )}
-                  </Link>
-                )}
+                  )}
+                </Link>
               </li>
-            ))}
+            )})}
 
             {isPlatformAdmin && (
-              <li className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800">
+              <li className={`${sidebarOpen ? 'pt-4 mt-4' : 'pt-2 mt-2'} border-t border-slate-100 dark:border-slate-800`}>
                 <Link
                   href="/admin"
-                  className="flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-amber-600 dark:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950 transition-colors"
+                  title={!sidebarOpen ? 'Platform Admin' : undefined}
+                  className={`flex items-center rounded-xl font-medium text-amber-600 dark:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950 transition-colors ${
+                    sidebarOpen ? 'space-x-3 px-4 py-3' : 'justify-center p-3'
+                  }`}
                 >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
                   </svg>
-                  <span>Platform Admin</span>
+                  {sidebarOpen && <span>Platform Admin</span>}
                 </Link>
               </li>
             )}
           </ul>
-        </nav>
 
-        <div className="p-4 border-t-2 border-slate-100 dark:border-slate-800 mt-auto flex-shrink-0">
-          <div className="px-4 py-3 mb-3">
-            <div className="flex items-start justify-between mb-2">
-              <div className="flex-1">
-                <p className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">{restaurant?.name}</p>
-                <p className="text-xs text-slate-400 dark:text-slate-500 truncate">{userEmail}</p>
-              </div>
-              <NotificationBell />
-            </div>
-            <div className="flex flex-wrap gap-1 mt-1">
-              {userLabel && (
-                <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${userLabel.class}`}>
-                  {userLabel.text}
-                </span>
-              )}
-              {departmentLabel && (
-                <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${departmentLabel.class}`}>
-                  {departmentLabel.text}
-                </span>
-              )}
-            </div>
-          </div>
-          {/* Hub Connection Status for staff users */}
-          {(userType === 'staff' || userType === 'staff-admin') && restaurant && (
-            <div className="mb-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
-              <HubConnectionStatus
-                restaurantId={restaurant.id}
-                staffInfo={{
-                  name: userEmail?.split('@')[0],
-                  department: staffDepartment
-                }}
-              />
+          {/* Expand button at bottom of nav when collapsed */}
+          {!sidebarOpen && (
+            <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-center">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                title="Expand sidebar"
+                className="p-3 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
+                </svg>
+              </button>
             </div>
           )}
-          <div className="mb-2">
-            <ThemeToggle />
-          </div>
-          <div className="mb-2">
-            <LanguageSelector className="w-full" />
-          </div>
-          {(userType === 'staff' || userType === 'staff-admin') ? (
-            <button
-              onClick={handleLogout}
-              className="w-full bg-red-500 dark:bg-red-600 text-white px-4 py-4 rounded-xl font-bold hover:bg-red-600 dark:hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
-            >
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
-              </svg>
-              <span>SIGN OUT</span>
-            </button>
+        </nav>
+
+        <div className="border-t border-slate-100 dark:border-slate-800 mt-auto flex-shrink-0">
+          {sidebarOpen ? (
+            <>
+              {/* Hub Connection Status for staff users */}
+              {(userType === 'staff' || userType === 'staff-admin') && restaurant && (
+                <div className="px-4 pt-3">
+                  <div className="p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                    <HubConnectionStatus
+                      restaurantId={restaurant.id}
+                      staffInfo={{
+                        name: userEmail?.split('@')[0],
+                        department: staffDepartment
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* User info row */}
+              <div className="flex items-center gap-2 px-4 pt-3 pb-2">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate leading-tight">{restaurant?.name}</p>
+                  <div className="flex items-center gap-1 mt-0.5">
+                    {userLabel && (
+                      <span className={`inline-block px-1.5 py-0 rounded text-xs font-medium ${userLabel.class}`}>
+                        {userLabel.text}
+                      </span>
+                    )}
+                    {departmentLabel && (
+                      <span className={`inline-block px-1.5 py-0 rounded text-xs font-medium ${departmentLabel.class}`}>
+                        {departmentLabel.text}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <NotificationBell />
+              </div>
+
+              {/* Controls row */}
+              <div className="flex items-center gap-1 px-4 pb-3">
+                <div className="flex-1">
+                  <LanguageSelector className="w-full" />
+                </div>
+                <ThemeToggle />
+              </div>
+
+              {/* Logout button */}
+              <div className="px-4 pb-4">
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white font-semibold transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+                  </svg>
+                  Log out
+                </button>
+              </div>
+            </>
           ) : (
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
-              </svg>
-              <span>Logout</span>
-            </button>
+            /* Collapsed bottom cluster: language + theme + notification + red logout dot */
+            <div className="flex flex-col items-center gap-1 py-3">
+              <LanguageSelector collapsed />
+              <ThemeToggle />
+              <NotificationBell />
+              <button
+                onClick={handleLogout}
+                title="Log out"
+                className="w-10 h-10 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center transition-colors shadow-md mt-1"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+                </svg>
+              </button>
+            </div>
           )}
         </div>
       </aside>
@@ -1874,13 +1416,8 @@ export default function DashboardLayout({ children }) {
       {/* Main content */}
       <main className={`
         flex-1
-        ${sidebarOpen ? 'ml-72' : 'ml-0'}
-        ${fullWidthMode
-          ? 'p-4 pt-16'
-          : sidebarOpen
-            ? 'p-4 md:p-8'
-            : 'pt-20 px-4 pb-4 md:px-8 md:pb-8'
-        }
+        ${fullWidthMode ? 'ml-0' : sidebarOpen ? 'ml-72' : 'ml-16'}
+        ${fullWidthMode ? 'p-4' : 'p-4 md:p-8'}
         ${debug ? 'mt-10' : ''}
         transition-all duration-300
       `}>

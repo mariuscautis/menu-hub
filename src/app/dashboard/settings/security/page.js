@@ -8,6 +8,8 @@ import QRCode from 'qrcode'
 import ConnectedDevicesPanel from '@/components/ConnectedDevicesPanel'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
+import PageTabs from '@/components/PageTabs'
+import { settingsTabs } from '@/components/PageTabsConfig'
 
 export default function Security() {
   const t = useTranslations('security')
@@ -199,6 +201,7 @@ export default function Security() {
 
   return (
     <div>
+      <PageTabs tabs={settingsTabs} />
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-800">{t('title') || 'Security & Authentication'}</h1>
         <p className="text-slate-500">{t('subtitle') || 'Manage staff login security and access control'}</p>

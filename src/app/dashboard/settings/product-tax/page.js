@@ -6,6 +6,8 @@ import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useCurrency } from '@/lib/CurrencyContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
+import PageTabs from '@/components/PageTabs'
+import { settingsTabs } from '@/components/PageTabsConfig'
 
 export default function ProductTaxSettings() {
   useModuleGuard('ordering')
@@ -261,6 +263,7 @@ export default function ProductTaxSettings() {
 
   return (
     <div className="p-8">
+      <PageTabs tabs={settingsTabs} />
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">

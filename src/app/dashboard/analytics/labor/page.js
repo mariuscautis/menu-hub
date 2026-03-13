@@ -7,6 +7,8 @@ import { useTranslations } from '@/lib/i18n/LanguageContext';
 import { useCurrency } from '@/lib/CurrencyContext';
 
 import { useModuleGuard } from '@/hooks/useModuleGuard'
+import PageTabs from '@/components/PageTabs'
+import { analyticsTabs } from '@/components/PageTabsConfig'
 
 export default function LaborAnalyticsPage() {
   useModuleGuard('analytics')
@@ -270,6 +272,7 @@ export default function LaborAnalyticsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
+      <PageTabs tabs={analyticsTabs} />
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-800 mb-2">{t('title')}</h1>

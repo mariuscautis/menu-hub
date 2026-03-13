@@ -4,6 +4,8 @@ import { useState, useRef } from 'react'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
+import PageTabs from '@/components/PageTabs'
+import { settingsTabs } from '@/components/PageTabsConfig'
 
 // --- CSV helpers ---
 
@@ -214,6 +216,7 @@ export default function DataMigration() {
 
   return (
     <div>
+      <PageTabs tabs={settingsTabs} />
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
         <p className="text-slate-500">{t('subtitle')}</p>

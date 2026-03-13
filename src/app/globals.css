@@ -55,11 +55,11 @@
   }
 
   .dark .bg-gray-50 {
-    background-color: rgb(17 24 39) !important; /* gray-900 */
+    background-color: rgb(2 6 23) !important; /* slate-950, near-black */
   }
 
   .dark .bg-gray-100 {
-    background-color: rgb(31 41 55) !important; /* gray-800 */
+    background-color: rgb(15 23 42) !important; /* slate-900 */
   }
 
   /* Text colors */

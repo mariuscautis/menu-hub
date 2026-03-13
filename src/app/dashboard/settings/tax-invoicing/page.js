@@ -7,6 +7,8 @@ import TemplateSelector from '@/components/invoices/TemplateSelector'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
+import PageTabs from '@/components/PageTabs'
+import { settingsTabs } from '@/components/PageTabsConfig'
 
 export default function TaxInvoicing() {
   useModuleGuard('ordering')
@@ -103,6 +105,7 @@ export default function TaxInvoicing() {
 
   return (
     <div>
+      <PageTabs tabs={settingsTabs} />
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-800">{t('pageTitle')}</h1>
         <p className="text-slate-500">{t('pageSubtitle')}</p>

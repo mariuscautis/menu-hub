@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import PageTabs from '@/components/PageTabs'
+import { menuNavTabs } from '@/components/PageTabsConfig'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
@@ -130,6 +132,7 @@ export default function MenuCategories() {
 
   return (
     <div>
+      <PageTabs tabs={menuNavTabs} />
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200">{t('title')}</h1>

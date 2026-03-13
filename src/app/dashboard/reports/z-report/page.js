@@ -24,6 +24,8 @@ import { useTranslations } from '@/lib/i18n/LanguageContext';
 import { useCurrency } from '@/lib/CurrencyContext';
 
 import { useModuleGuard } from '@/hooks/useModuleGuard'
+import PageTabs from '@/components/PageTabs'
+import { reportsNavTabs } from '@/components/PageTabsConfig'
 
 export default function ZReportPage() {
   useModuleGuard('reports')
@@ -474,6 +476,7 @@ export default function ZReportPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-4 md:p-8">
+      <PageTabs tabs={reportsNavTabs} />
       <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200">

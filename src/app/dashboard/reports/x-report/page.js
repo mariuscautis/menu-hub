@@ -24,6 +24,8 @@ import { useTranslations } from '@/lib/i18n/LanguageContext';
 import { useCurrency } from '@/lib/CurrencyContext';
 
 import { useModuleGuard } from '@/hooks/useModuleGuard'
+import PageTabs from '@/components/PageTabs'
+import { reportsNavTabs } from '@/components/PageTabsConfig'
 
 export default function XReportPage() {
   useModuleGuard('reports')
@@ -327,6 +329,7 @@ export default function XReportPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-4 md:p-8">
+      <PageTabs tabs={reportsNavTabs} />
       {/* Header */}
       <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>

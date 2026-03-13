@@ -7,6 +7,8 @@ import { useOrderSounds, soundOptions } from '@/hooks/useOrderSounds'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
+import PageTabs from '@/components/PageTabs'
+import { settingsTabs } from '@/components/PageTabsConfig'
 
 export default function OtherOptionsSettings() {
   useModuleGuard('ordering')
@@ -114,6 +116,7 @@ export default function OtherOptionsSettings() {
 
   return (
     <div>
+      <PageTabs tabs={settingsTabs} />
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-800">{t('title') || 'Other Options'}</h1>
         <p className="text-slate-500">{t('subtitle') || 'Configure additional restaurant features and notifications'}</p>

@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useRestaurant } from '@/lib/RestaurantContext'
+import PageTabs from '@/components/PageTabs'
+import { settingsTabs } from '@/components/PageTabsConfig'
 
 const PLANS = [
   {
@@ -210,6 +212,7 @@ export default function BillingPage() {
 
   return (
     <div>
+      <PageTabs tabs={settingsTabs} />
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Billing & Subscription</h1>
         <p className="text-slate-500 dark:text-slate-400">Choose the modules your business needs.</p>

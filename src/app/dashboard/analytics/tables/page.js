@@ -9,6 +9,8 @@ import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useCurrency } from '@/lib/CurrencyContext'
 
 import { useModuleGuard } from '@/hooks/useModuleGuard'
+import PageTabs from '@/components/PageTabs'
+import { analyticsTabs } from '@/components/PageTabsConfig'
 
 export default function TableAnalyticsPage() {
   useModuleGuard('analytics')
@@ -86,6 +88,7 @@ export default function TableAnalyticsPage() {
   return (
 
     <div className="space-y-6">
+      <PageTabs tabs={analyticsTabs} />
       {/* Header with Back Button */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">

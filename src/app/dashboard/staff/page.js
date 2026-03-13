@@ -5,6 +5,8 @@ import { supabase } from '@/lib/supabase'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
+import PageTabs from '@/components/PageTabs'
+import { staffTabs } from '@/components/PageTabsConfig'
 
 export default function Staff() {
   const t = useTranslations('staff')
@@ -391,6 +393,7 @@ export default function Staff() {
 
   return (
     <div>
+      <PageTabs tabs={staffTabs} />
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>

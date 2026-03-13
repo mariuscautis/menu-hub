@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import PageTabs from '@/components/PageTabs'
+import { stockNavTabs } from '@/components/PageTabsConfig'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useCurrency } from '@/lib/CurrencyContext'
@@ -326,6 +328,7 @@ export default function PurchasingInvoices() {
 
   return (
     <div>
+      <PageTabs tabs={stockNavTabs} />
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
