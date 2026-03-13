@@ -256,6 +256,19 @@ export default function BookReservation({ params }) {
       return
     }
 
+    // Check minimum advance notice — overrides operating hours
+    const minNoticeDays = settings.min_advance_notice_days || 0
+    if (minNoticeDays > 0) {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const selected = new Date(selectedDate + 'T00:00:00')
+      const diffDays = Math.round((selected - today) / (1000 * 60 * 60 * 24))
+      if (diffDays < minNoticeDays) {
+        setAvailableTimeSlots([])
+        return
+      }
+    }
+
     const dayHours = settings.operating_hours?.[getDayName(selectedDate)]
     if (!dayHours || dayHours.closed) {
       setAvailableTimeSlots([])
@@ -487,7 +500,10 @@ export default function BookReservation({ params }) {
     .filter(([, v]) => v.closed)
     .map(([k]) => k)
 
-  const minDate = new Date().toISOString().split('T')[0]
+  const minDateObj = new Date()
+  const minNoticeDays = settings.min_advance_notice_days || 0
+  if (minNoticeDays > 0) minDateObj.setDate(minDateObj.getDate() + minNoticeDays)
+  const minDate = minDateObj.toISOString().split('T')[0]
   const maxDateObj = new Date()
   maxDateObj.setDate(maxDateObj.getDate() + (settings.advance_booking_days || 60))
   const maxDate = maxDateObj.toISOString().split('T')[0]
