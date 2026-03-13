@@ -179,6 +179,14 @@ export default function BookReservation({ params }) {
   const [error, setError] = useState(null)
   const [bookingSuccess, setBookingSuccess] = useState(false)
 
+  // OTP flow
+  const [otpStep, setOtpStep] = useState(false) // true = showing OTP input
+  const [otpCode, setOtpCode] = useState('')
+  const [sendingOtp, setSendingOtp] = useState(false)
+  const [verifyingOtp, setVerifyingOtp] = useState(false)
+  const [otpError, setOtpError] = useState(null)
+  const [otpResendCountdown, setOtpResendCountdown] = useState(0)
+
   // Form state
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedDuration, setSelectedDuration] = useState(null) // customer-choice mode
@@ -375,58 +383,135 @@ export default function BookReservation({ params }) {
     } catch { return true } finally { setCheckingAvailability(false) }
   }
 
+  // Start OTP countdown timer
+  const startResendCountdown = () => {
+    setOtpResendCountdown(60)
+    const interval = setInterval(() => {
+      setOtpResendCountdown(prev => {
+        if (prev <= 1) { clearInterval(interval); return 0 }
+        return prev - 1
+      })
+    }, 1000)
+  }
+
+  // Step 1: validate form, check availability, send OTP
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError(null)
-    setSubmitting(true)
+
+    if (!customerPhone.trim()) {
+      setError('Phone number is required to verify your booking.')
+      return
+    }
+
+    setSendingOtp(true)
     try {
       const isAvailable = await checkAvailability(selectedDate, selectedTime)
       if (!isAvailable) {
         setError(t('slotUnavailable') || 'Sorry, this time slot is no longer available. Please select another time.')
-        setSubmitting(false)
         return
       }
 
+      const res = await fetch('/api/reservations/send-sms-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: customerPhone, restaurantName: restaurant.name })
+      })
+      const result = await res.json()
+
+      if (!result.success) {
+        setError(result.error || 'Failed to send verification code. Please check your phone number.')
+        return
+      }
+
+      setOtpStep(true)
+      setOtpCode('')
+      setOtpError(null)
+      startResendCountdown()
+    } catch (err) {
+      console.error('OTP send error:', err)
+      setError('Failed to send verification code. Please try again.')
+    } finally {
+      setSendingOtp(false)
+    }
+  }
+
+  // Resend OTP
+  const resendOtp = async () => {
+    setOtpError(null)
+    setSendingOtp(true)
+    try {
+      const res = await fetch('/api/reservations/send-sms-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: customerPhone, restaurantName: restaurant.name })
+      })
+      const result = await res.json()
+      if (!result.success) {
+        setOtpError(result.error || 'Failed to resend code.')
+      } else {
+        setOtpCode('')
+        startResendCountdown()
+      }
+    } catch {
+      setOtpError('Failed to resend code. Please try again.')
+    } finally {
+      setSendingOtp(false)
+    }
+  }
+
+  // Step 2: verify OTP and create booking
+  const verifyAndBook = async () => {
+    if (otpCode.length !== 6) {
+      setOtpError('Please enter the 6-digit code.')
+      return
+    }
+    setOtpError(null)
+    setVerifyingOtp(true)
+
+    try {
       const supportedLocales = ['en', 'ro', 'fr', 'it', 'es']
       const restaurantLocale = restaurant.email_language
       const locale = restaurantLocale && supportedLocales.includes(restaurantLocale) ? restaurantLocale : 'en'
 
-      const settings = restaurant.reservation_settings || {}
-      const duration = settings.slot_mode === 'customer_choice'
-        ? selectedDuration
-        : (settings.time_slot_interval || 30)
-
-      const { data, error: insertError } = await supabase
-        .from('reservations')
-        .insert({
-          restaurant_id: restaurant.id,
-          customer_name: customerName,
-          customer_email: customerEmail,
-          customer_phone: customerPhone || null,
-          party_size: partySize,
-          reservation_date: selectedDate,
-          reservation_time: selectedTime,
-          special_requests: specialRequests || null,
-          status: 'pending',
-          locale: locale
-        })
-        .select()
-        .single()
-
-      if (insertError) throw insertError
-
-      fetch('/api/reservations/send-confirmation', {
+      const res = await fetch('/api/reservations/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reservationId: data.id, isConfirmation: false, locale })
-      }).catch(err => console.error('Email error:', err))
+        body: JSON.stringify({
+          phone: customerPhone,
+          otp: otpCode,
+          restaurantId: restaurant.id,
+          customerName,
+          customerEmail: customerEmail || null,
+          partySize,
+          reservationDate: selectedDate,
+          reservationTime: selectedTime,
+          specialRequests: specialRequests || null,
+          locale
+        })
+      })
+      const result = await res.json()
+
+      if (!result.success) {
+        setOtpError(result.error || 'Verification failed. Please try again.')
+        return
+      }
+
+      // Fire-and-forget confirmation email (if email was provided)
+      if (customerEmail) {
+        fetch('/api/reservations/send-confirmation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reservationId: result.reservationId, isConfirmation: false, locale })
+        }).catch(err => console.error('Email error:', err))
+      }
 
       setBookingSuccess(true)
     } catch (err) {
-      console.error('Booking error:', err)
-      setError(t('bookingError') || 'Failed to create reservation. Please try again.')
+      console.error('Verify OTP error:', err)
+      setOtpError('Verification failed. Please try again.')
     } finally {
-      setSubmitting(false)
+      setVerifyingOtp(false)
     }
   }
 
@@ -475,9 +560,15 @@ export default function BookReservation({ params }) {
               time: selectedTime
             }) || `Thank you, ${customerName}! We've received your reservation request for ${partySize} ${partySize === 1 ? 'guest' : 'guests'} on ${new Date(selectedDate).toLocaleDateString()} at ${selectedTime}.`}
           </p>
-          <p className="text-slate-600 mb-6">
-            {t('confirmationEmailMessage', { email: customerEmail }) || `You'll receive a confirmation email at ${customerEmail} once the restaurant approves your request.`}
-          </p>
+          {customerEmail ? (
+            <p className="text-slate-600 mb-6">
+              {t('confirmationEmailMessage', { email: customerEmail }) || `You'll receive a confirmation email at ${customerEmail} once the restaurant approves your request.`}
+            </p>
+          ) : (
+            <p className="text-slate-600 mb-6">
+              The restaurant will review your request and get in touch.
+            </p>
+          )}
           <button
             onClick={() => router.push(`/${slug}/menu`)}
             className="bg-[#6262bd] text-white px-6 py-3 rounded-xl font-medium hover:bg-[#5252a3]"
@@ -691,32 +782,35 @@ export default function BookReservation({ params }) {
               />
             </div>
 
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">{t('emailLabel') || 'Email Address'} *</label>
-              <input
-                type="email"
-                value={customerEmail}
-                onChange={(e) => setCustomerEmail(e.target.value)}
-                required
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
-                placeholder={t('emailPlaceholder') || 'john@example.com'}
-              />
-              <p className="text-xs text-slate-500 mt-1">{t('emailHelpText') || "We'll send your confirmation to this email"}</p>
-            </div>
-
-            {/* Phone */}
+            {/* Phone — mandatory, used for OTP */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                {t('phoneLabel') || 'Phone Number'} ({t('optional') || 'Optional'})
+                {t('phoneLabel') || 'Phone Number'} *
               </label>
               <input
                 type="tel"
                 value={customerPhone}
                 onChange={(e) => setCustomerPhone(e.target.value)}
+                required
                 className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                 placeholder={t('phonePlaceholder') || '+1 (555) 123-4567'}
               />
+              <p className="text-xs text-slate-500 mt-1">We'll send a verification code to this number to confirm your booking.</p>
+            </div>
+
+            {/* Email — optional */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                {t('emailLabel') || 'Email Address'} <span className="font-normal text-slate-400">({t('optional') || 'Optional'})</span>
+              </label>
+              <input
+                type="email"
+                value={customerEmail}
+                onChange={(e) => setCustomerEmail(e.target.value)}
+                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                placeholder={t('emailPlaceholder') || 'john@example.com'}
+              />
+              <p className="text-xs text-slate-500 mt-1">{t('emailHelpText') || "We'll send your confirmation to this email"}</p>
             </div>
 
             {/* Special requests */}
@@ -736,16 +830,77 @@ export default function BookReservation({ params }) {
             {/* Submit */}
             <button
               type="submit"
-              disabled={submitting || checkingAvailability || !selectedDate || !selectedTime || (isCustomerChoice && !selectedDuration)}
+              disabled={sendingOtp || checkingAvailability || !selectedDate || !selectedTime || (isCustomerChoice && !selectedDuration) || !customerName.trim() || !customerPhone.trim()}
               className="w-full bg-[#6262bd] text-white py-4 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
-              {submitting
-                ? (t('submitting') || 'Creating Reservation...')
-                : checkingAvailability
-                  ? (t('checkingAvailability') || 'Checking Availability...')
-                  : (t('submitButton') || 'Request Reservation')}
+              {sendingOtp || checkingAvailability
+                ? 'Checking availability...'
+                : 'Continue — Verify Phone'}
             </button>
           </form>
+
+          {/* OTP Verification Step */}
+          {otpStep && (
+            <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-2xl p-8 w-full max-w-sm shadow-2xl">
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 bg-[#6262bd]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                    </svg>
+                  </div>
+                  <h2 className="text-xl font-bold text-slate-800 mb-2">Verify your phone</h2>
+                  <p className="text-slate-500 text-sm">
+                    We sent a 6-digit code to <strong>{customerPhone}</strong>
+                  </p>
+                </div>
+
+                {otpError && (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm text-center">{otpError}</div>
+                )}
+
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={6}
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="000000"
+                  className="w-full px-4 py-4 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-800 text-center text-2xl font-bold tracking-widest mb-4"
+                  autoFocus
+                />
+
+                <button
+                  onClick={verifyAndBook}
+                  disabled={verifyingOtp || otpCode.length !== 6}
+                  className="w-full bg-[#6262bd] text-white py-3.5 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all mb-3"
+                >
+                  {verifyingOtp ? 'Verifying...' : 'Confirm Booking'}
+                </button>
+
+                <div className="flex items-center justify-between text-sm">
+                  <button
+                    onClick={() => { setOtpStep(false); setOtpCode(''); setOtpError(null) }}
+                    className="text-slate-500 hover:text-slate-700"
+                  >
+                    ← Change details
+                  </button>
+                  {otpResendCountdown > 0 ? (
+                    <span className="text-slate-400">Resend in {otpResendCountdown}s</span>
+                  ) : (
+                    <button
+                      onClick={resendOtp}
+                      disabled={sendingOtp}
+                      className="text-[#6262bd] hover:text-[#5252a3] font-medium disabled:opacity-50"
+                    >
+                      {sendingOtp ? 'Sending...' : 'Resend code'}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Info box */}

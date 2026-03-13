@@ -31,7 +31,6 @@ export default function Reservations() {
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [showDenyModal, setShowDenyModal] = useState(false)
-  const [showBlockDateModal, setShowBlockDateModal] = useState(false)
   const [selectedReservation, setSelectedReservation] = useState(null)
   const [availableTables, setAvailableTables] = useState([])
   const [selectedTable, setSelectedTable] = useState('')
@@ -42,6 +41,12 @@ export default function Reservations() {
   const [blockedDates, setBlockedDates] = useState([])
   const [blockDateInput, setBlockDateInput] = useState('')
   const [savingBlockedDates, setSavingBlockedDates] = useState(false)
+
+  // Customer ratings
+  const [ratings, setRatings] = useState({}) // keyed by reservation_id
+  const [pendingRating, setPendingRating] = useState(0) // 1-5 hover/selected
+  const [ratingNote, setRatingNote] = useState('')
+  const [savingRating, setSavingRating] = useState(false)
 
   // Notifications
   const [notification, setNotification] = useState(null)
@@ -63,6 +68,19 @@ export default function Reservations() {
     setNotification({ type, message })
     setTimeout(() => setNotification(null), 4000)
   }, [])
+
+  const fetchRatings = useCallback(async (restaurantId) => {
+    if (!restaurantId) return
+    const { data, error } = await adminSupabase
+      .from('customer_ratings')
+      .select('reservation_id, rating, note, customer_id, customers(avg_rating, total_bookings)')
+      .eq('restaurant_id', restaurantId)
+    if (!error && data) {
+      const map = {}
+      data.forEach(r => { map[r.reservation_id] = r })
+      setRatings(map)
+    }
+  }, [adminSupabase])
 
   const fetchReservations = useCallback(async (restaurantId) => {
     if (!restaurantId) return
@@ -123,7 +141,8 @@ export default function Reservations() {
 
     await Promise.all([
       fetchReservations(restaurantData.id),
-      fetchTables(restaurantData.id)
+      fetchTables(restaurantData.id),
+      fetchRatings(restaurantData.id)
     ])
 
     setTimeout(() => {
@@ -131,11 +150,46 @@ export default function Reservations() {
     }, 2000)
 
     setLoading(false)
-  }, [restaurantCtx, fetchReservations, fetchTables])
+  }, [restaurantCtx, fetchReservations, fetchTables, fetchRatings])
 
   useEffect(() => {
     fetchData()
   }, [fetchData])
+
+  const saveRating = async (reservation, rating, note) => {
+    if (!reservation.customer_id) {
+      showNotification('error', 'No customer profile linked to this reservation.')
+      return
+    }
+    setSavingRating(true)
+    try {
+      const { error } = await adminSupabase
+        .from('customer_ratings')
+        .upsert(
+          {
+            customer_id: reservation.customer_id,
+            reservation_id: reservation.id,
+            restaurant_id: restaurant.id,
+            rating,
+            note: note || null
+          },
+          { onConflict: 'reservation_id' }
+        )
+      if (error) throw error
+      showNotification('success', 'Rating saved!')
+      setRatings(prev => ({
+        ...prev,
+        [reservation.id]: { rating, note, customer_id: reservation.customer_id }
+      }))
+      setPendingRating(0)
+      setRatingNote('')
+    } catch (err) {
+      console.error('saveRating error:', err)
+      showNotification('error', 'Failed to save rating.')
+    } finally {
+      setSavingRating(false)
+    }
+  }
 
   // Auto-cancel no-shows
   useEffect(() => {
@@ -709,13 +763,26 @@ export default function Reservations() {
                     <span className="font-medium">{reservation.party_size} {reservation.party_size === 1 ? t('guest') : t('guests')}</span>
                   </div>
 
-                  {/* Pending indicator */}
-                  {reservation.status === 'pending' && (
-                    <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700 flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 font-medium">
-                      <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                      Awaiting action
-                    </div>
-                  )}
+                  {/* Footer: pending indicator or customer rating */}
+                  <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+                    {reservation.status === 'pending' ? (
+                      <div className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 font-medium">
+                        <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                        Awaiting action
+                      </div>
+                    ) : ratings[reservation.id] ? (
+                      <div className="flex items-center gap-1">
+                        {[1,2,3,4,5].map(s => (
+                          <svg key={s} className={`w-3.5 h-3.5 ${s <= ratings[reservation.id].rating ? 'text-amber-400' : 'text-slate-200 dark:text-slate-600'}`} fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                          </svg>
+                        ))}
+                        <span className="text-xs text-slate-400 dark:text-slate-500 ml-1">{ratings[reservation.id].rating}/5</span>
+                      </div>
+                    ) : reservation.customer_id ? (
+                      <div className="text-xs text-slate-400 dark:text-slate-500 italic">No rating yet</div>
+                    ) : null}
+                  </div>
                 </div>
               </button>
             )
@@ -727,7 +794,7 @@ export default function Reservations() {
       {showDetailModal && selectedReservation && (
         <div
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4"
-          onClick={() => { setShowDetailModal(false); setSelectedReservation(null) }}
+          onClick={() => { setShowDetailModal(false); setSelectedReservation(null); setPendingRating(0); setRatingNote('') }}
         >
           <div
             className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden"
@@ -746,7 +813,7 @@ export default function Reservations() {
                   </span>
                 </div>
                 <button
-                  onClick={() => { setShowDetailModal(false); setSelectedReservation(null) }}
+                  onClick={() => { setShowDetailModal(false); setSelectedReservation(null); setPendingRating(0); setRatingNote('') }}
                   className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
                 >
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -845,6 +912,79 @@ export default function Reservations() {
                   >
                     {t('deny')}
                   </button>
+                </div>
+              )}
+
+              {/* Customer rating — shown for completed/confirmed/no_show */}
+              {['completed', 'confirmed', 'no_show'].includes(selectedReservation.status) && selectedReservation.customer_id && (
+                <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-700">
+                  <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
+                    {ratings[selectedReservation.id] ? 'Customer Rating' : 'Rate this customer'}
+                  </h3>
+
+                  {ratings[selectedReservation.id] ? (
+                    /* Existing rating — show + allow edit */
+                    <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
+                      <div className="flex items-center gap-1.5 mb-2">
+                        {[1,2,3,4,5].map(s => (
+                          <button
+                            key={s}
+                            type="button"
+                            onClick={() => {
+                              setPendingRating(s)
+                              saveRating(selectedReservation, s, ratings[selectedReservation.id]?.note || '')
+                            }}
+                            disabled={savingRating}
+                            className="focus:outline-none disabled:opacity-50"
+                          >
+                            <svg className={`w-6 h-6 ${s <= ratings[selectedReservation.id].rating ? 'text-amber-400' : 'text-slate-200 dark:text-slate-600'}`} fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                            </svg>
+                          </button>
+                        ))}
+                        <span className="text-sm font-medium text-amber-700 dark:text-amber-400 ml-1">{ratings[selectedReservation.id].rating}/5</span>
+                      </div>
+                      {ratings[selectedReservation.id].note && (
+                        <p className="text-sm text-slate-600 dark:text-slate-400 italic">"{ratings[selectedReservation.id].note}"</p>
+                      )}
+                    </div>
+                  ) : (
+                    /* New rating form */
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-1">
+                        {[1,2,3,4,5].map(s => (
+                          <button
+                            key={s}
+                            type="button"
+                            onClick={() => setPendingRating(s)}
+                            className="focus:outline-none"
+                          >
+                            <svg className={`w-8 h-8 transition-colors ${s <= pendingRating ? 'text-amber-400' : 'text-slate-200 dark:text-slate-600 hover:text-amber-300'}`} fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                            </svg>
+                          </button>
+                        ))}
+                      </div>
+                      {pendingRating > 0 && (
+                        <>
+                          <textarea
+                            value={ratingNote}
+                            onChange={(e) => setRatingNote(e.target.value)}
+                            rows={2}
+                            placeholder="Optional note (e.g. no-show, great guest, rude behaviour...)"
+                            className="w-full px-3 py-2 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 text-sm resize-none"
+                          />
+                          <button
+                            onClick={() => saveRating(selectedReservation, pendingRating, ratingNote)}
+                            disabled={savingRating}
+                            className="w-full bg-amber-500 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-amber-600 disabled:opacity-50"
+                          >
+                            {savingRating ? 'Saving...' : `Save ${pendingRating}-star rating`}
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
