@@ -54,7 +54,7 @@ export async function POST(request) {
 
       if (account.error) {
         console.error('Stripe account create error:', account.error)
-        return NextResponse.json({ error: 'Failed to create Stripe account' }, { status: 500 })
+        return NextResponse.json({ error: 'Failed to create Stripe account', detail: account.error?.message || JSON.stringify(account.error) }, { status: 500 })
       }
 
       accountId = account.id
@@ -76,13 +76,13 @@ export async function POST(request) {
 
     if (accountLink.error) {
       console.error('Stripe account link error:', accountLink.error)
-      return NextResponse.json({ error: 'Failed to create onboarding link' }, { status: 500 })
+      return NextResponse.json({ error: 'Failed to create onboarding link', detail: accountLink.error?.message || JSON.stringify(accountLink.error) }, { status: 500 })
     }
 
     return NextResponse.json({ url: accountLink.url })
 
   } catch (err) {
     console.error('stripe-connect/onboard error:', err)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Internal server error', detail: err?.message || String(err) }, { status: 500 })
   }
 }
