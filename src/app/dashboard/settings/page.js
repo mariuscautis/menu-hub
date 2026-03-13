@@ -90,6 +90,18 @@ const sections = [
     bg: 'bg-slate-100 dark:bg-slate-800',
   },
   {
+    title: 'Reservations',
+    description: 'Booking slots, operating hours and availability',
+    href: '/dashboard/settings/reservation-settings',
+    icon: (
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+    ),
+    color: 'text-indigo-500',
+    bg: 'bg-indigo-50 dark:bg-indigo-900/30',
+  },
+  {
     title: 'Data Migration',
     description: 'Import or export your restaurant data',
     href: '/dashboard/settings/data-migration',

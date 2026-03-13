@@ -22,9 +22,26 @@ export async function POST(request) {
   try {
     const { reservationId, tableId, confirmedByStaffName, confirmedByUserId } = await request.json()
 
-    console.log('Confirm reservation request:', { reservationId, tableId, confirmedByStaffName })
+    // Single-booking-area mode: no table to assign — update directly
+    if (!tableId) {
+      const { error } = await supabaseAdmin
+        .from('reservations')
+        .update({
+          status: 'confirmed',
+          table_id: null,
+          confirmed_by_staff_name: confirmedByStaffName,
+          confirmed_by_user_id: confirmedByUserId || null,
+          confirmed_at: new Date().toISOString()
+        })
+        .eq('id', reservationId)
 
-    // Use RPC function with admin client
+      if (error) {
+        return NextResponse.json({ success: false, error: error.message }, { status: 400 })
+      }
+      return NextResponse.json({ success: true })
+    }
+
+    // Multi-table mode: use RPC which validates the table belongs to the restaurant
     const { data, error } = await supabaseAdmin.rpc('confirm_reservation', {
       p_reservation_id: reservationId,
       p_table_id: tableId,
@@ -33,27 +50,17 @@ export async function POST(request) {
     })
 
     if (error) {
-      console.error('RPC error:', error)
-      return NextResponse.json({
-        success: false,
-        error: error.message || 'Failed to confirm reservation'
-      }, { status: 400 })
+      return NextResponse.json({ success: false, error: error.message || 'Failed to confirm reservation' }, { status: 400 })
     }
 
     if (data && !data.success) {
-      return NextResponse.json({
-        success: false,
-        error: data.error || 'Failed to confirm reservation'
-      }, { status: 400 })
+      return NextResponse.json({ success: false, error: data.error || 'Failed to confirm reservation' }, { status: 400 })
     }
 
     return NextResponse.json({ success: true })
 
   } catch (error) {
     console.error('Confirm reservation error:', error)
-    return NextResponse.json({
-      success: false,
-      error: error.message || 'Internal server error'
-    }, { status: 500 })
+    return NextResponse.json({ success: false, error: error.message || 'Internal server error' }, { status: 500 })
   }
 }

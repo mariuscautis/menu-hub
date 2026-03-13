@@ -148,7 +148,7 @@ export default function DashboardLayout({ children }) {
           try {
             const { data: freshRestaurant } = await supabase
               .from('restaurants')
-              .select('id, name, slug, logo_url, invoice_settings, enabled_modules')
+              .select('id, name, slug, logo_url, invoice_settings, enabled_modules, reservation_settings')
               .eq('id', staffSession.restaurant_id)
               .single()
 

@@ -6,11 +6,13 @@ import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useOrderSounds } from '@/hooks/useOrderSounds'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
+import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 
 export default function Reservations() {
   useModuleGuard('reservations')
   const t = useTranslations('reservations')
   const tc = useTranslations('common')
+  const adminSupabase = useAdminSupabase()
   const [restaurant, setRestaurant] = useState(null)
   const [reservations, setReservations] = useState([])
   const [tables, setTables] = useState([])
@@ -29,11 +31,17 @@ export default function Reservations() {
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [showDenyModal, setShowDenyModal] = useState(false)
+  const [showBlockDateModal, setShowBlockDateModal] = useState(false)
   const [selectedReservation, setSelectedReservation] = useState(null)
   const [availableTables, setAvailableTables] = useState([])
   const [selectedTable, setSelectedTable] = useState('')
   const [denyReason, setDenyReason] = useState('')
   const [modalLoading, setModalLoading] = useState(false)
+
+  // Blocked dates
+  const [blockedDates, setBlockedDates] = useState([])
+  const [blockDateInput, setBlockDateInput] = useState('')
+  const [savingBlockedDates, setSavingBlockedDates] = useState(false)
 
   // Notifications
   const [notification, setNotification] = useState(null)
@@ -111,6 +119,7 @@ export default function Reservations() {
 
     setRestaurant(restaurantData)
     setUserInfo({ email: userEmail, name: userName, id: userId })
+    setBlockedDates(restaurantData.reservation_settings?.blocked_dates || [])
 
     await Promise.all([
       fetchReservations(restaurantData.id),
@@ -192,6 +201,17 @@ export default function Reservations() {
 
   const openConfirmModal = async (reservation) => {
     setSelectedReservation(reservation)
+    setShowDetailModal(false)
+
+    const isSingleArea = restaurant.reservation_settings?.single_booking_area === true
+
+    if (isSingleArea) {
+      // No table assignment needed — confirm immediately
+      setAvailableTables([])
+      setSelectedTable('')
+      setShowConfirmModal(true)
+      return
+    }
 
     const { data: bookedTables } = await supabase
       .from('reservations')
@@ -207,12 +227,39 @@ export default function Reservations() {
 
     setAvailableTables(available)
     setSelectedTable(available[0]?.id || '')
-    setShowDetailModal(false)
     setShowConfirmModal(true)
   }
 
+  const saveBlockedDates = async (dates) => {
+    setSavingBlockedDates(true)
+    const updatedSettings = {
+      ...(restaurant.reservation_settings || {}),
+      blocked_dates: dates
+    }
+    const { error } = await adminSupabase
+      .from('restaurants')
+      .update({ reservation_settings: updatedSettings })
+      .eq('id', restaurant.id)
+
+    if (!error) {
+      setRestaurant(r => ({ ...r, reservation_settings: updatedSettings }))
+      setBlockedDates(dates)
+    } else {
+      showNotification('error', 'Failed to update blocked dates')
+    }
+    setSavingBlockedDates(false)
+  }
+
+  const toggleBlockedDate = (dateStr) => {
+    const next = blockedDates.includes(dateStr)
+      ? blockedDates.filter(d => d !== dateStr)
+      : [...blockedDates, dateStr].sort()
+    saveBlockedDates(next)
+  }
+
   const confirmReservation = async () => {
-    if (!selectedTable) {
+    const isSingleArea = restaurant.reservation_settings?.single_booking_area === true
+    if (!isSingleArea && !selectedTable) {
       showNotification('error', t('pleaseSelectTable'))
       return
     }
@@ -223,12 +270,13 @@ export default function Reservations() {
       const staffSessionData = localStorage.getItem('staff_session')
       const isPinBasedLogin = !!staffSessionData
 
+      const isSingleArea = restaurant.reservation_settings?.single_booking_area === true
       const response = await fetch('/api/reservations/confirm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           reservationId: selectedReservation.id,
-          tableId: selectedTable,
+          tableId: isSingleArea ? null : selectedTable,
           confirmedByStaffName: userInfo.name,
           confirmedByUserId: isPinBasedLogin ? null : userInfo.id
         })
@@ -419,6 +467,53 @@ export default function Reservations() {
           <span className={notification.type === 'success' ? 'text-green-700' : 'text-red-700'}>{notification.message}</span>
         </div>
       )}
+
+      {/* Block a date panel */}
+      <div className="mb-6 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl p-6">
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <h2 className="text-base font-bold text-slate-800 dark:text-slate-200 mb-1">Block a date</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Stop taking new bookings for a specific date. Existing reservations are unaffected.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="date"
+              value={blockDateInput}
+              onChange={e => setBlockDateInput(e.target.value)}
+              className="px-3 py-2 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 text-sm"
+            />
+            <button
+              disabled={!blockDateInput || savingBlockedDates}
+              onClick={() => { if (blockDateInput) { toggleBlockedDate(blockDateInput); setBlockDateInput('') } }}
+              className="px-4 py-2 bg-red-600 text-white rounded-xl text-sm font-medium hover:bg-red-700 disabled:opacity-50"
+            >
+              {blockedDates.includes(blockDateInput) ? 'Unblock' : 'Block'}
+            </button>
+          </div>
+        </div>
+        {blockedDates.length > 0 && (
+          <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700 flex flex-wrap gap-2">
+            {blockedDates.map(d => (
+              <div key={d} className="flex items-center gap-1.5 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg px-3 py-1.5">
+                <span className="text-sm font-medium text-red-700 dark:text-red-300">
+                  {new Date(d + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                </span>
+                <button
+                  onClick={() => toggleBlockedDate(d)}
+                  disabled={savingBlockedDates}
+                  className="text-red-400 hover:text-red-600 dark:hover:text-red-200 disabled:opacity-50"
+                >
+                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Time Scope Tabs */}
       <div className="mb-6 flex gap-2">
@@ -756,22 +851,24 @@ export default function Reservations() {
                 {new Date(selectedReservation.reservation_date).toLocaleDateString()} at {selectedReservation.reservation_time.substring(0, 5)}
               </p>
             </div>
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('assignTable')} *</label>
-              {availableTables.length === 0 ? (
-                <p className="text-red-600 dark:text-red-400 text-sm">{t('noAvailableTables')}</p>
-              ) : (
-                <select
-                  value={selectedTable}
-                  onChange={(e) => setSelectedTable(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
-                >
-                  {availableTables.map((table) => (
-                    <option key={table.id} value={table.id}>{t('table')} {table.table_number}</option>
-                  ))}
-                </select>
-              )}
-            </div>
+            {restaurant?.reservation_settings?.single_booking_area ? null : (
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('assignTable')} *</label>
+                {availableTables.length === 0 ? (
+                  <p className="text-red-600 dark:text-red-400 text-sm">{t('noAvailableTables')}</p>
+                ) : (
+                  <select
+                    value={selectedTable}
+                    onChange={(e) => setSelectedTable(e.target.value)}
+                    className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  >
+                    {availableTables.map((table) => (
+                      <option key={table.id} value={table.id}>{t('table')} {table.table_number}</option>
+                    ))}
+                  </select>
+                )}
+              </div>
+            )}
             <div className="flex gap-3">
               <button
                 type="button"
@@ -782,7 +879,7 @@ export default function Reservations() {
               </button>
               <button
                 onClick={confirmReservation}
-                disabled={modalLoading || !selectedTable}
+                disabled={modalLoading || (!restaurant?.reservation_settings?.single_booking_area && !selectedTable)}
                 className="flex-1 bg-green-600 text-white py-3 rounded-xl font-medium hover:bg-green-700 disabled:opacity-50"
               >
                 {modalLoading ? t('confirming') : t('confirmReservation')}

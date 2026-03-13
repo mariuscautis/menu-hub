@@ -1,10 +1,173 @@
 'use client'
 export const runtime = 'edge'
 
-import { useState, useEffect, use } from 'react'
+import { useState, useEffect, use, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { loadTranslations, createTranslator } from '@/lib/clientTranslations'
+
+// ─── helpers ─────────────────────────────────────────────────────────────────
+
+function toMinutes(hhmm) {
+  const [h, m] = hhmm.split(':').map(Number)
+  return h * 60 + m
+}
+
+function fromMinutes(totalMin) {
+  const h = Math.floor(totalMin / 60)
+  const m = totalMin % 60
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+}
+
+function getDayName(dateStr) {
+  return new Date(dateStr).toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()
+}
+
+function formatDuration(minutes) {
+  if (minutes < 60) return `${minutes} min`
+  if (minutes % 60 === 0) return `${minutes / 60} hour${minutes / 60 > 1 ? 's' : ''}`
+  return `${Math.floor(minutes / 60)}h ${minutes % 60}m`
+}
+
+// ─── Mini calendar ────────────────────────────────────────────────────────────
+
+const WEEK_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
+
+function MiniCalendar({ value, onChange, minDate, maxDate, closedDayNames = [], blockedDates = [] }) {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  const [viewYear, setViewYear] = useState(() => {
+    const d = value ? new Date(value + 'T00:00:00') : today
+    return d.getFullYear()
+  })
+  const [viewMonth, setViewMonth] = useState(() => {
+    const d = value ? new Date(value + 'T00:00:00') : today
+    return d.getMonth()
+  })
+
+  const minD = minDate ? new Date(minDate + 'T00:00:00') : today
+  const maxD = maxDate ? new Date(maxDate + 'T00:00:00') : null
+
+  const firstDay = new Date(viewYear, viewMonth, 1).getDay()
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate()
+
+  const prevMonth = () => {
+    if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1) }
+    else setViewMonth(m => m - 1)
+  }
+  const nextMonth = () => {
+    if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1) }
+    else setViewMonth(m => m + 1)
+  }
+
+  const canGoPrev = new Date(viewYear, viewMonth, 1) > new Date(minD.getFullYear(), minD.getMonth(), 1)
+  const canGoNext = !maxD || new Date(viewYear, viewMonth, 1) < new Date(maxD.getFullYear(), maxD.getMonth(), 1)
+
+  const cells = []
+  for (let i = 0; i < firstDay; i++) cells.push(null)
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d)
+
+  return (
+    <div className="bg-white rounded-2xl border-2 border-slate-100 p-4 select-none">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <button
+          type="button"
+          onClick={prevMonth}
+          disabled={!canGoPrev}
+          className="p-1.5 rounded-lg hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed text-slate-600"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <span className="font-semibold text-slate-800 text-sm">{MONTHS[viewMonth]} {viewYear}</span>
+        <button
+          type="button"
+          onClick={nextMonth}
+          disabled={!canGoNext}
+          className="p-1.5 rounded-lg hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed text-slate-600"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Day headers */}
+      <div className="grid grid-cols-7 mb-1">
+        {WEEK_DAYS.map(d => (
+          <div key={d} className="text-center text-xs font-medium text-slate-400 py-1">{d}</div>
+        ))}
+      </div>
+
+      {/* Date cells */}
+      <div className="grid grid-cols-7 gap-y-1">
+        {cells.map((day, idx) => {
+          if (!day) return <div key={`e-${idx}`} />
+
+          const cellDate = new Date(viewYear, viewMonth, day)
+          cellDate.setHours(0, 0, 0, 0)
+          const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+          const dayName = cellDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()
+
+          const isPast = cellDate < minD
+          const isBeyondMax = maxD && cellDate > maxD
+          const isClosed = closedDayNames.includes(dayName)
+          const isBlocked = blockedDates.includes(dateStr)
+          const isDisabled = isPast || isBeyondMax || isClosed || isBlocked
+          const isSelected = value === dateStr
+          const isToday = cellDate.getTime() === today.getTime()
+
+          return (
+            <button
+              key={dateStr}
+              type="button"
+              disabled={isDisabled}
+              onClick={() => !isDisabled && onChange(dateStr)}
+              className={`
+                relative text-center text-sm py-1.5 rounded-lg font-medium transition-all
+                ${isSelected ? 'bg-[#6262bd] text-white' : ''}
+                ${!isSelected && isToday ? 'ring-2 ring-[#6262bd] text-[#6262bd]' : ''}
+                ${!isSelected && (isClosed || isBlocked) && !isPast && !isBeyondMax ? 'text-slate-300 bg-slate-50 cursor-not-allowed' : ''}
+                ${!isSelected && (isPast || isBeyondMax) ? 'text-slate-200 cursor-not-allowed' : ''}
+                ${!isSelected && !isDisabled ? 'text-slate-700 hover:bg-slate-100' : ''}
+              `}
+              title={isBlocked && !isPast ? 'Unavailable' : isClosed && !isPast ? 'Closed' : undefined}
+            >
+              {day}
+              {!isSelected && !isPast && !isBeyondMax && (isClosed || isBlocked) && (
+                <span className={`absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full ${isBlocked ? 'bg-orange-400' : 'bg-red-300'}`} />
+              )}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Legend */}
+      {(closedDayNames.length > 0 || blockedDates.length > 0) && (
+        <div className="mt-3 pt-3 border-t border-slate-100 flex items-center gap-3 text-xs text-slate-400 flex-wrap">
+          {closedDayNames.length > 0 && (
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-red-300 flex-shrink-0" />
+              Closed
+            </span>
+          )}
+          {blockedDates.length > 0 && (
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-orange-400 flex-shrink-0" />
+              Unavailable
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function BookReservation({ params }) {
   const { restaurant: slug } = use(params)
@@ -18,30 +181,28 @@ export default function BookReservation({ params }) {
 
   // Form state
   const [selectedDate, setSelectedDate] = useState('')
+  const [selectedDuration, setSelectedDuration] = useState(null) // customer-choice mode
   const [selectedTime, setSelectedTime] = useState('')
-  const [partySize, setPartySize] = useState(2)
+  const [partySize, setPartySize] = useState(1)
   const [customerName, setCustomerName] = useState('')
   const [customerEmail, setCustomerEmail] = useState('')
   const [customerPhone, setCustomerPhone] = useState('')
   const [specialRequests, setSpecialRequests] = useState('')
 
-  // Availability state
+  // Availability
   const [availableTimeSlots, setAvailableTimeSlots] = useState([])
   const [checkingAvailability, setCheckingAvailability] = useState(false)
 
-  // Translation state
+  // Translations
   const [translations, setTranslations] = useState({})
   const t = createTranslator(translations)
 
-  useEffect(() => {
-    fetchRestaurant()
-  }, [slug])
+  useEffect(() => { fetchRestaurant() }, [slug])
 
+  // Re-generate slots whenever date or duration changes
   useEffect(() => {
-    if (selectedDate && restaurant) {
-      generateTimeSlots()
-    }
-  }, [selectedDate, restaurant])
+    if (selectedDate && restaurant) generateTimeSlots()
+  }, [selectedDate, selectedDuration, restaurant])
 
   const fetchRestaurant = async () => {
     try {
@@ -66,10 +227,17 @@ export default function BookReservation({ params }) {
 
       setRestaurant(data)
 
-      // Load translations based on restaurant's email language
+      // Default party size
+      const rs = data.reservation_settings || {}
+      setPartySize(rs.show_party_size !== false ? (rs.min_party_size || 1) : 1)
+
+      // Default duration for customer-choice mode
+      if (rs.slot_mode === 'customer_choice' && rs.allowed_durations?.length) {
+        setSelectedDuration(rs.allowed_durations[0])
+      }
+
       const locale = data.email_language || 'en'
-      const bookingTranslations = loadTranslations(locale, 'booking')
-      setTranslations(bookingTranslations)
+      setTranslations(loadTranslations(locale, 'booking'))
     } catch (err) {
       setError('Failed to load restaurant')
     } finally {
@@ -77,71 +245,112 @@ export default function BookReservation({ params }) {
     }
   }
 
-  const generateTimeSlots = () => {
+  const generateTimeSlots = useCallback(async () => {
     if (!restaurant?.reservation_settings) return
 
     const settings = restaurant.reservation_settings
-    const date = new Date(selectedDate)
-    const dayName = date.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()
-    const dayHours = settings.operating_hours[dayName]
 
+    // Check if this date is explicitly blocked by the manager
+    if (settings.blocked_dates?.includes(selectedDate)) {
+      setAvailableTimeSlots([])
+      return
+    }
+
+    const dayHours = settings.operating_hours?.[getDayName(selectedDate)]
     if (!dayHours || dayHours.closed) {
       setAvailableTimeSlots([])
       return
     }
 
-    const slots = []
-    const [openHour, openMin] = dayHours.open.split(':').map(Number)
-    const [closeHour, closeMin] = dayHours.close.split(':').map(Number)
+    const openMin  = toMinutes(dayHours.open)
+    const closeMin = toMinutes(dayHours.close)
 
-    let current = new Date(selectedDate)
-    current.setHours(openHour, openMin, 0, 0)
+    const duration = settings.slot_mode === 'customer_choice'
+      ? (selectedDuration || settings.allowed_durations?.[0] || 60)
+      : (settings.time_slot_interval || 30)
 
-    const closing = new Date(selectedDate)
-    closing.setHours(closeHour, closeMin, 0, 0)
+    const padding = settings.slot_padding || 0
 
-    const interval = settings.time_slot_interval || 30
+    const step = settings.slot_mode === 'customer_choice'
+      ? Math.min(...(settings.allowed_durations || [duration]))
+      : duration
 
-    // If today, skip past time slots
-    const now = new Date()
-    if (date.toDateString() === now.toDateString()) {
-      const minTime = new Date(now.getTime() + 60 * 60 * 1000) // At least 1 hour from now
-      if (current < minTime) {
-        current = minTime
-        // Round up to next slot
-        const minutes = current.getMinutes()
-        const roundedMinutes = Math.ceil(minutes / interval) * interval
-        current.setMinutes(roundedMinutes)
+    const candidates = []
+    for (let m = openMin; m + duration <= closeMin; m += step) {
+      candidates.push(m)
+    }
+
+    // If today, remove past slots (need at least 1 hour lead time)
+    const today = new Date()
+    const selectedDay = new Date(selectedDate + 'T00:00:00')
+    let filteredCandidates = candidates
+    if (selectedDay.toDateString() === today.toDateString()) {
+      const nowMin = today.getHours() * 60 + today.getMinutes() + 60
+      filteredCandidates = candidates.filter(m => m >= nowMin)
+    }
+
+    // For single-booking-area: both pending AND confirmed block slots
+    // For multi-table: only confirmed block (table count checked separately)
+    const isSingleArea = settings.single_booking_area === true
+    const statusFilter = isSingleArea ? ['confirmed', 'pending'] : ['confirmed']
+
+    const { data: existingReservations } = await supabase
+      .from('reservations')
+      .select('reservation_time')
+      .eq('restaurant_id', restaurant.id)
+      .eq('reservation_date', selectedDate)
+      .in('status', statusFilter)
+
+    const available = filteredCandidates.filter(startMin => {
+      const endMin = startMin + duration
+      if (!existingReservations?.length) return true
+
+      if (isSingleArea) {
+        // Any existing booking blocks the slot entirely
+        return !existingReservations.some(r => {
+          const rStart = toMinutes(r.reservation_time.substring(0, 5))
+          const rEnd = rStart + duration + padding
+          return startMin < rEnd && endMin > rStart
+        })
       }
-    }
 
-    while (current < closing) {
-      const timeString = current.toTimeString().substring(0, 5)
-      slots.push(timeString)
-      current = new Date(current.getTime() + interval * 60000)
-    }
+      // Multi-table: apply padding only — table capacity check happens on submit
+      return !existingReservations.some(r => {
+        const rStart = toMinutes(r.reservation_time.substring(0, 5))
+        const rEnd = rStart + duration + padding
+        return startMin < rEnd && endMin > rStart
+      })
+    })
 
-    setAvailableTimeSlots(slots)
-  }
+    setAvailableTimeSlots(available.map(fromMinutes))
+  }, [restaurant, selectedDate, selectedDuration])
 
   const checkAvailability = async (date, time) => {
     if (!restaurant) return false
-
     try {
       setCheckingAvailability(true)
+      const settings = restaurant.reservation_settings || {}
+      const isSingleArea = settings.single_booking_area === true
 
-      // Get all tables for this restaurant
+      if (isSingleArea) {
+        // Single booking area: any pending or confirmed booking blocks the slot
+        const { data: existing } = await supabase
+          .from('reservations')
+          .select('id')
+          .eq('restaurant_id', restaurant.id)
+          .eq('reservation_date', date)
+          .eq('reservation_time', time)
+          .in('status', ['confirmed', 'pending'])
+        return (existing?.length || 0) === 0
+      }
+
+      // Multi-table: check if any table is still free
       const { data: tables } = await supabase
         .from('tables')
         .select('id')
         .eq('restaurant_id', restaurant.id)
-
-      if (!tables || tables.length === 0) {
-        return false
-      }
-
-      // Get confirmed reservations for this time slot
-      const { data: existingReservations } = await supabase
+      if (!tables?.length) return false
+      const { data: existing } = await supabase
         .from('reservations')
         .select('table_id')
         .eq('restaurant_id', restaurant.id)
@@ -149,26 +358,15 @@ export default function BookReservation({ params }) {
         .eq('reservation_time', time)
         .eq('status', 'confirmed')
         .not('table_id', 'is', null)
-
-      // Available if not all tables are booked
-      const bookedCount = existingReservations?.length || 0
-      return bookedCount < tables.length
-
-    } catch (err) {
-      console.error('Availability check error:', err)
-      return true // Assume available on error
-    } finally {
-      setCheckingAvailability(false)
-    }
+      return (existing?.length || 0) < tables.length
+    } catch { return true } finally { setCheckingAvailability(false) }
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError(null)
     setSubmitting(true)
-
     try {
-      // Final availability check
       const isAvailable = await checkAvailability(selectedDate, selectedTime)
       if (!isAvailable) {
         setError(t('slotUnavailable') || 'Sorry, this time slot is no longer available. Please select another time.')
@@ -176,12 +374,15 @@ export default function BookReservation({ params }) {
         return
       }
 
-      // Use restaurant's email language preference (fallback to 'en')
       const supportedLocales = ['en', 'ro', 'fr', 'it', 'es']
       const restaurantLocale = restaurant.email_language
       const locale = restaurantLocale && supportedLocales.includes(restaurantLocale) ? restaurantLocale : 'en'
 
-      // Create reservation
+      const settings = restaurant.reservation_settings || {}
+      const duration = settings.slot_mode === 'customer_choice'
+        ? selectedDuration
+        : (settings.time_slot_interval || 30)
+
       const { data, error: insertError } = await supabase
         .from('reservations')
         .insert({
@@ -201,19 +402,13 @@ export default function BookReservation({ params }) {
 
       if (insertError) throw insertError
 
-      // Trigger email notification (non-blocking)
       fetch('/api/reservations/send-confirmation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          reservationId: data.id,
-          isConfirmation: false,  // This is a pending reservation email
-          locale: locale
-        })
+        body: JSON.stringify({ reservationId: data.id, isConfirmation: false, locale })
       }).catch(err => console.error('Email error:', err))
 
       setBookingSuccess(true)
-
     } catch (err) {
       console.error('Booking error:', err)
       setError(t('bookingError') || 'Failed to create reservation. Please try again.')
@@ -222,16 +417,7 @@ export default function BookReservation({ params }) {
     }
   }
 
-  const getMinDate = () => {
-    return new Date().toISOString().split('T')[0]
-  }
-
-  const getMaxDate = () => {
-    const maxDays = restaurant?.reservation_settings?.advance_booking_days || 60
-    const maxDate = new Date()
-    maxDate.setDate(maxDate.getDate() + maxDays)
-    return maxDate.toISOString().split('T')[0]
-  }
+  // ── early returns ──────────────────────────────────────────────────────────
 
   if (loading) {
     return (
@@ -290,7 +476,29 @@ export default function BookReservation({ params }) {
     )
   }
 
-  const settings = restaurant.reservation_settings
+  // ── render ─────────────────────────────────────────────────────────────────
+
+  const settings = restaurant.reservation_settings || {}
+  const isCustomerChoice = settings.slot_mode === 'customer_choice'
+  const allowedDurations = settings.allowed_durations || []
+
+  // Closed day names for the calendar
+  const closedDayNames = Object.entries(settings.operating_hours || {})
+    .filter(([, v]) => v.closed)
+    .map(([k]) => k)
+
+  const minDate = new Date().toISOString().split('T')[0]
+  const maxDateObj = new Date()
+  maxDateObj.setDate(maxDateObj.getDate() + (settings.advance_booking_days || 60))
+  const maxDate = maxDateObj.toISOString().split('T')[0]
+
+  // Hours for selected day
+  const selectedDayHours = selectedDate
+    ? settings.operating_hours?.[getDayName(selectedDate)]
+    : null
+
+  // Duration label for the time picker header
+  const activeDuration = isCustomerChoice ? selectedDuration : (settings.time_slot_interval || 30)
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -299,11 +507,7 @@ export default function BookReservation({ params }) {
         <div className="max-w-4xl mx-auto px-6 py-8">
           <div className="flex items-center gap-4">
             {restaurant.logo_url && (
-              <img
-                src={restaurant.logo_url}
-                alt={restaurant.name}
-                className="w-16 h-16 rounded-xl object-cover"
-              />
+              <img src={restaurant.logo_url} alt={restaurant.name} className="w-16 h-16 rounded-xl object-cover" />
             )}
             <div>
               <h1 className="text-3xl font-bold text-slate-800">{restaurant.name}</h1>
@@ -317,105 +521,150 @@ export default function BookReservation({ params }) {
       <div className="max-w-2xl mx-auto px-6 py-12">
         <div className="bg-white rounded-2xl border-2 border-slate-100 p-8">
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
-              {error}
-            </div>
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">{error}</div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Date Selection */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                {t('dateLabel') || 'Date'} *
-              </label>
-              <input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => {
-                  setSelectedDate(e.target.value)
-                  setSelectedTime('') // Reset time when date changes
-                }}
-                min={getMinDate()}
-                max={getMaxDate()}
-                required
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
-              />
-            </div>
 
-            {/* Time Selection */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                {t('timeLabel') || 'Time'} *
-              </label>
-              {!selectedDate ? (
-                <p className="text-slate-400 text-sm">{t('selectDateFirst') || 'Please select a date first'}</p>
-              ) : availableTimeSlots.length === 0 ? (
-                <p className="text-red-600 text-sm">{t('noAvailableSlots') || 'No available time slots for this date'}</p>
-              ) : (
+            {/* Duration picker — customer-choice mode only */}
+            {isCustomerChoice && allowedDurations.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  How long do you need? *
+                </label>
                 <div className="grid grid-cols-3 gap-2">
-                  {availableTimeSlots.map((slot) => (
+                  {allowedDurations.map(d => (
                     <button
-                      key={slot}
+                      key={d}
                       type="button"
-                      onClick={() => setSelectedTime(slot)}
-                      className={`py-3 rounded-xl font-medium transition-all ${
-                        selectedTime === slot
+                      onClick={() => { setSelectedDuration(d); setSelectedTime('') }}
+                      className={`py-3 rounded-xl font-medium text-sm transition-all ${
+                        selectedDuration === d
                           ? 'bg-[#6262bd] text-white'
                           : 'border-2 border-slate-200 text-slate-700 hover:border-[#6262bd]'
                       }`}
                     >
-                      {slot}
+                      {formatDuration(d)}
                     </button>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* Date — custom calendar */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                {t('dateLabel') || 'Date'} *
+              </label>
+              <MiniCalendar
+                value={selectedDate}
+                onChange={(d) => { setSelectedDate(d); setSelectedTime('') }}
+                minDate={minDate}
+                maxDate={maxDate}
+                closedDayNames={closedDayNames}
+                blockedDates={settings.blocked_dates || []}
+              />
+            </div>
+
+            {/* Time slots */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-slate-700">
+                  {t('timeLabel') || 'Time'} *
+                </label>
+                {selectedDate && activeDuration && (
+                  <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-lg">
+                    {formatDuration(activeDuration)} slots
+                    {settings.slot_padding > 0 && ` · ${settings.slot_padding}min buffer`}
+                  </span>
+                )}
+              </div>
+
+              {!selectedDate ? (
+                <p className="text-slate-400 text-sm">{t('selectDateFirst') || 'Please select a date first'}</p>
+              ) : isCustomerChoice && !selectedDuration ? (
+                <p className="text-slate-400 text-sm">Please select a duration first</p>
+              ) : availableTimeSlots.length === 0 ? (
+                <div>
+                  <p className="text-red-600 text-sm mb-1">{t('noAvailableSlots') || 'No available time slots for this date'}</p>
+                  {settings.blocked_dates?.includes(selectedDate) ? (
+                    <p className="text-xs text-slate-500">
+                      This date is not available for bookings. Please choose another day.
+                    </p>
+                  ) : selectedDayHours?.closed && (
+                    <p className="text-xs text-slate-500">
+                      We are closed on {new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long' })}s. Please choose another day.
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div>
+                  {selectedDayHours && !selectedDayHours.closed && (
+                    <p className="text-xs text-slate-500 mb-3">
+                      Open {selectedDayHours.open} – {selectedDayHours.close}
+                    </p>
+                  )}
+                  <div className="grid grid-cols-3 gap-2">
+                    {availableTimeSlots.map((slot) => (
+                      <button
+                        key={slot}
+                        type="button"
+                        onClick={() => setSelectedTime(slot)}
+                        className={`py-3 rounded-xl font-medium transition-all ${
+                          selectedTime === slot
+                            ? 'bg-[#6262bd] text-white'
+                            : 'border-2 border-slate-200 text-slate-700 hover:border-[#6262bd]'
+                        }`}
+                      >
+                        {slot}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
 
-            {/* Party Size */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                {t('partySizeLabel') || 'Party Size'} *
-              </label>
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setPartySize(Math.max(settings.min_party_size, partySize - 1))}
-                  disabled={partySize <= settings.min_party_size}
-                  className="w-12 h-12 flex items-center justify-center border-2 border-slate-200 rounded-xl hover:border-[#6262bd] hover:bg-[#6262bd] hover:text-white transition-all text-slate-700 font-bold text-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  −
-                </button>
-                <input
-                  type="number"
-                  value={partySize}
-                  onChange={(e) => {
-                    const val = parseInt(e.target.value)
-                    if (val >= settings.min_party_size && val <= settings.max_party_size) {
-                      setPartySize(val)
-                    }
-                  }}
-                  min={settings.min_party_size}
-                  max={settings.max_party_size}
-                  required
-                  className="w-24 px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 text-center font-semibold"
-                />
-                <button
-                  type="button"
-                  onClick={() => setPartySize(Math.min(settings.max_party_size, partySize + 1))}
-                  disabled={partySize >= settings.max_party_size}
-                  className="w-12 h-12 flex items-center justify-center border-2 border-slate-200 rounded-xl hover:border-[#6262bd] hover:bg-[#6262bd] hover:text-white transition-all text-slate-700 font-bold text-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  +
-                </button>
-                <span className="text-slate-600 ml-2">{partySize === 1 ? (t('guest') || 'guest') : (t('guests') || 'guests')}</span>
+            {/* Party size */}
+            {settings.show_party_size !== false && (
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  {t('partySizeLabel') || 'Party Size'} *
+                </label>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setPartySize(p => Math.max(settings.min_party_size || 1, p - 1))}
+                    disabled={partySize <= (settings.min_party_size || 1)}
+                    className="w-12 h-12 flex items-center justify-center border-2 border-slate-200 rounded-xl hover:border-[#6262bd] hover:bg-[#6262bd] hover:text-white transition-all text-slate-700 font-bold text-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  >−</button>
+                  <input
+                    type="number"
+                    value={partySize}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value)
+                      const min = settings.min_party_size || 1
+                      const max = settings.max_party_size || 20
+                      if (val >= min && val <= max) setPartySize(val)
+                    }}
+                    min={settings.min_party_size || 1}
+                    max={settings.max_party_size || 20}
+                    required
+                    className="w-24 px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 text-center font-semibold"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setPartySize(p => Math.min(settings.max_party_size || 20, p + 1))}
+                    disabled={partySize >= (settings.max_party_size || 20)}
+                    className="w-12 h-12 flex items-center justify-center border-2 border-slate-200 rounded-xl hover:border-[#6262bd] hover:bg-[#6262bd] hover:text-white transition-all text-slate-700 font-bold text-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  >+</button>
+                  <span className="text-slate-600 ml-2">{partySize === 1 ? (t('guest') || 'guest') : (t('guests') || 'guests')}</span>
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Customer Name */}
+            {/* Customer name */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                {t('nameLabel') || 'Your Name'} *
-              </label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">{t('nameLabel') || 'Your Name'} *</label>
               <input
                 type="text"
                 value={customerName}
@@ -426,11 +675,9 @@ export default function BookReservation({ params }) {
               />
             </div>
 
-            {/* Customer Email */}
+            {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                {t('emailLabel') || 'Email Address'} *
-              </label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">{t('emailLabel') || 'Email Address'} *</label>
               <input
                 type="email"
                 value={customerEmail}
@@ -439,12 +686,10 @@ export default function BookReservation({ params }) {
                 className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                 placeholder={t('emailPlaceholder') || 'john@example.com'}
               />
-              <p className="text-xs text-slate-500 mt-1">
-                {t('emailHelpText') || "We'll send your confirmation to this email"}
-              </p>
+              <p className="text-xs text-slate-500 mt-1">{t('emailHelpText') || "We'll send your confirmation to this email"}</p>
             </div>
 
-            {/* Customer Phone */}
+            {/* Phone */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
                 {t('phoneLabel') || 'Phone Number'} ({t('optional') || 'Optional'})
@@ -458,7 +703,7 @@ export default function BookReservation({ params }) {
               />
             </div>
 
-            {/* Special Requests */}
+            {/* Special requests */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
                 {t('specialRequestsLabel') || 'Special Requests'} ({t('optional') || 'Optional'})
@@ -472,18 +717,22 @@ export default function BookReservation({ params }) {
               />
             </div>
 
-            {/* Submit Button */}
+            {/* Submit */}
             <button
               type="submit"
-              disabled={submitting || checkingAvailability || !selectedDate || !selectedTime}
+              disabled={submitting || checkingAvailability || !selectedDate || !selectedTime || (isCustomerChoice && !selectedDuration)}
               className="w-full bg-[#6262bd] text-white py-4 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
-              {submitting ? (t('submitting') || 'Creating Reservation...') : checkingAvailability ? (t('checkingAvailability') || 'Checking Availability...') : (t('submitButton') || 'Request Reservation')}
+              {submitting
+                ? (t('submitting') || 'Creating Reservation...')
+                : checkingAvailability
+                  ? (t('checkingAvailability') || 'Checking Availability...')
+                  : (t('submitButton') || 'Request Reservation')}
             </button>
           </form>
         </div>
 
-        {/* Info Box */}
+        {/* Info box */}
         <div className="mt-6 bg-blue-50 border-2 border-blue-100 rounded-2xl p-6">
           <div className="flex gap-3">
             <svg className="w-6 h-6 text-blue-600 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
