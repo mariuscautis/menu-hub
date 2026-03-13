@@ -181,12 +181,25 @@ export default function Reservations() {
     })
   }, [adminSupabase])
 
-  const fetchRestriction = useCallback(async (customerId, restaurantId) => {
-    if (!customerId) { setRestriction('none'); return }
+  const fetchRestriction = useCallback(async (customerId, restaurantId, phone) => {
+    let resolvedId = customerId
+
+    // For old bookings without customer_id, look up by phone
+    if (!resolvedId && phone) {
+      const { data: c } = await adminSupabase
+        .from('customers')
+        .select('id')
+        .eq('phone', phone)
+        .maybeSingle()
+      resolvedId = c?.id || null
+    }
+
+    if (!resolvedId) { setRestriction('none'); return }
+
     const { data } = await adminSupabase
       .from('customer_venue_restrictions')
       .select('type, fee_amount, fee_currency')
-      .eq('customer_id', customerId)
+      .eq('customer_id', resolvedId)
       .eq('restaurant_id', restaurantId)
       .maybeSingle()
     setRestriction(data || 'none')
@@ -200,7 +213,51 @@ export default function Reservations() {
   }, [adminSupabase])
 
   const saveRestriction = async (customerId, restaurantId, type, feeAmount) => {
-    if (!customerId) return
+    let resolvedCustomerId = customerId
+
+    // If no customer_id on the reservation (old booking without OTP),
+    // look up or create the customer by phone so we can save the restriction
+    if (!resolvedCustomerId && selectedReservation?.customer_phone) {
+      const phone = selectedReservation.customer_phone
+      const { data: existing } = await adminSupabase
+        .from('customers')
+        .select('id')
+        .eq('phone', phone)
+        .maybeSingle()
+
+      if (existing) {
+        resolvedCustomerId = existing.id
+        // Also link the customer_id back onto this reservation
+        await adminSupabase
+          .from('reservations')
+          .update({ customer_id: resolvedCustomerId })
+          .eq('id', selectedReservation.id)
+      } else {
+        // Create a minimal customer profile from the reservation data
+        const { data: created } = await adminSupabase
+          .from('customers')
+          .insert({
+            phone,
+            name: selectedReservation.customer_name || null,
+            email: selectedReservation.customer_email || null,
+          })
+          .select('id')
+          .single()
+        if (created) {
+          resolvedCustomerId = created.id
+          await adminSupabase
+            .from('reservations')
+            .update({ customer_id: resolvedCustomerId })
+            .eq('id', selectedReservation.id)
+        }
+      }
+    }
+
+    if (!resolvedCustomerId) {
+      showNotification('error', 'No phone number on this reservation — cannot save restriction.')
+      return
+    }
+
     setSavingRestriction(true)
     try {
       if (!type) {
@@ -208,7 +265,7 @@ export default function Reservations() {
         await adminSupabase
           .from('customer_venue_restrictions')
           .delete()
-          .eq('customer_id', customerId)
+          .eq('customer_id', resolvedCustomerId)
           .eq('restaurant_id', restaurantId)
         setRestriction('none')
         setRestrictionMode(null)
@@ -216,7 +273,7 @@ export default function Reservations() {
         showNotification('success', 'Restriction removed.')
       } else {
         const payload = {
-          customer_id: customerId,
+          customer_id: resolvedCustomerId,
           restaurant_id: restaurantId,
           type,
           fee_amount: type === 'fee_required' ? parseFloat(feeAmount) || null : null,
@@ -803,7 +860,7 @@ export default function Reservations() {
             return (
               <button
                 key={reservation.id}
-                onClick={() => { setSelectedReservation(reservation); setShowDetailModal(true); fetchCustomerStats(reservation.customer_id, restaurant.id); fetchRestriction(reservation.customer_id, restaurant.id) }}
+                onClick={() => { setSelectedReservation(reservation); setShowDetailModal(true); fetchCustomerStats(reservation.customer_id, restaurant.id); fetchRestriction(reservation.customer_id, restaurant.id, reservation.customer_phone) }}
                 className="text-left bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl overflow-hidden hover:border-[#6262bd]/40 hover:shadow-md transition-all group focus:outline-none focus:border-[#6262bd]"
               >
                 {/* Colour bar */}
@@ -1097,8 +1154,8 @@ export default function Reservations() {
                 </div>
               )}
 
-              {/* Customer restriction panel — shown for any reservation with a customer_id */}
-              {selectedReservation.customer_id && restriction !== null && (
+              {/* Customer restriction panel — shown for any reservation with a phone number */}
+              {selectedReservation.customer_phone && restriction !== null && (
                 <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-700">
                   <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Booking restrictions</h3>
 
