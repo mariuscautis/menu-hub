@@ -6,6 +6,187 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { loadTranslations, createTranslator } from '@/lib/clientTranslations'
 
+// ─── Phone prefix data ────────────────────────────────────────────────────────
+
+const PHONE_PREFIXES = [
+  { code: 'AF', dial: '+93',  flag: '🇦🇫', name: 'Afghanistan' },
+  { code: 'AL', dial: '+355', flag: '🇦🇱', name: 'Albania' },
+  { code: 'DZ', dial: '+213', flag: '🇩🇿', name: 'Algeria' },
+  { code: 'AR', dial: '+54',  flag: '🇦🇷', name: 'Argentina' },
+  { code: 'AU', dial: '+61',  flag: '🇦🇺', name: 'Australia' },
+  { code: 'AT', dial: '+43',  flag: '🇦🇹', name: 'Austria' },
+  { code: 'BE', dial: '+32',  flag: '🇧🇪', name: 'Belgium' },
+  { code: 'BR', dial: '+55',  flag: '🇧🇷', name: 'Brazil' },
+  { code: 'BG', dial: '+359', flag: '🇧🇬', name: 'Bulgaria' },
+  { code: 'CA', dial: '+1',   flag: '🇨🇦', name: 'Canada' },
+  { code: 'CL', dial: '+56',  flag: '🇨🇱', name: 'Chile' },
+  { code: 'CN', dial: '+86',  flag: '🇨🇳', name: 'China' },
+  { code: 'CO', dial: '+57',  flag: '🇨🇴', name: 'Colombia' },
+  { code: 'HR', dial: '+385', flag: '🇭🇷', name: 'Croatia' },
+  { code: 'CY', dial: '+357', flag: '🇨🇾', name: 'Cyprus' },
+  { code: 'CZ', dial: '+420', flag: '🇨🇿', name: 'Czech Republic' },
+  { code: 'DK', dial: '+45',  flag: '🇩🇰', name: 'Denmark' },
+  { code: 'EG', dial: '+20',  flag: '🇪🇬', name: 'Egypt' },
+  { code: 'EE', dial: '+372', flag: '🇪🇪', name: 'Estonia' },
+  { code: 'FI', dial: '+358', flag: '🇫🇮', name: 'Finland' },
+  { code: 'FR', dial: '+33',  flag: '🇫🇷', name: 'France' },
+  { code: 'DE', dial: '+49',  flag: '🇩🇪', name: 'Germany' },
+  { code: 'GR', dial: '+30',  flag: '🇬🇷', name: 'Greece' },
+  { code: 'HU', dial: '+36',  flag: '🇭🇺', name: 'Hungary' },
+  { code: 'IN', dial: '+91',  flag: '🇮🇳', name: 'India' },
+  { code: 'ID', dial: '+62',  flag: '🇮🇩', name: 'Indonesia' },
+  { code: 'IE', dial: '+353', flag: '🇮🇪', name: 'Ireland' },
+  { code: 'IL', dial: '+972', flag: '🇮🇱', name: 'Israel' },
+  { code: 'IT', dial: '+39',  flag: '🇮🇹', name: 'Italy' },
+  { code: 'JP', dial: '+81',  flag: '🇯🇵', name: 'Japan' },
+  { code: 'JO', dial: '+962', flag: '🇯🇴', name: 'Jordan' },
+  { code: 'KE', dial: '+254', flag: '🇰🇪', name: 'Kenya' },
+  { code: 'KR', dial: '+82',  flag: '🇰🇷', name: 'South Korea' },
+  { code: 'LV', dial: '+371', flag: '🇱🇻', name: 'Latvia' },
+  { code: 'LB', dial: '+961', flag: '🇱🇧', name: 'Lebanon' },
+  { code: 'LT', dial: '+370', flag: '🇱🇹', name: 'Lithuania' },
+  { code: 'LU', dial: '+352', flag: '🇱🇺', name: 'Luxembourg' },
+  { code: 'MY', dial: '+60',  flag: '🇲🇾', name: 'Malaysia' },
+  { code: 'MT', dial: '+356', flag: '🇲🇹', name: 'Malta' },
+  { code: 'MX', dial: '+52',  flag: '🇲🇽', name: 'Mexico' },
+  { code: 'MA', dial: '+212', flag: '🇲🇦', name: 'Morocco' },
+  { code: 'NL', dial: '+31',  flag: '🇳🇱', name: 'Netherlands' },
+  { code: 'NZ', dial: '+64',  flag: '🇳🇿', name: 'New Zealand' },
+  { code: 'NG', dial: '+234', flag: '🇳🇬', name: 'Nigeria' },
+  { code: 'NO', dial: '+47',  flag: '🇳🇴', name: 'Norway' },
+  { code: 'PK', dial: '+92',  flag: '🇵🇰', name: 'Pakistan' },
+  { code: 'PE', dial: '+51',  flag: '🇵🇪', name: 'Peru' },
+  { code: 'PH', dial: '+63',  flag: '🇵🇭', name: 'Philippines' },
+  { code: 'PL', dial: '+48',  flag: '🇵🇱', name: 'Poland' },
+  { code: 'PT', dial: '+351', flag: '🇵🇹', name: 'Portugal' },
+  { code: 'RO', dial: '+40',  flag: '🇷🇴', name: 'Romania' },
+  { code: 'RU', dial: '+7',   flag: '🇷🇺', name: 'Russia' },
+  { code: 'SA', dial: '+966', flag: '🇸🇦', name: 'Saudi Arabia' },
+  { code: 'RS', dial: '+381', flag: '🇷🇸', name: 'Serbia' },
+  { code: 'SG', dial: '+65',  flag: '🇸🇬', name: 'Singapore' },
+  { code: 'SK', dial: '+421', flag: '🇸🇰', name: 'Slovakia' },
+  { code: 'SI', dial: '+386', flag: '🇸🇮', name: 'Slovenia' },
+  { code: 'ZA', dial: '+27',  flag: '🇿🇦', name: 'South Africa' },
+  { code: 'ES', dial: '+34',  flag: '🇪🇸', name: 'Spain' },
+  { code: 'SE', dial: '+46',  flag: '🇸🇪', name: 'Sweden' },
+  { code: 'CH', dial: '+41',  flag: '🇨🇭', name: 'Switzerland' },
+  { code: 'TW', dial: '+886', flag: '🇹🇼', name: 'Taiwan' },
+  { code: 'TH', dial: '+66',  flag: '🇹🇭', name: 'Thailand' },
+  { code: 'TN', dial: '+216', flag: '🇹🇳', name: 'Tunisia' },
+  { code: 'TR', dial: '+90',  flag: '🇹🇷', name: 'Turkey' },
+  { code: 'UA', dial: '+380', flag: '🇺🇦', name: 'Ukraine' },
+  { code: 'AE', dial: '+971', flag: '🇦🇪', name: 'UAE' },
+  { code: 'GB', dial: '+44',  flag: '🇬🇧', name: 'United Kingdom' },
+  { code: 'US', dial: '+1',   flag: '🇺🇸', name: 'United States' },
+  { code: 'VN', dial: '+84',  flag: '🇻🇳', name: 'Vietnam' },
+]
+
+// Map IANA timezone → country code (common ones)
+const TIMEZONE_TO_COUNTRY = {
+  'Europe/London': 'GB', 'Europe/Paris': 'FR', 'Europe/Berlin': 'DE',
+  'Europe/Rome': 'IT', 'Europe/Madrid': 'ES', 'Europe/Amsterdam': 'NL',
+  'Europe/Brussels': 'BE', 'Europe/Lisbon': 'PT', 'Europe/Athens': 'GR',
+  'Europe/Warsaw': 'PL', 'Europe/Prague': 'CZ', 'Europe/Vienna': 'AT',
+  'Europe/Zurich': 'CH', 'Europe/Stockholm': 'SE', 'Europe/Copenhagen': 'DK',
+  'Europe/Helsinki': 'FI', 'Europe/Oslo': 'NO', 'Europe/Bucharest': 'RO',
+  'Europe/Budapest': 'HU', 'Europe/Sofia': 'BG', 'Europe/Belgrade': 'RS',
+  'Europe/Zagreb': 'HR', 'Europe/Ljubljana': 'SI', 'Europe/Bratislava': 'SK',
+  'Europe/Tallinn': 'EE', 'Europe/Riga': 'LV', 'Europe/Vilnius': 'LT',
+  'Europe/Luxembourg': 'LU', 'Europe/Nicosia': 'CY', 'Europe/Malta': 'MT',
+  'Europe/Dublin': 'IE', 'Europe/Kiev': 'UA', 'Europe/Istanbul': 'TR',
+  'Europe/Moscow': 'RU',
+  'America/New_York': 'US', 'America/Chicago': 'US', 'America/Denver': 'US',
+  'America/Los_Angeles': 'US', 'America/Phoenix': 'US', 'America/Anchorage': 'US',
+  'America/Honolulu': 'US', 'America/Toronto': 'CA', 'America/Vancouver': 'CA',
+  'America/Montreal': 'CA', 'America/Mexico_City': 'MX', 'America/Sao_Paulo': 'BR',
+  'America/Buenos_Aires': 'AR', 'America/Santiago': 'CL', 'America/Bogota': 'CO',
+  'America/Lima': 'PE',
+  'Asia/Dubai': 'AE', 'Asia/Riyadh': 'SA', 'Asia/Beirut': 'LB',
+  'Asia/Amman': 'JO', 'Asia/Jerusalem': 'IL', 'Asia/Kolkata': 'IN',
+  'Asia/Dhaka': 'BD', 'Asia/Karachi': 'PK', 'Asia/Colombo': 'LK',
+  'Asia/Tokyo': 'JP', 'Asia/Shanghai': 'CN', 'Asia/Seoul': 'KR',
+  'Asia/Singapore': 'SG', 'Asia/Taipei': 'TW', 'Asia/Bangkok': 'TH',
+  'Asia/Kuala_Lumpur': 'MY', 'Asia/Manila': 'PH', 'Asia/Jakarta': 'ID',
+  'Asia/Ho_Chi_Minh': 'VN',
+  'Africa/Cairo': 'EG', 'Africa/Casablanca': 'MA', 'Africa/Tunis': 'TN',
+  'Africa/Nairobi': 'KE', 'Africa/Johannesburg': 'ZA', 'Africa/Lagos': 'NG',
+  'Australia/Sydney': 'AU', 'Australia/Melbourne': 'AU', 'Australia/Brisbane': 'AU',
+  'Australia/Perth': 'AU', 'Pacific/Auckland': 'NZ',
+}
+
+function detectCountryCode() {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+    return TIMEZONE_TO_COUNTRY[tz] || 'GB'
+  } catch {
+    return 'GB'
+  }
+}
+
+// ─── Phone prefix selector component ─────────────────────────────────────────
+
+function PhonePrefixSelector({ selectedCode, onChange }) {
+  const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState('')
+
+  const selected = PHONE_PREFIXES.find(p => p.code === selectedCode) || PHONE_PREFIXES.find(p => p.code === 'GB')
+  const filtered = PHONE_PREFIXES.filter(p =>
+    p.name.toLowerCase().includes(search.toLowerCase()) ||
+    p.dial.includes(search)
+  )
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => { setOpen(o => !o); setSearch('') }}
+        className="flex items-center gap-1.5 px-3 py-3 border-2 border-r-0 border-slate-200 rounded-l-xl bg-slate-50 hover:bg-slate-100 transition-colors text-slate-700 whitespace-nowrap h-full"
+      >
+        <span className="text-lg leading-none">{selected.flag}</span>
+        <span className="text-sm font-medium">{selected.dial}</span>
+        <svg className={`w-3.5 h-3.5 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`} fill="currentColor" viewBox="0 0 24 24">
+          <path d="M7 10l5 5 5-5z"/>
+        </svg>
+      </button>
+
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute left-0 top-full mt-1 z-50 bg-white border-2 border-slate-200 rounded-xl shadow-xl w-64 overflow-hidden">
+            <div className="p-2 border-b border-slate-100">
+              <input
+                type="text"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search country or code..."
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-[#6262bd]"
+                autoFocus
+              />
+            </div>
+            <div className="max-h-56 overflow-y-auto">
+              {filtered.map(p => (
+                <button
+                  key={p.code}
+                  type="button"
+                  onClick={() => { onChange(p.code); setOpen(false); setSearch('') }}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-slate-50 transition-colors text-left ${p.code === selectedCode ? 'bg-[#6262bd]/5 text-[#6262bd] font-medium' : 'text-slate-700'}`}
+                >
+                  <span className="text-base">{p.flag}</span>
+                  <span className="flex-1 truncate">{p.name}</span>
+                  <span className="text-slate-400 text-xs">{p.dial}</span>
+                </button>
+              ))}
+              {filtered.length === 0 && (
+                <div className="px-3 py-4 text-sm text-slate-400 text-center">No results</div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
 function toMinutes(hhmm) {
@@ -182,6 +363,7 @@ export default function BookReservation({ params }) {
   // OTP flow
   const [otpStep, setOtpStep] = useState(false) // true = showing OTP input
   const [otpCode, setOtpCode] = useState('')
+  const [fullPhone, setFullPhone] = useState('') // dial code + local number
   const [sendingOtp, setSendingOtp] = useState(false)
   const [verifyingOtp, setVerifyingOtp] = useState(false)
   const [otpError, setOtpError] = useState(null)
@@ -195,6 +377,7 @@ export default function BookReservation({ params }) {
   const [customerName, setCustomerName] = useState('')
   const [customerEmail, setCustomerEmail] = useState('')
   const [customerPhone, setCustomerPhone] = useState('')
+  const [phoneCountryCode, setPhoneCountryCode] = useState('GB') // auto-detected
   const [specialRequests, setSpecialRequests] = useState('')
 
   // Availability
@@ -205,7 +388,10 @@ export default function BookReservation({ params }) {
   const [translations, setTranslations] = useState({})
   const t = createTranslator(translations)
 
-  useEffect(() => { fetchRestaurant() }, [slug])
+  useEffect(() => {
+    fetchRestaurant()
+    setPhoneCountryCode(detectCountryCode())
+  }, [slug])
 
   // Re-generate slots whenever date or duration changes
   useEffect(() => {
@@ -404,6 +590,10 @@ export default function BookReservation({ params }) {
       return
     }
 
+    const dialCode = PHONE_PREFIXES.find(p => p.code === phoneCountryCode)?.dial || '+44'
+    const localNumber = customerPhone.replace(/^\+/, '').replace(/^0/, '')
+    const fullPhone = dialCode + localNumber
+
     setSendingOtp(true)
     try {
       const isAvailable = await checkAvailability(selectedDate, selectedTime)
@@ -415,7 +605,7 @@ export default function BookReservation({ params }) {
       const res = await fetch('/api/reservations/send-sms-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: customerPhone, restaurantName: restaurant.name })
+        body: JSON.stringify({ phone: fullPhone, restaurantName: restaurant.name })
       })
       const result = await res.json()
 
@@ -424,6 +614,7 @@ export default function BookReservation({ params }) {
         return
       }
 
+      setFullPhone(fullPhone)
       setOtpStep(true)
       setOtpCode('')
       setOtpError(null)
@@ -444,7 +635,7 @@ export default function BookReservation({ params }) {
       const res = await fetch('/api/reservations/send-sms-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: customerPhone, restaurantName: restaurant.name })
+        body: JSON.stringify({ phone: fullPhone, restaurantName: restaurant.name })
       })
       const result = await res.json()
       if (!result.success) {
@@ -478,7 +669,7 @@ export default function BookReservation({ params }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          phone: customerPhone,
+          phone: fullPhone,
           otp: otpCode,
           restaurantId: restaurant.id,
           customerName,
@@ -787,14 +978,20 @@ export default function BookReservation({ params }) {
               <label className="block text-sm font-medium text-slate-700 mb-2">
                 {t('phoneLabel') || 'Phone Number'} *
               </label>
-              <input
-                type="tel"
-                value={customerPhone}
-                onChange={(e) => setCustomerPhone(e.target.value)}
-                required
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
-                placeholder={t('phonePlaceholder') || '+1 (555) 123-4567'}
-              />
+              <div className="flex">
+                <PhonePrefixSelector
+                  selectedCode={phoneCountryCode}
+                  onChange={setPhoneCountryCode}
+                />
+                <input
+                  type="tel"
+                  value={customerPhone}
+                  onChange={(e) => setCustomerPhone(e.target.value)}
+                  required
+                  className="flex-1 px-4 py-3 border-2 border-slate-200 rounded-r-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  placeholder="7700 900000"
+                />
+              </div>
               <p className="text-xs text-slate-500 mt-1">We'll send a verification code to this number to confirm your booking.</p>
             </div>
 
@@ -851,7 +1048,7 @@ export default function BookReservation({ params }) {
                   </div>
                   <h2 className="text-xl font-bold text-slate-800 mb-2">Verify your phone</h2>
                   <p className="text-slate-500 text-sm">
-                    We sent a 6-digit code to <strong>{customerPhone}</strong>
+                    We sent a 6-digit code to <strong>{fullPhone}</strong>
                   </p>
                 </div>
 
