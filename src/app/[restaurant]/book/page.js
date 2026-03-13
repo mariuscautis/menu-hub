@@ -8,7 +8,7 @@ import { loadTranslations, createTranslator } from '@/lib/clientTranslations'
 
 // ─── Stripe fee payment form ───────────────────────────────────────────────────
 
-function FeePaymentForm({ clientSecret, onPay, processing, publishableKey }) {
+function FeePaymentForm({ clientSecret, onPay, processing, publishableKey, stripeAccountId }) {
   const stripeRef = useRef(null)
   const elementsRef = useRef(null)
   const mountedRef = useRef(false)
@@ -25,7 +25,8 @@ function FeePaymentForm({ clientSecret, onPay, processing, publishableKey }) {
         document.head.appendChild(script)
         await new Promise(resolve => { script.onload = resolve })
       }
-      const stripe = window.Stripe(publishableKey)
+      const stripeOptions = stripeAccountId ? { stripeAccount: stripeAccountId } : {}
+      const stripe = window.Stripe(publishableKey, stripeOptions)
       stripeRef.current = stripe
       const elements = stripe.elements({ clientSecret })
       elementsRef.current = elements
@@ -34,7 +35,7 @@ function FeePaymentForm({ clientSecret, onPay, processing, publishableKey }) {
     }
 
     init()
-  }, [clientSecret, publishableKey])
+  }, [clientSecret, publishableKey, stripeAccountId])
 
   return (
     <div>
@@ -420,6 +421,7 @@ export default function BookReservation({ params }) {
   const [feeCustomerId, setFeeCustomerId] = useState(null)
   const [feeClientSecret, setFeeClientSecret] = useState(null)
   const [feePaymentIntentId, setFeePaymentIntentId] = useState(null)
+  const [feeStripeAccountId, setFeeStripeAccountId] = useState(null)
   const [processingFee, setProcessingFee] = useState(false)
   const [feeError, setFeeError] = useState(null)
   const [verifiedLocale, setVerifiedLocale] = useState('en')
@@ -770,6 +772,7 @@ export default function BookReservation({ params }) {
 
         setFeeClientSecret(piData.clientSecret)
         setFeePaymentIntentId(piData.paymentIntentId)
+        setFeeStripeAccountId(piData.stripeAccountId || null)
         setOtpStep(false)
         setFeeStep(true)
         return
@@ -1274,6 +1277,7 @@ export default function BookReservation({ params }) {
                   onPay={payFeeAndBook}
                   processing={processingFee}
                   publishableKey={process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
+                  stripeAccountId={feeStripeAccountId}
                 />
 
                 <button

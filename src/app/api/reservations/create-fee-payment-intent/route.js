@@ -78,6 +78,7 @@ export async function POST(request) {
     return NextResponse.json({
       clientSecret: paymentIntent.client_secret,
       paymentIntentId: paymentIntent.id,
+      stripeAccountId: restaurant.stripe_connect_account_id,
     })
 
   } catch (err) {
