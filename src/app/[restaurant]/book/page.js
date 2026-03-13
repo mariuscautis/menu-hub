@@ -505,13 +505,13 @@ export default function BookReservation({ params }) {
       {/* Header */}
       <div className="bg-white border-b border-slate-200">
         <div className="max-w-4xl mx-auto px-6 py-8">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col items-center text-center gap-4">
             {restaurant.logo_url && (
-              <img src={restaurant.logo_url} alt={restaurant.name} className="w-16 h-16 rounded-xl object-cover" />
+              <img src={restaurant.logo_url} alt={restaurant.name} className="w-20 h-20 rounded-2xl object-cover shadow-sm" />
             )}
             <div>
               <h1 className="text-3xl font-bold text-slate-800">{restaurant.name}</h1>
-              <p className="text-slate-500">{t('pageTitle') || 'Make a Reservation'}</p>
+              <p className="text-slate-500 mt-1">{t('pageTitle') || 'Make a Reservation'}</p>
             </div>
           </div>
         </div>
