@@ -126,6 +126,35 @@ export async function POST(request) {
       ? generateConfirmationEmail(reservation, cancelUrl, tr, locale)
       : generatePendingEmail(reservation, cancelUrl, tr, locale)
 
+    // Send confirmation SMS if phone is available (email is optional)
+    if (isConfirmation && reservation.customer_phone) {
+      try {
+        const formattedDate = formatDateForLocale(reservation.reservation_date, locale)
+        const smsBody = `Your booking at ${reservation.restaurants.name} on ${formattedDate} at ${reservation.reservation_time.substring(0, 5)} has been confirmed. See you soon!`
+        await fetch('https://api.brevo.com/v3/transactionalSMS/sms', {
+          method: 'POST',
+          headers: {
+            'api-key': process.env.BREVO_API_KEY,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            sender: process.env.BREVO_SMS_SENDER || 'VenoApp',
+            recipient: reservation.customer_phone,
+            content: smsBody,
+            type: 'transactional'
+          })
+        })
+      } catch (smsErr) {
+        console.error('Confirmation SMS error:', smsErr)
+        // Non-fatal
+      }
+    }
+
+    // Skip email if no customer email
+    if (!reservation.customer_email) {
+      return NextResponse.json({ success: true, emailResult: null })
+    }
+
     console.log('Sending email:', { to: reservation.customer_email, subject })
 
     // Send email using Brevo - use restaurant name as sender name

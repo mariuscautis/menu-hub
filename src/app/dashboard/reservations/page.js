@@ -47,6 +47,7 @@ export default function Reservations() {
   const [pendingRating, setPendingRating] = useState(0) // 1-5 hover/selected
   const [ratingNote, setRatingNote] = useState('')
   const [savingRating, setSavingRating] = useState(false)
+  const [customerStats, setCustomerStats] = useState(null) // { venueAvg, venueCount, overallAvg, overallCount }
 
   // Notifications
   const [notification, setNotification] = useState(null)
@@ -156,6 +157,24 @@ export default function Reservations() {
     fetchData()
   }, [fetchData])
 
+  const fetchCustomerStats = useCallback(async (customerId, restaurantId) => {
+    if (!customerId) { setCustomerStats(null); return }
+    const { data } = await adminSupabase
+      .from('customer_ratings')
+      .select('rating, restaurant_id')
+      .eq('customer_id', customerId)
+    if (!data) { setCustomerStats(null); return }
+    const venue = data.filter(r => r.restaurant_id === restaurantId)
+    const overall = data
+    const avg = arr => arr.length ? (arr.reduce((s, r) => s + r.rating, 0) / arr.length).toFixed(1) : null
+    setCustomerStats({
+      venueAvg: avg(venue),
+      venueCount: venue.length,
+      overallAvg: avg(overall),
+      overallCount: overall.length
+    })
+  }, [adminSupabase])
+
   const saveRating = async (reservation, rating, note) => {
     if (!reservation.customer_id) {
       showNotification('error', 'No customer profile linked to this reservation.')
@@ -183,6 +202,7 @@ export default function Reservations() {
       }))
       setPendingRating(0)
       setRatingNote('')
+      fetchCustomerStats(reservation.customer_id, restaurant.id)
     } catch (err) {
       console.error('saveRating error:', err)
       showNotification('error', 'Failed to save rating.')
@@ -721,7 +741,7 @@ export default function Reservations() {
             return (
               <button
                 key={reservation.id}
-                onClick={() => { setSelectedReservation(reservation); setShowDetailModal(true) }}
+                onClick={() => { setSelectedReservation(reservation); setShowDetailModal(true); fetchCustomerStats(reservation.customer_id, restaurant.id) }}
                 className="text-left bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl overflow-hidden hover:border-[#6262bd]/40 hover:shadow-md transition-all group focus:outline-none focus:border-[#6262bd]"
               >
                 {/* Colour bar */}
@@ -794,7 +814,7 @@ export default function Reservations() {
       {showDetailModal && selectedReservation && (
         <div
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4"
-          onClick={() => { setShowDetailModal(false); setSelectedReservation(null); setPendingRating(0); setRatingNote('') }}
+          onClick={() => { setShowDetailModal(false); setSelectedReservation(null); setPendingRating(0); setRatingNote(''); setCustomerStats(null) }}
         >
           <div
             className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden"
@@ -813,7 +833,7 @@ export default function Reservations() {
                   </span>
                 </div>
                 <button
-                  onClick={() => { setShowDetailModal(false); setSelectedReservation(null); setPendingRating(0); setRatingNote('') }}
+                  onClick={() => { setShowDetailModal(false); setSelectedReservation(null); setPendingRating(0); setRatingNote(''); setCustomerStats(null) }}
                   className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
                 >
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -918,8 +938,35 @@ export default function Reservations() {
               {/* Customer rating — shown for completed/confirmed/no_show */}
               {['completed', 'confirmed', 'no_show'].includes(selectedReservation.status) && selectedReservation.customer_id && (
                 <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-700">
+                  {/* Customer trust stats */}
+                  {customerStats && (customerStats.venueCount > 0 || customerStats.overallCount > 0) && (
+                    <div className="mb-4 grid grid-cols-2 gap-3">
+                      <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-3 text-center">
+                        <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">Your venue</div>
+                        {customerStats.venueAvg ? (
+                          <>
+                            <div className="text-lg font-bold text-amber-500">{customerStats.venueAvg}★</div>
+                            <div className="text-xs text-slate-400">{customerStats.venueCount} visit{customerStats.venueCount !== 1 ? 's' : ''}</div>
+                          </>
+                        ) : (
+                          <div className="text-xs text-slate-400">No rating yet</div>
+                        )}
+                      </div>
+                      <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-3 text-center">
+                        <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">Overall rating</div>
+                        {customerStats.overallAvg ? (
+                          <>
+                            <div className="text-lg font-bold text-purple-500">{customerStats.overallAvg}★</div>
+                            <div className="text-xs text-slate-400">{customerStats.overallCount} visit{customerStats.overallCount !== 1 ? 's' : ''}</div>
+                          </>
+                        ) : (
+                          <div className="text-xs text-slate-400">No rating yet</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                   <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
-                    {ratings[selectedReservation.id] ? 'Customer Rating' : 'Rate this customer'}
+                    {ratings[selectedReservation.id] ? 'Rate this visit' : 'Rate this customer'}
                   </h3>
 
                   {ratings[selectedReservation.id] ? (
