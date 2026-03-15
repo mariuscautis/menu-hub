@@ -67,7 +67,7 @@ export default function PaymentsSettingsPage() {
       if (data.url) {
         window.location.href = data.url
       } else {
-        showNotification('error', data.error || 'Failed to start Stripe onboarding')
+        showNotification('error', data.detail || data.error || 'Failed to start Stripe onboarding')
         setConnecting(false)
       }
     } catch {

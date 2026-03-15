@@ -83,12 +83,41 @@ export async function POST(request) {
         { phone: normalised, name: customerName, email: customerEmail || null },
         { onConflict: 'phone', ignoreDuplicates: false }
       )
-      .select('id, avg_rating, total_bookings')
+      .select('id, total_bookings')
       .single()
 
     if (customerError) {
       console.error('Customer upsert error:', customerError)
       return NextResponse.json({ success: false, error: 'Failed to create customer profile' }, { status: 500 })
+    }
+
+    // Compute category-filtered average rating for this customer
+    let categoryAvgRating = null
+    if (restaurantId) {
+      const { data: venue } = await supabaseAdmin
+        .from('restaurants')
+        .select('industry_category')
+        .eq('id', restaurantId)
+        .single()
+
+      if (venue?.industry_category) {
+        const { data: peerVenues } = await supabaseAdmin
+          .from('restaurants')
+          .select('id')
+          .eq('industry_category', venue.industry_category)
+        const peerIds = (peerVenues || []).map(v => v.id)
+
+        if (peerIds.length) {
+          const { data: peerRatings } = await supabaseAdmin
+            .from('customer_ratings')
+            .select('rating')
+            .eq('customer_id', customer.id)
+            .in('restaurant_id', peerIds)
+          if (peerRatings?.length) {
+            categoryAvgRating = (peerRatings.reduce((s, r) => s + r.rating, 0) / peerRatings.length).toFixed(1)
+          }
+        }
+      }
     }
 
     // Check for venue restrictions (block or deposit required)
@@ -110,7 +139,7 @@ export async function POST(request) {
             feeCurrency: restriction.fee_currency || 'GBP',
             customer: {
               id: customer.id,
-              avgRating: customer.avg_rating,
+              avgRating: categoryAvgRating,
               totalBookings: customer.total_bookings
             }
           })
@@ -158,7 +187,7 @@ export async function POST(request) {
       reservationId: reservation.id,
       customer: {
         id: customer.id,
-        avgRating: customer.avg_rating,
+        avgRating: categoryAvgRating,
         totalBookings: customer.total_bookings
       }
     })

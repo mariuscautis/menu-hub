@@ -4,6 +4,17 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
+const DEFAULT_INDUSTRY_CATEGORIES = [
+  { value: 'restaurant',    label: 'Restaurant / Café / Bar' },
+  { value: 'beauty',        label: 'Beauty & Wellness' },
+  { value: 'fitness',       label: 'Fitness & Sport' },
+  { value: 'hotel',         label: 'Hotel & Accommodation' },
+  { value: 'entertainment', label: 'Entertainment & Events' },
+  { value: 'health',        label: 'Health & Medical' },
+  { value: 'education',     label: 'Education & Tutoring' },
+  { value: 'other',         label: 'Other' },
+]
+
 const MODULE_CONFIG = [
   {
     key: 'ordering',
@@ -67,7 +78,9 @@ export default function AdminRestaurants() {
   const [restaurants, setRestaurants] = useState([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
+  const [filterCategory, setFilterCategory] = useState('all')
   const [search, setSearch] = useState('')
+  const [openMenuId, setOpenMenuId] = useState(null)
 
   // Suspension state
   const [suspendPanelOpen, setSuspendPanelOpen] = useState(false)
@@ -80,12 +93,24 @@ export default function AdminRestaurants() {
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
   const [modules, setModules] = useState({})
   const [trialEndsAt, setTrialEndsAt] = useState('')
+  const [industryCategory, setIndustryCategory] = useState('')
+  const [industryCategories, setIndustryCategories] = useState([])
   const [savingModules, setSavingModules] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
 
   useEffect(() => {
     fetchRestaurants()
+    fetchIndustryCategories()
   }, [])
+
+  const fetchIndustryCategories = async () => {
+    const { data } = await supabase
+      .from('platform_settings')
+      .select('value')
+      .eq('key', 'industry_categories')
+      .single()
+    setIndustryCategories(data?.value ?? DEFAULT_INDUSTRY_CATEGORIES)
+  }
 
   const fetchRestaurants = async () => {
     const { data } = await supabase
@@ -166,6 +191,7 @@ export default function AdminRestaurants() {
     setModules({ ...DEFAULT_MODULES, ...(restaurant.enabled_modules || {}) })
     // Convert ISO string to local date string for the date input (YYYY-MM-DD)
     setTrialEndsAt(restaurant.trial_ends_at ? restaurant.trial_ends_at.substring(0, 10) : '')
+    setIndustryCategory(restaurant.industry_category || '')
     setSaveSuccess(false)
     setModulePanelOpen(true)
   }
@@ -193,6 +219,7 @@ export default function AdminRestaurants() {
     const updates = { enabled_modules: modules }
     // Save trial_ends_at — store as midnight UTC on the chosen date, or null if cleared
     updates.trial_ends_at = trialEndsAt ? new Date(trialEndsAt).toISOString() : null
+    updates.industry_category = industryCategory || null
 
     const { error } = await supabase
       .from('restaurants')
@@ -203,7 +230,7 @@ export default function AdminRestaurants() {
     if (!error) {
       setSaveSuccess(true)
       setRestaurants(prev => prev.map(r =>
-        r.id === selectedRestaurant.id ? { ...r, enabled_modules: modules, trial_ends_at: updates.trial_ends_at } : r
+        r.id === selectedRestaurant.id ? { ...r, enabled_modules: modules, trial_ends_at: updates.trial_ends_at, industry_category: updates.industry_category } : r
       ))
       setTimeout(() => setSaveSuccess(false), 3000)
     }
@@ -216,6 +243,8 @@ export default function AdminRestaurants() {
 
   const filteredRestaurants = restaurants.filter(r => {
     if (filter !== 'all' && r.status !== filter) return false
+    if (filterCategory === '__unassigned' && r.industry_category) return false
+    if (filterCategory !== 'all' && filterCategory !== '__unassigned' && r.industry_category !== filterCategory) return false
     if (search) {
       const q = search.toLowerCase()
       return (
@@ -281,6 +310,17 @@ export default function AdminRestaurants() {
             )}
           </button>
         ))}
+        <select
+          value={filterCategory}
+          onChange={e => setFilterCategory(e.target.value)}
+          className="px-3 py-2 bg-white border-2 border-slate-200 rounded-xl text-sm text-slate-600 focus:outline-none focus:border-[#6262bd] cursor-pointer"
+        >
+          <option value="all">All industries</option>
+          {industryCategories.map(cat => (
+            <option key={cat.value} value={cat.value}>{cat.label}</option>
+          ))}
+          <option value="__unassigned">Unassigned</option>
+        </select>
         <div className="relative ml-auto">
           <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
             <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
@@ -313,7 +353,7 @@ export default function AdminRestaurants() {
           </p>
         </div>
       ) : (
-        <div className="bg-white border-2 border-slate-100 rounded-2xl overflow-hidden">
+        <div className="bg-white border-2 border-slate-100 rounded-2xl">
           <table className="w-full">
             <thead className="bg-slate-50 border-b-2 border-slate-100">
               <tr>
@@ -332,6 +372,14 @@ export default function AdminRestaurants() {
                   <td className="px-6 py-4">
                     <p className="font-semibold text-slate-800">{restaurant.name}</p>
                     <p className="text-sm text-slate-400">{restaurant.slug}</p>
+                    {restaurant.industry_category && (() => {
+                      const cat = industryCategories.find(c => c.value === restaurant.industry_category)
+                      return cat ? (
+                        <span className="inline-block mt-1 px-2 py-0.5 rounded-md text-xs font-medium bg-[#6262bd]/10 text-[#6262bd]">
+                          {cat.label}
+                        </span>
+                      ) : null
+                    })()}
                   </td>
                   <td className="px-6 py-4">
                     <p className="text-slate-700">{restaurant.email}</p>
@@ -404,68 +452,94 @@ export default function AdminRestaurants() {
                     {formatDate(restaurant.created_at)}
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex justify-end gap-2">
+                    <div className="flex justify-end items-center gap-2">
+                      {/* Primary status action — always visible */}
                       {restaurant.status === 'pending' && (
-                        <>
-                          <button
-                            onClick={() => updateStatus(restaurant.id, 'approved')}
-                            className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200"
-                          >
-                            Approve
-                          </button>
-                          <button
-                            onClick={() => updateStatus(restaurant.id, 'rejected')}
-                            className="px-3 py-1.5 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200"
-                          >
-                            Reject
-                          </button>
-                        </>
-                      )}
-                      {restaurant.status === 'approved' && (
                         <button
-                          onClick={() => openSuspendPanel(restaurant)}
-                          className="px-3 py-1.5 bg-amber-100 text-amber-700 rounded-lg text-sm font-medium hover:bg-amber-200"
+                          onClick={() => updateStatus(restaurant.id, 'approved')}
+                          className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200"
                         >
-                          Suspend
+                          Approve
                         </button>
                       )}
                       {restaurant.status === 'rejected' && (
-                        <>
-                          <span className="px-3 py-1.5 bg-red-100 text-red-600 rounded-lg text-sm font-medium">
-                            Suspended
-                          </span>
-                          <button
-                            onClick={() => openSuspendPanel(restaurant)}
-                            className="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-200"
-                          >
-                            Edit message
-                          </button>
-                          <button
-                            onClick={() => updateStatus(restaurant.id, 'approved')}
-                            className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200"
-                          >
-                            Reactivate
-                          </button>
-                        </>
+                        <button
+                          onClick={() => updateStatus(restaurant.id, 'approved')}
+                          className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200"
+                        >
+                          Reactivate
+                        </button>
                       )}
-                      <button
-                        onClick={() => openModulePanel(restaurant)}
-                        className="px-3 py-1.5 bg-[#6262bd]/10 text-[#6262bd] rounded-lg text-sm font-medium hover:bg-[#6262bd]/20"
-                      >
-                        Modules
-                      </button>
-                      <button
-                        onClick={() => handleImpersonate(restaurant)}
-                        className="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-200"
-                      >
-                        Login as
-                      </button>
-                      <button
-                        onClick={() => deleteRestaurant(restaurant.id, restaurant.name)}
-                        className="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-200"
-                      >
-                        Delete
-                      </button>
+
+                      {/* ⋯ dropdown */}
+                      <div className="relative">
+                        <button
+                          onClick={() => setOpenMenuId(openMenuId === restaurant.id ? null : restaurant.id)}
+                          className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                          </svg>
+                        </button>
+
+                        {openMenuId === restaurant.id && (
+                          <>
+                            <div className="fixed inset-0 z-10" onClick={() => setOpenMenuId(null)} />
+                            <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-slate-200 rounded-xl shadow-lg z-20 py-1 overflow-hidden">
+                              <button
+                                onClick={() => { openModulePanel(restaurant); setOpenMenuId(null) }}
+                                className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"
+                              >
+                                <svg className="w-4 h-4 text-slate-400" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l4.59-4.58L18 11l-6 6z"/></svg>
+                                Modules & category
+                              </button>
+                              <button
+                                onClick={() => { handleImpersonate(restaurant); setOpenMenuId(null) }}
+                                className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"
+                              >
+                                <svg className="w-4 h-4 text-slate-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                                Login as venue
+                              </button>
+                              {restaurant.status === 'pending' && (
+                                <button
+                                  onClick={() => { updateStatus(restaurant.id, 'rejected'); setOpenMenuId(null) }}
+                                  className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                                >
+                                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                                  Reject
+                                </button>
+                              )}
+                              {restaurant.status === 'approved' && (
+                                <button
+                                  onClick={() => { openSuspendPanel(restaurant); setOpenMenuId(null) }}
+                                  className="w-full text-left px-4 py-2.5 text-sm text-amber-600 hover:bg-amber-50 flex items-center gap-2"
+                                >
+                                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                                  Suspend
+                                </button>
+                              )}
+                              {restaurant.status === 'rejected' && (
+                                <button
+                                  onClick={() => { openSuspendPanel(restaurant); setOpenMenuId(null) }}
+                                  className="w-full text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 flex items-center gap-2"
+                                >
+                                  <svg className="w-4 h-4 text-slate-400" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                                  Edit suspension
+                                </button>
+                              )}
+                              <div className="border-t border-slate-100 mt-1 pt-1">
+                                <button
+                                  onClick={() => { deleteRestaurant(restaurant.id, restaurant.name); setOpenMenuId(null) }}
+                                  className="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 flex items-center gap-2"
+                                >
+                                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                                  Delete
+                                </button>
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </td>
                 </tr>
@@ -559,6 +633,25 @@ export default function AdminRestaurants() {
                   </button>
                 )
               })}
+            </div>
+
+            {/* Industry category */}
+            <div className="px-6 pb-4 border-t border-slate-100 pt-5">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Industry Category</p>
+              <p className="text-xs text-slate-400 mb-3">Used to filter peer reviews shown to venue managers. Customers only see overall ratings from venues in the same category.</p>
+              <select
+                value={industryCategory}
+                onChange={e => setIndustryCategory(e.target.value)}
+                className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#6262bd]"
+              >
+                <option value="">— Not assigned —</option>
+                {industryCategories.map(cat => (
+                  <option key={cat.value} value={cat.value}>{cat.label}</option>
+                ))}
+              </select>
+              {industryCategories.length === 0 && (
+                <p className="text-xs text-slate-400 mt-1.5">No categories defined yet — add them in Platform Settings.</p>
+              )}
             </div>
 
             {/* Trial period */}

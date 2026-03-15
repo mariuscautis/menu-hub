@@ -49,37 +49,63 @@ export default function CustomersPage() {
     if (!restaurant?.id) return
     setLoading(true)
 
-    // Get all customers who have booked this venue
+    // Fetch restrictions first — these may include customers with no completed booking yet
+    const { data: restrictions } = await adminSupabase
+      .from('customer_venue_restrictions')
+      .select('customer_id, type, fee_amount, fee_currency')
+      .eq('restaurant_id', restaurant.id)
+
+    // Get all customers who have booked this venue (customer_id present)
     const { data: reservations } = await adminSupabase
       .from('reservations')
       .select('customer_id, customer_name, customer_phone, customer_email')
       .eq('restaurant_id', restaurant.id)
       .not('customer_id', 'is', null)
 
-    if (!reservations?.length) { setCustomers([]); setLoading(false); return }
+    // Build the union of customer IDs: from reservations + from restrictions
+    const reservationCustomerIds = new Set((reservations || []).map(r => r.customer_id))
+    const restrictionCustomerIds = new Set((restrictions || []).map(r => r.customer_id))
+    const allCustomerIds = [...new Set([...reservationCustomerIds, ...restrictionCustomerIds])]
 
-    // Unique customer IDs
-    const customerIds = [...new Set(reservations.map(r => r.customer_id))]
+    if (!allCustomerIds.length) { setCustomers([]); setLoading(false); return }
 
     // Fetch customer records
     const { data: customerRows } = await adminSupabase
       .from('customers')
-      .select('id, phone, name, email, avg_rating, total_bookings')
-      .in('id', customerIds)
+      .select('id, phone, name, email, total_bookings')
+      .in('id', allCustomerIds)
 
     // Fetch venue-specific ratings for avg
     const { data: venueRatings } = await adminSupabase
       .from('customer_ratings')
       .select('customer_id, rating')
       .eq('restaurant_id', restaurant.id)
-      .in('customer_id', customerIds)
+      .in('customer_id', allCustomerIds)
 
-    // Fetch restrictions
-    const { data: restrictions } = await adminSupabase
-      .from('customer_venue_restrictions')
-      .select('customer_id, type, fee_amount, fee_currency')
-      .eq('restaurant_id', restaurant.id)
-      .in('customer_id', customerIds)
+    // Fetch same-category peer ratings (industry-filtered overall)
+    // Only possible if this venue has an industry_category assigned
+    let categoryRatingMap = {}
+    if (restaurant.industry_category) {
+      // Get all restaurant IDs in the same category
+      const { data: peerVenues } = await adminSupabase
+        .from('restaurants')
+        .select('id')
+        .eq('industry_category', restaurant.industry_category)
+      const peerIds = (peerVenues || []).map(v => v.id)
+
+      if (peerIds.length) {
+        const { data: peerRatings } = await adminSupabase
+          .from('customer_ratings')
+          .select('customer_id, rating')
+          .in('restaurant_id', peerIds)
+          .in('customer_id', allCustomerIds)
+
+        ;(peerRatings || []).forEach(r => {
+          if (!categoryRatingMap[r.customer_id]) categoryRatingMap[r.customer_id] = []
+          categoryRatingMap[r.customer_id].push(r.rating)
+        })
+      }
+    }
 
     // Build venue avg map
     const venueRatingMap = {}
@@ -94,17 +120,20 @@ export default function CustomersPage() {
 
     // Build booking count per customer at this venue
     const bookingCountMap = {}
-    reservations.forEach(r => {
+    ;(reservations || []).forEach(r => {
       bookingCountMap[r.customer_id] = (bookingCountMap[r.customer_id] || 0) + 1
     })
 
     const combined = (customerRows || []).map(c => {
       const vr = venueRatingMap[c.id] || []
       const venueAvg = vr.length ? (vr.reduce((s, v) => s + v, 0) / vr.length).toFixed(1) : null
+      const cr = categoryRatingMap[c.id] || []
+      const categoryAvg = cr.length ? (cr.reduce((s, v) => s + v, 0) / cr.length).toFixed(1) : null
       return {
         ...c,
         venueBookings: bookingCountMap[c.id] || 0,
         venueAvg,
+        categoryAvg,
         restriction: restrictionMap[c.id] || null,
       }
     })
@@ -258,7 +287,9 @@ export default function CustomersPage() {
                   <th className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 hidden sm:table-cell">Phone</th>
                   <th className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 text-center">Visits</th>
                   <th className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 text-center hidden md:table-cell">Your rating</th>
-                  <th className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 text-center hidden md:table-cell">Overall</th>
+                  <th className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 text-center hidden md:table-cell">
+                    {restaurant?.industry_category ? 'Peer rating' : 'Overall'}
+                  </th>
                   <th className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400">Status</th>
                 </tr>
               </thead>
@@ -280,7 +311,7 @@ export default function CustomersPage() {
                       <td className="px-4 py-3 text-slate-600 dark:text-slate-400 hidden sm:table-cell">{customer.phone}</td>
                       <td className="px-4 py-3 text-center font-medium text-slate-700 dark:text-slate-300">{customer.venueBookings}</td>
                       <td className="px-4 py-3 text-center hidden md:table-cell"><Stars value={customer.venueAvg} /></td>
-                      <td className="px-4 py-3 text-center hidden md:table-cell"><Stars value={customer.avg_rating} /></td>
+                      <td className="px-4 py-3 text-center hidden md:table-cell"><Stars value={customer.categoryAvg} /></td>
                       <td className="px-4 py-3">
                         {restr ? (
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold border ${RESTRICTION_LABELS[restr.type]?.cls}`}>
@@ -331,8 +362,8 @@ export default function CustomersPage() {
                 <div className="text-xs text-slate-400 mt-0.5">Your rating</div>
               </div>
               <div className="p-4 text-center">
-                <div className="text-xl font-bold text-purple-500">{selected.avg_rating ? `${Number(selected.avg_rating).toFixed(1)}★` : '—'}</div>
-                <div className="text-xs text-slate-400 mt-0.5">Overall</div>
+                <div className="text-xl font-bold text-purple-500">{selected.categoryAvg ? `${selected.categoryAvg}★` : '—'}</div>
+                <div className="text-xs text-slate-400 mt-0.5">{restaurant?.industry_category ? 'Peer rating' : 'Overall'}</div>
               </div>
             </div>
 

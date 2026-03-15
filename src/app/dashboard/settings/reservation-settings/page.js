@@ -57,6 +57,7 @@ export default function ReservationSettingsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState(null)
+  const [categoryLabels, setCategoryLabels] = useState({})
 
   // Slot mode: 'fixed' | 'customer_choice'
   const [slotMode, setSlotMode] = useState('fixed')
@@ -68,6 +69,21 @@ export default function ReservationSettingsPage() {
   const [showPartySize, setShowPartySize] = useState(true)
   const [singleBookingArea, setSingleBookingArea] = useState(false)
   const [operatingHours, setOperatingHours] = useState(DEFAULT_HOURS)
+
+  useEffect(() => {
+    supabase
+      .from('platform_settings')
+      .select('value')
+      .eq('key', 'industry_categories')
+      .single()
+      .then(({ data }) => {
+        if (data?.value) {
+          const map = {}
+          data.value.forEach(c => { map[c.value] = c.label })
+          setCategoryLabels(map)
+        }
+      })
+  }, [])
 
   useEffect(() => {
     if (!restaurantCtx?.restaurant) return
@@ -144,6 +160,23 @@ export default function ReservationSettingsPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200">Reservation Settings</h1>
         <p className="text-slate-500 dark:text-slate-400">Configure booking slots, hours and availability</p>
+      </div>
+
+      {/* Industry category (read-only) */}
+      <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
+        <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">Industry category</h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
+          Your venue's category is assigned by the platform administrator and determines which peer reviews are shown for your customers.
+        </p>
+        {restaurant.industry_category ? (
+          <span className="inline-flex items-center px-4 py-2 rounded-xl bg-[#6262bd]/10 text-[#6262bd] font-semibold text-sm">
+            {categoryLabels[restaurant.industry_category] || restaurant.industry_category}
+          </span>
+        ) : (
+          <span className="inline-flex items-center px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-sm">
+            Not yet assigned — contact support
+          </span>
+        )}
       </div>
 
       {message && (

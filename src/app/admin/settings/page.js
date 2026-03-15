@@ -4,6 +4,17 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { clearBrandingCache } from '@/lib/usePlatformBranding'
 
+const DEFAULT_CATEGORIES = [
+  { value: 'restaurant',    label: 'Restaurant / Café / Bar' },
+  { value: 'beauty',        label: 'Beauty & Wellness' },
+  { value: 'fitness',       label: 'Fitness & Sport' },
+  { value: 'hotel',         label: 'Hotel & Accommodation' },
+  { value: 'entertainment', label: 'Entertainment & Events' },
+  { value: 'health',        label: 'Health & Medical' },
+  { value: 'education',     label: 'Education & Tutoring' },
+  { value: 'other',         label: 'Other' },
+]
+
 export default function AdminSettings() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -18,12 +29,19 @@ export default function AdminSettings() {
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const logoInputRef = useRef(null)
 
+  // Industry categories
+  const [categories, setCategories] = useState([])
+  const [newCategoryLabel, setNewCategoryLabel] = useState('')
+  const [savingCategories, setSavingCategories] = useState(false)
+  const [categoryMessage, setCategoryMessage] = useState(null)
+
   useEffect(() => {
     fetchBranding()
+    fetchCategories()
   }, [])
 
   const fetchBranding = async () => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('platform_settings')
       .select('value')
       .eq('key', 'branding')
@@ -34,6 +52,56 @@ export default function AdminSettings() {
       if (data.value.logo_url) setLogoPreview(data.value.logo_url)
     }
     setLoading(false)
+  }
+
+  const fetchCategories = async () => {
+    const { data } = await supabase
+      .from('platform_settings')
+      .select('value')
+      .eq('key', 'industry_categories')
+      .single()
+
+    setCategories(data?.value ?? DEFAULT_CATEGORIES)
+  }
+
+  const addCategory = () => {
+    const label = newCategoryLabel.trim()
+    if (!label) return
+    // Generate a slug-style value from the label
+    const value = label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')
+    if (categories.some(c => c.value === value)) return
+    setCategories(prev => [...prev, { value, label }])
+    setNewCategoryLabel('')
+  }
+
+  const removeCategory = (value) => {
+    setCategories(prev => prev.filter(c => c.value !== value))
+  }
+
+  const saveCategories = async () => {
+    setSavingCategories(true)
+    setCategoryMessage(null)
+    // Try update first; if no row matched, insert
+    const { data: updated, error: updateError } = await supabase
+      .from('platform_settings')
+      .update({ value: categories })
+      .eq('key', 'industry_categories')
+      .select('key')
+
+    let error = updateError
+    if (!updateError && (!updated || updated.length === 0)) {
+      const { error: insertError } = await supabase
+        .from('platform_settings')
+        .insert({ key: 'industry_categories', value: categories })
+      error = insertError
+    }
+
+    setSavingCategories(false)
+    setCategoryMessage(error
+      ? { type: 'error', text: 'Failed to save categories.' }
+      : { type: 'success', text: 'Categories saved.' }
+    )
+    setTimeout(() => setCategoryMessage(null), 3000)
   }
 
   const handleLogoUpload = async (e) => {
@@ -325,6 +393,67 @@ export default function AdminSettings() {
           <li><strong>Installed app (PWA) updates:</strong> The app automatically checks for updates in the background. Users will see the new logo and name the next time they open the app after closing it completely.</li>
           <li><strong>App icon on home screen:</strong> The icon shown on the home screen is cached by the device. For a new icon to appear, users need to uninstall and reinstall the app.</li>
         </ul>
+      </div>
+
+      {/* Industry Categories */}
+      <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
+        <h2 className="text-lg font-bold text-slate-700 mb-1">Industry Categories</h2>
+        <p className="text-sm text-slate-500 mb-5">
+          These categories are assigned to venues and used to filter peer reviews. Add or remove as needed.
+        </p>
+
+        {categoryMessage && (
+          <div className={`mb-4 p-3 rounded-xl border text-sm ${
+            categoryMessage.type === 'success' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-700'
+          }`}>
+            {categoryMessage.text}
+          </div>
+        )}
+
+        <div className="space-y-2 mb-4">
+          {categories.map(cat => (
+            <div key={cat.value} className="flex items-center justify-between px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+              <span className="text-sm font-medium text-slate-700">{cat.label}</span>
+              <button
+                onClick={() => removeCategory(cat.value)}
+                className="text-slate-400 hover:text-red-500 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+              </button>
+            </div>
+          ))}
+          {categories.length === 0 && (
+            <p className="text-sm text-slate-400 text-center py-4">No categories yet.</p>
+          )}
+        </div>
+
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newCategoryLabel}
+            onChange={e => setNewCategoryLabel(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && addCategory()}
+            placeholder="e.g. Photography Studio"
+            className="flex-1 px-4 py-2.5 border-2 border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#6262bd]"
+          />
+          <button
+            onClick={addCategory}
+            disabled={!newCategoryLabel.trim()}
+            className="px-4 py-2.5 bg-[#6262bd] text-white rounded-xl text-sm font-medium hover:bg-[#5252a3] disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Add
+          </button>
+        </div>
+
+        <button
+          onClick={saveCategories}
+          disabled={savingCategories}
+          className="mt-4 w-full bg-slate-800 text-white py-2.5 rounded-xl font-semibold text-sm hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+        >
+          {savingCategories ? 'Saving…' : 'Save Categories'}
+        </button>
       </div>
 
       {/* Save Button */}
