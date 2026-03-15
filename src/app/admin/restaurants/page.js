@@ -76,9 +76,9 @@ const SUB_STATUS_TILE = {
   unpaid:   'bg-red-100 text-red-700',
 }
 const ROW_STATUS = {
-  pending:  { row: 'bg-amber-50 hover:bg-amber-100/60', dot: 'bg-amber-400', label: 'Pending approval',       labelClass: 'bg-amber-100 text-amber-700 border-amber-200' },
-  approved: { row: 'bg-green-50 hover:bg-green-100/60',  dot: 'bg-green-500',  label: 'Approved',               labelClass: 'bg-green-100 text-green-700 border-green-200' },
-  rejected: { row: 'bg-red-50 hover:bg-red-100/60',    dot: 'bg-red-500',    label: 'Suspended / rejected',   labelClass: 'bg-red-100 text-red-700 border-red-200' },
+  pending:  { dot: 'bg-amber-400', label: 'Pending approval',     labelClass: 'bg-amber-100 text-amber-700 border-amber-200' },
+  approved: { dot: 'bg-green-500', label: 'Approved',             labelClass: 'bg-green-100 text-green-700 border-green-200' },
+  rejected: { dot: 'bg-red-500',   label: 'Suspended / rejected', labelClass: 'bg-red-100 text-red-700 border-red-200' },
 }
 
 function currentBillingMonth() {
@@ -399,7 +399,7 @@ export default function AdminRestaurants() {
               </tr>
             </thead>
             <tbody>
-              {filteredRestaurants.map((restaurant) => {
+              {filteredRestaurants.map((restaurant, idx) => {
                 const statusCfg = ROW_STATUS[restaurant.status] || ROW_STATUS.pending
                 const sub = restaurant.subscription_status || 'trialing'
                 const plans = (restaurant.subscription_plans || '').split(',').filter(Boolean)
@@ -411,7 +411,7 @@ export default function AdminRestaurants() {
                 return (
                   <tr
                     key={restaurant.id}
-                    className={`border-b border-slate-100 last:border-0 transition-colors cursor-pointer ${statusCfg.row}`}
+                    className={`border-b border-slate-100 last:border-0 transition-colors cursor-pointer hover:bg-slate-100 ${idx % 2 !== 0 ? 'bg-slate-50' : 'bg-white'}`}
                     onClick={() => openModulePanel(restaurant)}
                   >
                     {/* Restaurant */}
@@ -421,19 +421,21 @@ export default function AdminRestaurants() {
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
                             <p className="font-semibold text-slate-800 truncate text-sm">{restaurant.name}</p>
-                            <div className="relative group flex-shrink-0">
-                              <svg className="w-3.5 h-3.5 text-slate-400 cursor-help" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
-                              </svg>
-                              <div className="absolute left-0 top-5 z-30 hidden group-hover:block w-48 bg-slate-800 text-white text-xs rounded-xl px-3 py-2 shadow-lg pointer-events-none">
-                                <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border mb-1 ${statusCfg.labelClass}`}>
-                                  {statusCfg.label}
-                                </span>
-                                {restaurant.suspension_message && (
-                                  <p className="text-slate-300 mt-1 leading-snug">{restaurant.suspension_message}</p>
-                                )}
+                            {restaurant.status !== 'approved' && (
+                              <div className="relative group flex-shrink-0">
+                                <svg className="w-3.5 h-3.5 text-slate-400 cursor-help" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                                </svg>
+                                <div className="absolute left-0 top-5 z-30 hidden group-hover:block w-48 bg-slate-800 text-white text-xs rounded-xl px-3 py-2 shadow-lg pointer-events-none">
+                                  <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border mb-1 ${statusCfg.labelClass}`}>
+                                    {statusCfg.label}
+                                  </span>
+                                  {restaurant.suspension_message && (
+                                    <p className="text-slate-300 mt-1 leading-snug">{restaurant.suspension_message}</p>
+                                  )}
+                                </div>
                               </div>
-                            </div>
+                            )}
                           </div>
                           <p className="text-xs text-slate-400 truncate">{restaurant.slug}</p>
                         </div>
