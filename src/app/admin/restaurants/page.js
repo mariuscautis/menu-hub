@@ -95,6 +95,8 @@ export default function AdminRestaurants() {
   const [trialEndsAt, setTrialEndsAt] = useState('')
   const [industryCategory, setIndustryCategory] = useState('')
   const [industryCategories, setIndustryCategories] = useState([])
+  const [smsBillingEnabled, setSmsBillingEnabled] = useState(false)
+  const [smsBillingRate, setSmsBillingRate] = useState('20')
   const [savingModules, setSavingModules] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
 
@@ -192,6 +194,8 @@ export default function AdminRestaurants() {
     // Convert ISO string to local date string for the date input (YYYY-MM-DD)
     setTrialEndsAt(restaurant.trial_ends_at ? restaurant.trial_ends_at.substring(0, 10) : '')
     setIndustryCategory(restaurant.industry_category || '')
+    setSmsBillingEnabled(!!restaurant.sms_billing_enabled)
+    setSmsBillingRate(String(restaurant.sms_billing_rate_pence ?? 20))
     setSaveSuccess(false)
     setModulePanelOpen(true)
   }
@@ -220,6 +224,8 @@ export default function AdminRestaurants() {
     // Save trial_ends_at — store as midnight UTC on the chosen date, or null if cleared
     updates.trial_ends_at = trialEndsAt ? new Date(trialEndsAt).toISOString() : null
     updates.industry_category = industryCategory || null
+    updates.sms_billing_enabled = smsBillingEnabled
+    updates.sms_billing_rate_pence = parseInt(smsBillingRate, 10) || 20
 
     const { error } = await supabase
       .from('restaurants')
@@ -230,7 +236,7 @@ export default function AdminRestaurants() {
     if (!error) {
       setSaveSuccess(true)
       setRestaurants(prev => prev.map(r =>
-        r.id === selectedRestaurant.id ? { ...r, enabled_modules: modules, trial_ends_at: updates.trial_ends_at, industry_category: updates.industry_category } : r
+        r.id === selectedRestaurant.id ? { ...r, enabled_modules: modules, trial_ends_at: updates.trial_ends_at, industry_category: updates.industry_category, sms_billing_enabled: updates.sms_billing_enabled, sms_billing_rate_pence: updates.sms_billing_rate_pence } : r
       ))
       setTimeout(() => setSaveSuccess(false), 3000)
     }
@@ -651,6 +657,38 @@ export default function AdminRestaurants() {
               </select>
               {industryCategories.length === 0 && (
                 <p className="text-xs text-slate-400 mt-1.5">No categories defined yet — add them in Platform Settings.</p>
+              )}
+            </div>
+
+            {/* SMS Billing */}
+            <div className="px-6 pb-4 border-t border-slate-100 pt-5">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">SMS Verification Billing</p>
+              <p className="text-xs text-slate-400 mb-3">Charge this venue per SMS verification sent. Billed monthly as an invoice item on their next Stripe payment.</p>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm text-slate-700">Enable SMS billing</span>
+                <button
+                  onClick={() => setSmsBillingEnabled(v => !v)}
+                  className={`relative w-11 h-6 rounded-full transition-colors ${smsBillingEnabled ? 'bg-[#6262bd]' : 'bg-slate-200'}`}
+                >
+                  <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${smsBillingEnabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                </button>
+              </div>
+              {smsBillingEnabled && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-slate-500 whitespace-nowrap">Rate per SMS</span>
+                  <div className="relative flex items-center">
+                    <span className="absolute left-3 text-slate-400 text-sm">p</span>
+                    <input
+                      type="number"
+                      min="1"
+                      max="999"
+                      value={smsBillingRate}
+                      onChange={e => setSmsBillingRate(e.target.value)}
+                      className="pl-7 pr-3 py-2 border-2 border-slate-200 rounded-xl text-sm text-slate-700 w-24 focus:outline-none focus:border-[#6262bd]"
+                    />
+                  </div>
+                  <span className="text-xs text-slate-400">pence (default 20p)</span>
+                </div>
               )}
             </div>
 

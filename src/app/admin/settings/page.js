@@ -35,6 +35,17 @@ export default function AdminSettings() {
   const [savingCategories, setSavingCategories] = useState(false)
   const [categoryMessage, setCategoryMessage] = useState(null)
 
+  // SMS billing
+  const [smsMonth, setSmsMonth] = useState(() => {
+    const now = new Date()
+    const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+    return `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '0')}`
+  })
+  const [smsPreview, setSmsPreview] = useState(null)
+  const [smsPreviewLoading, setSmsPreviewLoading] = useState(false)
+  const [smsRunning, setSmsRunning] = useState(false)
+  const [smsMessage, setSmsMessage] = useState(null)
+
   useEffect(() => {
     fetchBranding()
     fetchCategories()
@@ -102,6 +113,47 @@ export default function AdminSettings() {
       : { type: 'success', text: 'Categories saved.' }
     )
     setTimeout(() => setCategoryMessage(null), 3000)
+  }
+
+  const loadSmsPreview = async (month) => {
+    setSmsPreviewLoading(true)
+    setSmsPreview(null)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const token = session?.access_token
+      const res = await fetch(`/api/admin/sms-billing?month=${month}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (res.ok) setSmsPreview(await res.json())
+    } catch (e) {
+      console.error('SMS preview error:', e)
+    }
+    setSmsPreviewLoading(false)
+  }
+
+  const runSmsBilling = async () => {
+    if (!confirm(`Run SMS billing for ${smsMonth}? This will create Stripe invoice items for all opted-in venues.`)) return
+    setSmsRunning(true)
+    setSmsMessage(null)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const token = session?.access_token
+      const res = await fetch('/api/admin/sms-billing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ billingMonth: smsMonth })
+      })
+      const json = await res.json()
+      if (res.ok) {
+        setSmsMessage({ type: 'success', text: `Billing run complete. ${json.results?.length || 0} venue(s) billed.` })
+        loadSmsPreview(smsMonth)
+      } else {
+        setSmsMessage({ type: 'error', text: json.error || 'Billing run failed.' })
+      }
+    } catch (e) {
+      setSmsMessage({ type: 'error', text: 'Billing run failed.' })
+    }
+    setSmsRunning(false)
   }
 
   const handleLogoUpload = async (e) => {
@@ -454,6 +506,97 @@ export default function AdminSettings() {
         >
           {savingCategories ? 'Saving…' : 'Save Categories'}
         </button>
+      </div>
+
+      {/* SMS Billing */}
+      <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
+        <h2 className="text-lg font-bold text-slate-700 mb-1">SMS Verification Billing</h2>
+        <p className="text-sm text-slate-500 mb-5">
+          Preview and run the monthly SMS billing charge for opted-in venues. Each opted-in venue will have a Stripe invoice item added to their next subscription renewal.
+        </p>
+
+        {smsMessage && (
+          <div className={`mb-4 p-3 rounded-xl border text-sm ${
+            smsMessage.type === 'success' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-700'
+          }`}>
+            {smsMessage.text}
+          </div>
+        )}
+
+        <div className="flex items-center gap-3 mb-4">
+          <label className="text-sm font-medium text-slate-700 whitespace-nowrap">Billing month</label>
+          <input
+            type="month"
+            value={smsMonth}
+            onChange={e => { setSmsMonth(e.target.value); setSmsPreview(null) }}
+            className="px-3 py-2 border-2 border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#6262bd]"
+          />
+          <button
+            onClick={() => loadSmsPreview(smsMonth)}
+            disabled={smsPreviewLoading}
+            className="px-4 py-2 border-2 border-slate-200 rounded-xl text-sm font-medium text-slate-600 hover:border-slate-300 disabled:opacity-50"
+          >
+            {smsPreviewLoading ? 'Loading…' : 'Preview'}
+          </button>
+        </div>
+
+        {smsPreview && (
+          <div className="mb-4">
+            {smsPreview.lastRun && (
+              <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 mb-3">
+                Billing already run for this month on {new Date(smsPreview.lastRun.ran_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}. Running again will create duplicate charges.
+              </p>
+            )}
+            {smsPreview.venues?.length === 0 ? (
+              <p className="text-sm text-slate-400 text-center py-4">No SMS usage recorded for this month.</p>
+            ) : (
+              <div className="border border-slate-200 rounded-xl overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-slate-50 border-b border-slate-200">
+                    <tr>
+                      <th className="text-left px-4 py-2.5 font-semibold text-slate-600">Venue</th>
+                      <th className="text-center px-4 py-2.5 font-semibold text-slate-600">SMS sent</th>
+                      <th className="text-center px-4 py-2.5 font-semibold text-slate-600">Rate</th>
+                      <th className="text-right px-4 py-2.5 font-semibold text-slate-600">Amount</th>
+                      <th className="text-center px-4 py-2.5 font-semibold text-slate-600">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {smsPreview.venues.map(v => (
+                      <tr key={v.id} className="border-b border-slate-100 last:border-0">
+                        <td className="px-4 py-2.5 font-medium text-slate-800">{v.name}</td>
+                        <td className="px-4 py-2.5 text-center text-slate-600">{v.sms_count}</td>
+                        <td className="px-4 py-2.5 text-center text-slate-500">{v.rate_pence}p</td>
+                        <td className="px-4 py-2.5 text-right font-semibold text-slate-800">
+                          £{(v.amount_pence / 100).toFixed(2)}
+                        </td>
+                        <td className="px-4 py-2.5 text-center">
+                          {!v.billing_enabled ? (
+                            <span className="text-xs text-slate-400">Opt-out</span>
+                          ) : !v.has_stripe ? (
+                            <span className="text-xs text-amber-600">No Stripe</span>
+                          ) : (
+                            <span className="text-xs text-green-600 font-medium">Will bill</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {smsPreview.venues?.some(v => v.billing_enabled && v.has_stripe) && (
+              <button
+                onClick={runSmsBilling}
+                disabled={smsRunning}
+                className="mt-4 w-full bg-slate-800 text-white py-2.5 rounded-xl font-semibold text-sm hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                {smsRunning ? 'Running billing…' : `Run billing for ${smsMonth}`}
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Save Button */}

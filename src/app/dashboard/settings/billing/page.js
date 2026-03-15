@@ -103,6 +103,8 @@ export default function BillingPage() {
   const [loading, setLoading]             = useState(false)
   const [portalLoading, setPortalLoading] = useState(false)
   const [message, setMessage]             = useState(null)
+  const [smsEnabled, setSmsEnabled]       = useState(false)
+  const [smsToggling, setSmsToggling]     = useState(false)
 
   // When active: pre-select current plans so the user sees their current state
   useEffect(() => {
@@ -110,6 +112,10 @@ export default function BillingPage() {
       setSelected(subscriptionPlans)
     }
   }, [restaurant?.subscription_plans, subscriptionStatus])
+
+  useEffect(() => {
+    setSmsEnabled(!!restaurant?.sms_billing_enabled)
+  }, [restaurant?.sms_billing_enabled])
 
   useEffect(() => {
     if (searchParams.get('success') === '1') {
@@ -131,6 +137,30 @@ export default function BillingPage() {
 
   const { base, total, saving } = calcTotal(selected)
   const { total: currentTotal } = calcTotal(subscriptionPlans)
+
+  const toggleSmsAddon = async (newValue) => {
+    if (!restaurant?.id || smsToggling) return
+    setSmsToggling(true)
+    try {
+      const { supabase } = await import('@/lib/supabase')
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/billing/sms-addon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+        body: JSON.stringify({ restaurantId: restaurant.id, enabled: newValue }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setSmsEnabled(newValue)
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Failed to update SMS add-on.' })
+      }
+    } catch {
+      setMessage({ type: 'error', text: 'Something went wrong. Please try again.' })
+    } finally {
+      setSmsToggling(false)
+    }
+  }
 
   const handleUpdate = async () => {
     if (!restaurant?.id) return
@@ -406,6 +436,56 @@ export default function BillingPage() {
                   </li>
                 ))}
               </ul>
+
+              {/* SMS verification add-on — only inside Bookings, only when selected */}
+              {plan.key === 'bookings' && isSelected && (
+                <div
+                  onClick={e => e.stopPropagation()}
+                  className={`mt-4 rounded-xl border-2 p-4 transition-colors ${
+                    smsEnabled
+                      ? 'border-emerald-300 bg-emerald-50 dark:bg-emerald-900/20 dark:border-emerald-700'
+                      : 'border-slate-200 bg-white/60 dark:bg-slate-700/30 dark:border-slate-600'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                        📱 SMS Verification Add-on
+                      </p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                        Require customers to verify with their phone number. Enables ratings, blacklist &amp; per-customer deposit fees.{' '}
+                        <a
+                          href="https://venoapp.com/services/reservations"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[#6262bd] underline"
+                        >
+                          Learn more
+                        </a>
+                      </p>
+                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-2">
+                        +{restaurant?.sms_billing_rate_pence ?? 20}p per SMS · billed monthly
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => toggleSmsAddon(!smsEnabled)}
+                      disabled={smsToggling}
+                      className={`flex-shrink-0 relative w-11 h-6 rounded-full transition-colors disabled:opacity-50 ${
+                        smsEnabled ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'
+                      }`}
+                    >
+                      <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                        smsEnabled ? 'translate-x-5' : 'translate-x-0.5'
+                      }`} />
+                    </button>
+                  </div>
+                  {smsEnabled && (
+                    <p className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">
+                      ✓ SMS verification enabled
+                    </p>
+                  )}
+                </div>
+              )}
             </button>
           )
         })}

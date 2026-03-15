@@ -1827,7 +1827,9 @@
     "howItWorksStep2": "Receive confirmation email once approved by restaurant",
     "howItWorksStep3": "Cancel anytime using the link in your email",
     "howItWorksStep4": "Please arrive within 15 minutes of your reservation time",
-    "required": "*"
+    "required": "*",
+    "smsOtpMessage": "Your {restaurantName} booking verification code is: {otp}. Valid for 10 minutes.",
+    "smsOtpMessageGeneric": "Your booking verification code is: {otp}. Valid for 10 minutes."
   },
   "cancellation": {
     "cancelReservation": "Cancel Reservation",

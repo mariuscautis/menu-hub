@@ -409,6 +409,7 @@ export default function BookReservation({ params }) {
   const [otpStep, setOtpStep] = useState(false) // true = showing OTP input
   const [otpCode, setOtpCode] = useState('')
   const [fullPhone, setFullPhone] = useState('') // dial code + local number
+  const [otpLocale, setOtpLocale] = useState('en') // locale used when OTP was sent (for resend)
   const [sendingOtp, setSendingOtp] = useState(false)
   const [verifyingOtp, setVerifyingOtp] = useState(false)
   const [otpError, setOtpError] = useState(null)
@@ -637,16 +638,78 @@ export default function BookReservation({ params }) {
     }, 1000)
   }
 
-  // Step 1: validate form, check availability, send OTP
+  // Derive SMS flag from restaurant data
+  const smsEnabled = !!restaurant?.sms_billing_enabled
+
+  // Step 1: validate form, check availability, then either send OTP or direct book
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError(null)
 
-    if (!customerPhone.trim()) {
+    if (smsEnabled && !customerPhone.trim()) {
       setError('Phone number is required to verify your booking.')
       return
     }
 
+    if (!smsEnabled && !customerEmail.trim()) {
+      setError('Email address is required to confirm your booking.')
+      return
+    }
+
+    const supportedLocales = ['en', 'ro', 'fr', 'it', 'es']
+    const restaurantLocale = restaurant.email_language
+    const locale = restaurantLocale && supportedLocales.includes(restaurantLocale) ? restaurantLocale : 'en'
+
+    // ── Non-SMS path: direct booking ──────────────────────────────────────────
+    if (!smsEnabled) {
+      setSendingOtp(true)
+      try {
+        const isAvailable = await checkAvailability(selectedDate, selectedTime)
+        if (!isAvailable) {
+          setError(t('slotUnavailable') || 'Sorry, this time slot is no longer available. Please select another time.')
+          return
+        }
+
+        const res = await fetch('/api/reservations/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            restaurantId: restaurant.id,
+            customerName,
+            customerEmail,
+            customerPhone: customerPhone.trim() || null,
+            partySize,
+            reservationDate: selectedDate,
+            reservationTime: selectedTime,
+            specialRequests: specialRequests || null,
+            locale,
+          })
+        })
+        const result = await res.json()
+
+        if (!result.success) {
+          setError(result.error || 'Failed to submit your booking. Please try again.')
+          return
+        }
+
+        // Fire-and-forget confirmation email
+        fetch('/api/reservations/send-confirmation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reservationId: result.reservationId, isConfirmation: false, locale })
+        }).catch(err => console.error('Email error:', err))
+
+        setBookingSuccess(true)
+      } catch (err) {
+        console.error('Direct booking error:', err)
+        setError('Failed to submit your booking. Please try again.')
+      } finally {
+        setSendingOtp(false)
+      }
+      return
+    }
+
+    // ── SMS path: send OTP ────────────────────────────────────────────────────
     const dialCode = PHONE_PREFIXES.find(p => p.code === phoneCountryCode)?.dial || '+44'
     const localNumber = customerPhone.replace(/^\+/, '').replace(/^0/, '')
     const fullPhone = dialCode + localNumber
@@ -662,7 +725,7 @@ export default function BookReservation({ params }) {
       const res = await fetch('/api/reservations/send-sms-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: fullPhone, restaurantName: restaurant.name })
+        body: JSON.stringify({ phone: fullPhone, restaurantName: restaurant.name, restaurantId: restaurant.id, locale })
       })
       const result = await res.json()
 
@@ -672,6 +735,7 @@ export default function BookReservation({ params }) {
       }
 
       setFullPhone(fullPhone)
+      setOtpLocale(locale)
       setOtpStep(true)
       setOtpCode('')
       setOtpError(null)
@@ -692,7 +756,7 @@ export default function BookReservation({ params }) {
       const res = await fetch('/api/reservations/send-sms-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: fullPhone, restaurantName: restaurant.name })
+        body: JSON.stringify({ phone: fullPhone, restaurantName: restaurant.name, restaurantId: restaurant.id, locale: otpLocale })
       })
       const result = await res.json()
       if (!result.success) {
@@ -1121,37 +1185,55 @@ export default function BookReservation({ params }) {
               />
             </div>
 
-            {/* Phone — mandatory, used for OTP */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                {t('phoneLabel') || 'Phone Number'} *
-              </label>
-              <div className="flex">
-                <PhonePrefixSelector
-                  selectedCode={phoneCountryCode}
-                  onChange={setPhoneCountryCode}
-                />
+            {/* Phone — mandatory for OTP flow, optional otherwise */}
+            {smsEnabled ? (
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  {t('phoneLabel') || 'Phone Number'} *
+                </label>
+                <div className="flex">
+                  <PhonePrefixSelector
+                    selectedCode={phoneCountryCode}
+                    onChange={setPhoneCountryCode}
+                  />
+                  <input
+                    type="tel"
+                    value={customerPhone}
+                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    required
+                    className="flex-1 px-4 py-3 border-2 border-slate-200 rounded-r-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                    placeholder="7700 900000"
+                  />
+                </div>
+                <p className="text-xs text-slate-500 mt-1">We'll send a verification code to this number to confirm your booking.</p>
+              </div>
+            ) : (
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  {t('phoneLabel') || 'Phone Number'} <span className="font-normal text-slate-400">({t('optional') || 'Optional'})</span>
+                </label>
                 <input
                   type="tel"
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
-                  required
-                  className="flex-1 px-4 py-3 border-2 border-slate-200 rounded-r-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
-                  placeholder="7700 900000"
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  placeholder="07700 900000"
                 />
               </div>
-              <p className="text-xs text-slate-500 mt-1">We'll send a verification code to this number to confirm your booking.</p>
-            </div>
+            )}
 
-            {/* Email — optional */}
+            {/* Email — required when SMS is off, optional otherwise */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                {t('emailLabel') || 'Email Address'} <span className="font-normal text-slate-400">({t('optional') || 'Optional'})</span>
+                {t('emailLabel') || 'Email Address'} {smsEnabled
+                  ? <span className="font-normal text-slate-400">({t('optional') || 'Optional'})</span>
+                  : '*'}
               </label>
               <input
                 type="email"
                 value={customerEmail}
                 onChange={(e) => setCustomerEmail(e.target.value)}
+                required={!smsEnabled}
                 className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                 placeholder={t('emailPlaceholder') || 'john@example.com'}
               />
@@ -1175,17 +1257,23 @@ export default function BookReservation({ params }) {
             {/* Submit */}
             <button
               type="submit"
-              disabled={sendingOtp || checkingAvailability || !selectedDate || !selectedTime || (isCustomerChoice && !selectedDuration) || !customerName.trim() || !customerPhone.trim()}
+              disabled={
+                sendingOtp || checkingAvailability ||
+                !selectedDate || !selectedTime ||
+                (isCustomerChoice && !selectedDuration) ||
+                !customerName.trim() ||
+                (smsEnabled ? !customerPhone.trim() : !customerEmail.trim())
+              }
               className="w-full bg-[#6262bd] text-white py-4 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               {sendingOtp || checkingAvailability
                 ? 'Checking availability...'
-                : 'Continue — Verify Phone'}
+                : smsEnabled ? 'Continue — Verify Phone' : 'Request Booking'}
             </button>
           </form>
 
-          {/* OTP Verification Step */}
-          {otpStep && (
+          {/* OTP Verification Step — only when SMS billing is active */}
+          {smsEnabled && otpStep && (
             <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
               <div className="bg-white rounded-2xl p-8 w-full max-w-sm shadow-2xl">
                 <div className="text-center mb-6">

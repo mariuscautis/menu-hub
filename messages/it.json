@@ -1460,7 +1460,9 @@
     "howItWorksStep2": "Ricevi l'email di conferma una volta approvata dal ristorante",
     "howItWorksStep3": "Annulla in qualsiasi momento utilizzando il link nella tua email",
     "howItWorksStep4": "Arrivi entro 15 minuti dall'ora della tua prenotazione",
-    "required": "*"
+    "required": "*",
+    "smsOtpMessage": "Il tuo codice di verifica per la prenotazione presso {restaurantName} è: {otp}. Valido per 10 minuti.",
+    "smsOtpMessageGeneric": "Il tuo codice di verifica per la prenotazione è: {otp}. Valido per 10 minuti."
   },
   "cancellation": {
     "cancelReservation": "Annulla Prenotazione",
