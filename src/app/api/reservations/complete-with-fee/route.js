@@ -128,7 +128,21 @@ export async function POST(request) {
       try {
         const formattedDate = formatDateForLocale(reservationDate, locale || 'en')
         const cur = feeCurrency || 'GBP'
-        const smsBody = `Your booking at ${restaurant.name} on ${formattedDate} at ${reservationTime.substring(0, 5)} is pending confirmation. A ${cur} ${feeAmount} deposit has been collected and is non-refundable if you don't show up.`
+        const FEE_SMS = {
+          en: 'Your booking at {name} on {date} at {time} is pending confirmation. A {cur} {fee} deposit has been collected and is non-refundable if you don\'t show up.',
+          es: 'Tu reserva en {name} el {date} a las {time} está pendiente de confirmación. Se ha cobrado un depósito de {fee} {cur} no reembolsable si no apareces.',
+          fr: 'Votre réservation chez {name} le {date} à {time} est en attente de confirmation. Un dépôt de {fee} {cur} a été encaissé et n\'est pas remboursable en cas d\'absence.',
+          it: 'La tua prenotazione presso {name} il {date} alle {time} è in attesa di conferma. È stato addebitato un deposito di {fee} {cur} non rimborsabile in caso di mancata presentazione.',
+          ro: 'Rezervarea ta la {name} pe {date} la ora {time} este în așteptarea confirmării. Un depozit de {fee} {cur} a fost colectat și nu este rambursabil dacă nu te prezinți.',
+        }
+        const resolvedLocale = locale && FEE_SMS[locale] ? locale : 'en'
+        const smsTpl = FEE_SMS[resolvedLocale]
+        const smsBody = smsTpl
+          .replace('{name}', restaurant.name)
+          .replace('{date}', formattedDate)
+          .replace('{time}', reservationTime.substring(0, 5))
+          .replace('{cur}', cur)
+          .replace('{fee}', feeAmount)
         await sendSms(customerPhone, smsBody)
       } catch (smsErr) {
         console.error('Fee confirmation SMS error:', smsErr)
