@@ -82,28 +82,27 @@ export default function CustomersPage() {
       .eq('restaurant_id', restaurant.id)
       .in('customer_id', allCustomerIds)
 
-    // Fetch same-category peer ratings (industry-filtered overall)
-    // Only possible if this venue has an industry_category assigned
-    let categoryRatingMap = {}
-    if (restaurant.industry_category) {
-      // Get all restaurant IDs in the same category
-      const { data: peerVenues } = await adminSupabase
-        .from('restaurants')
-        .select('id')
-        .eq('industry_category', restaurant.industry_category)
-      const peerIds = (peerVenues || []).map(v => v.id)
-
-      if (peerIds.length) {
-        const { data: peerRatings } = await adminSupabase
-          .from('customer_ratings')
-          .select('customer_id, rating')
-          .in('restaurant_id', peerIds)
-          .in('customer_id', allCustomerIds)
-
-        ;(peerRatings || []).forEach(r => {
-          if (!categoryRatingMap[r.customer_id]) categoryRatingMap[r.customer_id] = []
-          categoryRatingMap[r.customer_id].push(r.rating)
-        })
+    // Fetch same-category peer ratings via API (needs service role to bypass RLS)
+    let avgMap = {}
+    let categoryVisitMap = {}
+    if (restaurant.industry_category && allCustomerIds.length) {
+      try {
+        const { data: { session } } = await adminSupabase.auth.getSession()
+        const token = session?.access_token
+        if (token) {
+          const res = await fetch('/api/customers/peer-ratings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ restaurantId: restaurant.id, customerIds: allCustomerIds })
+          })
+          if (res.ok) {
+            const json = await res.json()
+            avgMap = json.avgMap || {}
+            categoryVisitMap = json.visitMap || {}
+          }
+        }
+      } catch (e) {
+        console.error('peer-ratings fetch error:', e)
       }
     }
 
@@ -127,13 +126,14 @@ export default function CustomersPage() {
     const combined = (customerRows || []).map(c => {
       const vr = venueRatingMap[c.id] || []
       const venueAvg = vr.length ? (vr.reduce((s, v) => s + v, 0) / vr.length).toFixed(1) : null
-      const cr = categoryRatingMap[c.id] || []
-      const categoryAvg = cr.length ? (cr.reduce((s, v) => s + v, 0) / cr.length).toFixed(1) : null
+      const categoryAvg = avgMap[c.id] || null
+      const categoryVisits = categoryVisitMap[c.id] || null
       return {
         ...c,
         venueBookings: bookingCountMap[c.id] || 0,
         venueAvg,
         categoryAvg,
+        categoryVisits,
         restriction: restrictionMap[c.id] || null,
       }
     })
@@ -352,18 +352,18 @@ export default function CustomersPage() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 divide-x divide-slate-100 dark:divide-slate-700 border-b border-slate-100 dark:border-slate-700">
-              <div className="p-4 text-center">
-                <div className="text-xl font-bold text-slate-800 dark:text-slate-200">{selected.venueBookings}</div>
-                <div className="text-xs text-slate-400 mt-0.5">Visits here</div>
-              </div>
+            <div className="grid grid-cols-2 divide-x divide-slate-100 dark:divide-slate-700 border-b border-slate-100 dark:border-slate-700">
               <div className="p-4 text-center">
                 <div className="text-xl font-bold text-amber-500">{selected.venueAvg ? `${selected.venueAvg}★` : '—'}</div>
-                <div className="text-xs text-slate-400 mt-0.5">Your rating</div>
+                <div className="text-xs text-slate-400 mt-0.5">Your venue</div>
+                <div className="text-xs text-slate-300 mt-0.5">{selected.venueBookings} {selected.venueBookings === 1 ? 'visit' : 'visits'}</div>
               </div>
               <div className="p-4 text-center">
                 <div className="text-xl font-bold text-purple-500">{selected.categoryAvg ? `${selected.categoryAvg}★` : '—'}</div>
-                <div className="text-xs text-slate-400 mt-0.5">{restaurant?.industry_category ? 'Peer rating' : 'Overall'}</div>
+                <div className="text-xs text-slate-400 mt-0.5">{restaurant?.industry_category ? 'Peer rating' : 'Overall rating'}</div>
+                {selected.categoryVisits != null && (
+                  <div className="text-xs text-slate-300 mt-0.5">{selected.categoryVisits} {selected.categoryVisits === 1 ? 'visit' : 'visits'}</div>
+                )}
               </div>
             </div>
 

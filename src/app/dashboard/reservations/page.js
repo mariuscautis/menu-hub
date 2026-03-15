@@ -164,21 +164,42 @@ export default function Reservations() {
   }, [fetchData])
 
   const fetchCustomerStats = useCallback(async (customerId, restaurantId) => {
-    if (!customerId) { setCustomerStats(null); return }
-    const { data } = await adminSupabase
+    if (!customerId || !restaurantId) { setCustomerStats(null); return }
+
+    // Venue-specific ratings (own RLS allows this)
+    const { data: venueData } = await adminSupabase
       .from('customer_ratings')
-      .select('rating, restaurant_id')
+      .select('rating')
       .eq('customer_id', customerId)
-    if (!data) { setCustomerStats(null); return }
-    const venue = data.filter(r => r.restaurant_id === restaurantId)
-    const overall = data
-    const avg = arr => arr.length ? (arr.reduce((s, r) => s + r.rating, 0) / arr.length).toFixed(1) : null
-    setCustomerStats({
-      venueAvg: avg(venue),
-      venueCount: venue.length,
-      overallAvg: avg(overall),
-      overallCount: overall.length
-    })
+      .eq('restaurant_id', restaurantId)
+
+    const avg = arr => arr?.length ? (arr.reduce((s, r) => s + r.rating, 0) / arr.length).toFixed(1) : null
+    const venueAvg = avg(venueData || [])
+    const venueCount = (venueData || []).length
+
+    // Cross-venue peer ratings via service role API
+    let overallAvg = null
+    let overallCount = null
+    try {
+      const { data: { session } } = await adminSupabase.auth.getSession()
+      const token = session?.access_token
+      if (token) {
+        const res = await fetch('/api/customers/peer-ratings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ restaurantId, customerIds: [customerId] })
+        })
+        if (res.ok) {
+          const json = await res.json()
+          overallAvg = json.avgMap?.[customerId] || null
+          overallCount = json.visitMap?.[customerId] || null
+        }
+      }
+    } catch (e) {
+      console.error('peer-ratings fetch error:', e)
+    }
+
+    setCustomerStats({ venueAvg, venueCount, overallAvg, overallCount })
   }, [adminSupabase])
 
   const fetchRestriction = useCallback(async (customerId, restaurantId, phone) => {
