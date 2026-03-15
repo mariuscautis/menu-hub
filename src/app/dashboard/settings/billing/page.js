@@ -105,6 +105,7 @@ export default function BillingPage() {
   const [message, setMessage]             = useState(null)
   const [smsEnabled, setSmsEnabled]       = useState(false)
   const [smsToggling, setSmsToggling]     = useState(false)
+  const [smsUsage, setSmsUsage]           = useState(null)
 
   // When active: pre-select current plans so the user sees their current state
   useEffect(() => {
@@ -116,6 +117,23 @@ export default function BillingPage() {
   useEffect(() => {
     setSmsEnabled(!!restaurant?.sms_billing_enabled)
   }, [restaurant?.sms_billing_enabled])
+
+  useEffect(() => {
+    if (!restaurant?.id || !restaurant?.sms_billing_enabled) return
+    let cancelled = false
+    ;(async () => {
+      try {
+        const { supabase } = await import('@/lib/supabase')
+        const { data: { session } } = await supabase.auth.getSession()
+        const res = await fetch(`/api/billing/sms-addon?restaurantId=${restaurant.id}`, {
+          headers: { Authorization: `Bearer ${session?.access_token}` }
+        })
+        const data = await res.json()
+        if (!cancelled) setSmsUsage(data)
+      } catch { /* non-fatal */ }
+    })()
+    return () => { cancelled = true }
+  }, [restaurant?.id, restaurant?.sms_billing_enabled])
 
   useEffect(() => {
     if (searchParams.get('success') === '1') {
@@ -483,6 +501,22 @@ export default function BillingPage() {
                     <p className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">
                       ✓ SMS verification enabled
                     </p>
+                  )}
+                  {smsEnabled && smsUsage && (
+                    <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-600">
+                      <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">
+                        This month's usage ({smsUsage.month})
+                      </p>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-slate-600 dark:text-slate-300">{smsUsage.sms_count} SMS sent</span>
+                        <span className="font-semibold text-slate-800 dark:text-white">
+                          £{(smsUsage.total_pence / 100).toFixed(2)} estimated
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                        At {smsUsage.rate_pence}p per SMS · added to your next invoice
+                      </p>
+                    </div>
                   )}
                 </div>
               )}

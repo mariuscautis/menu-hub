@@ -552,6 +552,13 @@ export default function Reservations() {
       if (error) throw error
       if (data && !data.success) throw new Error(data.error || t('failedToDeny'))
 
+      // Fire-and-forget denial notification (email + SMS if SMS add-on enabled)
+      fetch('/api/reservations/send-denial-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reservationId: selectedReservation.id })
+      }).catch(err => console.error('Denial notification error:', err))
+
       showNotification('success', t('reservationDenied'))
       setShowDenyModal(false)
       setDenyReason('')

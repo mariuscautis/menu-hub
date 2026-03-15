@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
@@ -66,21 +66,36 @@ const MODULE_CONFIG = [
   },
 ]
 
-const DEFAULT_MODULES = {
-  ordering: true,
-  reservations: true,
-  rota: true,
-  analytics: true,
+const DEFAULT_MODULES = { ordering: true, reservations: true, rota: true, analytics: true }
+const PLAN_LABELS = { orders: 'Orders', bookings: 'Bookings', team: 'Team' }
+const SUB_STATUS_TILE = {
+  trialing: 'bg-blue-100 text-blue-700',
+  active:   'bg-green-100 text-green-700',
+  past_due: 'bg-amber-100 text-amber-700',
+  canceled: 'bg-red-100 text-red-700',
+  unpaid:   'bg-red-100 text-red-700',
+}
+const ROW_STATUS = {
+  pending:  { row: 'bg-amber-50 hover:bg-amber-100/60', dot: 'bg-amber-400', label: 'Pending approval',       labelClass: 'bg-amber-100 text-amber-700 border-amber-200' },
+  approved: { row: 'bg-green-50 hover:bg-green-100/60',  dot: 'bg-green-500',  label: 'Approved',               labelClass: 'bg-green-100 text-green-700 border-green-200' },
+  rejected: { row: 'bg-red-50 hover:bg-red-100/60',    dot: 'bg-red-500',    label: 'Suspended / rejected',   labelClass: 'bg-red-100 text-red-700 border-red-200' },
+}
+
+function currentBillingMonth() {
+  const now = new Date()
+  return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`
 }
 
 export default function AdminRestaurants() {
   const router = useRouter()
   const [restaurants, setRestaurants] = useState([])
+  const [smsUsageMap, setSmsUsageMap] = useState({}) // restaurantId -> count
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
   const [filterCategory, setFilterCategory] = useState('all')
   const [search, setSearch] = useState('')
-  const [openMenuId, setOpenMenuId] = useState(null)
+  const [billingRunning, setBillingRunning] = useState(false)
+  const [billingResult, setBillingResult] = useState(null)
 
   // Suspension state
   const [suspendPanelOpen, setSuspendPanelOpen] = useState(false)
@@ -103,6 +118,7 @@ export default function AdminRestaurants() {
   useEffect(() => {
     fetchRestaurants()
     fetchIndustryCategories()
+    fetchSmsUsage()
   }, [])
 
   const fetchIndustryCategories = async () => {
@@ -119,17 +135,45 @@ export default function AdminRestaurants() {
       .from('restaurants')
       .select('*')
       .order('created_at', { ascending: false })
-    // Only show non-deleted restaurants here; deleted ones are on the separate page
     setRestaurants((data || []).filter(r => !r.deleted_at))
     setLoading(false)
   }
 
-  const updateStatus = async (id, status) => {
-    await supabase
-      .from('restaurants')
-      .update({ status })
-      .eq('id', id)
+  const fetchSmsUsage = async () => {
+    const month = currentBillingMonth()
+    const { data } = await supabase
+      .from('sms_usage_log')
+      .select('restaurant_id')
+      .eq('billing_month', month)
+    const map = {}
+    ;(data || []).forEach(row => {
+      map[row.restaurant_id] = (map[row.restaurant_id] || 0) + 1
+    })
+    setSmsUsageMap(map)
+  }
 
+  const runSmsBilling = async () => {
+    if (!confirm('This will add SMS charges as invoice items to all opted-in venues with usage this month. Continue?')) return
+    setBillingRunning(true)
+    setBillingResult(null)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/admin/sms-billing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+        body: JSON.stringify({ billingMonth: currentBillingMonth() })
+      })
+      const data = await res.json()
+      setBillingResult(data)
+    } catch (err) {
+      setBillingResult({ error: err.message })
+    } finally {
+      setBillingRunning(false)
+    }
+  }
+
+  const updateStatus = async (id, status) => {
+    await supabase.from('restaurants').update({ status }).eq('id', id)
     fetchRestaurants()
   }
 
@@ -162,9 +206,7 @@ export default function AdminRestaurants() {
   }
 
   const deleteRestaurant = async (id, name) => {
-    if (!confirm(`Are you sure you want to delete "${name}"? The record will be kept and can be reinstated later.`)) {
-      return
-    }
+    if (!confirm(`Are you sure you want to delete "${name}"? The record will be kept and can be reinstated later.`)) return
     await supabase
       .from('restaurants')
       .update({ deleted_at: new Date().toISOString(), status: 'rejected' })
@@ -172,26 +214,9 @@ export default function AdminRestaurants() {
     fetchRestaurants()
   }
 
-  const reinstateRestaurant = async (restaurant) => {
-    if (!confirm(`Reinstate "${restaurant.name}"? They will be redirected to billing to subscribe.`)) return
-    await supabase
-      .from('restaurants')
-      .update({
-        deleted_at: null,
-        recovery_requested_at: null,
-        status: 'approved',
-        subscription_status: 'trialing',
-        subscription_plans: '',
-        enabled_modules: { ordering: false, analytics: false, reservations: false, rota: false },
-      })
-      .eq('id', restaurant.id)
-    fetchRestaurants()
-  }
-
   const openModulePanel = (restaurant) => {
     setSelectedRestaurant(restaurant)
     setModules({ ...DEFAULT_MODULES, ...(restaurant.enabled_modules || {}) })
-    // Convert ISO string to local date string for the date input (YYYY-MM-DD)
     setTrialEndsAt(restaurant.trial_ends_at ? restaurant.trial_ends_at.substring(0, 10) : '')
     setIndustryCategory(restaurant.industry_category || '')
     setSmsBillingEnabled(!!restaurant.sms_billing_enabled)
@@ -208,7 +233,6 @@ export default function AdminRestaurants() {
   const toggleModule = (key) => {
     setModules(prev => {
       const next = { ...prev, [key]: !prev[key] }
-      // Reports is bundled with Ordering — always keep in sync
       if (key === 'ordering') next.reports = next.ordering
       return next
     })
@@ -219,32 +243,22 @@ export default function AdminRestaurants() {
     if (!selectedRestaurant) return
     setSavingModules(true)
     setSaveSuccess(false)
-
     const updates = { enabled_modules: modules }
-    // Save trial_ends_at — store as midnight UTC on the chosen date, or null if cleared
     updates.trial_ends_at = trialEndsAt ? new Date(trialEndsAt).toISOString() : null
     updates.industry_category = industryCategory || null
     updates.sms_billing_enabled = smsBillingEnabled
     updates.sms_billing_rate_pence = parseInt(smsBillingRate, 10) || 20
-
-    const { error } = await supabase
-      .from('restaurants')
-      .update(updates)
-      .eq('id', selectedRestaurant.id)
-
+    const { error } = await supabase.from('restaurants').update(updates).eq('id', selectedRestaurant.id)
     setSavingModules(false)
     if (!error) {
       setSaveSuccess(true)
       setRestaurants(prev => prev.map(r =>
-        r.id === selectedRestaurant.id ? { ...r, enabled_modules: modules, trial_ends_at: updates.trial_ends_at, industry_category: updates.industry_category, sms_billing_enabled: updates.sms_billing_enabled, sms_billing_rate_pence: updates.sms_billing_rate_pence } : r
+        r.id === selectedRestaurant.id
+          ? { ...r, enabled_modules: modules, trial_ends_at: updates.trial_ends_at, industry_category: updates.industry_category, sms_billing_enabled: updates.sms_billing_enabled, sms_billing_rate_pence: updates.sms_billing_rate_pence }
+          : r
       ))
       setTimeout(() => setSaveSuccess(false), 3000)
     }
-  }
-
-  const enabledCount = (restaurant) => {
-    const m = { ...DEFAULT_MODULES, ...(restaurant.enabled_modules || {}) }
-    return MODULE_CONFIG.filter(mod => m[mod.key] !== false).length
   }
 
   const filteredRestaurants = restaurants.filter(r => {
@@ -253,39 +267,21 @@ export default function AdminRestaurants() {
     if (filterCategory !== 'all' && filterCategory !== '__unassigned' && r.industry_category !== filterCategory) return false
     if (search) {
       const q = search.toLowerCase()
-      return (
-        r.name?.toLowerCase().includes(q) ||
-        r.email?.toLowerCase().includes(q) ||
-        r.slug?.toLowerCase().includes(q)
-      )
+      return r.name?.toLowerCase().includes(q) || r.email?.toLowerCase().includes(q) || r.slug?.toLowerCase().includes(q)
     }
     return true
   })
 
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-amber-100 text-amber-700'
-      case 'approved':
-        return 'bg-green-100 text-green-700'
-      case 'rejected':
-        return 'bg-red-100 text-red-700'
-      default:
-        return 'bg-slate-100 text-slate-600'
-    }
-  }
+  const formatDate = (dateString) => new Date(dateString).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-GB', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
-    })
-  }
+  // Venues with SMS billing enabled that have usage this month
+  const smsVenues = restaurants.filter(r => r.sms_billing_enabled && (smsUsageMap[r.id] || 0) > 0)
+  const totalSmsPence = smsVenues.reduce((sum, r) => {
+    const count = smsUsageMap[r.id] || 0
+    return sum + count * (r.sms_billing_rate_pence ?? 20)
+  }, 0)
 
-  if (loading) {
-    return <div className="text-slate-500">Loading restaurants...</div>
-  }
+  if (loading) return <div className="text-slate-500">Loading restaurants...</div>
 
   return (
     <div>
@@ -303,9 +299,7 @@ export default function AdminRestaurants() {
             key={f}
             onClick={() => setFilter(f)}
             className={`px-4 py-2 rounded-xl font-medium capitalize ${
-              filter === f
-                ? 'bg-[#6262bd] text-white'
-                : 'bg-white border-2 border-slate-200 text-slate-600 hover:border-slate-300'
+              filter === f ? 'bg-[#6262bd] text-white' : 'bg-white border-2 border-slate-200 text-slate-600 hover:border-slate-300'
             }`}
           >
             {f}
@@ -339,17 +333,46 @@ export default function AdminRestaurants() {
             className="pl-9 pr-4 py-2 bg-white border-2 border-slate-200 rounded-xl text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-[#6262bd] w-64"
           />
           {search && (
-            <button
-              onClick={() => setSearch('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500"
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-              </svg>
+            <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
             </button>
           )}
         </div>
       </div>
+
+      {/* SMS billing summary bar */}
+      {smsVenues.length > 0 && (
+        <div className="mb-6 bg-white border-2 border-slate-100 rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold text-slate-700 mb-1">
+              📱 SMS charges this month ({currentBillingMonth()})
+            </p>
+            <p className="text-xs text-slate-500">
+              {smsVenues.length} venue{smsVenues.length !== 1 ? 's' : ''} with SMS usage ·{' '}
+              <span className="font-semibold text-slate-700">£{(totalSmsPence / 100).toFixed(2)} estimated total</span>
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            {billingResult && (
+              <span className={`text-xs font-medium px-3 py-1 rounded-xl ${billingResult.error ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                {billingResult.error ? `Error: ${billingResult.error}` : `Billed ${billingResult.results?.length || 0} venue(s)`}
+              </span>
+            )}
+            <button
+              onClick={runSmsBilling}
+              disabled={billingRunning}
+              className="px-4 py-2 bg-[#6262bd] hover:bg-[#5151a8] text-white rounded-xl text-sm font-semibold disabled:opacity-50 transition-colors flex items-center gap-2"
+            >
+              {billingRunning ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
+                  Running…
+                </>
+              ) : 'Apply SMS charges'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Restaurants List */}
       {filteredRestaurants.length === 0 ? (
@@ -359,282 +382,263 @@ export default function AdminRestaurants() {
           </p>
         </div>
       ) : (
-        <div className="bg-white border-2 border-slate-100 rounded-2xl">
+        <div className="bg-white border-2 border-slate-100 rounded-2xl overflow-hidden">
           <table className="w-full">
             <thead className="bg-slate-50 border-b-2 border-slate-100">
               <tr>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Restaurant</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Contact</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Status</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Subscription</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Modules</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600">Registered</th>
-                <th className="text-right px-6 py-4 text-sm font-semibold text-slate-600">Actions</th>
+                <th className="text-left px-5 py-4 text-sm font-semibold text-slate-600">Restaurant</th>
+                <th className="text-left px-5 py-4 text-sm font-semibold text-slate-600">Contact</th>
+                <th className="text-left px-5 py-4 text-sm font-semibold text-slate-600">Industry</th>
+                <th className="text-left px-5 py-4 text-sm font-semibold text-slate-600">Subscription</th>
+                <th className="text-left px-5 py-4 text-sm font-semibold text-slate-600">Modules</th>
+                <th className="text-left px-5 py-4 text-sm font-semibold text-slate-600">SMS this month</th>
+                <th className="text-right px-5 py-4 text-sm font-semibold text-slate-600">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredRestaurants.map((restaurant) => (
-                <tr key={restaurant.id} className="border-b border-slate-100 last:border-0">
-                  <td className="px-6 py-4">
-                    <p className="font-semibold text-slate-800">{restaurant.name}</p>
-                    <p className="text-sm text-slate-400">{restaurant.slug}</p>
-                    {restaurant.industry_category && (() => {
-                      const cat = industryCategories.find(c => c.value === restaurant.industry_category)
-                      return cat ? (
-                        <span className="inline-block mt-1 px-2 py-0.5 rounded-md text-xs font-medium bg-[#6262bd]/10 text-[#6262bd]">
+              {filteredRestaurants.map((restaurant) => {
+                const statusCfg = ROW_STATUS[restaurant.status] || ROW_STATUS.pending
+                const sub = restaurant.subscription_status || 'trialing'
+                const plans = (restaurant.subscription_plans || '').split(',').filter(Boolean)
+                const mods = { ...DEFAULT_MODULES, ...(restaurant.enabled_modules || {}) }
+                const smsCount = smsUsageMap[restaurant.id] || 0
+                const smsCostPence = smsCount * (restaurant.sms_billing_rate_pence ?? 20)
+                const cat = industryCategories.find(c => c.value === restaurant.industry_category)
+
+                return (
+                  <tr
+                    key={restaurant.id}
+                    className={`border-b border-slate-100 last:border-0 transition-colors cursor-pointer ${statusCfg.row}`}
+                    onClick={() => openModulePanel(restaurant)}
+                  >
+                    {/* Restaurant */}
+                    <td className="px-5 py-4">
+                      <div className="flex items-start gap-2">
+                        <span className={`inline-block w-2 h-2 rounded-full flex-shrink-0 mt-1.5 ${statusCfg.dot}`} />
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <p className="font-semibold text-slate-800 truncate text-sm">{restaurant.name}</p>
+                            <div className="relative group flex-shrink-0">
+                              <svg className="w-3.5 h-3.5 text-slate-400 cursor-help" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                              </svg>
+                              <div className="absolute left-0 top-5 z-30 hidden group-hover:block w-48 bg-slate-800 text-white text-xs rounded-xl px-3 py-2 shadow-lg pointer-events-none">
+                                <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border mb-1 ${statusCfg.labelClass}`}>
+                                  {statusCfg.label}
+                                </span>
+                                {restaurant.suspension_message && (
+                                  <p className="text-slate-300 mt-1 leading-snug">{restaurant.suspension_message}</p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <p className="text-xs text-slate-400 truncate">{restaurant.slug}</p>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Contact */}
+                    <td className="px-5 py-4" onClick={e => e.stopPropagation()}>
+                      <p className="text-slate-700 text-sm truncate max-w-[180px]">{restaurant.email}</p>
+                      {restaurant.phone && <p className="text-xs text-slate-400">{restaurant.phone}</p>}
+                    </td>
+
+                    {/* Industry */}
+                    <td className="px-5 py-4">
+                      {cat ? (
+                        <span className="inline-block px-2 py-0.5 rounded-lg text-xs font-medium bg-[#6262bd]/10 text-[#6262bd]">
                           {cat.label}
                         </span>
-                      ) : null
-                    })()}
-                  </td>
-                  <td className="px-6 py-4">
-                    <p className="text-slate-700">{restaurant.email}</p>
-                    {restaurant.phone && (
-                      <p className="text-sm text-slate-400">{restaurant.phone}</p>
-                    )}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusBadge(restaurant.status)}`}>
-                      {restaurant.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    {(() => {
-                      const sub    = restaurant.subscription_status || 'trialing'
-                      const plans  = (restaurant.subscription_plans || '').split(',').filter(Boolean)
-                      const PLAN_LABELS = { orders: 'Orders', bookings: 'Bookings', team: 'Team' }
-                      const badgeColor = {
-                        trialing: 'bg-blue-100 text-blue-700',
-                        active:   'bg-green-100 text-green-700',
-                        past_due: 'bg-amber-100 text-amber-700',
-                        canceled: 'bg-red-100 text-red-700',
-                        unpaid:   'bg-red-100 text-red-700',
-                      }[sub] || 'bg-slate-100 text-slate-600'
-                      return (
-                        <div className="flex flex-col gap-1">
-                          {plans.length > 0 ? (
-                            <div className="flex flex-wrap gap-1">
-                              {plans.map(p => (
-                                <span key={p} className="px-2 py-0.5 rounded-full text-xs font-medium bg-[#6262bd]/10 text-[#6262bd]">
-                                  {PLAN_LABELS[p] || p}
-                                </span>
-                              ))}
-                            </div>
-                          ) : (
-                            <span className="text-slate-400 text-xs">None</span>
-                          )}
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium w-fit ${badgeColor}`}>
-                            {sub.replace('_', ' ')}
-                          </span>
-                        </div>
-                      )
-                    })()}
-                  </td>
-                  <td className="px-6 py-4">
-                    <button
-                      onClick={() => openModulePanel(restaurant)}
-                      className="flex items-center gap-2 group"
-                      title="Manage modules"
-                    >
-                      {MODULE_CONFIG.map((m, i) => {
-                        const active = { ...DEFAULT_MODULES, ...(restaurant.enabled_modules || {}) }[m.key] !== false
-                        return (
-                          <span key={m.key} className="flex items-center gap-2">
-                            {i > 0 && <span className="text-slate-200 select-none">·</span>}
+                      ) : (
+                        <span className="text-xs text-slate-300">—</span>
+                      )}
+                    </td>
+
+                    {/* Subscription */}
+                    <td className="px-5 py-4">
+                      <div className="flex flex-col gap-1">
+                        <span className={`px-2 py-0.5 rounded-lg text-xs font-semibold w-fit ${SUB_STATUS_TILE[sub] || 'bg-slate-100 text-slate-600'}`}>
+                          {sub.replace('_', ' ')}
+                        </span>
+                        {plans.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {plans.map(p => (
+                              <span key={p} className="px-2 py-0.5 rounded-lg text-xs font-medium bg-[#6262bd]/10 text-[#6262bd]">
+                                {PLAN_LABELS[p] || p}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-slate-300">No plans</span>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* Modules — 2×2 grid */}
+                    <td className="px-5 py-4">
+                      <div className="grid grid-cols-2 gap-1 w-fit">
+                        {MODULE_CONFIG.map(m => {
+                          const active = mods[m.key] !== false
+                          return (
                             <span
+                              key={m.key}
                               title={m.label}
-                              className={`text-xs font-medium transition-colors ${
-                                active ? 'text-[#6262bd]' : 'text-slate-300 line-through'
+                              className={`px-2 py-0.5 rounded-lg text-xs font-semibold text-center ${
+                                active ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-400'
                               }`}
                             >
                               {m.abbr}
                             </span>
-                          </span>
-                        )
-                      })}
-                    </button>
-                  </td>
-                  <td className="px-6 py-4 text-slate-500">
-                    {formatDate(restaurant.created_at)}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex justify-end items-center gap-2">
-                      {/* Primary status action — always visible */}
-                      {restaurant.status === 'pending' && (
-                        <button
-                          onClick={() => updateStatus(restaurant.id, 'approved')}
-                          className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200"
-                        >
-                          Approve
-                        </button>
-                      )}
-                      {restaurant.status === 'rejected' && (
-                        <button
-                          onClick={() => updateStatus(restaurant.id, 'approved')}
-                          className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200"
-                        >
-                          Reactivate
-                        </button>
-                      )}
+                          )
+                        })}
+                      </div>
+                    </td>
 
-                      {/* ⋯ dropdown */}
-                      <div className="relative">
+                    {/* SMS this month */}
+                    <td className="px-5 py-4">
+                      {restaurant.sms_billing_enabled ? (
+                        smsCount > 0 ? (
+                          <div>
+                            <p className="text-sm font-semibold text-slate-800">{smsCount} SMS</p>
+                            <p className="text-xs text-slate-500">£{(smsCostPence / 100).toFixed(2)}</p>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-slate-400">0 SMS</span>
+                        )
+                      ) : (
+                        <span className="text-xs text-slate-300">—</span>
+                      )}
+                    </td>
+
+                    {/* Actions */}
+                    <td className="px-5 py-4" onClick={e => e.stopPropagation()}>
+                      <div className="flex justify-end items-center gap-2">
+                        {restaurant.status === 'pending' && (
+                          <button
+                            onClick={() => updateStatus(restaurant.id, 'approved')}
+                            className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200"
+                          >
+                            Approve
+                          </button>
+                        )}
+                        {restaurant.status === 'rejected' && (
+                          <button
+                            onClick={() => updateStatus(restaurant.id, 'approved')}
+                            className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200"
+                          >
+                            Reactivate
+                          </button>
+                        )}
                         <button
-                          onClick={() => setOpenMenuId(openMenuId === restaurant.id ? null : restaurant.id)}
-                          className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                          onClick={() => openModulePanel(restaurant)}
+                          className="p-2 rounded-lg text-slate-400 hover:text-[#6262bd] hover:bg-[#6262bd]/10 transition-colors"
+                          title="Manage restaurant"
                         >
-                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/>
                           </svg>
                         </button>
-
-                        {openMenuId === restaurant.id && (
-                          <>
-                            <div className="fixed inset-0 z-10" onClick={() => setOpenMenuId(null)} />
-                            <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-slate-200 rounded-xl shadow-lg z-20 py-1 overflow-hidden">
-                              <button
-                                onClick={() => { openModulePanel(restaurant); setOpenMenuId(null) }}
-                                className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"
-                              >
-                                <svg className="w-4 h-4 text-slate-400" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l4.59-4.58L18 11l-6 6z"/></svg>
-                                Modules & category
-                              </button>
-                              <button
-                                onClick={() => { handleImpersonate(restaurant); setOpenMenuId(null) }}
-                                className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"
-                              >
-                                <svg className="w-4 h-4 text-slate-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                                Login as venue
-                              </button>
-                              {restaurant.status === 'pending' && (
-                                <button
-                                  onClick={() => { updateStatus(restaurant.id, 'rejected'); setOpenMenuId(null) }}
-                                  className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
-                                >
-                                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-                                  Reject
-                                </button>
-                              )}
-                              {restaurant.status === 'approved' && (
-                                <button
-                                  onClick={() => { openSuspendPanel(restaurant); setOpenMenuId(null) }}
-                                  className="w-full text-left px-4 py-2.5 text-sm text-amber-600 hover:bg-amber-50 flex items-center gap-2"
-                                >
-                                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-                                  Suspend
-                                </button>
-                              )}
-                              {restaurant.status === 'rejected' && (
-                                <button
-                                  onClick={() => { openSuspendPanel(restaurant); setOpenMenuId(null) }}
-                                  className="w-full text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 flex items-center gap-2"
-                                >
-                                  <svg className="w-4 h-4 text-slate-400" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-                                  Edit suspension
-                                </button>
-                              )}
-                              <div className="border-t border-slate-100 mt-1 pt-1">
-                                <button
-                                  onClick={() => { deleteRestaurant(restaurant.id, restaurant.name); setOpenMenuId(null) }}
-                                  className="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 flex items-center gap-2"
-                                >
-                                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-                                  Delete
-                                </button>
-                              </div>
-                            </div>
-                          </>
-                        )}
                       </div>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Billing result modal */}
+      {billingResult?.results && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-6">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6">
+            <h3 className="text-lg font-bold text-slate-800 mb-4">SMS Billing Results — {currentBillingMonth()}</h3>
+            <div className="space-y-2 max-h-72 overflow-y-auto mb-5">
+              {billingResult.results.map((r, i) => (
+                <div key={i} className={`flex items-center justify-between px-4 py-2.5 rounded-xl text-sm ${r.error ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
+                  <span className="font-medium">{r.name}</span>
+                  <span>{r.error ? `Error: ${r.error}` : `${r.sms_count} SMS · £${(r.amount_pence / 100).toFixed(2)} added`}</span>
+                </div>
+              ))}
+              {billingResult.results.length === 0 && (
+                <p className="text-slate-500 text-sm text-center py-4">No venues were billed (no usage or no Stripe account).</p>
+              )}
+            </div>
+            <button onClick={() => setBillingResult(null)} className="w-full px-4 py-3 bg-[#6262bd] text-white rounded-xl font-medium hover:bg-[#5151a8] transition-colors">
+              Done
+            </button>
+          </div>
         </div>
       )}
 
       {/* Module Management Panel */}
       {modulePanelOpen && (
         <>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 bg-black/40 z-40 transition-opacity"
-            onClick={closeModulePanel}
-          />
-
-          {/* Slide-over panel */}
+          <div className="fixed inset-0 bg-black/40 z-40 transition-opacity" onClick={closeModulePanel} />
           <div className="fixed right-0 top-0 h-full w-full max-w-md bg-white z-50 shadow-2xl flex flex-col">
             {/* Header */}
             <div className="flex items-start justify-between p-6 border-b border-slate-100">
-              <div>
-                <h2 className="text-lg font-bold text-slate-800">Module Access</h2>
-                <p className="text-sm text-slate-500 mt-0.5">
-                  {selectedRestaurant?.name}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  {selectedRestaurant && (() => {
+                    const cfg = ROW_STATUS[selectedRestaurant.status] || ROW_STATUS.pending
+                    return <span className={`inline-block w-2.5 h-2.5 rounded-full flex-shrink-0 ${cfg.dot}`} />
+                  })()}
+                  <h2 className="text-lg font-bold text-slate-800 truncate">{selectedRestaurant?.name}</h2>
+                </div>
+                {selectedRestaurant?.email && <p className="text-sm text-slate-500 truncate">{selectedRestaurant.email}</p>}
+                <p className="text-xs text-slate-400 mt-1">
+                  Registered on {selectedRestaurant?.created_at ? formatDate(selectedRestaurant.created_at) : '—'}
                 </p>
               </div>
-              <button
-                onClick={closeModulePanel}
-                className="p-2 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                </svg>
-              </button>
+              <div className="flex items-center gap-1 ml-3 flex-shrink-0">
+                <button onClick={() => handleImpersonate(selectedRestaurant)} className="p-2 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors" title="Login as venue">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                </button>
+                {selectedRestaurant?.status === 'approved' && (
+                  <button onClick={() => openSuspendPanel(selectedRestaurant)} className="p-2 rounded-xl hover:bg-amber-50 text-slate-400 hover:text-amber-600 transition-colors" title="Suspend">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                  </button>
+                )}
+                {selectedRestaurant?.status === 'rejected' && (
+                  <button onClick={() => openSuspendPanel(selectedRestaurant)} className="p-2 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors" title="Edit suspension">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                  </button>
+                )}
+                <button onClick={() => { deleteRestaurant(selectedRestaurant.id, selectedRestaurant.name); closeModulePanel() }} className="p-2 rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors" title="Delete">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                </button>
+                <button onClick={closeModulePanel} className="p-2 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                </button>
+              </div>
             </div>
 
             {/* Module list */}
             <div className="flex-1 overflow-y-auto p-6 space-y-3">
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">
-                Toggle modules on or off for this restaurant
-              </p>
-
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">Toggle modules on or off</p>
               {MODULE_CONFIG.map((mod) => {
                 const enabled = modules[mod.key] !== false
                 return (
-                  <button
-                    key={mod.key}
-                    onClick={() => toggleModule(mod.key)}
-                    className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-all ${
-                      enabled
-                        ? 'border-[#6262bd]/30 bg-[#6262bd]/5'
-                        : 'border-slate-100 bg-slate-50 opacity-60'
-                    }`}
+                  <button key={mod.key} onClick={() => toggleModule(mod.key)}
+                    className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-all ${enabled ? 'border-[#6262bd]/30 bg-[#6262bd]/5' : 'border-slate-100 bg-slate-50 opacity-60'}`}
                   >
-                    {/* Icon */}
-                    <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
-                      enabled ? 'bg-[#6262bd] text-white' : 'bg-slate-200 text-slate-400'
-                    }`}>
+                    <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center ${enabled ? 'bg-[#6262bd] text-white' : 'bg-slate-200 text-slate-400'}`}>
                       {mod.icon}
                     </div>
-
-                    {/* Text */}
                     <div className="flex-1 min-w-0">
-                      <p className={`font-semibold text-sm ${enabled ? 'text-slate-800' : 'text-slate-400'}`}>
-                        {mod.label}
-                      </p>
-                      <p className="text-xs text-slate-400 mt-0.5 leading-snug">
-                        {mod.description}
-                      </p>
+                      <p className={`font-semibold text-sm ${enabled ? 'text-slate-800' : 'text-slate-400'}`}>{mod.label}</p>
+                      <p className="text-xs text-slate-400 mt-0.5 leading-snug">{mod.description}</p>
                       {mod.includes && (
                         <div className="flex flex-wrap gap-1 mt-2">
                           {mod.includes.map(item => (
-                            <span key={item} className={`text-xs px-2 py-0.5 rounded-full ${enabled ? 'bg-[#6262bd]/10 text-[#6262bd]' : 'bg-slate-100 text-slate-400'}`}>
-                              {item}
-                            </span>
+                            <span key={item} className={`text-xs px-2 py-0.5 rounded-full ${enabled ? 'bg-[#6262bd]/10 text-[#6262bd]' : 'bg-slate-100 text-slate-400'}`}>{item}</span>
                           ))}
                         </div>
                       )}
                     </div>
-
-                    {/* Toggle */}
-                    <div className={`flex-shrink-0 w-11 h-6 rounded-full transition-colors relative ${
-                      enabled ? 'bg-[#6262bd]' : 'bg-slate-200'
-                    }`}>
-                      <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
-                        enabled ? 'translate-x-5' : 'translate-x-0.5'
-                      }`} />
+                    <div className={`flex-shrink-0 w-11 h-6 rounded-full transition-colors relative ${enabled ? 'bg-[#6262bd]' : 'bg-slate-200'}`}>
+                      <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${enabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
                     </div>
                   </button>
                 )
@@ -644,32 +648,20 @@ export default function AdminRestaurants() {
             {/* Industry category */}
             <div className="px-6 pb-4 border-t border-slate-100 pt-5">
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Industry Category</p>
-              <p className="text-xs text-slate-400 mb-3">Used to filter peer reviews shown to venue managers. Customers only see overall ratings from venues in the same category.</p>
-              <select
-                value={industryCategory}
-                onChange={e => setIndustryCategory(e.target.value)}
-                className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#6262bd]"
-              >
+              <p className="text-xs text-slate-400 mb-3">Used to filter peer reviews shown to venue managers.</p>
+              <select value={industryCategory} onChange={e => setIndustryCategory(e.target.value)} className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#6262bd]">
                 <option value="">— Not assigned —</option>
-                {industryCategories.map(cat => (
-                  <option key={cat.value} value={cat.value}>{cat.label}</option>
-                ))}
+                {industryCategories.map(cat => <option key={cat.value} value={cat.value}>{cat.label}</option>)}
               </select>
-              {industryCategories.length === 0 && (
-                <p className="text-xs text-slate-400 mt-1.5">No categories defined yet — add them in Platform Settings.</p>
-              )}
             </div>
 
             {/* SMS Billing */}
             <div className="px-6 pb-4 border-t border-slate-100 pt-5">
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">SMS Verification Billing</p>
-              <p className="text-xs text-slate-400 mb-3">Charge this venue per SMS verification sent. Billed monthly as an invoice item on their next Stripe payment.</p>
+              <p className="text-xs text-slate-400 mb-3">Charge this venue per SMS sent. Billed monthly as an invoice item on their next Stripe payment.</p>
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm text-slate-700">Enable SMS billing</span>
-                <button
-                  onClick={() => setSmsBillingEnabled(v => !v)}
-                  className={`relative w-11 h-6 rounded-full transition-colors ${smsBillingEnabled ? 'bg-[#6262bd]' : 'bg-slate-200'}`}
-                >
+                <button onClick={() => setSmsBillingEnabled(v => !v)} className={`relative w-11 h-6 rounded-full transition-colors ${smsBillingEnabled ? 'bg-[#6262bd]' : 'bg-slate-200'}`}>
                   <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${smsBillingEnabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
                 </button>
               </div>
@@ -678,14 +670,7 @@ export default function AdminRestaurants() {
                   <span className="text-sm text-slate-500 whitespace-nowrap">Rate per SMS</span>
                   <div className="relative flex items-center">
                     <span className="absolute left-3 text-slate-400 text-sm">p</span>
-                    <input
-                      type="number"
-                      min="1"
-                      max="999"
-                      value={smsBillingRate}
-                      onChange={e => setSmsBillingRate(e.target.value)}
-                      className="pl-7 pr-3 py-2 border-2 border-slate-200 rounded-xl text-sm text-slate-700 w-24 focus:outline-none focus:border-[#6262bd]"
-                    />
+                    <input type="number" min="1" max="999" value={smsBillingRate} onChange={e => setSmsBillingRate(e.target.value)} className="pl-7 pr-3 py-2 border-2 border-slate-200 rounded-xl text-sm text-slate-700 w-24 focus:outline-none focus:border-[#6262bd]" />
                   </div>
                   <span className="text-xs text-slate-400">pence (default 20p)</span>
                 </div>
@@ -695,32 +680,11 @@ export default function AdminRestaurants() {
             {/* Trial period */}
             <div className="px-6 pb-4 border-t border-slate-100 pt-5">
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Free Trial</p>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                Trial ends on
-              </label>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Trial ends on</label>
               <div className="flex items-center gap-2">
-                <input
-                  type="date"
-                  value={trialEndsAt}
-                  onChange={e => setTrialEndsAt(e.target.value)}
-                  className="flex-1 px-3 py-2 border-2 border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#6262bd]"
-                />
-                <button
-                  onClick={() => {
-                    const d = new Date()
-                    d.setDate(d.getDate() + 14)
-                    setTrialEndsAt(d.toISOString().substring(0, 10))
-                  }}
-                  className="px-3 py-2 text-xs font-medium text-[#6262bd] border-2 border-[#6262bd]/30 rounded-xl hover:bg-[#6262bd]/5 whitespace-nowrap"
-                >
-                  +14 days
-                </button>
-                <button
-                  onClick={() => setTrialEndsAt('')}
-                  className="px-3 py-2 text-xs font-medium text-slate-500 border-2 border-slate-200 rounded-xl hover:bg-slate-50 whitespace-nowrap"
-                >
-                  Clear
-                </button>
+                <input type="date" value={trialEndsAt} onChange={e => setTrialEndsAt(e.target.value)} className="flex-1 px-3 py-2 border-2 border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#6262bd]" />
+                <button onClick={() => { const d = new Date(); d.setDate(d.getDate() + 14); setTrialEndsAt(d.toISOString().substring(0, 10)) }} className="px-3 py-2 text-xs font-medium text-[#6262bd] border-2 border-[#6262bd]/30 rounded-xl hover:bg-[#6262bd]/5 whitespace-nowrap">+14 days</button>
+                <button onClick={() => setTrialEndsAt('')} className="px-3 py-2 text-xs font-medium text-slate-500 border-2 border-slate-200 rounded-xl hover:bg-slate-50 whitespace-nowrap">Clear</button>
               </div>
               {trialEndsAt && (
                 <p className="text-xs text-slate-400 mt-1.5">
@@ -738,25 +702,13 @@ export default function AdminRestaurants() {
             <div className="p-6 border-t border-slate-100">
               {saveSuccess && (
                 <div className="flex items-center gap-2 mb-4 px-4 py-3 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm font-medium">
-                  <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
-                  </svg>
+                  <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
                   Changes saved successfully
                 </div>
               )}
-
               <div className="flex gap-3">
-                <button
-                  onClick={closeModulePanel}
-                  className="flex-1 px-4 py-3 border-2 border-slate-200 text-slate-600 rounded-xl font-medium hover:border-slate-300 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={saveModules}
-                  disabled={savingModules}
-                  className="flex-1 px-4 py-3 bg-[#6262bd] text-white rounded-xl font-medium hover:bg-[#5151a8] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
+                <button onClick={closeModulePanel} className="flex-1 px-4 py-3 border-2 border-slate-200 text-slate-600 rounded-xl font-medium hover:border-slate-300 transition-colors">Cancel</button>
+                <button onClick={saveModules} disabled={savingModules} className="flex-1 px-4 py-3 bg-[#6262bd] text-white rounded-xl font-medium hover:bg-[#5151a8] disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                   {savingModules ? 'Saving…' : 'Save Changes'}
                 </button>
               </div>
@@ -778,25 +730,10 @@ export default function AdminRestaurants() {
               <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 Message to show the user <span className="text-slate-400 font-normal">(optional)</span>
               </label>
-              <textarea
-                value={suspensionMessage}
-                onChange={e => setSuspensionMessage(e.target.value)}
-                rows={3}
-                placeholder="e.g. Your account has been suspended due to unpaid invoices. Please contact us to resolve this."
-                className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-amber-400 resize-none mb-5"
-              />
+              <textarea value={suspensionMessage} onChange={e => setSuspensionMessage(e.target.value)} rows={3} placeholder="e.g. Your account has been suspended due to unpaid invoices." className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-amber-400 resize-none mb-5" />
               <div className="flex gap-3">
-                <button
-                  onClick={() => setSuspendPanelOpen(false)}
-                  className="flex-1 px-4 py-2.5 border-2 border-slate-200 text-slate-600 rounded-xl font-medium hover:border-slate-300 transition-colors text-sm"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmSuspend}
-                  disabled={suspending}
-                  className="flex-1 px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-medium disabled:opacity-50 transition-colors text-sm"
-                >
+                <button onClick={() => setSuspendPanelOpen(false)} className="flex-1 px-4 py-2.5 border-2 border-slate-200 text-slate-600 rounded-xl font-medium hover:border-slate-300 transition-colors text-sm">Cancel</button>
+                <button onClick={confirmSuspend} disabled={suspending} className="flex-1 px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-medium disabled:opacity-50 transition-colors text-sm">
                   {suspending ? 'Suspending…' : 'Confirm suspend'}
                 </button>
               </div>

@@ -26,7 +26,7 @@ export async function POST(request) {
     // Fetch reservation details with restaurant info
     const { data: reservation, error: fetchError } = await supabaseAdmin
       .from('reservations')
-      .select('*, restaurants(name, slug, phone)')
+      .select('*, restaurants(name, slug, phone, sms_billing_enabled)')
       .eq('id', reservationId)
       .single()
 
@@ -43,13 +43,47 @@ export async function POST(request) {
     const subject = `❌ ${tr.reservationCancelled} - ${reservation.restaurants.name}`
     const htmlContent = generateCancellationEmail(reservation, tr, locale)
 
+    // Send SMS if venue has SMS add-on and customer has a phone number
+    if (reservation.restaurants.sms_billing_enabled && reservation.customer_phone) {
+      try {
+        const formattedDate = formatDateForLocale(reservation.reservation_date, locale)
+        const CANCEL_SMS = {
+          en: 'Your booking at {name} on {date} at {time} has been cancelled. Contact the venue if you have any questions.',
+          es: 'Tu reserva en {name} el {date} a las {time} ha sido cancelada. Contacta al local si tienes alguna pregunta.',
+          fr: 'Votre réservation chez {name} le {date} à {time} a été annulée. Contactez l\'établissement si vous avez des questions.',
+          it: 'La tua prenotazione presso {name} il {date} alle {time} è stata cancellata. Contatta il locale per qualsiasi domanda.',
+          ro: 'Rezervarea ta la {name} pe {date} la ora {time} a fost anulată. Contactează localul dacă ai întrebări.',
+        }
+        const smsTpl = CANCEL_SMS[locale] || CANCEL_SMS.en
+        const smsBody = smsTpl
+          .replace('{name}', reservation.restaurants.name)
+          .replace('{date}', formattedDate)
+          .replace('{time}', reservation.reservation_time.substring(0, 5))
+        await fetch('https://api.brevo.com/v3/transactionalSMS/sms', {
+          method: 'POST',
+          headers: { 'api-key': process.env.BREVO_API_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sender: process.env.BREVO_SMS_SENDER || 'MenuHub',
+            recipient: reservation.customer_phone,
+            content: smsBody,
+            type: 'transactional'
+          })
+        })
+      } catch (smsErr) {
+        console.error('Cancellation SMS error:', smsErr)
+        // Non-fatal
+      }
+    }
+
     // Send email using Brevo - use restaurant name as sender name
-    await sendBrevoEmail({
-      to: reservation.customer_email,
-      subject,
-      htmlContent,
-      fromName: reservation.restaurants.name
-    })
+    if (reservation.customer_email) {
+      await sendBrevoEmail({
+        to: reservation.customer_email,
+        subject,
+        htmlContent,
+        fromName: reservation.restaurants.name
+      })
+    }
 
     return NextResponse.json({ success: true })
 
