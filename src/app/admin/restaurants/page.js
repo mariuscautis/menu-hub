@@ -140,16 +140,19 @@ export default function AdminRestaurants() {
   }
 
   const fetchSmsUsage = async () => {
-    const month = currentBillingMonth()
-    const { data } = await supabase
-      .from('sms_usage_log')
-      .select('restaurant_id')
-      .eq('billing_month', month)
-    const map = {}
-    ;(data || []).forEach(row => {
-      map[row.restaurant_id] = (map[row.restaurant_id] || 0) + 1
-    })
-    setSmsUsageMap(map)
+    try {
+      const month = currentBillingMonth()
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch(`/api/admin/sms-billing?month=${month}`, {
+        headers: { Authorization: `Bearer ${session?.access_token}` }
+      })
+      const data = await res.json()
+      const map = {}
+      ;(data.venues || []).forEach(v => {
+        map[v.id] = v.sms_count
+      })
+      setSmsUsageMap(map)
+    } catch { /* non-fatal */ }
   }
 
   const runSmsBilling = async () => {
