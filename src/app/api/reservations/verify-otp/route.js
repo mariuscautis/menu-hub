@@ -131,18 +131,28 @@ export async function POST(request) {
 
       if (restriction) {
         if (restriction.type === 'fee_required') {
-          // Customer verified — return fee requirement without inserting the booking yet
-          return NextResponse.json({
-            success: true,
-            requiresFee: true,
-            feeAmount: restriction.fee_amount,
-            feeCurrency: restriction.fee_currency || 'GBP',
-            customer: {
-              id: customer.id,
-              avgRating: categoryAvgRating,
-              totalBookings: customer.total_bookings
-            }
-          })
+          // Only trigger fee flow if the venue actually has Stripe Connect set up
+          const { data: venueStripe } = await supabaseAdmin
+            .from('restaurants')
+            .select('stripe_connect_account_id, stripe_connect_onboarded')
+            .eq('id', restaurantId)
+            .single()
+
+          if (venueStripe?.stripe_connect_account_id && venueStripe?.stripe_connect_onboarded) {
+            // Customer verified — return fee requirement without inserting the booking yet
+            return NextResponse.json({
+              success: true,
+              requiresFee: true,
+              feeAmount: restriction.fee_amount,
+              feeCurrency: restriction.fee_currency || 'GBP',
+              customer: {
+                id: customer.id,
+                avgRating: categoryAvgRating,
+                totalBookings: customer.total_bookings
+              }
+            })
+          }
+          // Stripe not set up — fall through and create the booking without a fee
         }
 
         if (restriction.type === 'blocked') {
