@@ -130,7 +130,18 @@ export async function POST(request) {
     if (isConfirmation && reservation.customer_phone) {
       try {
         const formattedDate = formatDateForLocale(reservation.reservation_date, locale)
-        const smsBody = `Your booking at ${reservation.restaurants.name} on ${formattedDate} at ${reservation.reservation_time.substring(0, 5)} has been confirmed. See you soon!`
+        const CONFIRMATION_SMS = {
+          en: 'Your booking at {name} on {date} at {time} has been confirmed. See you soon!',
+          es: 'Tu reserva en {name} el {date} a las {time} ha sido confirmada. ¡Hasta pronto!',
+          fr: 'Votre réservation chez {name} le {date} à {time} a été confirmée. À bientôt !',
+          it: 'La tua prenotazione presso {name} il {date} alle {time} è stata confermata. A presto!',
+          ro: 'Rezervarea ta la {name} pe {date} la ora {time} a fost confirmată. Ne vedem curând!',
+        }
+        const smsTpl = CONFIRMATION_SMS[locale] || CONFIRMATION_SMS.en
+        const smsBody = smsTpl
+          .replace('{name}', reservation.restaurants.name)
+          .replace('{date}', formattedDate)
+          .replace('{time}', reservation.reservation_time.substring(0, 5))
         await fetch('https://api.brevo.com/v3/transactionalSMS/sms', {
           method: 'POST',
           headers: {
