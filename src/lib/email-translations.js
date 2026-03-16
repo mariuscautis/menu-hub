@@ -189,7 +189,21 @@ const emailTranslations = {
     subPaymentFailedTitle: "Payment failed",
     subPaymentFailedGreeting: "Hi {restaurantName},",
     subPaymentFailedIntro: "We were unable to process your last payment. Don't worry — you still have full access for the next 3 days. Please update your payment method before then to avoid any interruption.",
-    subPaymentFailedCta: "Update payment method"
+    subPaymentFailedCta: "Update payment method",
+
+    // SMS billing notification (sent to venue manager when charges are applied)
+    smsBillingSubject: "SMS charges for {month} — Veno App",
+    smsBillingTitle: "Your SMS charges for {month}",
+    smsBillingGreeting: "Hi {restaurantName},",
+    smsBillingIntro: "Here is a summary of your SMS verification charges for {month}.",
+    smsBillingSmsCount: "SMS sent",
+    smsBillingRatePence: "Rate per SMS",
+    smsBillingTotal: "Total charges",
+    smsBillingCollectionNote: "These charges will be collected on your next subscription renewal on {renewalDate}.",
+    smsBillingCollectionNoteNoDate: "These charges will be added to your next invoice.",
+    smsBillingQuestion: "Questions about these charges?",
+    smsBillingContact: "Get in touch at support@venoapp.com — we're happy to help.",
+    smsBillingFooter: "Veno App — automated billing notification"
   },
 
   ro: {
@@ -372,7 +386,20 @@ const emailTranslations = {
     subPaymentFailedTitle: "Plata a eșuat",
     subPaymentFailedGreeting: "Salut {restaurantName},",
     subPaymentFailedIntro: "Nu am putut procesa ultima ta plată. Nu-ți face griji — mai ai acces complet timp de 3 zile. Te rugăm să actualizezi metoda de plată înainte de această dată pentru a evita orice întrerupere.",
-    subPaymentFailedCta: "Actualizează metoda de plată"
+    subPaymentFailedCta: "Actualizează metoda de plată",
+
+    smsBillingSubject: "Taxe SMS pentru {month} — Veno App",
+    smsBillingTitle: "Taxele tale SMS pentru {month}",
+    smsBillingGreeting: "Salut {restaurantName},",
+    smsBillingIntro: "Iată un rezumat al taxelor de verificare SMS pentru {month}.",
+    smsBillingSmsCount: "SMS trimise",
+    smsBillingRatePence: "Tarif per SMS",
+    smsBillingTotal: "Total taxe",
+    smsBillingCollectionNote: "Aceste taxe vor fi colectate la următoarea reînnoire a abonamentului tău pe {renewalDate}.",
+    smsBillingCollectionNoteNoDate: "Aceste taxe vor fi adăugate la următoarea ta factură.",
+    smsBillingQuestion: "Întrebări despre aceste taxe?",
+    smsBillingContact: "Contactează-ne la support@venoapp.com — suntem bucuroși să ajutăm.",
+    smsBillingFooter: "Veno App — notificare automată de facturare"
   },
 
   fr: {
@@ -555,7 +582,20 @@ const emailTranslations = {
     subPaymentFailedTitle: "Paiement échoué",
     subPaymentFailedGreeting: "Bonjour {restaurantName},",
     subPaymentFailedIntro: "Nous n'avons pas pu traiter votre dernier paiement. Ne vous inquiétez pas — vous conservez un accès complet pendant les 3 prochains jours. Veuillez mettre à jour votre moyen de paiement avant cette date pour éviter toute interruption.",
-    subPaymentFailedCta: "Mettre à jour le moyen de paiement"
+    subPaymentFailedCta: "Mettre à jour le moyen de paiement",
+
+    smsBillingSubject: "Frais SMS pour {month} — Veno App",
+    smsBillingTitle: "Vos frais SMS pour {month}",
+    smsBillingGreeting: "Bonjour {restaurantName},",
+    smsBillingIntro: "Voici un récapitulatif de vos frais de vérification SMS pour {month}.",
+    smsBillingSmsCount: "SMS envoyés",
+    smsBillingRatePence: "Tarif par SMS",
+    smsBillingTotal: "Total des frais",
+    smsBillingCollectionNote: "Ces frais seront prélevés lors de votre prochain renouvellement d'abonnement le {renewalDate}.",
+    smsBillingCollectionNoteNoDate: "Ces frais seront ajoutés à votre prochaine facture.",
+    smsBillingQuestion: "Des questions sur ces frais ?",
+    smsBillingContact: "Contactez-nous à support@venoapp.com — nous sommes là pour vous aider.",
+    smsBillingFooter: "Veno App — notification de facturation automatique"
   },
 
   it: {
@@ -738,7 +778,20 @@ const emailTranslations = {
     subPaymentFailedTitle: "Pagamento fallito",
     subPaymentFailedGreeting: "Ciao {restaurantName},",
     subPaymentFailedIntro: "Non siamo riusciti a elaborare il tuo ultimo pagamento. Non preoccuparti — hai ancora accesso completo per i prossimi 3 giorni. Aggiorna il tuo metodo di pagamento entro allora per evitare interruzioni.",
-    subPaymentFailedCta: "Aggiorna metodo di pagamento"
+    subPaymentFailedCta: "Aggiorna metodo di pagamento",
+
+    smsBillingSubject: "Addebiti SMS per {month} — Veno App",
+    smsBillingTitle: "I tuoi addebiti SMS per {month}",
+    smsBillingGreeting: "Ciao {restaurantName},",
+    smsBillingIntro: "Ecco un riepilogo degli addebiti di verifica SMS per {month}.",
+    smsBillingSmsCount: "SMS inviati",
+    smsBillingRatePence: "Tariffa per SMS",
+    smsBillingTotal: "Totale addebiti",
+    smsBillingCollectionNote: "Questi addebiti verranno riscossi al prossimo rinnovo del tuo abbonamento il {renewalDate}.",
+    smsBillingCollectionNoteNoDate: "Questi addebiti verranno aggiunti alla tua prossima fattura.",
+    smsBillingQuestion: "Domande su questi addebiti?",
+    smsBillingContact: "Contattaci a support@venoapp.com — siamo qui per aiutarti.",
+    smsBillingFooter: "Veno App — notifica di fatturazione automatica"
   },
 
   es: {
@@ -921,7 +974,20 @@ const emailTranslations = {
     subPaymentFailedTitle: "Pago fallido",
     subPaymentFailedGreeting: "Hola {restaurantName},",
     subPaymentFailedIntro: "No pudimos procesar tu último pago. No te preocupes — todavía tienes acceso completo durante los próximos 3 días. Actualiza tu método de pago antes de esa fecha para evitar cualquier interrupción.",
-    subPaymentFailedCta: "Actualizar método de pago"
+    subPaymentFailedCta: "Actualizar método de pago",
+
+    smsBillingSubject: "Cargos SMS para {month} — Veno App",
+    smsBillingTitle: "Tus cargos SMS para {month}",
+    smsBillingGreeting: "Hola {restaurantName},",
+    smsBillingIntro: "Aquí tienes un resumen de tus cargos de verificación SMS para {month}.",
+    smsBillingSmsCount: "SMS enviados",
+    smsBillingRatePence: "Tarifa por SMS",
+    smsBillingTotal: "Total de cargos",
+    smsBillingCollectionNote: "Estos cargos se cobrarán en tu próxima renovación de suscripción el {renewalDate}.",
+    smsBillingCollectionNoteNoDate: "Estos cargos se añadirán a tu próxima factura.",
+    smsBillingQuestion: "¿Preguntas sobre estos cargos?",
+    smsBillingContact: "Contáctanos en support@venoapp.com — estamos encantados de ayudar.",
+    smsBillingFooter: "Veno App — notificación de facturación automatizada"
   }
 }
 

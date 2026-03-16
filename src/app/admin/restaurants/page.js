@@ -81,9 +81,31 @@ const ROW_STATUS = {
   rejected: { dot: 'bg-red-500',   label: 'Suspended / rejected', labelClass: 'bg-red-100 text-red-700 border-red-200' },
 }
 
+function prevBillingMonth() {
+  const now = new Date()
+  const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+  return `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '0')}`
+}
+
 function currentBillingMonth() {
   const now = new Date()
   return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`
+}
+
+function formatMonthLabel(yearMonth) {
+  const [year, month] = yearMonth.split('-')
+  return new Date(Number(year), Number(month) - 1, 1).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
+}
+
+function last12Months() {
+  const months = []
+  const now = new Date()
+  for (let i = 0; i <= 12; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    months.push(val)
+  }
+  return months
 }
 
 export default function AdminRestaurants() {
@@ -94,6 +116,7 @@ export default function AdminRestaurants() {
   const [filter, setFilter] = useState('all')
   const [filterCategory, setFilterCategory] = useState('all')
   const [search, setSearch] = useState('')
+  const [billingMonth, setBillingMonth] = useState(prevBillingMonth)
   const [billingRunning, setBillingRunning] = useState(false)
   const [billingResult, setBillingResult] = useState(null)
 
@@ -155,8 +178,8 @@ export default function AdminRestaurants() {
     } catch { /* non-fatal */ }
   }
 
-  const runSmsBilling = async () => {
-    if (!confirm('This will add SMS charges as invoice items to all opted-in venues with usage this month. Continue?')) return
+  const runSmsBilling = async (force = false) => {
+    if (!confirm(`This will add SMS charges for ${formatMonthLabel(billingMonth)} as invoice items to all opted-in venues, and send them a notification email. Continue?`)) return
     setBillingRunning(true)
     setBillingResult(null)
     try {
@@ -164,10 +187,14 @@ export default function AdminRestaurants() {
       const res = await fetch('/api/admin/sms-billing', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
-        body: JSON.stringify({ billingMonth: currentBillingMonth() })
+        body: JSON.stringify({ billingMonth, ...(force ? { force: true } : {}) })
       })
       const data = await res.json()
-      setBillingResult(data)
+      if (res.status === 409 && data.error === 'already_billed') {
+        setBillingResult({ alreadyBilled: true, message: data.message, ran_at: data.ran_at })
+      } else {
+        setBillingResult(data)
+      }
     } catch (err) {
       setBillingResult({ error: err.message })
     } finally {
@@ -345,35 +372,58 @@ export default function AdminRestaurants() {
 
       {/* SMS billing summary bar */}
       {smsVenues.length > 0 && (
-        <div className="mb-6 bg-white border-2 border-slate-100 rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="text-sm font-semibold text-slate-700 mb-1">
-              📱 SMS charges this month ({currentBillingMonth()})
-            </p>
-            <p className="text-xs text-slate-500">
-              {smsVenues.length} venue{smsVenues.length !== 1 ? 's' : ''} with SMS usage ·{' '}
-              <span className="font-semibold text-slate-700">£{(totalSmsPence / 100).toFixed(2)} estimated total</span>
-            </p>
+        <div className="mb-6 bg-white border-2 border-slate-100 rounded-2xl p-5">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold text-slate-700 mb-1">
+                📱 SMS Billing
+              </p>
+              <p className="text-xs text-slate-500">
+                {smsVenues.length} venue{smsVenues.length !== 1 ? 's' : ''} with SMS usage this month ·{' '}
+                <span className="font-semibold text-slate-700">£{(totalSmsPence / 100).toFixed(2)} estimated</span>
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-2">
+                <label className="text-xs text-slate-500 whitespace-nowrap">Bill for</label>
+                <select
+                  value={billingMonth}
+                  onChange={e => { setBillingMonth(e.target.value); setBillingResult(null) }}
+                  className="px-3 py-1.5 bg-white border-2 border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#6262bd] cursor-pointer"
+                >
+                  {last12Months().map(m => (
+                    <option key={m} value={m}>{formatMonthLabel(m)}</option>
+                  ))}
+                </select>
+              </div>
+              <button
+                onClick={() => runSmsBilling(false)}
+                disabled={billingRunning}
+                className="px-4 py-2 bg-[#6262bd] hover:bg-[#5151a8] text-white rounded-xl text-sm font-semibold disabled:opacity-50 transition-colors flex items-center gap-2"
+              >
+                {billingRunning ? (
+                  <>
+                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
+                    Running…
+                  </>
+                ) : `Bill for ${formatMonthLabel(billingMonth)}`}
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            {billingResult && (
-              <span className={`text-xs font-medium px-3 py-1 rounded-xl ${billingResult.error ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
-                {billingResult.error ? `Error: ${billingResult.error}` : `Billed ${billingResult.results?.length || 0} venue(s)`}
-              </span>
-            )}
-            <button
-              onClick={runSmsBilling}
-              disabled={billingRunning}
-              className="px-4 py-2 bg-[#6262bd] hover:bg-[#5151a8] text-white rounded-xl text-sm font-semibold disabled:opacity-50 transition-colors flex items-center gap-2"
-            >
-              {billingRunning ? (
-                <>
-                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
-                  Running…
-                </>
-              ) : 'Apply SMS charges'}
-            </button>
-          </div>
+          {billingResult && (
+            <div className={`mt-3 pt-3 border-t border-slate-100 text-xs font-medium ${billingResult.alreadyBilled ? 'text-amber-700' : billingResult.error ? 'text-red-600' : 'text-green-700'}`}>
+              {billingResult.alreadyBilled ? (
+                <span>
+                  ⚠️ {billingResult.message}{' '}
+                  <button onClick={() => runSmsBilling(true)} className="underline ml-1">Run again anyway</button>
+                </span>
+              ) : billingResult.error ? (
+                `Error: ${billingResult.error}`
+              ) : (
+                `✓ Billed ${billingResult.results?.length || 0} venue(s) for ${formatMonthLabel(billingResult.billingMonth || billingMonth)} — notification emails sent`
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -554,10 +604,11 @@ export default function AdminRestaurants() {
       )}
 
       {/* Billing result modal */}
-      {billingResult?.results && (
+      {billingResult?.results && !billingResult.alreadyBilled && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-6">
           <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6">
-            <h3 className="text-lg font-bold text-slate-800 mb-4">SMS Billing Results — {currentBillingMonth()}</h3>
+            <h3 className="text-lg font-bold text-slate-800 mb-1">SMS Billing — {formatMonthLabel(billingResult.billingMonth || billingMonth)}</h3>
+            <p className="text-xs text-slate-400 mb-4">Notification emails have been sent to each billed venue in their preferred language.</p>
             <div className="space-y-2 max-h-72 overflow-y-auto mb-5">
               {billingResult.results.map((r, i) => (
                 <div key={i} className={`flex items-center justify-between px-4 py-2.5 rounded-xl text-sm ${r.error ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>

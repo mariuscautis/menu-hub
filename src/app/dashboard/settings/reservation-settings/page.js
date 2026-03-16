@@ -70,6 +70,10 @@ export default function ReservationSettingsPage() {
   const [singleBookingArea, setSingleBookingArea] = useState(false)
   const [operatingHours, setOperatingHours] = useState(DEFAULT_HOURS)
 
+  // Global booking fee
+  const [globalFeeEnabled, setGlobalFeeEnabled] = useState(false)
+  const [globalFeeAmount, setGlobalFeeAmount] = useState('')
+
   useEffect(() => {
     supabase
       .from('platform_settings')
@@ -100,6 +104,8 @@ export default function ReservationSettingsPage() {
     setShowPartySize(s.show_party_size !== false)
     setSingleBookingArea(s.single_booking_area === true)
     setOperatingHours(s.operating_hours || DEFAULT_HOURS)
+    setGlobalFeeEnabled(!!r.global_booking_fee_enabled)
+    setGlobalFeeAmount(r.global_booking_fee_amount != null ? String(r.global_booking_fee_amount) : '')
     setLoading(false)
   }, [restaurantCtx])
 
@@ -138,9 +144,15 @@ export default function ReservationSettingsPage() {
       operating_hours: operatingHours,
     }
 
+    const updates = { reservation_settings }
+    updates.global_booking_fee_enabled = globalFeeEnabled
+    updates.global_booking_fee_amount = globalFeeEnabled && globalFeeAmount !== ''
+      ? parseFloat(globalFeeAmount)
+      : null
+
     const { error } = await supabase
       .from('restaurants')
-      .update({ reservation_settings })
+      .update(updates)
       .eq('id', restaurant.id)
 
     setMessage(error
@@ -448,6 +460,65 @@ export default function ReservationSettingsPage() {
             )
           })}
         </div>
+      </div>
+
+      {/* Global booking fee */}
+      <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
+        <div className="flex items-start justify-between gap-6">
+          <div>
+            <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">Reservation fee</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Charge every customer a booking fee when they reserve. Requires{' '}
+              <strong>SMS verification</strong> and <strong>Stripe Connect</strong> to be active.
+              When enabled, individual customer deposit requirements are overridden by this fee.
+            </p>
+          </div>
+          <button
+            onClick={() => setGlobalFeeEnabled(v => !v)}
+            disabled={!restaurant.sms_billing_enabled || !restaurant.stripe_connect_onboarded}
+            className={`relative flex-shrink-0 w-12 h-6 rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${globalFeeEnabled ? 'bg-[#6262bd]' : 'bg-slate-300 dark:bg-slate-600'}`}
+          >
+            <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${globalFeeEnabled ? 'translate-x-6' : 'translate-x-0'}`} />
+          </button>
+        </div>
+
+        {!restaurant.sms_billing_enabled && (
+          <p className="mt-3 text-xs text-amber-600 dark:text-amber-400 font-medium">
+            SMS verification must be enabled to use a global reservation fee. Enable it in the SMS add-on settings.
+          </p>
+        )}
+        {restaurant.sms_billing_enabled && !restaurant.stripe_connect_onboarded && (
+          <p className="mt-3 text-xs text-amber-600 dark:text-amber-400 font-medium">
+            Stripe Connect must be set up to collect booking fees. Complete onboarding in your billing settings.
+          </p>
+        )}
+
+        {globalFeeEnabled && restaurant.sms_billing_enabled && restaurant.stripe_connect_onboarded && (
+          <div className="mt-5 flex items-center gap-3">
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">Fee amount</label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-medium">
+                {restaurant.invoice_settings?.currency || 'GBP'}
+              </span>
+              <input
+                type="number"
+                min="0.01"
+                step="0.01"
+                value={globalFeeAmount}
+                onChange={e => setGlobalFeeAmount(e.target.value)}
+                placeholder="0.00"
+                className="pl-14 pr-4 py-2.5 border-2 border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 w-40 text-sm"
+              />
+            </div>
+            <span className="text-xs text-slate-400">per booking</span>
+          </div>
+        )}
+
+        {globalFeeEnabled && restaurant.sms_billing_enabled && restaurant.stripe_connect_onboarded && (
+          <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+            All customers will be charged this fee during booking. Fully or partially blocked customers still cannot book.
+          </p>
+        )}
       </div>
 
       <button

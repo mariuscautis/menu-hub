@@ -120,48 +120,62 @@ export async function POST(request) {
       }
     }
 
-    // Check for venue restrictions (block or deposit required)
+    // Check for venue restrictions and global fee
     if (restaurantId) {
-      const { data: restriction } = await supabaseAdmin
-        .from('customer_venue_restrictions')
-        .select('type, fee_amount, fee_currency')
-        .eq('customer_id', customer.id)
-        .eq('restaurant_id', restaurantId)
-        .single()
+      const [{ data: restriction }, { data: venue }] = await Promise.all([
+        supabaseAdmin
+          .from('customer_venue_restrictions')
+          .select('type, fee_amount, fee_currency')
+          .eq('customer_id', customer.id)
+          .eq('restaurant_id', restaurantId)
+          .single(),
+        supabaseAdmin
+          .from('restaurants')
+          .select('stripe_connect_account_id, stripe_connect_onboarded, global_booking_fee_enabled, global_booking_fee_amount, invoice_settings')
+          .eq('id', restaurantId)
+          .single()
+      ])
 
-      if (restriction) {
-        if (restriction.type === 'fee_required') {
-          // Only trigger fee flow if the venue actually has Stripe Connect set up
-          const { data: venueStripe } = await supabaseAdmin
-            .from('restaurants')
-            .select('stripe_connect_account_id, stripe_connect_onboarded')
-            .eq('id', restaurantId)
-            .single()
+      // Blocked completely — always rejected regardless of global fee
+      if (restriction?.type === 'blocked') {
+        return NextResponse.json({
+          success: false,
+          error: 'We are unable to complete this booking. Please contact the venue directly.'
+        }, { status: 403 })
+      }
 
-          if (venueStripe?.stripe_connect_account_id && venueStripe?.stripe_connect_onboarded) {
-            // Customer verified — return fee requirement without inserting the booking yet
-            return NextResponse.json({
-              success: true,
-              requiresFee: true,
-              feeAmount: restriction.fee_amount,
-              feeCurrency: restriction.fee_currency || 'GBP',
-              customer: {
-                id: customer.id,
-                avgRating: categoryAvgRating,
-                totalBookings: customer.total_bookings
-              }
-            })
+      const stripeReady = venue?.stripe_connect_account_id && venue?.stripe_connect_onboarded
+      const globalFeeActive = venue?.global_booking_fee_enabled && venue?.global_booking_fee_amount > 0 && stripeReady
+
+      if (globalFeeActive) {
+        // Global fee takes priority over individual deposit requirement
+        const feeCurrency = venue.invoice_settings?.currency || 'GBP'
+        return NextResponse.json({
+          success: true,
+          requiresFee: true,
+          feeAmount: venue.global_booking_fee_amount,
+          feeCurrency,
+          customer: {
+            id: customer.id,
+            avgRating: categoryAvgRating,
+            totalBookings: customer.total_bookings
           }
-          // Stripe not set up — fall through and create the booking without a fee
-        }
+        })
+      }
 
-        if (restriction.type === 'blocked') {
-          // Generic message — don't reveal the reason
-          return NextResponse.json({
-            success: false,
-            error: 'We are unable to complete this booking. Please contact the venue directly.'
-          }, { status: 403 })
-        }
+      if (restriction?.type === 'fee_required' && stripeReady) {
+        // Individual deposit requirement (no global fee active)
+        return NextResponse.json({
+          success: true,
+          requiresFee: true,
+          feeAmount: restriction.fee_amount,
+          feeCurrency: restriction.fee_currency || 'GBP',
+          customer: {
+            id: customer.id,
+            avgRating: categoryAvgRating,
+            totalBookings: customer.total_bookings
+          }
+        })
       }
     }
 
