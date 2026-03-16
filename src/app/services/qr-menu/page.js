@@ -52,87 +52,127 @@ export default function QRMenuPage() {
             </div>
 
             {/* Hero Illustration */}
-            <div className="relative">
-              <svg viewBox="0 0 500 400" className="w-full h-auto">
+            <div className="relative flex justify-center">
+              <svg viewBox="0 0 420 480" className="w-full max-w-sm h-auto drop-shadow-xl">
                 <defs>
-                  <filter id="shadow1" x="-20%" y="-20%" width="140%" height="140%">
-                    <feDropShadow dx="0" dy="8" stdDeviation="12" floodOpacity="0.15" />
+                  <filter id="qr-shadow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feDropShadow dx="0" dy="6" stdDeviation="10" floodOpacity="0.15" />
                   </filter>
+                  <linearGradient id="qr-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#6262bd" />
+                    <stop offset="100%" stopColor="#8b5cf6" />
+                  </linearGradient>
+                  <clipPath id="qr-screen">
+                    <rect x="69" y="22" width="222" height="418" rx="18" />
+                  </clipPath>
                 </defs>
 
-                {/* Phone */}
-                <g transform="translate(150, 20)">
-                  <rect x="0" y="0" width="200" height="360" rx="24" fill="#1e293b" filter="url(#shadow1)" />
-                  <rect x="8" y="12" width="184" height="336" rx="16" fill="#f8fafc" />
+                {/* Phone shell */}
+                <rect x="56" y="8" width="248" height="456" rx="30" fill="#1e293b" filter="url(#qr-shadow)" />
+                <rect x="69" y="22" width="222" height="418" rx="18" fill="#f8fafc" />
+                {/* Notch */}
+                <rect x="148" y="22" width="64" height="16" rx="8" fill="#1e293b" />
 
+                {/* All screen content clipped */}
+                <g clipPath="url(#qr-screen)">
                   {/* Header */}
-                  <rect x="16" y="24" width="168" height="40" rx="8" fill="#6262bd" />
-                  <text x="100" y="50" fontSize="14" fill="white" textAnchor="middle" fontWeight="bold">Your Restaurant</text>
+                  <rect x="69" y="38" width="222" height="52" fill="url(#qr-grad)" />
+                  <text x="180" y="58" fontSize="13" fill="white" fontWeight="bold" textAnchor="middle">Your Restaurant</text>
+                  <text x="180" y="74" fontSize="9" fill="white" opacity="0.75" textAnchor="middle">Digital Menu</text>
 
-                  {/* Menu items */}
-                  <g transform="translate(16, 80)">
-                    {/* Item 1 */}
-                    <rect x="0" y="0" width="168" height="70" rx="8" fill="white" stroke="#e2e8f0" strokeWidth="1" />
-                    <rect x="8" y="8" width="54" height="54" rx="6" fill="#fef3c7" />
-                    <text x="35" y="42" fontSize="24" textAnchor="middle">🍔</text>
-                    <text x="70" y="28" fontSize="12" fill="#1e293b" fontWeight="bold">Classic Burger</text>
-                    <text x="70" y="44" fontSize="10" fill="#64748b">Beef patty, lettuce, tomato</text>
-                    <text x="70" y="58" fontSize="12" fill="#6262bd" fontWeight="bold">$12.99</text>
+                  {/* Category pills */}
+                  <rect x="79" y="100" width="54" height="22" rx="7" fill="#6262bd" />
+                  <text x="106" y="115" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">Starters</text>
+                  <rect x="141" y="100" width="50" height="22" rx="7" fill="#e2e8f0" />
+                  <text x="166" y="115" fontSize="8" fill="#64748b" textAnchor="middle">Mains</text>
+                  <rect x="199" y="100" width="54" height="22" rx="7" fill="#e2e8f0" />
+                  <text x="226" y="115" fontSize="8" fill="#64748b" textAnchor="middle">Desserts</text>
 
-                    {/* Item 2 */}
-                    <rect x="0" y="78" width="168" height="70" rx="8" fill="white" stroke="#e2e8f0" strokeWidth="1" />
-                    <rect x="8" y="86" width="54" height="54" rx="6" fill="#dcfce7" />
-                    <text x="35" y="120" fontSize="24" textAnchor="middle">🥗</text>
-                    <text x="70" y="106" fontSize="12" fill="#1e293b" fontWeight="bold">Fresh Salad</text>
-                    <text x="70" y="122" fontSize="10" fill="#64748b">Mixed greens, vinaigrette</text>
-                    <text x="70" y="136" fontSize="12" fill="#6262bd" fontWeight="bold">$9.99</text>
+                  {/* Menu item 1 */}
+                  <rect x="79" y="132" width="202" height="64" rx="10" fill="white" stroke="#e2e8f0" strokeWidth="1" />
+                  <rect x="87" y="140" width="46" height="46" rx="8" fill="#fef3c7" />
+                  <text x="110" y="170" fontSize="24" textAnchor="middle">🍔</text>
+                  <text x="145" y="154" fontSize="10" fill="#1e293b" fontWeight="bold">Classic Burger</text>
+                  <text x="145" y="168" fontSize="8" fill="#64748b">Beef patty, lettuce, tomato</text>
+                  <text x="145" y="184" fontSize="10" fill="#6262bd" fontWeight="bold">£12.99</text>
+                  <rect x="248" y="166" width="26" height="22" rx="6" fill="#6262bd" />
+                  <text x="261" y="181" fontSize="14" fill="white" textAnchor="middle">+</text>
 
-                    {/* Item 3 */}
-                    <rect x="0" y="156" width="168" height="70" rx="8" fill="white" stroke="#e2e8f0" strokeWidth="1" />
-                    <rect x="8" y="164" width="54" height="54" rx="6" fill="#fee2e2" />
-                    <text x="35" y="198" fontSize="24" textAnchor="middle">🍕</text>
-                    <text x="70" y="184" fontSize="12" fill="#1e293b" fontWeight="bold">Margherita Pizza</text>
-                    <text x="70" y="200" fontSize="10" fill="#64748b">Fresh mozzarella, basil</text>
-                    <text x="70" y="214" fontSize="12" fill="#6262bd" fontWeight="bold">$14.99</text>
-                  </g>
+                  {/* Menu item 2 */}
+                  <rect x="79" y="204" width="202" height="64" rx="10" fill="white" stroke="#e2e8f0" strokeWidth="1" />
+                  <rect x="87" y="212" width="46" height="46" rx="8" fill="#dcfce7" />
+                  <text x="110" y="242" fontSize="24" textAnchor="middle">🥗</text>
+                  <text x="145" y="226" fontSize="10" fill="#1e293b" fontWeight="bold">Garden Salad</text>
+                  <text x="145" y="240" fontSize="8" fill="#64748b">Mixed greens, vinaigrette</text>
+                  <text x="145" y="256" fontSize="10" fill="#6262bd" fontWeight="bold">£9.99</text>
+                  <rect x="248" y="238" width="26" height="22" rx="6" fill="#e2e8f0" />
+                  <text x="261" y="253" fontSize="14" fill="#94a3b8" textAnchor="middle">+</text>
+
+                  {/* Menu item 3 */}
+                  <rect x="79" y="276" width="202" height="64" rx="10" fill="white" stroke="#e2e8f0" strokeWidth="1" />
+                  <rect x="87" y="284" width="46" height="46" rx="8" fill="#fee2e2" />
+                  <text x="110" y="314" fontSize="24" textAnchor="middle">🍕</text>
+                  <text x="145" y="298" fontSize="10" fill="#1e293b" fontWeight="bold">Margherita Pizza</text>
+                  <text x="145" y="312" fontSize="8" fill="#64748b">Fresh mozzarella, basil</text>
+                  <text x="145" y="328" fontSize="10" fill="#6262bd" fontWeight="bold">£14.99</text>
+                  <rect x="248" y="310" width="26" height="22" rx="6" fill="#6262bd" />
+                  <text x="261" y="325" fontSize="14" fill="white" textAnchor="middle">+</text>
 
                   {/* Bottom nav */}
-                  <rect x="16" y="316" width="168" height="24" rx="12" fill="#f1f5f9" />
+                  <rect x="69" y="392" width="222" height="48" fill="white" />
+                  <line x1="69" y1="392" x2="291" y2="392" stroke="#e2e8f0" strokeWidth="1" />
+                  <rect x="155" y="402" width="50" height="28" rx="8" fill="#6262bd" />
+                  <text x="180" y="420" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">View Cart</text>
+                  {/* Home indicator */}
+                  <rect x="155" y="430" width="50" height="4" rx="2" fill="#cbd5e1" />
                 </g>
 
-                {/* QR Code floating */}
-                <g transform="translate(30, 120)">
-                  <rect x="0" y="0" width="100" height="100" rx="12" fill="white" filter="url(#shadow1)" />
-                  <rect x="10" y="10" width="80" height="80" rx="8" fill="#6262bd" opacity="0.1" />
-                  <g fill="#6262bd">
-                    <rect x="18" y="18" width="18" height="18" rx="3" />
-                    <rect x="42" y="18" width="18" height="18" rx="3" />
-                    <rect x="66" y="18" width="18" height="18" rx="3" />
-                    <rect x="18" y="42" width="18" height="18" rx="3" />
-                    <rect x="42" y="42" width="18" height="18" rx="3" />
-                    <rect x="66" y="42" width="18" height="18" rx="3" />
-                    <rect x="18" y="66" width="18" height="18" rx="3" />
-                    <rect x="42" y="66" width="18" height="18" rx="3" />
-                    <rect x="66" y="66" width="18" height="18" rx="3" />
-                  </g>
-                  <text x="50" y="115" fontSize="10" fill="#64748b" textAnchor="middle" fontWeight="medium">Scan Me</text>
-                </g>
+                {/* QR code badge — left side, inside viewBox */}
+                <rect x="10" y="130" width="96" height="110" rx="14" fill="white" filter="url(#qr-shadow)" />
+                <rect x="20" y="140" width="76" height="76" rx="8" fill="#ede9fe" />
+                {/* QR corners */}
+                <rect x="26" y="146" width="16" height="16" rx="2" fill="#6262bd" />
+                <rect x="30" y="150" width="8" height="8" rx="1" fill="white" />
+                <rect x="80" y="146" width="16" height="16" rx="2" fill="#6262bd" />
+                <rect x="84" y="150" width="8" height="8" rx="1" fill="white" />
+                <rect x="26" y="200" width="16" height="16" rx="2" fill="#6262bd" />
+                <rect x="30" y="204" width="8" height="8" rx="1" fill="white" />
+                {/* QR dots */}
+                <rect x="48" y="146" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="58" y="146" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="68" y="146" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="48" y="156" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="68" y="156" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="48" y="166" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="58" y="166" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="26" y="176" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="38" y="176" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="58" y="176" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="68" y="176" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="26" y="186" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="48" y="186" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="68" y="186" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="38" y="196" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="58" y="196" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="48" y="206" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="68" y="206" width="6" height="6" rx="1" fill="#6262bd" />
+                <text x="58" y="234" fontSize="8" fill="#6262bd" textAnchor="middle" fontWeight="bold">Scan Me</text>
+                {/* Arrow from QR to phone */}
+                <path d="M106 185 L118 185" fill="none" stroke="#6262bd" strokeWidth="1.5" strokeDasharray="3 2" opacity="0.6" />
+                <polygon points="118,181 124,185 118,189" fill="#6262bd" opacity="0.6" />
 
-                {/* Scan effect */}
-                <g transform="translate(80, 170)">
-                  <line x1="0" y1="0" x2="70" y2="50" stroke="#6262bd" strokeWidth="2" strokeDasharray="5,5">
-                    <animate attributeName="stroke-dashoffset" values="0;-10" dur="1s" repeatCount="indefinite" />
-                  </line>
-                </g>
+                {/* "Updated instantly" badge — right, inside viewBox */}
+                <rect x="306" y="100" width="104" height="52" rx="12" fill="white" filter="url(#qr-shadow)" />
+                <circle cx="325" cy="126" r="12" fill="#dcfce7" />
+                <text x="325" y="131" fontSize="11" textAnchor="middle">✓</text>
+                <text x="368" y="118" fontSize="8" fill="#1e293b" fontWeight="bold" textAnchor="middle">Menu updated</text>
+                <text x="368" y="131" fontSize="7" fill="#64748b" textAnchor="middle">Changes live</text>
+                <text x="368" y="144" fontSize="7" fill="#10b981" textAnchor="middle" fontWeight="bold">instantly</text>
 
-                {/* Update badge */}
-                <g transform="translate(370, 80)">
-                  <rect x="0" y="0" width="100" height="60" rx="10" fill="white" filter="url(#shadow1)" />
-                  <circle cx="25" cy="30" r="15" fill="#10b981" opacity="0.2" />
-                  <text x="25" y="35" fontSize="14" textAnchor="middle">✓</text>
-                  <text x="65" y="26" fontSize="9" fill="#1e293b" fontWeight="bold" textAnchor="middle">Updated</text>
-                  <text x="65" y="40" fontSize="8" fill="#64748b" textAnchor="middle">Just now</text>
-                </g>
+                {/* "No app needed" badge — bottom right, inside viewBox */}
+                <rect x="306" y="330" width="104" height="44" rx="12" fill="#6262bd" filter="url(#qr-shadow)" />
+                <text x="358" y="348" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">No app download</text>
+                <text x="358" y="362" fontSize="7" fill="white" opacity="0.8" textAnchor="middle">Works in any browser</text>
               </svg>
             </div>
           </div>
@@ -270,64 +310,107 @@ export default function QRMenuPage() {
 
             {/* Process Illustration */}
             <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-8">
-              <svg viewBox="0 0 400 400" className="w-full h-auto">
-                {/* Dashboard mockup */}
-                <rect x="20" y="20" width="360" height="250" rx="12" fill="white" stroke="#e2e8f0" strokeWidth="2" />
-                <rect x="20" y="20" width="360" height="40" rx="12" fill="#6262bd" />
-                <rect x="20" y="48" width="360" height="12" fill="#6262bd" />
-                <text x="200" y="46" fontSize="14" fill="white" textAnchor="middle" fontWeight="bold">Menu Dashboard</text>
+              <svg viewBox="0 0 400 420" className="w-full h-auto">
+                <defs>
+                  <filter id="proc-shadow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feDropShadow dx="0" dy="4" stdDeviation="6" floodOpacity="0.12" />
+                  </filter>
+                  <clipPath id="proc-phone">
+                    <rect x="244" y="278" width="88" height="118" rx="6" />
+                  </clipPath>
+                </defs>
 
-                {/* Menu list */}
-                <rect x="35" y="75" width="150" height="35" rx="6" fill="#f8fafc" stroke="#e2e8f0" />
-                <rect x="45" y="83" width="20" height="20" rx="4" fill="#fef3c7" />
-                <rect x="75" y="85" width="80" height="8" rx="2" fill="#cbd5e1" />
-                <rect x="75" y="97" width="50" height="6" rx="2" fill="#e2e8f0" />
+                {/* Dashboard card */}
+                <rect x="15" y="15" width="370" height="230" rx="12" fill="white" filter="url(#proc-shadow)" />
+                <rect x="15" y="15" width="370" height="40" rx="12" fill="#6262bd" />
+                <rect x="15" y="43" width="370" height="12" fill="#6262bd" />
+                {/* Window dots */}
+                <circle cx="34" cy="35" r="5" fill="white" opacity="0.4" />
+                <circle cx="50" cy="35" r="5" fill="white" opacity="0.4" />
+                <circle cx="66" cy="35" r="5" fill="white" opacity="0.4" />
+                <text x="200" y="40" fontSize="11" fill="white" textAnchor="middle" fontWeight="bold">Menu Dashboard</text>
 
-                <rect x="35" y="118" width="150" height="35" rx="6" fill="#f8fafc" stroke="#e2e8f0" />
-                <rect x="45" y="126" width="20" height="20" rx="4" fill="#dcfce7" />
-                <rect x="75" y="128" width="70" height="8" rx="2" fill="#cbd5e1" />
-                <rect x="75" y="140" width="60" height="6" rx="2" fill="#e2e8f0" />
+                {/* Menu list — left column */}
+                <rect x="28" y="68" width="162" height="32" rx="6" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
+                <rect x="36" y="75" width="20" height="18" rx="3" fill="#fef3c7" />
+                <text x="47" y="87" fontSize="10" textAnchor="middle">🍔</text>
+                <rect x="64" y="78" width="72" height="7" rx="2" fill="#cbd5e1" />
+                <rect x="64" y="89" width="46" height="5" rx="2" fill="#e2e8f0" />
 
-                <rect x="35" y="161" width="150" height="35" rx="6" fill="#f8fafc" stroke="#e2e8f0" />
-                <rect x="45" y="169" width="20" height="20" rx="4" fill="#fee2e2" />
-                <rect x="75" y="171" width="90" height="8" rx="2" fill="#cbd5e1" />
-                <rect x="75" y="183" width="55" height="6" rx="2" fill="#e2e8f0" />
+                <rect x="28" y="106" width="162" height="32" rx="6" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
+                <rect x="36" y="113" width="20" height="18" rx="3" fill="#dcfce7" />
+                <text x="47" y="125" fontSize="10" textAnchor="middle">🥗</text>
+                <rect x="64" y="116" width="62" height="7" rx="2" fill="#cbd5e1" />
+                <rect x="64" y="127" width="52" height="5" rx="2" fill="#e2e8f0" />
 
-                {/* Add button */}
-                <rect x="35" y="210" width="150" height="40" rx="8" fill="#6262bd" />
-                <text x="110" y="235" fontSize="12" fill="white" textAnchor="middle" fontWeight="bold">+ Add Item</text>
+                <rect x="28" y="144" width="162" height="32" rx="6" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
+                <rect x="36" y="151" width="20" height="18" rx="3" fill="#fee2e2" />
+                <text x="47" y="163" fontSize="10" textAnchor="middle">🍕</text>
+                <rect x="64" y="154" width="80" height="7" rx="2" fill="#cbd5e1" />
+                <rect x="64" y="165" width="50" height="5" rx="2" fill="#e2e8f0" />
 
-                {/* QR Preview */}
-                <rect x="215" y="75" width="150" height="175" rx="8" fill="#f8fafc" stroke="#e2e8f0" />
-                <text x="290" y="95" fontSize="10" fill="#64748b" textAnchor="middle" fontWeight="bold">QR CODE PREVIEW</text>
-                <rect x="235" y="110" width="110" height="110" rx="8" fill="#6262bd" opacity="0.1" />
-                <g fill="#6262bd" transform="translate(250, 125)">
-                  <rect x="0" y="0" width="20" height="20" rx="3" />
-                  <rect x="30" y="0" width="20" height="20" rx="3" />
-                  <rect x="60" y="0" width="20" height="20" rx="3" />
-                  <rect x="0" y="30" width="20" height="20" rx="3" />
-                  <rect x="30" y="30" width="20" height="20" rx="3" />
-                  <rect x="60" y="30" width="20" height="20" rx="3" />
-                  <rect x="0" y="60" width="20" height="20" rx="3" />
-                  <rect x="30" y="60" width="20" height="20" rx="3" />
-                  <rect x="60" y="60" width="20" height="20" rx="3" />
+                <rect x="28" y="185" width="162" height="46" rx="8" fill="#6262bd" />
+                <text x="109" y="212" fontSize="11" fill="white" textAnchor="middle" fontWeight="bold">＋ Add Item</text>
+
+                {/* QR Preview — right column */}
+                <rect x="208" y="58" width="162" height="178" rx="8" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
+                <text x="289" y="77" fontSize="9" fill="#64748b" textAnchor="middle" fontWeight="bold">QR CODE PREVIEW</text>
+                <rect x="224" y="86" width="130" height="104" rx="6" fill="#ede9fe" />
+                {/* QR corners */}
+                <rect x="232" y="94" width="18" height="18" rx="2" fill="#6262bd" />
+                <rect x="236" y="98" width="10" height="10" rx="1" fill="white" />
+                <rect x="330" y="94" width="18" height="18" rx="2" fill="#6262bd" />
+                <rect x="334" y="98" width="10" height="10" rx="1" fill="white" />
+                <rect x="232" y="162" width="18" height="18" rx="2" fill="#6262bd" />
+                <rect x="236" y="166" width="10" height="10" rx="1" fill="white" />
+                {/* QR dots */}
+                <rect x="256" y="94" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="266" y="94" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="276" y="94" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="296" y="94" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="316" y="94" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="256" y="106" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="286" y="106" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="316" y="106" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="266" y="118" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="296" y="118" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="256" y="130" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="276" y="130" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="306" y="130" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="256" y="150" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="276" y="150" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="306" y="150" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="316" y="150" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="266" y="162" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="286" y="162" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="316" y="162" width="6" height="6" rx="1" fill="#6262bd" />
+                <rect x="224" y="198" width="130" height="28" rx="6" fill="#6262bd" />
+                <text x="289" y="216" fontSize="9" fill="white" textAnchor="middle" fontWeight="bold">↓ Download QR Code</text>
+
+                {/* Arrow down */}
+                <line x1="200" y1="252" x2="200" y2="270" stroke="#6262bd" strokeWidth="2" />
+                <polygon points="193,268 200,280 207,268" fill="#6262bd" />
+
+                {/* Result phone */}
+                <rect x="240" y="272" width="100" height="136" rx="14" fill="#1e293b" filter="url(#proc-shadow)" />
+                <rect x="244" y="278" width="92" height="124" rx="10" fill="#f8fafc" />
+                <rect x="270" y="274" width="40" height="6" rx="3" fill="#334155" />
+                <g clipPath="url(#proc-phone)">
+                  <rect x="244" y="278" width="92" height="24" fill="#6262bd" />
+                  <text x="290" y="294" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">Your Restaurant</text>
+                  <rect x="250" y="308" width="80" height="16" rx="3" fill="#f1f5f9" />
+                  <rect x="254" y="312" width="44" height="8" rx="2" fill="#cbd5e1" />
+                  <rect x="250" y="328" width="80" height="16" rx="3" fill="#f1f5f9" />
+                  <rect x="254" y="332" width="56" height="8" rx="2" fill="#cbd5e1" />
+                  <rect x="250" y="348" width="80" height="16" rx="3" fill="#f1f5f9" />
+                  <rect x="254" y="352" width="38" height="8" rx="2" fill="#cbd5e1" />
+                  <rect x="250" y="372" width="80" height="18" rx="5" fill="#6262bd" />
+                  <text x="290" y="384" fontSize="7" fill="white" textAnchor="middle" fontWeight="bold">View Menu</text>
                 </g>
-                <rect x="235" y="230" width="110" height="12" rx="4" fill="#6262bd" />
-                <text x="290" y="240" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">Download QR</text>
 
-                {/* Arrow to phone */}
-                <path d="M290 280 L290 320 L230 350" fill="none" stroke="#6262bd" strokeWidth="2" strokeDasharray="5,5">
-                  <animate attributeName="stroke-dashoffset" values="0;-10" dur="1s" repeatCount="indefinite" />
-                </path>
-
-                {/* Small phone */}
-                <g transform="translate(170, 310)">
-                  <rect x="0" y="0" width="50" height="80" rx="8" fill="#1e293b" />
-                  <rect x="4" y="8" width="42" height="64" rx="4" fill="#f8fafc" />
-                  <rect x="8" y="14" width="34" height="10" rx="2" fill="#6262bd" />
-                  <rect x="8" y="28" width="34" height="16" rx="2" fill="#e2e8f0" />
-                  <rect x="8" y="48" width="34" height="16" rx="2" fill="#e2e8f0" />
-                </g>
+                {/* Labels */}
+                <text x="109" y="270" fontSize="8" fill="#64748b" textAnchor="middle">Admin dashboard</text>
+                <text x="290" y="416" fontSize="8" fill="#64748b" textAnchor="middle">Customer sees this</text>
               </svg>
             </div>
           </div>
@@ -358,7 +441,7 @@ export default function QRMenuPage() {
             </Link>
           </div>
           <p className="text-white/60 text-sm mt-6">
-            No credit card required. 1 month free trial.
+            No credit card required. 2 weeks free trial.
           </p>
         </div>
       </section>

@@ -369,7 +369,7 @@ export default function TableOrderingPage() {
             </Link>
           </div>
           <p className="text-white/60 text-sm mt-6">
-            No credit card required. 1 month free trial.
+            No credit card required. 2 weeks free trial.
           </p>
         </div>
       </section>

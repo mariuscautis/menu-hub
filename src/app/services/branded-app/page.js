@@ -52,176 +52,97 @@ export default function BrandedAppPage() {
             </div>
 
             {/* Hero Illustration */}
-            <div className="relative">
-              <svg viewBox="0 0 500 450" className="w-full h-auto">
+            <div className="relative flex justify-center">
+              <svg viewBox="0 0 380 480" className="w-full max-w-sm h-auto drop-shadow-xl">
                 <defs>
-                  <filter id="shadow1" x="-20%" y="-20%" width="140%" height="140%">
+                  <filter id="shadow1">
                     <feDropShadow dx="0" dy="8" stdDeviation="12" floodOpacity="0.15" />
                   </filter>
                   <linearGradient id="brandGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#6262bd" />
                     <stop offset="100%" stopColor="#8b5cf6" />
                   </linearGradient>
+                  <clipPath id="screenClip">
+                    <rect x="58" y="22" width="224" height="428" rx="20" />
+                  </clipPath>
                 </defs>
 
-                {/* Central branded phone */}
-                <g transform="translate(165, 30)">
-                  <rect x="0" y="0" width="170" height="320" rx="24" fill="#1e293b" filter="url(#shadow1)" />
-                  <rect x="8" y="12" width="154" height="296" rx="16" fill="#f8fafc" />
+                {/* Phone shell */}
+                <rect x="46" y="8" width="248" height="456" rx="30" fill="#1e293b" filter="url(#shadow1)" />
+                {/* Screen background */}
+                <rect x="58" y="22" width="224" height="428" rx="20" fill="#f8fafc" />
+                {/* Notch */}
+                <rect x="138" y="22" width="64" height="16" rx="8" fill="#1e293b" />
 
-                  {/* Custom branding header */}
-                  <rect x="16" y="24" width="138" height="50" rx="8" fill="url(#brandGradient)" />
-                  <circle cx="45" cy="49" r="16" fill="white" opacity="0.2" />
-                  <text x="45" y="54" fontSize="18" textAnchor="middle">🍽️</text>
-                  <text x="100" y="45" fontSize="11" fill="white" fontWeight="bold">Your Restaurant</text>
-                  <text x="100" y="58" fontSize="8" fill="white" opacity="0.8">Fine Dining</text>
+                {/* All screen content clipped inside */}
+                <g clipPath="url(#screenClip)">
+                  {/* Header bar */}
+                  <rect x="58" y="38" width="224" height="58" fill="url(#brandGradient)" />
+                  <circle cx="92" cy="67" r="18" fill="white" opacity="0.2" />
+                  <text x="92" y="74" fontSize="20" textAnchor="middle">🍽️</text>
+                  <text x="180" y="60" fontSize="12" fill="white" fontWeight="bold" textAnchor="middle">Your Restaurant</text>
+                  <text x="180" y="76" fontSize="9" fill="white" opacity="0.75" textAnchor="middle">Fine Dining</text>
 
-                  {/* Menu categories */}
-                  <g transform="translate(16, 85)">
-                    <rect x="0" y="0" width="42" height="30" rx="6" fill="#6262bd" opacity="0.15" />
-                    <text x="21" y="20" fontSize="8" fill="#6262bd" textAnchor="middle" fontWeight="bold">Starters</text>
+                  {/* Category pills */}
+                  <rect x="68" y="106" width="56" height="24" rx="8" fill="#6262bd" opacity="0.15" />
+                  <text x="96" y="122" fontSize="9" fill="#6262bd" textAnchor="middle" fontWeight="bold">Starters</text>
+                  <rect x="132" y="106" width="52" height="24" rx="8" fill="#e2e8f0" />
+                  <text x="158" y="122" fontSize="9" fill="#64748b" textAnchor="middle">Mains</text>
+                  <rect x="192" y="106" width="60" height="24" rx="8" fill="#e2e8f0" />
+                  <text x="222" y="122" fontSize="9" fill="#64748b" textAnchor="middle">Desserts</text>
 
-                    <rect x="48" y="0" width="42" height="30" rx="6" fill="#e2e8f0" />
-                    <text x="69" y="20" fontSize="8" fill="#64748b" textAnchor="middle">Mains</text>
+                  {/* Menu item 1 */}
+                  <rect x="68" y="140" width="204" height="60" rx="10" fill="white" stroke="#e2e8f0" strokeWidth="1" />
+                  <rect x="76" y="148" width="44" height="44" rx="8" fill="#fef3c7" />
+                  <text x="98" y="176" fontSize="22" textAnchor="middle">🥗</text>
+                  <text x="130" y="162" fontSize="10" fill="#1e293b" fontWeight="bold">Garden Salad</text>
+                  <text x="130" y="176" fontSize="8" fill="#64748b">Fresh seasonal greens</text>
+                  <text x="130" y="190" fontSize="10" fill="#6262bd" fontWeight="bold">£8.99</text>
 
-                    <rect x="96" y="0" width="42" height="30" rx="6" fill="#e2e8f0" />
-                    <text x="117" y="20" fontSize="8" fill="#64748b" textAnchor="middle">Desserts</text>
-                  </g>
+                  {/* Menu item 2 */}
+                  <rect x="68" y="210" width="204" height="60" rx="10" fill="white" stroke="#e2e8f0" strokeWidth="1" />
+                  <rect x="76" y="218" width="44" height="44" rx="8" fill="#fee2e2" />
+                  <text x="98" y="246" fontSize="22" textAnchor="middle">🍝</text>
+                  <text x="130" y="232" fontSize="10" fill="#1e293b" fontWeight="bold">Pasta Primavera</text>
+                  <text x="130" y="246" fontSize="8" fill="#64748b">Handmade pasta</text>
+                  <text x="130" y="260" fontSize="10" fill="#6262bd" fontWeight="bold">£16.99</text>
 
-                  {/* Menu items */}
-                  <g transform="translate(16, 125)">
-                    <rect x="0" y="0" width="138" height="55" rx="8" fill="white" stroke="#e2e8f0" strokeWidth="1" />
-                    <rect x="6" y="6" width="43" height="43" rx="6" fill="#fef3c7" />
-                    <text x="28" y="34" fontSize="20" textAnchor="middle">🥗</text>
-                    <text x="55" y="22" fontSize="10" fill="#1e293b" fontWeight="bold">Garden Salad</text>
-                    <text x="55" y="34" fontSize="8" fill="#64748b">Fresh seasonal greens</text>
-                    <text x="55" y="46" fontSize="10" fill="#6262bd" fontWeight="bold">$8.99</text>
+                  {/* Menu item 3 */}
+                  <rect x="68" y="280" width="204" height="60" rx="10" fill="white" stroke="#e2e8f0" strokeWidth="1" />
+                  <rect x="76" y="288" width="44" height="44" rx="8" fill="#e0f2fe" />
+                  <text x="98" y="316" fontSize="22" textAnchor="middle">🐟</text>
+                  <text x="130" y="302" fontSize="10" fill="#1e293b" fontWeight="bold">Sea Bass</text>
+                  <text x="130" y="316" fontSize="8" fill="#64748b">Grilled with lemon butter</text>
+                  <text x="130" y="330" fontSize="10" fill="#6262bd" fontWeight="bold">£22.50</text>
 
-                    <rect x="0" y="62" width="138" height="55" rx="8" fill="white" stroke="#e2e8f0" strokeWidth="1" />
-                    <rect x="6" y="68" width="43" height="43" rx="6" fill="#fee2e2" />
-                    <text x="28" y="96" fontSize="20" textAnchor="middle">🍝</text>
-                    <text x="55" y="84" fontSize="10" fill="#1e293b" fontWeight="bold">Pasta Primavera</text>
-                    <text x="55" y="96" fontSize="8" fill="#64748b">Handmade pasta</text>
-                    <text x="55" y="108" fontSize="10" fill="#6262bd" fontWeight="bold">$16.99</text>
-                  </g>
-
-                  {/* Bottom nav with brand color */}
-                  <g transform="translate(16, 268)">
-                    <rect x="0" y="0" width="138" height="35" rx="8" fill="#f8fafc" />
-                    <g fill="#6262bd">
-                      <rect x="12" y="8" width="26" height="3" rx="1.5" />
-                      <rect x="12" y="14" width="18" height="3" rx="1.5" opacity="0.5" />
-                    </g>
-                    <circle cx="69" cy="17" r="10" fill="#6262bd" />
-                    <text x="69" y="21" fontSize="10" fill="white" textAnchor="middle">🛒</text>
-                    <g fill="#94a3b8">
-                      <rect x="100" y="8" width="26" height="3" rx="1.5" />
-                      <rect x="108" y="14" width="18" height="3" rx="1.5" />
-                    </g>
-                  </g>
-
+                  {/* Bottom nav bar */}
+                  <rect x="58" y="390" width="224" height="60" fill="white" />
+                  <line x1="58" y1="390" x2="282" y2="390" stroke="#e2e8f0" strokeWidth="1" />
+                  {/* Nav icons */}
+                  <rect x="82" y="404" width="28" height="3" rx="1.5" fill="#6262bd" />
+                  <rect x="82" y="410" width="20" height="3" rx="1.5" fill="#6262bd" opacity="0.4" />
+                  <circle cx="170" cy="410" r="14" fill="#6262bd" />
+                  <text x="170" y="415" fontSize="12" textAnchor="middle">🛒</text>
+                  <rect x="218" y="404" width="28" height="3" rx="1.5" fill="#94a3b8" />
+                  <rect x="226" y="410" width="20" height="3" rx="1.5" fill="#94a3b8" />
                   {/* Home indicator */}
-                  <rect x="60" y="314" width="50" height="4" rx="2" fill="#cbd5e1" />
+                  <rect x="145" y="440" width="50" height="4" rx="2" fill="#cbd5e1" />
                 </g>
 
-                {/* Install prompt */}
-                <g transform="translate(350, 60)">
-                  <rect x="0" y="0" width="130" height="90" rx="12" fill="white" filter="url(#shadow1)" />
-                  <text x="65" y="25" fontSize="11" fill="#1e293b" textAnchor="middle" fontWeight="bold">Add to Home Screen</text>
-                  <rect x="15" y="38" width="100" height="20" rx="4" fill="#f8fafc" stroke="#e2e8f0" />
-                  <circle cx="30" cy="48" r="6" fill="#6262bd" opacity="0.3" />
-                  <text x="30" y="51" fontSize="8" textAnchor="middle">🍽️</text>
-                  <text x="72" y="51" fontSize="8" fill="#64748b">Your Restaurant</text>
-                  <rect x="30" y="65" width="70" height="18" rx="4" fill="#6262bd" />
-                  <text x="65" y="77" fontSize="9" fill="white" textAnchor="middle" fontWeight="bold">Install</text>
-                </g>
+                {/* Install badge — floating bottom-right, inside viewBox */}
+                <rect x="238" y="380" width="126" height="72" rx="12" fill="white" filter="url(#shadow1)" />
+                <text x="301" y="400" fontSize="9" fill="#1e293b" textAnchor="middle" fontWeight="bold">Add to Home Screen</text>
+                <rect x="248" y="408" width="106" height="18" rx="5" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
+                <circle cx="262" cy="417" r="6" fill="#6262bd" opacity="0.25" />
+                <text x="262" y="421" fontSize="8" textAnchor="middle">🍽️</text>
+                <text x="308" y="420" fontSize="8" fill="#64748b" textAnchor="middle">Your Restaurant</text>
+                <rect x="264" y="432" width="74" height="14" rx="5" fill="#6262bd" />
+                <text x="301" y="442" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">Install</text>
 
-                {/* Arrow from install to phone */}
-                <path d="M350 105 Q310 130 335 180" fill="none" stroke="#6262bd" strokeWidth="2" strokeDasharray="6,4">
-                  <animate attributeName="stroke-dashoffset" values="0;-10" dur="1s" repeatCount="indefinite" />
-                </path>
-
-                {/* Home screen icon */}
-                <g transform="translate(30, 140)">
-                  <rect x="0" y="0" width="100" height="100" rx="16" fill="white" filter="url(#shadow1)" />
-                  <text x="50" y="30" fontSize="10" fill="#64748b" textAnchor="middle" fontWeight="bold">HOME SCREEN</text>
-
-                  {/* App icons grid */}
-                  <rect x="12" y="42" width="22" height="22" rx="5" fill="#e2e8f0" />
-                  <rect x="39" y="42" width="22" height="22" rx="5" fill="#e2e8f0" />
-
-                  {/* Your branded app icon */}
-                  <rect x="66" y="42" width="22" height="22" rx="5" fill="url(#brandGradient)" />
-                  <text x="77" y="57" fontSize="12" textAnchor="middle">🍽️</text>
-
-                  <text x="77" y="75" fontSize="6" fill="#1e293b" textAnchor="middle">Your App</text>
-
-                  {/* Highlight ring around branded app */}
-                  <rect x="63" y="39" width="28" height="28" rx="7" fill="none" stroke="#6262bd" strokeWidth="2" opacity="0.5">
-                    <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite" />
-                  </rect>
-
-                  <rect x="12" y="72" width="22" height="22" rx="5" fill="#e2e8f0" />
-                  <rect x="39" y="72" width="22" height="22" rx="5" fill="#e2e8f0" />
-                </g>
-
-                {/* Connection lines showing brand sync */}
-                <path d="M130 190 Q145 200 165 200" fill="none" stroke="#6262bd" strokeWidth="1.5" opacity="0.4" strokeDasharray="3">
-                  <animate attributeName="stroke-dashoffset" values="0;-6" dur="2s" repeatCount="indefinite" />
-                </path>
-
-                {/* Admin dashboard hint */}
-                <g transform="translate(20, 300)">
-                  <rect x="0" y="0" width="120" height="70" rx="10" fill="white" filter="url(#shadow1)" />
-                  <rect x="0" y="0" width="120" height="25" rx="10" fill="#6262bd" />
-                  <rect x="0" y="15" width="120" height="10" fill="#6262bd" />
-                  <text x="60" y="17" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">ADMIN DASHBOARD</text>
-
-                  {/* Branding settings */}
-                  <text x="10" y="40" fontSize="7" fill="#64748b">Logo:</text>
-                  <rect x="40" y="32" width="30" height="12" rx="3" fill="#f8fafc" stroke="#e2e8f0" />
-                  <text x="55" y="41" fontSize="6" textAnchor="middle">🍽️</text>
-
-                  <text x="10" y="58" fontSize="7" fill="#64748b">Name:</text>
-                  <rect x="40" y="50" width="70" height="12" rx="3" fill="#f8fafc" stroke="#e2e8f0" />
-                  <text x="75" y="59" fontSize="6" fill="#64748b" textAnchor="middle">Your Restaurant</text>
-                </g>
-
-                {/* Sync arrow from dashboard */}
-                <path d="M140 340 Q170 330 165 310" fill="none" stroke="#6262bd" strokeWidth="1.5" strokeDasharray="4">
-                  <animate attributeName="stroke-dashoffset" values="0;-8" dur="1.5s" repeatCount="indefinite" />
-                </path>
-
-                {/* "PWA" badge */}
-                <g transform="translate(380, 200)">
-                  <rect x="0" y="0" width="80" height="35" rx="8" fill="#10b981" opacity="0.1" />
-                  <text x="40" y="15" fontSize="8" fill="#10b981" textAnchor="middle" fontWeight="bold">PWA TECHNOLOGY</text>
-                  <text x="40" y="27" fontSize="7" fill="#10b981" textAnchor="middle">Works Offline</text>
-                </g>
-
-                {/* Multiple device sync indicator */}
-                <g transform="translate(360, 280)">
-                  <rect x="0" y="0" width="100" height="70" rx="10" fill="#f8fafc" stroke="#e2e8f0" />
-                  <text x="50" y="18" fontSize="8" fill="#64748b" textAnchor="middle" fontWeight="bold">WORKS ON</text>
-
-                  {/* Device icons */}
-                  <g transform="translate(15, 28)">
-                    <rect x="0" y="0" width="18" height="28" rx="3" fill="#1e293b" />
-                    <rect x="2" y="3" width="14" height="20" rx="2" fill="#f8fafc" />
-                    <text x="9" y="22" fontSize="4" textAnchor="middle">📱</text>
-                  </g>
-                  <g transform="translate(40, 25)">
-                    <rect x="0" y="0" width="24" height="30" rx="3" fill="#1e293b" />
-                    <rect x="2" y="3" width="20" height="22" rx="2" fill="#f8fafc" />
-                    <text x="12" y="22" fontSize="5" textAnchor="middle">📱</text>
-                  </g>
-                  <g transform="translate(70, 28)">
-                    <rect x="0" y="0" width="22" height="16" rx="2" fill="#1e293b" />
-                    <rect x="2" y="2" width="18" height="10" rx="1" fill="#f8fafc" />
-                    <rect x="8" y="16" width="6" height="3" fill="#94a3b8" />
-                    <rect x="4" y="19" width="14" height="2" rx="1" fill="#64748b" />
-                  </g>
-                </g>
+                {/* PWA badge — floating top-right, inside viewBox */}
+                <rect x="248" y="30" width="116" height="38" rx="10" fill="#f0fdf4" stroke="#bbf7d0" strokeWidth="1" />
+                <text x="306" y="47" fontSize="9" fill="#16a34a" textAnchor="middle" fontWeight="bold">PWA Technology</text>
+                <text x="306" y="60" fontSize="8" fill="#16a34a" textAnchor="middle">Works Offline</text>
               </svg>
             </div>
           </div>
@@ -359,91 +280,73 @@ export default function BrandedAppPage() {
 
             {/* Process Illustration */}
             <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-8">
-              <svg viewBox="0 0 400 450" className="w-full h-auto">
-                {/* Admin dashboard */}
-                <rect x="20" y="20" width="360" height="180" rx="12" fill="white" stroke="#e2e8f0" strokeWidth="2" />
-                <rect x="20" y="20" width="360" height="40" rx="12" fill="#6262bd" />
-                <rect x="20" y="48" width="360" height="12" fill="#6262bd" />
-                <text x="200" y="46" fontSize="12" fill="white" textAnchor="middle" fontWeight="bold">Branding Settings</text>
-
-                {/* Logo upload */}
-                <g transform="translate(40, 75)">
-                  <text x="0" y="0" fontSize="10" fill="#1e293b" fontWeight="bold">Restaurant Logo</text>
-                  <rect x="0" y="10" width="80" height="80" rx="8" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="2" strokeDasharray="4" />
-                  <circle cx="40" cy="50" r="25" fill="#6262bd" opacity="0.2" />
-                  <text x="40" y="58" fontSize="24" textAnchor="middle">🍽️</text>
-                  <text x="40" y="78" fontSize="8" fill="#64748b" textAnchor="middle">Upload</text>
-                </g>
-
-                {/* Restaurant name input */}
-                <g transform="translate(150, 75)">
-                  <text x="0" y="0" fontSize="10" fill="#1e293b" fontWeight="bold">Restaurant Name</text>
-                  <rect x="0" y="12" width="200" height="35" rx="6" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="2" />
-                  <text x="100" y="35" fontSize="11" fill="#64748b" textAnchor="middle">Your Restaurant Name</text>
-
-                  <text x="0" y="70" fontSize="10" fill="#1e293b" fontWeight="bold">Tagline (optional)</text>
-                  <rect x="0" y="82" width="200" height="35" rx="6" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="2" />
-                  <text x="100" y="105" fontSize="11" fill="#64748b" textAnchor="middle">Fine Dining Since 1990</text>
-                </g>
-
-                {/* Arrow down */}
-                <path d="M200 210 L200 250" fill="none" stroke="#6262bd" strokeWidth="2" markerEnd="url(#arrowhead)">
-                  <animate attributeName="stroke-dasharray" values="0,100;40,60" dur="1s" repeatCount="indefinite" />
-                </path>
+              <svg viewBox="0 0 400 436" className="w-full h-auto">
                 <defs>
-                  <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-                    <polygon points="0 0, 10 3.5, 0 7" fill="#6262bd" />
-                  </marker>
+                  <clipPath id="phoneClip2">
+                    <rect x="136" y="246" width="128" height="160" rx="10" />
+                  </clipPath>
                 </defs>
 
-                {/* Resulting phone */}
-                <g transform="translate(130, 260)">
-                  <rect x="0" y="0" width="140" height="180" rx="16" fill="#1e293b" />
-                  <rect x="6" y="10" width="128" height="160" rx="10" fill="#f8fafc" />
+                {/* Admin dashboard card */}
+                <rect x="20" y="16" width="360" height="190" rx="12" fill="white" stroke="#e2e8f0" strokeWidth="2" />
+                {/* Title bar */}
+                <rect x="20" y="16" width="360" height="44" rx="12" fill="#6262bd" />
+                <rect x="20" y="44" width="360" height="16" fill="#6262bd" />
+                {/* Window dots */}
+                <circle cx="42" cy="38" r="5" fill="white" opacity="0.4" />
+                <circle cx="58" cy="38" r="5" fill="white" opacity="0.4" />
+                <circle cx="74" cy="38" r="5" fill="white" opacity="0.4" />
+                <text x="200" y="43" fontSize="11" fill="white" textAnchor="middle" fontWeight="bold">Branding Settings — Admin Dashboard</text>
 
+                {/* Logo upload area */}
+                <rect x="36" y="72" width="80" height="80" rx="8" fill="#f8fafc" stroke="#c7d2fe" strokeWidth="2" strokeDasharray="4 3" />
+                <circle cx="76" cy="106" r="22" fill="#6262bd" opacity="0.12" />
+                <text x="76" y="99" fontSize="9" fill="#6262bd" textAnchor="middle" fontWeight="bold">LOGO</text>
+                <text x="76" y="112" fontSize="20" textAnchor="middle">🍽️</text>
+                <text x="76" y="128" fontSize="8" fill="#94a3b8" textAnchor="middle">Click to upload</text>
+                <text x="76" y="163" fontSize="9" fill="#64748b" textAnchor="middle" fontWeight="bold">Restaurant Logo</text>
+
+                {/* Name field */}
+                <text x="138" y="83" fontSize="9" fill="#64748b" fontWeight="bold">Restaurant Name</text>
+                <rect x="138" y="90" width="220" height="28" rx="6" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1.5" />
+                <text x="150" y="109" fontSize="10" fill="#94a3b8">Your Restaurant Name</text>
+
+                {/* Tagline field */}
+                <text x="138" y="132" fontSize="9" fill="#64748b" fontWeight="bold">Tagline (optional)</text>
+                <rect x="138" y="140" width="220" height="28" rx="6" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1.5" />
+                <text x="150" y="159" fontSize="10" fill="#94a3b8">Fine Dining Since 1990</text>
+
+                {/* Save button */}
+                <rect x="272" y="176" width="86" height="22" rx="6" fill="#6262bd" />
+                <text x="315" y="191" fontSize="9" fill="white" textAnchor="middle" fontWeight="bold">Save Changes</text>
+
+                {/* Arrow */}
+                <line x1="200" y1="212" x2="200" y2="234" stroke="#6262bd" strokeWidth="2" />
+                <polygon points="192,230 200,244 208,230" fill="#6262bd" />
+
+                {/* Resulting phone shell */}
+                <rect x="130" y="242" width="140" height="168" rx="16" fill="#1e293b" />
+
+                {/* Phone screen — clipped */}
+                <rect x="136" y="246" width="128" height="160" rx="10" fill="#f8fafc" />
+                <g clipPath="url(#phoneClip2)">
                   {/* Branded header */}
-                  <rect x="12" y="18" width="116" height="40" rx="6" fill="#6262bd" />
-                  <circle cx="35" cy="38" r="12" fill="white" opacity="0.2" />
-                  <text x="35" y="42" fontSize="14" textAnchor="middle">🍽️</text>
-                  <text x="82" y="34" fontSize="9" fill="white" fontWeight="bold">Your Restaurant</text>
-                  <text x="82" y="46" fontSize="7" fill="white" opacity="0.8">Fine Dining</text>
-
-                  {/* Menu preview */}
-                  <rect x="12" y="65" width="116" height="30" rx="4" fill="#e2e8f0" />
-                  <rect x="12" y="100" width="116" height="30" rx="4" fill="#e2e8f0" />
-                  <rect x="12" y="135" width="116" height="25" rx="4" fill="#6262bd" />
-                  <text x="70" y="152" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">View Menu</text>
+                  <rect x="136" y="246" width="128" height="44" fill="#6262bd" />
+                  <circle cx="158" cy="268" r="12" fill="white" opacity="0.2" />
+                  <text x="158" y="273" fontSize="13" textAnchor="middle">🍽️</text>
+                  <text x="210" y="264" fontSize="9" fill="white" fontWeight="bold" textAnchor="middle">Your Restaurant</text>
+                  <text x="210" y="277" fontSize="7" fill="white" opacity="0.8" textAnchor="middle">Fine Dining</text>
+                  {/* Menu rows */}
+                  <rect x="142" y="296" width="116" height="22" rx="4" fill="#e2e8f0" />
+                  <rect x="142" y="323" width="116" height="22" rx="4" fill="#e2e8f0" />
+                  <rect x="142" y="350" width="116" height="22" rx="5" fill="#6262bd" />
+                  <text x="200" y="365" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">View Menu</text>
+                  {/* Home indicator */}
+                  <rect x="172" y="393" width="56" height="4" rx="2" fill="#cbd5e1" />
                 </g>
 
-                {/* Device icons showing cross-platform */}
-                <g transform="translate(300, 300)">
-                  <text x="40" y="0" fontSize="9" fill="#64748b" textAnchor="middle" fontWeight="bold">AVAILABLE ON</text>
-
-                  {/* iOS */}
-                  <g transform="translate(0, 20)">
-                    <rect x="0" y="0" width="24" height="40" rx="4" fill="#1e293b" />
-                    <rect x="2" y="4" width="20" height="30" rx="2" fill="#f8fafc" />
-                    <circle cx="12" cy="37" r="2" fill="#64748b" />
-                    <text x="12" y="55" fontSize="7" fill="#64748b" textAnchor="middle">iOS</text>
-                  </g>
-
-                  {/* Android */}
-                  <g transform="translate(30, 20)">
-                    <rect x="0" y="0" width="24" height="40" rx="4" fill="#1e293b" />
-                    <rect x="2" y="4" width="20" height="30" rx="2" fill="#f8fafc" />
-                    <rect x="8" y="36" width="8" height="2" rx="1" fill="#64748b" />
-                    <text x="12" y="55" fontSize="7" fill="#64748b" textAnchor="middle">Android</text>
-                  </g>
-
-                  {/* Desktop */}
-                  <g transform="translate(60, 25)">
-                    <rect x="0" y="0" width="30" height="22" rx="2" fill="#1e293b" />
-                    <rect x="2" y="2" width="26" height="16" rx="1" fill="#f8fafc" />
-                    <rect x="12" y="22" width="6" height="4" fill="#64748b" />
-                    <rect x="6" y="26" width="18" height="2" rx="1" fill="#94a3b8" />
-                    <text x="15" y="50" fontSize="7" fill="#64748b" textAnchor="middle">Desktop</text>
-                  </g>
-                </g>
+                {/* Platform labels below phone */}
+                <text x="200" y="422" fontSize="9" fill="#94a3b8" textAnchor="middle">iOS · Android · Desktop · Works offline</text>
               </svg>
             </div>
           </div>
@@ -580,7 +483,7 @@ export default function BrandedAppPage() {
             </Link>
           </div>
           <p className="text-white/60 text-sm mt-6">
-            No credit card required. 1 month free trial.
+            No credit card required. 2 weeks free trial.
           </p>
         </div>
       </section>

@@ -284,554 +284,626 @@ const industries = [
 const FeatureIllustrations = {
   'digital-menu': () => (
     <svg viewBox="0 0 400 300" className="w-full h-full">
-      {/* Phone frame */}
-      <rect x="130" y="30" width="140" height="240" rx="20" fill="#1e293b" />
-      <rect x="138" y="45" width="124" height="210" rx="12" fill="#f8fafc" />
-
-      {/* QR Code */}
-      <rect x="160" y="65" width="80" height="80" rx="8" fill="#6262bd" opacity="0.1" />
-      <g fill="#6262bd">
-        <rect x="170" y="75" width="15" height="15" rx="2" />
-        <rect x="195" y="75" width="15" height="15" rx="2" />
-        <rect x="220" y="75" width="15" height="15" rx="2" />
-        <rect x="170" y="100" width="15" height="15" rx="2" />
-        <rect x="195" y="100" width="15" height="15" rx="2" />
-        <rect x="220" y="100" width="15" height="15" rx="2" />
-        <rect x="170" y="125" width="15" height="15" rx="2" />
-        <rect x="195" y="125" width="15" height="15" rx="2" />
-        <rect x="220" y="125" width="15" height="15" rx="2" />
-      </g>
-
-      {/* Menu items */}
-      <rect x="148" y="160" width="104" height="24" rx="6" fill="#e2e8f0" />
-      <rect x="148" y="190" width="80" height="24" rx="6" fill="#e2e8f0" />
-      <rect x="148" y="220" width="90" height="24" rx="6" fill="#e2e8f0" />
-
-      {/* Scan effect circles */}
-      <circle cx="200" cy="105" r="60" fill="none" stroke="#6262bd" strokeWidth="2" opacity="0.3">
-        <animate attributeName="r" values="50;70;50" dur="2s" repeatCount="indefinite" />
-        <animate attributeName="opacity" values="0.3;0.1;0.3" dur="2s" repeatCount="indefinite" />
-      </circle>
-      <circle cx="200" cy="105" r="45" fill="none" stroke="#6262bd" strokeWidth="2" opacity="0.5">
-        <animate attributeName="r" values="35;55;35" dur="2s" repeatCount="indefinite" />
-        <animate attributeName="opacity" values="0.5;0.2;0.5" dur="2s" repeatCount="indefinite" />
-      </circle>
-
-      {/* Floating menu card */}
-      <g transform="translate(280, 80)">
-        <rect x="0" y="0" width="100" height="120" rx="12" fill="white" filter="url(#shadow)" />
-        <rect x="10" y="10" width="80" height="50" rx="8" fill="#e2e8f0" />
-        <rect x="10" y="70" width="60" height="10" rx="3" fill="#cbd5e1" />
-        <rect x="10" y="90" width="40" height="10" rx="3" fill="#6262bd" />
-        <text x="60" y="100" fontSize="12" fill="#6262bd" fontWeight="bold">$12</text>
-      </g>
-
-      {/* Filter definition */}
       <defs>
-        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+        <filter id="shadow-dm" x="-20%" y="-20%" width="140%" height="140%">
           <feDropShadow dx="0" dy="4" stdDeviation="8" floodOpacity="0.15" />
         </filter>
+        <clipPath id="phone-screen-dm">
+          <rect x="138" y="45" width="124" height="210" rx="12" />
+        </clipPath>
       </defs>
+
+      {/* Phone frame */}
+      <rect x="130" y="20" width="140" height="250" rx="20" fill="#1e293b" filter="url(#shadow-dm)" />
+      {/* Screen background */}
+      <rect x="138" y="45" width="124" height="210" rx="12" fill="#f8fafc" />
+
+      {/* Screen content clipped inside phone */}
+      <g clipPath="url(#phone-screen-dm)">
+        {/* Screen header bar */}
+        <rect x="138" y="45" width="124" height="28" fill="#6262bd" />
+        <rect x="150" y="54" width="50" height="8" rx="3" fill="white" opacity="0.7" />
+        <rect x="210" y="56" width="16" height="4" rx="2" fill="white" opacity="0.5" />
+
+        {/* QR background tile */}
+        <rect x="150" y="82" width="100" height="100" rx="8" fill="#ede9fe" />
+
+        {/* QR pattern: corner squares */}
+        <rect x="158" y="90" width="18" height="18" rx="2" fill="#6262bd" />
+        <rect x="161" y="93" width="12" height="12" rx="1" fill="white" />
+        <rect x="163" y="95" width="8" height="8" rx="1" fill="#6262bd" />
+
+        <rect x="224" y="90" width="18" height="18" rx="2" fill="#6262bd" />
+        <rect x="227" y="93" width="12" height="12" rx="1" fill="white" />
+        <rect x="229" y="95" width="8" height="8" rx="1" fill="#6262bd" />
+
+        <rect x="158" y="154" width="18" height="18" rx="2" fill="#6262bd" />
+        <rect x="161" y="157" width="12" height="12" rx="1" fill="white" />
+        <rect x="163" y="159" width="8" height="8" rx="1" fill="#6262bd" />
+
+        {/* QR inner dots */}
+        <rect x="182" y="90" width="6" height="6" rx="1" fill="#6262bd" />
+        <rect x="192" y="90" width="6" height="6" rx="1" fill="#6262bd" />
+        <rect x="202" y="90" width="6" height="6" rx="1" fill="#6262bd" />
+        <rect x="212" y="90" width="6" height="6" rx="1" fill="#6262bd" />
+        <rect x="182" y="100" width="6" height="6" rx="1" fill="#6262bd" />
+        <rect x="202" y="100" width="6" height="6" rx="1" fill="#6262bd" />
+        <rect x="182" y="110" width="6" height="6" rx="1" fill="#6262bd" />
+        <rect x="192" y="110" width="6" height="6" rx="1" fill="#6262bd" />
+        <rect x="212" y="110" width="6" height="6" rx="1" fill="#6262bd" />
+        <rect x="182" y="120" width="6" height="6" rx="1" fill="#6262bd" />
+        <rect x="192" y="120" width="6" height="6" rx="1" fill="#6262bd" />
+        <rect x="202" y="120" width="6" height="6" rx="1" fill="#6262bd" />
+        <rect x="182" y="130" width="6" height="6" rx="1" fill="#6262bd" />
+        <rect x="212" y="130" width="6" height="6" rx="1" fill="#6262bd" />
+        <rect x="182" y="140" width="6" height="6" rx="1" fill="#6262bd" />
+        <rect x="192" y="140" width="6" height="6" rx="1" fill="#6262bd" />
+        <rect x="202" y="140" width="6" height="6" rx="1" fill="#6262bd" />
+        <rect x="212" y="140" width="6" height="6" rx="1" fill="#6262bd" />
+
+        {/* Menu item rows */}
+        <rect x="148" y="192" width="104" height="22" rx="5" fill="#f1f5f9" />
+        <rect x="155" y="198" width="40" height="8" rx="2" fill="#cbd5e1" />
+        <rect x="225" y="198" width="20" height="8" rx="2" fill="#6262bd" opacity="0.5" />
+
+        <rect x="148" y="220" width="104" height="22" rx="5" fill="#f1f5f9" />
+        <rect x="155" y="226" width="55" height="8" rx="2" fill="#cbd5e1" />
+        <rect x="225" y="226" width="20" height="8" rx="2" fill="#10b981" opacity="0.6" />
+
+        <rect x="148" y="248" width="104" height="22" rx="5" fill="#f1f5f9" />
+        <rect x="155" y="254" width="35" height="8" rx="2" fill="#cbd5e1" />
+        <rect x="225" y="254" width="20" height="8" rx="2" fill="#6262bd" opacity="0.5" />
+      </g>
+
+      {/* Home indicator bar */}
+      <rect x="175" y="248" width="50" height="4" rx="2" fill="#cbd5e1" />
+
+      {/* Floating "Scan & View" badge top-right, within viewBox */}
+      <rect x="282" y="40" width="100" height="36" rx="10" fill="#6262bd" filter="url(#shadow-dm)" />
+      <rect x="288" y="46" width="14" height="14" rx="2" fill="white" opacity="0.3" />
+      <rect x="290" y="48" width="10" height="10" rx="1" fill="white" opacity="0.6" />
+      <text x="310" y="56" fontSize="9" fill="white" fontWeight="bold">Scan &amp; View</text>
+      {/* small arrow pointing left */}
+      <path d="M282 58 L275 58 L278 54 M275 58 L278 62" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.8" />
     </svg>
   ),
   'table-ordering': () => (
     <svg viewBox="0 0 400 300" className="w-full h-full">
-      {/* Table */}
-      <ellipse cx="200" cy="200" rx="150" ry="60" fill="#f1f5f9" />
-      <ellipse cx="200" cy="190" rx="150" ry="60" fill="#e2e8f0" />
+      <defs>
+        <filter id="shadow-to" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="4" stdDeviation="8" floodOpacity="0.15" />
+        </filter>
+        <clipPath id="phone-screen-to">
+          <rect x="34" y="40" width="62" height="100" rx="6" />
+        </clipPath>
+      </defs>
 
-      {/* Plate 1 */}
-      <circle cx="130" cy="175" r="35" fill="white" stroke="#cbd5e1" strokeWidth="2" />
-      <circle cx="130" cy="175" r="25" fill="#fef3c7" />
+      {/* Table surface */}
+      <ellipse cx="200" cy="230" rx="140" ry="50" fill="#e2e8f0" />
+      <ellipse cx="200" cy="222" rx="140" ry="50" fill="#f1f5f9" />
+      <ellipse cx="200" cy="220" rx="138" ry="48" fill="white" stroke="#e2e8f0" strokeWidth="2" />
 
-      {/* Plate 2 */}
-      <circle cx="270" cy="175" r="35" fill="white" stroke="#cbd5e1" strokeWidth="2" />
-      <circle cx="270" cy="175" r="25" fill="#fee2e2" />
+      {/* Plate left */}
+      <circle cx="120" cy="210" r="32" fill="white" stroke="#e2e8f0" strokeWidth="2" />
+      <circle cx="120" cy="210" r="24" fill="#fef3c7" />
+      <circle cx="120" cy="210" r="10" fill="#fde68a" />
 
-      {/* QR code stand */}
-      <rect x="185" y="140" width="30" height="50" rx="4" fill="#1e293b" />
-      <rect x="188" y="145" width="24" height="30" rx="2" fill="white" />
-      <g fill="#6262bd">
-        <rect x="191" y="148" width="6" height="6" rx="1" />
-        <rect x="200" y="148" width="6" height="6" rx="1" />
-        <rect x="191" y="157" width="6" height="6" rx="1" />
-        <rect x="200" y="157" width="6" height="6" rx="1" />
-        <rect x="191" y="166" width="6" height="6" rx="1" />
-        <rect x="200" y="166" width="6" height="6" rx="1" />
+      {/* Plate right */}
+      <circle cx="280" cy="210" r="32" fill="white" stroke="#e2e8f0" strokeWidth="2" />
+      <circle cx="280" cy="210" r="24" fill="#fee2e2" />
+      <circle cx="280" cy="210" r="10" fill="#fca5a5" />
+
+      {/* QR stand center of table */}
+      <rect x="186" y="178" width="28" height="44" rx="4" fill="#1e293b" />
+      <rect x="189" y="182" width="22" height="30" rx="2" fill="white" />
+      {/* QR mini pattern */}
+      <rect x="192" y="185" width="5" height="5" rx="1" fill="#6262bd" />
+      <rect x="200" y="185" width="5" height="5" rx="1" fill="#6262bd" />
+      <rect x="192" y="193" width="5" height="5" rx="1" fill="#6262bd" />
+      <rect x="200" y="193" width="5" height="5" rx="1" fill="#6262bd" />
+      <rect x="192" y="201" width="5" height="5" rx="1" fill="#6262bd" />
+      <rect x="200" y="201" width="5" height="5" rx="1" fill="#6262bd" />
+      {/* stand base */}
+      <rect x="182" y="220" width="36" height="5" rx="2" fill="#334155" />
+
+      {/* Phone frame left */}
+      <rect x="30" y="30" width="70" height="110" rx="10" fill="#1e293b" filter="url(#shadow-to)" />
+      {/* Screen bg */}
+      <rect x="34" y="40" width="62" height="100" rx="6" fill="#f8fafc" />
+      {/* Phone content clipped */}
+      <g clipPath="url(#phone-screen-to)">
+        <rect x="34" y="40" width="62" height="16" fill="#6262bd" />
+        <rect x="38" y="44" width="30" height="6" rx="2" fill="white" opacity="0.7" />
+        <rect x="38" y="62" width="54" height="7" rx="2" fill="#e2e8f0" />
+        <rect x="38" y="73" width="46" height="7" rx="2" fill="#e2e8f0" />
+        <rect x="38" y="84" width="50" height="7" rx="2" fill="#e2e8f0" />
+        <rect x="38" y="95" width="42" height="7" rx="2" fill="#e2e8f0" />
+        <rect x="38" y="113" width="54" height="18" rx="4" fill="#10b981" />
+        <text x="65" y="126" fontSize="7" fill="white" textAnchor="middle" fontWeight="bold">ORDER</text>
       </g>
+      {/* home bar */}
+      <rect x="52" y="135" width="26" height="3" rx="1.5" fill="#475569" />
 
-      {/* Phone with order */}
-      <g transform="translate(90, 40)">
-        <rect x="0" y="0" width="70" height="120" rx="10" fill="#1e293b" />
-        <rect x="4" y="10" width="62" height="100" rx="6" fill="#f8fafc" />
-        <rect x="10" y="20" width="50" height="12" rx="3" fill="#6262bd" />
-        <rect x="10" y="40" width="40" height="8" rx="2" fill="#e2e8f0" />
-        <rect x="10" y="54" width="35" height="8" rx="2" fill="#e2e8f0" />
-        <rect x="10" y="68" width="45" height="8" rx="2" fill="#e2e8f0" />
-        <rect x="10" y="90" width="50" height="16" rx="4" fill="#10b981" />
-        <text x="35" y="102" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">ORDER</text>
-      </g>
-
-      {/* Order flow arrows */}
-      <path d="M165 90 Q200 50 235 90" fill="none" stroke="#6262bd" strokeWidth="2" strokeDasharray="5,5">
-        <animate attributeName="stroke-dashoffset" values="0;-10" dur="1s" repeatCount="indefinite" />
-      </path>
-      <circle cx="200" cy="50" r="3" fill="#6262bd">
-        <animate attributeName="cy" values="70;50;70" dur="2s" repeatCount="indefinite" />
-      </circle>
-
-      {/* Kitchen notification */}
-      <g transform="translate(250, 30)">
-        <rect x="0" y="0" width="100" height="70" rx="10" fill="white" filter="url(#shadow)" />
-        <circle cx="20" cy="20" r="10" fill="#fef3c7" />
-        <text x="20" y="24" fontSize="12" textAnchor="middle">🍳</text>
-        <rect x="38" y="14" width="50" height="8" rx="2" fill="#e2e8f0" />
-        <rect x="38" y="26" width="35" height="6" rx="2" fill="#cbd5e1" />
-        <rect x="10" y="45" width="80" height="16" rx="4" fill="#10b981" />
-        <text x="50" y="56" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">NEW ORDER</text>
-      </g>
+      {/* Kitchen ticket card — fits x=290 to x=390, y=20 to y=100 */}
+      <rect x="290" y="20" width="100" height="80" rx="10" fill="white" filter="url(#shadow-to)" stroke="#e2e8f0" strokeWidth="1" />
+      {/* ticket header */}
+      <rect x="290" y="20" width="100" height="26" rx="10" fill="#f59e0b" />
+      <rect x="290" y="34" width="100" height="12" fill="#f59e0b" />
+      <text x="340" y="37" fontSize="9" fill="white" textAnchor="middle" fontWeight="bold">NEW ORDER</text>
+      {/* ticket content */}
+      <rect x="300" y="54" width="60" height="6" rx="2" fill="#e2e8f0" />
+      <rect x="300" y="64" width="46" height="6" rx="2" fill="#e2e8f0" />
+      <rect x="300" y="74" width="52" height="6" rx="2" fill="#e2e8f0" />
+      {/* ticket number */}
+      <text x="376" y="72" fontSize="14" fill="#f59e0b" fontWeight="bold" textAnchor="middle">#7</text>
     </svg>
   ),
   'staff-management': () => (
     <svg viewBox="0 0 400 300" className="w-full h-full">
-      {/* Main calendar/rota view */}
-      <rect x="40" y="30" width="320" height="240" rx="16" fill="white" filter="url(#shadow)" />
+      <defs>
+        <filter id="shadow-sm" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="4" stdDeviation="8" floodOpacity="0.15" />
+        </filter>
+      </defs>
 
-      {/* Header with title */}
-      <rect x="40" y="30" width="320" height="45" rx="16" fill="#0891b2" />
-      <rect x="40" y="60" width="320" height="15" fill="#0891b2" />
-      <text x="200" y="58" fontSize="14" fill="white" textAnchor="middle" fontWeight="bold">Staff Rota - Week 9</text>
+      {/* Main card */}
+      <rect x="20" y="20" width="360" height="260" rx="16" fill="white" filter="url(#shadow-sm)" />
 
-      {/* Day columns headers */}
-      <g transform="translate(55, 85)">
-        {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => (
-          <text key={i} x={i * 43} y="0" fontSize="9" fill="#64748b" textAnchor="middle" fontWeight="bold">{day}</text>
-        ))}
-      </g>
+      {/* Header bar */}
+      <rect x="20" y="20" width="360" height="44" rx="16" fill="#0891b2" />
+      <rect x="20" y="48" width="360" height="16" fill="#0891b2" />
+      <text x="200" y="47" fontSize="13" fill="white" textAnchor="middle" fontWeight="bold">Staff Rota</text>
 
-      {/* Staff row 1 - Sarah */}
-      <g transform="translate(55, 105)">
-        <circle cx="-25" cy="15" r="12" fill="#dbeafe" />
-        <text x="-25" y="19" fontSize="10" textAnchor="middle">👩</text>
-        {/* Shifts */}
-        <rect x="0" y="5" width="38" height="20" rx="4" fill="#3b82f6" />
-        <text x="19" y="18" fontSize="7" fill="white" textAnchor="middle">9-5</text>
-        <rect x="43" y="5" width="38" height="20" rx="4" fill="#3b82f6" />
-        <text x="62" y="18" fontSize="7" fill="white" textAnchor="middle">9-5</text>
-        <rect x="86" y="5" width="38" height="20" rx="4" fill="#3b82f6" />
-        <text x="105" y="18" fontSize="7" fill="white" textAnchor="middle">9-5</text>
-        <rect x="172" y="5" width="38" height="20" rx="4" fill="#3b82f6" />
-        <text x="191" y="18" fontSize="7" fill="white" textAnchor="middle">12-8</text>
-        <rect x="215" y="5" width="38" height="20" rx="4" fill="#3b82f6" />
-        <text x="234" y="18" fontSize="7" fill="white" textAnchor="middle">12-8</text>
-      </g>
+      {/* Day column headers — 7 cols, starting x=70, spacing=42 */}
+      <text x="72"  y="82" fontSize="9" fill="#64748b" textAnchor="middle" fontWeight="bold">Mon</text>
+      <text x="114" y="82" fontSize="9" fill="#64748b" textAnchor="middle" fontWeight="bold">Tue</text>
+      <text x="156" y="82" fontSize="9" fill="#64748b" textAnchor="middle" fontWeight="bold">Wed</text>
+      <text x="198" y="82" fontSize="9" fill="#64748b" textAnchor="middle" fontWeight="bold">Thu</text>
+      <text x="240" y="82" fontSize="9" fill="#64748b" textAnchor="middle" fontWeight="bold">Fri</text>
+      <text x="282" y="82" fontSize="9" fill="#64748b" textAnchor="middle" fontWeight="bold">Sat</text>
+      <text x="324" y="82" fontSize="9" fill="#64748b" textAnchor="middle" fontWeight="bold">Sun</text>
 
-      {/* Staff row 2 - Mike */}
-      <g transform="translate(55, 140)">
-        <circle cx="-25" cy="15" r="12" fill="#fef3c7" />
-        <text x="-25" y="19" fontSize="10" textAnchor="middle">👨</text>
-        {/* Shifts */}
-        <rect x="43" y="5" width="38" height="20" rx="4" fill="#f59e0b" />
-        <text x="62" y="18" fontSize="7" fill="white" textAnchor="middle">6-2</text>
-        <rect x="86" y="5" width="38" height="20" rx="4" fill="#f59e0b" />
-        <text x="105" y="18" fontSize="7" fill="white" textAnchor="middle">6-2</text>
-        <rect x="129" y="5" width="38" height="20" rx="4" fill="#f59e0b" />
-        <text x="148" y="18" fontSize="7" fill="white" textAnchor="middle">6-2</text>
-        <rect x="172" y="5" width="38" height="20" rx="4" fill="#f59e0b" />
-        <text x="191" y="18" fontSize="7" fill="white" textAnchor="middle">6-2</text>
-        <rect x="258" y="5" width="38" height="20" rx="4" fill="#f59e0b" />
-        <text x="277" y="18" fontSize="7" fill="white" textAnchor="middle">6-2</text>
-      </g>
+      {/* Staff name labels */}
+      <text x="34" y="102" fontSize="8" fill="#1e293b" fontWeight="bold">Sarah</text>
+      <text x="34" y="136" fontSize="8" fill="#1e293b" fontWeight="bold">Mike</text>
+      <text x="34" y="170" fontSize="8" fill="#1e293b" fontWeight="bold">Lisa</text>
 
-      {/* Staff row 3 - Lisa */}
-      <g transform="translate(55, 175)">
-        <circle cx="-25" cy="15" r="12" fill="#dcfce7" />
-        <text x="-25" y="19" fontSize="10" textAnchor="middle">👩</text>
-        {/* Shifts */}
-        <rect x="0" y="5" width="38" height="20" rx="4" fill="#22c55e" />
-        <text x="19" y="18" fontSize="7" fill="white" textAnchor="middle">2-10</text>
-        <rect x="129" y="5" width="38" height="20" rx="4" fill="#22c55e" />
-        <text x="148" y="18" fontSize="7" fill="white" textAnchor="middle">2-10</text>
-        <rect x="215" y="5" width="38" height="20" rx="4" fill="#22c55e" />
-        <text x="234" y="18" fontSize="7" fill="white" textAnchor="middle">2-10</text>
-        <rect x="258" y="5" width="38" height="20" rx="4" fill="#22c55e" />
-        <text x="277" y="18" fontSize="7" fill="white" textAnchor="middle">2-10</text>
-      </g>
+      {/* Row 1 — Sarah — blue shifts */}
+      <rect x="53" y="89" width="38" height="18" rx="4" fill="#3b82f6" />
+      <text x="72" y="101" fontSize="6" fill="white" textAnchor="middle">9–5</text>
+      <rect x="95" y="89" width="38" height="18" rx="4" fill="#3b82f6" />
+      <text x="114" y="101" fontSize="6" fill="white" textAnchor="middle">9–5</text>
+      <rect x="137" y="89" width="38" height="18" rx="4" fill="#3b82f6" />
+      <text x="156" y="101" fontSize="6" fill="white" textAnchor="middle">9–5</text>
+      <rect x="221" y="89" width="38" height="18" rx="4" fill="#3b82f6" />
+      <text x="240" y="101" fontSize="6" fill="white" textAnchor="middle">12–8</text>
+      <rect x="263" y="89" width="38" height="18" rx="4" fill="#3b82f6" />
+      <text x="282" y="101" fontSize="6" fill="white" textAnchor="middle">12–8</text>
 
-      {/* Clock in/out panel */}
-      <g transform="translate(280, 85)">
-        <rect x="0" y="0" width="70" height="45" rx="6" fill="#f0fdf4" stroke="#22c55e" strokeWidth="1" />
-        <text x="35" y="15" fontSize="8" fill="#16a34a" textAnchor="middle" fontWeight="bold">Clocked In</text>
-        <circle cx="20" cy="30" r="8" fill="#22c55e" />
-        <text x="20" y="33" fontSize="8" fill="white" textAnchor="middle">✓</text>
-        <text x="45" y="33" fontSize="9" fill="#16a34a" fontWeight="bold">3h 24m</text>
-      </g>
+      {/* Row 2 — Mike — amber shifts */}
+      <rect x="95"  y="123" width="38" height="18" rx="4" fill="#f59e0b" />
+      <text x="114" y="135" fontSize="6" fill="white" textAnchor="middle">6–2</text>
+      <rect x="137" y="123" width="38" height="18" rx="4" fill="#f59e0b" />
+      <text x="156" y="135" fontSize="6" fill="white" textAnchor="middle">6–2</text>
+      <rect x="179" y="123" width="38" height="18" rx="4" fill="#f59e0b" />
+      <text x="198" y="135" fontSize="6" fill="white" textAnchor="middle">6–2</text>
+      <rect x="221" y="123" width="38" height="18" rx="4" fill="#f59e0b" />
+      <text x="240" y="135" fontSize="6" fill="white" textAnchor="middle">6–2</text>
+      <rect x="305" y="123" width="38" height="18" rx="4" fill="#f59e0b" />
+      <text x="324" y="135" fontSize="6" fill="white" textAnchor="middle">6–2</text>
 
-      {/* Leave request notification */}
-      <g transform="translate(280, 140)">
-        <rect x="0" y="0" width="70" height="45" rx="6" fill="#fef3c7" stroke="#f59e0b" strokeWidth="1" />
-        <text x="35" y="15" fontSize="8" fill="#d97706" textAnchor="middle" fontWeight="bold">Leave Request</text>
-        <rect x="8" y="23" width="54" height="16" rx="3" fill="#f59e0b" />
-        <text x="35" y="34" fontSize="7" fill="white" textAnchor="middle" fontWeight="bold">APPROVE</text>
-      </g>
+      {/* Row 3 — Lisa — green shifts */}
+      <rect x="53"  y="157" width="38" height="18" rx="4" fill="#22c55e" />
+      <text x="72"  y="169" fontSize="6" fill="white" textAnchor="middle">2–10</text>
+      <rect x="179" y="157" width="38" height="18" rx="4" fill="#22c55e" />
+      <text x="198" y="169" fontSize="6" fill="white" textAnchor="middle">2–10</text>
+      <rect x="263" y="157" width="38" height="18" rx="4" fill="#22c55e" />
+      <text x="282" y="169" fontSize="6" fill="white" textAnchor="middle">2–10</text>
+      <rect x="305" y="157" width="38" height="18" rx="4" fill="#22c55e" />
+      <text x="324" y="169" fontSize="6" fill="white" textAnchor="middle">2–10</text>
 
-      {/* Stats footer */}
-      <g transform="translate(55, 230)">
-        <rect x="0" y="0" width="75" height="28" rx="4" fill="#f0fdf4" />
-        <text x="37" y="12" fontSize="7" fill="#64748b" textAnchor="middle">Active Now</text>
-        <text x="37" y="23" fontSize="11" fill="#16a34a" textAnchor="middle" fontWeight="bold">5 Staff</text>
+      {/* Divider */}
+      <line x1="30" y1="188" x2="370" y2="188" stroke="#e2e8f0" strokeWidth="1" />
 
-        <rect x="85" y="0" width="75" height="28" rx="4" fill="#ede9fe" />
-        <text x="122" y="12" fontSize="7" fill="#64748b" textAnchor="middle">Hours This Week</text>
-        <text x="122" y="23" fontSize="11" fill="#6262bd" textAnchor="middle" fontWeight="bold">156h</text>
+      {/* Stats row — 3 tiles within x=30–370 */}
+      <rect x="30"  y="196" width="100" height="34" rx="6" fill="#f0fdf4" />
+      <text x="80"  y="209" fontSize="7" fill="#64748b" textAnchor="middle">Active Now</text>
+      <text x="80"  y="223" fontSize="12" fill="#16a34a" textAnchor="middle" fontWeight="bold">5 Staff</text>
 
-        <rect x="170" y="0" width="75" height="28" rx="4" fill="#fef3c7" />
-        <text x="207" y="12" fontSize="7" fill="#64748b" textAnchor="middle">Pending Requests</text>
-        <text x="207" y="23" fontSize="11" fill="#d97706" textAnchor="middle" fontWeight="bold">2</text>
-      </g>
+      <rect x="150" y="196" width="100" height="34" rx="6" fill="#ede9fe" />
+      <text x="200" y="209" fontSize="7" fill="#64748b" textAnchor="middle">Hours / Week</text>
+      <text x="200" y="223" fontSize="12" fill="#6262bd" textAnchor="middle" fontWeight="bold">156h</text>
+
+      <rect x="270" y="196" width="100" height="34" rx="6" fill="#fef3c7" />
+      <text x="320" y="209" fontSize="7" fill="#64748b" textAnchor="middle">Pending</text>
+      <text x="320" y="223" fontSize="12" fill="#d97706" textAnchor="middle" fontWeight="bold">2 Req</text>
     </svg>
   ),
   'staff-dashboard': () => (
     <svg viewBox="0 0 400 300" className="w-full h-full">
-      {/* Monitor frame */}
-      <rect x="50" y="30" width="300" height="200" rx="12" fill="#1e293b" />
-      <rect x="60" y="40" width="280" height="170" rx="6" fill="#f8fafc" />
+      <defs>
+        <filter id="shadow-sd" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="4" stdDeviation="8" floodOpacity="0.15" />
+        </filter>
+        <clipPath id="monitor-screen-sd">
+          <rect x="42" y="32" width="316" height="186" rx="4" />
+        </clipPath>
+      </defs>
 
-      {/* Dashboard header */}
-      <rect x="70" y="50" width="260" height="30" rx="4" fill="#6262bd" />
-      <circle cx="85" cy="65" r="8" fill="white" opacity="0.3" />
-      <rect x="100" y="60" width="60" height="10" rx="2" fill="white" opacity="0.5" />
+      {/* Monitor outer frame */}
+      <rect x="30" y="20" width="340" height="210" rx="12" fill="#1e293b" filter="url(#shadow-sd)" />
+      {/* Screen area */}
+      <rect x="42" y="32" width="316" height="186" rx="4" fill="#f8fafc" />
 
-      {/* Order cards */}
-      <g>
-        {/* Order 1 - Ready */}
-        <rect x="70" y="90" width="80" height="70" rx="6" fill="white" stroke="#10b981" strokeWidth="2" />
-        <rect x="78" y="98" width="30" height="8" rx="2" fill="#10b981" />
-        <rect x="78" y="112" width="60" height="6" rx="2" fill="#e2e8f0" />
-        <rect x="78" y="122" width="45" height="6" rx="2" fill="#e2e8f0" />
-        <rect x="78" y="140" width="64" height="14" rx="3" fill="#10b981" opacity="0.2" />
-        <text x="110" y="151" fontSize="8" fill="#10b981" textAnchor="middle" fontWeight="bold">READY</text>
+      {/* Screen content clipped */}
+      <g clipPath="url(#monitor-screen-sd)">
+        {/* Header bar */}
+        <rect x="42" y="32" width="316" height="32" fill="#6262bd" />
+        <rect x="52" y="42" width="80" height="10" rx="3" fill="white" opacity="0.5" />
+        <rect x="320" y="42" width="30" height="10" rx="3" fill="white" opacity="0.3" />
+
+        {/* Order card 1 — Ready */}
+        <rect x="52" y="74" width="90" height="72" rx="6" fill="white" stroke="#10b981" strokeWidth="2" />
+        <rect x="60" y="82" width="32" height="8" rx="2" fill="#10b981" />
+        <rect x="60" y="96" width="70" height="6" rx="2" fill="#e2e8f0" />
+        <rect x="60" y="106" width="54" height="6" rx="2" fill="#e2e8f0" />
+        <rect x="60" y="124" width="74" height="14" rx="3" fill="#10b981" opacity="0.15" />
+        <text x="97" y="135" fontSize="7" fill="#10b981" textAnchor="middle" fontWeight="bold">READY</text>
+
+        {/* Order card 2 — Cooking */}
+        <rect x="155" y="74" width="90" height="72" rx="6" fill="white" stroke="#f59e0b" strokeWidth="2" />
+        <rect x="163" y="82" width="32" height="8" rx="2" fill="#f59e0b" />
+        <rect x="163" y="96" width="70" height="6" rx="2" fill="#e2e8f0" />
+        <rect x="163" y="106" width="58" height="6" rx="2" fill="#e2e8f0" />
+        <rect x="163" y="124" width="74" height="14" rx="3" fill="#f59e0b" opacity="0.15" />
+        <text x="200" y="135" fontSize="7" fill="#f59e0b" textAnchor="middle" fontWeight="bold">COOKING</text>
+
+        {/* Order card 3 — New */}
+        <rect x="258" y="74" width="90" height="72" rx="6" fill="white" stroke="#6262bd" strokeWidth="2" />
+        <rect x="266" y="82" width="32" height="8" rx="2" fill="#6262bd" />
+        <rect x="266" y="96" width="64" height="6" rx="2" fill="#e2e8f0" />
+        <rect x="266" y="106" width="48" height="6" rx="2" fill="#e2e8f0" />
+        <rect x="266" y="124" width="74" height="14" rx="3" fill="#6262bd" opacity="0.15" />
+        <text x="303" y="135" fontSize="7" fill="#6262bd" textAnchor="middle" fontWeight="bold">NEW</text>
+
+        {/* Stats row inside screen */}
+        <rect x="52" y="158" width="90" height="52" rx="4" fill="#f0fdf4" />
+        <text x="97" y="172" fontSize="7" fill="#64748b" textAnchor="middle">Completed</text>
+        <text x="97" y="188" fontSize="13" fill="#16a34a" textAnchor="middle" fontWeight="bold">12</text>
+        <text x="97" y="202" fontSize="6" fill="#64748b" textAnchor="middle">orders</text>
+
+        <rect x="155" y="158" width="90" height="52" rx="4" fill="#fef3c7" />
+        <text x="200" y="172" fontSize="7" fill="#64748b" textAnchor="middle">In Progress</text>
+        <text x="200" y="188" fontSize="13" fill="#d97706" textAnchor="middle" fontWeight="bold">5</text>
+        <text x="200" y="202" fontSize="6" fill="#64748b" textAnchor="middle">orders</text>
+
+        <rect x="258" y="158" width="90" height="52" rx="4" fill="#ede9fe" />
+        <text x="303" y="172" fontSize="7" fill="#64748b" textAnchor="middle">Queue</text>
+        <text x="303" y="188" fontSize="13" fill="#6262bd" textAnchor="middle" fontWeight="bold">3</text>
+        <text x="303" y="202" fontSize="6" fill="#64748b" textAnchor="middle">waiting</text>
       </g>
-
-      <g>
-        {/* Order 2 - In Progress */}
-        <rect x="160" y="90" width="80" height="70" rx="6" fill="white" stroke="#f59e0b" strokeWidth="2" />
-        <rect x="168" y="98" width="30" height="8" rx="2" fill="#f59e0b" />
-        <rect x="168" y="112" width="60" height="6" rx="2" fill="#e2e8f0" />
-        <rect x="168" y="122" width="50" height="6" rx="2" fill="#e2e8f0" />
-        <rect x="168" y="140" width="64" height="14" rx="3" fill="#f59e0b" opacity="0.2" />
-        <text x="200" y="151" fontSize="8" fill="#f59e0b" textAnchor="middle" fontWeight="bold">COOKING</text>
-      </g>
-
-      <g>
-        {/* Order 3 - New */}
-        <rect x="250" y="90" width="80" height="70" rx="6" fill="white" stroke="#6262bd" strokeWidth="2" />
-        <rect x="258" y="98" width="30" height="8" rx="2" fill="#6262bd" />
-        <rect x="258" y="112" width="55" height="6" rx="2" fill="#e2e8f0" />
-        <rect x="258" y="122" width="40" height="6" rx="2" fill="#e2e8f0" />
-        <rect x="258" y="140" width="64" height="14" rx="3" fill="#6262bd" opacity="0.2" />
-        <text x="290" y="151" fontSize="8" fill="#6262bd" textAnchor="middle" fontWeight="bold">NEW</text>
-        {/* Notification badge */}
-        <circle cx="322" cy="95" r="10" fill="#ef4444">
-          <animate attributeName="r" values="10;12;10" dur="1s" repeatCount="indefinite" />
-        </circle>
-        <text x="322" y="99" fontSize="10" fill="white" textAnchor="middle" fontWeight="bold">!</text>
-      </g>
-
-      {/* Stats row */}
-      <rect x="70" y="170" width="60" height="30" rx="4" fill="#f0fdf4" />
-      <text x="100" y="190" fontSize="10" fill="#16a34a" textAnchor="middle" fontWeight="bold">12 Done</text>
-
-      <rect x="140" y="170" width="60" height="30" rx="4" fill="#fef3c7" />
-      <text x="170" y="190" fontSize="10" fill="#d97706" textAnchor="middle" fontWeight="bold">5 Active</text>
-
-      <rect x="210" y="170" width="60" height="30" rx="4" fill="#ede9fe" />
-      <text x="240" y="190" fontSize="10" fill="#6262bd" textAnchor="middle" fontWeight="bold">3 New</text>
 
       {/* Monitor stand */}
-      <rect x="175" y="230" width="50" height="15" rx="2" fill="#cbd5e1" />
-      <rect x="165" y="245" width="70" height="8" rx="4" fill="#94a3b8" />
+      <rect x="180" y="230" width="40" height="18" rx="2" fill="#475569" />
+      <rect x="155" y="246" width="90" height="10" rx="5" fill="#334155" />
     </svg>
   ),
   'analytics': () => (
     <svg viewBox="0 0 400 300" className="w-full h-full">
-      {/* Chart container */}
-      <rect x="40" y="40" width="320" height="220" rx="16" fill="white" filter="url(#shadow)" />
+      <defs>
+        <filter id="shadow-an" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="4" stdDeviation="8" floodOpacity="0.15" />
+        </filter>
+      </defs>
 
-      {/* Chart header */}
-      <rect x="55" y="55" width="100" height="12" rx="3" fill="#1e293b" />
-      <rect x="55" y="72" width="60" height="8" rx="2" fill="#94a3b8" />
+      {/* Chart card */}
+      <rect x="15" y="15" width="370" height="270" rx="16" fill="white" filter="url(#shadow-an)" />
 
-      {/* Revenue number */}
-      <text x="280" y="68" fontSize="24" fill="#10b981" textAnchor="end" fontWeight="bold">$24,580</text>
-      <text x="280" y="82" fontSize="10" fill="#94a3b8" textAnchor="end">+12% vs last week</text>
+      {/* Header row */}
+      <rect x="28" y="28" width="110" height="11" rx="3" fill="#1e293b" />
+      <rect x="28" y="44" width="70" height="8" rx="2" fill="#94a3b8" />
+      <text x="358" y="40" fontSize="18" fill="#10b981" textAnchor="end" fontWeight="bold">£24,580</text>
+      <text x="358" y="54" fontSize="8" fill="#94a3b8" textAnchor="end">+12% vs last week ↑</text>
 
-      {/* Bar chart */}
-      <g transform="translate(55, 100)">
-        {/* Grid lines */}
-        <line x1="0" y1="0" x2="290" y2="0" stroke="#e2e8f0" strokeDasharray="4" />
-        <line x1="0" y1="35" x2="290" y2="35" stroke="#e2e8f0" strokeDasharray="4" />
-        <line x1="0" y1="70" x2="290" y2="70" stroke="#e2e8f0" strokeDasharray="4" />
-        <line x1="0" y1="105" x2="290" y2="105" stroke="#e2e8f0" />
+      {/* Divider */}
+      <line x1="28" y1="62" x2="372" y2="62" stroke="#f1f5f9" strokeWidth="1" />
 
-        {/* Bars */}
-        <rect x="10" y="55" width="30" height="50" rx="4" fill="#6262bd" opacity="0.3" />
-        <rect x="50" y="35" width="30" height="70" rx="4" fill="#6262bd" opacity="0.4" />
-        <rect x="90" y="45" width="30" height="60" rx="4" fill="#6262bd" opacity="0.5" />
-        <rect x="130" y="25" width="30" height="80" rx="4" fill="#6262bd" opacity="0.6" />
-        <rect x="170" y="15" width="30" height="90" rx="4" fill="#6262bd" opacity="0.8" />
-        <rect x="210" y="5" width="30" height="100" rx="4" fill="#6262bd">
-          <animate attributeName="height" values="90;100;90" dur="2s" repeatCount="indefinite" />
-          <animate attributeName="y" values="15;5;15" dur="2s" repeatCount="indefinite" />
-        </rect>
-        <rect x="250" y="20" width="30" height="85" rx="4" fill="#6262bd" opacity="0.7" />
+      {/* === LEFT: Bar chart === x=28 to x=250, baseline y=195 */}
+      {/* Grid lines */}
+      <line x1="28" y1="75"  x2="250" y2="75"  stroke="#f1f5f9" strokeWidth="1" />
+      <line x1="28" y1="105" x2="250" y2="105" stroke="#f1f5f9" strokeWidth="1" />
+      <line x1="28" y1="135" x2="250" y2="135" stroke="#f1f5f9" strokeWidth="1" />
+      <line x1="28" y1="165" x2="250" y2="165" stroke="#f1f5f9" strokeWidth="1" />
+      <line x1="28" y1="195" x2="250" y2="195" stroke="#e2e8f0" strokeWidth="1" />
 
-        {/* Labels */}
-        <text x="25" y="120" fontSize="8" fill="#94a3b8" textAnchor="middle">Mon</text>
-        <text x="65" y="120" fontSize="8" fill="#94a3b8" textAnchor="middle">Tue</text>
-        <text x="105" y="120" fontSize="8" fill="#94a3b8" textAnchor="middle">Wed</text>
-        <text x="145" y="120" fontSize="8" fill="#94a3b8" textAnchor="middle">Thu</text>
-        <text x="185" y="120" fontSize="8" fill="#94a3b8" textAnchor="middle">Fri</text>
-        <text x="225" y="120" fontSize="8" fill="#6262bd" textAnchor="middle" fontWeight="bold">Sat</text>
-        <text x="265" y="120" fontSize="8" fill="#94a3b8" textAnchor="middle">Sun</text>
-      </g>
+      {/* 7 bars — width=22, gap=8, starts x=32 */}
+      <rect x="32"  y="165" width="22" height="30"  rx="3" fill="#6262bd" opacity="0.25" />
+      <rect x="62"  y="145" width="22" height="50"  rx="3" fill="#6262bd" opacity="0.35" />
+      <rect x="92"  y="150" width="22" height="45"  rx="3" fill="#6262bd" opacity="0.45" />
+      <rect x="122" y="120" width="22" height="75"  rx="3" fill="#6262bd" opacity="0.6" />
+      <rect x="152" y="100" width="22" height="95"  rx="3" fill="#6262bd" opacity="0.75" />
+      <rect x="182" y="80"  width="22" height="115" rx="3" fill="#6262bd" />
+      <rect x="212" y="110" width="22" height="85"  rx="3" fill="#6262bd" opacity="0.65" />
 
-      {/* Pie chart */}
-      <g transform="translate(320, 180)">
-        <circle cx="0" cy="0" r="35" fill="none" stroke="#6262bd" strokeWidth="12" strokeDasharray="55 165" />
-        <circle cx="0" cy="0" r="35" fill="none" stroke="#10b981" strokeWidth="12" strokeDasharray="35 185" strokeDashoffset="-55" />
-        <circle cx="0" cy="0" r="35" fill="none" stroke="#f59e0b" strokeWidth="12" strokeDasharray="30 190" strokeDashoffset="-90" />
-        <circle cx="0" cy="0" r="20" fill="white" />
-      </g>
+      {/* Bar day labels */}
+      <text x="43"  y="208" fontSize="7" fill="#94a3b8" textAnchor="middle">Mon</text>
+      <text x="73"  y="208" fontSize="7" fill="#94a3b8" textAnchor="middle">Tue</text>
+      <text x="103" y="208" fontSize="7" fill="#94a3b8" textAnchor="middle">Wed</text>
+      <text x="133" y="208" fontSize="7" fill="#94a3b8" textAnchor="middle">Thu</text>
+      <text x="163" y="208" fontSize="7" fill="#94a3b8" textAnchor="middle">Fri</text>
+      <text x="193" y="208" fontSize="7" fill="#6262bd" textAnchor="middle" fontWeight="bold">Sat</text>
+      <text x="223" y="208" fontSize="7" fill="#94a3b8" textAnchor="middle">Sun</text>
 
-      {/* Trend arrow */}
-      <g transform="translate(290, 55)">
-        <path d="M0 10 L8 0 L16 10 M8 0 L8 18" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" />
-      </g>
+      {/* === RIGHT: Donut chart === centred at cx=320, well within 400 */}
+      <circle cx="320" cy="138" r="44" fill="none" stroke="#6262bd" strokeWidth="16" strokeDasharray="83 193" />
+      <circle cx="320" cy="138" r="44" fill="none" stroke="#10b981" strokeWidth="16" strokeDasharray="55 221" strokeDashoffset="-83" />
+      <circle cx="320" cy="138" r="44" fill="none" stroke="#f59e0b" strokeWidth="16" strokeDasharray="55 221" strokeDashoffset="-138" />
+      {/* Donut hole */}
+      <circle cx="320" cy="138" r="28" fill="white" />
+      <text x="320" y="134" fontSize="8" fill="#64748b" textAnchor="middle">Sales</text>
+      <text x="320" y="146" fontSize="8" fill="#1e293b" textAnchor="middle" fontWeight="bold">Mix</text>
+
+      {/* Legend below donut */}
+      <circle cx="280" cy="210" r="5" fill="#6262bd" />
+      <text x="289" y="214" fontSize="8" fill="#64748b">Dine-in</text>
+      <circle cx="280" cy="226" r="5" fill="#10b981" />
+      <text x="289" y="230" fontSize="8" fill="#64748b">Takeout</text>
+      <circle cx="280" cy="242" r="5" fill="#f59e0b" />
+      <text x="289" y="246" fontSize="8" fill="#64748b">Delivery</text>
+
+      {/* Vertical separator between bar chart and donut */}
+      <line x1="260" y1="68" x2="260" y2="270" stroke="#f1f5f9" strokeWidth="1" />
     </svg>
   ),
   'reservations': () => (
     <svg viewBox="0 0 400 300" className="w-full h-full">
-      {/* Calendar */}
-      <rect x="60" y="40" width="280" height="220" rx="16" fill="white" filter="url(#shadow)" />
+      <defs>
+        <filter id="shadow-res" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="4" stdDeviation="8" floodOpacity="0.15" />
+        </filter>
+      </defs>
 
-      {/* Calendar header */}
-      <rect x="60" y="40" width="280" height="50" rx="16" fill="#6262bd" />
-      <rect x="60" y="75" width="280" height="15" fill="#6262bd" />
-      <text x="200" y="72" fontSize="16" fill="white" textAnchor="middle" fontWeight="bold">February 2026</text>
+      {/* Calendar card — x=30 to x=370 */}
+      <rect x="30" y="20" width="340" height="230" rx="16" fill="white" filter="url(#shadow-res)" />
 
-      {/* Day headers */}
-      <g transform="translate(75, 105)">
-        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
-          <text key={i} x={i * 38} y="0" fontSize="10" fill="#94a3b8" textAnchor="middle" fontWeight="bold">{day}</text>
-        ))}
-      </g>
+      {/* Purple header */}
+      <rect x="30" y="20" width="340" height="48" rx="16" fill="#6262bd" />
+      <rect x="30" y="52" width="340" height="16" fill="#6262bd" />
+      <text x="200" y="50" fontSize="15" fill="white" textAnchor="middle" fontWeight="bold">March 2026</text>
+      {/* nav arrows */}
+      <text x="50"  y="50" fontSize="16" fill="white" textAnchor="middle" opacity="0.7">‹</text>
+      <text x="350" y="50" fontSize="16" fill="white" textAnchor="middle" opacity="0.7">›</text>
 
-      {/* Calendar days */}
-      <g transform="translate(75, 125)">
-        {/* Row 1 */}
-        <text x="0" y="0" fontSize="12" fill="#cbd5e1" textAnchor="middle">26</text>
-        <text x="38" y="0" fontSize="12" fill="#cbd5e1" textAnchor="middle">27</text>
-        <text x="76" y="0" fontSize="12" fill="#cbd5e1" textAnchor="middle">28</text>
-        <text x="114" y="0" fontSize="12" fill="#cbd5e1" textAnchor="middle">29</text>
-        <text x="152" y="0" fontSize="12" fill="#cbd5e1" textAnchor="middle">30</text>
-        <text x="190" y="0" fontSize="12" fill="#cbd5e1" textAnchor="middle">31</text>
-        <text x="228" y="0" fontSize="12" fill="#1e293b" textAnchor="middle">1</text>
+      {/* Day headers — 7 cols starting x=55, spacing=42 */}
+      <text x="55"  y="84" fontSize="9" fill="#94a3b8" textAnchor="middle" fontWeight="bold">Sun</text>
+      <text x="97"  y="84" fontSize="9" fill="#94a3b8" textAnchor="middle" fontWeight="bold">Mon</text>
+      <text x="139" y="84" fontSize="9" fill="#94a3b8" textAnchor="middle" fontWeight="bold">Tue</text>
+      <text x="181" y="84" fontSize="9" fill="#94a3b8" textAnchor="middle" fontWeight="bold">Wed</text>
+      <text x="223" y="84" fontSize="9" fill="#94a3b8" textAnchor="middle" fontWeight="bold">Thu</text>
+      <text x="265" y="84" fontSize="9" fill="#94a3b8" textAnchor="middle" fontWeight="bold">Fri</text>
+      <text x="307" y="84" fontSize="9" fill="#94a3b8" textAnchor="middle" fontWeight="bold">Sat</text>
 
-        {/* Row 2 */}
-        <text x="0" y="28" fontSize="12" fill="#1e293b" textAnchor="middle">2</text>
-        <text x="38" y="28" fontSize="12" fill="#1e293b" textAnchor="middle">3</text>
-        <text x="76" y="28" fontSize="12" fill="#1e293b" textAnchor="middle">4</text>
-        <text x="114" y="28" fontSize="12" fill="#1e293b" textAnchor="middle">5</text>
+      {/* Row 1 */}
+      <text x="55"  y="108" fontSize="11" fill="#cbd5e1" textAnchor="middle">1</text>
+      <text x="97"  y="108" fontSize="11" fill="#1e293b" textAnchor="middle">2</text>
+      <text x="139" y="108" fontSize="11" fill="#1e293b" textAnchor="middle">3</text>
+      <text x="181" y="108" fontSize="11" fill="#1e293b" textAnchor="middle">4</text>
+      <text x="223" y="108" fontSize="11" fill="#1e293b" textAnchor="middle">5</text>
+      <text x="265" y="108" fontSize="11" fill="#1e293b" textAnchor="middle">6</text>
+      <text x="307" y="108" fontSize="11" fill="#1e293b" textAnchor="middle">7</text>
 
-        {/* Highlighted day */}
-        <circle cx="152" cy="24" r="14" fill="#6262bd" />
-        <text x="152" y="28" fontSize="12" fill="white" textAnchor="middle" fontWeight="bold">6</text>
+      {/* Row 2 */}
+      <text x="55"  y="136" fontSize="11" fill="#1e293b" textAnchor="middle">8</text>
+      <text x="97"  y="136" fontSize="11" fill="#1e293b" textAnchor="middle">9</text>
+      <text x="139" y="136" fontSize="11" fill="#1e293b" textAnchor="middle">10</text>
+      {/* Today highlight */}
+      <circle cx="181" cy="131" r="14" fill="#6262bd" />
+      <text x="181" y="135" fontSize="11" fill="white" textAnchor="middle" fontWeight="bold">11</text>
+      <text x="223" y="136" fontSize="11" fill="#1e293b" textAnchor="middle">12</text>
+      {/* Reservation dot */}
+      <circle cx="265" cy="131" r="14" fill="#10b981" opacity="0.18" />
+      <text x="265" y="135" fontSize="11" fill="#10b981" textAnchor="middle" fontWeight="bold">13</text>
+      <text x="307" y="136" fontSize="11" fill="#1e293b" textAnchor="middle">14</text>
 
-        <text x="190" y="28" fontSize="12" fill="#1e293b" textAnchor="middle">7</text>
-        <circle cx="228" cy="24" r="14" fill="#10b981" opacity="0.2" />
-        <text x="228" y="28" fontSize="12" fill="#10b981" textAnchor="middle" fontWeight="bold">8</text>
+      {/* Row 3 */}
+      <text x="55"  y="164" fontSize="11" fill="#1e293b" textAnchor="middle">15</text>
+      <circle cx="97"  cy="159" r="14" fill="#f59e0b" opacity="0.18" />
+      <text x="97"  y="163" fontSize="11" fill="#f59e0b" textAnchor="middle" fontWeight="bold">16</text>
+      <text x="139" y="164" fontSize="11" fill="#1e293b" textAnchor="middle">17</text>
+      <text x="181" y="164" fontSize="11" fill="#1e293b" textAnchor="middle">18</text>
+      <circle cx="223" cy="159" r="14" fill="#6262bd" opacity="0.18" />
+      <text x="223" y="163" fontSize="11" fill="#6262bd" textAnchor="middle">19</text>
+      <text x="265" y="164" fontSize="11" fill="#1e293b" textAnchor="middle">20</text>
+      <text x="307" y="164" fontSize="11" fill="#1e293b" textAnchor="middle">21</text>
 
-        {/* Row 3 */}
-        <text x="0" y="56" fontSize="12" fill="#1e293b" textAnchor="middle">9</text>
-        <text x="38" y="56" fontSize="12" fill="#1e293b" textAnchor="middle">10</text>
-        <text x="76" y="56" fontSize="12" fill="#1e293b" textAnchor="middle">11</text>
-        <circle cx="114" cy="52" r="14" fill="#f59e0b" opacity="0.2" />
-        <text x="114" y="56" fontSize="12" fill="#f59e0b" textAnchor="middle" fontWeight="bold">12</text>
-        <text x="152" y="56" fontSize="12" fill="#1e293b" textAnchor="middle">13</text>
-        <circle cx="190" cy="52" r="14" fill="#6262bd" opacity="0.2" />
-        <text x="190" y="56" fontSize="12" fill="#6262bd" textAnchor="middle">14</text>
-        <circle cx="228" cy="52" r="14" fill="#10b981" opacity="0.2" />
-        <text x="228" y="56" fontSize="12" fill="#10b981" textAnchor="middle">15</text>
-      </g>
-
-      {/* Reservation card */}
-      <g transform="translate(75, 210)">
-        <rect x="0" y="0" width="250" height="40" rx="8" fill="#6262bd" opacity="0.1" />
-        <circle cx="20" cy="20" r="12" fill="#6262bd" opacity="0.2" />
-        <text x="20" y="24" fontSize="12" textAnchor="middle">👤</text>
-        <text x="40" y="16" fontSize="11" fill="#1e293b" fontWeight="bold">Johnson Party - Table 5</text>
-        <text x="40" y="30" fontSize="9" fill="#64748b">7:30 PM • 4 guests</text>
-        <rect x="180" y="10" width="60" height="20" rx="4" fill="#10b981" />
-        <text x="210" y="24" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">CONFIRMED</text>
-      </g>
-    </svg>
-  ),
-  'inventory': () => (
-    <svg viewBox="0 0 400 300" className="w-full h-full">
-      {/* Shelving unit */}
-      <rect x="60" y="50" width="280" height="200" rx="8" fill="#f1f5f9" />
-
-      {/* Shelves */}
-      <rect x="60" y="100" width="280" height="4" fill="#cbd5e1" />
-      <rect x="60" y="165" width="280" height="4" fill="#cbd5e1" />
-      <rect x="60" y="230" width="280" height="4" fill="#cbd5e1" />
-
-      {/* Items on shelf 1 */}
-      <g transform="translate(75, 60)">
-        <rect x="0" y="0" width="35" height="38" rx="4" fill="#fef3c7" stroke="#f59e0b" strokeWidth="2" />
-        <text x="17" y="28" fontSize="16" textAnchor="middle">🧈</text>
-        <rect x="45" y="0" width="35" height="38" rx="4" fill="#dcfce7" stroke="#22c55e" strokeWidth="2" />
-        <text x="62" y="28" fontSize="16" textAnchor="middle">🥛</text>
-        <rect x="90" y="8" width="35" height="30" rx="4" fill="#fee2e2" stroke="#ef4444" strokeWidth="2" />
-        <text x="107" y="30" fontSize="14" textAnchor="middle">🍅</text>
-        {/* Low stock alert */}
-        <circle cx="115" cy="12" r="8" fill="#ef4444">
-          <animate attributeName="opacity" values="1;0.5;1" dur="1s" repeatCount="indefinite" />
-        </circle>
-        <text x="115" y="16" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">!</text>
-        <rect x="135" y="0" width="35" height="38" rx="4" fill="#dbeafe" stroke="#3b82f6" strokeWidth="2" />
-        <text x="152" y="28" fontSize="16" textAnchor="middle">🧀</text>
-      </g>
-
-      {/* Items on shelf 2 */}
-      <g transform="translate(75, 115)">
-        <rect x="0" y="0" width="40" height="48" rx="4" fill="#f3e8ff" stroke="#a855f7" strokeWidth="2" />
-        <text x="20" y="32" fontSize="18" textAnchor="middle">🍷</text>
-        <rect x="50" y="0" width="40" height="48" rx="4" fill="#f3e8ff" stroke="#a855f7" strokeWidth="2" />
-        <text x="70" y="32" fontSize="18" textAnchor="middle">🍷</text>
-        <rect x="100" y="10" width="30" height="38" rx="4" fill="#fef3c7" stroke="#f59e0b" strokeWidth="2" />
-        <text x="115" y="36" fontSize="16" textAnchor="middle">🫒</text>
-        <rect x="140" y="5" width="45" height="43" rx="4" fill="#e2e8f0" stroke="#64748b" strokeWidth="2" />
-        <text x="162" y="34" fontSize="18" textAnchor="middle">📦</text>
-      </g>
-
-      {/* Items on shelf 3 */}
-      <g transform="translate(75, 178)">
-        <rect x="0" y="0" width="60" height="50" rx="4" fill="#dcfce7" stroke="#22c55e" strokeWidth="2" />
-        <text x="30" y="32" fontSize="10" fill="#16a34a" textAnchor="middle" fontWeight="bold">FLOUR</text>
-        <text x="30" y="44" fontSize="8" fill="#16a34a" textAnchor="middle">5kg</text>
-        <rect x="70" y="0" width="60" height="50" rx="4" fill="#dcfce7" stroke="#22c55e" strokeWidth="2" />
-        <text x="100" y="32" fontSize="10" fill="#16a34a" textAnchor="middle" fontWeight="bold">SUGAR</text>
-        <text x="100" y="44" fontSize="8" fill="#16a34a" textAnchor="middle">2kg</text>
-        <rect x="140" y="0" width="50" height="50" rx="4" fill="#fef3c7" stroke="#f59e0b" strokeWidth="2" />
-        <text x="165" y="32" fontSize="10" fill="#d97706" textAnchor="middle" fontWeight="bold">RICE</text>
-        <text x="165" y="44" fontSize="8" fill="#d97706" textAnchor="middle">Low</text>
-      </g>
-
-      {/* Inventory stats panel */}
-      <g transform="translate(250, 60)">
-        <rect x="0" y="0" width="80" height="95" rx="8" fill="white" filter="url(#shadow)" />
-        <text x="40" y="20" fontSize="9" fill="#64748b" textAnchor="middle" fontWeight="bold">STOCK LEVEL</text>
-
-        {/* Progress bars */}
-        <rect x="10" y="32" width="60" height="6" rx="3" fill="#e2e8f0" />
-        <rect x="10" y="32" width="50" height="6" rx="3" fill="#22c55e" />
-        <text x="10" y="48" fontSize="7" fill="#64748b">Dairy</text>
-
-        <rect x="10" y="55" width="60" height="6" rx="3" fill="#e2e8f0" />
-        <rect x="10" y="55" width="20" height="6" rx="3" fill="#ef4444" />
-        <text x="10" y="71" fontSize="7" fill="#64748b">Produce</text>
-
-        <rect x="10" y="78" width="60" height="6" rx="3" fill="#e2e8f0" />
-        <rect x="10" y="78" width="40" height="6" rx="3" fill="#f59e0b" />
-        <text x="10" y="94" fontSize="7" fill="#64748b">Dry Goods</text>
-      </g>
+      {/* Reservation booking row inside card */}
+      <rect x="38" y="178" width="324" height="62" rx="10" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
+      <rect x="38" y="178" width="6" height="62" rx="3" fill="#6262bd" />
+      <text x="56" y="198" fontSize="10" fill="#1e293b" fontWeight="bold">Johnson Party</text>
+      <text x="56" y="212" fontSize="8" fill="#64748b">Table 5 · 4 guests · 7:30 PM</text>
+      <rect x="260" y="186" width="84" height="22" rx="6" fill="#10b981" />
+      <text x="302" y="201" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">CONFIRMED</text>
+      <text x="56" y="228" fontSize="8" fill="#64748b">Mar 13, 2026</text>
     </svg>
   ),
   'branded-app': () => (
     <svg viewBox="0 0 400 300" className="w-full h-full">
-      {/* Central phone with custom branding */}
-      <g transform="translate(140, 20)">
-        <rect x="0" y="0" width="120" height="220" rx="20" fill="#1e293b" />
-        <rect x="8" y="15" width="104" height="190" rx="12" fill="#f8fafc" />
+      <defs>
+        <filter id="shadow-ba" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="4" stdDeviation="8" floodOpacity="0.15" />
+        </filter>
+        <clipPath id="phone-screen-ba">
+          <rect x="148" y="22" width="104" height="196" rx="10" />
+        </clipPath>
+        <clipPath id="tablet-screen-ba">
+          <rect x="15" y="88" width="70" height="90" rx="4" />
+        </clipPath>
+        <clipPath id="desktop-screen-ba">
+          <rect x="304" y="142" width="72" height="44" rx="2" />
+        </clipPath>
+      </defs>
 
-        {/* Custom restaurant logo placeholder */}
-        <circle cx="60" cy="65" r="30" fill="#6262bd" opacity="0.15" />
-        <circle cx="60" cy="65" r="22" fill="#6262bd" opacity="0.3" />
-        <text x="60" y="72" fontSize="24" textAnchor="middle">🍽️</text>
+      {/* Central phone */}
+      <rect x="140" y="10" width="120" height="220" rx="18" fill="#1e293b" filter="url(#shadow-ba)" />
+      <rect x="148" y="22" width="104" height="196" rx="10" fill="#f8fafc" />
 
-        {/* Restaurant name */}
-        <rect x="25" y="105" width="70" height="12" rx="3" fill="#1e293b" />
-        <text x="60" y="114" fontSize="9" fill="white" textAnchor="middle" fontWeight="bold">YOUR LOGO</text>
+      {/* Phone screen content */}
+      <g clipPath="url(#phone-screen-ba)">
+        {/* Branded gradient header */}
+        <rect x="148" y="22" width="104" height="70" fill="#6262bd" />
+        <rect x="148" y="70" width="104" height="22" fill="#4f4f9e" />
+        {/* Logo circle */}
+        <circle cx="200" cy="48" r="20" fill="white" opacity="0.2" />
+        <circle cx="200" cy="48" r="14" fill="white" opacity="0.35" />
+        {/* Logo text stand-in */}
+        <rect x="188" y="43" width="24" height="10" rx="3" fill="white" opacity="0.8" />
+        {/* Brand name */}
+        <text x="200" y="84" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold" opacity="0.9">YOUR BRAND</text>
+        {/* Menu rows */}
+        <rect x="153" y="100" width="94" height="18" rx="4" fill="#ede9fe" />
+        <rect x="158" y="106" width="50" height="6" rx="2" fill="#6262bd" opacity="0.5" />
+        <rect x="230" y="106" width="14" height="6" rx="2" fill="#6262bd" opacity="0.7" />
 
-        {/* Menu items preview */}
-        <rect x="15" y="130" width="90" height="18" rx="4" fill="#6262bd" opacity="0.1" />
-        <rect x="20" y="134" width="50" height="10" rx="2" fill="#6262bd" opacity="0.3" />
+        <rect x="153" y="122" width="94" height="18" rx="4" fill="#f1f5f9" />
+        <rect x="158" y="128" width="40" height="6" rx="2" fill="#94a3b8" />
+        <rect x="230" y="128" width="14" height="6" rx="2" fill="#94a3b8" />
 
-        <rect x="15" y="155" width="90" height="18" rx="4" fill="#e2e8f0" />
-        <rect x="20" y="159" width="40" height="10" rx="2" fill="#cbd5e1" />
+        <rect x="153" y="144" width="94" height="18" rx="4" fill="#f1f5f9" />
+        <rect x="158" y="150" width="55" height="6" rx="2" fill="#94a3b8" />
+        <rect x="230" y="150" width="14" height="6" rx="2" fill="#94a3b8" />
 
-        <rect x="15" y="180" width="90" height="18" rx="4" fill="#e2e8f0" />
-        <rect x="20" y="184" width="55" height="10" rx="2" fill="#cbd5e1" />
+        <rect x="153" y="166" width="94" height="18" rx="4" fill="#f1f5f9" />
+        <rect x="158" y="172" width="44" height="6" rx="2" fill="#94a3b8" />
+        <rect x="230" y="172" width="14" height="6" rx="2" fill="#94a3b8" />
 
-        {/* Home indicator */}
-        <rect x="45" y="208" width="30" height="4" rx="2" fill="#cbd5e1" />
+        {/* Bottom nav */}
+        <rect x="148" y="196" width="104" height="22" fill="#f8fafc" />
+        <rect x="148" y="196" width="104" height="1" fill="#e2e8f0" />
+        <rect x="165" y="201" width="12" height="12" rx="2" fill="#6262bd" opacity="0.3" />
+        <rect x="194" y="201" width="12" height="12" rx="2" fill="#e2e8f0" />
+        <rect x="223" y="201" width="12" height="12" rx="2" fill="#e2e8f0" />
       </g>
+      {/* Home indicator */}
+      <rect x="183" y="222" width="34" height="4" rx="2" fill="#475569" />
 
-      {/* Install prompt arrow */}
-      <g transform="translate(270, 80)">
-        <rect x="0" y="0" width="90" height="60" rx="10" fill="white" filter="url(#shadow)" />
-        <text x="45" y="20" fontSize="9" fill="#1e293b" textAnchor="middle" fontWeight="bold">Add to Home</text>
-        <text x="45" y="32" fontSize="8" fill="#64748b" textAnchor="middle">Screen</text>
-        <rect x="20" y="40" width="50" height="14" rx="4" fill="#6262bd" />
-        <text x="45" y="50" fontSize="7" fill="white" textAnchor="middle" fontWeight="bold">INSTALL</text>
+      {/* Small tablet — x=10 to x=90 */}
+      <rect x="10" y="80" width="80" height="110" rx="10" fill="#1e293b" filter="url(#shadow-ba)" />
+      <rect x="15" y="88" width="70" height="90" rx="4" fill="#f8fafc" />
+      <g clipPath="url(#tablet-screen-ba)">
+        <rect x="15" y="88" width="70" height="28" fill="#6262bd" />
+        <circle cx="50" cy="102" r="10" fill="white" opacity="0.3" />
+        <rect x="20" y="122" width="60" height="8" rx="2" fill="#e2e8f0" />
+        <rect x="20" y="134" width="46" height="8" rx="2" fill="#e2e8f0" />
+        <rect x="20" y="146" width="52" height="8" rx="2" fill="#e2e8f0" />
+        <rect x="20" y="158" width="38" height="8" rx="2" fill="#e2e8f0" />
+        <rect x="20" y="170" width="60" height="7" rx="2" fill="#ede9fe" />
       </g>
+      <rect x="40" y="186" width="20" height="3" rx="1.5" fill="#475569" />
 
-      {/* Arrow from install to phone */}
-      <path d="M270 110 Q240 130 260 160" fill="none" stroke="#6262bd" strokeWidth="2" strokeDasharray="4">
-        <animate attributeName="stroke-dashoffset" values="0;-8" dur="1s" repeatCount="indefinite" />
-      </path>
-
-      {/* Multiple devices showing same branded app */}
-      <g transform="translate(30, 100)">
-        {/* Tablet */}
-        <rect x="0" y="0" width="80" height="110" rx="10" fill="#1e293b" />
-        <rect x="5" y="8" width="70" height="90" rx="6" fill="#f8fafc" />
-        <circle cx="40" cy="40" r="15" fill="#6262bd" opacity="0.3" />
-        <text x="40" y="45" fontSize="14" textAnchor="middle">🍽️</text>
-        <rect x="15" y="62" width="50" height="8" rx="2" fill="#1e293b" />
-        <rect x="12" y="78" width="56" height="12" rx="3" fill="#e2e8f0" />
+      {/* Small desktop — x=300 to x=380 */}
+      <rect x="300" y="130" width="80" height="60" rx="6" fill="#1e293b" filter="url(#shadow-ba)" />
+      <rect x="304" y="142" width="72" height="44" rx="2" fill="#f8fafc" />
+      <g clipPath="url(#desktop-screen-ba)">
+        <rect x="304" y="142" width="72" height="16" fill="#6262bd" />
+        <circle cx="310" cy="150" r="4" fill="#ef4444" />
+        <circle cx="318" cy="150" r="4" fill="#f59e0b" />
+        <circle cx="326" cy="150" r="4" fill="#22c55e" />
+        <rect x="308" y="162" width="64" height="6" rx="2" fill="#e2e8f0" />
+        <rect x="308" y="172" width="48" height="6" rx="2" fill="#e2e8f0" />
+        <rect x="308" y="179" width="54" height="5" rx="2" fill="#ede9fe" />
       </g>
+      {/* stand */}
+      <rect x="334" y="190" width="12" height="10" rx="1" fill="#475569" />
+      <rect x="326" y="199" width="28" height="5" rx="2" fill="#334155" />
 
-      {/* Desktop browser */}
-      <g transform="translate(290, 160)">
-        <rect x="0" y="0" width="80" height="60" rx="6" fill="#1e293b" />
-        <rect x="4" y="12" width="72" height="44" rx="3" fill="#f8fafc" />
-        {/* Browser dots */}
-        <circle cx="10" cy="6" r="2" fill="#ef4444" />
-        <circle cx="18" cy="6" r="2" fill="#f59e0b" />
-        <circle cx="26" cy="6" r="2" fill="#22c55e" />
-        {/* Content */}
-        <circle cx="40" cy="30" r="10" fill="#6262bd" opacity="0.3" />
-        <text x="40" y="34" fontSize="10" textAnchor="middle">🍽️</text>
-        <rect x="15" y="45" width="50" height="6" rx="2" fill="#e2e8f0" />
-      </g>
+      {/* Static dashed lines connecting devices */}
+      <path d="M90 135 C110 130 125 130 140 140" fill="none" stroke="#6262bd" strokeWidth="1.5" strokeDasharray="4 3" opacity="0.5" />
+      <path d="M260 140 C275 138 288 138 300 150" fill="none" stroke="#6262bd" strokeWidth="1.5" strokeDasharray="4 3" opacity="0.5" />
 
-      {/* Sync lines connecting devices */}
-      <path d="M110 155 Q140 180 140 130" fill="none" stroke="#6262bd" strokeWidth="1.5" opacity="0.4" strokeDasharray="3">
-        <animate attributeName="stroke-dashoffset" values="0;-6" dur="2s" repeatCount="indefinite" />
-      </path>
-      <path d="M260 130 Q280 150 290 190" fill="none" stroke="#6262bd" strokeWidth="1.5" opacity="0.4" strokeDasharray="3">
-        <animate attributeName="stroke-dashoffset" values="0;-6" dur="2s" repeatCount="indefinite" />
-      </path>
+      {/* Brand banner at bottom */}
+      <rect x="10" y="260" width="380" height="30" rx="8" fill="#6262bd" opacity="0.12" />
+      <rect x="10" y="260" width="4" height="30" rx="2" fill="#6262bd" />
+      <text x="200" y="271" fontSize="9" fill="#6262bd" textAnchor="middle" fontWeight="bold">ONE PLATFORM · EVERY DEVICE · YOUR BRAND</text>
+      <text x="200" y="283" fontSize="7" fill="#64748b" textAnchor="middle">Customers see your brand, powered by Veno App</text>
+    </svg>
+  ),
+  'inventory': () => (
+    <svg viewBox="0 0 400 300" className="w-full h-full">
+      <defs>
+        <filter id="shadow-inv" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="4" stdDeviation="6" floodOpacity="0.12" />
+        </filter>
+      </defs>
 
-      {/* "Your Brand" label */}
-      <g transform="translate(30, 230)">
-        <rect x="0" y="0" width="340" height="35" rx="8" fill="#6262bd" opacity="0.1" />
-        <text x="170" y="15" fontSize="10" fill="#6262bd" textAnchor="middle" fontWeight="bold">ONE PLATFORM • EVERY DEVICE • YOUR BRAND</text>
-        <text x="170" y="28" fontSize="8" fill="#64748b" textAnchor="middle">Customers see your restaurant app, powered by Veno App</text>
-      </g>
+      {/* Main card — leaves 15px margin all sides */}
+      <rect x="15" y="12" width="370" height="276" rx="14" fill="white" filter="url(#shadow-inv)" />
+
+      {/* Card header */}
+      <rect x="15" y="12" width="370" height="42" rx="14" fill="#475569" />
+      <rect x="15" y="40" width="370" height="14" fill="#475569" />
+      <text x="32" y="38" fontSize="12" fill="white" fontWeight="bold">Inventory</text>
+      <rect x="290" y="20" width="80" height="20" rx="6" fill="#f59e0b" />
+      <text x="330" y="34" fontSize="9" fill="white" textAnchor="middle" fontWeight="bold">2 Low Stock</text>
+
+      {/* Column headers — cols: Item@32, Qty@195, Level@260, Status@340 */}
+      <text x="32"  y="72" fontSize="8" fill="#94a3b8" fontWeight="bold">ITEM</text>
+      <text x="195" y="72" fontSize="8" fill="#94a3b8" fontWeight="bold" textAnchor="middle">QTY</text>
+      <text x="258" y="72" fontSize="8" fill="#94a3b8" fontWeight="bold" textAnchor="middle">LEVEL</text>
+      <text x="340" y="72" fontSize="8" fill="#94a3b8" fontWeight="bold" textAnchor="middle">STATUS</text>
+      <line x1="25" y1="77" x2="375" y2="77" stroke="#e2e8f0" strokeWidth="1" />
+
+      {/* Row 1 — In Stock */}
+      <rect x="25" y="81" width="350" height="28" rx="4" fill="#f8fafc" />
+      <text x="32" y="99"  fontSize="9" fill="#1e293b">🧈 Butter</text>
+      <text x="195" y="99" fontSize="9" fill="#1e293b" textAnchor="middle">24 kg</text>
+      <rect x="228" y="91" width="58" height="7" rx="3" fill="#e2e8f0" />
+      <rect x="228" y="91" width="50" height="7" rx="3" fill="#22c55e" />
+      <rect x="308" y="88" width="62" height="16" rx="5" fill="#dcfce7" />
+      <text x="339" y="100" fontSize="8" fill="#16a34a" textAnchor="middle" fontWeight="bold">In Stock</text>
+
+      {/* Row 2 — Low Stock */}
+      <rect x="25" y="113" width="350" height="28" rx="4" fill="#fff7ed" />
+      <text x="32" y="131"  fontSize="9" fill="#1e293b">🍅 Tomatoes</text>
+      <text x="195" y="131" fontSize="9" fill="#d97706" textAnchor="middle">3 kg</text>
+      <rect x="228" y="123" width="58" height="7" rx="3" fill="#e2e8f0" />
+      <rect x="228" y="123" width="14" height="7" rx="3" fill="#f59e0b" />
+      <rect x="308" y="120" width="62" height="16" rx="5" fill="#fef3c7" />
+      <text x="339" y="132" fontSize="8" fill="#d97706" textAnchor="middle" fontWeight="bold">Low</text>
+
+      {/* Row 3 — In Stock */}
+      <rect x="25" y="145" width="350" height="28" rx="4" fill="#f8fafc" />
+      <text x="32" y="163"  fontSize="9" fill="#1e293b">🧀 Cheese</text>
+      <text x="195" y="163" fontSize="9" fill="#1e293b" textAnchor="middle">18 kg</text>
+      <rect x="228" y="155" width="58" height="7" rx="3" fill="#e2e8f0" />
+      <rect x="228" y="155" width="44" height="7" rx="3" fill="#22c55e" />
+      <rect x="308" y="152" width="62" height="16" rx="5" fill="#dcfce7" />
+      <text x="339" y="164" fontSize="8" fill="#16a34a" textAnchor="middle" fontWeight="bold">In Stock</text>
+
+      {/* Row 4 — Out of Stock */}
+      <rect x="25" y="177" width="350" height="28" rx="4" fill="#fff1f2" />
+      <text x="32" y="195"  fontSize="9" fill="#1e293b">🍷 Red Wine</text>
+      <text x="195" y="195" fontSize="9" fill="#ef4444" textAnchor="middle">0 btl</text>
+      <rect x="228" y="187" width="58" height="7" rx="3" fill="#e2e8f0" />
+      <rect x="308" y="184" width="62" height="16" rx="5" fill="#fee2e2" />
+      <text x="339" y="196" fontSize="8" fill="#ef4444" textAnchor="middle" fontWeight="bold">Out</text>
+
+      {/* Row 5 — In Stock */}
+      <rect x="25" y="209" width="350" height="28" rx="4" fill="#f8fafc" />
+      <text x="32" y="227"  fontSize="9" fill="#1e293b">📦 Flour</text>
+      <text x="195" y="227" fontSize="9" fill="#1e293b" textAnchor="middle">12 kg</text>
+      <rect x="228" y="219" width="58" height="7" rx="3" fill="#e2e8f0" />
+      <rect x="228" y="219" width="36" height="7" rx="3" fill="#22c55e" />
+      <rect x="308" y="216" width="62" height="16" rx="5" fill="#dcfce7" />
+      <text x="339" y="228" fontSize="8" fill="#16a34a" textAnchor="middle" fontWeight="bold">In Stock</text>
+
+      {/* Footer stats — all inside card (card bottom = 12+276=288) */}
+      <line x1="25" y1="244" x2="375" y2="244" stroke="#e2e8f0" strokeWidth="1" />
+      <text x="90"  y="258" fontSize="8" fill="#64748b" textAnchor="middle">Total Items</text>
+      <text x="90"  y="272" fontSize="12" fill="#1e293b" textAnchor="middle" fontWeight="bold">48</text>
+      <text x="200" y="258" fontSize="8" fill="#64748b" textAnchor="middle">Low Stock</text>
+      <text x="200" y="272" fontSize="12" fill="#f59e0b" textAnchor="middle" fontWeight="bold">2</text>
+      <text x="315" y="258" fontSize="8" fill="#64748b" textAnchor="middle">Out of Stock</text>
+      <text x="315" y="272" fontSize="12" fill="#ef4444" textAnchor="middle" fontWeight="bold">1</text>
     </svg>
   ),
 }
@@ -1333,59 +1405,83 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="relative">
-            {/* Connection line for desktop */}
-            <div className="hidden md:block absolute top-24 left-1/6 right-1/6 h-0.5 bg-gradient-to-r from-[#6262bd]/20 via-[#6262bd] to-[#6262bd]/20"></div>
-
-            <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
-              {[
-                {
-                  step: '01',
-                  title: 'Create Your Account',
-                  description: 'Sign up for free and set up your restaurant profile with your branding, hours, and contact information.',
-                  icon: (
-                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  ),
-                },
-                {
-                  step: '02',
-                  title: 'Configure Your Menu',
-                  description: 'Add your menu items with photos, descriptions, and prices. Organize them into categories and set availability.',
-                  icon: (
-                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                    </svg>
-                  ),
-                },
-                {
-                  step: '03',
-                  title: 'Start Taking Orders',
-                  description: 'Print your QR codes, place them on tables, and watch orders flow directly to your kitchen display.',
-                  icon: (
-                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                  ),
-                },
-              ].map((item, index) => (
-                <div key={item.step} className="relative text-center">
-                  {/* Step circle */}
-                  <div className="relative inline-flex flex-col items-center">
-                    <div className="w-20 h-20 bg-[#6262bd] rounded-2xl flex items-center justify-center text-white shadow-xl shadow-[#6262bd]/25 mb-6 relative z-10">
-                      {item.icon}
-                    </div>
-                    <div className="absolute -top-2 -right-2 w-8 h-8 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-lg border-2 border-[#6262bd]">
-                      <span className="text-sm font-bold text-[#6262bd]">{item.step}</span>
-                    </div>
-                  </div>
-
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">{item.title}</h3>
-                  <p className="text-slate-600 dark:text-slate-400 leading-relaxed">{item.description}</p>
+          <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
+            {[
+              {
+                step: '01',
+                title: 'Create Your Account',
+                description: 'Sign up for free and set up your restaurant profile with your branding, hours, and contact information.',
+                icon: (
+                  <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                ),
+                tag: 'Takes 2 minutes',
+                color: 'from-[#6262bd] to-violet-500',
+                bg: 'bg-indigo-50 dark:bg-indigo-900/20',
+                border: 'border-indigo-100 dark:border-indigo-800/40',
+              },
+              {
+                step: '02',
+                title: 'Configure Your Menu',
+                description: 'Add your menu items with photos, descriptions, and prices. Organize them into categories and set availability.',
+                icon: (
+                  <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                  </svg>
+                ),
+                tag: 'Import or build from scratch',
+                color: 'from-violet-500 to-purple-600',
+                bg: 'bg-violet-50 dark:bg-violet-900/20',
+                border: 'border-violet-100 dark:border-violet-800/40',
+              },
+              {
+                step: '03',
+                title: 'Start Taking Orders',
+                description: 'Print your QR codes, place them on tables, and watch orders flow directly to your kitchen display.',
+                icon: (
+                  <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                ),
+                tag: 'Live instantly',
+                color: 'from-emerald-500 to-teal-500',
+                bg: 'bg-emerald-50 dark:bg-emerald-900/20',
+                border: 'border-emerald-100 dark:border-emerald-800/40',
+              },
+            ].map((item, index) => (
+              <div key={item.step} className={`relative rounded-2xl border-2 ${item.border} ${item.bg} p-8`}>
+                {/* Step number — top left, always visible */}
+                <div className="text-5xl font-black text-slate-300 dark:text-slate-600 leading-none mb-4 select-none">
+                  {item.step}
                 </div>
-              ))}
-            </div>
+
+                {/* Icon */}
+                <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center text-white shadow-lg mb-5`}>
+                  {item.icon}
+                </div>
+
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">{item.title}</h3>
+                <p className="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">{item.description}</p>
+
+                {/* Tag */}
+                <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                  <svg className="w-3.5 h-3.5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  {item.tag}
+                </div>
+
+                {/* Connector arrow between cards — desktop only */}
+                {index < 2 && (
+                  <div className="hidden md:flex absolute -right-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white dark:bg-slate-800 rounded-full border-2 border-slate-100 dark:border-slate-700 items-center justify-center shadow-md">
+                    <svg className="w-4 h-4 text-[#6262bd]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -1398,72 +1494,131 @@ export default function HomePage() {
             <div className="order-2 lg:order-1">
               <svg viewBox="0 0 500 400" className="w-full h-auto">
                 <defs>
-                  <filter id="deviceShadow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feDropShadow dx="0" dy="8" stdDeviation="12" floodOpacity="0.15" />
+                  <filter id="devShadow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feDropShadow dx="0" dy="6" stdDeviation="10" floodOpacity="0.18" />
                   </filter>
+                  <linearGradient id="devGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#6262bd" />
+                    <stop offset="100%" stopColor="#8b5cf6" />
+                  </linearGradient>
+                  <clipPath id="laptopScreen">
+                    <rect x="68" y="48" width="224" height="144" rx="4" />
+                  </clipPath>
+                  <clipPath id="phoneScreen">
+                    <rect x="364" y="174" width="62" height="106" rx="6" />
+                  </clipPath>
+                  <clipPath id="tabletScreen">
+                    <rect x="364" y="28" width="96" height="120" rx="4" />
+                  </clipPath>
                 </defs>
 
-                {/* Laptop */}
-                <g transform="translate(50, 80)">
-                  <rect x="0" y="0" width="200" height="130" rx="8" fill="#1e293b" />
-                  <rect x="8" y="8" width="184" height="114" rx="4" fill="#f8fafc" />
-                  {/* Screen content */}
-                  <rect x="16" y="16" width="168" height="20" rx="4" fill="#6262bd" />
-                  <rect x="16" y="44" width="50" height="35" rx="4" fill="#f0fdf4" stroke="#22c55e" strokeWidth="1" />
-                  <rect x="72" y="44" width="50" height="35" rx="4" fill="#fef3c7" stroke="#f59e0b" strokeWidth="1" />
-                  <rect x="128" y="44" width="56" height="35" rx="4" fill="#ede9fe" stroke="#6262bd" strokeWidth="1" />
-                  <rect x="16" y="86" width="168" height="28" rx="4" fill="#f1f5f9" />
-                  {/* Laptop base */}
-                  <path d="M-10 130 L210 130 L220 145 L-20 145 Z" fill="#334155" />
-                  <ellipse cx="100" cy="137" rx="30" ry="3" fill="#475569" />
-                </g>
+                {/* ── LAPTOP (left, prominent) ── */}
+                {/* Screen bezel */}
+                <rect x="56" y="36" width="248" height="168" rx="10" fill="#1e293b" filter="url(#devShadow)" />
+                {/* Screen glass */}
+                <rect x="68" y="48" width="224" height="144" rx="4" fill="#f8fafc" />
+                <g clipPath="url(#laptopScreen)">
+                  {/* App header */}
+                  <rect x="68" y="48" width="224" height="32" fill="url(#devGrad)" />
+                  <rect x="78" y="56" width="70" height="10" rx="3" fill="white" opacity="0.5" />
+                  <rect x="256" y="58" width="28" height="8" rx="2" fill="white" opacity="0.3" />
+                  {/* Sidebar */}
+                  <rect x="68" y="80" width="44" height="112" fill="#1e293b" opacity="0.06" />
+                  <rect x="74" y="88" width="32" height="6" rx="2" fill="#6262bd" opacity="0.5" />
+                  <rect x="74" y="100" width="28" height="6" rx="2" fill="#94a3b8" opacity="0.4" />
+                  <rect x="74" y="112" width="30" height="6" rx="2" fill="#94a3b8" opacity="0.4" />
+                  <rect x="74" y="124" width="26" height="6" rx="2" fill="#94a3b8" opacity="0.4" />
+                  {/* Order cards */}
+                  <rect x="120" y="84" width="70" height="52" rx="6" fill="white" stroke="#e2e8f0" strokeWidth="1" />
+                  <rect x="128" y="92" width="32" height="8" rx="2" fill="#22c55e" />
+                  <rect x="128" y="106" width="50" height="6" rx="2" fill="#e2e8f0" />
+                  <rect x="128" y="116" width="40" height="6" rx="2" fill="#e2e8f0" />
+                  <text x="164" y="131" fontSize="8" fill="#22c55e" textAnchor="middle" fontWeight="bold">Table 4</text>
 
-                {/* Tablet */}
-                <g transform="translate(280, 50)">
-                  <rect x="0" y="0" width="120" height="170" rx="12" fill="#1e293b" filter="url(#deviceShadow)" />
-                  <rect x="6" y="12" width="108" height="146" rx="6" fill="#f8fafc" />
-                  {/* Screen content */}
-                  <rect x="12" y="20" width="96" height="16" rx="3" fill="#6262bd" />
-                  <rect x="12" y="44" width="44" height="50" rx="4" fill="#e2e8f0" />
-                  <rect x="62" y="44" width="46" height="50" rx="4" fill="#e2e8f0" />
-                  <rect x="12" y="100" width="96" height="12" rx="3" fill="#f1f5f9" />
-                  <rect x="12" y="118" width="70" height="12" rx="3" fill="#f1f5f9" />
-                  <rect x="12" y="136" width="96" height="16" rx="4" fill="#10b981" />
-                  {/* Home button */}
-                  <circle cx="60" cy="163" r="4" fill="#475569" />
-                </g>
+                  <rect x="198" y="84" width="70" height="52" rx="6" fill="white" stroke="#e2e8f0" strokeWidth="1" />
+                  <rect x="206" y="92" width="38" height="8" rx="2" fill="#f59e0b" />
+                  <rect x="206" y="106" width="50" height="6" rx="2" fill="#e2e8f0" />
+                  <rect x="206" y="116" width="35" height="6" rx="2" fill="#e2e8f0" />
+                  <text x="242" y="131" fontSize="8" fill="#f59e0b" textAnchor="middle" fontWeight="bold">Table 7</text>
 
-                {/* Smartphone */}
-                <g transform="translate(320, 230)">
-                  <rect x="0" y="0" width="70" height="130" rx="10" fill="#1e293b" filter="url(#deviceShadow)" />
-                  <rect x="4" y="12" width="62" height="106" rx="6" fill="#f8fafc" />
-                  {/* Screen content */}
-                  <rect x="8" y="18" width="54" height="12" rx="2" fill="#6262bd" />
-                  <rect x="8" y="36" width="54" height="30" rx="3" fill="#e2e8f0" />
-                  <rect x="8" y="72" width="40" height="8" rx="2" fill="#f1f5f9" />
-                  <rect x="8" y="84" width="54" height="8" rx="2" fill="#f1f5f9" />
-                  <rect x="8" y="98" width="54" height="14" rx="3" fill="#10b981" />
-                  {/* Notch */}
-                  <rect x="22" y="4" width="26" height="6" rx="3" fill="#475569" />
+                  {/* Stats row */}
+                  <rect x="120" y="144" width="50" height="22" rx="4" fill="#f0fdf4" />
+                  <text x="145" y="153" fontSize="7" fill="#64748b" textAnchor="middle">Sales Today</text>
+                  <text x="145" y="163" fontSize="9" fill="#16a34a" textAnchor="middle" fontWeight="bold">£1,842</text>
+                  <rect x="178" y="144" width="42" height="22" rx="4" fill="#ede9fe" />
+                  <text x="199" y="153" fontSize="7" fill="#64748b" textAnchor="middle">Orders</text>
+                  <text x="199" y="163" fontSize="9" fill="#6262bd" textAnchor="middle" fontWeight="bold">34</text>
+                  <rect x="228" y="144" width="50" height="22" rx="4" fill="#fef3c7" />
+                  <text x="253" y="153" fontSize="7" fill="#64748b" textAnchor="middle">Active</text>
+                  <text x="253" y="163" fontSize="9" fill="#d97706" textAnchor="middle" fontWeight="bold">6</text>
                 </g>
+                {/* Laptop hinge + base */}
+                <rect x="56" y="204" width="248" height="8" rx="2" fill="#334155" />
+                <path d="M36 212 L324 212 L334 228 L26 228 Z" fill="#334155" />
+                <ellipse cx="180" cy="220" rx="36" ry="4" fill="#475569" />
+                {/* Label */}
+                <rect x="116" y="234" width="128" height="20" rx="10" fill="#6262bd" opacity="0.1" />
+                <text x="180" y="248" fontSize="9" fill="#6262bd" textAnchor="middle" fontWeight="bold">💻  Laptop / Desktop</text>
 
-                {/* Checkmarks */}
-                <g transform="translate(180, 260)">
-                  <circle cx="0" cy="0" r="20" fill="#10b981" />
-                  <path d="M-8 0 L-3 5 L8 -6" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                {/* ── TABLET (top right) ── */}
+                <rect x="360" y="20" width="112" height="140" rx="12" fill="#1e293b" filter="url(#devShadow)" />
+                <rect x="364" y="28" width="96" height="120" rx="4" fill="#f8fafc" />
+                <g clipPath="url(#tabletScreen)">
+                  <rect x="364" y="28" width="96" height="22" fill="url(#devGrad)" />
+                  <rect x="370" y="34" width="40" height="8" rx="2" fill="white" opacity="0.5" />
+                  {/* Menu items */}
+                  <rect x="368" y="56" width="88" height="16" rx="3" fill="#f1f5f9" />
+                  <rect x="372" y="60" width="40" height="8" rx="2" fill="#cbd5e1" />
+                  <rect x="368" y="76" width="88" height="16" rx="3" fill="#f1f5f9" />
+                  <rect x="372" y="80" width="52" height="8" rx="2" fill="#cbd5e1" />
+                  <rect x="368" y="96" width="88" height="16" rx="3" fill="#f1f5f9" />
+                  <rect x="372" y="100" width="36" height="8" rx="2" fill="#cbd5e1" />
+                  <rect x="368" y="118" width="88" height="22" rx="4" fill="#6262bd" />
+                  <text x="412" y="133" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">Send to Kitchen</text>
                 </g>
+                <circle cx="416" cy="152" r="5" fill="#475569" />
+                <rect x="388" y="164" width="56" height="16" rx="8" fill="#6262bd" opacity="0.1" />
+                <text x="416" y="176" fontSize="8" fill="#6262bd" textAnchor="middle" fontWeight="bold">📱  Tablet</text>
 
-                {/* "Works on" labels */}
-                <text x="150" y="320" fontSize="12" fill="#64748b" textAnchor="middle" fontWeight="500">Laptop</text>
-                <text x="340" y="320" fontSize="12" fill="#64748b" textAnchor="middle" fontWeight="500">Tablet</text>
-                <text x="355" y="380" fontSize="12" fill="#64748b" textAnchor="middle" fontWeight="500">Phone</text>
-
-                {/* No cost badge */}
-                <g transform="translate(30, 280)">
-                  <rect x="0" y="0" width="100" height="40" rx="20" fill="#6262bd" />
-                  <text x="50" y="18" fontSize="10" fill="white" textAnchor="middle" fontWeight="bold">NO EXTRA</text>
-                  <text x="50" y="32" fontSize="10" fill="white" textAnchor="middle" fontWeight="bold">HARDWARE</text>
+                {/* ── PHONE (bottom right) ── */}
+                <rect x="360" y="192" width="80" height="138" rx="12" fill="#1e293b" filter="url(#devShadow)" />
+                <rect x="364" y="204" width="72" height="116" rx="6" fill="#f8fafc" />
+                {/* Notch */}
+                <rect x="385" y="196" width="30" height="6" rx="3" fill="#334155" />
+                <g clipPath="url(#phoneScreen)">
+                  <rect x="364" y="204" width="72" height="22" fill="url(#devGrad)" />
+                  <text x="400" y="219" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">New Order</text>
+                  {/* Notification card */}
+                  <rect x="368" y="232" width="64" height="38" rx="5" fill="white" stroke="#e2e8f0" strokeWidth="1" />
+                  <rect x="372" y="237" width="28" height="7" rx="2" fill="#22c55e" />
+                  <rect x="372" y="248" width="52" height="5" rx="2" fill="#e2e8f0" />
+                  <rect x="372" y="256" width="40" height="5" rx="2" fill="#e2e8f0" />
+                  <rect x="368" y="274" width="64" height="14" rx="4" fill="#6262bd" />
+                  <text x="400" y="284" fontSize="7" fill="white" textAnchor="middle" fontWeight="bold">Confirm</text>
+                  {/* Home indicator */}
+                  <rect x="385" y="306" width="30" height="3" rx="1.5" fill="#cbd5e1" />
                 </g>
+                <rect x="382" y="334" width="36" height="16" rx="8" fill="#6262bd" opacity="0.1" />
+                <text x="400" y="346" fontSize="8" fill="#6262bd" textAnchor="middle" fontWeight="bold">📲  Phone</text>
+
+                {/* ── Central sync badge ── */}
+                <circle cx="340" cy="200" r="28" fill="white" filter="url(#devShadow)" />
+                <circle cx="340" cy="200" r="22" fill="url(#devGrad)" opacity="0.12" />
+                <circle cx="340" cy="200" r="16" fill="url(#devGrad)" />
+                {/* Sync icon */}
+                <path d="M333 196 a7 7 0 0 1 14 0" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                <path d="M347 204 a7 7 0 0 1 -14 0" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                <path d="M345 193 l2 3 l3 -1" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M335 207 l-2 -3 l-3 1" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                {/* Connector lines */}
+                <line x1="304" y1="180" x2="325" y2="190" stroke="#6262bd" strokeWidth="1.5" strokeDasharray="4 3" opacity="0.4" />
+                <line x1="356" y1="185" x2="368" y2="130" stroke="#6262bd" strokeWidth="1.5" strokeDasharray="4 3" opacity="0.4" />
+                <line x1="356" y1="215" x2="368" y2="240" stroke="#6262bd" strokeWidth="1.5" strokeDasharray="4 3" opacity="0.4" />
+
+                {/* No hardware badge */}
+                <rect x="26" y="278" width="148" height="44" rx="12" fill="url(#devGrad)" filter="url(#devShadow)" />
+                <text x="100" y="297" fontSize="10" fill="white" textAnchor="middle" fontWeight="bold">✓  No extra hardware</text>
+                <text x="100" y="313" fontSize="8" fill="white" textAnchor="middle" opacity="0.85">Works on what you already own</text>
               </svg>
             </div>
 
@@ -1551,6 +1706,77 @@ export default function HomePage() {
                 <p className="text-sm text-slate-500 dark:text-slate-400">{industry.description}</p>
               </div>
             ))}
+          </div>
+
+          {/* Bookings beyond restaurants */}
+          <div className="mt-20 rounded-3xl bg-gradient-to-br from-[#6262bd] to-violet-700 overflow-hidden">
+            <div className="grid lg:grid-cols-2 gap-0">
+              {/* Left — pitch */}
+              <div className="p-10 lg:p-14 flex flex-col justify-center">
+                <div className="inline-flex items-center gap-2 bg-white/15 text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-6 w-fit">
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Reservations Module
+                </div>
+                <h3 className="text-3xl lg:text-4xl font-bold text-white mb-4 leading-tight">
+                  The booking system built for <span className="text-violet-200">any appointment business</span>
+                </h3>
+                <p className="text-white/75 text-lg mb-8 leading-relaxed">
+                  Our reservations module isn't just for restaurants. Any business that takes appointments can use it — online bookings, automatic confirmations, SMS reminders, and a clean calendar view for your team.
+                </p>
+                <ul className="space-y-3 mb-10">
+                  {[
+                    'Online booking page — 24/7, no phone calls needed',
+                    'Email & SMS confirmations sent automatically',
+                    'Deposit or booking fee collection via Stripe',
+                    'Block or flag unreliable customers',
+                  ].map(point => (
+                    <li key={point} className="flex items-start gap-3 text-white/85 text-sm">
+                      <svg className="w-4 h-4 text-violet-300 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      {point}
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/services/reservations"
+                  className="inline-flex items-center gap-2 bg-white text-[#6262bd] font-semibold px-6 py-3 rounded-xl hover:bg-violet-50 transition-all w-fit shadow-lg"
+                >
+                  Explore the Reservations Module
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              </div>
+
+              {/* Right — business type grid */}
+              <div className="bg-white/10 backdrop-blur-sm p-10 lg:p-14">
+                <p className="text-white/60 text-xs font-semibold uppercase tracking-widest mb-6">Works for any appointment-based business</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { icon: '💇', label: 'Hair Salons' },
+                    { icon: '✂️', label: 'Barber Shops' },
+                    { icon: '💆', label: 'Massage & Wellness' },
+                    { icon: '💅', label: 'Beauty & Nail Studios' },
+                    { icon: '🦷', label: 'Dental Clinics' },
+                    { icon: '🐾', label: 'Pet Grooming' },
+                    { icon: '🔧', label: 'Tradespeople' },
+                    { icon: '🏋️', label: 'Personal Trainers' },
+                    { icon: '📸', label: 'Photographers' },
+                    { icon: '🍽️', label: 'Restaurants' },
+                    { icon: '🩺', label: 'Private Clinics' },
+                    { icon: '🎨', label: 'Tattoo Studios' },
+                  ].map(({ icon, label }) => (
+                    <div key={label} className="flex items-center gap-3 bg-white/10 hover:bg-white/20 transition-colors rounded-xl px-4 py-3">
+                      <span className="text-xl">{icon}</span>
+                      <span className="text-white text-sm font-medium">{label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -1678,7 +1904,7 @@ export default function HomePage() {
             </Link>
           </div>
           <p className="text-white/60 text-sm mt-6">
-            No credit card required. 1 month free trial.
+            No credit card required. 2 weeks free trial.
           </p>
         </div>
       </section>

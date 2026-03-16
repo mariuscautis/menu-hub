@@ -134,71 +134,162 @@ export default function InventoryPage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {/* Step 1 */}
-            <div className="text-center">
-              <div className="w-20 h-20 bg-[#6262bd]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg viewBox="0 0 60 60" className="w-10 h-10">
-                  <rect x="15" y="10" width="30" height="40" rx="3" fill="none" stroke="#6262bd" strokeWidth="2"/>
-                  <line x1="20" y1="20" x2="35" y2="20" stroke="#6262bd" strokeWidth="2"/>
-                  <line x1="20" y1="28" x2="40" y2="28" stroke="#6262bd" strokeWidth="2"/>
-                  <line x1="20" y1="36" x2="32" y2="36" stroke="#6262bd" strokeWidth="2"/>
-                  <circle cx="42" cy="42" r="10" fill="#6262bd"/>
-                  <text x="42" y="46" fill="white" fontSize="12" fontWeight="bold" textAnchor="middle">+</text>
+            {/* Step 1 — Add Your Items */}
+            <div className="relative border-2 border-slate-100 dark:border-slate-700 rounded-2xl p-6 bg-white dark:bg-gray-900 flex flex-col">
+              <span className="text-7xl font-black text-slate-200 dark:text-slate-700 leading-none select-none mb-2">1</span>
+              <div className="w-full rounded-xl overflow-hidden mb-5" style={{background:'linear-gradient(135deg,#f5f3ff 0%,#ede9fe 100%)'}}>
+                <svg viewBox="0 0 280 170" className="w-full" style={{display:'block'}}>
+                  <defs>
+                    <clipPath id="inv-card1">
+                      <rect x="10" y="10" width="260" height="150" rx="10"/>
+                    </clipPath>
+                  </defs>
+                  {/* Card */}
+                  <rect x="10" y="10" width="260" height="150" rx="10" fill="white" stroke="#e2e8f0" strokeWidth="1.5"/>
+                  {/* Header */}
+                  <rect x="10" y="10" width="260" height="34" rx="10" fill="#6262bd"/>
+                  <rect x="10" y="30" width="260" height="14" fill="#6262bd"/>
+                  <text x="24" y="32" fill="white" fontSize="10" fontWeight="600">Stock Catalogue</text>
+                  <rect x="196" y="17" width="64" height="20" rx="6" fill="white" fillOpacity="0.25"/>
+                  <text x="204" y="31" fill="white" fontSize="9" fontWeight="700">+ Add Item</text>
+                  {/* Row 1 */}
+                  <rect x="18" y="52" width="244" height="24" rx="5" fill="#f8fafc" clipPath="url(#inv-card1)"/>
+                  <rect x="26" y="59" width="8" height="8" rx="2" fill="#6262bd"/>
+                  <text x="42" y="68" fill="#374151" fontSize="9">Tomato Sauce</text>
+                  <rect x="176" y="55" width="40" height="16" rx="4" fill="#dcfce7"/>
+                  <text x="182" y="67" fill="#16a34a" fontSize="8" fontWeight="600">48 kg</text>
+                  <text x="220" y="67" fill="#9ca3af" fontSize="7">min 20</text>
+                  {/* Row 2 */}
+                  <rect x="18" y="82" width="244" height="24" rx="5" fill="#f8fafc" clipPath="url(#inv-card1)"/>
+                  <rect x="26" y="89" width="8" height="8" rx="2" fill="#6262bd"/>
+                  <text x="42" y="98" fill="#374151" fontSize="9">Olive Oil</text>
+                  <rect x="176" y="85" width="40" height="16" rx="4" fill="#fef9c3"/>
+                  <text x="180" y="97" fill="#ca8a04" fontSize="8" fontWeight="600">12 bot</text>
+                  <text x="220" y="97" fill="#9ca3af" fontSize="7">min 10</text>
+                  {/* Row 3 */}
+                  <rect x="18" y="112" width="244" height="24" rx="5" fill="#f8fafc" clipPath="url(#inv-card1)"/>
+                  <rect x="26" y="119" width="8" height="8" rx="2" fill="#6262bd"/>
+                  <text x="42" y="128" fill="#374151" fontSize="9">Mozzarella</text>
+                  <rect x="176" y="115" width="40" height="16" rx="4" fill="#dcfce7"/>
+                  <text x="182" y="127" fill="#16a34a" fontSize="8" fontWeight="600">35 kg</text>
+                  <text x="220" y="127" fill="#9ca3af" fontSize="7">min 15</text>
+                  {/* Footer */}
+                  <text x="24" y="150" fill="#9ca3af" fontSize="7">3 of 24 items shown</text>
                 </svg>
               </div>
-              <div className="w-10 h-10 bg-[#6262bd] text-white rounded-full flex items-center justify-center mx-auto mb-4 text-lg font-bold">
-                1
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{background:'linear-gradient(135deg,#6262bd,#8b8bd8)'}}>
+                  <svg viewBox="0 0 20 20" className="w-4 h-4" fill="white"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd"/></svg>
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Add Your Items</h3>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                Add Your Items
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Enter your ingredients and supplies with quantities. Set minimum stock levels for each item.
+              <p className="text-gray-600 dark:text-gray-300 text-sm">
+                Enter your ingredients and supplies with quantities. Set minimum stock thresholds so the system knows when to warn you.
               </p>
+              <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-[#6262bd] bg-[#6262bd]/10 rounded-full px-3 py-1 self-start">
+                ✓ Import from CSV or add one by one
+              </span>
             </div>
 
-            {/* Step 2 */}
-            <div className="text-center">
-              <div className="w-20 h-20 bg-[#6262bd]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg viewBox="0 0 60 60" className="w-10 h-10">
-                  <rect x="10" y="15" width="40" height="30" rx="4" fill="none" stroke="#6262bd" strokeWidth="2"/>
-                  <circle cx="30" cy="30" r="8" fill="none" stroke="#6262bd" strokeWidth="2"/>
-                  <path d="M30 24 L30 30 L34 30" stroke="#6262bd" strokeWidth="2" strokeLinecap="round"/>
-                  <path d="M42 20 L48 14" stroke="#10b981" strokeWidth="2" strokeLinecap="round"/>
-                  <path d="M48 14 L52 18" stroke="#10b981" strokeWidth="2" strokeLinecap="round"/>
+            {/* Step 2 — Track Automatically */}
+            <div className="relative border-2 border-slate-100 dark:border-slate-700 rounded-2xl p-6 bg-white dark:bg-gray-900 flex flex-col">
+              <span className="text-7xl font-black text-slate-200 dark:text-slate-700 leading-none select-none mb-2">2</span>
+              <div className="w-full rounded-xl overflow-hidden mb-5" style={{background:'linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%)'}}>
+                <svg viewBox="0 0 280 170" className="w-full" style={{display:'block'}}>
+                  <defs>
+                    <clipPath id="inv-card2">
+                      <rect x="10" y="10" width="260" height="150" rx="10"/>
+                    </clipPath>
+                  </defs>
+                  <rect x="10" y="10" width="260" height="150" rx="10" fill="white" stroke="#e2e8f0" strokeWidth="1.5"/>
+                  {/* Header */}
+                  <rect x="10" y="10" width="260" height="34" rx="10" fill="#10b981"/>
+                  <rect x="10" y="30" width="260" height="14" fill="#10b981"/>
+                  <text x="24" y="32" fill="white" fontSize="10" fontWeight="600">Live Stock Tracker</text>
+                  <rect x="214" y="17" width="46" height="18" rx="6" fill="white" fillOpacity="0.25"/>
+                  <text x="220" y="30" fill="white" fontSize="8" fontWeight="600">● Live</text>
+                  {/* Order banner */}
+                  <rect x="18" y="52" width="244" height="18" rx="5" fill="#f0fdf4" clipPath="url(#inv-card2)"/>
+                  <text x="26" y="64" fill="#16a34a" fontSize="7.5" fontWeight="600">↓ Order #1042 — deducting ingredients…</text>
+                  {/* Tomato Sauce bar */}
+                  <text x="18" y="84" fill="#6b7280" fontSize="8">Tomato Sauce</text>
+                  <rect x="112" y="76" width="120" height="10" rx="4" fill="#e2e8f0"/>
+                  <rect x="112" y="76" width="88" height="10" rx="4" fill="#10b981"/>
+                  <text x="238" y="85" fill="#374151" fontSize="8" fontWeight="600">48 kg</text>
+                  {/* Olive Oil bar */}
+                  <text x="18" y="106" fill="#6b7280" fontSize="8">Olive Oil</text>
+                  <rect x="112" y="98" width="120" height="10" rx="4" fill="#e2e8f0"/>
+                  <rect x="112" y="98" width="28" height="10" rx="4" fill="#f59e0b"/>
+                  <text x="238" y="107" fill="#374151" fontSize="8" fontWeight="600">12 bot</text>
+                  {/* Mozzarella bar */}
+                  <text x="18" y="128" fill="#6b7280" fontSize="8">Mozzarella</text>
+                  <rect x="112" y="120" width="120" height="10" rx="4" fill="#e2e8f0"/>
+                  <rect x="112" y="120" width="64" height="10" rx="4" fill="#10b981"/>
+                  <text x="238" y="129" fill="#374151" fontSize="8" fontWeight="600">35 kg</text>
+                  {/* Footer */}
+                  <text x="18" y="150" fill="#9ca3af" fontSize="7">Auto-updated from recipe deductions</text>
                 </svg>
               </div>
-              <div className="w-10 h-10 bg-[#6262bd] text-white rounded-full flex items-center justify-center mx-auto mb-4 text-lg font-bold">
-                2
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{background:'linear-gradient(135deg,#10b981,#34d399)'}}>
+                  <svg viewBox="0 0 20 20" className="w-4 h-4" fill="white"><path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd"/></svg>
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Track Automatically</h3>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                Track Automatically
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Stock levels update as orders come in. The system deducts ingredients based on recipes.
+              <p className="text-gray-600 dark:text-gray-300 text-sm">
+                Stock levels update in real time as orders come in. Ingredients are deducted automatically based on your recipes — zero manual counting.
               </p>
+              <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400 rounded-full px-3 py-1 self-start">
+                ✓ No manual updates needed
+              </span>
             </div>
 
-            {/* Step 3 */}
-            <div className="text-center">
-              <div className="w-20 h-20 bg-[#6262bd]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg viewBox="0 0 60 60" className="w-10 h-10">
-                  <rect x="10" y="15" width="25" height="35" rx="3" fill="none" stroke="#6262bd" strokeWidth="2"/>
-                  <rect x="15" y="20" width="15" height="25" rx="2" fill="#fef3c7"/>
-                  <circle cx="45" cy="25" r="12" fill="none" stroke="#f59e0b" strokeWidth="2"/>
-                  <text x="45" y="29" fill="#f59e0b" fontSize="14" fontWeight="bold" textAnchor="middle">!</text>
-                  <path d="M45 40 L45 50" stroke="#6262bd" strokeWidth="2" strokeLinecap="round" strokeDasharray="3,2"/>
+            {/* Step 3 — Get Alerts */}
+            <div className="relative border-2 border-slate-100 dark:border-slate-700 rounded-2xl p-6 bg-white dark:bg-gray-900 flex flex-col">
+              <span className="text-7xl font-black text-slate-200 dark:text-slate-700 leading-none select-none mb-2">3</span>
+              <div className="w-full rounded-xl overflow-hidden mb-5" style={{background:'linear-gradient(135deg,#fffbeb 0%,#fef3c7 100%)'}}>
+                <svg viewBox="0 0 280 170" className="w-full" style={{display:'block'}}>
+                  <defs>
+                    <clipPath id="inv-card3">
+                      <rect x="10" y="10" width="260" height="150" rx="10"/>
+                    </clipPath>
+                  </defs>
+                  <rect x="10" y="10" width="260" height="150" rx="10" fill="white" stroke="#e2e8f0" strokeWidth="1.5"/>
+                  {/* Header */}
+                  <rect x="10" y="10" width="260" height="34" rx="10" fill="#f59e0b"/>
+                  <rect x="10" y="30" width="260" height="14" fill="#f59e0b"/>
+                  <text x="24" y="32" fill="white" fontSize="10" fontWeight="600">Stock Alerts</text>
+                  <rect x="198" y="17" width="62" height="18" rx="6" fill="white" fillOpacity="0.25"/>
+                  <text x="204" y="30" fill="white" fontSize="8" fontWeight="600">3 alerts</text>
+                  {/* Alert row 1 — amber */}
+                  <rect x="18" y="52" width="244" height="28" rx="6" fill="#fffbeb" stroke="#f59e0b" strokeWidth="1" clipPath="url(#inv-card3)"/>
+                  <rect x="26" y="60" width="10" height="10" rx="3" fill="#f59e0b"/>
+                  <text x="42" y="67" fill="#92400e" fontSize="8" fontWeight="700">Low Stock</text>
+                  <text x="42" y="76" fill="#b45309" fontSize="7">Olive Oil — 12 bottles left (min 20)</text>
+                  {/* Alert row 2 — red */}
+                  <rect x="18" y="86" width="244" height="28" rx="6" fill="#fff1f2" stroke="#f43f5e" strokeWidth="1" clipPath="url(#inv-card3)"/>
+                  <rect x="26" y="94" width="10" height="10" rx="3" fill="#f43f5e"/>
+                  <text x="42" y="101" fill="#9f1239" fontSize="8" fontWeight="700">Critical</text>
+                  <text x="42" y="110" fill="#be123c" fontSize="7">Garlic — only 2 kg left (min 5)</text>
+                  {/* Alert row 3 — green */}
+                  <rect x="18" y="120" width="244" height="28" rx="6" fill="#f0fdf4" stroke="#22c55e" strokeWidth="1" clipPath="url(#inv-card3)"/>
+                  <rect x="26" y="128" width="10" height="10" rx="3" fill="#22c55e"/>
+                  <text x="42" y="135" fill="#15803d" fontSize="8" fontWeight="700">Reorder placed</text>
+                  <text x="42" y="144" fill="#166534" fontSize="7">Olive Oil — supplier notified ✓</text>
                 </svg>
               </div>
-              <div className="w-10 h-10 bg-[#6262bd] text-white rounded-full flex items-center justify-center mx-auto mb-4 text-lg font-bold">
-                3
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{background:'linear-gradient(135deg,#f59e0b,#fbbf24)'}}>
+                  <svg viewBox="0 0 20 20" className="w-4 h-4" fill="white"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/></svg>
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Get Alerts</h3>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                Get Alerts
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Receive notifications when items run low. Never be caught off guard during a busy shift.
+              <p className="text-gray-600 dark:text-gray-300 text-sm">
+                Receive instant notifications when items run low or hit critical levels. Never be caught off guard mid-service again.
               </p>
+              <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-amber-700 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400 rounded-full px-3 py-1 self-start">
+                ✓ Push, email &amp; in-app alerts
+              </span>
             </div>
           </div>
         </div>
@@ -216,113 +307,71 @@ export default function InventoryPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-sm">
-              <div className="w-14 h-14 bg-[#6262bd]/10 rounded-xl flex items-center justify-center mb-6">
-                <svg viewBox="0 0 40 40" className="w-8 h-8">
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Feature 1 — Real-Time Tracking */}
+            <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl border border-slate-100 dark:border-slate-700 flex gap-6 items-start">
+              <div className="w-12 h-12 shrink-0 bg-[#6262bd]/10 rounded-xl flex items-center justify-center">
+                <svg viewBox="0 0 40 40" className="w-7 h-7">
                   <rect x="5" y="8" width="30" height="24" rx="3" fill="none" stroke="#6262bd" strokeWidth="2"/>
                   <line x1="5" y1="16" x2="35" y2="16" stroke="#6262bd" strokeWidth="2"/>
-                  <rect x="10" y="20" width="8" height="8" rx="1" fill="#6262bd" opacity="0.3"/>
-                  <rect x="22" y="20" width="8" height="8" rx="1" fill="#6262bd" opacity="0.3"/>
+                  <rect x="10" y="20" width="8" height="8" rx="1" fill="#6262bd" opacity="0.4"/>
+                  <rect x="22" y="20" width="8" height="8" rx="1" fill="#6262bd" opacity="0.4"/>
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                Real-Time Tracking
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                See exactly what you have in stock at any moment. No more manual counts or guesswork.
-              </p>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Real-Time Tracking</h3>
+                <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">See exactly what you have in stock at any moment. No more manual counts, clipboards, or guesswork before a busy service.</p>
+              </div>
             </div>
 
-            {/* Feature 2 */}
-            <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-sm">
-              <div className="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center mb-6">
-                <svg viewBox="0 0 40 40" className="w-8 h-8">
+            {/* Feature 2 — Low Stock Alerts */}
+            <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl border border-slate-100 dark:border-slate-700 flex gap-6 items-start">
+              <div className="w-12 h-12 shrink-0 bg-amber-100 dark:bg-amber-900/20 rounded-xl flex items-center justify-center">
+                <svg viewBox="0 0 40 40" className="w-7 h-7">
                   <circle cx="20" cy="20" r="14" fill="none" stroke="#f59e0b" strokeWidth="2"/>
                   <path d="M20 10 L20 20 L26 20" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round"/>
                   <circle cx="32" cy="8" r="6" fill="#f59e0b"/>
                   <text x="32" y="11" fill="white" fontSize="8" fontWeight="bold" textAnchor="middle">!</text>
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                Low Stock Alerts
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Get notified before you run out. Set custom thresholds for each ingredient.
-              </p>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Low Stock Alerts</h3>
+                <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">Get notified before you run out. Set custom thresholds for each ingredient and receive alerts before stock becomes a problem.</p>
+              </div>
             </div>
 
-            {/* Feature 3 */}
-            <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-sm">
-              <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center mb-6">
-                <svg viewBox="0 0 40 40" className="w-8 h-8">
-                  <path d="M8 30 L15 20 L22 25 L32 10" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round"/>
+            {/* Feature 3 — Usage Analytics */}
+            <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl border border-slate-100 dark:border-slate-700 flex gap-6 items-start">
+              <div className="w-12 h-12 shrink-0 bg-green-100 dark:bg-green-900/20 rounded-xl flex items-center justify-center">
+                <svg viewBox="0 0 40 40" className="w-7 h-7">
+                  <path d="M8 30 L15 20 L22 25 L32 10" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   <circle cx="15" cy="20" r="3" fill="#10b981"/>
                   <circle cx="22" cy="25" r="3" fill="#10b981"/>
                   <circle cx="32" cy="10" r="3" fill="#10b981"/>
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                Usage Analytics
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Track consumption patterns. Know which items you use most and when.
-              </p>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Usage Analytics</h3>
+                <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">Track consumption patterns over time. Know which items you go through fastest and plan your ordering accordingly.</p>
+              </div>
             </div>
 
-            {/* Feature 4 */}
-            <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-sm">
-              <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
-                <svg viewBox="0 0 40 40" className="w-8 h-8">
+            {/* Feature 4 — Recipe Integration */}
+            <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl border border-slate-100 dark:border-slate-700 flex gap-6 items-start">
+              <div className="w-12 h-12 shrink-0 bg-blue-100 dark:bg-blue-900/20 rounded-xl flex items-center justify-center">
+                <svg viewBox="0 0 40 40" className="w-7 h-7">
                   <rect x="8" y="6" width="24" height="28" rx="2" fill="none" stroke="#3b82f6" strokeWidth="2"/>
-                  <line x1="12" y1="12" x2="28" y2="12" stroke="#3b82f6" strokeWidth="2"/>
-                  <line x1="12" y1="18" x2="28" y2="18" stroke="#3b82f6" strokeWidth="2"/>
-                  <line x1="12" y1="24" x2="22" y2="24" stroke="#3b82f6" strokeWidth="2"/>
-                  <circle cx="28" cy="28" r="8" fill="#3b82f6"/>
-                  <path d="M25 28 L27 30 L31 26" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <line x1="12" y1="13" x2="28" y2="13" stroke="#3b82f6" strokeWidth="2"/>
+                  <line x1="12" y1="20" x2="28" y2="20" stroke="#3b82f6" strokeWidth="2"/>
+                  <line x1="12" y1="27" x2="20" y2="27" stroke="#3b82f6" strokeWidth="2"/>
+                  <circle cx="30" cy="30" r="7" fill="#3b82f6"/>
+                  <path d="M27 30 L29 32 L33 28" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                Recipe Integration
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Link recipes to ingredients. Stock automatically updates when dishes are sold.
-              </p>
-            </div>
-
-            {/* Feature 5 */}
-            <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-sm">
-              <div className="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
-                <svg viewBox="0 0 40 40" className="w-8 h-8">
-                  <rect x="5" y="10" width="14" height="20" rx="2" fill="none" stroke="#8b5cf6" strokeWidth="2"/>
-                  <rect x="21" y="10" width="14" height="20" rx="2" fill="none" stroke="#8b5cf6" strokeWidth="2"/>
-                  <path d="M19 18 L21 20 L19 22" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Recipe Integration</h3>
+                <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">Link recipes to ingredients. When a dish is sold, the system automatically deducts the right quantities — no manual input needed.</p>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                Multi-Location Support
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Manage inventory across multiple venues from a single dashboard.
-              </p>
-            </div>
-
-            {/* Feature 6 */}
-            <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-sm">
-              <div className="w-14 h-14 bg-red-100 rounded-xl flex items-center justify-center mb-6">
-                <svg viewBox="0 0 40 40" className="w-8 h-8">
-                  <rect x="8" y="8" width="24" height="24" rx="4" fill="none" stroke="#ef4444" strokeWidth="2"/>
-                  <path d="M14 14 L26 26" stroke="#ef4444" strokeWidth="2" strokeLinecap="round"/>
-                  <path d="M26 14 L14 26" stroke="#ef4444" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                Waste Reduction
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Track expiry dates and reduce spoilage. Save money by ordering smarter.
-              </p>
             </div>
           </div>
         </div>

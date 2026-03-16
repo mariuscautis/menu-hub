@@ -32,7 +32,7 @@ export default function StaffManagementPage() {
               </h1>
 
               <p className="text-xl text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
-                Manage your entire team from one place. Create rotas, schedule shifts, track clock-ins, handle vacation requests, and assign departments — all in one powerful platform.
+                Manage your entire team from one place. Build rotas, track clock-ins and clock-outs, handle leave requests, and give each staff member their own self-service portal — all without the paperwork.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
@@ -51,116 +51,92 @@ export default function StaffManagementPage() {
               </div>
             </div>
 
-            {/* Hero Illustration */}
-            <div className="relative">
-              <svg viewBox="0 0 500 450" className="w-full h-auto">
+            {/* Hero Illustration — rota view */}
+            <div className="relative flex justify-center">
+              <svg viewBox="0 0 480 400" className="w-full h-auto drop-shadow-xl">
                 <defs>
-                  <filter id="shadow1" x="-20%" y="-20%" width="140%" height="140%">
-                    <feDropShadow dx="0" dy="8" stdDeviation="12" floodOpacity="0.15" />
+                  <filter id="sm-shadow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feDropShadow dx="0" dy="6" stdDeviation="10" floodOpacity="0.14" />
                   </filter>
-                  <linearGradient id="staffGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <linearGradient id="sm-grad" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#0891b2" />
                     <stop offset="100%" stopColor="#3b82f6" />
                   </linearGradient>
                 </defs>
 
-                {/* Main rota calendar */}
-                <g transform="translate(50, 30)">
-                  <rect x="0" y="0" width="400" height="300" rx="20" fill="white" filter="url(#shadow1)" />
+                {/* Main rota card */}
+                <rect x="10" y="10" width="460" height="280" rx="16" fill="white" filter="url(#sm-shadow)" />
+                <rect x="10" y="10" width="460" height="46" rx="16" fill="url(#sm-grad)" />
+                <rect x="10" y="40" width="460" height="16" fill="url(#sm-grad)" />
+                <text x="240" y="38" fontSize="13" fill="white" textAnchor="middle" fontWeight="bold">Staff Rota — Week of 24 Feb</text>
 
-                  {/* Calendar header */}
-                  <rect x="0" y="0" width="400" height="55" rx="20" fill="url(#staffGradient)" />
-                  <rect x="0" y="40" width="400" height="15" fill="url(#staffGradient)" />
-                  <text x="200" y="35" fontSize="16" fill="white" textAnchor="middle" fontWeight="bold">Staff Rota - Week of Feb 24</text>
+                {/* Day headers — 7 cols from x=80, spacing=54 */}
+                {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((d, i) => (
+                  <text key={d} x={104 + i * 54} y="72" fontSize="9" fill="#64748b" textAnchor="middle" fontWeight="bold">{d}</text>
+                ))}
 
-                  {/* Day columns */}
-                  <g transform="translate(85, 70)">
-                    {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => (
-                      <text key={i} x={i * 45} y="0" fontSize="10" fill="#64748b" textAnchor="middle" fontWeight="bold">{day}</text>
-                    ))}
-                  </g>
+                {/* Row 1 — Sarah */}
+                <circle cx="38" cy="99" r="13" fill="#dbeafe" />
+                <text x="38" y="104" fontSize="12" textAnchor="middle">👩</text>
+                <text x="38" y="120" fontSize="7" fill="#64748b" textAnchor="middle">Sarah</text>
+                <rect x="78"  y="88" width="46" height="22" rx="4" fill="#3b82f6" /><text x="101" y="103" fontSize="8" fill="white" textAnchor="middle">9–5</text>
+                <rect x="132" y="88" width="46" height="22" rx="4" fill="#3b82f6" /><text x="155" y="103" fontSize="8" fill="white" textAnchor="middle">9–5</text>
+                <rect x="186" y="88" width="46" height="22" rx="4" fill="#3b82f6" /><text x="209" y="103" fontSize="8" fill="white" textAnchor="middle">9–5</text>
+                <rect x="348" y="88" width="46" height="22" rx="4" fill="#3b82f6" /><text x="371" y="103" fontSize="8" fill="white" textAnchor="middle">12–8</text>
+                <rect x="402" y="88" width="46" height="22" rx="4" fill="#3b82f6" /><text x="425" y="103" fontSize="8" fill="white" textAnchor="middle">12–8</text>
 
-                  {/* Staff avatars column */}
-                  <g transform="translate(30, 95)">
-                    <circle cx="0" cy="15" r="14" fill="#dbeafe" />
-                    <text x="0" y="19" fontSize="12" textAnchor="middle">👩</text>
-                    <text x="0" y="38" fontSize="8" fill="#64748b" textAnchor="middle">Sarah</text>
+                {/* Row 2 — Mike */}
+                <circle cx="38" cy="155" r="13" fill="#fef3c7" />
+                <text x="38" y="160" fontSize="12" textAnchor="middle">👨</text>
+                <text x="38" y="176" fontSize="7" fill="#64748b" textAnchor="middle">Mike</text>
+                <rect x="132" y="144" width="46" height="22" rx="4" fill="#f59e0b" /><text x="155" y="159" fontSize="8" fill="white" textAnchor="middle">6–2</text>
+                <rect x="186" y="144" width="46" height="22" rx="4" fill="#f59e0b" /><text x="209" y="159" fontSize="8" fill="white" textAnchor="middle">6–2</text>
+                <rect x="240" y="144" width="46" height="22" rx="4" fill="#f59e0b" /><text x="263" y="159" fontSize="8" fill="white" textAnchor="middle">6–2</text>
+                <rect x="294" y="144" width="46" height="22" rx="4" fill="#f59e0b" /><text x="317" y="159" fontSize="8" fill="white" textAnchor="middle">6–2</text>
 
-                    <circle cx="0" cy="80" r="14" fill="#fef3c7" />
-                    <text x="0" y="84" fontSize="12" textAnchor="middle">👨</text>
-                    <text x="0" y="103" fontSize="8" fill="#64748b" textAnchor="middle">Mike</text>
+                {/* Row 3 — Lisa */}
+                <circle cx="38" cy="211" r="13" fill="#dcfce7" />
+                <text x="38" y="216" fontSize="12" textAnchor="middle">👩</text>
+                <text x="38" y="232" fontSize="7" fill="#64748b" textAnchor="middle">Lisa</text>
+                <rect x="78"  y="200" width="46" height="22" rx="4" fill="#22c55e" /><text x="101" y="215" fontSize="8" fill="white" textAnchor="middle">2–10</text>
+                <rect x="240" y="200" width="46" height="22" rx="4" fill="#22c55e" /><text x="263" y="215" fontSize="8" fill="white" textAnchor="middle">2–10</text>
+                <rect x="348" y="200" width="46" height="22" rx="4" fill="#22c55e" /><text x="371" y="215" fontSize="8" fill="white" textAnchor="middle">2–10</text>
+                <rect x="402" y="200" width="46" height="22" rx="4" fill="#22c55e" /><text x="425" y="215" fontSize="8" fill="white" textAnchor="middle">2–10</text>
 
-                    <circle cx="0" cy="145" r="14" fill="#dcfce7" />
-                    <text x="0" y="149" fontSize="12" textAnchor="middle">👩</text>
-                    <text x="0" y="168" fontSize="8" fill="#64748b" textAnchor="middle">Lisa</text>
+                {/* Row 4 — James */}
+                <circle cx="38" cy="267" r="13" fill="#fce7f3" />
+                <text x="38" y="272" fontSize="12" textAnchor="middle">👨</text>
+                <text x="38" y="288" fontSize="7" fill="#64748b" textAnchor="middle">James</text>
+                <rect x="78"  y="256" width="46" height="22" rx="4" fill="#8b5cf6" /><text x="101" y="271" fontSize="8" fill="white" textAnchor="middle">10–6</text>
+                <rect x="132" y="256" width="46" height="22" rx="4" fill="#8b5cf6" /><text x="155" y="271" fontSize="8" fill="white" textAnchor="middle">10–6</text>
+                <rect x="294" y="256" width="46" height="22" rx="4" fill="#8b5cf6" /><text x="317" y="271" fontSize="8" fill="white" textAnchor="middle">10–6</text>
+                <rect x="402" y="256" width="46" height="22" rx="4" fill="#8b5cf6" /><text x="425" y="271" fontSize="8" fill="white" textAnchor="middle">10–6</text>
 
-                    <circle cx="0" cy="210" r="14" fill="#fce7f3" />
-                    <text x="0" y="214" fontSize="12" textAnchor="middle">👨</text>
-                    <text x="0" y="233" fontSize="8" fill="#64748b" textAnchor="middle">James</text>
-                  </g>
+                {/* Clocked-in badge */}
+                <rect x="10" y="302" width="148" height="70" rx="12" fill="white" filter="url(#sm-shadow)" />
+                <rect x="20" y="312" width="128" height="24" rx="6" fill="#f0fdf4" />
+                <circle cx="36" cy="324" r="8" fill="#22c55e" />
+                <text x="36" y="328" fontSize="9" fill="white" textAnchor="middle">✓</text>
+                <text x="90" y="328" fontSize="9" fill="#16a34a" textAnchor="middle" fontWeight="bold">Clocked In</text>
+                <text x="84" y="351" fontSize="10" fill="#1e293b" textAnchor="middle" fontWeight="bold">Sarah M.</text>
+                <text x="84" y="364" fontSize="8" fill="#64748b" textAnchor="middle">3h 24m today</text>
 
-                  {/* Shift blocks - Row 1 (Sarah) */}
-                  <g transform="translate(65, 90)">
-                    <rect x="0" y="0" width="40" height="25" rx="4" fill="#3b82f6" />
-                    <text x="20" y="16" fontSize="8" fill="white" textAnchor="middle">9-5</text>
-                    <rect x="45" y="0" width="40" height="25" rx="4" fill="#3b82f6" />
-                    <text x="65" y="16" fontSize="8" fill="white" textAnchor="middle">9-5</text>
-                    <rect x="90" y="0" width="40" height="25" rx="4" fill="#3b82f6" />
-                    <text x="110" y="16" fontSize="8" fill="white" textAnchor="middle">9-5</text>
-                    <rect x="225" y="0" width="40" height="25" rx="4" fill="#3b82f6" />
-                    <text x="245" y="16" fontSize="8" fill="white" textAnchor="middle">12-8</text>
-                    <rect x="270" y="0" width="40" height="25" rx="4" fill="#3b82f6" />
-                    <text x="290" y="16" fontSize="8" fill="white" textAnchor="middle">12-8</text>
-                  </g>
+                {/* Leave request badge */}
+                <rect x="322" y="302" width="148" height="86" rx="12" fill="white" filter="url(#sm-shadow)" />
+                <circle cx="342" cy="322" r="10" fill="#fef3c7" />
+                <text x="342" y="326" fontSize="12" textAnchor="middle">📅</text>
+                <text x="410" y="320" fontSize="9" fill="#1e293b" textAnchor="middle" fontWeight="bold">Leave Request</text>
+                <text x="396" y="334" fontSize="8" fill="#64748b" textAnchor="middle">Mike · Feb 28–Mar 2</text>
+                <rect x="332" y="346" width="56" height="20" rx="5" fill="#22c55e" />
+                <text x="360" y="359" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">Approve</text>
+                <rect x="396" y="346" width="56" height="20" rx="5" fill="#ef4444" />
+                <text x="424" y="359" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">Decline</text>
 
-                  {/* Shift blocks - Row 2 (Mike) */}
-                  <g transform="translate(65, 155)">
-                    <rect x="45" y="0" width="40" height="25" rx="4" fill="#f59e0b" />
-                    <text x="65" y="16" fontSize="8" fill="white" textAnchor="middle">6-2</text>
-                    <rect x="90" y="0" width="40" height="25" rx="4" fill="#f59e0b" />
-                    <text x="110" y="16" fontSize="8" fill="white" textAnchor="middle">6-2</text>
-                    <rect x="135" y="0" width="40" height="25" rx="4" fill="#f59e0b" />
-                    <text x="155" y="16" fontSize="8" fill="white" textAnchor="middle">6-2</text>
-                    <rect x="180" y="0" width="40" height="25" rx="4" fill="#f59e0b" />
-                    <text x="200" y="16" fontSize="8" fill="white" textAnchor="middle">6-2</text>
-                  </g>
-
-                  {/* Shift blocks - Row 3 (Lisa) */}
-                  <g transform="translate(65, 220)">
-                    <rect x="0" y="0" width="40" height="25" rx="4" fill="#22c55e" />
-                    <text x="20" y="16" fontSize="8" fill="white" textAnchor="middle">2-10</text>
-                    <rect x="135" y="0" width="40" height="25" rx="4" fill="#22c55e" />
-                    <text x="155" y="16" fontSize="8" fill="white" textAnchor="middle">2-10</text>
-                    <rect x="225" y="0" width="40" height="25" rx="4" fill="#22c55e" />
-                    <text x="245" y="16" fontSize="8" fill="white" textAnchor="middle">2-10</text>
-                    <rect x="270" y="0" width="40" height="25" rx="4" fill="#22c55e" />
-                    <text x="290" y="16" fontSize="8" fill="white" textAnchor="middle">2-10</text>
-                  </g>
-                </g>
-
-                {/* Clock in status card */}
-                <g transform="translate(320, 350)">
-                  <rect x="0" y="0" width="130" height="80" rx="12" fill="white" filter="url(#shadow1)" />
-                  <rect x="10" y="10" width="110" height="25" rx="6" fill="#f0fdf4" />
-                  <circle cx="25" cy="22" r="8" fill="#22c55e" />
-                  <text x="25" y="26" fontSize="10" fill="white" textAnchor="middle">✓</text>
-                  <text x="75" y="26" fontSize="10" fill="#16a34a" fontWeight="bold">Clocked In</text>
-                  <text x="65" y="52" fontSize="11" fill="#1e293b" textAnchor="middle" fontWeight="bold">Sarah M.</text>
-                  <text x="65" y="68" fontSize="9" fill="#64748b" textAnchor="middle">3h 24m today</text>
-                </g>
-
-                {/* Leave request notification */}
-                <g transform="translate(50, 350)">
-                  <rect x="0" y="0" width="130" height="80" rx="12" fill="white" filter="url(#shadow1)" />
-                  <circle cx="20" cy="20" r="10" fill="#fef3c7" />
-                  <text x="20" y="24" fontSize="12" textAnchor="middle">📅</text>
-                  <text x="80" y="24" fontSize="10" fill="#1e293b" fontWeight="bold">Leave Request</text>
-                  <text x="65" y="42" fontSize="9" fill="#64748b" textAnchor="middle">Mike - Feb 28-Mar 2</text>
-                  <rect x="15" y="52" width="45" height="20" rx="4" fill="#22c55e" />
-                  <text x="37" y="65" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">Approve</text>
-                  <rect x="70" y="52" width="45" height="20" rx="4" fill="#ef4444" />
-                  <text x="92" y="65" fontSize="8" fill="white" textAnchor="middle" fontWeight="bold">Decline</text>
-                </g>
+                {/* Hours stat badge */}
+                <rect x="174" y="302" width="130" height="70" rx="12" fill="url(#sm-grad)" filter="url(#sm-shadow)" />
+                <text x="239" y="328" fontSize="22" fill="white" textAnchor="middle" fontWeight="bold">156h</text>
+                <text x="239" y="344" fontSize="8" fill="white" opacity="0.85" textAnchor="middle">Total hours this week</text>
+                <text x="239" y="360" fontSize="8" fill="white" opacity="0.7" textAnchor="middle">4 staff · 3 departments</text>
               </svg>
             </div>
           </div>
@@ -175,7 +151,7 @@ export default function StaffManagementPage() {
               Everything You Need to Manage Your Team
             </h2>
             <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
-              From scheduling to time tracking, handle all your staff management needs in one place.
+              From rota building to time tracking, handle all your workforce needs without spreadsheets or paperwork.
             </p>
           </div>
 
@@ -184,37 +160,37 @@ export default function StaffManagementPage() {
               {
                 icon: '📅',
                 title: 'Rota & Scheduling',
-                description: 'Create and manage weekly rotas with an intuitive drag-and-drop calendar. Set shift times, roles, and departments for each team member.',
+                description: 'Build weekly rotas with ease. Assign shifts, set times, and allocate staff to departments. Publish rotas so your team can see their schedule instantly.',
                 color: 'bg-blue-500/10 text-blue-600',
               },
               {
                 icon: '⏰',
-                title: 'Clock In/Out',
-                description: 'Track attendance with digital clock-in and clock-out. Staff can clock in via their devices, and managers see real-time attendance.',
+                title: 'Clock In / Clock Out',
+                description: 'Staff clock in and out digitally from any device. Managers see who is on site in real time, and hours are logged automatically — no timesheets needed.',
                 color: 'bg-green-500/10 text-green-600',
               },
               {
                 icon: '🏖️',
-                title: 'Vacation & Leave',
-                description: 'Handle time-off requests, track holiday entitlements, manage sick leave, and approve or decline requests with one click.',
+                title: 'Leave & Holiday Management',
+                description: 'Staff submit time-off requests directly from their portal. Managers approve or decline with one click. Holiday entitlements are tracked and updated automatically.',
                 color: 'bg-amber-500/10 text-amber-600',
               },
               {
                 icon: '🏢',
-                title: 'Department Management',
-                description: 'Organize staff into departments (Kitchen, Bar, Floor, etc.) with custom permissions and role-based access control.',
+                title: 'Departments & Roles',
+                description: 'Organise your team into departments — Kitchen, Bar, Floor, Management — and assign roles with the right access level for each. Staff only see what they need to.',
                 color: 'bg-purple-500/10 text-purple-600',
               },
               {
                 icon: '📊',
-                title: 'Hours & Analytics',
-                description: 'Track total hours worked, overtime, and labor costs. Generate reports to optimize scheduling and control expenses.',
+                title: 'Hours & Attendance Reports',
+                description: 'See total hours worked per staff member, spot attendance patterns, and export data to help with payroll. Know your labour costs at a glance.',
                 color: 'bg-cyan-500/10 text-cyan-600',
               },
               {
-                icon: '🔔',
-                title: 'Shift Notifications',
-                description: 'Automatic SMS and email reminders for upcoming shifts. Staff never miss a shift with timely notifications.',
+                icon: '📱',
+                title: 'Staff Self-Service Portal',
+                description: 'Every team member gets their own login. They can view their rota, check remaining holiday, submit leave requests, and track their hours — all from their phone.',
                 color: 'bg-pink-500/10 text-pink-600',
               },
             ].map((feature, index) => (
@@ -239,10 +215,10 @@ export default function StaffManagementPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 dark:text-white mb-4">
-              How Staff Management Works
+              How It Works
             </h2>
             <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
-              Get your team organized in four simple steps.
+              Get your team organised in four simple steps.
             </p>
           </div>
 
@@ -251,22 +227,22 @@ export default function StaffManagementPage() {
               {
                 step: '1',
                 title: 'Add Your Team',
-                description: 'Create staff profiles with roles, departments, and contact details. Set up their holiday entitlements and availability.',
+                description: 'Create a profile for each staff member — name, role, department, and holiday entitlement. They get their own login straight away.',
               },
               {
                 step: '2',
-                title: 'Build Your Rota',
-                description: 'Drag and drop shifts onto the calendar. Assign times, roles, and departments. Publish when ready.',
+                title: 'Build the Rota',
+                description: 'Set shifts for the week, assign departments, and publish. Staff are notified and can view their schedule immediately.',
               },
               {
                 step: '3',
-                title: 'Staff Check In',
-                description: 'Team members clock in and out via their devices. Track breaks and total hours automatically.',
+                title: 'Track Attendance',
+                description: 'Staff clock in and out from any device. Hours are recorded automatically, and you see who is on site at all times.',
               },
               {
                 step: '4',
-                title: 'Manage & Report',
-                description: 'Approve leave requests, review attendance, and generate reports for payroll and optimization.',
+                title: 'Review & Report',
+                description: 'Approve leave requests, check hours worked, and review attendance history. Export reports for payroll whenever you need them.',
               },
             ].map((item, index) => (
               <div key={index} className="text-center">
@@ -290,19 +266,19 @@ export default function StaffManagementPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
-              Why Restaurants Love Our Staff Management
+              Less Admin. Better Teams.
             </h2>
             <p className="text-xl text-white/80 max-w-3xl mx-auto">
-              Save hours every week and keep your team happy.
+              Stop spending hours on rotas and chasing timesheets. Let Veno App handle it.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               { stat: '5+ hrs', label: 'Saved weekly on scheduling' },
-              { stat: '98%', label: 'Shift attendance rate' },
-              { stat: '60%', label: 'Faster leave approvals' },
               { stat: '100%', label: 'Digital time tracking' },
+              { stat: '1 click', label: 'Leave approvals' },
+              { stat: 'Real-time', label: 'Attendance visibility' },
             ].map((item, index) => (
               <div key={index} className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 text-center">
                 <div className="text-4xl font-bold text-white mb-2">{item.stat}</div>
@@ -318,34 +294,37 @@ export default function StaffManagementPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
+              <div className="inline-block px-4 py-1.5 bg-cyan-500/10 rounded-full text-cyan-600 text-sm font-semibold mb-4">
+                Staff Portal
+              </div>
               <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 dark:text-white mb-6">
-                Staff Self-Service Portal
+                Your Team's Own Dashboard
               </h2>
               <p className="text-xl text-slate-600 dark:text-slate-400 mb-8">
-                Your team gets their own dashboard to manage their work life. Less admin for you, more autonomy for them.
+                Every staff member gets a personal login. They manage their own work life — less back-and-forth for you, more ownership for them.
               </p>
 
               <div className="space-y-6">
                 {[
                   {
-                    icon: '📱',
-                    title: 'View Their Schedule',
-                    description: 'Staff see their upcoming shifts, breaks, and total hours at a glance.',
+                    icon: '📆',
+                    title: 'View Their Rota',
+                    description: 'Staff see their upcoming shifts and total hours for the week as soon as the rota is published.',
+                  },
+                  {
+                    icon: '⏱️',
+                    title: 'Clock In & Out',
+                    description: 'One tap to start or end a shift, from any device. No paper, no manual timesheets.',
                   },
                   {
                     icon: '✋',
                     title: 'Request Time Off',
-                    description: 'Submit holiday or sick leave requests that go straight to managers for approval.',
-                  },
-                  {
-                    icon: '🔄',
-                    title: 'Swap Shifts',
-                    description: 'Request shift swaps with colleagues, subject to manager approval.',
+                    description: 'Submit holiday or sick leave requests that go straight to the manager for approval.',
                   },
                   {
                     icon: '📈',
-                    title: 'Track Their Hours',
-                    description: 'View work history, total hours, and remaining holiday entitlement.',
+                    title: 'Track Hours & Holiday',
+                    description: 'View hours worked, remaining holiday entitlement, and full attendance history at any time.',
                   },
                 ].map((item, index) => (
                   <div key={index} className="flex items-start space-x-4">
@@ -362,68 +341,76 @@ export default function StaffManagementPage() {
             </div>
 
             {/* Staff Portal Illustration */}
-            <div className="relative">
-              <svg viewBox="0 0 400 450" className="w-full h-auto">
+            <div className="relative flex justify-center">
+              <svg viewBox="0 0 360 500" className="w-full max-w-xs h-auto drop-shadow-xl">
                 <defs>
-                  <filter id="shadow2" x="-20%" y="-20%" width="140%" height="140%">
-                    <feDropShadow dx="0" dy="4" stdDeviation="8" floodOpacity="0.1" />
+                  <filter id="sm-shadow2" x="-20%" y="-20%" width="140%" height="140%">
+                    <feDropShadow dx="0" dy="6" stdDeviation="10" floodOpacity="0.15" />
                   </filter>
+                  <linearGradient id="sm-grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#0891b2" />
+                    <stop offset="100%" stopColor="#3b82f6" />
+                  </linearGradient>
+                  <clipPath id="portal-screen">
+                    <rect x="68" y="28" width="224" height="434" rx="18" />
+                  </clipPath>
                 </defs>
 
-                {/* Phone frame */}
-                <g transform="translate(100, 20)">
-                  <rect x="0" y="0" width="200" height="410" rx="30" fill="#1e293b" filter="url(#shadow2)" />
-                  <rect x="10" y="15" width="180" height="380" rx="22" fill="#f8fafc" />
+                {/* Phone shell */}
+                <rect x="56" y="12" width="248" height="464" rx="30" fill="#1e293b" filter="url(#sm-shadow2)" />
+                <rect x="68" y="28" width="224" height="434" rx="18" fill="#f8fafc" />
+                {/* Notch */}
+                <rect x="144" y="28" width="72" height="16" rx="8" fill="#1e293b" />
 
+                <g clipPath="url(#portal-screen)">
                   {/* Header */}
-                  <rect x="20" y="30" width="160" height="50" rx="10" fill="#0891b2" />
-                  <circle cx="50" cy="55" r="15" fill="white" opacity="0.2" />
-                  <text x="50" y="60" fontSize="16" textAnchor="middle">👩</text>
-                  <text x="115" y="50" fontSize="12" fill="white" fontWeight="bold">My Rota</text>
-                  <text x="115" y="65" fontSize="9" fill="white" opacity="0.8">Sarah Mitchell</text>
+                  <rect x="68" y="44" width="224" height="64" fill="url(#sm-grad2)" />
+                  <circle cx="100" cy="72" r="18" fill="white" opacity="0.2" />
+                  <text x="100" y="78" fontSize="18" textAnchor="middle">👩</text>
+                  <text x="198" y="65" fontSize="11" fill="white" fontWeight="bold" textAnchor="middle">My Rota</text>
+                  <text x="198" y="80" fontSize="8" fill="white" opacity="0.8" textAnchor="middle">Sarah Mitchell · Kitchen</text>
+                  <text x="198" y="96" fontSize="8" fill="white" opacity="0.6" textAnchor="middle">Mon 24 Feb</text>
 
-                  {/* Stats cards */}
-                  <g transform="translate(20, 95)">
-                    <rect x="0" y="0" width="75" height="50" rx="8" fill="#f0fdf4" />
-                    <text x="37" y="22" fontSize="16" fill="#16a34a" textAnchor="middle" fontWeight="bold">32h</text>
-                    <text x="37" y="38" fontSize="8" fill="#64748b" textAnchor="middle">This Week</text>
+                  {/* Stats row */}
+                  <rect x="78" y="120" width="96" height="52" rx="8" fill="#f0fdf4" />
+                  <text x="126" y="144" fontSize="20" fill="#16a34a" textAnchor="middle" fontWeight="bold">32h</text>
+                  <text x="126" y="160" fontSize="8" fill="#64748b" textAnchor="middle">This Week</text>
 
-                    <rect x="85" y="0" width="75" height="50" rx="8" fill="#ede9fe" />
-                    <text x="122" y="22" fontSize="16" fill="#6262bd" textAnchor="middle" fontWeight="bold">18</text>
-                    <text x="122" y="38" fontSize="8" fill="#64748b" textAnchor="middle">Days Left</text>
-                  </g>
+                  <rect x="186" y="120" width="96" height="52" rx="8" fill="#ede9fe" />
+                  <text x="234" y="144" fontSize="20" fill="#6262bd" textAnchor="middle" fontWeight="bold">18</text>
+                  <text x="234" y="160" fontSize="8" fill="#64748b" textAnchor="middle">Days Holiday</text>
 
                   {/* Next shift card */}
-                  <g transform="translate(20, 160)">
-                    <rect x="0" y="0" width="160" height="70" rx="10" fill="white" stroke="#e2e8f0" strokeWidth="1" />
-                    <text x="10" y="20" fontSize="9" fill="#64748b">NEXT SHIFT</text>
-                    <text x="10" y="38" fontSize="12" fill="#1e293b" fontWeight="bold">Monday, Feb 24</text>
-                    <text x="10" y="55" fontSize="11" fill="#0891b2">9:00 AM - 5:00 PM</text>
-                    <rect x="110" y="35" width="40" height="22" rx="4" fill="#dbeafe" />
-                    <text x="130" y="50" fontSize="8" fill="#3b82f6" textAnchor="middle" fontWeight="bold">Kitchen</text>
-                  </g>
+                  <rect x="78" y="184" width="204" height="68" rx="10" fill="white" stroke="#e2e8f0" strokeWidth="1" />
+                  <text x="90" y="202" fontSize="8" fill="#94a3b8" fontWeight="bold">NEXT SHIFT</text>
+                  <text x="90" y="220" fontSize="11" fill="#1e293b" fontWeight="bold">Monday, 24 Feb</text>
+                  <text x="90" y="236" fontSize="10" fill="#0891b2">9:00 AM – 5:00 PM</text>
+                  <rect x="212" y="214" width="60" height="20" rx="5" fill="#dbeafe" />
+                  <text x="242" y="228" fontSize="8" fill="#3b82f6" textAnchor="middle" fontWeight="bold">Kitchen</text>
 
                   {/* Quick actions */}
-                  <g transform="translate(20, 245)">
-                    <text x="0" y="15" fontSize="10" fill="#64748b" fontWeight="bold">QUICK ACTIONS</text>
+                  <text x="78" y="273" fontSize="9" fill="#94a3b8" fontWeight="bold">QUICK ACTIONS</text>
 
-                    <rect x="0" y="25" width="160" height="40" rx="8" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
-                    <text x="15" y="50" fontSize="16">⏰</text>
-                    <text x="40" y="50" fontSize="11" fill="#1e293b">Clock In</text>
-                    <circle cx="145" cy="45" r="10" fill="#22c55e" />
-                    <text x="145" y="49" fontSize="12" fill="white" textAnchor="middle">→</text>
+                  <rect x="78" y="282" width="204" height="40" rx="8" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
+                  <text x="100" y="307" fontSize="14">⏰</text>
+                  <text x="122" y="307" fontSize="10" fill="#1e293b">Clock In</text>
+                  <circle cx="264" cy="302" r="10" fill="#22c55e" />
+                  <text x="264" y="307" fontSize="10" fill="white" textAnchor="middle">→</text>
 
-                    <rect x="0" y="75" width="160" height="40" rx="8" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
-                    <text x="15" y="100" fontSize="16">🏖️</text>
-                    <text x="40" y="100" fontSize="11" fill="#1e293b">Request Time Off</text>
+                  <rect x="78" y="330" width="204" height="40" rx="8" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
+                  <text x="100" y="355" fontSize="14">🏖️</text>
+                  <text x="122" y="355" fontSize="10" fill="#1e293b">Request Time Off</text>
 
-                    <rect x="0" y="125" width="160" height="40" rx="8" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
-                    <text x="15" y="150" fontSize="16">📋</text>
-                    <text x="40" y="150" fontSize="11" fill="#1e293b">View Full Schedule</text>
-                  </g>
+                  <rect x="78" y="378" width="204" height="40" rx="8" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
+                  <text x="100" y="403" fontSize="14">📋</text>
+                  <text x="122" y="403" fontSize="10" fill="#1e293b">View Full Schedule</text>
+
+                  <rect x="78" y="426" width="204" height="40" rx="8" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
+                  <text x="100" y="451" fontSize="14">📊</text>
+                  <text x="122" y="451" fontSize="10" fill="#1e293b">My Hours History</text>
 
                   {/* Home indicator */}
-                  <rect x="75" y="400" width="50" height="5" rx="2.5" fill="#cbd5e1" />
+                  <rect x="148" y="452" width="64" height="4" rx="2" fill="#cbd5e1" />
                 </g>
               </svg>
             </div>
@@ -438,7 +425,7 @@ export default function StaffManagementPage() {
             Ready to Transform Your Staff Management?
           </h2>
           <p className="text-xl text-slate-400 mb-10">
-            Join hundreds of restaurants saving time and keeping their teams organized with Veno App.
+            Say goodbye to paper rotas and manual timesheets. Get your whole team organised with Veno App.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
@@ -455,7 +442,7 @@ export default function StaffManagementPage() {
             </Link>
           </div>
           <p className="text-slate-500 text-sm mt-6">
-            No credit card required. 1 month free trial.
+            No credit card required. 2 weeks free trial.
           </p>
         </div>
       </section>

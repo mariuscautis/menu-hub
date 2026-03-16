@@ -5,6 +5,23 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
+const VENUE_TYPES = [
+  { value: '', label: 'Select your venue type…' },
+  { value: 'restaurant', label: 'Restaurant' },
+  { value: 'cafe', label: 'Café / Coffee Shop' },
+  { value: 'bar', label: 'Bar / Pub' },
+  { value: 'fast_food', label: 'Fast Food / Takeaway' },
+  { value: 'beauty', label: 'Beauty Salon / Nail Studio' },
+  { value: 'barber', label: 'Barber Shop' },
+  { value: 'wellness', label: 'Wellness / Massage / Spa' },
+  { value: 'fitness', label: 'Personal Trainer / Gym' },
+  { value: 'medical', label: 'Medical / Dental Clinic' },
+  { value: 'pet', label: 'Pet Grooming' },
+  { value: 'photographer', label: 'Photographer / Creative Studio' },
+  { value: 'trade', label: 'Tradesperson / Contractor' },
+  { value: 'other', label: 'Other' },
+]
+
 export default function Register() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -13,10 +30,11 @@ export default function Register() {
   const [emailExists, setEmailExists] = useState(false)
   const [formData, setFormData] = useState({
     restaurantName: '',
+    venueType: '',
     email: '',
+    phone: '',
     password: '',
     confirmPassword: '',
-    phone: ''
   })
 
   const handleChange = (e) => {
@@ -36,8 +54,8 @@ export default function Register() {
     e.preventDefault()
     setLoading(true)
     setError(null)
+    setEmailExists(false)
 
-    // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match')
       setLoading(false)
@@ -47,19 +65,21 @@ export default function Register() {
     try {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
-        password: formData.password
+        password: formData.password,
       })
 
       if (authError) throw authError
 
       const slug = generateSlug(formData.restaurantName)
       const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
+
       const { error: dbError } = await supabase.from('restaurants').insert({
         name: formData.restaurantName,
-        slug: slug,
+        slug,
         owner_id: authData.user.id,
         email: formData.email,
         phone: formData.phone,
+        venue_type: formData.venueType,
         status: 'pending',
         trial_ends_at: trialEndsAt,
         enabled_modules: { ordering: true, analytics: true, reservations: true, rota: true },
@@ -67,7 +87,7 @@ export default function Register() {
 
       if (dbError) throw dbError
 
-      // Notify super admin + send welcome email to client (fire-and-forget)
+      // Notify super admin + send welcome email (fire-and-forget)
       fetch('/api/notifications/restaurant-registered', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -75,15 +95,16 @@ export default function Register() {
           restaurantName: formData.restaurantName,
           email: formData.email,
           phone: formData.phone,
+          venueType: formData.venueType,
           trialEndsAt,
         }),
       }).catch(() => {})
 
-      router.push('/dashboard')
+      // Gate on email confirmation — don't go straight to dashboard
+      router.push(`/auth/confirmation?email=${encodeURIComponent(formData.email)}`)
 
     } catch (err) {
       const msg = err.message || ''
-      // Supabase returns "User already registered" for duplicate email
       if (msg.toLowerCase().includes('already registered') || msg.toLowerCase().includes('already been registered')) {
         setEmailExists(true)
       } else {
@@ -97,17 +118,12 @@ export default function Register() {
   const handleGoogleSignup = async () => {
     setGoogleLoading(true)
     setError(null)
-
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`
-        }
+        options: { redirectTo: `${window.location.origin}/auth/callback` },
       })
-
       if (error) throw error
-
     } catch (err) {
       setError(err.message)
       setGoogleLoading(false)
@@ -120,7 +136,7 @@ export default function Register() {
       <nav className="flex justify-between items-center p-6 max-w-6xl mx-auto w-full">
         <Link href="/" className="flex items-center space-x-2">
           <div className="w-10 h-10 bg-[#6262bd] rounded-xl flex items-center justify-center">
-            <span className="text-white font-bold text-xl">M</span>
+            <span className="text-white font-bold text-xl">V</span>
           </div>
           <span className="text-2xl font-bold text-slate-700">Veno App</span>
         </Link>
@@ -137,14 +153,14 @@ export default function Register() {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-slate-800 mb-2">Create your account</h1>
-            <p className="text-slate-500">Get your restaurant menu online in minutes</p>
+            <p className="text-slate-500">Get your venue up and running in minutes</p>
           </div>
 
           <div className="bg-white border-2 border-slate-100 rounded-2xl p-8">
             {emailExists && (
               <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-sm">
                 <p className="font-semibold mb-1">This email address is already registered.</p>
-                <p className="mb-3">If you previously had an account, you can reset your password to regain access.</p>
+                <p className="mb-3">You can reset your password to regain access.</p>
                 <Link
                   href={`/auth/forgot-password?email=${encodeURIComponent(formData.email)}`}
                   className="inline-block px-4 py-2 bg-[#6262bd] text-white rounded-lg font-semibold text-xs hover:bg-[#5151a8] transition-colors"
@@ -159,7 +175,7 @@ export default function Register() {
               </div>
             )}
 
-            {/* Google Button */}
+            {/* Google */}
             <button
               onClick={handleGoogleSignup}
               disabled={googleLoading}
@@ -171,12 +187,12 @@ export default function Register() {
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </svg>
-              {googleLoading ? 'Connecting...' : 'Continue with Google'}
+              {googleLoading ? 'Connecting…' : 'Continue with Google'}
             </button>
 
             <div className="relative mb-6">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200"></div>
+                <div className="w-full border-t border-slate-200" />
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-4 bg-white text-slate-400">or sign up with email</span>
@@ -185,9 +201,10 @@ export default function Register() {
 
             <form onSubmit={handleSubmit}>
               <div className="space-y-5">
+
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Restaurant Name
+                    Venue Name
                   </label>
                   <input
                     type="text"
@@ -202,6 +219,25 @@ export default function Register() {
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Venue Type
+                  </label>
+                  <select
+                    name="venueType"
+                    value={formData.venueType}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 bg-white"
+                  >
+                    {VENUE_TYPES.map(({ value, label }) => (
+                      <option key={value} value={value} disabled={value === ''}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
                     Email Address
                   </label>
                   <input
@@ -211,7 +247,7 @@ export default function Register() {
                     onChange={handleChange}
                     required
                     className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
-                    placeholder="you@restaurant.com"
+                    placeholder="you@yourvenue.com"
                   />
                 </div>
 
@@ -224,6 +260,7 @@ export default function Register() {
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
+                    required
                     className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
                     placeholder="07123 456789"
                   />
@@ -266,7 +303,7 @@ export default function Register() {
                   disabled={loading}
                   className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? 'Creating account...' : 'Create Account'}
+                  {loading ? 'Creating account…' : 'Create Account'}
                 </button>
               </div>
             </form>
