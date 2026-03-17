@@ -14,13 +14,13 @@ export default function ServicePageLayout({ children }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16 lg:h-20">
             {/* Logo */}
-            <Link href="/home" className="flex items-center">
+            <Link href="/" className="flex items-center">
               <PlatformLogo size="md" />
             </Link>
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center space-x-8">
-              <Link href="/home#features" className="text-slate-600 dark:text-slate-300 hover:text-[#6262bd] dark:hover:text-[#8585d0] font-medium transition-colors">
+              <Link href="/#features" className="text-slate-600 dark:text-slate-300 hover:text-[#6262bd] dark:hover:text-[#8585d0] font-medium transition-colors">
                 Features
               </Link>
               <Link href="/pricing" className="text-slate-600 dark:text-slate-300 hover:text-[#6262bd] dark:hover:text-[#8585d0] font-medium transition-colors">
@@ -67,7 +67,7 @@ export default function ServicePageLayout({ children }) {
         {mobileMenuOpen && (
           <div className="lg:hidden border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
             <div className="px-4 py-6 space-y-4">
-              <Link href="/home#features" className="block px-3 py-2 text-slate-600 dark:text-slate-300 font-medium" onClick={() => setMobileMenuOpen(false)}>Features</Link>
+              <Link href="/#features" className="block px-3 py-2 text-slate-600 dark:text-slate-300 font-medium" onClick={() => setMobileMenuOpen(false)}>Features</Link>
               <Link href="/pricing" className="block px-3 py-2 text-slate-600 dark:text-slate-300 font-medium" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
               <Link href="/about" className="block px-3 py-2 text-slate-600 dark:text-slate-300 font-medium" onClick={() => setMobileMenuOpen(false)}>About</Link>
               <Link href="/contact" className="block px-3 py-2 text-slate-600 dark:text-slate-300 font-medium" onClick={() => setMobileMenuOpen(false)}>Contact</Link>
@@ -93,7 +93,7 @@ export default function ServicePageLayout({ children }) {
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 lg:gap-12 mb-12">
             {/* Brand */}
             <div className="col-span-2 lg:col-span-1">
-              <Link href="/home" className="flex items-center mb-6">
+              <Link href="/" className="flex items-center mb-6">
                 <PlatformLogo size="md" darkMode={true} />
               </Link>
               <p className="text-slate-400 text-sm leading-relaxed">

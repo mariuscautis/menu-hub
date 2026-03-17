@@ -24,13 +24,13 @@ export default function InventoryPage() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <a
-                  href="/home#cta"
+                  href="/#cta"
                   className="inline-flex items-center justify-center px-8 py-4 bg-[#6262bd] text-white rounded-xl font-semibold hover:bg-[#5252a8] transition-colors"
                 >
                   Start Free Trial
                 </a>
                 <a
-                  href="/home"
+                  href="/"
                   className="inline-flex items-center justify-center px-8 py-4 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl font-semibold hover:border-[#6262bd] hover:text-[#6262bd] transition-colors"
                 >
                   Back to Home
@@ -621,7 +621,7 @@ export default function InventoryPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="/home#cta"
+              href="/#cta"
               className="inline-flex items-center justify-center px-8 py-4 bg-[#6262bd] text-white rounded-xl font-semibold hover:bg-[#5252a8] transition-colors"
             >
               Start Free Trial
