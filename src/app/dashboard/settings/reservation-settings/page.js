@@ -9,13 +9,27 @@ import { settingsTabs } from '@/components/PageTabsConfig'
 const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
 
 const DEFAULT_HOURS = {
-  monday:    { open: '09:00', close: '22:00', closed: false },
-  tuesday:   { open: '09:00', close: '22:00', closed: false },
-  wednesday: { open: '09:00', close: '22:00', closed: false },
-  thursday:  { open: '09:00', close: '22:00', closed: false },
-  friday:    { open: '09:00', close: '23:00', closed: false },
-  saturday:  { open: '10:00', close: '23:00', closed: false },
-  sunday:    { open: '10:00', close: '21:00', closed: true },
+  monday:    { shifts: [{ open: '09:00', close: '22:00' }], closed: false },
+  tuesday:   { shifts: [{ open: '09:00', close: '22:00' }], closed: false },
+  wednesday: { shifts: [{ open: '09:00', close: '22:00' }], closed: false },
+  thursday:  { shifts: [{ open: '09:00', close: '22:00' }], closed: false },
+  friday:    { shifts: [{ open: '09:00', close: '23:00' }], closed: false },
+  saturday:  { shifts: [{ open: '10:00', close: '23:00' }], closed: false },
+  sunday:    { shifts: [{ open: '10:00', close: '21:00' }], closed: true },
+}
+
+// Normalise legacy { open, close } format → { shifts } format
+function normaliseHours(raw) {
+  const result = {}
+  for (const day of DAYS) {
+    const d = raw[day] || DEFAULT_HOURS[day]
+    if (d.shifts) {
+      result[day] = d
+    } else {
+      result[day] = { closed: d.closed, shifts: [{ open: d.open || '09:00', close: d.close || '22:00' }] }
+    }
+  }
+  return result
 }
 
 // Fixed-interval options (manager picks one, customer sees pre-made slots)
@@ -103,7 +117,7 @@ export default function ReservationSettingsPage() {
     setMinAdvanceNoticeDays(s.min_advance_notice_days || 0)
     setShowPartySize(s.show_party_size !== false)
     setSingleBookingArea(s.single_booking_area === true)
-    setOperatingHours(s.operating_hours || DEFAULT_HOURS)
+    setOperatingHours(normaliseHours(s.operating_hours || DEFAULT_HOURS))
     setGlobalFeeEnabled(!!r.global_booking_fee_enabled)
     setGlobalFeeAmount(r.global_booking_fee_amount != null ? String(r.global_booking_fee_amount) : '')
     setLoading(false)
@@ -115,11 +129,33 @@ export default function ReservationSettingsPage() {
     )
   }
 
-  const updateDay = (day, field, value) => {
+  const toggleDayClosed = (day) => {
     setOperatingHours(prev => ({
       ...prev,
-      [day]: { ...prev[day], [field]: value }
+      [day]: { ...prev[day], closed: !prev[day].closed }
     }))
+  }
+
+  const updateShift = (day, idx, field, value) => {
+    setOperatingHours(prev => {
+      const shifts = prev[day].shifts.map((s, i) => i === idx ? { ...s, [field]: value } : s)
+      return { ...prev, [day]: { ...prev[day], shifts } }
+    })
+  }
+
+  const addShift = (day) => {
+    setOperatingHours(prev => {
+      const last = prev[day].shifts[prev[day].shifts.length - 1]
+      const newShift = { open: last?.close || '14:00', close: '22:00' }
+      return { ...prev, [day]: { ...prev[day], shifts: [...prev[day].shifts, newShift] } }
+    })
+  }
+
+  const removeShift = (day, idx) => {
+    setOperatingHours(prev => {
+      const shifts = prev[day].shifts.filter((_, i) => i !== idx)
+      return { ...prev, [day]: { ...prev[day], shifts: shifts.length ? shifts : [{ open: '09:00', close: '22:00' }] } }
+    })
   }
 
   const handleSave = async () => {
@@ -421,41 +457,78 @@ export default function ReservationSettingsPage() {
           )}
         </div>
 
-        <div className="space-y-3">
-          {DAYS.map(day => {
+        <div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+          {DAYS.map((day, dayIdx) => {
             const hours = operatingHours[day] || DEFAULT_HOURS[day]
             return (
-              <div key={day} className="flex items-center gap-4 flex-wrap">
-                <div className="w-28 flex-shrink-0">
-                  <span className={`text-sm font-semibold capitalize ${hours.closed ? 'text-slate-400 dark:text-slate-500' : 'text-slate-700 dark:text-slate-300'}`}>{day}</span>
+              <div
+                key={day}
+                className={`flex items-start gap-4 px-4 py-3 ${
+                  dayIdx % 2 === 0
+                    ? 'bg-white dark:bg-slate-900'
+                    : 'bg-slate-50 dark:bg-slate-800/50'
+                }`}
+              >
+                {/* Day name */}
+                <div className="w-24 flex-shrink-0 pt-2">
+                  <span className={`text-sm font-semibold capitalize ${hours.closed ? 'text-slate-400 dark:text-slate-500' : 'text-slate-700 dark:text-slate-300'}`}>
+                    {day.charAt(0).toUpperCase() + day.slice(1, 3)}
+                  </span>
                 </div>
-                <button
-                  onClick={() => updateDay(day, 'closed', !hours.closed)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
-                    hours.closed
-                      ? 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/40 dark:text-red-300 dark:border-red-700'
-                      : 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/40 dark:text-green-300 dark:border-green-700'
-                  }`}
-                >
-                  {hours.closed ? 'Closed' : 'Open'}
-                </button>
-                {!hours.closed && (
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="time"
-                      value={hours.open}
-                      onChange={(e) => updateDay(day, 'open', e.target.value)}
-                      className="px-3 py-2 border-2 border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 text-sm"
-                    />
-                    <span className="text-slate-400 dark:text-slate-500 text-sm">to</span>
-                    <input
-                      type="time"
-                      value={hours.close}
-                      onChange={(e) => updateDay(day, 'close', e.target.value)}
-                      className="px-3 py-2 border-2 border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 text-sm"
-                    />
-                  </div>
-                )}
+
+                {/* Toggle */}
+                <div className="flex-shrink-0 pt-1.5">
+                  <button
+                    onClick={() => toggleDayClosed(day)}
+                    className={`relative w-10 h-5 rounded-full transition-colors ${hours.closed ? 'bg-slate-300 dark:bg-slate-600' : 'bg-[#6262bd]'}`}
+                  >
+                    <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${hours.closed ? 'translate-x-0' : 'translate-x-5'}`} />
+                  </button>
+                </div>
+
+                {/* Shifts or closed label */}
+                <div className="flex-1">
+                  {hours.closed ? (
+                    <span className="text-sm text-slate-400 dark:text-slate-500 pt-1.5 inline-block">Closed</span>
+                  ) : (
+                    <div className="flex flex-col gap-1.5">
+                      {hours.shifts.map((shift, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <input
+                            type="time"
+                            value={shift.open}
+                            onChange={e => updateShift(day, idx, 'open', e.target.value)}
+                            className="px-2.5 py-1.5 border border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 rounded-lg focus:outline-none focus:border-[#6262bd] text-slate-700 text-sm w-[118px]"
+                          />
+                          <span className="text-slate-400 dark:text-slate-500 text-xs">–</span>
+                          <input
+                            type="time"
+                            value={shift.close}
+                            onChange={e => updateShift(day, idx, 'close', e.target.value)}
+                            className="px-2.5 py-1.5 border border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 rounded-lg focus:outline-none focus:border-[#6262bd] text-slate-700 text-sm w-[118px]"
+                          />
+                          {hours.shifts.length > 1 && (
+                            <button
+                              onClick={() => removeShift(day, idx)}
+                              className="w-6 h-6 flex items-center justify-center rounded-md text-slate-300 hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors text-base leading-none"
+                              title="Remove shift"
+                            >
+                              ×
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                      {hours.shifts.length < 3 && (
+                        <button
+                          onClick={() => addShift(day)}
+                          className="self-start text-xs text-[#6262bd] hover:underline font-medium mt-0.5"
+                        >
+                          + Add shift
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             )
           })}

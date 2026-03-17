@@ -31,7 +31,14 @@ export default function CustomersPage() {
   // Selected customer side panel
   const [selected, setSelected] = useState(null) // full customer object
   const [bookingHistory, setBookingHistory] = useState([])
+  const [venueReviews, setVenueReviews] = useState([])
   const [loadingHistory, setLoadingHistory] = useState(false)
+
+  const [showVenueReviews, setShowVenueReviews] = useState(false)
+
+  // Peer reviews drawer
+  const [peerReviews, setPeerReviews] = useState(null) // null = closed, [] = loaded
+  const [loadingPeerReviews, setLoadingPeerReviews] = useState(false)
 
   // Restriction editing
   const [restrictionMode, setRestrictionMode] = useState(null)
@@ -146,21 +153,54 @@ export default function CustomersPage() {
 
   useEffect(() => { fetchCustomers() }, [fetchCustomers])
 
+  const openPeerReviews = async (customer) => {
+    setLoadingPeerReviews(true)
+    setPeerReviews([])
+    const { data: { session } } = await adminSupabase.auth.getSession()
+    const token = session?.access_token
+    if (!token) { setLoadingPeerReviews(false); return }
+    try {
+      const res = await fetch(
+        `/api/customers/peer-ratings?restaurantId=${restaurant.id}&customerId=${customer.id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      const json = await res.json()
+      setPeerReviews(json.reviews || [])
+    } catch {
+      setPeerReviews([])
+    } finally {
+      setLoadingPeerReviews(false)
+    }
+  }
+
   const openCustomer = async (customer) => {
     setSelected(customer)
     setRestrictionMode(null)
     setRestrictionFee(customer.restriction?.fee_amount ? String(customer.restriction.fee_amount) : '')
     setLoadingHistory(true)
+    setVenueReviews([])
+    setShowVenueReviews(false)
+    setPeerReviews(null)
 
-    const { data } = await adminSupabase
-      .from('reservations')
-      .select('id, reservation_date, reservation_time, party_size, status')
-      .eq('restaurant_id', restaurant.id)
-      .eq('customer_id', customer.id)
-      .order('reservation_date', { ascending: false })
-      .limit(20)
+    const [{ data: bookings }, { data: ratings }] = await Promise.all([
+      adminSupabase
+        .from('reservations')
+        .select('id, reservation_date, reservation_time, party_size, status')
+        .eq('restaurant_id', restaurant.id)
+        .eq('customer_id', customer.id)
+        .order('reservation_date', { ascending: false })
+        .limit(20),
+      adminSupabase
+        .from('customer_ratings')
+        .select('reservation_id, rating, note, created_at')
+        .eq('restaurant_id', restaurant.id)
+        .eq('customer_id', customer.id)
+        .order('created_at', { ascending: false })
+        .limit(10),
+    ])
 
-    setBookingHistory(data || [])
+    setBookingHistory(bookings || [])
+    setVenueReviews(ratings || [])
     setLoadingHistory(false)
   }
 
@@ -353,19 +393,109 @@ export default function CustomersPage() {
 
             {/* Stats */}
             <div className="grid grid-cols-2 divide-x divide-slate-100 dark:divide-slate-700 border-b border-slate-100 dark:border-slate-700">
-              <div className="p-4 text-center">
+              <button
+                onClick={() => { setShowVenueReviews(v => !v); setPeerReviews(null) }}
+                className="p-4 text-center hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors group"
+              >
                 <div className="text-xl font-bold text-amber-500">{selected.venueAvg ? `${selected.venueAvg}★` : '—'}</div>
                 <div className="text-xs text-slate-400 mt-0.5">Your venue</div>
                 <div className="text-xs text-slate-300 mt-0.5">{selected.venueBookings} {selected.venueBookings === 1 ? 'visit' : 'visits'}</div>
-              </div>
-              <div className="p-4 text-center">
+                <div className="text-xs text-amber-400 mt-1 group-hover:underline">
+                  {showVenueReviews ? 'hide reviews' : 'see reviews'}
+                </div>
+              </button>
+              <button
+                onClick={() => { setShowVenueReviews(false); peerReviews === null ? openPeerReviews(selected) : setPeerReviews(null) }}
+                className="p-4 text-center hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors group"
+              >
                 <div className="text-xl font-bold text-purple-500">{selected.categoryAvg ? `${selected.categoryAvg}★` : '—'}</div>
                 <div className="text-xs text-slate-400 mt-0.5">{restaurant?.industry_category ? 'Peer rating' : 'Overall rating'}</div>
                 {selected.categoryVisits != null && (
                   <div className="text-xs text-slate-300 mt-0.5">{selected.categoryVisits} {selected.categoryVisits === 1 ? 'visit' : 'visits'}</div>
                 )}
-              </div>
+                <div className="text-xs text-purple-400 mt-1 group-hover:underline">
+                  {peerReviews !== null ? 'hide reviews' : 'see reviews'}
+                </div>
+              </button>
             </div>
+
+            {/* Venue reviews drawer */}
+            {showVenueReviews && (
+              <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700 bg-amber-50/50 dark:bg-amber-900/10">
+                <h3 className="text-sm font-semibold text-amber-700 dark:text-amber-300 mb-3">Your reviews of this customer</h3>
+                {loadingHistory ? (
+                  <p className="text-xs text-slate-400">Loading...</p>
+                ) : venueReviews.length === 0 ? (
+                  <p className="text-xs text-slate-400">No reviews left yet.</p>
+                ) : (
+                  <div className="space-y-2.5 max-h-64 overflow-y-auto">
+                    {venueReviews.map(r => {
+                      const booking = bookingHistory.find(b => b.id === r.reservation_id)
+                      return (
+                        <div key={r.reservation_id || r.created_at} className="rounded-xl bg-white dark:bg-slate-800 border border-amber-100 dark:border-amber-800/40 p-3">
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="flex gap-0.5">
+                              {[1,2,3,4,5].map(star => (
+                                <svg key={star} className={`w-3.5 h-3.5 ${star <= r.rating ? 'text-amber-400' : 'text-slate-300 dark:text-slate-600'}`} fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                                </svg>
+                              ))}
+                            </div>
+                            <span className="text-xs text-slate-400">
+                              {booking
+                                ? new Date(booking.reservation_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+                                : new Date(r.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            </span>
+                          </div>
+                          {r.note ? (
+                            <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">{r.note}</p>
+                          ) : (
+                            <p className="text-xs text-slate-400 italic">No note left.</p>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Peer reviews drawer */}
+            {peerReviews !== null && (
+              <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700 bg-purple-50/50 dark:bg-purple-900/10">
+                <h3 className="text-sm font-semibold text-purple-700 dark:text-purple-300 mb-3">Peer reviews (last 10)</h3>
+                {loadingPeerReviews ? (
+                  <p className="text-xs text-slate-400">Loading...</p>
+                ) : peerReviews.length === 0 ? (
+                  <p className="text-xs text-slate-400">No peer reviews found for this customer.</p>
+                ) : (
+                  <div className="space-y-2.5 max-h-64 overflow-y-auto">
+                    {peerReviews.map((r, i) => (
+                      <div key={i} className="rounded-xl bg-white dark:bg-slate-800 border border-purple-100 dark:border-purple-800/40 p-3">
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex gap-0.5">
+                            {[1,2,3,4,5].map(star => (
+                              <svg key={star} className={`w-3.5 h-3.5 ${star <= r.rating ? 'text-amber-400' : 'text-slate-300 dark:text-slate-600'}`} fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                              </svg>
+                            ))}
+                          </div>
+                          <span className="text-xs text-slate-400">
+                            {new Date(r.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{r.venue_name}</p>
+                        {r.note ? (
+                          <p className="text-xs text-slate-700 dark:text-slate-300 mt-1 leading-relaxed">{r.note}</p>
+                        ) : (
+                          <p className="text-xs text-slate-400 italic mt-1">No note left.</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Restriction management */}
             <div className="p-5 border-b border-slate-100 dark:border-slate-700">
@@ -460,14 +590,14 @@ export default function CustomersPage() {
             </div>
 
             {/* Booking history */}
-            <div className="p-5">
+            <div className="p-5 border-b border-slate-100 dark:border-slate-700">
               <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Booking history at this venue</h3>
               {loadingHistory ? (
                 <p className="text-xs text-slate-400">Loading...</p>
               ) : bookingHistory.length === 0 ? (
                 <p className="text-xs text-slate-400">No bookings found.</p>
               ) : (
-                <div className="space-y-2 max-h-72 overflow-y-auto">
+                <div className="space-y-2 max-h-56 overflow-y-auto">
                   {bookingHistory.map(b => (
                     <div key={b.id} className="flex items-center justify-between text-xs py-2 border-b border-slate-50 dark:border-slate-700/50 last:border-b-0">
                       <div>
@@ -482,6 +612,8 @@ export default function CustomersPage() {
                 </div>
               )}
             </div>
+
+            <div className="h-2" />
           </div>
         </div>
       )}

@@ -527,8 +527,10 @@ export default function BookReservation({ params }) {
       return
     }
 
-    const openMin  = toMinutes(dayHours.open)
-    const closeMin = toMinutes(dayHours.close)
+    // Normalise: support both legacy { open, close } and new { shifts } format
+    const shifts = dayHours.shifts
+      ? dayHours.shifts
+      : [{ open: dayHours.open, close: dayHours.close }]
 
     const duration = settings.slot_mode === 'customer_choice'
       ? (selectedDuration || settings.allowed_durations?.[0] || 60)
@@ -541,8 +543,12 @@ export default function BookReservation({ params }) {
       : duration
 
     const candidates = []
-    for (let m = openMin; m + duration <= closeMin; m += step) {
-      candidates.push(m)
+    for (const shift of shifts) {
+      const openMin  = toMinutes(shift.open)
+      const closeMin = toMinutes(shift.close)
+      for (let m = openMin; m + duration <= closeMin; m += step) {
+        candidates.push(m)
+      }
     }
 
     // If today, remove past slots (need at least 1 hour lead time)
@@ -1111,7 +1117,9 @@ export default function BookReservation({ params }) {
                 <div>
                   {selectedDayHours && !selectedDayHours.closed && (
                     <p className="text-xs text-slate-500 mb-3">
-                      Open {selectedDayHours.open} – {selectedDayHours.close}
+                      {selectedDayHours.shifts
+                        ? selectedDayHours.shifts.map(s => `${s.open}–${s.close}`).join(' · ')
+                        : `${selectedDayHours.open}–${selectedDayHours.close}`}
                     </p>
                   )}
                   <div className="grid grid-cols-3 gap-2">

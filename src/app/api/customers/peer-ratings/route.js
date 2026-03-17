@@ -120,3 +120,88 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+
+/**
+ * GET /api/customers/peer-ratings?restaurantId=&customerId=
+ * Returns last 10 peer reviews (rating + note + venue name + date) for one customer,
+ * across all venues in the same industry category, excluding the caller's own venue.
+ */
+export async function GET(request) {
+  try {
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const token = authHeader.replace('Bearer ', '')
+    const supabaseAdmin = getSupabaseAdmin()
+
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token)
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const restaurantId = searchParams.get('restaurantId')
+    const customerId = searchParams.get('customerId')
+    if (!restaurantId || !customerId) {
+      return NextResponse.json({ reviews: [] })
+    }
+
+    // Verify caller owns this restaurant or is admin
+    const { data: restaurant } = await supabaseAdmin
+      .from('restaurants')
+      .select('id, industry_category, owner_id')
+      .eq('id', restaurantId)
+      .single()
+
+    if (!restaurant) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+    if (restaurant.owner_id !== user.id) {
+      const { data: admin } = await supabaseAdmin
+        .from('admins')
+        .select('id')
+        .eq('user_id', user.id)
+        .single()
+      if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    if (!restaurant.industry_category) {
+      return NextResponse.json({ reviews: [] })
+    }
+
+    // Peer venue IDs (same category, excluding own)
+    const { data: peerVenues } = await supabaseAdmin
+      .from('restaurants')
+      .select('id, name')
+      .eq('industry_category', restaurant.industry_category)
+      .neq('id', restaurantId)
+
+    const peerIds = (peerVenues || []).map(v => v.id)
+    if (!peerIds.length) return NextResponse.json({ reviews: [] })
+
+    const venueNameMap = {}
+    ;(peerVenues || []).forEach(v => { venueNameMap[v.id] = v.name })
+
+    // Last 10 peer reviews for this customer
+    const { data: ratings } = await supabaseAdmin
+      .from('customer_ratings')
+      .select('restaurant_id, rating, note, created_at')
+      .in('restaurant_id', peerIds)
+      .eq('customer_id', customerId)
+      .order('created_at', { ascending: false })
+      .limit(10)
+
+    const reviews = (ratings || []).map(r => ({
+      rating: r.rating,
+      note: r.note || null,
+      created_at: r.created_at,
+      venue_name: venueNameMap[r.restaurant_id] || 'Another venue',
+    }))
+
+    return NextResponse.json({ reviews })
+  } catch (err) {
+    console.error('peer-ratings GET error:', err)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
