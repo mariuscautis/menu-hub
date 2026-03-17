@@ -5,6 +5,8 @@ import { supabase } from '@/lib/supabase';
 import { useRestaurant } from '@/lib/RestaurantContext';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
 import { useAdminSupabase } from '@/hooks/useAdminSupabase';
+import PageTabs from '@/components/PageTabs';
+import { staffTabs } from '@/components/PageTabsConfig';
 
 export default function DepartmentsSettingsPage() {
   const t = useTranslations('departmentsSettings');
@@ -178,6 +180,7 @@ export default function DepartmentsSettingsPage() {
   }
   return (
     <div className="min-h-screen bg-gray-50 p-8">
+      <PageTabs tabs={staffTabs} />
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-800 mb-2">{t('title')}</h1>

@@ -88,27 +88,12 @@ export const reportsTabs = [
   },
 ]
 
+// Pills-only — staff already has a prominent hub page
 export const staffTabs = [
-  {
-    href: '/dashboard/staff',
-    label: 'Staff Members',
-    icon: icon('M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'),
-  },
-  {
-    href: '/dashboard/rota',
-    label: 'Rota',
-    icon: icon('M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'),
-  },
-  {
-    href: '/dashboard/time-off-requests',
-    label: 'Time Off',
-    icon: icon('M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'),
-  },
-  {
-    href: '/dashboard/settings/departments',
-    label: 'Departments',
-    icon: icon('M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'),
-  },
+  { href: '/dashboard/staff-members', label: 'Staff Members' },
+  { href: '/dashboard/rota', label: 'Rota' },
+  { href: '/dashboard/time-off-requests', label: 'Time Off' },
+  { href: '/dashboard/settings/departments', label: 'Departments' },
 ]
 
 export const settingsTabs = [
