@@ -1,5 +1,6 @@
 import './globals.css'
 import { ThemeProvider } from '@/lib/ThemeContext'
+import { GoogleAnalytics } from '@next/third-parties/google'
 
 export const metadata = {
   title: 'Veno App - QR Menu & Ordering for Restaurants',
@@ -33,6 +34,7 @@ export default function RootLayout({ children }) {
       <body>
         <ThemeProvider>{children}</ThemeProvider>
       </body>
+      <GoogleAnalytics gaId="G-K3Y39SW4R0" />
     </html>
   )
 }
