@@ -5,25 +5,16 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
-const VENUE_TYPES = [
-  { value: '', label: 'Select your venue type…' },
-  { value: 'restaurant', label: 'Restaurant' },
-  { value: 'cafe', label: 'Café / Coffee Shop' },
-  { value: 'bar', label: 'Bar / Pub' },
-  { value: 'fast_food', label: 'Fast Food / Takeaway' },
-  { value: 'beauty', label: 'Beauty Salon / Nail Studio' },
-  { value: 'barber', label: 'Barber Shop' },
-  { value: 'wellness', label: 'Wellness / Massage / Spa' },
-  { value: 'fitness', label: 'Personal Trainer / Gym' },
-  { value: 'medical', label: 'Medical / Dental Clinic' },
-  { value: 'pet', label: 'Pet Grooming' },
-  { value: 'photographer', label: 'Photographer / Creative Studio' },
-  { value: 'trade', label: 'Tradesperson / Contractor' },
-  { value: 'other', label: 'Other' },
+const DEFAULT_VENUE_TYPES = [
+  { value: 'beauty',     label: 'Beauty & Wellness' },
+  { value: 'fitness',    label: 'Fitness & Sport' },
+  { value: 'health',     label: 'Health & Medical' },
+  { value: 'restaurant', label: 'Restaurant / Café / Bar' },
 ]
 
 export default function Onboarding() {
   const router = useRouter()
+  const [venueTypes, setVenueTypes] = useState(DEFAULT_VENUE_TYPES)
   const [loading, setLoading] = useState(false)
   const [checking, setChecking] = useState(true)
   const [error, setError] = useState(null)
@@ -31,6 +22,7 @@ export default function Onboarding() {
   const [formData, setFormData] = useState({
     restaurantName: '',
     venueType: '',
+    venueTypeOther: '',
     phone: '',
   })
 
@@ -69,6 +61,18 @@ export default function Onboarding() {
 
       setUser(user)
       setChecking(false)
+
+      // Load industry categories from platform settings
+      supabase
+        .from('platform_settings')
+        .select('value')
+        .eq('key', 'industry_categories')
+        .single()
+        .then(({ data }) => {
+          if (data?.value?.length) {
+          setVenueTypes([...data.value].sort((a, b) => a.label.localeCompare(b.label)))
+        }
+        })
     }
     checkUser()
   }, [router])
@@ -102,6 +106,7 @@ export default function Onboarding() {
         email: user.email,
         phone: formData.phone,
         venue_type: formData.venueType,
+        venue_type_other: formData.venueType === 'other' ? formData.venueTypeOther : null,
         status: 'pending',
         trial_ends_at: trialEndsAt,
         enabled_modules: { ordering: true, analytics: true, reservations: true, rota: true },
@@ -117,6 +122,7 @@ export default function Onboarding() {
           email: user.email,
           phone: formData.phone,
           venueType: formData.venueType,
+          venueTypeOther: formData.venueType === 'other' ? formData.venueTypeOther : null,
           trialEndsAt,
         }),
       }).catch(() => {})
@@ -195,12 +201,23 @@ export default function Onboarding() {
                   required
                   className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 bg-white"
                 >
-                  {VENUE_TYPES.map(({ value, label }) => (
-                    <option key={value} value={value} disabled={value === ''}>
-                      {label}
-                    </option>
+                  <option value="" disabled>Select your venue type…</option>
+                  {venueTypes.map(({ value, label }) => (
+                    <option key={value} value={value}>{label}</option>
                   ))}
+                  <option value="other">Other — tell us more</option>
                 </select>
+                {formData.venueType === 'other' && (
+                  <textarea
+                    name="venueTypeOther"
+                    value={formData.venueTypeOther}
+                    onChange={handleChange}
+                    required
+                    rows={2}
+                    className="w-full mt-2 px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 bg-white resize-none"
+                    placeholder="Tell us more about your business in a few words here"
+                  />
+                )}
               </div>
 
               <div>

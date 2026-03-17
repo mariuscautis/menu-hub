@@ -15,8 +15,37 @@ export async function POST(request) {
       location,
       phone,
       email,
-      message
+      message,
+      _trap,
+      _turnstile,
     } = body
+
+    // Honeypot — bots fill hidden fields, humans don't
+    if (_trap) {
+      // Silently pretend success so bots don't retry
+      return NextResponse.json({ success: true })
+    }
+
+    // Turnstile verification (skip if secret not configured — allows local dev)
+    const turnstileSecret = process.env.TURNSTILE_SECRET_KEY
+    if (turnstileSecret && _turnstile) {
+      const verifyRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          secret: turnstileSecret,
+          response: _turnstile,
+          remoteip: request.headers.get('CF-Connecting-IP') ?? undefined,
+        }),
+      })
+      const verifyData = await verifyRes.json()
+      if (!verifyData.success) {
+        return NextResponse.json({ error: 'Security check failed. Please refresh and try again.' }, { status: 400 })
+      }
+    } else if (turnstileSecret && !_turnstile) {
+      // Secret is set but no token provided — block
+      return NextResponse.json({ error: 'Security check missing. Please refresh and try again.' }, { status: 400 })
+    }
 
     // Validate required fields
     if (!firstName || !lastName || !businessName || !businessType || !location || !phone || !email) {
