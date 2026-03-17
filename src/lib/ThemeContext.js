@@ -9,10 +9,8 @@ const ThemeContext = createContext({
 
 export function ThemeProvider({ children }) {
   const [isDark, setIsDark] = useState(false)
-  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
     const savedTheme = localStorage.getItem('theme')
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
 
@@ -37,10 +35,6 @@ export function ThemeProvider({ children }) {
       }
       return newValue
     })
-  }
-
-  if (!mounted) {
-    return <>{children}</>
   }
 
   return (
