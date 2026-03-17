@@ -119,8 +119,6 @@ export default function ServicePageLayout({ children }) {
               <ul className="space-y-3 text-sm text-slate-400">
                 <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
                 <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
-                <li><Link href="/careers" className="hover:text-white transition-colors">Careers</Link></li>
-                <li><Link href="/blog" className="hover:text-white transition-colors">Blog</Link></li>
               </ul>
             </div>
 
@@ -129,9 +127,6 @@ export default function ServicePageLayout({ children }) {
               <h4 className="font-semibold text-white mb-4">Support</h4>
               <ul className="space-y-3 text-sm text-slate-400">
                 <li><Link href="/help" className="hover:text-white transition-colors">Help Center</Link></li>
-                <li><Link href="/docs" className="hover:text-white transition-colors">Documentation</Link></li>
-                <li><Link href="/api" className="hover:text-white transition-colors">API Reference</Link></li>
-                <li><Link href="/status" className="hover:text-white transition-colors">System Status</Link></li>
               </ul>
             </div>
 

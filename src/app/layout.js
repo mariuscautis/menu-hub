@@ -5,14 +5,6 @@ export const metadata = {
   title: 'Veno App - QR Menu & Ordering for Restaurants',
   description: 'Let your customers scan, browse your menu, and order directly from their table.',
   manifest: '/api/manifest',
-  robots: {
-    index: false,
-    follow: false,
-    googleBot: {
-      index: false,
-      follow: false,
-    },
-  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',

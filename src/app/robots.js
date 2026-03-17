@@ -2,7 +2,8 @@ export default function robots() {
   return {
     rules: {
       userAgent: '*',
-      disallow: '/',
+      allow: '/',
+      disallow: ['/dashboard', '/admin', '/staff-dashboard', '/auth/callback'],
     },
   }
 }
