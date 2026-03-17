@@ -15,7 +15,7 @@ export default function ServicePageLayout({ children }) {
           <div className="flex justify-between items-center h-16 lg:h-20">
             {/* Logo */}
             <Link href="/" className="flex items-center">
-              <PlatformLogo size="md" />
+              <PlatformLogo size="md" stacked={false} />
             </Link>
 
             {/* Desktop Navigation */}
@@ -94,7 +94,7 @@ export default function ServicePageLayout({ children }) {
             {/* Brand */}
             <div className="col-span-2 lg:col-span-1">
               <Link href="/" className="flex items-center mb-6">
-                <PlatformLogo size="md" darkMode={true} />
+                <PlatformLogo size="md" darkMode={true} stacked={false} />
               </Link>
               <p className="text-slate-400 text-sm leading-relaxed">
                 The complete restaurant management platform. Simplify operations, delight customers.
