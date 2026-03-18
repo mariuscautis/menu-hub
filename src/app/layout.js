@@ -25,6 +25,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
+        <link rel="icon" href="/api/favicon" />
         <link rel="apple-touch-icon" sizes="192x192" href="/api/icon/192" />
         <link rel="apple-touch-icon" sizes="512x512" href="/api/icon/512" />
         <meta name="apple-mobile-web-app-capable" content="yes" />

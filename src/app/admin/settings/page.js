@@ -28,6 +28,9 @@ export default function AdminSettings() {
   const [logoPreview, setLogoPreview] = useState(null)
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const logoInputRef = useRef(null)
+  const [faviconPreview, setFaviconPreview] = useState(null)
+  const [uploadingFavicon, setUploadingFavicon] = useState(false)
+  const faviconInputRef = useRef(null)
 
   // Industry categories
   const [categories, setCategories] = useState([])
@@ -61,6 +64,7 @@ export default function AdminSettings() {
     if (data?.value) {
       setBranding(prev => ({ ...prev, ...data.value }))
       if (data.value.logo_url) setLogoPreview(data.value.logo_url)
+      if (data.value.favicon_url) setFaviconPreview(data.value.favicon_url)
     }
     setLoading(false)
   }
@@ -222,6 +226,57 @@ export default function AdminSettings() {
     setLogoPreview(null)
   }
 
+  const handleFaviconUpload = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      setMessage({ type: 'error', text: 'Please upload an image file' })
+      return
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      setMessage({ type: 'error', text: 'Favicon must be less than 2MB' })
+      return
+    }
+
+    setUploadingFavicon(true)
+    setMessage(null)
+
+    try {
+      const reader = new FileReader()
+      reader.onloadend = () => setFaviconPreview(reader.result)
+      reader.readAsDataURL(file)
+
+      const fileExt = file.name.split('.').pop()
+      const filePath = `branding/platform-favicon.${fileExt}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('platform-assets')
+        .upload(filePath, file, { upsert: true })
+
+      if (uploadError) throw uploadError
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('platform-assets')
+        .getPublicUrl(filePath)
+
+      const faviconUrl = `${publicUrl}?t=${Date.now()}`
+      setBranding(prev => ({ ...prev, favicon_url: faviconUrl }))
+      setMessage({ type: 'success', text: 'Favicon uploaded successfully!' })
+    } catch (error) {
+      console.error('Favicon upload error:', error)
+      setMessage({ type: 'error', text: 'Failed to upload favicon' })
+    }
+
+    setUploadingFavicon(false)
+  }
+
+  const removeFavicon = () => {
+    setBranding(prev => ({ ...prev, favicon_url: null }))
+    setFaviconPreview(null)
+  }
+
   const handleSave = async () => {
     setSaving(true)
     setMessage(null)
@@ -357,6 +412,79 @@ export default function AdminSettings() {
             </button>
             <p className="text-xs text-slate-500 mt-2">
               Recommended: Square image, at least 256x256 pixels. Max 5MB.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Favicon Upload */}
+      <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
+        <h2 className="text-lg font-bold text-slate-700 mb-4">Favicon</h2>
+        <p className="text-sm text-slate-500 mb-4">
+          The small icon shown in browser tabs. Recommended: square PNG or ICO, at least 32×32 pixels.
+        </p>
+
+        <div className="flex items-start gap-6">
+          {/* Preview */}
+          <div className="flex-shrink-0">
+            {faviconPreview ? (
+              <div className="relative">
+                <img
+                  src={faviconPreview}
+                  alt="Favicon preview"
+                  className="w-16 h-16 object-contain rounded-xl border-2 border-slate-200 bg-slate-50"
+                />
+                <button
+                  onClick={removeFavicon}
+                  className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                  </svg>
+                </button>
+              </div>
+            ) : (
+              <div className="w-16 h-16 bg-slate-100 border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center">
+                <svg className="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+            )}
+          </div>
+
+          {/* Upload Button */}
+          <div className="flex-1">
+            <input
+              ref={faviconInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFaviconUpload}
+              className="hidden"
+            />
+            <button
+              onClick={() => faviconInputRef.current?.click()}
+              disabled={uploadingFavicon}
+              className="px-6 py-3 bg-[#6262bd] text-white rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 transition-all flex items-center gap-2"
+            >
+              {uploadingFavicon ? (
+                <>
+                  <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                  </svg>
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
+                  </svg>
+                  Upload Favicon
+                </>
+              )}
+            </button>
+            <p className="text-xs text-slate-500 mt-2">
+              Square PNG or ICO recommended. Max 2MB.
             </p>
           </div>
         </div>
