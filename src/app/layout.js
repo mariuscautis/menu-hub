@@ -8,7 +8,7 @@ export const metadata = {
   manifest: '/api/manifest',
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'default',
+    statusBarStyle: 'black-translucent',
     title: 'Veno App'
   }
 }
@@ -29,7 +29,7 @@ export default function RootLayout({ children }) {
         <link rel="apple-touch-icon" sizes="192x192" href="/api/icon/192" />
         <link rel="apple-touch-icon" sizes="512x512" href="/api/icon/512" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Veno App" />
       </head>
       <body>

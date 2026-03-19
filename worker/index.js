@@ -7,6 +7,14 @@
  * returns, even if the user has closed the tab.
  */
 
+// When skipWaiting activates a new SW, immediately claim all open clients so
+// every tab is controlled by the new worker. Without this, a tab opened under
+// the old SW keeps using the old fetch handlers even after the new SW activates,
+// which can result in stale cached HTML referencing old JS chunk hashes.
+self.addEventListener('activate', (event) => {
+  event.waitUntil(self.clients.claim())
+})
+
 const DB_NAME = 'menuhub-offline'
 const DB_VERSION = 1
 const ORDERS_STORE = 'pending_orders'

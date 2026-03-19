@@ -126,200 +126,230 @@ export default function DashboardLayout({ children }) {
   }
 
   useEffect(() => {
-    const init = async () => {
-      // Check for staff session first (PIN-based login)
-      const staffSessionData = localStorage.getItem('staff_session')
-      if (staffSessionData) {
-        try {
-          const staffSession = JSON.parse(staffSessionData)
+    // Safety net: if init() hangs for any reason (e.g. Supabase stalls on a
+    // cold PWA launch, flaky network, Android WebView reconnecting), ensure
+    // loading is cleared after 10s so the screen never stays frozen.
+    const safetyTimer = setTimeout(() => {
+      setLoading(false)
+    }, 10000)
 
-          // Set cached data immediately so the UI works even offline
-          setRestaurant(staffSession.restaurant)
-          const staffType = staffSession.role === 'admin' ? 'staff-admin' : 'staff'
+    const init = async () => {
+      try {
+        // Check for staff session first (PIN-based login)
+        const staffSessionData = localStorage.getItem('staff_session')
+        if (staffSessionData) {
+          try {
+            const staffSession = JSON.parse(staffSessionData)
+
+            // Set cached data immediately so the UI works even offline
+            setRestaurant(staffSession.restaurant)
+            const staffType = staffSession.role === 'admin' ? 'staff-admin' : 'staff'
+            setUserType(staffType)
+            setUserEmail(staffSession.email)
+            setStaffName(staffSession.name || '')
+            setStaffAvatar(staffSession.avatar_url || null)
+            const dept = staffSession.department || 'universal'
+            setStaffDepartment(dept)
+
+            // Load cached department permissions immediately (so UI works offline)
+            if (staffType === 'staff') {
+              const permissions = await fetchDepartmentPermissions(staffSession.restaurant_id, dept)
+              setDepartmentPermissions(permissions)
+            }
+
+            // Mark loading done with cached data before hitting the network —
+            // the UI is already fully functional at this point.
+            setLoading(false)
+
+            // Try to fetch fresh data in the background (non-blocking)
+            try {
+              const { data: freshRestaurant } = await supabase
+                .from('restaurants')
+                .select('id, name, slug, logo_url, invoice_settings, enabled_modules, reservation_settings')
+                .eq('id', staffSession.restaurant_id)
+                .single()
+
+              if (freshRestaurant) {
+                setRestaurant(freshRestaurant)
+              }
+
+              // Refresh department permissions with fresh data (only for regular staff)
+              if (staffType === 'staff') {
+                const freshPermissions = await fetchDepartmentPermissions(staffSession.restaurant_id, dept)
+                setDepartmentPermissions(freshPermissions)
+              }
+            } catch (networkErr) {
+              // Offline or network error — cached data already shown
+              console.warn('Offline: using cached staff session data')
+            }
+
+            return
+          } catch (err) {
+            // Invalid session, clear it
+            localStorage.removeItem('staff_session')
+          }
+        }
+
+        // Check for owner/admin auth session.
+        // Race against a 8s timeout so a stalled Supabase auth call
+        // (common on Android cold start) doesn't freeze the app forever.
+        let user = null
+        try {
+          const authResult = await Promise.race([
+            supabase.auth.getUser(),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error('auth_timeout')), 8000)
+            )
+          ])
+          user = authResult?.data?.user
+        } catch (authErr) {
+          if (authErr.message === 'auth_timeout') {
+            console.warn('Auth timed out — redirecting to login')
+          } else {
+            // Offline and no staff session — can't authenticate
+            console.warn('Offline: cannot authenticate owner session')
+          }
+          setLoading(false)
+          return
+        }
+
+        if (!user) {
+          router.push('/auth/login')
+          return
+        }
+
+        setUserEmail(user.email)
+        let debugText = `User: ${user.email} (${user.id})\n\n`
+
+        // Check if platform admin
+        const { data: admin } = await supabase
+          .from('admins')
+          .select('id')
+          .eq('user_id', user.id)
+
+        const isPlatAdmin = admin && admin.length > 0
+        setIsPlatformAdmin(isPlatAdmin)
+        debugText += `Platform Admin: ${isPlatAdmin}\n\n`
+
+        // Check for impersonation session (platform admin only)
+        if (isPlatAdmin) {
+          try {
+            const impersonationData = sessionStorage.getItem('impersonation_session')
+            if (impersonationData) {
+              const { restaurantId, restaurantName } = JSON.parse(impersonationData)
+              const { data: targetRestaurant } = await supabase
+                .from('restaurants')
+                .select('*')
+                .eq('id', restaurantId)
+                .single()
+              if (targetRestaurant) {
+                setRestaurant(targetRestaurant)
+                setUserType('owner')
+                setIsImpersonating(true)
+                setImpersonatedRestaurantName(restaurantName)
+                setLoading(false)
+                return
+              }
+            }
+          } catch {
+            // Malformed impersonation data — ignore and continue normal flow
+            sessionStorage.removeItem('impersonation_session')
+          }
+        }
+
+        // Check if restaurant owner
+        const { data: ownedRestaurant, error: ownedError } = await supabase
+          .from('restaurants')
+          .select('*')
+          .eq('owner_id', user.id)
+          .maybeSingle()
+
+        debugText += `Owned Restaurant Query:\n`
+        debugText += `  Result: ${JSON.stringify(ownedRestaurant)}\n`
+        debugText += `  Error: ${ownedError?.message || 'none'}\n\n`
+
+        if (ownedRestaurant) {
+          setRestaurant(ownedRestaurant)
+          setUserType('owner')
+          debugText += `User Type: owner\n`
+          setDebug(debugText)
+          setLoading(false)
+          return
+        }
+
+        // Check if staff member by user_id (preferred) or email (fallback)
+        const { data: staffRecord, error: staffError } = await supabase
+          .from('staff')
+          .select('*, restaurants(*)')
+          .or(`user_id.eq.${user.id},email.eq.${user.email}`)
+
+        debugText += `Staff Query (by user_id or email):\n`
+        debugText += `  Result: ${JSON.stringify(staffRecord)}\n`
+        debugText += `  Error: ${staffError?.message || 'none'}\n\n`
+
+        // Filter for active staff
+        const activeStaff = staffRecord?.find(s => s.status === 'active')
+        const pendingStaff = staffRecord?.find(s => s.status === 'pending')
+
+        debugText += `Active Staff: ${JSON.stringify(activeStaff)}\n`
+        debugText += `Pending Staff: ${JSON.stringify(pendingStaff)}\n\n`
+
+        if (activeStaff && activeStaff.restaurants) {
+          if (!activeStaff.user_id) {
+            await supabase
+              .from('staff')
+              .update({ user_id: user.id })
+              .eq('id', activeStaff.id)
+          }
+
+          setRestaurant(activeStaff.restaurants)
+          const staffType = activeStaff.role === 'admin' ? 'staff-admin' : 'staff'
           setUserType(staffType)
-          setUserEmail(staffSession.email)
-          setStaffName(staffSession.name || '')
-          setStaffAvatar(staffSession.avatar_url || null)
-          const dept = staffSession.department || 'universal'
+          const dept = activeStaff.department || 'kitchen'
           setStaffDepartment(dept)
 
-          // Load cached department permissions immediately (so UI works offline)
+          // Fetch department permissions (only for regular staff, not admins)
           if (staffType === 'staff') {
-            const permissions = await fetchDepartmentPermissions(staffSession.restaurant_id, dept)
+            const permissions = await fetchDepartmentPermissions(activeStaff.restaurants.id, dept)
             setDepartmentPermissions(permissions)
           }
 
-          // Try to fetch fresh data (non-blocking — falls back to cached if offline)
-          try {
-            const { data: freshRestaurant } = await supabase
-              .from('restaurants')
-              .select('id, name, slug, logo_url, invoice_settings, enabled_modules, reservation_settings')
-              .eq('id', staffSession.restaurant_id)
-              .single()
-
-            if (freshRestaurant) {
-              setRestaurant(freshRestaurant)
-            }
-
-            // Refresh department permissions with fresh data (only for regular staff)
-            if (staffType === 'staff') {
-              const freshPermissions = await fetchDepartmentPermissions(staffSession.restaurant_id, dept)
-              setDepartmentPermissions(freshPermissions)
-            }
-          } catch (networkErr) {
-            // Offline or network error — cached data already set above
-            console.warn('Offline: using cached staff session data')
-          }
-
+          debugText += `User Type: ${staffType}\n`
+          debugText += `Department: ${dept}\n`
+          setDebug(debugText)
           setLoading(false)
           return
-        } catch (err) {
-          // Invalid session, clear it
-          localStorage.removeItem('staff_session')
         }
-      }
 
-      // Check for owner/admin auth session
-      let user = null
-      try {
-        const { data } = await supabase.auth.getUser()
-        user = data?.user
-      } catch (authErr) {
-        // Offline and no staff session — can't authenticate
-        console.warn('Offline: cannot authenticate owner session')
+        if (pendingStaff) {
+          debugText += `Redirecting to pending page\n`
+          setDebug(debugText)
+          router.push('/auth/pending')
+          return
+        }
+
+        // If platform admin without restaurant
+        if (isPlatAdmin) {
+          debugText += `Platform admin without restaurant, redirecting to /admin\n`
+          setDebug(debugText)
+          router.push('/admin')
+          return
+        }
+
+        debugText += `No restaurant or staff, redirecting to onboarding\n`
+        setDebug(debugText)
+        router.push('/auth/onboarding')
+      } finally {
+        // Always cancel the safety timer — either we finished normally,
+        // or an unexpected throw happened. Either way, clear loading.
+        clearTimeout(safetyTimer)
         setLoading(false)
-        return
       }
-
-      if (!user) {
-        router.push('/auth/login')
-        return
-      }
-
-      setUserEmail(user.email)
-      let debugText = `User: ${user.email} (${user.id})\n\n`
-
-      // Check if platform admin
-      const { data: admin } = await supabase
-        .from('admins')
-        .select('id')
-        .eq('user_id', user.id)
-
-      const isPlatAdmin = admin && admin.length > 0
-      setIsPlatformAdmin(isPlatAdmin)
-      debugText += `Platform Admin: ${isPlatAdmin}\n\n`
-
-      // Check for impersonation session (platform admin only)
-      if (isPlatAdmin) {
-        try {
-          const impersonationData = sessionStorage.getItem('impersonation_session')
-          if (impersonationData) {
-            const { restaurantId, restaurantName } = JSON.parse(impersonationData)
-            const { data: targetRestaurant } = await supabase
-              .from('restaurants')
-              .select('*')
-              .eq('id', restaurantId)
-              .single()
-            if (targetRestaurant) {
-              setRestaurant(targetRestaurant)
-              setUserType('owner')
-              setIsImpersonating(true)
-              setImpersonatedRestaurantName(restaurantName)
-              setLoading(false)
-              return
-            }
-          }
-        } catch {
-          // Malformed impersonation data — ignore and continue normal flow
-          sessionStorage.removeItem('impersonation_session')
-        }
-      }
-
-      // Check if restaurant owner
-      const { data: ownedRestaurant, error: ownedError } = await supabase
-        .from('restaurants')
-        .select('*')
-        .eq('owner_id', user.id)
-        .maybeSingle()
-
-      debugText += `Owned Restaurant Query:\n`
-      debugText += `  Result: ${JSON.stringify(ownedRestaurant)}\n`
-      debugText += `  Error: ${ownedError?.message || 'none'}\n\n`
-
-      if (ownedRestaurant) {
-        setRestaurant(ownedRestaurant)
-        setUserType('owner')
-        debugText += `User Type: owner\n`
-        setDebug(debugText)
-        setLoading(false)
-        return
-      }
-
-      // Check if staff member by user_id (preferred) or email (fallback)
-      const { data: staffRecord, error: staffError } = await supabase
-        .from('staff')
-        .select('*, restaurants(*)')
-        .or(`user_id.eq.${user.id},email.eq.${user.email}`)
-
-      debugText += `Staff Query (by user_id or email):\n`
-      debugText += `  Result: ${JSON.stringify(staffRecord)}\n`
-      debugText += `  Error: ${staffError?.message || 'none'}\n\n`
-
-      // Filter for active staff
-      const activeStaff = staffRecord?.find(s => s.status === 'active')
-      const pendingStaff = staffRecord?.find(s => s.status === 'pending')
-
-      debugText += `Active Staff: ${JSON.stringify(activeStaff)}\n`
-      debugText += `Pending Staff: ${JSON.stringify(pendingStaff)}\n\n`
-
-      if (activeStaff && activeStaff.restaurants) {
-        if (!activeStaff.user_id) {
-          await supabase
-            .from('staff')
-            .update({ user_id: user.id })
-            .eq('id', activeStaff.id)
-        }
-
-        setRestaurant(activeStaff.restaurants)
-        const staffType = activeStaff.role === 'admin' ? 'staff-admin' : 'staff'
-        setUserType(staffType)
-        const dept = activeStaff.department || 'kitchen'
-        setStaffDepartment(dept)
-
-        // Fetch department permissions (only for regular staff, not admins)
-        if (staffType === 'staff') {
-          const permissions = await fetchDepartmentPermissions(activeStaff.restaurants.id, dept)
-          setDepartmentPermissions(permissions)
-        }
-
-        debugText += `User Type: ${staffType}\n`
-        debugText += `Department: ${dept}\n`
-        setDebug(debugText)
-        setLoading(false)
-        return
-      }
-
-      if (pendingStaff) {
-        debugText += `Redirecting to pending page\n`
-        setDebug(debugText)
-        router.push('/auth/pending')
-        return
-      }
-
-      // If platform admin without restaurant
-      if (isPlatAdmin) {
-        debugText += `Platform admin without restaurant, redirecting to /admin\n`
-        setDebug(debugText)
-        router.push('/admin')
-        return
-      }
-
-      debugText += `No restaurant or staff, redirecting to onboarding\n`
-      setDebug(debugText)
-      router.push('/auth/onboarding')
     }
 
     init()
+
+    return () => clearTimeout(safetyTimer)
   }, [router])
 
   // Fetch and subscribe to pending reservations count (only for non-kitchen staff)

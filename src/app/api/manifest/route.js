@@ -50,11 +50,14 @@ export async function GET() {
     }
 
     const manifest = {
+      id: '/',
       name: `${platformName} - Restaurant Management`,
       short_name: platformName,
       description: 'Complete restaurant management system for orders, reservations, staff, and inventory',
       start_url: '/',
+      scope: '/',
       display: 'standalone',
+      display_override: ['standalone', 'minimal-ui'],
       background_color: backgroundColor,
       theme_color: themeColor,
       orientation: 'portrait-primary',
@@ -89,7 +92,11 @@ export async function GET() {
     return NextResponse.json(manifest, {
       headers: {
         'Content-Type': 'application/manifest+json',
-        'Cache-Control': 'no-cache, no-store, must-revalidate'
+        // Allow browsers/CDN to cache for 1 hour and serve stale while
+        // revalidating in the background. A no-cache manifest causes Chrome
+        // to wait for the Supabase fetch on every PWA launch — if it's slow,
+        // Chrome falls back to browser mode and shows the "venoapp.com ✕" bar.
+        'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400'
       }
     })
   } catch (error) {
@@ -97,11 +104,14 @@ export async function GET() {
 
     // Return default manifest on error
     const defaultManifest = {
+      id: '/',
       name: 'Veno App - Restaurant Management',
       short_name: 'Veno App',
       description: 'Complete restaurant management system for orders, reservations, staff, and inventory',
       start_url: '/',
+      scope: '/',
       display: 'standalone',
+      display_override: ['standalone', 'minimal-ui'],
       background_color: '#ffffff',
       theme_color: '#6262bd',
       orientation: 'portrait-primary',

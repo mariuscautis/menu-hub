@@ -30,7 +30,21 @@ const pwaConfig = withPWA({
     document: '/offline.html', // Fallback page when offline and page not cached
   },
   runtimeCaching: [
-    // Cache HTML pages with network-first strategy and offline fallback
+    // Cache the dynamic manifest so the PWA can launch offline
+    {
+      urlPattern: /\/api\/manifest/i,
+      handler: 'StaleWhileRevalidate',
+      options: {
+        cacheName: 'manifest-cache',
+        expiration: {
+          maxEntries: 1,
+          maxAgeSeconds: 24 * 60 * 60 // 24 hours
+        }
+      }
+    },
+    // Cache HTML pages with network-first strategy and offline fallback.
+    // TTL kept at 1 day (down from 7) so stale HTML referencing old JS chunk
+    // hashes is evicted quickly after a service worker update.
     {
       urlPattern: /^https?:\/\/.*\/(?:dashboard|r\/|staff|hub).*$/i,
       handler: 'NetworkFirst',
@@ -38,7 +52,7 @@ const pwaConfig = withPWA({
         cacheName: 'pages-cache',
         expiration: {
           maxEntries: 50,
-          maxAgeSeconds: 7 * 24 * 60 * 60 // 7 days
+          maxAgeSeconds: 24 * 60 * 60 // 1 day
         },
         networkTimeoutSeconds: 5,
       }

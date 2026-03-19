@@ -9,10 +9,15 @@
     --color-primary-light: 124 124 229;
   }
 
-  html {
+  html,
+  body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    /* Prevent native pull-to-refresh in PWA standalone mode — swiping down
+       was triggering a full location.reload() which unmounted the React app
+       and caused the permanent "Loading..." freeze. */
+    overscroll-behavior-y: none;
   }
 
   .dark {

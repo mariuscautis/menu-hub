@@ -1,9 +1,12 @@
 {
+  "id": "/",
   "name": "Menu Hub - Restaurant Management",
   "short_name": "Menu Hub",
   "description": "Complete restaurant management system for orders, reservations, staff, and inventory",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "background_color": "#ffffff",
   "theme_color": "#6262bd",
   "orientation": "portrait-primary",
