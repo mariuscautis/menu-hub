@@ -33,6 +33,8 @@ export default function DashboardLayout({ children }) {
   const [recoveryLoading, setRecoveryLoading] = useState(false)
   const [pendingOrdersCount, setPendingOrdersCount] = useState(0)
   const [unreadSupportCount, setUnreadSupportCount] = useState(0)
+  const [staffAvatar, setStaffAvatar] = useState(null)
+  const [staffName, setStaffName] = useState('')
 
   // Responsive state - works on all devices
   const [sidebarOpen, setSidebarOpen] = useState(true) // Start with sidebar open on desktop
@@ -136,6 +138,8 @@ export default function DashboardLayout({ children }) {
           const staffType = staffSession.role === 'admin' ? 'staff-admin' : 'staff'
           setUserType(staffType)
           setUserEmail(staffSession.email)
+          setStaffName(staffSession.name || '')
+          setStaffAvatar(staffSession.avatar_url || null)
           const dept = staffSession.department || 'universal'
           setStaffDepartment(dept)
 
@@ -1290,7 +1294,22 @@ export default function DashboardLayout({ children }) {
           <div className={`flex items-center ${sidebarOpen ? 'justify-between' : 'justify-center'}`}>
             {sidebarOpen ? (
               <div className="flex items-center space-x-2 flex-1 min-w-0">
-                {restaurant?.logo_url ? (
+                {(userType === 'staff' || userType === 'staff-admin') ? (
+                  <div className="flex flex-col items-center w-full">
+                    {staffAvatar ? (
+                      <img src={staffAvatar} alt={staffName} className="w-14 h-14 rounded-full object-cover border-2 border-[#6262bd]/20" />
+                    ) : (
+                      <div className="w-14 h-14 rounded-full bg-[#6262bd]/10 dark:bg-[#6262bd]/20 flex items-center justify-center">
+                        <svg className="w-7 h-7 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                      </div>
+                    )}
+                    <span className="mt-2 text-sm font-semibold text-slate-700 dark:text-slate-200 truncate max-w-full text-center">
+                      {staffName || restaurant?.name || 'Veno App'}
+                    </span>
+                  </div>
+                ) : restaurant?.logo_url ? (
                   <>
                     <div className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800 flex-shrink-0">
                       <img
@@ -1309,7 +1328,15 @@ export default function DashboardLayout({ children }) {
               </div>
             ) : (
               <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800">
-                {restaurant?.logo_url ? (
+                {(userType === 'staff' || userType === 'staff-admin') ? (
+                  staffAvatar ? (
+                    <img src={staffAvatar} alt={staffName} className="w-full h-full object-cover rounded-full" />
+                  ) : (
+                    <svg className="w-5 h-5 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                  )
+                ) : restaurant?.logo_url ? (
                   <img src={restaurant.logo_url} alt={restaurant.name} className="max-w-full max-h-full object-contain" />
                 ) : (
                   <PlatformLogo size="sm" />

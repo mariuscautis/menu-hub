@@ -278,6 +278,7 @@ export default function StaffLogin() {
   const [loggingIn, setLoggingIn] = useState(false)
 
   const [isOfflineMode, setIsOfflineMode] = useState(false)
+  const [currentSession, setCurrentSession] = useState(null) // staff session already in localStorage
 
   useEffect(() => {
     const fetchRestaurant = async () => {
@@ -330,7 +331,7 @@ export default function StaffLogin() {
         // Fetch and cache staff list for future offline use
         const { data: staffList } = await supabase
           .from('staff')
-          .select('id, name, email, pin_code, role, department, restaurant_id, status, is_hub')
+          .select('id, name, email, pin_code, role, department, restaurant_id, status, is_hub, avatar_url')
           .eq('restaurant_id', restaurantData.id)
           .eq('status', 'active')
 
@@ -371,6 +372,12 @@ export default function StaffLogin() {
     }
 
     fetchRestaurant()
+
+    // Read any existing staff session from localStorage
+    try {
+      const raw = localStorage.getItem('staff_session')
+      if (raw) setCurrentSession(JSON.parse(raw))
+    } catch {}
   }, [slug])
 
   const handlePasswordSubmit = async (e) => {
@@ -451,7 +458,8 @@ export default function StaffLogin() {
         department: staffMember.department,
         restaurant_id: staffMember.restaurant_id,
         restaurant: restaurant,
-        is_hub: staffMember.is_hub || false
+        is_hub: staffMember.is_hub || false,
+        avatar_url: staffMember.avatar_url || null
       }))
 
       // Redirect to hub dashboard if this is a hub user
@@ -521,13 +529,14 @@ export default function StaffLogin() {
         department: staffMember.department,
         restaurant_id: staffMember.restaurant_id,
         restaurant: restaurant,
-        is_hub: staffMember.is_hub || false
+        is_hub: staffMember.is_hub || false,
+        avatar_url: staffMember.avatar_url || null
       }))
 
       // Refresh the offline cache with latest staff data
       const { data: staffList } = await supabase
         .from('staff')
-        .select('id, name, email, pin_code, role, department, restaurant_id, status, is_hub')
+        .select('id, name, email, pin_code, role, department, restaurant_id, status, is_hub, avatar_url')
         .eq('restaurant_id', restaurant.id)
         .eq('status', 'active')
 
@@ -560,7 +569,8 @@ export default function StaffLogin() {
             department: staffMember.department,
             restaurant_id: staffMember.restaurant_id,
             restaurant: restaurant,
-            is_hub: staffMember.is_hub || false
+            is_hub: staffMember.is_hub || false,
+            avatar_url: staffMember.avatar_url || null
           }))
           // Redirect to hub dashboard if this is a hub user
           if (staffMember.is_hub) {
@@ -730,21 +740,46 @@ export default function StaffLogin() {
     <div className="h-screen bg-slate-50 flex flex-col overflow-hidden">
       {/* Header */}
       <div className="bg-white border-b-2 border-slate-100 px-6 py-4 shrink-0">
-        <div className="flex items-center space-x-2">
-          {restaurant?.logo_url ? (
-            <img
-              src={restaurant.logo_url}
-              alt={restaurant.name}
-              className="w-9 h-9 object-contain rounded-xl"
-            />
-          ) : (
-            <div className="w-9 h-9 bg-[#6262bd] rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-lg">
-                {restaurant?.name?.charAt(0) || 'M'}
-              </span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            {restaurant?.logo_url ? (
+              <img
+                src={restaurant.logo_url}
+                alt={restaurant.name}
+                className="w-9 h-9 object-contain rounded-xl"
+              />
+            ) : (
+              <div className="w-9 h-9 bg-[#6262bd] rounded-xl flex items-center justify-center">
+                <span className="text-white font-bold text-lg">
+                  {restaurant?.name?.charAt(0) || 'M'}
+                </span>
+              </div>
+            )}
+            <span className="text-xl font-bold text-slate-700">{restaurant?.name || 'Veno App'}</span>
+          </div>
+
+          {/* Currently logged-in staff member indicator */}
+          {currentSession && (
+            <div className="flex items-center gap-3">
+              <div className="text-right hidden sm:block">
+                <p className="text-xs text-slate-400">Logged in as</p>
+                <p className="text-sm font-semibold text-slate-700">{currentSession.name}</p>
+              </div>
+              {currentSession.avatar_url ? (
+                <img
+                  src={currentSession.avatar_url}
+                  alt={currentSession.name}
+                  className="w-10 h-10 rounded-full object-cover border-2 border-[#6262bd]/30"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-[#6262bd]/10 border-2 border-[#6262bd]/30 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                  </svg>
+                </div>
+              )}
             </div>
           )}
-          <span className="text-xl font-bold text-slate-700">{restaurant?.name || 'Veno App'}</span>
         </div>
       </div>
 

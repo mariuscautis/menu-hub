@@ -1,11 +1,26 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
+import { supabase } from '@/lib/supabase'
 import PageTabs from '@/components/PageTabs'
 import { staffTabs } from '@/components/PageTabsConfig'
+
+function StaffAvatar({ avatarUrl, name, size = 'md' }) {
+  const sizeClasses = size === 'sm' ? 'w-8 h-8 text-xs' : 'w-10 h-10 text-sm'
+  if (avatarUrl) {
+    return <img src={avatarUrl} alt={name} className={`${sizeClasses} rounded-full object-cover flex-shrink-0 border-2 border-slate-100 dark:border-slate-700`} />
+  }
+  return (
+    <div className={`${sizeClasses} rounded-full bg-[#6262bd]/10 dark:bg-[#6262bd]/20 flex items-center justify-center flex-shrink-0`}>
+      <svg className={size === 'sm' ? 'w-4 h-4' : 'w-5 h-5'} fill="#6262bd" viewBox="0 0 24 24">
+        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+      </svg>
+    </div>
+  )
+}
 
 export default function StaffMembers() {
   const t = useTranslations('staff')
@@ -34,6 +49,8 @@ export default function StaffMembers() {
   const [passwordData, setPasswordData] = useState({
     newPassword: ''
   })
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const avatarInputRef = useRef(null)
 
   useEffect(() => {
     fetchData()
@@ -205,6 +222,27 @@ export default function StaffMembers() {
     }
   }
 
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file || !selectedStaff) return
+    if (!file.type.startsWith('image/')) { alert('Please select an image file.'); return }
+    if (file.size > 2 * 1024 * 1024) { alert('Image must be under 2MB.'); return }
+    setUploadingAvatar(true)
+    try {
+      const ext = file.name.split('.').pop()
+      const path = `${restaurant.id}/${selectedStaff.id}/avatar.${ext}`
+      const { error: uploadError } = await supabase.storage.from('restaurant-logos').upload(path, file, { upsert: true })
+      if (uploadError) throw uploadError
+      const { data: { publicUrl } } = supabase.storage.from('restaurant-logos').getPublicUrl(path)
+      await supabase.from('staff').update({ avatar_url: publicUrl }).eq('id', selectedStaff.id)
+      setSelectedStaff(prev => ({ ...prev, avatar_url: publicUrl }))
+      setStaff(prev => prev.map(m => m.id === selectedStaff.id ? { ...m, avatar_url: publicUrl } : m))
+    } catch (err) {
+      alert('Failed to upload avatar: ' + err.message)
+    }
+    setUploadingAvatar(false)
+  }
+
   const deleteStaff = async (id, name) => {
     if (!confirm(t('removeStaffConfirm').replace('{name}', name || 'this staff member'))) return
     await supabase.from('staff').delete().eq('id', id)
@@ -349,7 +387,8 @@ export default function StaffMembers() {
               {staff.map((member) => (
                 <tr key={member.id} className="border-b border-slate-100 dark:border-slate-800 last:border-0">
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
+                      <StaffAvatar avatarUrl={member.avatar_url} name={member.name} size="sm" />
                       <div>
                         <p className="font-medium text-slate-800 dark:text-slate-200">{member.name || '-'}</p>
                         <p className="text-xs text-slate-400">{member.email}</p>
@@ -407,12 +446,32 @@ export default function StaffMembers() {
           <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-lg max-h-[92vh] flex flex-col shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between px-6 py-5 border-b-2 border-slate-100 dark:border-slate-700 flex-shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[#6262bd]/10 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                </div>
+                {isEditing && selectedStaff ? (
+                  <div className="relative group">
+                    <StaffAvatar avatarUrl={selectedStaff.avatar_url} name={selectedStaff.name} size="md" />
+                    <button
+                      type="button"
+                      onClick={() => avatarInputRef.current?.click()}
+                      disabled={uploadingAvatar}
+                      className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                      title="Change photo"
+                    >
+                      {uploadingAvatar
+                        ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        : <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M3 4V1h2v3h3v2H5v3H3V6H0V4h3zm3 6V7h3V4h7l1.83 2H21c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V10h3zm7 9c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-3.2-5c0 1.77 1.43 3.2 3.2 3.2 1.77 0 3.2-1.43 3.2-3.2 0-1.77-1.43-3.2-3.2-3.2-1.77 0-3.2 1.43-3.2 3.2z"/></svg>
+                      }
+                    </button>
+                    <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+                  </div>
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-[#6262bd]/10 flex items-center justify-center">
+                    <svg className="w-5 h-5 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                  </div>
+                )}
                 <div>
                   <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200">{isEditing ? t('editStaffMember') : t('addStaffMember')}</h2>
                   {isEditing && selectedStaff && <p className="text-xs text-slate-500 dark:text-slate-400">{selectedStaff.name || selectedStaff.email}</p>}
+                  {isEditing && <p className="text-xs text-slate-400 dark:text-slate-500">Hover photo to change</p>}
                 </div>
               </div>
               <button onClick={() => { setShowModal(false); setIsEditing(false); setError(null) }} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-xl font-bold">×</button>
