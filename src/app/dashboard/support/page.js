@@ -1,22 +1,23 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import { supabase } from '@/lib/supabase'
 
 const STATUS_STYLES = {
-  open:        { label: 'Open',        cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' },
-  in_progress: { label: 'In Progress', cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' },
-  resolved:    { label: 'Resolved',    cls: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' },
-  closed:      { label: 'Closed',      cls: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400' },
+  open:        { key: 'statusOpen',       cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' },
+  in_progress: { key: 'statusInProgress', cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' },
+  resolved:    { key: 'statusResolved',   cls: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' },
+  closed:      { key: 'statusClosed',     cls: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400' },
 }
 
-const CATEGORY_LABELS = {
-  billing: 'Billing',
-  bug: 'Bug / Issue',
-  feature: 'Feature Request',
-  other: 'Other',
+const CATEGORY_KEYS = {
+  billing: 'categoryBilling',
+  bug: 'categoryBug',
+  feature: 'categoryFeature',
+  other: 'categoryOther',
 }
 
 function formatDate(ts) {
@@ -25,6 +26,7 @@ function formatDate(ts) {
 }
 
 export default function SupportPage() {
+  const t = useTranslations('support')
   const restaurantCtx = useRestaurant()
   const adminSupabase = useAdminSupabase()
   const [restaurant, setRestaurant] = useState(null)
@@ -62,7 +64,6 @@ export default function SupportPage() {
       .order('updated_at', { ascending: false })
 
     if (data) {
-      // Fetch unread counts per ticket
       const ticketIds = data.map(t => t.id)
       let unreadMap = {}
       if (ticketIds.length > 0) {
@@ -76,7 +77,7 @@ export default function SupportPage() {
           unread.forEach(m => { unreadMap[m.ticket_id] = (unreadMap[m.ticket_id] || 0) + 1 })
         }
       }
-      setTickets(data.map(t => ({ ...t, unreadCount: unreadMap[t.id] || 0 })))
+      setTickets(data.map(tk => ({ ...tk, unreadCount: unreadMap[tk.id] || 0 })))
     }
     setLoading(false)
   }
@@ -86,7 +87,6 @@ export default function SupportPage() {
     setMessagesLoading(true)
     setReplyBody('')
 
-    // Fetch messages
     const { data } = await adminSupabase
       .from('support_messages')
       .select('*')
@@ -95,7 +95,6 @@ export default function SupportPage() {
     setMessages(data || [])
     setMessagesLoading(false)
 
-    // Mark admin messages as read
     await adminSupabase
       .from('support_messages')
       .update({ is_read: true })
@@ -103,11 +102,9 @@ export default function SupportPage() {
       .eq('sender_type', 'support')
       .eq('is_read', false)
 
-    // Update local unread count and notify layout to clear badge immediately
-    setTickets(prev => prev.map(t => t.id === ticket.id ? { ...t, unreadCount: 0 } : t))
+    setTickets(prev => prev.map(tk => tk.id === ticket.id ? { ...tk, unreadCount: 0 } : tk))
     window.dispatchEvent(new CustomEvent('support-read'))
 
-    // Subscribe to new messages
     if (channelRef.current) supabase.removeChannel(channelRef.current)
     channelRef.current = supabase
       .channel(`support-messages-${ticket.id}-${Date.now()}`)
@@ -202,6 +199,7 @@ export default function SupportPage() {
   // Thread view
   if (selectedTicket) {
     const status = STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.open
+    const statusLabel = t(status.key)
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
@@ -210,7 +208,7 @@ export default function SupportPage() {
             className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 mb-6 transition-colors"
           >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-            Back to tickets
+            {t('backToTickets')}
           </button>
 
           {/* Ticket header */}
@@ -219,8 +217,8 @@ export default function SupportPage() {
               <div>
                 <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-1">{selectedTicket.subject}</h1>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${status.cls}`}>{status.label}</span>
-                  <span className="text-xs text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">{CATEGORY_LABELS[selectedTicket.category] || selectedTicket.category}</span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${status.cls}`}>{statusLabel}</span>
+                  <span className="text-xs text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">{t(CATEGORY_KEYS[selectedTicket.category] || 'categoryOther')}</span>
                   <span className="text-xs text-slate-400">{formatDate(selectedTicket.created_at)}</span>
                 </div>
               </div>
@@ -243,7 +241,7 @@ export default function SupportPage() {
                       : 'bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 text-slate-800 dark:text-slate-100 rounded-bl-sm'
                   }`}>
                     <div className={`text-xs mb-1 ${isVenue ? 'text-white/70' : 'text-slate-400'}`}>
-                      {isVenue ? 'You' : 'Support Team'} · {formatDate(msg.created_at)}
+                      {isVenue ? t('you') : t('supportTeam')} · {formatDate(msg.created_at)}
                     </div>
                     <p className="text-sm whitespace-pre-wrap">{msg.body}</p>
                   </div>
@@ -260,7 +258,7 @@ export default function SupportPage() {
               <textarea
                 value={replyBody}
                 onChange={e => setReplyBody(e.target.value)}
-                placeholder="Type your reply..."
+                placeholder={t('replyPlaceholder')}
                 rows={3}
                 className="w-full px-3 py-2 text-sm border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 resize-none mb-3"
               />
@@ -270,12 +268,14 @@ export default function SupportPage() {
                   disabled={sending || !replyBody.trim()}
                   className="px-5 py-2 bg-[#6262bd] text-white rounded-xl text-sm font-medium hover:bg-[#5252a5] disabled:opacity-50 transition-colors"
                 >
-                  {sending ? 'Sending…' : 'Send Reply'}
+                  {sending ? t('sending') : t('sendReply')}
                 </button>
               </div>
             </form>
           ) : (
-            <div className="text-center py-4 text-sm text-slate-400">This ticket is {selectedTicket.status}. Open a new ticket if you need further help.</div>
+            <div className="text-center py-4 text-sm text-slate-400">
+              {t('ticketClosedNote').replace('{status}', statusLabel)}
+            </div>
           )}
         </div>
       </div>
@@ -288,65 +288,65 @@ export default function SupportPage() {
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-100 mb-1">Support</h1>
-            <p className="text-slate-500 dark:text-slate-400 text-sm">Get help from our team</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-100 mb-1">{t('title')}</h1>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">{t('subtitle')}</p>
           </div>
           <button
             onClick={() => setShowNewTicket(true)}
             className="flex items-center gap-2 px-4 py-2.5 bg-[#6262bd] text-white rounded-xl text-sm font-medium hover:bg-[#5252a5] transition-colors"
           >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-            New Ticket
+            {t('newTicket')}
           </button>
         </div>
 
         {/* New ticket form */}
         {showNewTicket && (
           <div className="bg-white dark:bg-slate-900 border-2 border-[#6262bd]/30 rounded-2xl p-6 mb-6">
-            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4">New Support Ticket</h2>
+            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4">{t('newTicketTitle')}</h2>
             <form onSubmit={handleNewTicketSubmit} className="space-y-4">
               {error && <p className="text-red-600 text-sm">{error}</p>}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Category</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{t('categoryLabel')}</label>
                   <select
                     value={newTicket.category}
                     onChange={e => setNewTicket(p => ({ ...p, category: e.target.value }))}
                     className="w-full px-3 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
                   >
-                    <option value="bug">Bug / Issue</option>
-                    <option value="billing">Billing</option>
-                    <option value="feature">Feature Request</option>
-                    <option value="other">Other</option>
+                    <option value="bug">{t('categoryBug')}</option>
+                    <option value="billing">{t('categoryBilling')}</option>
+                    <option value="feature">{t('categoryFeature')}</option>
+                    <option value="other">{t('categoryOther')}</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Subject</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{t('subjectLabel')}</label>
                   <input
                     type="text"
                     value={newTicket.subject}
                     onChange={e => setNewTicket(p => ({ ...p, subject: e.target.value }))}
-                    placeholder="Brief description of your issue"
+                    placeholder={t('subjectPlaceholder')}
                     required
                     className="w-full px-3 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Message</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{t('messageLabel')}</label>
                 <textarea
                   value={newTicket.body}
                   onChange={e => setNewTicket(p => ({ ...p, body: e.target.value }))}
-                  placeholder="Describe your issue in detail..."
+                  placeholder={t('messagePlaceholder')}
                   rows={4}
                   required
                   className="w-full px-3 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 resize-none"
                 />
               </div>
               <div className="flex gap-3 justify-end">
-                <button type="button" onClick={() => { setShowNewTicket(false); setError(null) }} className="px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">Cancel</button>
+                <button type="button" onClick={() => { setShowNewTicket(false); setError(null) }} className="px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">{t('cancel')}</button>
                 <button type="submit" disabled={submitting} className="px-5 py-2 bg-[#6262bd] text-white rounded-xl text-sm font-medium hover:bg-[#5252a5] disabled:opacity-50 transition-colors">
-                  {submitting ? 'Submitting…' : 'Submit Ticket'}
+                  {submitting ? t('submitting') : t('submit')}
                 </button>
               </div>
             </form>
@@ -361,10 +361,10 @@ export default function SupportPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
             </div>
-            <h3 className="font-semibold text-slate-700 dark:text-slate-200 mb-1">No support tickets yet</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Submit a ticket and our team will get back to you.</p>
+            <h3 className="font-semibold text-slate-700 dark:text-slate-200 mb-1">{t('noTicketsTitle')}</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">{t('noTicketsSubtitle')}</p>
             <button onClick={() => setShowNewTicket(true)} className="px-4 py-2 bg-[#6262bd] text-white rounded-xl text-sm font-medium hover:bg-[#5252a5] transition-colors">
-              Open your first ticket
+              {t('openFirstTicket')}
             </button>
           </div>
         ) : (
@@ -386,14 +386,14 @@ export default function SupportPage() {
                         )}
                       </div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${status.cls}`}>{status.label}</span>
-                        <span className="text-xs text-slate-400">{CATEGORY_LABELS[ticket.category] || ticket.category}</span>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${status.cls}`}>{t(status.key)}</span>
+                        <span className="text-xs text-slate-400">{t(CATEGORY_KEYS[ticket.category] || 'categoryOther')}</span>
                         <span className="text-xs text-slate-400">{formatDate(ticket.updated_at)}</span>
                       </div>
                     </div>
                     {ticket.unreadCount > 0 && (
                       <span className="flex-shrink-0 bg-[#6262bd] text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                        {ticket.unreadCount} new
+                        {t('unreadNew').replace('{count}', ticket.unreadCount)}
                       </span>
                     )}
                     <svg className="w-5 h-5 text-slate-400 flex-shrink-0 group-hover:text-[#6262bd] transition-colors" fill="currentColor" viewBox="0 0 24 24"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg>
