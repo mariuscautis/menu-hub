@@ -9,6 +9,12 @@
     --color-primary-light: 124 124 229;
   }
 
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
   .dark {
     --color-primary: 124 124 229;
     --color-primary-hover: 144 144 239;
