@@ -103,8 +103,9 @@ export default function SupportPage() {
       .eq('sender_type', 'support')
       .eq('is_read', false)
 
-    // Update local unread count
+    // Update local unread count and notify layout to clear badge immediately
     setTickets(prev => prev.map(t => t.id === ticket.id ? { ...t, unreadCount: 0 } : t))
+    window.dispatchEvent(new CustomEvent('support-read'))
 
     // Subscribe to new messages
     if (channelRef.current) supabase.removeChannel(channelRef.current)

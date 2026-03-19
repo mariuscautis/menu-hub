@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 
 const STATUS_STYLES = {
@@ -27,15 +27,101 @@ function formatDate(ts) {
   return new Date(ts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
+// Searchable venue dropdown component
+function VenueDropdown({ venues, value, onChange }) {
+  const [query, setQuery] = useState('')
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+
+  const selected = venues.find(v => v.id === value)
+  const filtered = venues.filter(v =>
+    !query || v.name.toLowerCase().includes(query.toLowerCase())
+  )
+
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  const select = (id) => {
+    onChange(id)
+    setQuery('')
+    setOpen(false)
+  }
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="flex items-center gap-2 px-3 py-2 text-sm border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white min-w-[200px] text-left"
+      >
+        <span className="flex-1 truncate text-slate-700">{selected ? selected.name : 'All Venues'}</span>
+        <svg className="w-4 h-4 text-slate-400 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+      </button>
+
+      {open && (
+        <div className="absolute top-full left-0 mt-1 w-72 bg-white border-2 border-slate-200 rounded-xl shadow-lg z-50 overflow-hidden">
+          {/* Search input */}
+          <div className="p-2 border-b border-slate-100">
+            <div className="flex items-center gap-2 px-2 py-1.5 bg-slate-50 rounded-lg">
+              <svg className="w-4 h-4 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                autoFocus
+                type="text"
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                placeholder="Search venues…"
+                className="flex-1 bg-transparent text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none"
+              />
+              {query && (
+                <button onClick={() => setQuery('')} className="text-slate-400 hover:text-slate-600">
+                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Options */}
+          <div className="max-h-60 overflow-y-auto">
+            <button
+              onClick={() => select(null)}
+              className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${!value ? 'bg-[#6262bd]/10 text-[#6262bd] font-medium' : 'text-slate-700 hover:bg-slate-50'}`}
+            >
+              All Venues
+            </button>
+            {filtered.length === 0 ? (
+              <div className="px-4 py-3 text-sm text-slate-400">No venues found</div>
+            ) : filtered.map(v => (
+              <button
+                key={v.id}
+                onClick={() => select(v.id)}
+                className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${value === v.id ? 'bg-[#6262bd]/10 text-[#6262bd] font-medium' : 'text-slate-700 hover:bg-slate-50'}`}
+              >
+                {v.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function AdminSupportPage() {
   const [tickets, setTickets] = useState([])
   const [filtered, setFiltered] = useState([])
+  const [venues, setVenues] = useState([]) // unique venues that have tickets
   const [selectedTicket, setSelectedTicket] = useState(null)
   const [messages, setMessages] = useState([])
   const [messagesLoading, setMessagesLoading] = useState(false)
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState('all')
   const [priorityFilter, setPriorityFilter] = useState('all')
+  const [venueFilter, setVenueFilter] = useState(null)
   const [replyBody, setReplyBody] = useState('')
   const [sending, setSending] = useState(false)
   const [user, setUser] = useState(null)
@@ -50,15 +136,29 @@ export default function AdminSupportPage() {
     let result = tickets
     if (statusFilter !== 'all') result = result.filter(t => t.status === statusFilter)
     if (priorityFilter !== 'all') result = result.filter(t => t.priority === priorityFilter)
+    if (venueFilter) result = result.filter(t => t.restaurant_id === venueFilter)
     setFiltered(result)
-  }, [tickets, statusFilter, priorityFilter])
+  }, [tickets, statusFilter, priorityFilter, venueFilter])
 
   const fetchTickets = async () => {
     const { data } = await supabase
       .from('support_tickets')
       .select('*, restaurants(id, name)')
       .order('updated_at', { ascending: false })
-    setTickets(data || [])
+    const rows = data || []
+    setTickets(rows)
+
+    // Build unique venues list from tickets
+    const seen = new Set()
+    const uniqueVenues = []
+    rows.forEach(t => {
+      if (t.restaurants && !seen.has(t.restaurants.id)) {
+        seen.add(t.restaurants.id)
+        uniqueVenues.push({ id: t.restaurants.id, name: t.restaurants.name })
+      }
+    })
+    uniqueVenues.sort((a, b) => a.name.localeCompare(b.name))
+    setVenues(uniqueVenues)
     setLoading(false)
   }
 
@@ -73,9 +173,6 @@ export default function AdminSupportPage() {
       .order('created_at', { ascending: true })
     setMessages(data || [])
     setMessagesLoading(false)
-
-    // Mark venue messages as read (from admin's perspective — optional, not used for admin badge)
-    // We update support messages is_read when venue reads them, not here
   }
 
   const handleStatusChange = async (newStatus) => {
@@ -116,14 +213,12 @@ export default function AdminSupportPage() {
       })
       if (!res.ok) throw new Error('Failed to send reply')
       setReplyBody('')
-      // Refetch messages
       const { data } = await supabase
         .from('support_messages')
         .select('*')
         .eq('ticket_id', selectedTicket.id)
         .order('created_at', { ascending: true })
       setMessages(data || [])
-      // Auto set to in_progress if still open
       if (selectedTicket.status === 'open') {
         await handleStatusChange('in_progress')
       }
@@ -265,7 +360,8 @@ export default function AdminSupportPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex gap-3 mb-6 flex-wrap">
+      <div className="flex gap-3 mb-6 flex-wrap items-center">
+        <VenueDropdown venues={venues} value={venueFilter} onChange={setVenueFilter} />
         <select
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value)}
@@ -286,6 +382,14 @@ export default function AdminSupportPage() {
           <option value="urgent">Urgent</option>
           <option value="normal">Normal</option>
         </select>
+        {(venueFilter || statusFilter !== 'all' || priorityFilter !== 'all') && (
+          <button
+            onClick={() => { setVenueFilter(null); setStatusFilter('all'); setPriorityFilter('all') }}
+            className="px-3 py-2 text-xs text-slate-500 hover:text-slate-700 border-2 border-slate-200 rounded-xl transition-colors"
+          >
+            Clear filters
+          </button>
+        )}
       </div>
 
       {filtered.length === 0 ? (

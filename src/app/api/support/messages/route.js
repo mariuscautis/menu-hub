@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { sendEmail } from '@/lib/services/email-edge'
+import { getEmailTranslations, t } from '@/lib/email-translations'
 
 export const runtime = 'edge'
 
@@ -37,63 +38,78 @@ export async function POST(request) {
       .update({ updated_at: new Date().toISOString() })
       .eq('id', ticket_id)
 
-    // Fetch ticket + restaurant for email
+    // Fetch ticket + restaurant (including email_language) for email
     const { data: ticket } = await supabase
       .from('support_tickets')
-      .select('*, restaurants(name, email)')
+      .select('*, restaurants(name, email, email_language)')
       .eq('id', ticket_id)
       .single()
 
     if (ticket) {
       if (sender_type === 'support') {
-        // Email venue owner
+        // Email venue owner in their configured language
         const venueEmail = ticket.restaurants?.email
         if (venueEmail) {
+          const locale = ticket.restaurants?.email_language || 'en'
+          const tr = getEmailTranslations(locale)
+          const subject = t(tr.supportReplySubject || 'Reply to your support ticket: {subject}', { subject: ticket.subject })
+
           await sendEmail({
             to: venueEmail,
-            subject: `Reply to your support ticket: ${ticket.subject}`,
+            subject,
+            fromName: 'Veno App',
             htmlContent: `
               <!DOCTYPE html><html><head><meta charset="utf-8">
-              <style>body{font-family:Arial,sans-serif;line-height:1.6;color:#333}
-              .container{max-width:600px;margin:0 auto;padding:20px}
-              .header{background:#6262bd;color:white;padding:20px;text-align:center;border-radius:8px 8px 0 0}
-              .content{background:#f9f9f9;padding:24px;border-radius:0 0 8px 8px}
-              .message-box{background:white;border:1px solid #e2e8f0;border-radius:6px;padding:16px}
-              .btn{display:inline-block;padding:12px 24px;background:#6262bd;color:white;text-decoration:none;border-radius:6px;margin-top:16px}
+              <style>
+                body{font-family:Arial,sans-serif;line-height:1.6;color:#333;background:#f8f9fa}
+                .container{max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+                .header{background:#6262bd;color:white;padding:32px 30px;text-align:center}
+                .header h2{margin:0;font-size:22px}
+                .content{padding:30px}
+                .ticket-subject{font-weight:bold;color:#6262bd;margin-bottom:16px}
+                .message-box{background:#f9fafb;border-left:4px solid #6262bd;border-radius:0 8px 8px 0;padding:16px;margin:16px 0;white-space:pre-wrap;font-size:15px}
+                .btn{display:inline-block;padding:12px 28px;background:#6262bd;color:white;text-decoration:none;border-radius:8px;font-weight:bold;margin-top:20px}
+                .footer{background:#f9fafb;padding:20px 30px;text-align:center;font-size:12px;color:#888;border-top:1px solid #eee}
               </style></head><body>
               <div class="container">
-                <div class="header"><h2 style="margin:0">Support Reply</h2></div>
+                <div class="header"><h2>${tr.supportReplyTitle || 'Support Reply'}</h2></div>
                 <div class="content">
-                  <p>Our support team has replied to your ticket: <strong>${ticket.subject}</strong></p>
+                  <p>${tr.supportReplyIntro || 'Our support team has replied to your ticket:'}</p>
+                  <div class="ticket-subject">${ticket.subject}</div>
                   <div class="message-box">${body.replace(/\n/g, '<br>')}</div>
-                  <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://app.venoapp.com'}/dashboard/support" class="btn">View Ticket</a>
-                  <p style="margin-top:16px;font-size:12px;color:#888">You can reply directly in the dashboard.</p>
+                  <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://app.venoapp.com'}/dashboard/support" class="btn">${tr.supportReplyCta || 'View Ticket'}</a>
                 </div>
+                <div class="footer">${tr.supportReplyFooter || 'You can reply directly in the dashboard. — Veno App'}</div>
               </div></body></html>
             `,
           }).catch(() => {})
         }
       } else {
-        // Email support team
+        // Email support team (always in English, internal)
         await sendEmail({
           to: 'hello@venoapp.com',
           subject: `[Support Reply] ${ticket.subject} — ${ticket.restaurants?.name || ticket_id}`,
+          fromName: 'Veno App',
           htmlContent: `
             <!DOCTYPE html><html><head><meta charset="utf-8">
-            <style>body{font-family:Arial,sans-serif;line-height:1.6;color:#333}
-            .container{max-width:600px;margin:0 auto;padding:20px}
-            .header{background:#6262bd;color:white;padding:20px;text-align:center;border-radius:8px 8px 0 0}
-            .content{background:#f9f9f9;padding:24px;border-radius:0 0 8px 8px}
-            .message-box{background:white;border:1px solid #e2e8f0;border-radius:6px;padding:16px}
-            .btn{display:inline-block;padding:12px 24px;background:#6262bd;color:white;text-decoration:none;border-radius:6px;margin-top:16px}
+            <style>
+              body{font-family:Arial,sans-serif;line-height:1.6;color:#333;background:#f8f9fa}
+              .container{max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+              .header{background:#6262bd;color:white;padding:32px 30px;text-align:center}
+              .header h2{margin:0;font-size:22px}
+              .content{padding:30px}
+              .message-box{background:#f9fafb;border-left:4px solid #6262bd;border-radius:0 8px 8px 0;padding:16px;margin:16px 0;white-space:pre-wrap;font-size:15px}
+              .btn{display:inline-block;padding:12px 28px;background:#6262bd;color:white;text-decoration:none;border-radius:8px;font-weight:bold;margin-top:20px}
+              .footer{background:#f9fafb;padding:20px 30px;text-align:center;font-size:12px;color:#888;border-top:1px solid #eee}
             </style></head><body>
             <div class="container">
-              <div class="header"><h2 style="margin:0">New Reply from Venue</h2></div>
+              <div class="header"><h2>New Reply from Venue</h2></div>
               <div class="content">
                 <p><strong>${ticket.restaurants?.name || 'Venue'}</strong> has replied to ticket: <strong>${ticket.subject}</strong></p>
                 <div class="message-box">${body.replace(/\n/g, '<br>')}</div>
                 <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://app.venoapp.com'}/admin/support" class="btn">View in Admin Panel</a>
               </div>
+              <div class="footer">Veno App — Support Notifications</div>
             </div></body></html>
           `,
         }).catch(() => {})

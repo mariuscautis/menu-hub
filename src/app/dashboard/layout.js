@@ -463,6 +463,10 @@ export default function DashboardLayout({ children }) {
 
     fetchUnreadSupport()
 
+    // Clear badge immediately when the user opens a ticket
+    const handleSupportRead = () => setUnreadSupportCount(0)
+    window.addEventListener('support-read', handleSupportRead)
+
     const channel = supabase
       .channel(`support-badge-${restaurant.id}-${Date.now()}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'support_messages' }, () => {
@@ -470,7 +474,10 @@ export default function DashboardLayout({ children }) {
       })
       .subscribe()
 
-    return () => supabase.removeChannel(channel)
+    return () => {
+      window.removeEventListener('support-read', handleSupportRead)
+      supabase.removeChannel(channel)
+    }
   }, [restaurant, userType])
 
   // Helper function to check if user has permission (used for mobile redirect)

@@ -43,6 +43,7 @@ export async function POST(request) {
     await sendEmail({
       to: 'hello@venoapp.com',
       subject: `[Support] ${subject} — ${restaurant_name || restaurant_id}`,
+      fromName: 'Veno App',
       htmlContent: `
         <!DOCTYPE html><html><head><meta charset="utf-8">
         <style>body{font-family:Arial,sans-serif;line-height:1.6;color:#333}

@@ -203,7 +203,14 @@ const emailTranslations = {
     smsBillingCollectionNoteNoDate: "These charges will be added to your next invoice.",
     smsBillingQuestion: "Questions about these charges?",
     smsBillingContact: "Get in touch at support@venoapp.com — we're happy to help.",
-    smsBillingFooter: "Veno App — automated billing notification"
+    smsBillingFooter: "Veno App — automated billing notification",
+
+    // Support ticket reply (sent to venue when admin replies)
+    supportReplySubject: "Reply to your support ticket: {subject}",
+    supportReplyTitle: "Support Reply",
+    supportReplyIntro: "Our support team has replied to your ticket:",
+    supportReplyCta: "View Ticket",
+    supportReplyFooter: "You can reply directly in the dashboard. — Veno App"
   },
 
   ro: {
@@ -399,7 +406,14 @@ const emailTranslations = {
     smsBillingCollectionNoteNoDate: "Aceste taxe vor fi adăugate la următoarea ta factură.",
     smsBillingQuestion: "Întrebări despre aceste taxe?",
     smsBillingContact: "Contactează-ne la support@venoapp.com — suntem bucuroși să ajutăm.",
-    smsBillingFooter: "Veno App — notificare automată de facturare"
+    smsBillingFooter: "Veno App — notificare automată de facturare",
+
+    // Support ticket reply
+    supportReplySubject: "Răspuns la tichetul tău de suport: {subject}",
+    supportReplyTitle: "Răspuns Suport",
+    supportReplyIntro: "Echipa noastră de suport a răspuns la tichetul tău:",
+    supportReplyCta: "Vezi Tichetul",
+    supportReplyFooter: "Poți răspunde direct din panou. — Veno App"
   },
 
   fr: {
@@ -595,7 +609,14 @@ const emailTranslations = {
     smsBillingCollectionNoteNoDate: "Ces frais seront ajoutés à votre prochaine facture.",
     smsBillingQuestion: "Des questions sur ces frais ?",
     smsBillingContact: "Contactez-nous à support@venoapp.com — nous sommes là pour vous aider.",
-    smsBillingFooter: "Veno App — notification de facturation automatique"
+    smsBillingFooter: "Veno App — notification de facturation automatique",
+
+    // Support ticket reply
+    supportReplySubject: "Réponse à votre ticket de support : {subject}",
+    supportReplyTitle: "Réponse du Support",
+    supportReplyIntro: "Notre équipe de support a répondu à votre ticket :",
+    supportReplyCta: "Voir le Ticket",
+    supportReplyFooter: "Vous pouvez répondre directement depuis le tableau de bord. — Veno App"
   },
 
   it: {
@@ -791,7 +812,14 @@ const emailTranslations = {
     smsBillingCollectionNoteNoDate: "Questi addebiti verranno aggiunti alla tua prossima fattura.",
     smsBillingQuestion: "Domande su questi addebiti?",
     smsBillingContact: "Contattaci a support@venoapp.com — siamo qui per aiutarti.",
-    smsBillingFooter: "Veno App — notifica di fatturazione automatica"
+    smsBillingFooter: "Veno App — notifica di fatturazione automatica",
+
+    // Support ticket reply
+    supportReplySubject: "Risposta al tuo ticket di supporto: {subject}",
+    supportReplyTitle: "Risposta del Supporto",
+    supportReplyIntro: "Il nostro team di supporto ha risposto al tuo ticket:",
+    supportReplyCta: "Visualizza il Ticket",
+    supportReplyFooter: "Puoi rispondere direttamente dalla dashboard. — Veno App"
   },
 
   es: {
@@ -987,7 +1015,14 @@ const emailTranslations = {
     smsBillingCollectionNoteNoDate: "Estos cargos se añadirán a tu próxima factura.",
     smsBillingQuestion: "¿Preguntas sobre estos cargos?",
     smsBillingContact: "Contáctanos en support@venoapp.com — estamos encantados de ayudar.",
-    smsBillingFooter: "Veno App — notificación de facturación automatizada"
+    smsBillingFooter: "Veno App — notificación de facturación automatizada",
+
+    // Support ticket reply
+    supportReplySubject: "Respuesta a tu ticket de soporte: {subject}",
+    supportReplyTitle: "Respuesta de Soporte",
+    supportReplyIntro: "Nuestro equipo de soporte ha respondido a tu ticket:",
+    supportReplyCta: "Ver Ticket",
+    supportReplyFooter: "Puedes responder directamente desde el panel. — Veno App"
   }
 }
 
