@@ -32,6 +32,7 @@ export default function DashboardLayout({ children }) {
   const [recoveryRequested, setRecoveryRequested] = useState(false)
   const [recoveryLoading, setRecoveryLoading] = useState(false)
   const [pendingOrdersCount, setPendingOrdersCount] = useState(0)
+  const [unreadSupportCount, setUnreadSupportCount] = useState(0)
 
   // Responsive state - works on all devices
   const [sidebarOpen, setSidebarOpen] = useState(true) // Start with sidebar open on desktop
@@ -437,6 +438,41 @@ export default function DashboardLayout({ children }) {
     }
   }, [restaurant])
 
+  // Unread support replies badge
+  useEffect(() => {
+    if (!restaurant || (userType !== 'owner' && userType !== 'staff-admin')) return
+
+    const fetchUnreadSupport = async () => {
+      const { data: ticketIds } = await supabase
+        .from('support_tickets')
+        .select('id')
+        .eq('restaurant_id', restaurant.id)
+
+      const ids = (ticketIds || []).map(t => t.id)
+      if (ids.length === 0) { setUnreadSupportCount(0); return }
+
+      const { count } = await supabase
+        .from('support_messages')
+        .select('id', { count: 'exact', head: true })
+        .eq('sender_type', 'support')
+        .eq('is_read', false)
+        .in('ticket_id', ids)
+
+      setUnreadSupportCount(count || 0)
+    }
+
+    fetchUnreadSupport()
+
+    const channel = supabase
+      .channel(`support-badge-${restaurant.id}-${Date.now()}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'support_messages' }, () => {
+        fetchUnreadSupport()
+      })
+      .subscribe()
+
+    return () => supabase.removeChannel(channel)
+  }, [restaurant, userType])
+
   // Helper function to check if user has permission (used for mobile redirect)
   const checkPermission = useCallback((permissionId) => {
     if (userType === 'owner' || userType === 'staff-admin') {
@@ -767,6 +803,20 @@ export default function DashboardLayout({ children }) {
         icon: (
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+          </svg>
+        )
+      })
+    }
+
+    if (userType === 'owner' || userType === 'staff-admin') {
+      items.push({
+        href: '/dashboard/support',
+        label: 'Support',
+        badge: unreadSupportCount > 0 ? unreadSupportCount : null,
+        badgeColor: 'bg-[#6262bd]',
+        icon: (
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/>
           </svg>
         )
       })
@@ -1301,7 +1351,7 @@ export default function DashboardLayout({ children }) {
                       </div>
                       {item.badge && (
                         <span className={`text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center ${
-                          item.label === 'Orders' ? 'bg-primary' : 'bg-red-500'
+                          item.badgeColor || (item.label === 'Orders' ? 'bg-primary' : 'bg-red-500')
                         }`}>
                           {item.badge}
                         </span>

@@ -12,6 +12,7 @@ export default function AdminLayout({ children }) {
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
   const [recoveryRequestCount, setRecoveryRequestCount] = useState(0)
+  const [openTicketCount, setOpenTicketCount] = useState(0)
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -43,6 +44,13 @@ export default function AdminLayout({ children }) {
         .not('deleted_at', 'is', null)
         .not('recovery_requested_at', 'is', null)
       setRecoveryRequestCount(count || 0)
+
+      // Count open support tickets
+      const { count: ticketCount } = await supabase
+        .from('support_tickets')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'open')
+      setOpenTicketCount(ticketCount || 0)
     }
 
     checkAdmin()
@@ -82,6 +90,11 @@ export default function AdminLayout({ children }) {
     { href: '/admin/billing', label: 'Billing', icon: (
       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
         <path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+      </svg>
+    )},
+    { href: '/admin/support', label: 'Support', badge: openTicketCount, icon: (
+      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/>
       </svg>
     )},
   ]
