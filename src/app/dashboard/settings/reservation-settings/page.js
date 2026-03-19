@@ -84,6 +84,10 @@ export default function ReservationSettingsPage() {
   const [singleBookingArea, setSingleBookingArea] = useState(false)
   const [operatingHours, setOperatingHours] = useState(DEFAULT_HOURS)
 
+  // "See menu" button on booking confirmation page
+  const [showMenuButton, setShowMenuButton] = useState(true)
+  const [menuButtonText, setMenuButtonText] = useState('')
+
   // Global booking fee
   const [globalFeeEnabled, setGlobalFeeEnabled] = useState(false)
   const [globalFeeAmount, setGlobalFeeAmount] = useState('')
@@ -117,6 +121,8 @@ export default function ReservationSettingsPage() {
     setMinAdvanceNoticeDays(s.min_advance_notice_days || 0)
     setShowPartySize(s.show_party_size !== false)
     setSingleBookingArea(s.single_booking_area === true)
+    setShowMenuButton(s.show_menu_button !== false)
+    setMenuButtonText(s.menu_button_text || '')
     setOperatingHours(normaliseHours(s.operating_hours || DEFAULT_HOURS))
     setGlobalFeeEnabled(!!r.global_booking_fee_enabled)
     setGlobalFeeAmount(r.global_booking_fee_amount != null ? String(r.global_booking_fee_amount) : '')
@@ -177,6 +183,8 @@ export default function ReservationSettingsPage() {
       min_advance_notice_days: minAdvanceNoticeDays,
       show_party_size: showPartySize,
       single_booking_area: singleBookingArea,
+      show_menu_button: showMenuButton,
+      menu_button_text: menuButtonText.trim() || null,
       operating_hours: operatingHours,
     }
 
@@ -408,6 +416,42 @@ export default function ReservationSettingsPage() {
             ? 'Single area — only one booking per slot, no table assignment required'
             : 'Multiple areas — table assignment required, multiple concurrent bookings allowed'}
         </div>
+      </div>
+
+      {/* "See menu" button on confirmation page */}
+      <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
+        <div className="flex items-start justify-between gap-6">
+          <div>
+            <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">"See menu" button on confirmation page</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              When enabled, a button is shown on the booking confirmation page linking customers to your menu. You can optionally override the button label below.
+            </p>
+          </div>
+          <button
+            onClick={() => setShowMenuButton(v => !v)}
+            className={`relative flex-shrink-0 w-12 h-6 rounded-full transition-colors ${showMenuButton ? 'bg-[#6262bd]' : 'bg-slate-300 dark:bg-slate-600'}`}
+          >
+            <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${showMenuButton ? 'translate-x-6' : 'translate-x-0'}`} />
+          </button>
+        </div>
+        <div className={`mt-3 text-sm font-medium ${showMenuButton ? 'text-[#6262bd]' : 'text-slate-500 dark:text-slate-400'}`}>
+          {showMenuButton ? 'Button visible on booking confirmation page' : 'Button hidden'}
+        </div>
+        {showMenuButton && (
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+              Button label <span className="text-slate-400 font-normal">(optional — defaults to "View Menu")</span>
+            </label>
+            <input
+              type="text"
+              value={menuButtonText}
+              onChange={e => setMenuButtonText(e.target.value)}
+              placeholder="View Menu"
+              maxLength={60}
+              className="w-full max-w-xs px-4 py-2.5 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 text-sm"
+            />
+          </div>
+        )}
       </div>
 
       {/* Operating hours */}

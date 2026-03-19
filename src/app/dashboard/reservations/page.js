@@ -964,13 +964,13 @@ export default function Reservations() {
           onClick={() => { setShowDetailModal(false); setSelectedReservation(null); setPendingRating(0); setRatingNote(''); setCustomerStats(null); setRestriction(null); setRestrictionMode(null); setRestrictionFee('') }}
         >
           <div
-            className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden"
+            className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90dvh]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal colour bar */}
-            <div className={`h-2 w-full ${getStatusConfig(selectedReservation.status).bar}`} />
+            <div className={`h-2 w-full flex-shrink-0 ${getStatusConfig(selectedReservation.status).bar}`} />
 
-            <div className="p-8">
+            <div className="p-6 overflow-y-auto flex-1">
               {/* Modal header */}
               <div className="flex items-start justify-between mb-6">
                 <div>
@@ -1288,49 +1288,58 @@ export default function Reservations() {
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4"
           onClick={() => { setShowConfirmModal(false); setSelectedReservation(null); setSelectedTable('') }}
         >
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-6">{t('confirmReservation')}</h2>
-            <div className="mb-6 p-4 bg-slate-50 dark:bg-slate-700 rounded-xl">
-              <p className="text-sm text-slate-600 dark:text-slate-300 mb-1">
-                <strong>{selectedReservation.customer_name}</strong> — {selectedReservation.party_size} {selectedReservation.party_size === 1 ? t('guest') : t('guests')}
-              </p>
-              <p className="text-sm text-slate-600 dark:text-slate-300">
-                {new Date(selectedReservation.reservation_date).toLocaleDateString()} at {selectedReservation.reservation_time.substring(0, 5)}
-              </p>
-            </div>
-            {restaurant?.reservation_settings?.single_booking_area ? null : (
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('assignTable')} *</label>
-                {availableTables.length === 0 ? (
-                  <p className="text-red-600 dark:text-red-400 text-sm">{t('noAvailableTables')}</p>
-                ) : (
-                  <select
-                    value={selectedTable}
-                    onChange={(e) => setSelectedTable(e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
-                  >
-                    {availableTables.map((table) => (
-                      <option key={table.id} value={table.id}>{t('table')} {table.table_number}</option>
-                    ))}
-                  </select>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            {/* Green accent bar */}
+            <div className="h-1.5 w-full bg-green-500" />
+            <div className="p-6 flex flex-row gap-6">
+              {/* Left: booking summary */}
+              <div className="flex-1 min-w-0">
+                <h2 className="text-base font-bold text-slate-800 dark:text-slate-200 mb-3">{t('confirmReservation')}</h2>
+                <div className="p-3 bg-slate-50 dark:bg-slate-700 rounded-xl mb-3">
+                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{selectedReservation.customer_name}</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                    {selectedReservation.party_size} {selectedReservation.party_size === 1 ? t('guest') : t('guests')}
+                  </p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                    {new Date(selectedReservation.reservation_date).toLocaleDateString()} · {selectedReservation.reservation_time.substring(0, 5)}
+                  </p>
+                </div>
+                {restaurant?.reservation_settings?.single_booking_area ? null : (
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">{t('assignTable')} *</label>
+                    {availableTables.length === 0 ? (
+                      <p className="text-red-600 dark:text-red-400 text-sm">{t('noAvailableTables')}</p>
+                    ) : (
+                      <select
+                        value={selectedTable}
+                        onChange={(e) => setSelectedTable(e.target.value)}
+                        className="w-full px-3 py-2.5 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 text-sm"
+                      >
+                        {availableTables.map((table) => (
+                          <option key={table.id} value={table.id}>{t('table')} {table.table_number}</option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
                 )}
               </div>
-            )}
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => { setShowConfirmModal(false); setSelectedReservation(null); setSelectedTable('') }}
-                className="flex-1 border-2 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 py-3 rounded-xl font-medium hover:bg-slate-50 dark:hover:bg-slate-700"
-              >
-                {t('cancel')}
-              </button>
-              <button
-                onClick={confirmReservation}
-                disabled={modalLoading || (!restaurant?.reservation_settings?.single_booking_area && !selectedTable)}
-                className="flex-1 bg-green-600 text-white py-3 rounded-xl font-medium hover:bg-green-700 disabled:opacity-50"
-              >
-                {modalLoading ? t('confirming') : t('confirmReservation')}
-              </button>
+              {/* Right: actions */}
+              <div className="flex flex-col gap-3 justify-center w-36 flex-shrink-0">
+                <button
+                  onClick={confirmReservation}
+                  disabled={modalLoading || (!restaurant?.reservation_settings?.single_booking_area && !selectedTable)}
+                  className="w-full bg-green-600 text-white py-3 rounded-xl font-medium hover:bg-green-700 disabled:opacity-50 text-sm"
+                >
+                  {modalLoading ? t('confirming') : t('confirm')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowConfirmModal(false); setSelectedReservation(null); setSelectedTable('') }}
+                  className="w-full border-2 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 py-3 rounded-xl font-medium hover:bg-slate-50 dark:hover:bg-slate-700 text-sm"
+                >
+                  {t('cancel')}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1342,33 +1351,48 @@ export default function Reservations() {
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4"
           onClick={() => { setShowDenyModal(false); setDenyReason('') }}
         >
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-6">{t('denyReservation')}</h2>
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('reasonForDenying')} *</label>
-              <textarea
-                value={denyReason}
-                onChange={(e) => setDenyReason(e.target.value)}
-                rows={3}
-                className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 resize-none"
-                placeholder={t('reasonPlaceholder')}
-              />
-            </div>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => { setShowDenyModal(false); setDenyReason('') }}
-                className="flex-1 border-2 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 py-3 rounded-xl font-medium hover:bg-slate-50 dark:hover:bg-slate-700"
-              >
-                {t('cancel')}
-              </button>
-              <button
-                onClick={denyReservation}
-                disabled={modalLoading || !denyReason.trim()}
-                className="flex-1 bg-red-600 text-white py-3 rounded-xl font-medium hover:bg-red-700 disabled:opacity-50"
-              >
-                {modalLoading ? t('denying') : t('denyReservation')}
-              </button>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            {/* Red accent bar */}
+            <div className="h-1.5 w-full bg-red-500" />
+            <div className="p-6 flex flex-row gap-6">
+              {/* Left: booking info + reason */}
+              <div className="flex-1 min-w-0">
+                <h2 className="text-base font-bold text-slate-800 dark:text-slate-200 mb-3">{t('denyReservation')}</h2>
+                <div className="p-3 bg-slate-50 dark:bg-slate-700 rounded-xl mb-3">
+                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{selectedReservation.customer_name}</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                    {selectedReservation.party_size} {selectedReservation.party_size === 1 ? t('guest') : t('guests')}
+                  </p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                    {new Date(selectedReservation.reservation_date).toLocaleDateString()} · {selectedReservation.reservation_time.substring(0, 5)}
+                  </p>
+                </div>
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">{t('reasonForDenying')} *</label>
+                <textarea
+                  value={denyReason}
+                  onChange={(e) => setDenyReason(e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2.5 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 resize-none text-sm"
+                  placeholder={t('reasonPlaceholder')}
+                />
+              </div>
+              {/* Right: actions */}
+              <div className="flex flex-col gap-3 justify-center w-36 flex-shrink-0">
+                <button
+                  onClick={denyReservation}
+                  disabled={modalLoading || !denyReason.trim()}
+                  className="w-full bg-red-600 text-white py-3 rounded-xl font-medium hover:bg-red-700 disabled:opacity-50 text-sm"
+                >
+                  {modalLoading ? t('denying') : t('deny')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowDenyModal(false); setDenyReason('') }}
+                  className="w-full border-2 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 py-3 rounded-xl font-medium hover:bg-slate-50 dark:hover:bg-slate-700 text-sm"
+                >
+                  {t('cancel')}
+                </button>
+              </div>
             </div>
           </div>
         </div>

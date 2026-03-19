@@ -978,12 +978,14 @@ export default function BookReservation({ params }) {
               The restaurant will review your request and get in touch.
             </p>
           )}
-          <button
-            onClick={() => router.push(`/${slug}/menu`)}
-            className="bg-[#6262bd] text-white px-6 py-3 rounded-xl font-medium hover:bg-[#5252a3]"
-          >
-            {t('viewMenuButton') || 'View Menu'}
-          </button>
+          {restaurant.reservation_settings?.show_menu_button !== false && (
+            <button
+              onClick={() => router.push(`/${slug}/menu`)}
+              className="bg-[#6262bd] text-white px-6 py-3 rounded-xl font-medium hover:bg-[#5252a3]"
+            >
+              {restaurant.reservation_settings?.menu_button_text || t('viewMenuButton') || 'View Menu'}
+            </button>
+          )}
         </div>
       </div>
     )
