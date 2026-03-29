@@ -507,50 +507,56 @@ export default function ReservationSettingsPage() {
             return (
               <div
                 key={day}
-                className={`flex items-start gap-4 px-4 py-3 ${
+                className={`px-4 py-3 ${
                   dayIdx % 2 === 0
                     ? 'bg-white dark:bg-slate-900'
                     : 'bg-slate-50 dark:bg-slate-800/50'
                 }`}
               >
-                {/* Day name */}
-                <div className="w-24 flex-shrink-0 pt-2">
-                  <span className={`text-sm font-semibold capitalize ${hours.closed ? 'text-slate-400 dark:text-slate-500' : 'text-slate-700 dark:text-slate-300'}`}>
-                    {day.charAt(0).toUpperCase() + day.slice(1, 3)}
+                {/* Day name + toggle on one line */}
+                <div className="flex items-center gap-3 mb-2">
+                  <span className={`text-sm font-semibold capitalize w-20 flex-shrink-0 ${hours.closed ? 'text-slate-400 dark:text-slate-500' : 'text-slate-700 dark:text-slate-300'}`}>
+                    {day.charAt(0).toUpperCase() + day.slice(1)}
                   </span>
-                </div>
-
-                {/* Toggle */}
-                <div className="flex-shrink-0 pt-1.5">
                   <button
                     onClick={() => toggleDayClosed(day)}
-                    className={`relative w-10 h-5 rounded-full transition-colors ${hours.closed ? 'bg-slate-300 dark:bg-slate-600' : 'bg-[#6262bd]'}`}
+                    className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 ${hours.closed ? 'bg-slate-300 dark:bg-slate-600' : 'bg-[#6262bd]'}`}
                   >
                     <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${hours.closed ? 'translate-x-0' : 'translate-x-5'}`} />
                   </button>
+                  {hours.closed && (
+                    <span className="text-sm text-slate-400 dark:text-slate-500">Closed</span>
+                  )}
                 </div>
 
-                {/* Shifts or closed label */}
-                <div className="flex-1">
-                  {hours.closed ? (
-                    <span className="text-sm text-slate-400 dark:text-slate-500 pt-1.5 inline-block">Closed</span>
-                  ) : (
-                    <div className="flex flex-col gap-1.5">
-                      {hours.shifts.map((shift, idx) => (
-                        <div key={idx} className="flex items-center gap-2">
-                          <input
-                            type="time"
-                            value={shift.open}
-                            onChange={e => updateShift(day, idx, 'open', e.target.value)}
-                            className="px-2.5 py-1.5 border border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 rounded-lg focus:outline-none focus:border-[#6262bd] text-slate-700 text-sm w-[118px]"
-                          />
-                          <span className="text-slate-400 dark:text-slate-500 text-xs">–</span>
-                          <input
-                            type="time"
-                            value={shift.close}
-                            onChange={e => updateShift(day, idx, 'close', e.target.value)}
-                            className="px-2.5 py-1.5 border border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 rounded-lg focus:outline-none focus:border-[#6262bd] text-slate-700 text-sm w-[118px]"
-                          />
+                {/* Time inputs below */}
+                {!hours.closed && (
+                  <div className="flex flex-col gap-2 ml-2">
+                    {hours.shifts.map((shift, idx) => (
+                      <div key={idx}>
+                        {idx > 0 && (
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="flex-1 border-t border-dashed border-slate-200 dark:border-slate-700" />
+                            <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">Shift {idx + 1}</span>
+                            <div className="flex-1 border-t border-dashed border-slate-200 dark:border-slate-700" />
+                          </div>
+                        )}
+                        <div className="flex flex-col xs:flex-row items-start xs:items-center gap-1.5">
+                          <div className="flex items-center gap-1.5">
+                            <input
+                              type="time"
+                              value={shift.open}
+                              onChange={e => updateShift(day, idx, 'open', e.target.value)}
+                              className="px-2 py-1.5 border border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 rounded-lg focus:outline-none focus:border-[#6262bd] text-slate-700 text-sm flex-1 min-w-0"
+                            />
+                            <span className="text-slate-400 dark:text-slate-500 text-xs">–</span>
+                            <input
+                              type="time"
+                              value={shift.close}
+                              onChange={e => updateShift(day, idx, 'close', e.target.value)}
+                              className="px-2 py-1.5 border border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 rounded-lg focus:outline-none focus:border-[#6262bd] text-slate-700 text-sm flex-1 min-w-0"
+                            />
+                          </div>
                           {hours.shifts.length > 1 && (
                             <button
                               onClick={() => removeShift(day, idx)}
@@ -561,18 +567,18 @@ export default function ReservationSettingsPage() {
                             </button>
                           )}
                         </div>
-                      ))}
-                      {hours.shifts.length < 3 && (
-                        <button
-                          onClick={() => addShift(day)}
-                          className="self-start text-xs text-[#6262bd] hover:underline font-medium mt-0.5"
-                        >
-                          + Add shift
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
+                      </div>
+                    ))}
+                    {hours.shifts.length < 3 && (
+                      <button
+                        onClick={() => addShift(day)}
+                        className="self-start text-xs text-[#6262bd] hover:underline font-medium mt-0.5"
+                      >
+                        + Add shift
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             )
           })}

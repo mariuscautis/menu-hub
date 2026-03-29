@@ -2880,30 +2880,30 @@ export default function Tables() {
 
       {/* Floor filter tabs — only shown when multiple floors exist */}
       {floors.length > 1 && (
-        <div className="flex items-center gap-1 bg-slate-100 rounded-xl p-1 mb-6 self-start overflow-x-auto max-w-full">
-          <button
-            onClick={() => setActiveFloorId(null)}
-            className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
-              activeFloorId === null
-                ? 'bg-white text-slate-800 shadow-sm'
-                : 'text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            All
-          </button>
-          {floors.map(floor => (
+        <div className="bg-slate-100 rounded-xl p-1 mb-6 flex flex-wrap gap-1">
             <button
-              key={floor.id}
-              onClick={() => setActiveFloorId(floor.id)}
-              className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors whitespace-nowrap ${
-                activeFloorId === floor.id
+              onClick={() => setActiveFloorId(null)}
+              className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+                activeFloorId === null
                   ? 'bg-white text-slate-800 shadow-sm'
                   : 'text-slate-500 hover:text-slate-700'
               }`}
             >
-              {floor.name}
+              All
             </button>
-          ))}
+            {floors.map(floor => (
+              <button
+                key={floor.id}
+                onClick={() => setActiveFloorId(floor.id)}
+                className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+                  activeFloorId === floor.id
+                    ? 'bg-white text-slate-800 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                {floor.name}
+              </button>
+            ))}
         </div>
       )}
 

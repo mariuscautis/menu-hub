@@ -326,7 +326,7 @@ export default function CustomersPage() {
                 <tr className="border-b border-slate-100 dark:border-slate-700 text-left">
                   <th className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400">Customer</th>
                   <th className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 hidden sm:table-cell">Phone</th>
-                  <th className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 text-center">Visits</th>
+                  <th className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 text-center hidden sm:table-cell">Visits</th>
                   <th className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 text-center hidden md:table-cell">Your rating</th>
                   <th className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 text-center hidden md:table-cell">
                     {restaurant?.industry_category ? 'Peer rating' : 'Overall'}
@@ -350,7 +350,7 @@ export default function CustomersPage() {
                         {customer.email && <div className="text-xs text-slate-400 truncate max-w-40">{customer.email}</div>}
                       </td>
                       <td className="px-4 py-3 text-slate-600 dark:text-slate-400 hidden sm:table-cell">{customer.phone}</td>
-                      <td className="px-4 py-3 text-center font-medium text-slate-700 dark:text-slate-300">{customer.venueBookings}</td>
+                      <td className="px-4 py-3 text-center font-medium text-slate-700 dark:text-slate-300 hidden sm:table-cell">{customer.venueBookings}</td>
                       <td className="px-4 py-3 text-center hidden md:table-cell"><Stars value={customer.venueAvg} /></td>
                       <td className="px-4 py-3 text-center hidden md:table-cell"><Stars value={customer.categoryAvg} /></td>
                       <td className="px-4 py-3">

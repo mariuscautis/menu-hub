@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { supabase } from '@/lib/supabase';
 
 export default function NotificationBell() {
@@ -148,21 +149,20 @@ export default function NotificationBell() {
         )}
       </button>
 
-      {showDropdown && (
+      {showDropdown && createPortal(
         <>
-          {/* Backdrop */}
-          <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)} />
+          {/* Dark backdrop */}
+          <div
+            className="fixed inset-0 z-[9998] bg-black/50"
+            onClick={() => setShowDropdown(false)}
+          />
 
-          {/* Panel — bottom sheet on all screen sizes */}
-          <div className="fixed inset-x-0 bottom-0 z-50 flex flex-col bg-white dark:bg-slate-900 rounded-t-2xl border-t-2 border-slate-200 dark:border-slate-700 shadow-2xl max-h-[75vh]">
-
-            {/* Drag handle */}
-            <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
-              <div className="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
-            </div>
+          {/* Modal — centered on all screen sizes */}
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 pointer-events-none">
+          <div className="w-full max-w-md flex flex-col bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl max-h-[80vh] pointer-events-auto">
 
             {/* Header */}
-            <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between flex-shrink-0">
+            <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-2">
                 <h3 className="font-bold text-base text-slate-800 dark:text-slate-100">Notifications</h3>
                 {unreadCount > 0 && (
@@ -178,9 +178,14 @@ export default function NotificationBell() {
                     Mark all read
                   </button>
                 )}
-                <button onClick={() => setShowDropdown(false)}
-                  className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 text-lg font-bold transition-colors">
-                  ×
+                <button
+                  onClick={() => setShowDropdown(false)}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                  aria-label="Close notifications"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                  </svg>
                 </button>
               </div>
             </div>
@@ -203,7 +208,7 @@ export default function NotificationBell() {
                     <div
                       key={notification.id}
                       onClick={() => !notification.read && markAsRead(notification.id)}
-                      className={`px-4 py-3.5 flex gap-3 cursor-pointer transition-colors active:scale-[0.99] ${
+                      className={`px-5 py-4 flex gap-3 cursor-pointer transition-colors active:scale-[0.99] ${
                         !notification.read
                           ? 'bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100/70 dark:hover:bg-blue-900/40'
                           : 'hover:bg-slate-50 dark:hover:bg-slate-800'
@@ -236,7 +241,9 @@ export default function NotificationBell() {
               )}
             </div>
           </div>
-        </>
+          </div>
+        </>,
+        document.body
       )}
     </div>
   );

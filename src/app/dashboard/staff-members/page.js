@@ -371,74 +371,68 @@ export default function StaffMembers() {
           </button>
         </div>
       ) : (
-        <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden">
-          <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-slate-50 dark:bg-slate-800 border-b-2 border-slate-100 dark:border-slate-700">
-              <tr>
-                <th className="text-left px-4 sm:px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('name')}</th>
-                <th className="text-left px-4 sm:px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300 hidden sm:table-cell">{t('role')}</th>
-                <th className="text-left px-4 sm:px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300 hidden md:table-cell">{t('department')}</th>
-                <th className="text-left px-4 sm:px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300 hidden lg:table-cell">{t('pinCode')}</th>
-                <th className="text-left px-4 sm:px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300 hidden sm:table-cell">{t('status.label')}</th>
-                <th className="text-right px-4 sm:px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('actions')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {staff.map((member) => (
-                <tr key={member.id} className="border-b border-slate-100 dark:border-slate-800 last:border-0">
-                  <td className="px-4 sm:px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <StaffAvatar avatarUrl={member.avatar_url} name={member.name} size="sm" />
-                      <div>
-                        <p className="font-medium text-slate-800 dark:text-slate-200">{member.name || '-'}</p>
-                        <p className="text-xs text-slate-400">{member.email}</p>
-                      </div>
-                      {member.is_hub && (
-                        <span className="px-2 py-1 bg-green-100 text-green-700 rounded-md text-xs font-semibold flex items-center gap-1 whitespace-nowrap">
-                          🍽️ Hub
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-4 sm:px-6 py-4 hidden sm:table-cell">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium capitalize ${getRoleBadge(member.role)}`}>{member.role}</span>
-                  </td>
-                  <td className="px-4 sm:px-6 py-4 hidden md:table-cell">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium capitalize ${getDepartmentBadge(member.department)}`}>{member.department}</span>
-                  </td>
-                  <td className="px-4 sm:px-6 py-4 hidden lg:table-cell">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-lg font-bold text-[#6262bd] dark:text-[#8b8bdb]">{member.pin_code || '---'}</span>
-                      <button onClick={() => openPinModal(member)} className="px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-xs font-medium hover:bg-slate-200 dark:hover:bg-slate-600">
-                        {t('change')}
-                      </button>
-                    </div>
-                  </td>
-                  <td className="px-4 sm:px-6 py-4 hidden sm:table-cell">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium capitalize ${getStatusBadge(member.status)}`}>{t(`status.${member.status}`)}</span>
-                  </td>
-                  <td className="px-4 sm:px-6 py-4">
-                    <div className="flex justify-end flex-wrap gap-1.5">
-                      <button onClick={() => sendMagicLink(member)} className="px-3 py-1.5 bg-purple-50 text-purple-600 rounded-lg text-sm font-medium hover:bg-purple-100 dark:bg-purple-600 dark:text-white dark:hover:bg-purple-700" title="Generate and copy magic link for staff login">
-                        <svg className="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
-                        {t('link')}
-                      </button>
-                      <button onClick={() => openEditModal(member)} className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-100 dark:bg-blue-600 dark:text-white dark:hover:bg-blue-700">{t('edit')}</button>
-                      {!member.is_hub && (
-                        <button onClick={() => resetStaffPassword(member)} className="px-3 py-1.5 bg-slate-50 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600" title="Reset staff password">Reset PW</button>
-                      )}
-                      {member.status === 'pending' && <button onClick={() => updateStaffStatus(member.id, 'active')} className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200 dark:bg-green-600 dark:text-white dark:hover:bg-green-700">{t('activate')}</button>}
-                      {member.status === 'active' && <button onClick={() => updateStaffStatus(member.id, 'inactive')} className="px-3 py-1.5 bg-amber-100 text-amber-700 rounded-lg text-sm font-medium hover:bg-amber-200 dark:bg-amber-600 dark:text-white dark:hover:bg-amber-700">{t('deactivate')}</button>}
-                      {member.status === 'inactive' && <button onClick={() => updateStaffStatus(member.id, 'active')} className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200 dark:bg-green-600 dark:text-white dark:hover:bg-green-700">{t('reactivate')}</button>}
-                      <button onClick={() => deleteStaff(member.id, member.name)} className="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100 dark:bg-red-600 dark:text-white dark:hover:bg-red-700">{t('remove')}</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          </div>
+        <div className="flex flex-col gap-3">
+          {staff.map((member) => (
+            <div key={member.id} className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
+              {/* Name + email + hub badge */}
+              <div className="flex items-start gap-3 mb-4">
+                <StaffAvatar avatarUrl={member.avatar_url} name={member.name} size="sm" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                    <p className="font-semibold text-slate-800 dark:text-slate-200">{member.name || '-'}</p>
+                    {member.is_hub && (
+                      <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded-md text-xs font-semibold">🍽️ Hub</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-400 truncate">{member.email}</p>
+                </div>
+              </div>
+
+              {/* Info grid: labelled fields */}
+              <div className="grid grid-cols-2 gap-x-4 gap-y-3 mb-4 text-sm">
+                <div>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mb-0.5">{t('role')}</p>
+                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getRoleBadge(member.role)}`}>{member.role}</span>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mb-0.5">{t('status.label')}</p>
+                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getStatusBadge(member.status)}`}>{t(`status.${member.status}`)}</span>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mb-0.5">{t('department')}</p>
+                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getDepartmentBadge(member.department)}`}>{member.department}</span>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mb-0.5">{t('pinCode')}</p>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-mono text-sm font-bold text-[#6262bd] dark:text-[#8b8bdb]">{member.pin_code || '---'}</span>
+                    <button onClick={() => openPinModal(member)} className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-xs font-medium hover:bg-slate-200 dark:hover:bg-slate-600">
+                      {t('change')}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-slate-100 dark:border-slate-800 mb-3" />
+
+              {/* Actions */}
+              <div className="flex flex-wrap gap-2">
+                <button onClick={() => sendMagicLink(member)} className="px-3 py-1.5 bg-purple-50 text-purple-600 rounded-lg text-sm font-medium hover:bg-purple-100 dark:bg-purple-600 dark:text-white dark:hover:bg-purple-700 flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
+                  {t('link')}
+                </button>
+                <button onClick={() => openEditModal(member)} className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-100 dark:bg-blue-600 dark:text-white dark:hover:bg-blue-700">{t('edit')}</button>
+                {!member.is_hub && (
+                  <button onClick={() => resetStaffPassword(member)} className="px-3 py-1.5 bg-slate-50 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600">Reset PW</button>
+                )}
+                {member.status === 'pending' && <button onClick={() => updateStaffStatus(member.id, 'active')} className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200 dark:bg-green-600 dark:text-white dark:hover:bg-green-700">{t('activate')}</button>}
+                {member.status === 'active' && <button onClick={() => updateStaffStatus(member.id, 'inactive')} className="px-3 py-1.5 bg-amber-100 text-amber-700 rounded-lg text-sm font-medium hover:bg-amber-200 dark:bg-amber-600 dark:text-white dark:hover:bg-amber-700">{t('deactivate')}</button>}
+                {member.status === 'inactive' && <button onClick={() => updateStaffStatus(member.id, 'active')} className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200 dark:bg-green-600 dark:text-white dark:hover:bg-green-700">{t('reactivate')}</button>}
+                <button onClick={() => deleteStaff(member.id, member.name)} className="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100 dark:bg-red-600 dark:text-white dark:hover:bg-red-700">{t('remove')}</button>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 

@@ -746,7 +746,8 @@ export default function Menu() {
                   onChange={() => toggleSelect(item.id)}
                   className="w-4 h-4 mt-1 rounded border-slate-300 accent-[#6262bd] cursor-pointer flex-shrink-0"
                 />
-                <div className="flex-1 flex justify-between items-start gap-3 min-w-0">
+                <div className="flex-1 flex flex-col gap-3 min-w-0">
+                  <div className="flex items-start gap-3 min-w-0">
                   {item.image_url && (
                     <img
                       src={item.image_url}
@@ -754,7 +755,7 @@ export default function Menu() {
                       className="w-16 h-16 sm:w-24 sm:h-24 rounded-xl object-cover flex-shrink-0"
                     />
                   )}
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-1">
                       <h3 className={`text-lg font-semibold ${item.available ? 'text-slate-800' : 'text-slate-400'}`}>
                         {item.name}
@@ -843,7 +844,8 @@ export default function Menu() {
                       })()}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  </div>
+                  <div className="flex items-center gap-2 justify-end">
                     <button
                       onClick={() => toggleAvailability(item)}
                       className={`p-2 rounded-xl ${

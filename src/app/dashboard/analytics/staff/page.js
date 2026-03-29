@@ -258,8 +258,8 @@ export default function StaffAnalyticsPage() {
                         <h3 className="text-xl font-bold text-slate-800">
                           {staff.staff_name}
                         </h3>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-slate-500">{staff.staff_email}</span>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-sm text-slate-500 truncate max-w-[180px] sm:max-w-none">{staff.staff_email}</span>
                           {staff.department && (
                             <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                               staff.department === 'bar'

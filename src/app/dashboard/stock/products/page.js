@@ -786,7 +786,7 @@ export default function StockManagement() {
               {filteredProducts.map((product) => (
                 <div
                   key={product.id}
-                  className={`bg-white border-2 rounded-2xl p-6 flex items-center gap-3 ${
+                  className={`bg-white border-2 rounded-2xl p-4 sm:p-6 flex gap-3 ${
                     selectedIds.has(product.id) ? 'border-[#6262bd] bg-[#6262bd]/5' :
                     product.current_stock <= 0 ? 'border-red-300 bg-red-50' : 'border-slate-100'
                   }`}
@@ -795,33 +795,33 @@ export default function StockManagement() {
                     type="checkbox"
                     checked={selectedIds.has(product.id)}
                     onChange={() => toggleSelect(product.id)}
-                    className="w-4 h-4 rounded border-slate-300 accent-[#6262bd] cursor-pointer flex-shrink-0"
+                    className="w-4 h-4 mt-1 rounded border-slate-300 accent-[#6262bd] cursor-pointer flex-shrink-0"
                   />
-                  <div className="flex-1 flex justify-between items-center">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-slate-800">
+                  <div className="flex-1 flex flex-col gap-3 min-w-0">
+                    {/* Name + badges */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="text-base font-semibold text-slate-800">
                         {product.name}
                       </h3>
                       {product.current_stock <= 0 && (
-                        <span className="px-2 py-1 bg-red-100 text-red-600 text-xs rounded-full font-medium">
+                        <span className="px-2 py-0.5 bg-red-100 text-red-600 text-xs rounded-full font-medium">
                           ⚠ Out of Stock
                         </span>
                       )}
                       {product.current_stock > 0 && !product.cost_per_base_unit && (
                         <button
                           onClick={() => openAdjustModal(product)}
-                          className="px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded-full font-medium hover:bg-amber-200 transition-colors"
+                          className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full font-medium hover:bg-amber-200 transition-colors"
                         >
                           ⚠ Set value
                         </button>
                       )}
                       {product.brand && (
-                        <span className="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-full font-medium">
+                        <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs rounded-full font-medium">
                           {product.brand}
                         </span>
                       )}
-                      <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                      <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${
                         product.category === 'bar'
                           ? 'bg-orange-100 text-orange-700'
                           : 'bg-green-100 text-green-700'
@@ -829,53 +829,48 @@ export default function StockManagement() {
                         {product.category === 'bar' ? `🍸 ${t('bar')}` : `🍳 ${t('kitchen')}`}
                       </span>
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-slate-600">
+                    {/* Metadata */}
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-600">
                       <span>
                         {t('currentStock')}: <strong className={product.current_stock <= 0 ? 'text-red-500' : 'text-[#6262bd]'}>{formatStock(product.current_stock, product.base_unit)}</strong>
                       </span>
-                      <span className="text-slate-300">•</span>
                       <span>
                         {t('inputUnit')}: <strong>{getUnitLabel(product.input_unit_type)}</strong>
                       </span>
-                      <span className="text-slate-300">•</span>
                       <span>
                         1 {product.input_unit_type} = {product.units_to_base_multiplier} {product.base_unit}
                       </span>
                       {product.product_tax_categories && (
-                        <>
-                          <span className="text-slate-300">•</span>
-                          <span>
-                            {t('tax')}: <strong className="text-purple-600">{product.product_tax_categories.name} ({product.product_tax_categories.rate}%)</strong>
-                          </span>
-                        </>
+                        <span>
+                          {t('tax')}: <strong className="text-purple-600">{product.product_tax_categories.name} ({product.product_tax_categories.rate}%)</strong>
+                        </span>
                       )}
                     </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => openStockModal(product)}
-                      className="px-4 py-2 bg-green-50 text-green-600 rounded-xl font-medium hover:bg-green-100"
-                    >
-                      {t('addStockButton')}
-                    </button>
-                    <button
-                      onClick={() => openProductModal(product)}
-                      className="p-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    >
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => deleteProduct(product.id)}
-                      className="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100"
-                    >
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                      </svg>
-                    </button>
-                  </div>
+                    {/* Actions */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <button
+                        onClick={() => openStockModal(product)}
+                        className="flex-1 sm:flex-none px-4 py-2 bg-green-50 text-green-600 rounded-xl font-medium hover:bg-green-100 text-sm"
+                      >
+                        {t('addStockButton')}
+                      </button>
+                      <button
+                        onClick={() => openProductModal(product)}
+                        className="p-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      >
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => deleteProduct(product.id)}
+                        className="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100"
+                      >
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}

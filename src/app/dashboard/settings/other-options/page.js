@@ -135,7 +135,7 @@ export default function OtherOptionsSettings() {
       {/* Order Sound Notifications Section */}
       <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
         <div className="mb-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="text-lg font-bold text-slate-700 mb-2 flex items-center gap-2">
                 <svg className="w-6 h-6 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24">

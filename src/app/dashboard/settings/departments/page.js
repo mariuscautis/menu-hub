@@ -277,7 +277,7 @@ export default function DepartmentsSettingsPage() {
       {/* Add New Department */}
       <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
         <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-3">{t('addNewDepartment')}</h3>
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <input
             type="text"
             value={newDepartmentName}
@@ -292,7 +292,7 @@ export default function DepartmentsSettingsPage() {
           />
           <button
             onClick={handleAddDepartment}
-            className="px-6 py-3 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252a5] transition-colors font-medium"
+            className="px-6 py-3 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252a5] transition-colors font-medium whitespace-nowrap"
           >
             {t('addDepartment')}
           </button>

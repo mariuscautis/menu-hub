@@ -110,7 +110,7 @@ export default function MenuItemLosses() {
       {/* Filters */}
       <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
         <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-4">{t('filters')}</h2>
-        <div className="grid grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('startDate')}</label>
             <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
@@ -160,7 +160,7 @@ export default function MenuItemLosses() {
 
       {lossesData && (
         <>
-          <div className="grid grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-xl p-4">
               <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">{t('totalLossRecords')}</p>
               <p className="text-2xl font-bold text-[#6262bd]">{lossesData.summary.total_loss_records}</p>
@@ -192,8 +192,8 @@ export default function MenuItemLosses() {
               <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-4">{t('topLossItems')}</h2>
               <div className="space-y-2">
                 {lossesData.summary.top_loss_items.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                    <div className="flex items-center gap-3">
+                  <div key={index} className="flex flex-wrap items-start justify-between gap-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
+                    <div className="flex items-center gap-3 min-w-0">
                       <span className="text-lg font-bold text-slate-400">#{index + 1}</span>
                       <div>
                         <p className="font-semibold text-slate-800 dark:text-slate-200">{item.name}</p>

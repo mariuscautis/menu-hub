@@ -369,8 +369,8 @@ export default function DiscountsSettings() {
                         }}
                       />
                     ) : (
-                      <div className="flex items-start gap-3">
-                        <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-start gap-3">
+                        <div className="flex-1 min-w-0" style={{minWidth: '0', flexBasis: '200px'}}>
                           <div className="flex items-center gap-2 flex-wrap">
                             <p className="font-medium text-slate-800 dark:text-slate-100">{discount.name}</p>
                             {discount.is_promotion && (
@@ -411,7 +411,7 @@ export default function DiscountsSettings() {
                             </div>
                           )}
                         </div>
-                        <div className="flex items-center gap-2 shrink-0">
+                        <div className="flex flex-wrap items-center gap-2">
                           <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold ${
                             discount.type === 'percentage'
                               ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
