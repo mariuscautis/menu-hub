@@ -1,0 +1,21 @@
+{
+  "name": "menuhub-hub-server",
+  "version": "1.0.0",
+  "description": "Local WebSocket hub server for Menu Hub restaurant app",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "optionalDependencies": {
+    "bonjour-service": "^1.2.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": ["restaurant", "pos", "websocket", "offline", "hub"],
+  "license": "UNLICENSED"
+}

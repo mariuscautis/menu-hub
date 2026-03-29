@@ -398,6 +398,15 @@ class LocalHubClient {
         // Ping response, connection is alive
         break
 
+      case 'device_list':
+        this.emit('device_list', data)
+        break
+
+      case 'server_shutdown':
+        console.log('[LocalHub] Server is shutting down')
+        this.emit('server_shutdown', data)
+        break
+
       case 'error':
         console.error('[LocalHub] Server error:', data.error)
         this.emit('error', data)

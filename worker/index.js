@@ -16,9 +16,11 @@ self.addEventListener('activate', (event) => {
 })
 
 const DB_NAME = 'menuhub-offline'
-const DB_VERSION = 1
+const DB_VERSION = 3
 const ORDERS_STORE = 'pending_orders'
 const ORDER_ITEMS_STORE = 'pending_order_items'
+const PAYMENTS_STORE = 'pending_payments'
+const ORDER_UPDATES_STORE = 'pending_order_updates'
 
 // Supabase config - set via message from the main thread
 let SUPABASE_URL = ''
@@ -43,6 +45,8 @@ function openDB() {
 
     request.onupgradeneeded = (event) => {
       const db = event.target.result
+
+      // v1 stores (always create if missing)
       if (!db.objectStoreNames.contains(ORDERS_STORE)) {
         const orderStore = db.createObjectStore(ORDERS_STORE, { keyPath: 'client_id' })
         orderStore.createIndex('sync_status', 'sync_status', { unique: false })
@@ -52,6 +56,22 @@ function openDB() {
       if (!db.objectStoreNames.contains(ORDER_ITEMS_STORE)) {
         const itemsStore = db.createObjectStore(ORDER_ITEMS_STORE, { keyPath: 'id', autoIncrement: true })
         itemsStore.createIndex('order_client_id', 'order_client_id', { unique: false })
+      }
+
+      // v2: pending_payments store
+      if (!db.objectStoreNames.contains(PAYMENTS_STORE)) {
+        const paymentsStore = db.createObjectStore(PAYMENTS_STORE, { keyPath: 'payment_id' })
+        paymentsStore.createIndex('sync_status', 'sync_status', { unique: false })
+        paymentsStore.createIndex('created_at', 'created_at', { unique: false })
+        paymentsStore.createIndex('restaurant_id', 'restaurant_id', { unique: false })
+      }
+
+      // v3: pending_order_updates store
+      if (!db.objectStoreNames.contains(ORDER_UPDATES_STORE)) {
+        const updatesStore = db.createObjectStore(ORDER_UPDATES_STORE, { keyPath: 'update_id' })
+        updatesStore.createIndex('sync_status', 'sync_status', { unique: false })
+        updatesStore.createIndex('order_id', 'order_id', { unique: false })
+        updatesStore.createIndex('created_at', 'created_at', { unique: false })
       }
     }
 

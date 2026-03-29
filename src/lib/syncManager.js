@@ -33,12 +33,36 @@ import {
 // Event target for sync status updates (so UI components can listen)
 const syncEventTarget = typeof window !== 'undefined' ? new EventTarget() : null
 
+// BroadcastChannel so other open tabs learn about sync completions
+const syncBroadcast = typeof window !== 'undefined' && 'BroadcastChannel' in window
+  ? new BroadcastChannel('menuhub-sync')
+  : null
+
+// Listen for broadcasts from other tabs and re-emit locally
+if (syncBroadcast) {
+  syncBroadcast.onmessage = (event) => {
+    const { type, detail } = event.data || {}
+    if (type && syncEventTarget) {
+      syncEventTarget.dispatchEvent(new CustomEvent(type, { detail }))
+    }
+  }
+}
+
 /**
  * Dispatch a sync status event for UI updates.
+ * Also broadcasts to other tabs via BroadcastChannel.
  */
 function emitSyncEvent(type, detail = {}) {
   if (!syncEventTarget) return
   syncEventTarget.dispatchEvent(new CustomEvent(type, { detail }))
+  // Broadcast to other tabs (only for meaningful events, not every progress tick)
+  if (syncBroadcast && (type === 'sync-complete' || type === 'pending-count-change')) {
+    try {
+      syncBroadcast.postMessage({ type, detail })
+    } catch {
+      // BroadcastChannel may be closed — ignore
+    }
+  }
 }
 
 /**

@@ -19,6 +19,7 @@
  */
 
 import * as offlineQueue from './offlineQueue'
+import { syncAll as syncManagerAll } from './syncManager'
 
 const SYNC_INTERVAL = 30000 // 30 seconds
 const CONNECTIVITY_CHECK_INTERVAL = 10000 // 10 seconds
@@ -312,172 +313,23 @@ class SyncCoordinator {
   }
 
   /**
-   * Sync to cloud (Supabase)
+   * Sync to cloud (Supabase).
+   * Delegates to syncManager which is the single authoritative implementation.
    */
   async syncToCloud() {
-    if (!this.supabaseClient || !this.isOnline) {
+    if (!this.isOnline) {
       return { orders: { synced: 0, failed: 0 }, payments: { synced: 0, failed: 0 } }
     }
 
-    const result = {
-      orders: { synced: 0, failed: 0 },
-      payments: { synced: 0, failed: 0 }
-    }
-
     try {
-      // Sync orders
-      const ordersToSync = await offlineQueue.getOrdersToSync()
-      console.log('[SyncCoordinator] Syncing', ordersToSync.length, 'orders to cloud')
-
-      for (const order of ordersToSync) {
-        try {
-          // Update sync status to 'syncing'
-          await offlineQueue.updateSyncStatus(order.client_id, 'syncing')
-
-          // Get order items
-          const items = await offlineQueue.getOrderItems(order.client_id)
-
-          // Insert order to Supabase
-          const { data: orderData, error: orderError } = await this.supabaseClient
-            .from('orders')
-            .insert({
-              restaurant_id: order.restaurant_id,
-              table_id: order.table_id,
-              total: order.total,
-              customer_name: order.customer_name,
-              customer_email: order.customer_email,
-              customer_phone: order.customer_phone,
-              notes: order.notes,
-              status: order.status,
-              order_type: order.order_type,
-              pickup_code: order.pickup_code,
-              locale: order.locale,
-              created_at: order.created_at
-            })
-            .select()
-            .single()
-
-          if (orderError) throw orderError
-
-          // Insert order items
-          const itemsToInsert = items.map(item => ({
-            order_id: orderData.id,
-            menu_item_id: item.menu_item_id,
-            name: item.name,
-            quantity: item.quantity,
-            price_at_time: item.price_at_time
-          }))
-
-          const { error: itemsError } = await this.supabaseClient
-            .from('order_items')
-            .insert(itemsToInsert)
-
-          if (itemsError) throw itemsError
-
-          // Mark as synced
-          await offlineQueue.updateSyncStatus(order.client_id, 'synced')
-
-          // Remove from offline queue after successful sync
-          await offlineQueue.removeSyncedOrder(order.client_id)
-
-          result.orders.synced++
-          console.log('[SyncCoordinator] Synced order to cloud:', order.client_id)
-
-        } catch (error) {
-          console.error('[SyncCoordinator] Failed to sync order:', order.client_id, error)
-          await offlineQueue.updateSyncStatus(order.client_id, 'failed', error.message)
-          result.orders.failed++
-        }
+      const result = await syncManagerAll()
+      return {
+        orders: result.orders,
+        payments: result.payments,
       }
-
-      // Sync payments
-      const paymentsToSync = await offlineQueue.getPaymentsToSync()
-      console.log('[SyncCoordinator] Syncing', paymentsToSync.length, 'payments to cloud')
-
-      for (const payment of paymentsToSync) {
-        try {
-          // Update payment status
-          await offlineQueue.updatePaymentSyncStatus(payment.payment_id, 'syncing')
-
-          // Insert payment to Supabase
-          const { error: paymentError } = await this.supabaseClient
-            .from('payments')
-            .insert({
-              restaurant_id: payment.restaurant_id,
-              table_id: payment.table_id,
-              total_amount: payment.total_amount,
-              payment_method: payment.payment_method,
-              staff_name: payment.staff_name,
-              user_id: payment.user_id,
-              created_at: payment.created_at
-            })
-
-          if (paymentError) throw paymentError
-
-          // Mark as synced
-          await offlineQueue.updatePaymentSyncStatus(payment.payment_id, 'synced')
-
-          // Remove from offline queue
-          await offlineQueue.removeSyncedPayment(payment.payment_id)
-
-          result.payments.synced++
-          console.log('[SyncCoordinator] Synced payment to cloud:', payment.payment_id)
-
-        } catch (error) {
-          console.error('[SyncCoordinator] Failed to sync payment:', payment.payment_id, error)
-          await offlineQueue.updatePaymentSyncStatus(payment.payment_id, 'failed', error.message)
-          result.payments.failed++
-        }
-      }
-
-      // Sync order updates
-      const updatesToSync = await offlineQueue.getOrderUpdatesToSync()
-      console.log('[SyncCoordinator] Syncing', updatesToSync.length, 'order updates to cloud')
-
-      for (const update of updatesToSync) {
-        try {
-          // Insert items to existing order
-          const itemsToInsert = update.items.map(item => ({
-            order_id: update.order_id,
-            menu_item_id: item.menu_item_id,
-            name: item.name,
-            quantity: item.quantity,
-            price_at_time: item.price_at_time
-          }))
-
-          const { error: itemsError } = await this.supabaseClient
-            .from('order_items')
-            .insert(itemsToInsert)
-
-          if (itemsError) throw itemsError
-
-          // Update order total
-          const { error: updateError } = await this.supabaseClient
-            .from('orders')
-            .update({
-              total: this.supabaseClient.raw(`total + ${update.total_to_add}`)
-            })
-            .eq('id', update.order_id)
-
-          if (updateError) throw updateError
-
-          // Mark as synced
-          await offlineQueue.updateOrderUpdateSyncStatus(update.update_id, 'synced')
-          await offlineQueue.removeSyncedOrderUpdate(update.update_id)
-
-          console.log('[SyncCoordinator] Synced order update to cloud:', update.update_id)
-
-        } catch (error) {
-          console.error('[SyncCoordinator] Failed to sync order update:', update.update_id, error)
-          await offlineQueue.updateOrderUpdateSyncStatus(update.update_id, 'failed', error.message)
-        }
-      }
-
-      return result
-
     } catch (error) {
       console.error('[SyncCoordinator] Cloud sync error:', error)
-      return result
+      return { orders: { synced: 0, failed: 0 }, payments: { synced: 0, failed: 0 } }
     }
   }
 
