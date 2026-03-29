@@ -4,23 +4,20 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { addPendingOrder, getPendingOrders, getPendingCount } from '@/lib/offlineQueue'
 import { syncPendingOrders, onSyncEvent, initAutoSync } from '@/lib/syncManager'
-import localHubClient from '@/lib/localHubClient'
 
 /**
  * Hook for offline-aware order placement.
  *
  * Priority order:
- * 1. Local Hub (if connected) - instant local sync
- * 2. Supabase (if online but no hub) - cloud sync
- * 3. IndexedDB (if offline) - queue for later sync
+ * 1. Supabase (if online) - cloud sync
+ * 2. IndexedDB (if offline) - queue for later sync
  *
- * @returns {Object} { placeOrder, pendingCount, isOnline, isSyncing, syncNow, hubConnected }
+ * @returns {Object} { placeOrder, pendingCount, isOnline, isSyncing, syncNow }
  */
 export default function useOfflineOrder() {
   const [isOnline, setIsOnline] = useState(true)
   const [pendingCount, setPendingCount] = useState(0)
   const [isSyncing, setIsSyncing] = useState(false)
-  const [hubConnected, setHubConnected] = useState(false)
 
   // Track online status
   useEffect(() => {
@@ -59,30 +56,8 @@ export default function useOfflineOrder() {
     }
   }, [])
 
-  // Monitor local hub connection status
-  useEffect(() => {
-    const updateHubStatus = () => {
-      const status = localHubClient.getStatus()
-      setHubConnected(status.isConnected)
-    }
-
-    // Initial status
-    updateHubStatus()
-
-    // Listen for connection changes
-    const unsubConnected = localHubClient.on('connected', updateHubStatus)
-    const unsubDisconnected = localHubClient.on('disconnected', updateHubStatus)
-    const unsubRegistered = localHubClient.on('registered', updateHubStatus)
-
-    return () => {
-      unsubConnected()
-      unsubDisconnected()
-      unsubRegistered()
-    }
-  }, [])
-
   /**
-   * Place an order — via local hub, Supabase, or offline queue.
+   * Place an order — via Supabase or offline queue.
    *
    * @param {Object} params
    * @param {Object} params.restaurant - Restaurant object
@@ -134,22 +109,7 @@ export default function useOfflineOrder() {
     const clientId = `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     orderData.client_id = clientId
 
-    // PRIORITY 1: Try local hub first (if connected)
-    if (localHubClient.getStatus().isConnected) {
-      try {
-        console.log('[useOfflineOrder] Placing order via local hub')
-        await localHubClient.placeOrder(orderData, orderItems)
-
-        // Order sent to hub successfully
-        // The hub will handle syncing with Supabase
-        return { success: true, pickupCode, offline: false, via: 'local-hub' }
-      } catch (err) {
-        console.warn('[useOfflineOrder] Local hub placement failed, falling back:', err.message)
-        // Fall through to next method
-      }
-    }
-
-    // PRIORITY 2: Try Supabase directly (if online but no hub)
+    // PRIORITY 1: Try Supabase directly (if online)
     if (navigator.onLine) {
       try {
         console.log('[useOfflineOrder] Placing order via Supabase')
@@ -195,7 +155,7 @@ export default function useOfflineOrder() {
       }
     }
 
-    // PRIORITY 3: Queue locally in IndexedDB (offline or all else failed)
+    // PRIORITY 2: Queue locally in IndexedDB (offline or all else failed)
     try {
       console.log('[useOfflineOrder] Queueing order in IndexedDB')
       await addPendingOrder(orderData, orderItems)
@@ -222,6 +182,5 @@ export default function useOfflineOrder() {
     isOnline,
     isSyncing,
     syncNow,
-    hubConnected,
   }
 }

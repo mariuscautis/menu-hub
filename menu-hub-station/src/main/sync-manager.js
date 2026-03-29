@@ -1,35 +1,84 @@
 const { createClient } = require('@supabase/supabase-js');
+const { app } = require('electron');
+const fs = require('fs');
+const path = require('path');
 
 let supabase = null;
+let credentialsPath = null;
 
-function initializeSupabase() {
-  // These should come from environment variables or config
-  // For now, using placeholder - will need to be configured on first run
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseKey) {
-    console.warn('[Sync] Supabase credentials not configured');
-    return null;
+// ─── Credentials persistence ────────────────────────────────────────────────
+function getCredentialsPath() {
+  if (!credentialsPath) {
+    credentialsPath = path.join(app.getPath('userData'), 'supabase-config.json');
   }
-
-  supabase = createClient(supabaseUrl, supabaseKey);
-  return supabase;
+  return credentialsPath;
 }
 
+function loadSavedCredentials() {
+  try {
+    const raw = fs.readFileSync(getCredentialsPath(), 'utf8');
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function saveCredentials(url, key) {
+  try {
+    fs.writeFileSync(getCredentialsPath(), JSON.stringify({ url, key }), 'utf8');
+  } catch (err) {
+    console.error('[Sync] Failed to save credentials:', err.message);
+  }
+}
+
+/**
+ * Set Supabase credentials at runtime (called from IPC when PWA sends them).
+ * Persists them to disk so they survive restarts.
+ */
+function setSupabaseCredentials(url, key) {
+  if (!url || !key) {
+    console.warn('[Sync] setSupabaseCredentials: missing url or key');
+    return;
+  }
+  saveCredentials(url, key);
+  supabase = createClient(url, key);
+  console.log('[Sync] Supabase credentials updated and saved');
+}
+
+function getSupabaseClient() {
+  if (supabase) return supabase;
+
+  // Try env vars first
+  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (url && key) {
+    supabase = createClient(url, key);
+    return supabase;
+  }
+
+  // Try saved credentials
+  const saved = loadSavedCredentials();
+  if (saved?.url && saved?.key) {
+    supabase = createClient(saved.url, saved.key);
+    console.log('[Sync] Loaded saved Supabase credentials');
+    return supabase;
+  }
+
+  return null;
+}
+
+// ─── Sync ───────────────────────────────────────────────────────────────────
 async function syncWithSupabase(serverState) {
-  if (!supabase) {
-    supabase = initializeSupabase();
-    if (!supabase) {
-      console.log('[Sync] Skipping sync - Supabase not configured');
-      return;
-    }
+  const client = getSupabaseClient();
+  if (!client) {
+    console.log('[Sync] Skipping sync — Supabase credentials not configured');
+    return;
   }
 
   console.log('[Sync] Starting sync with Supabase...');
 
   try {
-    // Get pending orders
     const pendingOrders = serverState.db.getPendingSync();
 
     if (pendingOrders.length === 0) {
@@ -41,45 +90,40 @@ async function syncWithSupabase(serverState) {
 
     for (const order of pendingOrders) {
       try {
-        await syncOrder(order, serverState);
+        await syncOrder(order, serverState, client);
       } catch (error) {
         console.error(`[Sync] Failed to sync order ${order.client_id}:`, error);
-
-        // Update sync attempts
         serverState.db.updateOrder(order.client_id, {
-          sync_attempts: order.sync_attempts + 1,
+          sync_attempts: (order.sync_attempts || 0) + 1,
           last_sync_attempt: new Date().toISOString()
         });
       }
     }
 
     console.log('[Sync] Sync completed');
-
   } catch (error) {
     console.error('[Sync] Sync failed:', error);
     throw error;
   }
 }
 
-async function syncOrder(order, serverState) {
-  // Check if order already exists in Supabase (deduplication)
-  const { data: existing } = await supabase
+async function syncOrder(order, serverState, client) {
+  // Deduplication by client_id
+  const { data: existing } = await client
     .from('orders')
     .select('id')
     .eq('client_id', order.client_id)
-    .single();
+    .maybeSingle();
 
   if (existing) {
-    console.log(`[Sync] Order ${order.client_id} already exists in Supabase, marking as synced`);
+    console.log(`[Sync] Order ${order.client_id} already in Supabase, marking synced`);
     serverState.db.markAsSynced(order.client_id, existing.id);
     return;
   }
 
-  // Get order items
   const items = serverState.db.getOrderItems(order.client_id);
 
-  // Insert order
-  const { data: insertedOrder, error: orderError } = await supabase
+  const { data: insertedOrder, error: orderError } = await client
     .from('orders')
     .insert({
       client_id: order.client_id,
@@ -105,62 +149,58 @@ async function syncOrder(order, serverState) {
     .select()
     .single();
 
-  if (orderError) {
-    throw new Error(`Failed to insert order: ${orderError.message}`);
-  }
+  if (orderError) throw new Error(`Order insert failed: ${orderError.message}`);
 
-  console.log(`[Sync] Order ${order.client_id} inserted into Supabase with id ${insertedOrder.id}`);
+  console.log(`[Sync] Order ${order.client_id} → Supabase id ${insertedOrder.id}`);
 
-  // Insert order items
   if (items.length > 0) {
-    const { error: itemsError } = await supabase
+    const { error: itemsError } = await client
       .from('order_items')
-      .insert(
-        items.map(item => ({
-          order_id: insertedOrder.id,
-          menu_item_id: item.menu_item_id,
-          name: item.name,
-          quantity: item.quantity,
-          price_at_time: item.price_at_time,
-          department: item.department,
-          preparing_started_at: item.preparing_started_at,
-          marked_ready_at: item.marked_ready_at,
-          delivered_at: item.delivered_at
-        }))
-      );
+      .insert(items.map(item => ({
+        order_id: insertedOrder.id,
+        menu_item_id: item.menu_item_id,
+        name: item.name,
+        quantity: item.quantity,
+        price_at_time: item.price_at_time,
+        department: item.department,
+        preparing_started_at: item.preparing_started_at,
+        marked_ready_at: item.marked_ready_at,
+        delivered_at: item.delivered_at
+      })));
 
-    if (itemsError) {
-      throw new Error(`Failed to insert order items: ${itemsError.message}`);
-    }
-
-    console.log(`[Sync] Inserted ${items.length} order items for order ${order.client_id}`);
+    if (itemsError) throw new Error(`Items insert failed: ${itemsError.message}`);
   }
 
-  // Mark as synced in local database
   serverState.db.markAsSynced(order.client_id, insertedOrder.id);
 
-  // Send confirmation email if needed (takeaway orders)
+  // Send confirmation email for takeaway orders
   if (order.order_type === 'takeaway' && order.customer_email) {
-    await sendOrderConfirmationEmail(order, items);
+    await sendOrderConfirmationEmail(order, items, client);
   }
 }
 
-async function sendOrderConfirmationEmail(order, items) {
+async function sendOrderConfirmationEmail(order, items, client) {
   try {
-    // Call the same API endpoint that the main app uses
-    // This would need the actual URL of your deployed app
-    console.log(`[Sync] Sending confirmation email for order ${order.client_id}`);
-
-    // TODO: Implement email sending
-    // This should call your existing takeaway order confirmation endpoint
-
+    // Best-effort — use the same API endpoint as the main app
+    // The app URL is stored in env or can be configured later
+    const appUrl = process.env.APP_URL || 'https://venoapp.com';
+    await fetch(`${appUrl}/api/takeaway/order`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        orderId: order.client_id,
+        restaurantId: order.restaurant_id,
+        locale: order.locale,
+      }),
+    });
+    console.log(`[Sync] Confirmation email sent for ${order.client_id}`);
   } catch (error) {
-    console.error('[Sync] Failed to send confirmation email:', error);
-    // Don't fail the sync if email fails
+    console.warn('[Sync] Email send failed (non-blocking):', error.message);
   }
 }
 
 module.exports = {
-  initializeSupabase,
-  syncWithSupabase
+  syncWithSupabase,
+  setSupabaseCredentials,
+  getSupabaseClient,
 };

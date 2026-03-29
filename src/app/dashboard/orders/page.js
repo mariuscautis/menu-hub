@@ -8,7 +8,6 @@ import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { generateInvoicePdfBase64, downloadInvoicePdf } from '@/lib/invoicePdfGenerator'
 import { getPendingOrders, getOrderItems as getOfflineOrderItems } from '@/lib/offlineQueue'
 import { onSyncEvent } from '@/lib/syncManager'
-import localHubClient from '@/lib/localHubClient'
 import { useOrderSounds } from '@/hooks/useOrderSounds'
 import { useCurrency } from '@/lib/CurrencyContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
@@ -243,51 +242,6 @@ export default function Orders() {
     }
   }, [restaurant])
 
-  // Listen for orders arriving via the local hub (works offline)
-  useEffect(() => {
-    if (!restaurant) return
-
-    const unsubNewOrder = localHubClient.on('new_order', ({ order, items }) => {
-      if (!order || order.restaurant_id !== restaurant.id) return
-      console.log('[Orders] Hub: new_order received', order.client_id)
-
-      // Build a display-compatible object from hub data
-      const hubOrder = {
-        ...order,
-        id: order.id || `hub-${order.client_id}`,
-        _isOffline: !order.id, // no server ID yet = still offline
-        _fromHub: true,
-        order_items: (items || []).map(item => ({ ...item })),
-        tables: null,
-      }
-
-      setOfflineOrders(prev => {
-        // Avoid duplicates by client_id
-        const exists = prev.some(o => o.client_id === order.client_id)
-        if (exists) return prev
-        if (!isInitialLoadRef.current) {
-          playNewOrderSoundRef.current(hubOrder, menuItemsRef.current)
-        }
-        return [hubOrder, ...prev]
-      })
-    })
-
-    const unsubOrderUpdate = localHubClient.on('order_update', ({ clientId, updates }) => {
-      console.log('[Orders] Hub: order_update received', clientId)
-      // Update offline order if we have it; then also refresh server orders
-      setOfflineOrders(prev =>
-        prev.map(o => o.client_id === clientId ? { ...o, ...updates } : o)
-      )
-      // Refresh server orders so status changes appear immediately
-      fetchOrders(restaurant.id)
-    })
-
-    return () => {
-      unsubNewOrder()
-      unsubOrderUpdate()
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [restaurant])
 
   const fetchOrders = async (restaurantId) => {
     const { data } = await supabase

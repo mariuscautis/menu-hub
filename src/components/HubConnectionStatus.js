@@ -1,54 +1,27 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import localHubClient from '@/lib/localHubClient'
 import { onSyncEvent } from '@/lib/syncManager'
 import { getPendingCount } from '@/lib/offlineQueue'
 
 /**
- * Hub Connection Status
- *
- * Shows the local hub and internet connection status in the dashboard header.
- * Automatically connects to the hub discovered via IP scan or cached URL.
- * No QR scanning required — connection is fully automatic.
+ * Connection status indicator shown in the dashboard header.
+ * Displays internet connectivity and pending offline-sync count.
  */
-export default function HubConnectionStatus({ restaurantId, staffInfo }) {
-  const [isConnected, setIsConnected] = useState(false)
+export default function HubConnectionStatus({ restaurantId }) {
   const [isOnline, setIsOnline] = useState(
     typeof navigator !== 'undefined' ? navigator.onLine : true
   )
-  const [connectedCount, setConnectedCount] = useState(0)
-  const [hubUrl, setHubUrl] = useState(null)
   const [syncStatus, setSyncStatus] = useState({ isSyncing: false, pendingCount: 0 })
 
   useEffect(() => {
     if (typeof window === 'undefined' || !restaurantId) return
 
-    // Update device info so the hub knows who this device is
-    if (staffInfo) {
-      localHubClient.setDeviceInfo({
-        deviceName: staffInfo.name || 'Staff Device',
-        deviceRole: staffInfo.department || 'staff',
-        restaurantId,
-      })
-    }
+    const handleOnline = () => setIsOnline(true)
+    const handleOffline = () => setIsOnline(false)
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
 
-    // Subscribe to hub events
-    const unsubConnected = localHubClient.on('connected', () => {
-      setIsConnected(true)
-      const status = localHubClient.getStatus()
-      setHubUrl(status.hubUrl)
-    })
-
-    const unsubDisconnected = localHubClient.on('disconnected', () => {
-      setIsConnected(false)
-    })
-
-    const unsubDeviceList = localHubClient.on('device_list', (data) => {
-      setConnectedCount(data?.count || 0)
-    })
-
-    // Subscribe to sync events
     const unsubSyncStart = onSyncEvent('sync-start', () => {
       setSyncStatus(prev => ({ ...prev, isSyncing: true }))
     })
@@ -65,29 +38,13 @@ export default function HubConnectionStatus({ restaurantId, staffInfo }) {
       setSyncStatus(prev => ({ ...prev, pendingCount: e.detail?.count ?? prev.pendingCount }))
     })
 
-    // Online/offline
-    const handleOnline = () => setIsOnline(true)
-    const handleOffline = () => setIsOnline(false)
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
-
-    // Reflect current state immediately
-    const status = localHubClient.getStatus()
-    setIsConnected(status.isConnected)
-    setHubUrl(status.hubUrl)
-
-    // Connect if not already connected
-    if (!status.isConnected) {
-      localHubClient.connect(restaurantId).catch(() => {})
-    }
-
     // Load initial pending count
     getPendingCount().then(count => {
       setSyncStatus(prev => ({ ...prev, pendingCount: count }))
     }).catch(() => {})
 
     // Refresh pending count every 15s
-    const countInterval = setInterval(async () => {
+    const interval = setInterval(async () => {
       try {
         const count = await getPendingCount()
         setSyncStatus(prev => ({ ...prev, pendingCount: count }))
@@ -95,17 +52,14 @@ export default function HubConnectionStatus({ restaurantId, staffInfo }) {
     }, 15_000)
 
     return () => {
-      unsubConnected()
-      unsubDisconnected()
-      unsubDeviceList()
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
       unsubSyncStart()
       unsubSyncComplete()
       unsubPendingChange()
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
-      clearInterval(countInterval)
+      clearInterval(interval)
     }
-  }, [restaurantId, staffInfo])
+  }, [restaurantId])
 
   if (!restaurantId) return null
 
@@ -116,27 +70,6 @@ export default function HubConnectionStatus({ restaurantId, staffInfo }) {
         <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isOnline ? 'bg-green-500' : 'bg-red-500'}`} />
         <span className="text-xs text-slate-600 dark:text-slate-400 hidden sm:inline">
           {isOnline ? 'Online' : 'Offline'}
-        </span>
-      </div>
-
-      {/* Hub status */}
-      <div
-        className="flex items-center gap-1.5"
-        title={
-          isConnected
-            ? `Hub connected — ${connectedCount} device${connectedCount !== 1 ? 's' : ''} (${hubUrl || ''})`
-            : 'Hub: Searching...'
-        }
-      >
-        <div
-          className={`w-2 h-2 rounded-full flex-shrink-0 ${
-            isConnected ? 'bg-blue-500 animate-pulse' : 'bg-slate-400'
-          }`}
-        />
-        <span className="text-xs text-slate-600 dark:text-slate-400 hidden sm:inline">
-          {isConnected
-            ? connectedCount > 1 ? `Hub (${connectedCount})` : 'Hub'
-            : 'No Hub'}
         </span>
       </div>
 

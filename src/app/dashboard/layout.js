@@ -9,7 +9,6 @@ import ThemeToggle from '@/components/ThemeToggle'
 import OfflineIndicator from '@/components/OfflineIndicator'
 import HubConnectionStatus from '@/components/HubConnectionStatus'
 import { initAutoSync } from '@/lib/syncManager'
-import localHubClient from '@/lib/localHubClient'
 import { LanguageProvider } from '@/lib/i18n/LanguageContext'
 import { CurrencyProvider } from '@/lib/CurrencyContext'
 import LanguageSelector from '@/components/LanguageSelector'
@@ -516,20 +515,11 @@ export default function DashboardLayout({ children }) {
     }
   }, [restaurant, userType])
 
-  // Initialize auto-sync and hub connection once the restaurant is known
+  // Initialize auto-sync once the restaurant is known
   useEffect(() => {
     if (!restaurant) return
-
-    // Start auto-sync (uploads queued offline orders to Supabase when online)
     const cleanupSync = initAutoSync()
-
-    // Connect to the local hub (auto-discovers via cached IP or network scan)
-    localHubClient.setDeviceInfo({ restaurantId: restaurant.id })
-    localHubClient.connect(restaurant.id).catch(() => {})
-
-    return () => {
-      cleanupSync()
-    }
+    return () => cleanupSync()
   }, [restaurant])
 
   // Helper function to check if user has permission (used for mobile redirect)
@@ -1494,13 +1484,7 @@ export default function DashboardLayout({ children }) {
               {(userType === 'staff' || userType === 'staff-admin') && restaurant && (
                 <div className="px-4 pt-3">
                   <div className="p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
-                    <HubConnectionStatus
-                      restaurantId={restaurant.id}
-                      staffInfo={{
-                        name: userEmail?.split('@')[0],
-                        department: staffDepartment
-                      }}
-                    />
+                    <HubConnectionStatus restaurantId={restaurant.id} />
                   </div>
                 </div>
               )}

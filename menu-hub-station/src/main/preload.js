@@ -1,29 +1,27 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
-// Expose protected methods that allow the renderer process to use
-// ipcRenderer without exposing the entire object
 contextBridge.exposeInMainWorld('electronAPI', {
-  // Get server state
+  // State
   getServerState: () => ipcRenderer.invoke('get-server-state'),
-
-  // Get orders from local database
   getOrders: () => ipcRenderer.invoke('get-orders'),
+  getLocalAddresses: () => ipcRenderer.invoke('get-local-addresses'),
 
-  // Force sync with Supabase
+  // Actions
   forceSync: () => ipcRenderer.invoke('force-sync'),
+  setAutoStart: (enable) => ipcRenderer.invoke('set-auto-start', enable),
+  setSupabaseCredentials: (url, key) => ipcRenderer.invoke('set-supabase-credentials', { url, key }),
 
-  // Listen for state updates
+  // Events
   onStateUpdate: (callback) => {
-    ipcRenderer.on('state-update', (event, data) => callback(data));
+    ipcRenderer.on('state-update', (_, data) => callback(data));
+    return () => ipcRenderer.removeAllListeners('state-update');
   },
-
-  // Listen for new orders
   onNewOrder: (callback) => {
-    ipcRenderer.on('new-order', (event, order) => callback(order));
+    ipcRenderer.on('new-order', (_, order) => callback(order));
+    return () => ipcRenderer.removeAllListeners('new-order');
   },
-
-  // Listen for order updates
   onOrderUpdate: (callback) => {
-    ipcRenderer.on('order-update', (event, update) => callback(update));
-  }
+    ipcRenderer.on('order-update', (_, update) => callback(update));
+    return () => ipcRenderer.removeAllListeners('order-update');
+  },
 });
