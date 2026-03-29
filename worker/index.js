@@ -36,7 +36,35 @@ self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'TRIGGER_SYNC') {
     syncAllOrders()
   }
+  // Pre-warm a list of URLs into the cache so they work offline without a prior visit
+  if (event.data && event.data.type === 'PRECACHE_URLS') {
+    event.waitUntil(precacheUrls(event.data.urls))
+  }
 })
+
+/**
+ * Fetch each URL and store it in the appropriate runtime cache.
+ * Uses a separate 'precache-on-demand' cache so it doesn't pollute
+ * the workbox runtime caches, which have their own size limits.
+ * Runs quietly — failures are ignored so one bad URL can't block the rest.
+ */
+async function precacheUrls(urls) {
+  if (!Array.isArray(urls) || urls.length === 0) return
+  const cache = await caches.open('precache-on-demand')
+  for (const url of urls) {
+    try {
+      // Only fetch if not already cached (avoids redundant network calls)
+      const existing = await cache.match(url)
+      if (existing) continue
+      const response = await fetch(url, { credentials: 'same-origin' })
+      if (response.ok) {
+        await cache.put(url, response)
+      }
+    } catch (_) {
+      // Silently ignore — device may be offline, or URL may not exist yet
+    }
+  }
+}
 
 // Open IndexedDB from within the service worker
 function openDB() {
@@ -157,6 +185,29 @@ function removeOrderFromDB(db, clientId) {
     tx.onerror = () => reject(tx.error)
   })
 }
+
+/**
+ * Serve pre-warmed pages from the 'precache-on-demand' cache as a fallback
+ * when the network is unavailable and the workbox runtime cache misses.
+ * Only handles same-origin navigation requests (HTML pages).
+ */
+self.addEventListener('fetch', (event) => {
+  const { request } = event
+  // Only intercept same-origin GET navigation requests
+  if (
+    request.method !== 'GET' ||
+    request.mode !== 'navigate' ||
+    !request.url.startsWith(self.registration.scope)
+  ) return
+
+  event.respondWith(
+    fetch(request).catch(async () => {
+      const cache = await caches.open('precache-on-demand')
+      const cached = await cache.match(request)
+      return cached || caches.match('/offline.html')
+    })
+  )
+})
 
 /**
  * Background Sync handler.

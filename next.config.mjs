@@ -46,12 +46,25 @@ const pwaConfig = withPWA({
     // TTL kept at 1 day (down from 7) so stale HTML referencing old JS chunk
     // hashes is evicted quickly after a service worker update.
     {
-      urlPattern: /^https?:\/\/.*\/(?:dashboard|r\/|staff|hub).*$/i,
+      urlPattern: /^https?:\/\/.*\/(?:dashboard|staff).*$/i,
       handler: 'NetworkFirst',
       options: {
         cacheName: 'pages-cache',
         expiration: {
-          maxEntries: 50,
+          maxEntries: 100,
+          maxAgeSeconds: 24 * 60 * 60 // 1 day
+        },
+        networkTimeoutSeconds: 5,
+      }
+    },
+    // Cache customer-facing ordering + reservation pages
+    {
+      urlPattern: /^https?:\/\/[^/]+\/[^/]+\/(?:menu|table|takeaway|book|reservation).*$/i,
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'ordering-pages-cache',
+        expiration: {
+          maxEntries: 100,
           maxAgeSeconds: 24 * 60 * 60 // 1 day
         },
         networkTimeoutSeconds: 5,

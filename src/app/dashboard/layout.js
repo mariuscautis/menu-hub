@@ -522,6 +522,52 @@ export default function DashboardLayout({ children }) {
     return () => cleanupSync()
   }, [restaurant])
 
+  // Pre-warm key pages into the service worker cache so they work offline
+  // without requiring a prior visit. Runs once per session after the restaurant
+  // slug is known, and only when the browser is online.
+  useEffect(() => {
+    if (!restaurant?.id || !restaurant?.slug || typeof window === 'undefined' || !navigator.onLine) return
+    if (!('serviceWorker' in navigator) || !navigator.serviceWorker.controller) return
+
+    const slug = restaurant.slug
+    const origin = window.location.origin
+
+    async function warmCache() {
+      const urls = [
+        // Dashboard core pages
+        `${origin}/dashboard/orders`,
+        `${origin}/dashboard/reservations`,
+        `${origin}/dashboard/floor-plan`,
+        // Customer-facing ordering + booking pages
+        `${origin}/${slug}/menu`,
+        `${origin}/${slug}/takeaway`,
+        `${origin}/${slug}/book`,
+      ]
+
+      // Also pre-cache each table's ordering page
+      try {
+        const { data: tables } = await supabase
+          .from('tables')
+          .select('id')
+          .eq('restaurant_id', restaurant.id)
+        if (tables) {
+          for (const table of tables) {
+            urls.push(`${origin}/${slug}/table/${table.id}`)
+          }
+        }
+      } catch (_) {
+        // Non-blocking — table URLs simply won't be pre-cached
+      }
+
+      navigator.serviceWorker.controller.postMessage({
+        type: 'PRECACHE_URLS',
+        urls,
+      })
+    }
+
+    warmCache()
+  }, [restaurant?.id, restaurant?.slug])
+
   // Helper function to check if user has permission (used for mobile redirect)
   const checkPermission = useCallback((permissionId) => {
     if (userType === 'owner' || userType === 'staff-admin') {
