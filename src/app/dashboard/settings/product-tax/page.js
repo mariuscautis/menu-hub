@@ -221,7 +221,7 @@ export default function ProductTaxSettings() {
 
   if (loading) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-8">
         <div className="max-w-4xl mx-auto text-center text-slate-500 dark:text-slate-400">
           {tc('loading') || 'Loading...'}
         </div>
@@ -230,7 +230,7 @@ export default function ProductTaxSettings() {
   }
   if (!restaurant) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-8">
         <div className="max-w-4xl mx-auto text-center text-red-500">
           {t('accessDenied') || 'Access denied - Restaurant owners only'}
         </div>

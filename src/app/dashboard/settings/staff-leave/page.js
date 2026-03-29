@@ -122,7 +122,7 @@ export default function StaffLeaveSettings() {
 
   if (loading) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-8">
         <div className="max-w-6xl mx-auto">
           <div className="text-center text-slate-500">Loading...</div>
         </div>
@@ -132,7 +132,7 @@ export default function StaffLeaveSettings() {
 
   if (!restaurant) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-8">
         <div className="max-w-6xl mx-auto">
           <div className="text-center text-red-500">Access denied - Restaurant owners only</div>
         </div>
@@ -141,7 +141,7 @@ export default function StaffLeaveSettings() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-6">

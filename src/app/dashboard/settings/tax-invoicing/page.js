@@ -87,7 +87,7 @@ export default function TaxInvoicing() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-8">
+      <div className="flex items-center justify-center p-4 sm:p-8">
         <div className="text-slate-500">{t('loading')}</div>
       </div>
     )
@@ -95,7 +95,7 @@ export default function TaxInvoicing() {
 
   if (!restaurant) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-8">
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-600">
           {t('accessError')}
         </div>

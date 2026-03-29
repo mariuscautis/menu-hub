@@ -271,7 +271,7 @@ export default function LaborAnalyticsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-8">
       <PageTabs tabs={analyticsTabs} />
       {/* Header */}
       <div className="mb-8">
@@ -282,7 +282,7 @@ export default function LaborAnalyticsPage() {
       {/* Date Range Selector */}
       <div className="mb-8 bg-white border-2 border-slate-100 rounded-2xl p-6">
         <div className="flex flex-wrap items-end gap-4">
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setDateRange('week')}
               className={`px-6 py-3 rounded-xl font-medium transition-colors ${
@@ -462,7 +462,7 @@ export default function LaborAnalyticsPage() {
                 {analytics.staffPerformance.map((staff, index) => (
                   <div
                     key={staff.staff.id}
-                    className="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors"
+                    className="flex flex-wrap items-center justify-between gap-3 p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors"
                   >
                     <div className="flex items-center gap-4">
                       <div className="w-8 h-8 bg-[#6262bd] text-white rounded-full flex items-center justify-center font-bold">

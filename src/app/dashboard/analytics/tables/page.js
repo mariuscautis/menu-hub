@@ -143,9 +143,9 @@ export default function TableAnalyticsPage() {
           )}
           {/* Sort Controls */}
           <div className="bg-white border-2 border-slate-100 rounded-2xl p-4">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <span className="text-sm font-medium text-slate-700">{t('sortBy')}</span>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {[
                   { value: 'revenue', label: t('sortRevenue') },
                   { value: 'occupancy', label: t('sortOccupancy') },

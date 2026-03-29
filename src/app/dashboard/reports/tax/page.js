@@ -348,7 +348,7 @@ export default function TaxReportPage() {
           </div>
 
           {/* Summary Stats */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4 text-center">
               <p className="text-sm text-slate-500 dark:text-slate-400">{t('totalSales') || 'Total Sales'}</p>
               <p className="text-xl font-bold text-slate-800 dark:text-slate-200">

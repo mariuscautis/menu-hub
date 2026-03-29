@@ -320,6 +320,7 @@ export default function CustomersPage() {
           <div className="text-center py-16 text-slate-400">No customers found.</div>
         ) : (
           <div className="bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl overflow-hidden">
+            <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-100 dark:border-slate-700 text-left">
@@ -366,6 +367,7 @@ export default function CustomersPage() {
                 })}
               </tbody>
             </table>
+            </div>
           </div>
         )}
       </div>

@@ -285,8 +285,8 @@ export default function RestaurantInfo() {
         <div className="space-y-4">
           {/* Logo Preview */}
           {logoPreview && (
-            <div className="flex items-center gap-4">
-              <div className="w-32 h-32 bg-slate-100 rounded-xl border-2 border-slate-200 flex items-center justify-center overflow-hidden">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="w-32 h-32 bg-slate-100 rounded-xl border-2 border-slate-200 flex items-center justify-center overflow-hidden flex-shrink-0">
                 <img
                   src={logoPreview}
                   alt="Restaurant Logo"

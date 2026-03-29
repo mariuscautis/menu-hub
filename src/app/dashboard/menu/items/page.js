@@ -534,14 +534,14 @@ export default function Menu() {
   return (
     <div>
       <PageTabs tabs={menuNavTabs} />
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-wrap justify-between items-start gap-3 mb-8">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
           <p className="text-slate-500">{t('subtitle')}</p>
         </div>
         <button
           onClick={() => openModal()}
-          className="bg-[#6262bd] text-white px-5 py-2.5 rounded-xl font-medium hover:bg-[#5252a3] flex items-center gap-2"
+          className="bg-[#6262bd] text-white px-5 py-2.5 rounded-xl font-medium hover:bg-[#5252a3] flex items-center gap-2 flex-shrink-0"
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
@@ -550,7 +550,7 @@ export default function Menu() {
         </button>
       </div>
       {/* Stats Cards */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         <div className="bg-white border-2 border-slate-100 rounded-xl p-4">
           <p className="text-slate-500 text-sm font-medium mb-1">{t('totalItems')}</p>
           <p className="text-2xl font-bold text-[#6262bd]">{stats.total}</p>
@@ -569,7 +569,7 @@ export default function Menu() {
         </div>
       </div>
       {/* Search and Filter Bar */}
-      <div className="mb-6 flex gap-3">
+      <div className="mb-6 flex flex-wrap gap-3">
         <div className="flex-1 relative">
           <svg className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -604,7 +604,7 @@ export default function Menu() {
         </select>
       </div>
       {/* Filter Buttons */}
-      <div className="mb-6 flex gap-2">
+      <div className="mb-6 flex flex-wrap gap-2">
         <button
           onClick={() => setFilterDepartment('all')}
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${
@@ -746,16 +746,16 @@ export default function Menu() {
                   onChange={() => toggleSelect(item.id)}
                   className="w-4 h-4 mt-1 rounded border-slate-300 accent-[#6262bd] cursor-pointer flex-shrink-0"
                 />
-                <div className="flex-1 flex justify-between items-start gap-4">
+                <div className="flex-1 flex justify-between items-start gap-3 min-w-0">
                   {item.image_url && (
                     <img
                       src={item.image_url}
                       alt={item.name}
-                      className="w-24 h-24 rounded-xl object-cover"
+                      className="w-16 h-16 sm:w-24 sm:h-24 rounded-xl object-cover flex-shrink-0"
                     />
                   )}
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-1">
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
                       <h3 className={`text-lg font-semibold ${item.available ? 'text-slate-800' : 'text-slate-400'}`}>
                         {item.name}
                       </h3>

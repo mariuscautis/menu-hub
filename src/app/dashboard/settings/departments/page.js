@@ -179,7 +179,7 @@ export default function DepartmentsSettingsPage() {
     );
   }
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-8">
       <PageTabs tabs={staffTabs} />
       {/* Header */}
       <div className="mb-8">
@@ -203,15 +203,15 @@ export default function DepartmentsSettingsPage() {
         {departments.map((dept, index) => (
           <div key={dept.id || `new-${index}`} className="bg-white border-2 border-slate-100 rounded-2xl p-6">
             {/* Department Header */}
-            <div className="flex items-center justify-between mb-4 pb-4 border-b-2 border-slate-100">
-              <div className="flex items-center gap-3">
-                <div className="w-4 h-4 bg-[#6262bd] rounded-full"></div>
-                <h3 className="text-xl font-bold text-slate-800 capitalize">{dept.name}</h3>
-                <span className="text-sm text-slate-500">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-4 border-b-2 border-slate-100">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-4 h-4 bg-[#6262bd] rounded-full flex-shrink-0"></div>
+                <h3 className="text-xl font-bold text-slate-800 capitalize truncate">{dept.name}</h3>
+                <span className="text-sm text-slate-500 whitespace-nowrap">
                   ({dept.permissions.length} permission{dept.permissions.length !== 1 ? 's' : ''})
                 </span>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => handleSelectAll(dept.name)}
                   className="px-3 py-1 text-sm text-[#6262bd] hover:bg-[#6262bd]/10 rounded-lg transition-colors"

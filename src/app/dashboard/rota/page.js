@@ -352,15 +352,15 @@ export default function RotaPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-4 sm:p-8">
       <PageTabs tabs={staffTabs} />
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-wrap justify-between items-start gap-3 mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-200">{t('title')}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200">{t('title')}</h1>
           <p className="text-slate-600 dark:text-slate-400 mt-1">{t('subtitle')}</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-2">
           {/* Send Rota Notifications button */}
           <div className="flex flex-col items-end gap-0.5">
             <button
@@ -372,7 +372,7 @@ export default function RotaPage() {
                   : 'bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-[#6262bd]'
               }`}
             >
-              {notifying ? '⏳ Sending...' : '📧 Send Rota Notifications'}
+              {notifying ? '⏳ Sending...' : <><span className="hidden sm:inline">📧 Send Rota Notifications</span><span className="sm:hidden">📧 Notify</span></>}
             </button>
             {lastNotified && !hasUnnotifiedChanges && (
               <span className="text-xs text-slate-400 dark:text-slate-500 pr-1">
@@ -382,13 +382,13 @@ export default function RotaPage() {
           </div>
           <button
             onClick={() => setShowTemplatesModal(true)}
-            className="px-5 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl hover:border-[#6262bd] transition-colors font-medium"
+            className="px-3 sm:px-5 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl hover:border-[#6262bd] transition-colors font-medium text-sm sm:text-base"
           >
             📋 {t('templates')}
           </button>
           <button
             onClick={() => setShowRequestsModal(true)}
-            className="relative px-5 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl hover:border-[#6262bd] transition-colors font-medium"
+            className="relative px-3 sm:px-5 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl hover:border-[#6262bd] transition-colors font-medium text-sm sm:text-base"
           >
             📨 {t('requests')}
             {pendingRequestsCount > 0 && (
@@ -399,24 +399,24 @@ export default function RotaPage() {
           </button>
           <button
             onClick={() => setShowCurrentlyWorkingModal(true)}
-            className="px-5 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors font-medium"
+            className="px-3 sm:px-5 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors font-medium text-sm sm:text-base"
           >
-            👥 {t('currentlyWorking')}
+            👥 <span className="hidden sm:inline">{t('currentlyWorking')}</span><span className="sm:hidden">Working</span>
           </button>
           <button
             onClick={() => {
               setSelectedShift(null);
               setShowShiftModal(true);
             }}
-            className="px-5 py-2.5 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252a5] transition-colors font-medium"
+            className="px-3 sm:px-5 py-2.5 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252a5] transition-colors font-medium text-sm sm:text-base"
           >
-            ➕ {t('createShift')}
+            ➕ <span className="hidden sm:inline">{t('createShift')}</span><span className="sm:hidden">Shift</span>
           </button>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="mb-6 flex gap-3">
+      <div className="mb-6 flex flex-wrap gap-3">
         <select
           value={filters.department}
           onChange={(e) => setFilters({ ...filters, department: e.target.value })}

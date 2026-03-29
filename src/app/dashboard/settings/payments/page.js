@@ -114,7 +114,7 @@ export default function PaymentsSettingsPage() {
         <div className="space-y-6">
           {/* Status card */}
           <div className="bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl p-6">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-[#635bff]/10 rounded-xl flex items-center justify-center">
                   {/* Stripe logo mark */}

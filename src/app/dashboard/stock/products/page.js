@@ -546,12 +546,12 @@ export default function StockManagement() {
   return (
     <div>
       <PageTabs tabs={stockNavTabs} />
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-wrap justify-between items-start gap-3 mb-8">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
           <p className="text-slate-500">{t('subtitle')}</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={() => openStockModal()}
             className="bg-green-600 text-white px-5 py-2.5 rounded-xl font-medium hover:bg-green-700 dark:bg-green-600 dark:text-white dark:hover:bg-green-700 flex items-center gap-2"
@@ -601,7 +601,7 @@ export default function StockManagement() {
       {activeTab === 'products' && (
         <div>
           {/* Stats Cards - Clickable Filters */}
-          <div className="grid grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
             <button
               onClick={() => setFilterStockType('all')}
               className={`bg-white border-2 rounded-xl p-4 text-left transition-all ${
@@ -649,7 +649,7 @@ export default function StockManagement() {
           </div>
 
           {/* Search and Sort Bar */}
-          <div className="mb-6 flex gap-3">
+          <div className="mb-6 flex flex-wrap gap-3">
             <div className="flex-1 relative">
               <svg className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -684,7 +684,7 @@ export default function StockManagement() {
           </div>
 
           {/* Category Filter */}
-          <div className="mb-6 flex gap-2">
+          <div className="mb-6 flex flex-wrap gap-2">
             <button
               onClick={() => setFilterCategory('all')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${

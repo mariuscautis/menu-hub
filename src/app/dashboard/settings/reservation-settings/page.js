@@ -282,7 +282,7 @@ export default function ReservationSettingsPage() {
         {slotMode === 'fixed' && (
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">Slot interval</label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
               {FIXED_SLOT_OPTIONS.map(opt => (
                 <button
                   key={opt.value}
@@ -305,7 +305,7 @@ export default function ReservationSettingsPage() {
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Duration options to offer customers</label>
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">Select all that apply. Customers will choose from these before picking a time.</p>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {DURATION_OPTIONS.map(opt => (
                 <button
                   key={opt.value}

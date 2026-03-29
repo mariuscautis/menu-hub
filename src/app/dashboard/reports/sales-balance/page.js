@@ -588,7 +588,7 @@ export default function SalesBalanceReport() {
                   </svg>
                   Tax Balance Summary
                 </h3>
-                <div className="grid grid-cols-3 gap-4 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
                   <div>
                     <p className="text-amber-700 dark:text-amber-400 text-xs mb-0.5">Tax collected from sales</p>
                     <p className="text-lg font-bold text-amber-800 dark:text-amber-200">{formatCurrency(reportData.summary.totalTaxCollected)}</p>

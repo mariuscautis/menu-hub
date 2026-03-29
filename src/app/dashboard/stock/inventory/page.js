@@ -362,12 +362,12 @@ export default function InventoryManagement() {
   return (
     <div>
       <PageTabs tabs={stockNavTabs} />
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-wrap justify-between items-start gap-3 mb-8">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
           <p className="text-slate-500">{t('subtitle')}</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={() => openStockModal()}
             className="bg-green-600 text-white px-5 py-2.5 rounded-xl font-medium hover:bg-green-700 dark:bg-green-600 dark:text-white dark:hover:bg-green-700 flex items-center gap-2"
@@ -417,7 +417,7 @@ export default function InventoryManagement() {
       {activeTab === 'items' && (
         <div>
           {/* Stats Cards - Clickable Filters */}
-          <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             <button
               onClick={() => setFilterStockType('all')}
               className={`bg-white border-2 rounded-xl p-4 text-left transition-all ${
@@ -447,7 +447,7 @@ export default function InventoryManagement() {
           </div>
 
           {/* Search and Sort Bar */}
-          <div className="mb-6 flex gap-3">
+          <div className="mb-6 flex flex-wrap gap-3">
             <div className="flex-1 relative">
               <svg className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -573,7 +573,7 @@ export default function InventoryManagement() {
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-slate-600">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-600">
                       <span>
                         {t('currentStock')}: <strong className={`${product.current_stock <= 0 ? 'text-red-500' : product.current_stock < product.min_stock_level ? 'text-amber-600' : 'text-[#6262bd]'}`}>
                           {product.current_stock} {product.unit_type}

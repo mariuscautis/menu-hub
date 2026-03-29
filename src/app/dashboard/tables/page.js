@@ -2809,12 +2809,12 @@ export default function Tables() {
         </div>
       )}
 
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-wrap justify-between items-start gap-3 mb-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
           <p className="text-slate-500">{t('subtitle')}</p>
         </div>
-        <div className="flex gap-3 items-center">
+        <div className="flex flex-wrap gap-2 items-center">
           {/* Grid density toggle */}
           {tables.length > 0 && (
             <div className="flex items-center gap-0.5 bg-slate-100 rounded-xl p-1">
@@ -2856,23 +2856,23 @@ export default function Tables() {
           {userType === 'owner' && tables.length > 0 && (
             <button
               onClick={downloadAllQR}
-              className="border-2 border-slate-200 text-slate-600 px-5 py-2.5 rounded-xl font-medium hover:bg-slate-50 flex items-center gap-2"
+              className="border-2 border-slate-200 text-slate-600 px-3 sm:px-5 py-2.5 rounded-xl font-medium hover:bg-slate-50 flex items-center gap-2"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
               </svg>
-              {t('downloadAllQR')}
+              <span className="hidden sm:inline">{t('downloadAllQR')}</span>
             </button>
           )}
           {userType === 'owner' && (
             <button
               onClick={() => setShowModal(true)}
-              className="bg-[#6262bd] text-white px-5 py-2.5 rounded-xl font-medium hover:bg-[#5252a3] flex items-center gap-2"
+              className="bg-[#6262bd] text-white px-3 sm:px-5 py-2.5 rounded-xl font-medium hover:bg-[#5252a3] flex items-center gap-2"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
               </svg>
-              {t('addTable')}
+              <span className="hidden sm:inline">{t('addTable')}</span>
             </button>
           )}
         </div>
@@ -2880,7 +2880,7 @@ export default function Tables() {
 
       {/* Floor filter tabs — only shown when multiple floors exist */}
       {floors.length > 1 && (
-        <div className="flex items-center gap-1 bg-slate-100 rounded-xl p-1 mb-6 self-start">
+        <div className="flex items-center gap-1 bg-slate-100 rounded-xl p-1 mb-6 self-start overflow-x-auto max-w-full">
           <button
             onClick={() => setActiveFloorId(null)}
             className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${

@@ -332,14 +332,14 @@ export default function StaffMembers() {
   return (
     <div>
       <PageTabs tabs={staffTabs} />
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-wrap justify-between items-start gap-3 mb-8">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
           <p className="text-slate-500">{t('subtitle').replace('{restaurantName}', restaurant.name)}</p>
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="bg-[#6262bd] text-white px-5 py-2.5 rounded-xl font-medium hover:bg-[#5252a3] flex items-center gap-2"
+          className="bg-[#6262bd] text-white px-5 py-2.5 rounded-xl font-medium hover:bg-[#5252a3] flex items-center gap-2 flex-shrink-0"
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
@@ -372,21 +372,22 @@ export default function StaffMembers() {
         </div>
       ) : (
         <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-slate-50 dark:bg-slate-800 border-b-2 border-slate-100 dark:border-slate-700">
               <tr>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('name')}</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('role')}</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('department')}</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('pinCode')}</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('status.label')}</th>
-                <th className="text-right px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('actions')}</th>
+                <th className="text-left px-4 sm:px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('name')}</th>
+                <th className="text-left px-4 sm:px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300 hidden sm:table-cell">{t('role')}</th>
+                <th className="text-left px-4 sm:px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300 hidden md:table-cell">{t('department')}</th>
+                <th className="text-left px-4 sm:px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300 hidden lg:table-cell">{t('pinCode')}</th>
+                <th className="text-left px-4 sm:px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300 hidden sm:table-cell">{t('status.label')}</th>
+                <th className="text-right px-4 sm:px-6 py-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('actions')}</th>
               </tr>
             </thead>
             <tbody>
               {staff.map((member) => (
                 <tr key={member.id} className="border-b border-slate-100 dark:border-slate-800 last:border-0">
-                  <td className="px-6 py-4">
+                  <td className="px-4 sm:px-6 py-4">
                     <div className="flex items-center gap-3">
                       <StaffAvatar avatarUrl={member.avatar_url} name={member.name} size="sm" />
                       <div>
@@ -400,13 +401,13 @@ export default function StaffMembers() {
                       )}
                     </div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 sm:px-6 py-4 hidden sm:table-cell">
                     <span className={`px-3 py-1 rounded-full text-sm font-medium capitalize ${getRoleBadge(member.role)}`}>{member.role}</span>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 sm:px-6 py-4 hidden md:table-cell">
                     <span className={`px-3 py-1 rounded-full text-sm font-medium capitalize ${getDepartmentBadge(member.department)}`}>{member.department}</span>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 sm:px-6 py-4 hidden lg:table-cell">
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-lg font-bold text-[#6262bd] dark:text-[#8b8bdb]">{member.pin_code || '---'}</span>
                       <button onClick={() => openPinModal(member)} className="px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-xs font-medium hover:bg-slate-200 dark:hover:bg-slate-600">
@@ -414,11 +415,11 @@ export default function StaffMembers() {
                       </button>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 sm:px-6 py-4 hidden sm:table-cell">
                     <span className={`px-3 py-1 rounded-full text-sm font-medium capitalize ${getStatusBadge(member.status)}`}>{t(`status.${member.status}`)}</span>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="flex justify-end gap-2">
+                  <td className="px-4 sm:px-6 py-4">
+                    <div className="flex justify-end flex-wrap gap-1.5">
                       <button onClick={() => sendMagicLink(member)} className="px-3 py-1.5 bg-purple-50 text-purple-600 rounded-lg text-sm font-medium hover:bg-purple-100 dark:bg-purple-600 dark:text-white dark:hover:bg-purple-700" title="Generate and copy magic link for staff login">
                         <svg className="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
                         {t('link')}
@@ -437,6 +438,7 @@ export default function StaffMembers() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 

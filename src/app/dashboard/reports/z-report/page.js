@@ -562,7 +562,7 @@ export default function ZReportPage() {
                 <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4 print:text-base">
                   {t('paymentBreakdown') || 'Payment Breakdown'}
                 </h2>
-                <div className="grid grid-cols-3 gap-4 print:gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 print:gap-2">
                   <div className="bg-green-50 dark:bg-green-900/30 rounded-xl p-4 text-center print:p-2 print:rounded-none">
                     <p className="text-sm text-green-600 dark:text-green-400">{t('cash') || 'Cash'}</p>
                     <p className="text-xl font-bold text-green-600 dark:text-green-400 print:text-base">
@@ -663,7 +663,7 @@ export default function ZReportPage() {
                 <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4 print:text-base">
                   {t('tipsSummary') || 'Tips Summary'}
                 </h2>
-                <div className="grid grid-cols-3 gap-4 print:gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 print:gap-2">
                   <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 text-center print:p-2 print:rounded-none">
                     <p className="text-sm text-slate-600 dark:text-slate-400">{t('totalTips') || 'Total Tips'}</p>
                     <p className="text-xl font-bold text-[#6262bd] print:text-base">

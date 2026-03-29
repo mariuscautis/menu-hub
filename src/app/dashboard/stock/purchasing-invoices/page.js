@@ -329,14 +329,14 @@ export default function PurchasingInvoices() {
   return (
     <div>
       <PageTabs tabs={stockNavTabs} />
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-wrap justify-between items-start gap-3 mb-8">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
           <p className="text-slate-500">{t('subtitle')}</p>
         </div>
         <button
           onClick={() => openInvoiceModal()}
-          className="bg-[#6262bd] text-white px-5 py-2.5 rounded-xl font-medium hover:bg-[#5252a3] flex items-center gap-2"
+          className="bg-[#6262bd] text-white px-5 py-2.5 rounded-xl font-medium hover:bg-[#5252a3] flex items-center gap-2 flex-shrink-0"
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
@@ -419,10 +419,10 @@ export default function PurchasingInvoices() {
           {filteredInvoices.map((invoice) => (
             <div
               key={invoice.id}
-              className="bg-white border-2 border-slate-100 rounded-2xl p-6 flex justify-between items-center"
+              className="bg-white border-2 border-slate-100 rounded-2xl p-4 sm:p-6 flex flex-wrap justify-between items-start gap-3"
             >
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2 mb-2">
                   <h3 className="text-lg font-semibold text-slate-800">
                     {invoice.reference_number}
                   </h3>
@@ -437,7 +437,7 @@ export default function PurchasingInvoices() {
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-4 text-sm text-slate-600">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-600">
                   <span>
                     {t('invoiceDate')}: <strong>{new Date(invoice.invoice_date).toLocaleDateString()}</strong>
                   </span>

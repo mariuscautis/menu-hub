@@ -133,14 +133,14 @@ export default function MenuCategories() {
   return (
     <div>
       <PageTabs tabs={menuNavTabs} />
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-wrap justify-between items-start gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200">{t('title')}</h1>
           <p className="text-slate-500 dark:text-slate-400">{t('subtitle')}</p>
         </div>
         <button
           onClick={() => openModal()}
-          className="bg-[#6262bd] text-white px-5 py-2.5 rounded-xl font-medium hover:bg-[#5252a3] flex items-center gap-2"
+          className="bg-[#6262bd] text-white px-5 py-2.5 rounded-xl font-medium hover:bg-[#5252a3] flex items-center gap-2 flex-shrink-0"
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>

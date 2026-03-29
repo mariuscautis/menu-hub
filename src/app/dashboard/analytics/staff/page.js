@@ -203,9 +203,9 @@ export default function StaffAnalyticsPage() {
 
           {/* Sort Controls */}
           <div className="bg-white border-2 border-slate-100 rounded-2xl p-4">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <span className="text-sm font-medium text-slate-700">{t('sortBy')}</span>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {[
                   { value: 'revenue', label: t('sortRevenue') },
                   { value: 'orders', label: t('sortOrders') },
@@ -243,8 +243,8 @@ export default function StaffAnalyticsPage() {
                       : 'border-slate-100'
                   }`}
                 >
-                  <div className="flex justify-between items-start mb-6">
-                    <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap justify-between items-start gap-3 mb-6">
+                    <div className="flex items-center gap-3 min-w-0">
                       <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
                         staff.performance === 'high' ? 'bg-green-100' : 'bg-slate-100'
                       }`}>
