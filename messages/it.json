@@ -2630,5 +2630,24 @@
     "statusPastDue": "Scaduto",
     "statusCanceled": "Annullato",
     "statusUnpaid": "Non pagato"
+  },
+  "nav": {
+    "overview": "Panoramica",
+    "orders": "Ordini",
+    "tablesQr": "Tavoli & QR",
+    "tables": "Tavoli",
+    "floorPlan": "Planimetria",
+    "reservations": "Prenotazioni",
+    "customers": "Clienti",
+    "menu": "Menu",
+    "stock": "Stock",
+    "reportLoss": "Segnala perdita",
+    "staffRota": "Personale & Turni",
+    "myRota": "I miei turni",
+    "analytics": "Analisi",
+    "reports": "Report",
+    "support": "Supporto",
+    "settings": "Impostazioni",
+    "platformAdmin": "Admin piattaforma"
   }
 }

@@ -2630,5 +2630,24 @@
     "statusPastDue": "En retard",
     "statusCanceled": "Annulé",
     "statusUnpaid": "Impayé"
+  },
+  "nav": {
+    "overview": "Vue d'ensemble",
+    "orders": "Commandes",
+    "tablesQr": "Tables & QR",
+    "tables": "Tables",
+    "floorPlan": "Plan de salle",
+    "reservations": "Réservations",
+    "customers": "Clients",
+    "menu": "Menu",
+    "stock": "Stock",
+    "reportLoss": "Signaler une perte",
+    "staffRota": "Personnel & Roulement",
+    "myRota": "Mon planning",
+    "analytics": "Analytique",
+    "reports": "Rapports",
+    "support": "Support",
+    "settings": "Paramètres",
+    "platformAdmin": "Admin plateforme"
   }
 }

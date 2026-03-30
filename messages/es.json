@@ -2630,5 +2630,24 @@
     "statusPastDue": "Vencido",
     "statusCanceled": "Cancelado",
     "statusUnpaid": "Sin pagar"
+  },
+  "nav": {
+    "overview": "Resumen",
+    "orders": "Pedidos",
+    "tablesQr": "Mesas & QR",
+    "tables": "Mesas",
+    "floorPlan": "Plano",
+    "reservations": "Reservas",
+    "customers": "Clientes",
+    "menu": "Menú",
+    "stock": "Stock",
+    "reportLoss": "Reportar pérdida",
+    "staffRota": "Personal & Turnos",
+    "myRota": "Mis turnos",
+    "analytics": "Análisis",
+    "reports": "Informes",
+    "support": "Soporte",
+    "settings": "Configuración",
+    "platformAdmin": "Admin plataforma"
   }
 }

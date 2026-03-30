@@ -2651,5 +2651,24 @@
     "statusPastDue": "Past Due",
     "statusCanceled": "Canceled",
     "statusUnpaid": "Unpaid"
+  },
+  "nav": {
+    "overview": "Overview",
+    "orders": "Orders",
+    "tablesQr": "Tables & QR",
+    "tables": "Tables",
+    "floorPlan": "Floor Plan",
+    "reservations": "Reservations",
+    "customers": "Customers",
+    "menu": "Menu",
+    "stock": "Stock",
+    "reportLoss": "Report Loss",
+    "staffRota": "Staff & Rota",
+    "myRota": "My Rota",
+    "analytics": "Analytics",
+    "reports": "Reports",
+    "support": "Support",
+    "settings": "Settings",
+    "platformAdmin": "Platform Admin"
   }
 }

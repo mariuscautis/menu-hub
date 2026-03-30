@@ -2630,5 +2630,24 @@
     "statusPastDue": "Restant",
     "statusCanceled": "Anulat",
     "statusUnpaid": "Neplătit"
+  },
+  "nav": {
+    "overview": "Prezentare generală",
+    "orders": "Comenzi",
+    "tablesQr": "Mese & QR",
+    "tables": "Mese",
+    "floorPlan": "Plan etaj",
+    "reservations": "Rezervări",
+    "customers": "Clienți",
+    "menu": "Meniu",
+    "stock": "Stoc",
+    "reportLoss": "Raportare pierderi",
+    "staffRota": "Personal & Ture",
+    "myRota": "Turele mele",
+    "analytics": "Analiză",
+    "reports": "Rapoarte",
+    "support": "Suport",
+    "settings": "Setări",
+    "platformAdmin": "Admin platformă"
   }
 }

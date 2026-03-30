@@ -9,7 +9,12 @@ import ThemeToggle from '@/components/ThemeToggle'
 import OfflineIndicator from '@/components/OfflineIndicator'
 import HubConnectionStatus from '@/components/HubConnectionStatus'
 import { initAutoSync } from '@/lib/syncManager'
-import { LanguageProvider } from '@/lib/i18n/LanguageContext'
+import { LanguageProvider, useTranslations } from '@/lib/i18n/LanguageContext'
+
+function NavLabel({ labelKey }) {
+  const t = useTranslations('nav')
+  return <>{t(labelKey)}</>
+}
 import { CurrencyProvider } from '@/lib/CurrencyContext'
 import LanguageSelector from '@/components/LanguageSelector'
 import { useSessionValidator } from '@/hooks/useSessionValidator'
@@ -717,6 +722,7 @@ export default function DashboardLayout({ children }) {
     if (hasPermission('overview')) {
       items.push({
         href: '/dashboard',
+        labelKey: 'overview',
         label: 'Overview',
         icon: (
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -730,6 +736,7 @@ export default function DashboardLayout({ children }) {
     if (hasModule('ordering') && (hasPermission('orders_kitchen') || hasPermission('orders_bar'))) {
       items.push({
         href: '/dashboard/orders',
+        labelKey: 'orders',
         label: 'Orders',
         badge: pendingOrdersCount > 0 ? pendingOrdersCount : null,
         icon: (
@@ -745,6 +752,7 @@ export default function DashboardLayout({ children }) {
     if (hasModule('ordering') && hasPermission('tables')) {
       items.push({
         href: '/dashboard/tables',
+        labelKey: userType === 'owner' || userType === 'staff-admin' ? 'tablesQr' : 'tables',
         label: userType === 'owner' || userType === 'staff-admin' ? 'Tables & QR' : 'Tables',
         icon: (
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -758,6 +766,7 @@ export default function DashboardLayout({ children }) {
     if (hasModule('ordering') && (userType === 'owner' || userType === 'staff-admin')) {
       items.push({
         href: '/dashboard/floor-plan',
+        labelKey: 'floorPlan',
         label: 'Floor Plan',
         icon: (
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -771,6 +780,7 @@ export default function DashboardLayout({ children }) {
     if (hasModule('ordering') && hasPermission('floor_plan') && userType !== 'owner' && userType !== 'staff-admin') {
       items.push({
         href: '/dashboard/tables-floor-plan',
+        labelKey: 'floorPlan',
         label: 'Floor Plan',
         icon: (
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -784,6 +794,7 @@ export default function DashboardLayout({ children }) {
     if (hasModule('reservations') && hasPermission('reservations')) {
       items.push({
         href: '/dashboard/reservations',
+        labelKey: 'reservations',
         label: 'Reservations',
         badge: pendingReservationsCount > 0 ? pendingReservationsCount : null,
         icon: (
@@ -794,6 +805,7 @@ export default function DashboardLayout({ children }) {
       })
       items.push({
         href: '/dashboard/customers',
+        labelKey: 'customers',
         label: 'Customers',
         icon: (
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -807,6 +819,7 @@ export default function DashboardLayout({ children }) {
     if (hasModule('ordering') && (userType === 'owner' || userType === 'staff-admin' || hasPermission('menu'))) {
       items.push({
         href: '/dashboard/menu',
+        labelKey: 'menu',
         label: 'Menu',
         icon: (
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -820,6 +833,7 @@ export default function DashboardLayout({ children }) {
     if (hasModule('ordering') && (userType === 'owner' || userType === 'staff-admin' || hasPermission('stock'))) {
       items.push({
         href: '/dashboard/stock',
+        labelKey: 'stock',
         label: 'Stock',
         icon: (
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -833,6 +847,7 @@ export default function DashboardLayout({ children }) {
     if (hasModule('ordering') && hasPermission('report_loss')) {
       items.push({
         href: '/dashboard/report-loss',
+        labelKey: 'reportLoss',
         label: 'Report Loss',
         icon: (
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -846,6 +861,7 @@ export default function DashboardLayout({ children }) {
     if (hasModule('rota') && (userType === 'owner' || userType === 'staff-admin' || hasPermission('staff_rota'))) {
       items.push({
         href: '/dashboard/staff',
+        labelKey: 'staffRota',
         label: 'Staff & Rota',
         icon: (
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -859,6 +875,7 @@ export default function DashboardLayout({ children }) {
     if (hasModule('rota') && (userType === 'staff' || userType === 'staff-admin') && hasPermission('my_rota')) {
       items.push({
         href: '/dashboard/my-rota',
+        labelKey: 'myRota',
         label: 'My Rota',
         icon: (
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -872,6 +889,7 @@ export default function DashboardLayout({ children }) {
 
       if (hasModule('analytics')) items.push({
         href: '/dashboard/analytics',
+        labelKey: 'analytics',
         label: 'Analytics',
         icon: (
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -883,6 +901,7 @@ export default function DashboardLayout({ children }) {
       // Reports - Dedicated report pages for quick access (Z-Report, X-Report, Weekly, Monthly, Tax)
       if (hasModule('reports')) items.push({
         href: '/dashboard/reports',
+        labelKey: 'reports',
         label: 'Reports',
         icon: (
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -894,6 +913,7 @@ export default function DashboardLayout({ children }) {
       // Staff with reports or z_report permission
       items.push({
         href: '/dashboard/reports',
+        labelKey: 'reports',
         label: 'Reports',
         icon: (
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -906,6 +926,7 @@ export default function DashboardLayout({ children }) {
     if (userType === 'owner' || userType === 'staff-admin') {
       items.push({
         href: '/dashboard/support',
+        labelKey: 'support',
         label: 'Support',
         badge: unreadSupportCount > 0 ? unreadSupportCount : null,
         badgeColor: 'bg-[#6262bd]',
@@ -920,6 +941,7 @@ export default function DashboardLayout({ children }) {
     if (userType === 'owner') {
       items.push({
         href: '/dashboard/settings',
+        labelKey: 'settings',
         label: 'Settings',
         icon: (
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -1465,11 +1487,11 @@ export default function DashboardLayout({ children }) {
                     <>
                       <div className="flex items-center space-x-3">
                         {item.icon}
-                        <span>{item.label}</span>
+                        <span>{item.labelKey ? <NavLabel labelKey={item.labelKey} /> : item.label}</span>
                       </div>
                       {item.badge && (
                         <span className={`text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center ${
-                          item.badgeColor || (item.label === 'Orders' ? 'bg-primary' : 'bg-red-500')
+                          item.badgeColor || (item.labelKey === 'orders' ? 'bg-primary' : 'bg-red-500')
                         }`}>
                           {item.badge}
                         </span>
@@ -1501,7 +1523,7 @@ export default function DashboardLayout({ children }) {
                   <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
                   </svg>
-                  {sidebarOpen && <span>Platform Admin</span>}
+                  {sidebarOpen && <span><NavLabel labelKey="platformAdmin" /></span>}
                 </Link>
               </li>
             )}
