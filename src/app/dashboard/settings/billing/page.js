@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useRestaurant } from '@/lib/RestaurantContext'
-import { useTranslations } from '@/lib/i18n/LanguageContext'
+import { useTranslations, useLanguage } from '@/lib/i18n/LanguageContext'
 import PageTabs from '@/components/PageTabs'
 import { settingsTabs } from '@/components/PageTabsConfig'
 
@@ -65,6 +65,7 @@ function formatDate(iso) {
 }
 
 export default function BillingPage() {
+  const { messages } = useLanguage()
   const t = useTranslations('billing')
   const restaurantCtx = useRestaurant()
   const searchParams  = useSearchParams()
@@ -126,12 +127,13 @@ export default function BillingPage() {
   }, [restaurant?.id, restaurant?.sms_billing_enabled])
 
   useEffect(() => {
+    if (!messages || Object.keys(messages).length === 0) return
     if (searchParams.get('success') === '1') {
       setMessage({ type: 'success', text: t('msgSuccess') })
     } else if (searchParams.get('canceled') === '1') {
       setMessage({ type: 'info', text: t('msgCanceled') })
     }
-  }, [searchParams])
+  }, [searchParams, messages])
 
   const togglePlan = (key) => {
     setSelected(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key])
