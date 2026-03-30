@@ -135,9 +135,9 @@ export default function ReportLoss() {
     setMessage(null)
     try {
       const product = stockProducts.find(p => p.id === stockForm.stock_product_id)
-      if (!product) { setMessage({ type: 'error', text: 'Please select a stock item' }); setSubmitting(false); return }
+      if (!product) { setMessage({ type: 'error', text: t('selectStockItem') }); setSubmitting(false); return }
       const qty = parseFloat(stockForm.quantity)
-      if (isNaN(qty) || qty <= 0) { setMessage({ type: 'error', text: 'Please enter a valid quantity' }); setSubmitting(false); return }
+      if (isNaN(qty) || qty <= 0) { setMessage({ type: 'error', text: t('invalidQuantity') }); setSubmitting(false); return }
 
       const baseQtyToDeduct = qty * (product.units_to_base_multiplier || 1)
       const newStock = Math.max(0, (product.current_stock || 0) - baseQtyToDeduct)
@@ -162,7 +162,7 @@ export default function ReportLoss() {
 
       if (error) { setMessage({ type: 'error', text: error.message || t('errorGeneric') }); setSubmitting(false); return }
 
-      setMessage({ type: 'success', text: `Loss recorded: ${qty} ${product.input_unit_type} of ${product.name} removed from stock.` })
+      setMessage({ type: 'success', text: t('stockLossSuccess').replace('{quantity}', qty).replace('{unit}', product.input_unit_type).replace('{name}', product.name) })
       setStockForm({ stock_product_id: '', quantity: '', reason: '', notes: '' })
       setStockSearch('')
       // Refresh stock product data
@@ -218,8 +218,8 @@ export default function ReportLoss() {
             </svg>
           </div>
           <div>
-            <p className={`font-semibold text-sm ${lossType === 'menu' ? 'text-white' : 'text-slate-800 dark:text-slate-200'}`}>Menu Item Loss</p>
-            <p className={`text-xs mt-0.5 ${lossType === 'menu' ? 'text-white/75' : 'text-slate-500 dark:text-slate-400'}`}>Log a prepared dish or drink</p>
+            <p className={`font-semibold text-sm ${lossType === 'menu' ? 'text-white' : 'text-slate-800 dark:text-slate-200'}`}>{t('menuItemLossTitle')}</p>
+            <p className={`text-xs mt-0.5 ${lossType === 'menu' ? 'text-white/75' : 'text-slate-500 dark:text-slate-400'}`}>{t('menuItemLossDesc')}</p>
           </div>
         </button>
 
@@ -237,8 +237,8 @@ export default function ReportLoss() {
             </svg>
           </div>
           <div>
-            <p className={`font-semibold text-sm ${lossType === 'stock' ? 'text-white' : 'text-slate-800 dark:text-slate-200'}`}>Stock Item Loss</p>
-            <p className={`text-xs mt-0.5 ${lossType === 'stock' ? 'text-white/75' : 'text-slate-500 dark:text-slate-400'}`}>Log an ingredient or raw stock</p>
+            <p className={`font-semibold text-sm ${lossType === 'stock' ? 'text-white' : 'text-slate-800 dark:text-slate-200'}`}>{t('stockItemLossTitle')}</p>
+            <p className={`text-xs mt-0.5 ${lossType === 'stock' ? 'text-white/75' : 'text-slate-500 dark:text-slate-400'}`}>{t('stockItemLossDesc')}</p>
           </div>
         </button>
       </div>
@@ -336,7 +336,7 @@ export default function ReportLoss() {
           <form onSubmit={handleStockSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Stock Item *
+                {t('stockItemLabel')} {t('menuItemRequired')}
               </label>
               <div className="relative stock-dropdown-container">
                 <input
@@ -347,7 +347,7 @@ export default function ReportLoss() {
                   }
                   onChange={e => { setStockSearch(e.target.value); setShowStockDropdown(true); if (stockForm.stock_product_id) setStockForm({ ...stockForm, stock_product_id: '' }) }}
                   onFocus={() => setStockSearch('')}
-                  placeholder="Search or select stock item..."
+                  placeholder={t('stockItemPlaceholder')}
                   className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800"
                   required
                 />
@@ -361,21 +361,21 @@ export default function ReportLoss() {
                           <span>{p.name}{p.brand ? <span className="opacity-60"> — {p.brand}</span> : ''}</span>
                           <span className="text-xs opacity-70 ml-2">{p.category} · {p.input_unit_type}</span>
                         </div>
-                      )) : <div className="px-4 py-2 text-slate-400 text-sm">No stock items found</div>
+                      )) : <div className="px-4 py-2 text-slate-400 text-sm">{t('noStockItemsFound')}</div>
                     })()}
                   </div>
                 )}
               </div>
               {selectedStock && (
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  Current stock: <strong>{(selectedStock.current_stock / (selectedStock.units_to_base_multiplier || 1)).toFixed(2)} {selectedStock.input_unit_type}</strong>
+                  {t('currentStock')}: <strong>{(selectedStock.current_stock / (selectedStock.units_to_base_multiplier || 1)).toFixed(2)} {selectedStock.input_unit_type}</strong>
                 </p>
               )}
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                Quantity to Remove *
+                {t('quantityToRemove')} {t('menuItemRequired')}
               </label>
               <div className="relative">
                 <input
@@ -416,7 +416,7 @@ export default function ReportLoss() {
 
             <button type="submit" disabled={submitting}
               className="w-full bg-red-600 text-white py-3 rounded-xl font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
-              {submitting ? t('submitting') : 'Report Stock Loss'}
+              {submitting ? t('submitting') : t('submitStockButton')}
             </button>
           </form>
         )}
@@ -439,10 +439,10 @@ export default function ReportLoss() {
                 </ul>
               ) : (
                 <ul className="text-sm text-blue-800 dark:text-blue-400 space-y-1 list-disc list-inside">
-                  <li>Enter the quantity in the product's input unit (e.g. kg, litres, pieces)</li>
-                  <li>Stock will be immediately deducted from current levels</li>
-                  <li>The loss appears in the Stock Movement Report as Lost/Adj.</li>
-                  <li>All losses are tracked with your name, timestamp, and reason</li>
+                  <li>{t('stockInfoBullet1')}</li>
+                  <li>{t('stockInfoBullet2')}</li>
+                  <li>{t('stockInfoBullet3')}</li>
+                  <li>{t('infoBullet4')}</li>
                 </ul>
               )}
             </div>

@@ -3,54 +3,35 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useRestaurant } from '@/lib/RestaurantContext'
+import { useTranslations } from '@/lib/i18n/LanguageContext'
 import PageTabs from '@/components/PageTabs'
 import { settingsTabs } from '@/components/PageTabsConfig'
 
-const PLANS = [
+const PLAN_DEFS = [
   {
     key: 'orders',
-    name: 'Orders',
+    nameKey: 'planOrdersName',
     price: 28.99,
-    description: 'Digital ordering, menus & analytics.',
-    features: [
-      'QR table ordering',
-      'Takeaway orders',
-      'Menu & categories management',
-      'Stock & inventory tracking',
-      'Sales reports & analytics',
-      'Revenue & peak-hours charts',
-    ],
-    badge: 'Most popular',
+    descKey: 'planOrdersDesc',
+    featuresKeys: ['featQrOrdering', 'featTakeaway', 'featMenuMgmt', 'featStock', 'featReports', 'featCharts'],
+    badgeKey: 'badgeMostPopular',
     badgeColor: 'bg-[#6262bd] text-white',
   },
   {
     key: 'bookings',
-    name: 'Bookings',
+    nameKey: 'planBookingsName',
     price: 11.99,
-    description: 'Online reservations & booking management.',
-    features: [
-      'Public booking page',
-      'Reservations dashboard',
-      'Confirmation & cancellation emails',
-      'No-show auto-cancellation',
-      'Floor plan & table assignment',
-    ],
-    badge: null,
+    descKey: 'planBookingsDesc',
+    featuresKeys: ['featBookingPage', 'featReservations', 'featConfEmails', 'featNoShow', 'featFloorPlan'],
+    badgeKey: null,
   },
   {
     key: 'team',
-    name: 'Team',
+    nameKey: 'planTeamName',
     price: 14.99,
-    description: 'Staff management, rota & scheduling.',
-    features: [
-      'Staff directory',
-      'Rota scheduling calendar',
-      'Clock in / clock out',
-      'Time-off requests',
-      'Staff availability management',
-      'Shift templates',
-    ],
-    badge: null,
+    descKey: 'planTeamDesc',
+    featuresKeys: ['featStaffDir', 'featRota', 'featClockIn', 'featTimeOff', 'featAvailability', 'featShiftTemplates'],
+    badgeKey: null,
   },
 ]
 
@@ -58,7 +39,7 @@ const BUNDLE_DISCOUNT = 0.15
 
 function calcTotal(selectedKeys) {
   const base = selectedKeys.reduce((sum, key) => {
-    const plan = PLANS.find(p => p.key === key)
+    const plan = PLAN_DEFS.find(p => p.key === key)
     return sum + (plan?.price || 0)
   }, 0)
   const discount = selectedKeys.length >= 2 ? BUNDLE_DISCOUNT : 0
@@ -71,11 +52,11 @@ function calcTotal(selectedKeys) {
 }
 
 const STATUS_CONFIG = {
-  trialing: { label: 'Free Trial', className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' },
-  active:   { label: 'Active',     className: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' },
-  past_due: { label: 'Past Due',   className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' },
-  canceled: { label: 'Canceled',   className: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' },
-  unpaid:   { label: 'Unpaid',     className: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' },
+  trialing: { labelKey: 'statusTrialing', className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' },
+  active:   { labelKey: 'statusActive',   className: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' },
+  past_due: { labelKey: 'statusPastDue',  className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' },
+  canceled: { labelKey: 'statusCanceled', className: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' },
+  unpaid:   { labelKey: 'statusUnpaid',   className: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' },
 }
 
 function formatDate(iso) {
@@ -84,8 +65,17 @@ function formatDate(iso) {
 }
 
 export default function BillingPage() {
+  const t = useTranslations('billing')
   const restaurantCtx = useRestaurant()
   const searchParams  = useSearchParams()
+
+  const PLANS = PLAN_DEFS.map(p => ({
+    ...p,
+    name: t(p.nameKey),
+    description: t(p.descKey),
+    features: p.featuresKeys.map(k => t(k)),
+    badge: p.badgeKey ? t(p.badgeKey) : null,
+  }))
 
   const restaurant         = restaurantCtx?.restaurant
   const subscriptionStatus = restaurant?.subscription_status || 'trialing'
@@ -137,9 +127,9 @@ export default function BillingPage() {
 
   useEffect(() => {
     if (searchParams.get('success') === '1') {
-      setMessage({ type: 'success', text: 'Subscription activated! Your modules are now unlocked.' })
+      setMessage({ type: 'success', text: t('msgSuccess') })
     } else if (searchParams.get('canceled') === '1') {
-      setMessage({ type: 'info', text: 'Checkout cancelled. No charge was made.' })
+      setMessage({ type: 'info', text: t('msgCanceled') })
     }
   }, [searchParams])
 
@@ -171,10 +161,10 @@ export default function BillingPage() {
       if (data.success) {
         setSmsEnabled(newValue)
       } else {
-        setMessage({ type: 'error', text: data.error || 'Failed to update SMS add-on.' })
+        setMessage({ type: 'error', text: data.error || t('msgSmsError') })
       }
     } catch {
-      setMessage({ type: 'error', text: 'Something went wrong. Please try again.' })
+      setMessage({ type: 'error', text: t('msgGenericError') })
     } finally {
       setSmsToggling(false)
     }
@@ -183,7 +173,7 @@ export default function BillingPage() {
   const handleUpdate = async () => {
     if (!restaurant?.id) return
     if (selected.length === 0) {
-      setMessage({ type: 'error', text: 'You must keep at least one module. To cancel entirely, use Manage Billing.' })
+      setMessage({ type: 'error', text: t('msgAtLeastOne') })
       return
     }
     setLoading(true)
@@ -198,14 +188,14 @@ export default function BillingPage() {
       if (data.url) {
         window.location.href = data.url
       } else if (data.updated || data.added) {
-        setMessage({ type: 'success', text: 'Subscription updated! Your modules have been changed.' })
+        setMessage({ type: 'success', text: t('msgUpdated') })
         setTimeout(() => window.location.reload(), 1500)
       } else {
-        setMessage({ type: 'error', text: data.error || 'Failed to update subscription.' })
+        setMessage({ type: 'error', text: data.error || t('msgGenericError') })
         setLoading(false)
       }
     } catch {
-      setMessage({ type: 'error', text: 'Something went wrong. Please try again.' })
+      setMessage({ type: 'error', text: t('msgGenericError') })
       setLoading(false)
     }
   }
@@ -224,11 +214,11 @@ export default function BillingPage() {
       if (data.url) {
         window.location.href = data.url
       } else {
-        setMessage({ type: 'error', text: data.error || 'Failed to start checkout.' })
+        setMessage({ type: 'error', text: data.error || t('msgGenericError') })
         setLoading(false)
       }
     } catch {
-      setMessage({ type: 'error', text: 'Something went wrong. Please try again.' })
+      setMessage({ type: 'error', text: t('msgGenericError') })
       setLoading(false)
     }
   }
@@ -247,10 +237,10 @@ export default function BillingPage() {
       if (data.url) {
         window.location.href = data.url
       } else {
-        setMessage({ type: 'error', text: data.error || 'Failed to open billing portal.' })
+        setMessage({ type: 'error', text: data.error || t('msgGenericError') })
       }
     } catch {
-      setMessage({ type: 'error', text: 'Something went wrong. Please try again.' })
+      setMessage({ type: 'error', text: t('msgGenericError') })
     } finally {
       setPortalLoading(false)
     }
@@ -262,8 +252,8 @@ export default function BillingPage() {
     <div>
       <PageTabs tabs={settingsTabs} />
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Billing & Subscription</h1>
-        <p className="text-slate-500 dark:text-slate-400">Choose the modules your business needs.</p>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-white">{t('title')}</h1>
+        <p className="text-slate-500 dark:text-slate-400">{t('subtitle')}</p>
       </div>
 
       {/* Trial countdown banner */}
@@ -284,7 +274,7 @@ export default function BillingPage() {
                 : 'bg-blue-500 text-white'
           }`}>
             <span className="text-xl leading-none">{trialDaysLeft}</span>
-            <span className="text-xs leading-none opacity-80">days</span>
+            <span className="text-xs leading-none opacity-80">{t('days')}</span>
           </div>
           <div className="flex-1 min-w-0">
             <p className={`font-semibold text-sm ${
@@ -293,15 +283,15 @@ export default function BillingPage() {
               : 'text-blue-700 dark:text-blue-300'
             }`}>
               {trialDaysLeft === 0
-                ? 'Your free trial ends today'
-                : `${trialDaysLeft} day${trialDaysLeft === 1 ? '' : 's'} left on your free trial`}
+                ? t('trialEndsToday')
+                : t('trialDaysLeft', { n: trialDaysLeft })}
             </p>
             <p className={`text-xs mt-0.5 ${
               trialDaysLeft <= 3 ? 'text-red-500 dark:text-red-400'
               : trialDaysLeft <= 7 ? 'text-amber-500 dark:text-amber-400'
               : 'text-blue-500 dark:text-blue-400'
             }`}>
-              Trial expires {formatDate(trialEndsAt)}. Subscribe below to keep full access.
+              {t('trialExpires', { date: formatDate(trialEndsAt) })}
             </p>
           </div>
         </div>
@@ -321,10 +311,10 @@ export default function BillingPage() {
       <div className="bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl p-6 mb-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">Current Subscription</h2>
+            <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">{t('currentSubscription')}</h2>
             <div className="flex items-center gap-3 flex-wrap mb-2">
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusConfig.className}`}>
-                {statusConfig.label}
+                {t(statusConfig.labelKey)}
               </span>
               {subscriptionPlans.map(key => {
                 const plan = PLANS.find(p => p.key === key)
@@ -335,20 +325,20 @@ export default function BillingPage() {
                 ) : null
               })}
               {subscriptionPlans.length === 0 && (
-                <span className="text-sm text-slate-500 dark:text-slate-400">No active modules yet</span>
+                <span className="text-sm text-slate-500 dark:text-slate-400">{t('noActiveModules')}</span>
               )}
             </div>
             {subscriptionStatus === 'trialing' && !trialEndsAt && (
-              <p className="text-sm text-slate-500 dark:text-slate-400">Free trial active — no expiry date set</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t('trialNoExpiry')}</p>
             )}
             {isActive && currentPeriodEnd && (
-              <p className="text-sm text-slate-500 dark:text-slate-400">Next billing date: <strong>{formatDate(currentPeriodEnd)}</strong></p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t('nextBillingDate', { date: formatDate(currentPeriodEnd) })}</p>
             )}
             {subscriptionStatus === 'past_due' && (
-              <p className="text-sm text-red-600 dark:text-red-400 font-medium">Payment failed — update your payment method to restore access.</p>
+              <p className="text-sm text-red-600 dark:text-red-400 font-medium">{t('pastDueNote')}</p>
             )}
             {subscriptionStatus === 'canceled' && currentPeriodEnd && (
-              <p className="text-sm text-slate-500 dark:text-slate-400">Access until <strong>{formatDate(currentPeriodEnd)}</strong> — resubscribe below.</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t('canceledNote', { date: formatDate(currentPeriodEnd) })}</p>
             )}
           </div>
           {restaurant?.stripe_customer_id && (
@@ -361,7 +351,7 @@ export default function BillingPage() {
                 ? <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
                 : <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
               }
-              {portalLoading ? 'Opening…' : 'Manage Billing'}
+              {portalLoading ? t('opening') : t('manageBilling')}
             </button>
           )}
         </div>
@@ -371,17 +361,15 @@ export default function BillingPage() {
       <div className="mb-4 flex items-end justify-between flex-wrap gap-2">
         <div>
           <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200">
-            {isActive ? 'Your modules' : 'Select your modules'}
+            {isActive ? t('yourModules') : t('selectModules')}
           </h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-            {isActive
-              ? 'Toggle modules on or off, then click Update plan to apply changes.'
-              : 'Pick one or more — 15% bundle discount applies when you choose 2 or more.'}
+            {isActive ? t('modulesActiveDesc') : t('modulesTrialDesc')}
           </p>
         </div>
         {selected.length >= 2 && (
           <span className="text-sm font-semibold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-3 py-1 rounded-full border border-green-200 dark:border-green-800">
-            15% bundle discount applied
+            {t('bundleDiscountApplied')}
           </span>
         )}
       </div>
@@ -410,12 +398,12 @@ export default function BillingPage() {
               {/* Badge */}
               {isRemoving && (
                 <span className="absolute -top-3 left-5 text-xs font-bold px-3 py-1 rounded-full bg-red-500 text-white">
-                  Will be removed
+                  {t('willBeRemoved')}
                 </span>
               )}
               {isAdding && (
                 <span className="absolute -top-3 left-5 text-xs font-bold px-3 py-1 rounded-full bg-[#6262bd] text-white">
-                  Will be added
+                  {t('willBeAdded')}
                 </span>
               )}
               {!isActive && plan.badge && isSelected === false && (
@@ -441,7 +429,7 @@ export default function BillingPage() {
 
               <div className="mb-4">
                 <span className="text-2xl font-bold text-slate-800 dark:text-white">£{plan.price}</span>
-                <span className="text-slate-500 dark:text-slate-400 text-sm">/month</span>
+                <span className="text-slate-500 dark:text-slate-400 text-sm">/{t('month')}</span>
               </div>
 
               <ul className="space-y-1.5 flex-1">
@@ -468,21 +456,21 @@ export default function BillingPage() {
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <div className="flex-1">
                       <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-                        📱 SMS Verification Add-on
+                        📱 {t('smsAddonTitle')}
                       </p>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                        Require customers to verify with their phone number. Enables ratings, blacklist &amp; per-customer deposit fees.{' '}
+                        {t('smsAddonDesc')}{' '}
                         <a
                           href="https://venoapp.com/services/reservations"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-[#6262bd] underline"
                         >
-                          Learn more
+                          {t('learnMore')}
                         </a>
                       </p>
                       <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-2">
-                        +{restaurant?.sms_billing_rate_pence ?? 20}p per SMS · billed monthly
+                        {t('smsBilledMonthly', { rate: restaurant?.sms_billing_rate_pence ?? 20 })}
                       </p>
                     </div>
                     <button
@@ -499,22 +487,22 @@ export default function BillingPage() {
                   </div>
                   {smsEnabled && (
                     <p className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">
-                      ✓ SMS verification enabled
+                      ✓ {t('smsEnabled')}
                     </p>
                   )}
                   {smsEnabled && smsUsage && (
                     <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-600">
                       <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">
-                        This month's usage ({smsUsage.month})
+                        {t('smsUsageMonth', { month: smsUsage.month })}
                       </p>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-slate-600 dark:text-slate-300">{smsUsage.sms_count} SMS sent</span>
+                        <span className="text-slate-600 dark:text-slate-300">{t('smsSent', { count: smsUsage.sms_count })}</span>
                         <span className="font-semibold text-slate-800 dark:text-white">
-                          £{(smsUsage.total_pence / 100).toFixed(2)} estimated
+                          {t('smsEstimated', { amount: (smsUsage.total_pence / 100).toFixed(2) })}
                         </span>
                       </div>
                       <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-                        At {smsUsage.rate_pence}p per SMS · added to your next invoice
+                        {t('smsRate', { rate: smsUsage.rate_pence })}
                       </p>
                     </div>
                   )}
@@ -538,34 +526,34 @@ export default function BillingPage() {
                   <p className="text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">
                     {toAdd.length > 0 && (
                       <span className="text-green-600 dark:text-green-400 mr-3">
-                        + Adding: {toAdd.map(k => PLANS.find(p => p.key === k)?.name).join(', ')}
+                        {t('adding')} {toAdd.map(k => PLANS.find(p => p.key === k)?.name).join(', ')}
                       </span>
                     )}
                     {toRemove.length > 0 && (
                       <span className="text-red-500 dark:text-red-400">
-                        − Removing: {toRemove.map(k => PLANS.find(p => p.key === k)?.name).join(', ')}
+                        {t('removing')} {toRemove.map(k => PLANS.find(p => p.key === k)?.name).join(', ')}
                       </span>
                     )}
                   </p>
                   <div className="flex items-center gap-3 flex-wrap">
-                    <span className="text-slate-400 dark:text-slate-500 line-through text-sm">£{currentTotal}/mo</span>
+                    <span className="text-slate-400 dark:text-slate-500 line-through text-sm">£{currentTotal}/{t('month')}</span>
                     <span className="text-2xl font-bold text-slate-800 dark:text-white">
-                      £{total}<span className="text-sm font-normal text-slate-500">/month</span>
+                      £{total}<span className="text-sm font-normal text-slate-500">/{t('month')}</span>
                     </span>
                     {selected.length >= 2 && saving > 0 && (
-                      <span className="text-green-600 dark:text-green-400 text-sm font-medium">Save £{saving}/mo</span>
+                      <span className="text-green-600 dark:text-green-400 text-sm font-medium">{t('saveMo', { amount: saving })}</span>
                     )}
                   </div>
                 </>
               ) : (
                 <div>
                   <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
-                    {selected.map(k => PLANS.find(p => p.key === k)?.name).join(' + ') || 'No modules selected'}
+                    {selected.map(k => PLANS.find(p => p.key === k)?.name).join(' + ') || t('noModulesSelected')}
                   </p>
                   <p className="text-2xl font-bold text-slate-800 dark:text-white mt-0.5">
-                    £{total}<span className="text-sm font-normal text-slate-500">/month</span>
+                    £{total}<span className="text-sm font-normal text-slate-500">/{t('month')}</span>
                     {selected.length >= 2 && saving > 0 && (
-                      <span className="text-green-600 text-sm font-medium ml-3">Save £{saving}/mo</span>
+                      <span className="text-green-600 text-sm font-medium ml-3">{t('saveMo', { amount: saving })}</span>
                     )}
                   </p>
                 </div>
@@ -579,19 +567,19 @@ export default function BillingPage() {
               {loading ? (
                 <>
                   <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
-                  Updating…
+                  {t('updating')}
                 </>
               ) : (
                 <>
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
-                  {hasChanges ? 'Update plan' : 'No changes'}
+                  {hasChanges ? t('updatePlan') : t('noChanges')}
                 </>
               )}
             </button>
           </div>
           {hasChanges && toRemove.length > 0 && (
             <p className="text-xs text-slate-400 dark:text-slate-500 mt-3">
-              Removed modules will remain accessible until the end of the current billing period.
+              {t('removedModulesNote')}
             </p>
           )}
         </div>
@@ -606,14 +594,14 @@ export default function BillingPage() {
                 </p>
                 <div className="flex items-center gap-3 flex-wrap">
                   {selected.length >= 2 && (
-                    <span className="text-slate-400 dark:text-slate-500 line-through text-sm">£{base}/mo</span>
+                    <span className="text-slate-400 dark:text-slate-500 line-through text-sm">£{base}/{t('month')}</span>
                   )}
                   <span className="text-2xl font-bold text-slate-800 dark:text-white">
-                    £{total}<span className="text-sm font-normal text-slate-500">/month</span>
+                    £{total}<span className="text-sm font-normal text-slate-500">/{t('month')}</span>
                   </span>
                   {selected.length >= 2 && (
                     <span className="text-green-600 dark:text-green-400 text-sm font-medium">
-                      Save £{saving}/mo
+                      {t('saveMo', { amount: saving })}
                     </span>
                   )}
                 </div>
@@ -626,12 +614,12 @@ export default function BillingPage() {
                 {loading ? (
                   <>
                     <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
-                    Redirecting…
+                    {t('redirecting')}
                   </>
                 ) : (
                   <>
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
-                    Secure checkout
+                    {t('secureCheckout')}
                   </>
                 )}
               </button>
@@ -641,7 +629,7 @@ export default function BillingPage() {
       )}
 
       <p className="text-xs text-slate-400 dark:text-slate-500 text-center mt-5">
-        All modules include a 14-day free trial. Cancel anytime. Prices exclude VAT. Payments processed securely by Stripe.
+        {t('trialNote')}
       </p>
     </div>
   )

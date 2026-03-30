@@ -7,16 +7,16 @@ import { useCurrency } from '@/lib/CurrencyContext';
 
 // Quick-pick presets
 const PRESETS = [
-  { label: 'Today', getValue: () => { const d = new Date().toISOString().split('T')[0]; return [d, d]; } },
-  { label: 'Yesterday', getValue: () => { const d = new Date(); d.setDate(d.getDate() - 1); const s = d.toISOString().split('T')[0]; return [s, s]; } },
-  { label: 'This Week', getValue: () => {
+  { key: 'Today', labelKey: 'presetToday', getValue: () => { const d = new Date().toISOString().split('T')[0]; return [d, d]; } },
+  { key: 'Yesterday', labelKey: 'presetYesterday', getValue: () => { const d = new Date(); d.setDate(d.getDate() - 1); const s = d.toISOString().split('T')[0]; return [s, s]; } },
+  { key: 'This Week', labelKey: 'presetThisWeek', getValue: () => {
     const today = new Date();
     const day = today.getDay();
     const diff = today.getDate() - day + (day === 0 ? -6 : 1);
     const mon = new Date(today); mon.setDate(diff);
     return [mon.toISOString().split('T')[0], new Date().toISOString().split('T')[0]];
   }},
-  { label: 'Last Week', getValue: () => {
+  { key: 'Last Week', labelKey: 'presetLastWeek', getValue: () => {
     const today = new Date();
     const day = today.getDay();
     const thisMon = new Date(today); thisMon.setDate(today.getDate() - day + (day === 0 ? -6 : 1));
@@ -24,12 +24,12 @@ const PRESETS = [
     const lastSun = new Date(thisMon); lastSun.setDate(lastSun.getDate() - 1);
     return [lastMon.toISOString().split('T')[0], lastSun.toISOString().split('T')[0]];
   }},
-  { label: 'This Month', getValue: () => {
+  { key: 'This Month', labelKey: 'presetThisMonth', getValue: () => {
     const today = new Date();
     const start = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`;
     return [start, today.toISOString().split('T')[0]];
   }},
-  { label: 'Last Month', getValue: () => {
+  { key: 'Last Month', labelKey: 'presetLastMonth', getValue: () => {
     const today = new Date();
     const first = new Date(today.getFullYear(), today.getMonth() - 1, 1);
     const last = new Date(today.getFullYear(), today.getMonth(), 0);
@@ -40,9 +40,11 @@ const PRESETS = [
 import { useModuleGuard } from '@/hooks/useModuleGuard'
 import PageTabs from '@/components/PageTabs'
 import { reportsNavTabs } from '@/components/PageTabsConfig'
+import { useTranslations } from '@/lib/i18n/LanguageContext'
 
 export default function StockMovementReport() {
   useModuleGuard('reports')
+  const t = useTranslations('stockMovement')
   const { formatCurrency, currencySymbol } = useCurrency();
   const restaurantCtx = useRestaurant();
 
@@ -74,7 +76,7 @@ export default function StockMovementReport() {
     const [s, e] = preset.getValue();
     setStartDate(s);
     setEndDate(e);
-    setActivePreset(preset.label);
+    setActivePreset(preset.key);
   };
 
   const fetchReport = useCallback(async () => {
@@ -471,30 +473,30 @@ export default function StockMovementReport() {
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-1">
-          Stock Movement Report
+          {t('title')}
         </h1>
         <p className="text-slate-500 dark:text-slate-400 text-sm">
-          Track stock usage, purchases, and losses across a time period
+          {t('subtitle')}
         </p>
       </div>
 
       {/* Date Range Selector */}
       <div className="mb-6 bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-5">
         <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 uppercase tracking-wide">
-          Time Frame
+          {t('timeFrame')}
         </h2>
         <div className="flex flex-wrap gap-2 mb-4">
           {PRESETS.map(p => (
             <button
-              key={p.label}
+              key={p.key}
               onClick={() => applyPreset(p)}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                activePreset === p.label
+                activePreset === p.key
                   ? 'bg-[#6262bd] text-white'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >
-              {p.label}
+              {t(p.labelKey)}
             </button>
           ))}
           <button
@@ -505,12 +507,12 @@ export default function StockMovementReport() {
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
             }`}
           >
-            Custom
+            {t('presetCustom')}
           </button>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 items-end">
           <div className="flex-1">
-            <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">From</label>
+            <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{t('from')}</label>
             <input
               type="date"
               value={startDate}
@@ -519,7 +521,7 @@ export default function StockMovementReport() {
             />
           </div>
           <div className="flex-1">
-            <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">To</label>
+            <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{t('to')}</label>
             <input
               type="date"
               value={endDate}
@@ -533,7 +535,7 @@ export default function StockMovementReport() {
             disabled={loading}
             className="px-5 py-2 bg-[#6262bd] hover:bg-[#5252ad] text-white font-medium rounded-xl transition-colors disabled:opacity-50 text-sm whitespace-nowrap"
           >
-            {loading ? 'Loading...' : 'Generate Report'}
+            {loading ? t('loading') : t('generateReport')}
           </button>
         </div>
       </div>
@@ -549,24 +551,24 @@ export default function StockMovementReport() {
           {/* Summary Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4 text-center">
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Total Stock Items</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">{t('totalStockItems')}</p>
               <p className="text-xl font-bold text-slate-800 dark:text-slate-200">{reportData.summary.totalProducts}</p>
-              <p className="text-xs text-slate-400 mt-0.5">active products</p>
+              <p className="text-xs text-slate-400 mt-0.5">{t('activeProducts')}</p>
             </div>
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4 text-center">
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Purchased (Period)</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">{t('purchasedPeriod')}</p>
               <p className="text-xl font-bold text-blue-600">{formatCurrency(reportData.summary.totalPurchasedCost)}</p>
-              <p className="text-xs text-slate-400 mt-0.5">total purchase cost</p>
+              <p className="text-xs text-slate-400 mt-0.5">{t('totalPurchaseCost')}</p>
             </div>
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4 text-center">
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Used in Recipes</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">{t('usedInRecipes')}</p>
               <p className="text-xl font-bold text-amber-600">{formatCurrency(reportData.summary.totalRecipeUsedValue)}</p>
-              <p className="text-xs text-slate-400 mt-0.5">ingredient cost of sales</p>
+              <p className="text-xs text-slate-400 mt-0.5">{t('ingredientCostOfSales')}</p>
             </div>
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4 text-center">
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Current Stock Value</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">{t('currentStockValue')}</p>
               <p className="text-xl font-bold text-emerald-600">{formatCurrency(reportData.summary.totalCurrentValue)}</p>
-              <p className="text-xs text-slate-400 mt-0.5">at current unit cost</p>
+              <p className="text-xs text-slate-400 mt-0.5">{t('atCurrentUnitCost')}</p>
             </div>
           </div>
 
@@ -575,9 +577,9 @@ export default function StockMovementReport() {
             {/* Category toggle */}
             <div className="flex items-center gap-1 bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-xl p-1">
               {[
-                { value: 'all', label: 'All Stock' },
-                { value: 'kitchen', label: 'Kitchen / Food' },
-                { value: 'bar', label: 'Bar / Beverage' },
+                { value: 'all', labelKey: 'allStock' },
+                { value: 'kitchen', labelKey: 'kitchenFood' },
+                { value: 'bar', labelKey: 'barBeverage' },
               ].map(opt => (
                 <button
                   key={opt.value}
@@ -588,7 +590,7 @@ export default function StockMovementReport() {
                       : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                   }`}
                 >
-                  {opt.label}
+                  {t(opt.labelKey)}
                 </button>
               ))}
             </div>
@@ -596,15 +598,15 @@ export default function StockMovementReport() {
             <div className="flex items-center gap-3">
               {/* Sort */}
               <div className="flex items-center gap-2">
-                <label className="text-xs text-slate-500 dark:text-slate-400">Sort by:</label>
+                <label className="text-xs text-slate-500 dark:text-slate-400">{t('sortBy')}</label>
                 <select
                   value={sortBy}
                   onChange={e => setSortBy(e.target.value)}
                   className="text-sm px-3 py-1.5 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:border-[#6262bd]"
                 >
-                  <option value="name">Name</option>
-                  <option value="used-desc">Most Used</option>
-                  <option value="cost-desc">Highest Value</option>
+                  <option value="name">{t('sortName')}</option>
+                  <option value="used-desc">{t('sortMostUsed')}</option>
+                  <option value="cost-desc">{t('sortHighestValue')}</option>
                 </select>
               </div>
               {/* Export */}
@@ -634,21 +636,21 @@ export default function StockMovementReport() {
           {/* Stock Table */}
           {filteredItems.length === 0 ? (
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-10 text-center">
-              <p className="text-slate-500 dark:text-slate-400">No stock items found for this filter.</p>
+              <p className="text-slate-500 dark:text-slate-400">{t('noStockItems')}</p>
             </div>
           ) : (
             <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden">
               {/* Table header */}
               <div className="hidden lg:grid grid-cols-10 gap-2 px-5 py-3 bg-slate-50 dark:bg-slate-800/50 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
-                <div className="col-span-2">Product</div>
-                <div className="text-right">Cost/Unit</div>
-                <div className="text-right">Opening</div>
-                <div className="text-right text-blue-600">Purchased</div>
-                <div className="text-right text-amber-600">Used (recipe)</div>
-                <div className="text-right text-red-500">Lost/Adj.</div>
-                <div className="text-right">Closing</div>
-                <div className="text-right">Stock Value</div>
-                <div className="text-right">Details</div>
+                <div className="col-span-2">{t('product')}</div>
+                <div className="text-right">{t('costUnit')}</div>
+                <div className="text-right">{t('opening')}</div>
+                <div className="text-right text-blue-600">{t('purchased')}</div>
+                <div className="text-right text-amber-600">{t('usedRecipe')}</div>
+                <div className="text-right text-red-500">{t('lostAdj')}</div>
+                <div className="text-right">{t('closing')}</div>
+                <div className="text-right">{t('stockValue')}</div>
+                <div className="text-right">{t('details')}</div>
               </div>
 
               <div className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -683,37 +685,37 @@ export default function StockMovementReport() {
 
                         {/* Cost per unit */}
                         <div className="lg:text-right text-xs text-slate-500 dark:text-slate-400 lg:block flex justify-between items-center">
-                          <span className="lg:hidden text-slate-400">Cost/unit</span>
+                          <span className="lg:hidden text-slate-400">{t('costUnit')}</span>
                           <span>{item.currentQty > 0 ? `${formatCostPerUnit(item.costPerUnit * item.multiplier)}/${item.inputUnit}` : '—'}</span>
                         </div>
 
                         {/* Opening qty */}
                         <div className="lg:text-right text-sm text-slate-600 dark:text-slate-400 lg:block flex justify-between">
-                          <span className="lg:hidden text-xs text-slate-400">Opening</span>
+                          <span className="lg:hidden text-xs text-slate-400">{t('opening')}</span>
                           <span>{formatQty(item.openingQty / item.multiplier, item.inputUnit)}</span>
                         </div>
 
                         {/* Purchased — show in input units (e.g. kg, pieces) */}
                         <div className="lg:text-right text-sm text-blue-600 lg:block flex justify-between">
-                          <span className="lg:hidden text-xs text-slate-400">Purchased</span>
+                          <span className="lg:hidden text-xs text-slate-400">{t('purchased')}</span>
                           <span>{item.purchasedInputQty > 0 ? `+${formatQty(item.purchasedInputQty, item.inputUnit)}` : '—'}</span>
                         </div>
 
                         {/* Used in recipe */}
                         <div className="lg:text-right text-sm text-amber-600 lg:block flex justify-between">
-                          <span className="lg:hidden text-xs text-slate-400">Used (recipe)</span>
+                          <span className="lg:hidden text-xs text-slate-400">{t('usedRecipe')}</span>
                           <span>{item.recipeUsedQty > 0 ? `−${formatQty(item.recipeUsedQty / item.multiplier, item.inputUnit)}` : '—'}</span>
                         </div>
 
                         {/* Lost / adjusted */}
                         <div className="lg:text-right text-sm text-red-500 lg:block flex justify-between">
-                          <span className="lg:hidden text-xs text-slate-400">Lost/Adj.</span>
+                          <span className="lg:hidden text-xs text-slate-400">{t('lostAdj')}</span>
                           <span>{item.lostQty > 0 ? `−${formatQty(item.lostInputQty, item.inputUnit)}` : '—'}</span>
                         </div>
 
                         {/* Closing / current */}
                         <div className={`lg:text-right text-sm font-semibold lg:block flex justify-between ${isEmpty ? 'text-red-500' : isLow ? 'text-amber-500' : 'text-slate-700 dark:text-slate-300'}`}>
-                          <span className="lg:hidden text-xs text-slate-400">Closing</span>
+                          <span className="lg:hidden text-xs text-slate-400">{t('closing')}</span>
                           <span className="flex items-center lg:justify-end gap-1">
                             {formatQty(item.currentQty / item.multiplier, item.inputUnit)}
                             {isEmpty && <span className="text-xs bg-red-100 dark:bg-red-900/30 text-red-600 px-1 rounded">out</span>}
@@ -723,7 +725,7 @@ export default function StockMovementReport() {
 
                         {/* Stock value */}
                         <div className="lg:text-right text-sm text-slate-600 dark:text-slate-400 lg:block flex justify-between">
-                          <span className="lg:hidden text-xs text-slate-400">Value</span>
+                          <span className="lg:hidden text-xs text-slate-400">{t('stockValue')}</span>
                           <span>{item.currentQty > 0 ? formatCurrency(item.totalCurrentValue) : '—'}</span>
                         </div>
 
@@ -731,7 +733,7 @@ export default function StockMovementReport() {
                         <div className="hidden lg:flex lg:justify-end items-center">
                           {hasDetails && (
                             <span className="text-xs text-[#6262bd] font-medium">
-                              {isExpanded ? 'Hide' : 'Details'}
+                              {isExpanded ? t('hide') : t('details')}
                             </span>
                           )}
                         </div>
@@ -744,7 +746,7 @@ export default function StockMovementReport() {
                           {Object.keys(item.usedIn).length > 0 && (
                             <div>
                               <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wide mb-2">
-                                Used in recipes (period)
+                                {t('usedInRecipesSection')}
                               </p>
                               <div className="space-y-1">
                                 {Object.entries(item.usedIn).sort((a, b) => b[1] - a[1]).map(([dish, qty]) => (
@@ -754,7 +756,7 @@ export default function StockMovementReport() {
                                   </div>
                                 ))}
                                 <div className="flex justify-between text-xs font-semibold text-amber-700 dark:text-amber-400 pt-1 border-t border-slate-200 dark:border-slate-700">
-                                  <span>Total recipe usage</span>
+                                  <span>{t('totalRecipeUsage')}</span>
                                   <span>{formatQty(item.recipeUsedQty / item.multiplier, item.inputUnit)} ({formatCurrency(item.recipeUsedValue)})</span>
                                 </div>
                               </div>
@@ -765,7 +767,7 @@ export default function StockMovementReport() {
                           {item.purchaseEntries.length > 0 && (
                             <div>
                               <p className="text-xs font-semibold text-blue-700 dark:text-blue-400 uppercase tracking-wide mb-2">
-                                Purchases in period
+                                {t('purchasesInPeriod')}
                               </p>
                               <div className="space-y-1">
                                 {item.purchaseEntries.map((entry, i) => (
@@ -782,7 +784,7 @@ export default function StockMovementReport() {
                           {item.lossEntries.length > 0 && (
                             <div>
                               <p className="text-xs font-semibold text-red-600 dark:text-red-400 uppercase tracking-wide mb-2">
-                                Direct adjustments / losses
+                                {t('directAdjustments')}
                               </p>
                               <div className="space-y-1">
                                 {item.lossEntries.map((entry, i) => (
@@ -803,12 +805,12 @@ export default function StockMovementReport() {
 
               {/* Table footer */}
               <div className="hidden lg:grid grid-cols-10 gap-2 px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border-t-2 border-slate-200 dark:border-slate-700 text-sm font-bold text-slate-800 dark:text-slate-200">
-                <div className="col-span-2">{filteredItems.length} products</div>
+                <div className="col-span-2">{filteredItems.length} {t('products')}</div>
                 <div></div>
                 <div></div>
                 <div className="text-right text-blue-600">{formatCurrency(filteredItems.reduce((s, i) => s + i.purchasedCost, 0))}</div>
                 <div className="text-right text-amber-600">{formatCurrency(filteredItems.reduce((s, i) => s + i.recipeUsedValue, 0))}</div>
-                <div className="text-right text-red-500">{formatCurrency(filteredItems.reduce((s, i) => s + i.lostQty * i.costPerUnit, 0))} lost</div>
+                <div className="text-right text-red-500">{formatCurrency(filteredItems.reduce((s, i) => s + i.lostQty * i.costPerUnit, 0))} {t('lost')}</div>
                 <div></div>
                 <div className="text-right text-emerald-600">{formatCurrency(filteredItems.reduce((s, i) => s + i.totalCurrentValue, 0))}</div>
                 <div></div>
@@ -822,13 +824,7 @@ export default function StockMovementReport() {
               <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span>
-                <strong>How this works:</strong> "Closing qty" is the live current quantity from your stock records.
-                "Opening qty" is estimated as closing + used − purchased during the period.
-                "Used in recipes" is calculated from paid orders × recipe ingredient quantities.
-                "Lost/Adj." are negative stock entries (manual adjustments or recorded losses).
-                Click any row to expand usage breakdown.
-              </span>
+              <span>{t('infoNote')}</span>
             </p>
           </div>
         </>

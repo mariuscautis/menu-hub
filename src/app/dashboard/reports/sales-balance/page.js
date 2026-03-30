@@ -7,16 +7,16 @@ import { useCurrency } from '@/lib/CurrencyContext';
 
 // Quick-pick presets
 const PRESETS = [
-  { label: 'Today', getValue: () => { const d = new Date().toISOString().split('T')[0]; return [d, d]; } },
-  { label: 'Yesterday', getValue: () => { const d = new Date(); d.setDate(d.getDate() - 1); const s = d.toISOString().split('T')[0]; return [s, s]; } },
-  { label: 'This Week', getValue: () => {
+  { key: 'Today', labelKey: 'presetToday', getValue: () => { const d = new Date().toISOString().split('T')[0]; return [d, d]; } },
+  { key: 'Yesterday', labelKey: 'presetYesterday', getValue: () => { const d = new Date(); d.setDate(d.getDate() - 1); const s = d.toISOString().split('T')[0]; return [s, s]; } },
+  { key: 'This Week', labelKey: 'presetThisWeek', getValue: () => {
     const today = new Date();
     const day = today.getDay();
     const diff = today.getDate() - day + (day === 0 ? -6 : 1);
     const mon = new Date(today); mon.setDate(diff);
     return [mon.toISOString().split('T')[0], new Date().toISOString().split('T')[0]];
   }},
-  { label: 'Last Week', getValue: () => {
+  { key: 'Last Week', labelKey: 'presetLastWeek', getValue: () => {
     const today = new Date();
     const day = today.getDay();
     const thisMon = new Date(today); thisMon.setDate(today.getDate() - day + (day === 0 ? -6 : 1));
@@ -24,12 +24,12 @@ const PRESETS = [
     const lastSun = new Date(thisMon); lastSun.setDate(lastSun.getDate() - 1);
     return [lastMon.toISOString().split('T')[0], lastSun.toISOString().split('T')[0]];
   }},
-  { label: 'This Month', getValue: () => {
+  { key: 'This Month', labelKey: 'presetThisMonth', getValue: () => {
     const today = new Date();
     const start = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`;
     return [start, today.toISOString().split('T')[0]];
   }},
-  { label: 'Last Month', getValue: () => {
+  { key: 'Last Month', labelKey: 'presetLastMonth', getValue: () => {
     const today = new Date();
     const first = new Date(today.getFullYear(), today.getMonth() - 1, 1);
     const last = new Date(today.getFullYear(), today.getMonth(), 0);
@@ -40,9 +40,11 @@ const PRESETS = [
 import { useModuleGuard } from '@/hooks/useModuleGuard'
 import PageTabs from '@/components/PageTabs'
 import { reportsNavTabs } from '@/components/PageTabsConfig'
+import { useTranslations } from '@/lib/i18n/LanguageContext'
 
 export default function SalesBalanceReport() {
   useModuleGuard('reports')
+  const t = useTranslations('salesBalance')
   const { formatCurrency } = useCurrency();
   const restaurantCtx = useRestaurant();
 
@@ -71,7 +73,7 @@ export default function SalesBalanceReport() {
     const [s, e] = preset.getValue();
     setStartDate(s);
     setEndDate(e);
-    setActivePreset(preset.label);
+    setActivePreset(preset.key);
   };
 
   const fetchReport = useCallback(async () => {
@@ -465,31 +467,31 @@ export default function SalesBalanceReport() {
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-1">
-          Sales & Tax Balance Report
+          {t('title')}
         </h1>
         <p className="text-slate-500 dark:text-slate-400 text-sm">
-          Products sold, recipe costs, and tax collected vs. purchase tax paid
+          {t('subtitle')}
         </p>
       </div>
 
       {/* Date Range Selector */}
       <div className="mb-6 bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-5">
         <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 uppercase tracking-wide">
-          Time Frame
+          {t('timeFrame')}
         </h2>
         {/* Quick picks */}
         <div className="flex flex-wrap gap-2 mb-4">
           {PRESETS.map(p => (
             <button
-              key={p.label}
+              key={p.key}
               onClick={() => applyPreset(p)}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                activePreset === p.label
+                activePreset === p.key
                   ? 'bg-[#6262bd] text-white'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >
-              {p.label}
+              {t(p.labelKey)}
             </button>
           ))}
           <button
@@ -500,13 +502,13 @@ export default function SalesBalanceReport() {
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
             }`}
           >
-            Custom
+            {t('presetCustom')}
           </button>
         </div>
         {/* Date inputs */}
         <div className="flex flex-col sm:flex-row gap-3 items-end">
           <div className="flex-1">
-            <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">From</label>
+            <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{t('from')}</label>
             <input
               type="date"
               value={startDate}
@@ -515,7 +517,7 @@ export default function SalesBalanceReport() {
             />
           </div>
           <div className="flex-1">
-            <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">To</label>
+            <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{t('to')}</label>
             <input
               type="date"
               value={endDate}
@@ -529,7 +531,7 @@ export default function SalesBalanceReport() {
             disabled={loading}
             className="px-5 py-2 bg-[#6262bd] hover:bg-[#5252ad] text-white font-medium rounded-xl transition-colors disabled:opacity-50 text-sm whitespace-nowrap"
           >
-            {loading ? 'Loading...' : 'Generate Report'}
+            {loading ? t('loading') : t('generateReport')}
           </button>
         </div>
       </div>
@@ -552,31 +554,31 @@ export default function SalesBalanceReport() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <p className="text-slate-600 dark:text-slate-400">No sales found for this period.</p>
+              <p className="text-slate-600 dark:text-slate-400">{t('noSalesFound')}</p>
             </div>
           ) : (
             <>
               {/* Summary Cards */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4 text-center">
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Total Revenue</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">{t('totalRevenue')}</p>
                   <p className="text-xl font-bold text-slate-800 dark:text-slate-200">{formatCurrency(reportData.summary.totalRevenue)}</p>
-                  <p className="text-xs text-slate-400 mt-0.5">{reportData.summary.orderCount} orders</p>
+                  <p className="text-xs text-slate-400 mt-0.5">{reportData.summary.orderCount} {t('orders')}</p>
                 </div>
                 <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4 text-center">
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Tax Collected (Sales)</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">{t('taxCollectedSales')}</p>
                   <p className="text-xl font-bold text-amber-600">{formatCurrency(reportData.summary.totalTaxCollected)}</p>
-                  <p className="text-xs text-slate-400 mt-0.5">From customers</p>
+                  <p className="text-xs text-slate-400 mt-0.5">{t('fromCustomers')}</p>
                 </div>
                 <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4 text-center">
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Purchase Tax Paid</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">{t('purchaseTaxPaid')}</p>
                   <p className="text-xl font-bold text-orange-600">{formatCurrency(reportData.summary.totalIngredientTaxPaid)}</p>
-                  <p className="text-xs text-slate-400 mt-0.5">On ingredients used</p>
+                  <p className="text-xs text-slate-400 mt-0.5">{t('onIngredients')}</p>
                 </div>
                 <div className={`rounded-2xl p-4 text-center border-2 ${reportData.summary.grossProfit >= 0 ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800' : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'}`}>
-                  <p className={`text-xs mb-1 ${reportData.summary.grossProfit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>Gross Profit</p>
+                  <p className={`text-xs mb-1 ${reportData.summary.grossProfit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>{t('grossProfit')}</p>
                   <p className={`text-xl font-bold ${reportData.summary.grossProfit >= 0 ? 'text-emerald-700 dark:text-emerald-300' : 'text-red-700 dark:text-red-300'}`}>{formatCurrency(reportData.summary.grossProfit)}</p>
-                  <p className={`text-xs mt-0.5 ${reportData.summary.grossProfit >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>Net rev. minus ingredients</p>
+                  <p className={`text-xs mt-0.5 ${reportData.summary.grossProfit >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>{t('netRevMinusIngredients')}</p>
                 </div>
               </div>
 
@@ -586,26 +588,26 @@ export default function SalesBalanceReport() {
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
                   </svg>
-                  Tax Balance Summary
+                  {t('taxBalanceSummary')}
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
                   <div>
-                    <p className="text-amber-700 dark:text-amber-400 text-xs mb-0.5">Tax collected from sales</p>
+                    <p className="text-amber-700 dark:text-amber-400 text-xs mb-0.5">{t('taxCollectedFromSales')}</p>
                     <p className="text-lg font-bold text-amber-800 dark:text-amber-200">{formatCurrency(reportData.summary.totalTaxCollected)}</p>
                   </div>
                   <div>
-                    <p className="text-amber-700 dark:text-amber-400 text-xs mb-0.5">Purchase tax paid (inputs)</p>
+                    <p className="text-amber-700 dark:text-amber-400 text-xs mb-0.5">{t('purchaseTaxPaidInputs')}</p>
                     <p className="text-lg font-bold text-amber-800 dark:text-amber-200">− {formatCurrency(reportData.summary.totalIngredientTaxPaid)}</p>
                   </div>
                   <div className="border-l-2 border-amber-300 dark:border-amber-700 pl-4">
-                    <p className="text-amber-700 dark:text-amber-400 text-xs mb-0.5">Net tax payable</p>
+                    <p className="text-amber-700 dark:text-amber-400 text-xs mb-0.5">{t('netTaxPayable')}</p>
                     <p className="text-lg font-bold text-amber-800 dark:text-amber-200">
                       {formatCurrency(reportData.summary.totalTaxCollected - reportData.summary.totalIngredientTaxPaid)}
                     </p>
                   </div>
                 </div>
                 <p className="text-xs text-amber-600 dark:text-amber-500 mt-3">
-                  * Net tax payable = tax collected on sales minus tax paid on recipe ingredients. Consult your accountant for official VAT/tax returns.
+                  {t('taxBalanceNote')}
                 </p>
               </div>
 
@@ -613,8 +615,8 @@ export default function SalesBalanceReport() {
               <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden">
                 <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
                   <h2 className="text-base font-bold text-slate-800 dark:text-slate-200">
-                    Product Breakdown
-                    <span className="ml-2 text-sm font-normal text-slate-400">({reportData.products.length} items — click to expand recipe)</span>
+                    {t('productBreakdown')}
+                    <span className="ml-2 text-sm font-normal text-slate-400">({reportData.products.length} {t('itemsExpandHint')})</span>
                   </h2>
                   <div className="flex items-center gap-2">
                     <button
@@ -640,14 +642,14 @@ export default function SalesBalanceReport() {
 
                 {/* Table header */}
                 <div className="hidden md:grid grid-cols-9 gap-2 px-5 py-3 bg-slate-50 dark:bg-slate-800/50 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
-                  <div className="col-span-2">Product</div>
-                  <div className="text-right">Qty</div>
-                  <div className="text-right">Revenue</div>
-                  <div className="text-right">Tax Rate</div>
-                  <div className="text-right">Tax Collected</div>
-                  <div className="text-right">Net Revenue</div>
-                  <div className="text-right">Ingr. Cost</div>
-                  <div className="text-right">Gross Profit</div>
+                  <div className="col-span-2">{t('product')}</div>
+                  <div className="text-right">{t('qty')}</div>
+                  <div className="text-right">{t('revenue')}</div>
+                  <div className="text-right">{t('taxRate')}</div>
+                  <div className="text-right">{t('taxCollected')}</div>
+                  <div className="text-right">{t('netRevenue')}</div>
+                  <div className="text-right">{t('ingrCost')}</div>
+                  <div className="text-right">{t('grossProfitCol')}</div>
                 </div>
 
                 {/* Rows */}
@@ -673,17 +675,17 @@ export default function SalesBalanceReport() {
                             {!hasRecipe && <span className="w-3.5 flex-shrink-0" />}
                             <div>
                               <span className="font-medium text-slate-800 dark:text-slate-200 text-sm">{product.name}</span>
-                              {hasRecipe && <span className="ml-1 text-xs text-slate-400">(recipe)</span>}
+                              {hasRecipe && <span className="ml-1 text-xs text-slate-400">({t('recipe')})</span>}
                             </div>
                           </div>
                           <div className="md:text-right text-sm text-slate-700 dark:text-slate-300 font-semibold md:block flex justify-between">
-                            <span className="md:hidden text-xs text-slate-400">Qty</span>{product.qty}
+                            <span className="md:hidden text-xs text-slate-400">{t('qty')}</span>{product.qty}
                           </div>
                           <div className="md:text-right text-sm text-slate-700 dark:text-slate-300 md:block flex justify-between">
-                            <span className="md:hidden text-xs text-slate-400">Revenue</span>{formatCurrency(product.revenue)}
+                            <span className="md:hidden text-xs text-slate-400">{t('revenue')}</span>{formatCurrency(product.revenue)}
                           </div>
                           <div className="md:text-right text-sm md:block flex justify-between">
-                            <span className="md:hidden text-xs text-slate-400">Tax Rate</span>
+                            <span className="md:hidden text-xs text-slate-400">{t('taxRate')}</span>
                             {product.taxRate > 0 ? (
                               <span className="text-amber-600 text-xs font-medium">{product.taxName || 'Tax'} {product.taxRate}%</span>
                             ) : (
@@ -691,17 +693,17 @@ export default function SalesBalanceReport() {
                             )}
                           </div>
                           <div className="md:text-right text-sm text-amber-600 md:block flex justify-between">
-                            <span className="md:hidden text-xs text-slate-400">Tax Collected</span>{product.taxRate > 0 ? formatCurrency(product.taxCollected) : <span className="text-slate-400">—</span>}
+                            <span className="md:hidden text-xs text-slate-400">{t('taxCollected')}</span>{product.taxRate > 0 ? formatCurrency(product.taxCollected) : <span className="text-slate-400">—</span>}
                           </div>
                           <div className="md:text-right text-sm text-slate-600 dark:text-slate-400 md:block flex justify-between">
-                            <span className="md:hidden text-xs text-slate-400">Net Revenue</span>{formatCurrency(product.netRevenue)}
+                            <span className="md:hidden text-xs text-slate-400">{t('netRevenue')}</span>{formatCurrency(product.netRevenue)}
                           </div>
                           <div className="md:text-right text-sm text-slate-600 dark:text-slate-400 md:block flex justify-between">
-                            <span className="md:hidden text-xs text-slate-400">Ingr. Cost</span>
+                            <span className="md:hidden text-xs text-slate-400">{t('ingrCost')}</span>
                             {hasRecipe ? formatCurrency(product.ingredientCost) : <span className="text-slate-300 dark:text-slate-600">—</span>}
                           </div>
                           <div className={`md:text-right text-sm font-semibold md:block flex justify-between ${grossProfit >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-                            <span className="md:hidden text-xs text-slate-400">Gross Profit</span>
+                            <span className="md:hidden text-xs text-slate-400">{t('grossProfitCol')}</span>
                             {hasRecipe ? formatCurrency(grossProfit) : <span className="text-slate-300 dark:text-slate-600">—</span>}
                           </div>
                         </div>
@@ -710,7 +712,7 @@ export default function SalesBalanceReport() {
                         {isExpanded && hasRecipe && (
                           <div className="bg-slate-50 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-800 px-10 py-3">
                             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">
-                              Recipe — per unit sold × {product.qty} units
+                              {t('recipePerUnit', { qty: product.qty })}
                             </p>
                             <div className="space-y-1.5">
                               {reportData.productIngredients[product.id].map((ing, i) => (
@@ -718,7 +720,7 @@ export default function SalesBalanceReport() {
                                   <div className="col-span-2 font-medium text-slate-700 dark:text-slate-300">{ing.name}</div>
                                   <div className="text-right">{ing.qtyNeeded} {ing.unit}</div>
                                   <div className="text-right">
-                                    {formatCurrency(ing.unitCost)} per unit
+                                    {formatCurrency(ing.unitCost)} {t('perUnit')}
                                     {ing.taxRate > 0 && <span className="ml-1 text-orange-500">+ {ing.taxName || 'tax'} {ing.taxRate}%</span>}
                                   </div>
                                   <div className="text-right font-medium">

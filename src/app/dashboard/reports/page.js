@@ -4,10 +4,10 @@ import Link from 'next/link';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
 import { useModuleGuard } from '@/hooks/useModuleGuard';
 
-const reports = [
+const reportKeys = [
   {
-    title: 'Z-Report',
-    description: 'End of day closeout with full reconciliation',
+    titleKey: 'zReportTitle',
+    descKey: 'zReportDesc',
     href: '/dashboard/reports/z-report',
     icon: (
       <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -18,8 +18,8 @@ const reports = [
     bg: 'bg-[#6262bd]/10',
   },
   {
-    title: 'X-Report',
-    description: 'Current shift summary without closing',
+    titleKey: 'xReportTitle',
+    descKey: 'xReportDesc',
     href: '/dashboard/reports/x-report',
     icon: (
       <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -30,8 +30,8 @@ const reports = [
     bg: 'bg-violet-50 dark:bg-violet-900/30',
   },
   {
-    title: 'Weekly Summary',
-    description: 'Week-by-week performance comparison',
+    titleKey: 'weeklySummaryTitle',
+    descKey: 'weeklyDesc',
     href: '/dashboard/reports/weekly',
     icon: (
       <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -42,8 +42,8 @@ const reports = [
     bg: 'bg-blue-50 dark:bg-blue-900/30',
   },
   {
-    title: 'Monthly Summary',
-    description: 'Monthly P&L and performance overview',
+    titleKey: 'monthlySummaryTitle',
+    descKey: 'monthlyDesc',
     href: '/dashboard/reports/monthly',
     icon: (
       <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -54,8 +54,8 @@ const reports = [
     bg: 'bg-purple-50 dark:bg-purple-900/30',
   },
   {
-    title: 'Tax Report',
-    description: 'Tax summary for accounting and filing',
+    titleKey: 'taxReportTitle',
+    descKey: 'taxDesc',
     href: '/dashboard/reports/tax',
     icon: (
       <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -66,8 +66,8 @@ const reports = [
     bg: 'bg-amber-50 dark:bg-amber-900/30',
   },
   {
-    title: 'Sales & Tax Balance',
-    description: 'Products sold, ingredient costs, and tax collected vs. paid',
+    titleKey: 'salesBalanceTitle',
+    descKey: 'salesBalanceDesc',
     href: '/dashboard/reports/sales-balance',
     icon: (
       <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -78,8 +78,8 @@ const reports = [
     bg: 'bg-emerald-50 dark:bg-emerald-900/30',
   },
   {
-    title: 'Stock Movement',
-    description: 'Stock quantities used, purchased, and remaining over time',
+    titleKey: 'stockMovementTitle',
+    descKey: 'stockMovementDesc',
     href: '/dashboard/reports/stock-movement',
     icon: (
       <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -100,15 +100,15 @@ export default function ReportsPage() {
       <div className="max-w-5xl mx-auto">
         <div className="mb-10 text-center">
           <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-2">
-            {t('title') || 'Reports'}
+            {t('title')}
           </h1>
           <p className="text-slate-500 dark:text-slate-400">
-            {t('subtitle') || 'Financial and operational reports'}
+            {t('subtitle')}
           </p>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {reports.map((report) => (
+          {reportKeys.map((report) => (
             <Link
               key={report.href}
               href={report.href}
@@ -119,10 +119,10 @@ export default function ReportsPage() {
               </div>
               <div>
                 <h3 className="font-semibold text-slate-800 dark:text-slate-200 group-hover:text-[#6262bd] transition-colors mb-1">
-                  {report.title}
+                  {t(report.titleKey)}
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-snug">
-                  {report.description}
+                  {t(report.descKey)}
                 </p>
               </div>
             </Link>

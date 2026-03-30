@@ -52,7 +52,7 @@ export function useLanguage() {
 export function useTranslations(namespace) {
   const { messages } = useLanguage()
 
-  return (key) => {
+  return (key, replacements = {}) => {
     const keys = `${namespace}.${key}`.split('.')
     let value = messages
 
@@ -60,6 +60,10 @@ export function useTranslations(namespace) {
       value = value?.[k]
     }
 
-    return value || key
+    let text = value || key
+    Object.entries(replacements).forEach(([placeholder, val]) => {
+      text = text.replace(new RegExp(`\\{${placeholder}\\}`, 'g'), val)
+    })
+    return text
   }
 }

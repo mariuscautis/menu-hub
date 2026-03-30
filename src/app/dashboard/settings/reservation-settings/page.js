@@ -5,6 +5,7 @@ import { useRestaurant } from '@/lib/RestaurantContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import PageTabs from '@/components/PageTabs'
 import { settingsTabs } from '@/components/PageTabsConfig'
+import { useTranslations } from '@/lib/i18n/LanguageContext'
 
 const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
 
@@ -34,36 +35,37 @@ function normaliseHours(raw) {
 
 // Fixed-interval options (manager picks one, customer sees pre-made slots)
 const FIXED_SLOT_OPTIONS = [
-  { value: 15,  label: '15 minutes' },
-  { value: 30,  label: '30 minutes' },
-  { value: 45,  label: '45 minutes' },
-  { value: 60,  label: '1 hour' },
-  { value: 90,  label: '1.5 hours' },
-  { value: 120, label: '2 hours' },
+  { value: 15,  labelKey: 'minute15' },
+  { value: 30,  labelKey: 'minute30' },
+  { value: 45,  labelKey: 'minute45' },
+  { value: 60,  labelKey: 'hour1' },
+  { value: 90,  labelKey: 'hour15' },
+  { value: 120, labelKey: 'hour2' },
 ]
 
 // Duration choices the manager can offer to customers (customer-choose mode)
 const DURATION_OPTIONS = [
-  { value: 15,  label: '15 min' },
-  { value: 30,  label: '30 min' },
-  { value: 45,  label: '45 min' },
-  { value: 60,  label: '1 hour' },
-  { value: 90,  label: '1.5 hours' },
-  { value: 120, label: '2 hours' },
-  { value: 180, label: '3 hours' },
+  { value: 15,  labelKey: 'min15' },
+  { value: 30,  labelKey: 'min30' },
+  { value: 45,  labelKey: 'min45' },
+  { value: 60,  labelKey: 'hour1' },
+  { value: 90,  labelKey: 'hour15' },
+  { value: 120, labelKey: 'hour2' },
+  { value: 180, labelKey: 'hour3' },
 ]
 
 // Padding options between bookings
 const PADDING_OPTIONS = [
-  { value: 0,  label: 'None' },
-  { value: 5,  label: '5 min' },
-  { value: 10, label: '10 min' },
-  { value: 15, label: '15 min' },
-  { value: 30, label: '30 min' },
-  { value: 60, label: '1 hour' },
+  { value: 0,  labelKey: 'paddingNone' },
+  { value: 5,  labelKey: 'min5' },
+  { value: 10, labelKey: 'min10' },
+  { value: 15, labelKey: 'min15' },
+  { value: 30, labelKey: 'min30' },
+  { value: 60, labelKey: 'hour1' },
 ]
 
 export default function ReservationSettingsPage() {
+  const t = useTranslations('reservationSettings')
   const restaurantCtx = useRestaurant()
   const supabase = useAdminSupabase()
 
@@ -166,7 +168,7 @@ export default function ReservationSettingsPage() {
 
   const handleSave = async () => {
     if (slotMode === 'customer_choice' && allowedDurations.length === 0) {
-      setMessage({ type: 'error', text: 'Please select at least one duration option for customers.' })
+      setMessage({ type: 'error', text: t('errorSelectDuration') })
       return
     }
 
@@ -200,29 +202,29 @@ export default function ReservationSettingsPage() {
       .eq('id', restaurant.id)
 
     setMessage(error
-      ? { type: 'error', text: 'Failed to save settings. Please try again.' }
-      : { type: 'success', text: 'Reservation settings saved successfully.' }
+      ? { type: 'error', text: t('errorSave') }
+      : { type: 'success', text: t('successSave') }
     )
     setSaving(false)
   }
 
-  if (loading) return <div className="text-slate-500">Loading...</div>
-  if (!restaurant) return <div className="text-red-600">No restaurant found.</div>
+  if (loading) return <div className="text-slate-500">{t('loading')}</div>
+  if (!restaurant) return <div className="text-red-600">{t('noRestaurant')}</div>
 
   return (
     <div>
       <PageTabs tabs={settingsTabs} />
 
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200">Reservation Settings</h1>
-        <p className="text-slate-500 dark:text-slate-400">Configure booking slots, hours and availability</p>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200">{t('title')}</h1>
+        <p className="text-slate-500 dark:text-slate-400">{t('subtitle')}</p>
       </div>
 
       {/* Industry category (read-only) */}
       <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
-        <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">Industry category</h2>
+        <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">{t('industryCategory')}</h2>
         <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
-          Your venue's category is assigned by the platform administrator and determines which peer reviews are shown for your customers.
+          {t('industryCategoryDesc')}
         </p>
         {restaurant.industry_category ? (
           <span className="inline-flex items-center px-4 py-2 rounded-xl bg-[#6262bd]/10 text-[#6262bd] font-semibold text-sm">
@@ -230,7 +232,7 @@ export default function ReservationSettingsPage() {
           </span>
         ) : (
           <span className="inline-flex items-center px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-sm">
-            Not yet assigned — contact support
+            {t('notAssigned')}
           </span>
         )}
       </div>
@@ -247,9 +249,9 @@ export default function ReservationSettingsPage() {
 
       {/* Booking slot mode */}
       <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
-        <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">Booking slot mode</h2>
+        <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">{t('bookingSlotMode')}</h2>
         <p className="text-sm text-slate-500 dark:text-slate-400 mb-5">
-          Choose whether customers select from fixed time slots you define, or whether they pick their own session duration.
+          {t('bookingSlotModeDesc')}
         </p>
 
         {/* Mode toggle */}
@@ -262,8 +264,8 @@ export default function ReservationSettingsPage() {
                 : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'
             }`}
           >
-            <div className={`font-semibold mb-1 ${slotMode === 'fixed' ? 'text-[#6262bd]' : 'text-slate-700 dark:text-slate-300'}`}>Fixed slots</div>
-            <div className="text-xs text-slate-500 dark:text-slate-400">You define the interval. Customers pick a start time from pre-made slots (e.g. every 30 min).</div>
+            <div className={`font-semibold mb-1 ${slotMode === 'fixed' ? 'text-[#6262bd]' : 'text-slate-700 dark:text-slate-300'}`}>{t('fixedSlots')}</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">{t('fixedSlotsDesc')}</div>
           </button>
           <button
             onClick={() => setSlotMode('customer_choice')}
@@ -273,15 +275,15 @@ export default function ReservationSettingsPage() {
                 : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'
             }`}
           >
-            <div className={`font-semibold mb-1 ${slotMode === 'customer_choice' ? 'text-[#6262bd]' : 'text-slate-700 dark:text-slate-300'}`}>Customer chooses duration</div>
-            <div className="text-xs text-slate-500 dark:text-slate-400">You offer duration options. Customers first choose how long they need, then pick a start time.</div>
+            <div className={`font-semibold mb-1 ${slotMode === 'customer_choice' ? 'text-[#6262bd]' : 'text-slate-700 dark:text-slate-300'}`}>{t('customerChooses')}</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">{t('customerChoosesDesc')}</div>
           </button>
         </div>
 
         {/* Fixed: slot interval */}
         {slotMode === 'fixed' && (
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">Slot interval</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">{t('slotInterval')}</label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
               {FIXED_SLOT_OPTIONS.map(opt => (
                 <button
@@ -293,7 +295,7 @@ export default function ReservationSettingsPage() {
                       : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300'
                   }`}
                 >
-                  {opt.label}
+                  {t(opt.labelKey)}
                 </button>
               ))}
             </div>
@@ -303,8 +305,8 @@ export default function ReservationSettingsPage() {
         {/* Customer choice: allowed durations */}
         {slotMode === 'customer_choice' && (
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Duration options to offer customers</label>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">Select all that apply. Customers will choose from these before picking a time.</p>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{t('durationOptions')}</label>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">{t('durationOptionsDesc')}</p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {DURATION_OPTIONS.map(opt => (
                 <button
@@ -316,12 +318,12 @@ export default function ReservationSettingsPage() {
                       : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300'
                   }`}
                 >
-                  {opt.label}
+                  {t(opt.labelKey)}
                 </button>
               ))}
             </div>
             {allowedDurations.length === 0 && (
-              <p className="text-xs text-red-500 mt-2">Select at least one duration.</p>
+              <p className="text-xs text-red-500 mt-2">{t('selectAtLeastOne')}</p>
             )}
           </div>
         )}
@@ -329,9 +331,9 @@ export default function ReservationSettingsPage() {
 
       {/* Padding between bookings */}
       <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
-        <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">Buffer time between bookings</h2>
+        <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">{t('bufferTime')}</h2>
         <p className="text-sm text-slate-500 dark:text-slate-400 mb-5">
-          Extra time after each confirmed booking before the next slot opens. Useful for cleaning, setup, or travel between sessions.
+          {t('bufferTimeDesc')}
         </p>
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
           {PADDING_OPTIONS.map(opt => (
@@ -344,22 +346,22 @@ export default function ReservationSettingsPage() {
                   : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300'
               }`}
             >
-              {opt.label}
+              {t(opt.labelKey)}
             </button>
           ))}
         </div>
         {slotPadding > 0 && (
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-3">
-            After a confirmed booking, the next available slot will start {slotPadding} minute{slotPadding > 1 ? 's' : ''} later.
+            {t('bufferNote', { minutes: slotPadding, plural: slotPadding > 1 ? 's' : '' })}
           </p>
         )}
       </div>
 
       {/* Advance booking window */}
       <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
-        <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">Advance booking window</h2>
+        <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">{t('advanceBookingWindow')}</h2>
         <p className="text-sm text-slate-500 dark:text-slate-400 mb-5">
-          How many days in advance customers can make a reservation.
+          {t('advanceBookingWindowDesc')}
         </p>
         <div className="flex items-center gap-4 max-w-xs">
           <input
@@ -370,7 +372,7 @@ export default function ReservationSettingsPage() {
             onChange={(e) => setAdvanceBookingDays(Number(e.target.value))}
             className="w-28 px-4 py-3 border-2 border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 text-center text-lg font-semibold"
           />
-          <span className="text-slate-600 dark:text-slate-400 font-medium">days</span>
+          <span className="text-slate-600 dark:text-slate-400 font-medium">{t('days')}</span>
         </div>
       </div>
 
@@ -378,9 +380,9 @@ export default function ReservationSettingsPage() {
       <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
         <div className="flex items-start justify-between gap-6">
           <div>
-            <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">Party size selector</h2>
+            <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">{t('partySize')}</h2>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              When enabled, customers choose how many people will attend. Disable if each booking is always for one person (e.g. individual appointments).
+              {t('partySizeDesc')}
             </p>
           </div>
           <button
@@ -391,7 +393,7 @@ export default function ReservationSettingsPage() {
           </button>
         </div>
         <div className={`mt-3 text-sm font-medium ${showPartySize ? 'text-green-600 dark:text-green-400' : 'text-slate-500 dark:text-slate-400'}`}>
-          {showPartySize ? 'Party size selection shown to customers' : 'Hidden — each booking is treated as 1 person'}
+          {showPartySize ? t('partySizeOn') : t('partySizeOff')}
         </div>
       </div>
 
@@ -399,9 +401,9 @@ export default function ReservationSettingsPage() {
       <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
         <div className="flex items-start justify-between gap-6">
           <div>
-            <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">Single booking area</h2>
+            <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">{t('singleBookingArea')}</h2>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              Enable if your venue has only one bookable space (e.g. a private dining room, a studio, a single court). When enabled, only one booking can be confirmed per time slot — no table assignment needed. Pending bookings block the slot to prevent double-bookings.
+              {t('singleBookingAreaDesc')}
             </p>
           </div>
           <button
@@ -412,9 +414,7 @@ export default function ReservationSettingsPage() {
           </button>
         </div>
         <div className={`mt-3 text-sm font-medium ${singleBookingArea ? 'text-[#6262bd]' : 'text-slate-500 dark:text-slate-400'}`}>
-          {singleBookingArea
-            ? 'Single area — only one booking per slot, no table assignment required'
-            : 'Multiple areas — table assignment required, multiple concurrent bookings allowed'}
+          {singleBookingArea ? t('singleAreaOn') : t('singleAreaOff')}
         </div>
       </div>
 
@@ -422,9 +422,9 @@ export default function ReservationSettingsPage() {
       <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
         <div className="flex items-start justify-between gap-6">
           <div>
-            <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">"See menu" button on confirmation page</h2>
+            <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">{t('seeMenuButton')}</h2>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              When enabled, a button is shown on the booking confirmation page linking customers to your menu. You can optionally override the button label below.
+              {t('seeMenuButtonDesc')}
             </p>
           </div>
           <button
@@ -435,18 +435,18 @@ export default function ReservationSettingsPage() {
           </button>
         </div>
         <div className={`mt-3 text-sm font-medium ${showMenuButton ? 'text-[#6262bd]' : 'text-slate-500 dark:text-slate-400'}`}>
-          {showMenuButton ? 'Button visible on booking confirmation page' : 'Button hidden'}
+          {showMenuButton ? t('menuButtonOn') : t('menuButtonOff')}
         </div>
         {showMenuButton && (
           <div className="mt-4">
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-              Button label <span className="text-slate-400 font-normal">(optional — defaults to "View Menu")</span>
+              {t('buttonLabel')} <span className="text-slate-400 font-normal">{t('buttonLabelOptional')}</span>
             </label>
             <input
               type="text"
               value={menuButtonText}
               onChange={e => setMenuButtonText(e.target.value)}
-              placeholder="View Menu"
+              placeholder={t('viewMenuPlaceholder')}
               maxLength={60}
               className="w-full max-w-xs px-4 py-2.5 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 text-sm"
             />
@@ -456,17 +456,16 @@ export default function ReservationSettingsPage() {
 
       {/* Operating hours */}
       <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
-        <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">Operating hours &amp; advance notice</h2>
+        <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">{t('operatingHours')}</h2>
         <p className="text-sm text-slate-500 dark:text-slate-400 mb-5">
-          Set open and close times for each day. Closed days are greyed out on the booking calendar.
+          {t('operatingHoursDesc')}
         </p>
 
         {/* Minimum advance notice */}
         <div className="mb-6 p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Minimum advance notice</h3>
+          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">{t('minAdvanceNotice')}</h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
-            Customers must book at least this many days before their visit. Set to 0 to allow same-day bookings.
-            This overrides operating hours — even if a day is open, it won't appear as bookable within this window.
+            {t('minAdvanceNoticeDesc')}
           </p>
           <div className="flex items-center gap-3 flex-wrap">
             {[0, 1, 2, 3, 5, 7].map(n => (
@@ -479,7 +478,7 @@ export default function ReservationSettingsPage() {
                     : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300'
                 }`}
               >
-                {n === 0 ? 'Same day' : n === 1 ? '1 day' : `${n} days`}
+                {n === 0 ? t('sameDay') : n === 1 ? t('oneDay') : t('nDays', { n })}
               </button>
             ))}
             <div className="flex items-center gap-2">
@@ -491,12 +490,17 @@ export default function ReservationSettingsPage() {
                 onChange={e => setMinAdvanceNoticeDays(Math.max(0, Number(e.target.value)))}
                 className="w-20 px-3 py-2 border-2 border-slate-200 dark:border-slate-700 dark:bg-slate-700 dark:text-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 text-center text-sm font-semibold"
               />
-              <span className="text-sm text-slate-500 dark:text-slate-400">days</span>
+              <span className="text-sm text-slate-500 dark:text-slate-400">{t('days')}</span>
             </div>
           </div>
           {minAdvanceNoticeDays > 0 && (
             <p className="text-xs text-[#6262bd] mt-3 font-medium">
-              Customers must book at least {minAdvanceNoticeDays} day{minAdvanceNoticeDays > 1 ? 's' : ''} in advance. Today and the next {minAdvanceNoticeDays - 1} day{minAdvanceNoticeDays > 1 ? 's' : ''} will not be bookable.
+              {t('minAdvanceNote', {
+                n: minAdvanceNoticeDays,
+                plural: minAdvanceNoticeDays > 1 ? 's' : '',
+                remaining: minAdvanceNoticeDays - 1,
+                remainingPlural: minAdvanceNoticeDays > 1 ? 's' : '',
+              })}
             </p>
           )}
         </div>
@@ -516,7 +520,7 @@ export default function ReservationSettingsPage() {
                 {/* Day name + toggle on one line */}
                 <div className="flex items-center gap-3 mb-2">
                   <span className={`text-sm font-semibold capitalize w-20 flex-shrink-0 ${hours.closed ? 'text-slate-400 dark:text-slate-500' : 'text-slate-700 dark:text-slate-300'}`}>
-                    {day.charAt(0).toUpperCase() + day.slice(1)}
+                    {t(day)}
                   </span>
                   <button
                     onClick={() => toggleDayClosed(day)}
@@ -525,7 +529,7 @@ export default function ReservationSettingsPage() {
                     <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${hours.closed ? 'translate-x-0' : 'translate-x-5'}`} />
                   </button>
                   {hours.closed && (
-                    <span className="text-sm text-slate-400 dark:text-slate-500">Closed</span>
+                    <span className="text-sm text-slate-400 dark:text-slate-500">{t('closed')}</span>
                   )}
                 </div>
 
@@ -537,7 +541,7 @@ export default function ReservationSettingsPage() {
                         {idx > 0 && (
                           <div className="flex items-center gap-2 mb-2">
                             <div className="flex-1 border-t border-dashed border-slate-200 dark:border-slate-700" />
-                            <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">Shift {idx + 1}</span>
+                            <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">{t('shift', { n: idx + 1 })}</span>
                             <div className="flex-1 border-t border-dashed border-slate-200 dark:border-slate-700" />
                           </div>
                         )}
@@ -574,7 +578,7 @@ export default function ReservationSettingsPage() {
                         onClick={() => addShift(day)}
                         className="self-start text-xs text-[#6262bd] hover:underline font-medium mt-0.5"
                       >
-                        + Add shift
+                        {t('addShift')}
                       </button>
                     )}
                   </div>
@@ -589,11 +593,9 @@ export default function ReservationSettingsPage() {
       <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
         <div className="flex items-start justify-between gap-6">
           <div>
-            <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">Reservation fee</h2>
+            <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">{t('reservationFee')}</h2>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              Charge every customer a booking fee when they reserve. Requires{' '}
-              <strong>SMS verification</strong> and <strong>Stripe Connect</strong> to be active.
-              When enabled, individual customer deposit requirements are overridden by this fee.
+              {t('reservationFeeDesc')}
             </p>
           </div>
           <button
@@ -607,18 +609,18 @@ export default function ReservationSettingsPage() {
 
         {!restaurant.sms_billing_enabled && (
           <p className="mt-3 text-xs text-amber-600 dark:text-amber-400 font-medium">
-            SMS verification must be enabled to use a global reservation fee. Enable it in the SMS add-on settings.
+            {t('smsRequired')}
           </p>
         )}
         {restaurant.sms_billing_enabled && !restaurant.stripe_connect_onboarded && (
           <p className="mt-3 text-xs text-amber-600 dark:text-amber-400 font-medium">
-            Stripe Connect must be set up to collect booking fees. Complete onboarding in your billing settings.
+            {t('stripeRequired')}
           </p>
         )}
 
         {globalFeeEnabled && restaurant.sms_billing_enabled && restaurant.stripe_connect_onboarded && (
           <div className="mt-5 flex items-center gap-3">
-            <label className="text-sm font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">Fee amount</label>
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">{t('feeAmount')}</label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-medium">
                 {restaurant.invoice_settings?.currency || 'GBP'}
@@ -633,13 +635,13 @@ export default function ReservationSettingsPage() {
                 className="pl-14 pr-4 py-2.5 border-2 border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 w-40 text-sm"
               />
             </div>
-            <span className="text-xs text-slate-400">per booking</span>
+            <span className="text-xs text-slate-400">{t('perBooking')}</span>
           </div>
         )}
 
         {globalFeeEnabled && restaurant.sms_billing_enabled && restaurant.stripe_connect_onboarded && (
           <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-            All customers will be charged this fee during booking. Fully or partially blocked customers still cannot book.
+            {t('feeNote')}
           </p>
         )}
       </div>
@@ -649,7 +651,7 @@ export default function ReservationSettingsPage() {
         disabled={saving}
         className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
       >
-        {saving ? 'Saving…' : 'Save reservation settings'}
+        {saving ? t('saving') : t('saveButton')}
       </button>
     </div>
   )

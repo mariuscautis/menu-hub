@@ -329,7 +329,7 @@ export default function ProductTaxSettings() {
                   {t('menuSalesTaxFullDesc') || 'These are the tax rates applied to items when they are sold to customers. Each menu item can be assigned its own tax bracket (e.g. Beer at 21%, Soft Drinks at 17%, Food at 9%). Tax-inclusive pricing means customers pay the shown price — invoices then show the net + tax breakdown for accounting.'}
                 </p>
                 <p className="text-xs text-indigo-600 dark:text-indigo-400 mt-2">
-                  {t('example') || `Example: ${currencySymbol}5.00 menu price with 21% VAT → Customer pays ${currencySymbol}5.00 → Invoice: Net ${currencySymbol}4.13 + VAT ${currencySymbol}0.87`}
+                  {t('example', { symbol: currencySymbol })}
                 </p>
               </div>
             </div>

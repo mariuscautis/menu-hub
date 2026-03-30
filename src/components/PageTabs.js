@@ -2,15 +2,22 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useTranslations } from '@/lib/i18n/LanguageContext'
 
 /**
  * PageTabs – two modes:
  *  - "tiles"  – when any tab has an `icon`, renders prominent card tiles (grid)
  *  - "pills"  – plain segmented pill bar (original style, no icons)
+ *
+ * Tabs should use `labelKey` (looked up in the 'pageTabs' namespace) or a
+ * fallback `label` string for backwards compatibility.
  */
 export default function PageTabs({ tabs }) {
   const pathname = usePathname()
-  const hasTiles = tabs.some(t => t.icon)
+  const t = useTranslations('pageTabs')
+  const hasTiles = tabs.some(tab => tab.icon)
+
+  const getLabel = (tab) => tab.labelKey ? t(tab.labelKey) : tab.label
 
   if (hasTiles) {
     return (
@@ -37,7 +44,7 @@ export default function PageTabs({ tabs }) {
               <span className={`text-sm font-semibold leading-tight ${
                 active ? 'text-white' : 'text-slate-800 dark:text-slate-200 group-hover:text-[#6262bd] transition-colors'
               }`}>
-                {tab.label}
+                {getLabel(tab)}
               </span>
               {tab.description && (
                 <span className={`text-xs leading-tight ${
@@ -66,7 +73,7 @@ export default function PageTabs({ tabs }) {
               : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
           }`}
         >
-          {tab.label}
+          {getLabel(tab)}
         </Link>
       ))}
     </div>

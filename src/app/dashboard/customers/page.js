@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
+import { useTranslations, useLanguage } from '@/lib/i18n/LanguageContext'
 
 const RESTRICTION_LABELS = {
   blocked:      { label: 'Blocked',  cls: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800' },
@@ -22,6 +23,8 @@ export default function CustomersPage() {
   const restaurantCtx = useRestaurant()
   const restaurant = restaurantCtx?.restaurant
   const adminSupabase = useAdminSupabase()
+  const t = useTranslations('customers')
+  const { locale } = useLanguage()
 
   const [customers, setCustomers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -218,7 +221,7 @@ export default function CustomersPage() {
         setSelected(updated)
         setCustomers(prev => prev.map(c => c.id === customerId ? { ...c, restriction: null } : c))
         setRestrictionMode(null)
-        showNotification('success', 'Restriction removed.')
+        showNotification('success', t('restrictionRemoved'))
       } else {
         const payload = {
           customer_id:   customerId,
@@ -236,11 +239,11 @@ export default function CustomersPage() {
         setSelected(updated)
         setCustomers(prev => prev.map(c => c.id === customerId ? { ...c, restriction: payload } : c))
         setRestrictionMode(null)
-        showNotification('success', type === 'blocked' ? 'Customer blocked.' : 'Deposit requirement saved.')
+        showNotification('success', type === 'blocked' ? t('customerBlocked') : t('depositSaved'))
       }
     } catch (err) {
       console.error('saveRestriction error:', err)
-      showNotification('error', 'Failed to save restriction.')
+      showNotification('error', t('failedToSave'))
     } finally {
       setSavingRestriction(false)
     }
@@ -273,7 +276,7 @@ export default function CustomersPage() {
     return map[status] || 'bg-slate-100 text-slate-600'
   }
 
-  if (loading) return <div className="text-slate-500 p-8">Loading customers...</div>
+  if (loading) return <div className="text-slate-500 p-8">{t('loadingCustomers')}</div>
 
   return (
     <div className="flex h-full gap-0">
@@ -281,8 +284,8 @@ export default function CustomersPage() {
       <div className={`flex-1 min-w-0 ${selected ? 'hidden md:block' : ''}`}>
         <div className="mb-6 flex items-center justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200">Customers</h1>
-            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{customers.length} customers who have booked this venue</p>
+            <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200">{t('title')}</h1>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{t('subtitle', { count: customers.length })}</p>
           </div>
         </div>
 
@@ -300,7 +303,7 @@ export default function CustomersPage() {
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Search name, phone, email..."
+            placeholder={t('searchPlaceholder')}
             className="flex-1 min-w-48 px-4 py-2.5 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#6262bd]"
           />
           <select
@@ -308,30 +311,30 @@ export default function CustomersPage() {
             onChange={e => setFilterRestriction(e.target.value)}
             className="px-3 py-2.5 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#6262bd]"
           >
-            <option value="all">All customers</option>
-            <option value="blocked">Blocked</option>
-            <option value="fee_required">Deposit required</option>
-            <option value="none">No restriction</option>
+            <option value="all">{t('allCustomers')}</option>
+            <option value="blocked">{t('blocked')}</option>
+            <option value="fee_required">{t('depositRequired')}</option>
+            <option value="none">{t('noRestriction')}</option>
           </select>
         </div>
 
         {/* Table */}
         {filtered.length === 0 ? (
-          <div className="text-center py-16 text-slate-400">No customers found.</div>
+          <div className="text-center py-16 text-slate-400">{t('noCustomersFound')}</div>
         ) : (
           <div className="bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl overflow-hidden">
             <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-100 dark:border-slate-700 text-left">
-                  <th className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400">Customer</th>
-                  <th className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 hidden sm:table-cell">Phone</th>
-                  <th className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 text-center hidden sm:table-cell">Visits</th>
-                  <th className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 text-center hidden md:table-cell">Your rating</th>
+                  <th className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400">{t('colCustomer')}</th>
+                  <th className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 hidden sm:table-cell">{t('colPhone')}</th>
+                  <th className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 text-center hidden sm:table-cell">{t('colVisits')}</th>
+                  <th className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 text-center hidden md:table-cell">{t('colYourRating')}</th>
                   <th className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 text-center hidden md:table-cell">
-                    {restaurant?.industry_category ? 'Peer rating' : 'Overall'}
+                    {restaurant?.industry_category ? t('colPeerRating') : t('colOverall')}
                   </th>
-                  <th className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400">Status</th>
+                  <th className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400">{t('colStatus')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -356,7 +359,7 @@ export default function CustomersPage() {
                       <td className="px-4 py-3">
                         {restr ? (
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold border ${RESTRICTION_LABELS[restr.type]?.cls}`}>
-                            {restr.type === 'blocked' ? '🚫 Blocked' : `💳 ${restr.fee_currency || 'GBP'} ${Number(restr.fee_amount).toFixed(0)}`}
+                            {restr.type === 'blocked' ? `🚫 ${t('blocked')}` : `💳 ${restr.fee_currency || 'GBP'} ${Number(restr.fee_amount).toFixed(0)}`}
                           </span>
                         ) : (
                           <span className="text-xs text-slate-400">—</span>
@@ -379,7 +382,7 @@ export default function CustomersPage() {
             {/* Header */}
             <div className="p-5 border-b border-slate-100 dark:border-slate-700 flex items-start justify-between">
               <div>
-                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200">{selected.name || 'Unknown'}</h2>
+                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200">{selected.name || t('unknown')}</h2>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{selected.phone}</p>
                 {selected.email && <p className="text-xs text-slate-400 mt-0.5">{selected.email}</p>}
               </div>
@@ -400,10 +403,10 @@ export default function CustomersPage() {
                 className="p-4 text-center hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors group"
               >
                 <div className="text-xl font-bold text-amber-500">{selected.venueAvg ? `${selected.venueAvg}★` : '—'}</div>
-                <div className="text-xs text-slate-400 mt-0.5">Your venue</div>
-                <div className="text-xs text-slate-300 mt-0.5">{selected.venueBookings} {selected.venueBookings === 1 ? 'visit' : 'visits'}</div>
+                <div className="text-xs text-slate-400 mt-0.5">{t('yourVenue')}</div>
+                <div className="text-xs text-slate-300 mt-0.5">{selected.venueBookings} {selected.venueBookings === 1 ? t('visit') : t('visits')}</div>
                 <div className="text-xs text-amber-400 mt-1 group-hover:underline">
-                  {showVenueReviews ? 'hide reviews' : 'see reviews'}
+                  {showVenueReviews ? t('hideReviews') : t('seeReviews')}
                 </div>
               </button>
               <button
@@ -411,12 +414,12 @@ export default function CustomersPage() {
                 className="p-4 text-center hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors group"
               >
                 <div className="text-xl font-bold text-purple-500">{selected.categoryAvg ? `${selected.categoryAvg}★` : '—'}</div>
-                <div className="text-xs text-slate-400 mt-0.5">{restaurant?.industry_category ? 'Peer rating' : 'Overall rating'}</div>
+                <div className="text-xs text-slate-400 mt-0.5">{restaurant?.industry_category ? t('peerRating') : t('overallRating')}</div>
                 {selected.categoryVisits != null && (
-                  <div className="text-xs text-slate-300 mt-0.5">{selected.categoryVisits} {selected.categoryVisits === 1 ? 'visit' : 'visits'}</div>
+                  <div className="text-xs text-slate-300 mt-0.5">{selected.categoryVisits} {selected.categoryVisits === 1 ? t('visit') : t('visits')}</div>
                 )}
                 <div className="text-xs text-purple-400 mt-1 group-hover:underline">
-                  {peerReviews !== null ? 'hide reviews' : 'see reviews'}
+                  {peerReviews !== null ? t('hideReviews') : t('seeReviews')}
                 </div>
               </button>
             </div>
@@ -424,11 +427,11 @@ export default function CustomersPage() {
             {/* Venue reviews drawer */}
             {showVenueReviews && (
               <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700 bg-amber-50/50 dark:bg-amber-900/10">
-                <h3 className="text-sm font-semibold text-amber-700 dark:text-amber-300 mb-3">Your reviews of this customer</h3>
+                <h3 className="text-sm font-semibold text-amber-700 dark:text-amber-300 mb-3">{t('yourVenueReviews')}</h3>
                 {loadingHistory ? (
-                  <p className="text-xs text-slate-400">Loading...</p>
+                  <p className="text-xs text-slate-400">{t('loading')}</p>
                 ) : venueReviews.length === 0 ? (
-                  <p className="text-xs text-slate-400">No reviews left yet.</p>
+                  <p className="text-xs text-slate-400">{t('noReviewsYet')}</p>
                 ) : (
                   <div className="space-y-2.5 max-h-64 overflow-y-auto">
                     {venueReviews.map(r => {
@@ -445,14 +448,14 @@ export default function CustomersPage() {
                             </div>
                             <span className="text-xs text-slate-400">
                               {booking
-                                ? new Date(booking.reservation_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-                                : new Date(r.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                ? new Date(booking.reservation_date).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })
+                                : new Date(r.created_at).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })}
                             </span>
                           </div>
                           {r.note ? (
                             <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">{r.note}</p>
                           ) : (
-                            <p className="text-xs text-slate-400 italic">No note left.</p>
+                            <p className="text-xs text-slate-400 italic">{t('noNoteLeft')}</p>
                           )}
                         </div>
                       )
@@ -465,11 +468,11 @@ export default function CustomersPage() {
             {/* Peer reviews drawer */}
             {peerReviews !== null && (
               <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700 bg-purple-50/50 dark:bg-purple-900/10">
-                <h3 className="text-sm font-semibold text-purple-700 dark:text-purple-300 mb-3">Peer reviews (last 10)</h3>
+                <h3 className="text-sm font-semibold text-purple-700 dark:text-purple-300 mb-3">{t('peerReviews')}</h3>
                 {loadingPeerReviews ? (
-                  <p className="text-xs text-slate-400">Loading...</p>
+                  <p className="text-xs text-slate-400">{t('loading')}</p>
                 ) : peerReviews.length === 0 ? (
-                  <p className="text-xs text-slate-400">No peer reviews found for this customer.</p>
+                  <p className="text-xs text-slate-400">{t('noPeerReviews')}</p>
                 ) : (
                   <div className="space-y-2.5 max-h-64 overflow-y-auto">
                     {peerReviews.map((r, i) => (
@@ -483,14 +486,14 @@ export default function CustomersPage() {
                             ))}
                           </div>
                           <span className="text-xs text-slate-400">
-                            {new Date(r.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            {new Date(r.created_at).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })}
                           </span>
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{r.venue_name}</p>
                         {r.note ? (
                           <p className="text-xs text-slate-700 dark:text-slate-300 mt-1 leading-relaxed">{r.note}</p>
                         ) : (
-                          <p className="text-xs text-slate-400 italic mt-1">No note left.</p>
+                          <p className="text-xs text-slate-400 italic mt-1">{t('noNoteLeft')}</p>
                         )}
                       </div>
                     ))}
@@ -501,7 +504,7 @@ export default function CustomersPage() {
 
             {/* Restriction management */}
             <div className="p-5 border-b border-slate-100 dark:border-slate-700">
-              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Booking restriction</h3>
+              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">{t('bookingRestriction')}</h3>
 
               {/* Current restriction badge */}
               {selected.restriction && !restrictionMode && (
@@ -512,8 +515,8 @@ export default function CustomersPage() {
                 }`}>
                   <p className={`text-sm font-semibold ${selected.restriction.type === 'blocked' ? 'text-red-700 dark:text-red-400' : 'text-amber-700 dark:text-amber-400'}`}>
                     {selected.restriction.type === 'blocked'
-                      ? '🚫 Blocked from this venue'
-                      : `💳 Deposit: ${selected.restriction.fee_currency || 'GBP'} ${Number(selected.restriction.fee_amount).toFixed(2)}`}
+                      ? t('blockedFromVenue')
+                      : `${t('deposit')} ${selected.restriction.fee_currency || 'GBP'} ${Number(selected.restriction.fee_amount).toFixed(2)}`}
                   </p>
                 </div>
               )}
@@ -527,7 +530,7 @@ export default function CustomersPage() {
                       : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-red-300 hover:text-red-600'
                   }`}
                 >
-                  🚫 Block
+                  {t('blockBtn')}
                 </button>
                 <button
                   onClick={() => {
@@ -542,7 +545,7 @@ export default function CustomersPage() {
                       : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-amber-300 hover:text-amber-600'
                   }`}
                 >
-                  💳 Deposit
+                  {t('depositBtn')}
                 </button>
               </div>
 
@@ -552,14 +555,14 @@ export default function CustomersPage() {
                   disabled={savingRestriction}
                   className="w-full bg-red-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-red-700 disabled:opacity-50 mb-2"
                 >
-                  {savingRestriction ? 'Saving...' : 'Confirm block'}
+                  {savingRestriction ? t('saving') : t('confirmBlock')}
                 </button>
               )}
 
               {restrictionMode === 'fee_required' && (
                 <div className="space-y-2 mb-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-slate-500 dark:text-slate-400 whitespace-nowrap">Amount</span>
+                    <span className="text-sm text-slate-500 dark:text-slate-400 whitespace-nowrap">{t('amount')}</span>
                     <input
                       type="number"
                       min="1"
@@ -575,7 +578,7 @@ export default function CustomersPage() {
                     disabled={savingRestriction || !restrictionFee}
                     className="w-full bg-amber-500 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-amber-600 disabled:opacity-50"
                   >
-                    {savingRestriction ? 'Saving...' : 'Save deposit'}
+                    {savingRestriction ? t('saving') : t('saveDeposit')}
                   </button>
                 </div>
               )}
@@ -586,27 +589,27 @@ export default function CustomersPage() {
                   disabled={savingRestriction}
                   className="w-full text-xs text-slate-400 hover:text-red-500 underline disabled:opacity-50"
                 >
-                  Remove all restrictions
+                  {t('removeAllRestrictions')}
                 </button>
               )}
             </div>
 
             {/* Booking history */}
             <div className="p-5 border-b border-slate-100 dark:border-slate-700">
-              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Booking history at this venue</h3>
+              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">{t('bookingHistory')}</h3>
               {loadingHistory ? (
-                <p className="text-xs text-slate-400">Loading...</p>
+                <p className="text-xs text-slate-400">{t('loading')}</p>
               ) : bookingHistory.length === 0 ? (
-                <p className="text-xs text-slate-400">No bookings found.</p>
+                <p className="text-xs text-slate-400">{t('noBookingsFound')}</p>
               ) : (
                 <div className="space-y-2 max-h-56 overflow-y-auto">
                   {bookingHistory.map(b => (
                     <div key={b.id} className="flex items-center justify-between text-xs py-2 border-b border-slate-50 dark:border-slate-700/50 last:border-b-0">
                       <div>
                         <span className="font-medium text-slate-700 dark:text-slate-300">
-                          {new Date(b.reservation_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          {new Date(b.reservation_date).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })}
                         </span>
-                        <span className="text-slate-400 ml-2">{b.reservation_time?.substring(0, 5)} · {b.party_size} {b.party_size === 1 ? 'guest' : 'guests'}</span>
+                        <span className="text-slate-400 ml-2">{b.reservation_time?.substring(0, 5)} · {b.party_size} {b.party_size === 1 ? t('guest') : t('guests')}</span>
                       </div>
                       <span className={`px-2 py-0.5 rounded-lg font-semibold capitalize ${statusColour(b.status)}`}>{b.status.replace('_', ' ')}</span>
                     </div>

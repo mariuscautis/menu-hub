@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRestaurant } from '@/lib/RestaurantContext'
-import { useTranslations } from '@/lib/i18n/LanguageContext'
+import { useTranslations, useLanguage } from '@/lib/i18n/LanguageContext'
 import { useOrderSounds } from '@/hooks/useOrderSounds'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
@@ -12,6 +12,7 @@ export default function Reservations() {
   useModuleGuard('reservations')
   const t = useTranslations('reservations')
   const tc = useTranslations('common')
+  const { locale } = useLanguage()
   const adminSupabase = useAdminSupabase()
   const [restaurant, setRestaurant] = useState(null)
   const [reservations, setReservations] = useState([])
@@ -693,9 +694,9 @@ export default function Reservations() {
       <div className="mb-6 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl p-6">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h2 className="text-base font-bold text-slate-800 dark:text-slate-200 mb-1">Block a date</h2>
+            <h2 className="text-base font-bold text-slate-800 dark:text-slate-200 mb-1">{t('blockADate')}</h2>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              Stop taking new bookings for a specific date. Existing reservations are unaffected.
+              {t('blockADateDesc')}
             </p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
@@ -712,7 +713,7 @@ export default function Reservations() {
                       : 'bg-amber-50 border-amber-300 text-amber-700 hover:bg-amber-100 dark:bg-amber-900/30 dark:border-amber-700 dark:text-amber-300'
                   }`}
                 >
-                  {isTodayBlocked ? '✓ Today unblocked' : 'Block today'}
+                  {isTodayBlocked ? t('todayUnblocked') : t('blockToday')}
                 </button>
               )
             })()}
@@ -727,7 +728,7 @@ export default function Reservations() {
               onClick={() => { if (blockDateInput) { toggleBlockedDate(blockDateInput); setBlockDateInput('') } }}
               className="px-4 py-2 bg-red-600 text-white rounded-xl text-sm font-medium hover:bg-red-700 disabled:opacity-50"
             >
-              {blockedDates.includes(blockDateInput) ? 'Unblock' : 'Block'}
+              {blockedDates.includes(blockDateInput) ? t('unblock') : t('block')}
             </button>
           </div>
         </div>
@@ -736,7 +737,7 @@ export default function Reservations() {
             {blockedDates.map(d => (
               <div key={d} className="flex items-center gap-1.5 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg px-3 py-1.5">
                 <span className="text-sm font-medium text-red-700 dark:text-red-300">
-                  {new Date(d + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                  {new Date(d + 'T00:00:00').toLocaleDateString(locale, { weekday: 'short', month: 'short', day: 'numeric' })}
                 </span>
                 <button
                   onClick={() => toggleBlockedDate(d)}
