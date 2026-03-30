@@ -331,9 +331,7 @@ export default function CustomersPage() {
                   <th className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 hidden sm:table-cell">{t('colPhone')}</th>
                   <th className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 text-center hidden sm:table-cell">{t('colVisits')}</th>
                   <th className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 text-center hidden md:table-cell">{t('colYourRating')}</th>
-                  <th className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 text-center hidden md:table-cell">
-                    {restaurant?.industry_category ? t('colPeerRating') : t('colOverall')}
-                  </th>
+                  <th className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 text-center hidden md:table-cell">{t('colOverall')}</th>
                   <th className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400">{t('colStatus')}</th>
                 </tr>
               </thead>
@@ -414,7 +412,7 @@ export default function CustomersPage() {
                 className="p-4 text-center hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors group"
               >
                 <div className="text-xl font-bold text-purple-500">{selected.categoryAvg ? `${selected.categoryAvg}★` : '—'}</div>
-                <div className="text-xs text-slate-400 mt-0.5">{restaurant?.industry_category ? t('peerRating') : t('overallRating')}</div>
+                <div className="text-xs text-slate-400 mt-0.5">{t('overallRating')}</div>
                 {selected.categoryVisits != null && (
                   <div className="text-xs text-slate-300 mt-0.5">{selected.categoryVisits} {selected.categoryVisits === 1 ? t('visit') : t('visits')}</div>
                 )}

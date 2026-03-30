@@ -85,8 +85,14 @@ export default function AdminSettings() {
     // Generate a slug-style value from the label
     const value = label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')
     if (categories.some(c => c.value === value)) return
-    setCategories(prev => [...prev, { value, label }])
+    setCategories(prev => [...prev, { value, label, hidden_from_registration: false }])
     setNewCategoryLabel('')
+  }
+
+  const toggleHidden = (value) => {
+    setCategories(prev => prev.map(c =>
+      c.value === value ? { ...c, hidden_from_registration: !c.hidden_from_registration } : c
+    ))
   }
 
   const removeCategory = (value) => {
@@ -592,8 +598,17 @@ export default function AdminSettings() {
 
         <div className="space-y-2 mb-4">
           {categories.map(cat => (
-            <div key={cat.value} className="flex items-center justify-between px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl">
-              <span className="text-sm font-medium text-slate-700">{cat.label}</span>
+            <div key={cat.value} className="flex items-center gap-3 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+              <span className="flex-1 text-sm font-medium text-slate-700">{cat.label}</span>
+              <label className="flex items-center gap-1.5 cursor-pointer select-none" title="Hide from registration form">
+                <input
+                  type="checkbox"
+                  checked={!!cat.hidden_from_registration}
+                  onChange={() => toggleHidden(cat.value)}
+                  className="w-3.5 h-3.5 accent-[#6262bd]"
+                />
+                <span className="text-xs text-slate-500 whitespace-nowrap">Hide from signup</span>
+              </label>
               <button
                 onClick={() => removeCategory(cat.value)}
                 className="text-slate-400 hover:text-red-500 transition-colors"

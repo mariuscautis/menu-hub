@@ -70,7 +70,7 @@ export default function Onboarding() {
         .single()
         .then(({ data }) => {
           if (data?.value?.length) {
-          setVenueTypes([...data.value].sort((a, b) => a.label.localeCompare(b.label)))
+          setVenueTypes([...data.value].filter(c => !c.hidden_from_registration).sort((a, b) => a.label.localeCompare(b.label)))
         }
         })
     }
