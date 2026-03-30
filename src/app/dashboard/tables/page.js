@@ -456,21 +456,36 @@ export default function Tables() {
       .eq('paid', false)
       .neq('status', 'cancelled')
 
-    // Get all completed split bills to calculate amounts already paid
-    const { data: splitBills } = await supabase
-      .from('split_bills')
-      .select('table_id, total_amount, payment_status')
-      .eq('restaurant_id', restaurantId)
-      .eq('payment_status', 'completed')
-
-    // Calculate total paid via split bills per table
-    const splitBillTotalsByTable = {}
-    splitBills?.forEach(bill => {
-      if (!splitBillTotalsByTable[bill.table_id]) {
-        splitBillTotalsByTable[bill.table_id] = 0
-      }
-      splitBillTotalsByTable[bill.table_id] += parseFloat(bill.total_amount) || 0
+    // Build a set of all order_item ids from the current unpaid orders
+    const unpaidOrderItemIds = new Set()
+    orders?.forEach(order => {
+      order.order_items?.forEach(item => {
+        if (item.id) unpaidOrderItemIds.add(item.id)
+      })
     })
+
+    // Get completed split bills whose items belong to the current unpaid orders only.
+    // Fetching split_bill_items lets us match by order_item_id so old paid sessions
+    // on the same table don't bleed into a new open order.
+    let splitBillTotalsByTable = {}
+    if (unpaidOrderItemIds.size > 0) {
+      const { data: splitBills } = await supabase
+        .from('split_bills')
+        .select('table_id, split_bill_items(order_item_id, quantity, price)')
+        .eq('restaurant_id', restaurantId)
+        .eq('payment_status', 'completed')
+
+      splitBills?.forEach(bill => {
+        bill.split_bill_items?.forEach(sbi => {
+          if (unpaidOrderItemIds.has(sbi.order_item_id)) {
+            if (!splitBillTotalsByTable[bill.table_id]) {
+              splitBillTotalsByTable[bill.table_id] = 0
+            }
+            splitBillTotalsByTable[bill.table_id] += (parseFloat(sbi.price) || 0) * (sbi.quantity || 1)
+          }
+        })
+      })
+    }
 
     // Group by table and calculate totals
     const orderInfo = {}
@@ -513,7 +528,7 @@ export default function Tables() {
       }
     })
 
-    // Subtract split bill amounts from totals
+    // Subtract split bill amounts from totals (only for items in current open orders)
     Object.keys(splitBillTotalsByTable).forEach(tableId => {
       if (orderInfo[tableId]) {
         orderInfo[tableId].total -= splitBillTotalsByTable[tableId]
