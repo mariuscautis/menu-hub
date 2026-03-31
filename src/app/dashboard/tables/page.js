@@ -4852,8 +4852,8 @@ export default function Tables() {
                   <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-slate-800 mb-2">Payment Successful!</h2>
-              <p className="text-slate-600">Would you like to generate an invoice for this order?</p>
+              <h2 className="text-2xl font-bold text-slate-800 mb-2">{t('paymentModal.postPaymentTitle')}</h2>
+              <p className="text-slate-600">{t('paymentModal.postPaymentSubtitle')}</p>
             </div>
 
             <div className="space-y-3">
@@ -4868,7 +4868,7 @@ export default function Tables() {
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
                 </svg>
-                Generate Invoice
+                {t('paymentModal.generateInvoice')}
               </button>
               <button
                 onClick={() => {
@@ -4879,7 +4879,7 @@ export default function Tables() {
                 }}
                 className="w-full border-2 border-slate-200 text-slate-700 py-3 rounded-xl font-semibold hover:bg-slate-50 transition-all"
               >
-                Close
+                {t('paymentModal.close')}
               </button>
             </div>
           </div>

@@ -658,7 +658,12 @@
       "noDiscount": "Sin descuento",
       "terminalCurrencyNotSupportedTitle": "Moneda no compatible con el lector de tarjetas",
       "terminalCurrencyNotSupportedDesc": "Tu lector de tarjetas no admite esta moneda. Puedes registrar el pago con tarjeta manualmente o cobrar en efectivo.",
-      "paymentSuccess": "¡Pago realizado con éxito!"
+      "paymentSuccess": "¡Pago realizado con éxito!",
+      "subtotal": "Subtotal",
+      "postPaymentTitle": "¡Pago realizado con éxito!",
+      "postPaymentSubtitle": "¿Deseas generar una factura para este pedido?",
+      "generateInvoice": "Generar factura",
+      "close": "Cerrar"
     },
     "transferTable": "Transferir Mesa",
     "transferModal": {

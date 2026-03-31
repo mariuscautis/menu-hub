@@ -658,7 +658,12 @@
       "noDiscount": "Nessuno sconto",
       "terminalCurrencyNotSupportedTitle": "Valuta non supportata dal lettore di carte",
       "terminalCurrencyNotSupportedDesc": "Il tuo lettore di carte non supporta questa valuta. Puoi registrare il pagamento con carta manualmente o accettare contanti.",
-      "paymentSuccess": "Pagamento riuscito!"
+      "paymentSuccess": "Pagamento riuscito!",
+      "subtotal": "Subtotale",
+      "postPaymentTitle": "Pagamento riuscito!",
+      "postPaymentSubtitle": "Vuoi generare una fattura per questo ordine?",
+      "generateInvoice": "Genera fattura",
+      "close": "Chiudi"
     },
     "transferTable": "Trasferisci Tavolo",
     "transferModal": {

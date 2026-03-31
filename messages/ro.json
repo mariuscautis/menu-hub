@@ -658,7 +658,12 @@
       "noDiscount": "Fără reducere",
       "terminalCurrencyNotSupportedTitle": "Monedă neacceptată de cititorul de card",
       "terminalCurrencyNotSupportedDesc": "Cititorul tău de card nu acceptă această monedă. Poți înregistra plata cu cardul manual sau să încasezi în numerar.",
-      "paymentSuccess": "Plată efectuată cu succes!"
+      "paymentSuccess": "Plată efectuată cu succes!",
+      "subtotal": "Subtotal",
+      "postPaymentTitle": "Plată efectuată cu succes!",
+      "postPaymentSubtitle": "Dorești să generezi o factură pentru această comandă?",
+      "generateInvoice": "Generează factură",
+      "close": "Închide"
     },
     "transferTable": "Transferă Masă",
     "transferModal": {

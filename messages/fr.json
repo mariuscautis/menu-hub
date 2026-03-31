@@ -658,7 +658,12 @@
       "noDiscount": "Sans réduction",
       "terminalCurrencyNotSupportedTitle": "Devise non prise en charge par le lecteur de carte",
       "terminalCurrencyNotSupportedDesc": "Votre lecteur de carte ne prend pas en charge cette devise. Vous pouvez enregistrer le paiement par carte manuellement ou encaisser en espèces.",
-      "paymentSuccess": "Paiement réussi !"
+      "paymentSuccess": "Paiement réussi !",
+      "subtotal": "Sous-total",
+      "postPaymentTitle": "Paiement réussi !",
+      "postPaymentSubtitle": "Souhaitez-vous générer une facture pour cette commande ?",
+      "generateInvoice": "Générer une facture",
+      "close": "Fermer"
     },
     "transferTable": "Transférer la Table",
     "transferModal": {

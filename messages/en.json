@@ -701,7 +701,11 @@
       "terminalNoReadersOnline": "No card readers online",
       "terminalCurrencyNotSupportedTitle": "Currency not supported by card reader",
       "terminalCurrencyNotSupportedDesc": "Your card reader does not support this currency. You can register the card payment manually or take cash instead.",
-      "paymentSuccess": "Payment successful!"
+      "paymentSuccess": "Payment successful!",
+      "postPaymentTitle": "Payment Successful!",
+      "postPaymentSubtitle": "Would you like to generate an invoice for this order?",
+      "generateInvoice": "Generate Invoice",
+      "close": "Close"
     },
     "splitBillModal": {
       "title": "Split Bill - Table {tableNumber}",
