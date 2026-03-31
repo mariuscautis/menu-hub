@@ -1048,7 +1048,7 @@ export default function Tables() {
       } catch (err) {
         // Network error - offline mode
         console.warn('Offline: could not fetch existing order for table', table.table_number)
-        showNotification('info', 'Offline mode — starting new order')
+        showNotification('info', t('notifications.offlineModeNewOrder'))
         // existingOrder remains null, so we'll start with empty order
       }
     }
@@ -1356,7 +1356,7 @@ export default function Tables() {
       }).filter(order => order.order_items && order.order_items.length > 0) // Remove orders with no remaining items
 
       if (filteredOrders.length === 0) {
-        showNotification('info', 'No unpaid orders found for this table.')
+        showNotification('info', t('notifications.noUnpaidOrders'))
         return
       }
 
@@ -1492,7 +1492,7 @@ export default function Tables() {
     } catch (err) {
       console.error('Error opening split bill modal:', err)
       if (!navigator.onLine) {
-        showNotification('error', 'Split bill is not available offline. Please connect to the internet.')
+        showNotification('error', t('notifications.splitBillOffline'))
       } else {
         showNotification('error', t('notifications.splitBillPaymentFailed'))
       }
@@ -1589,7 +1589,7 @@ export default function Tables() {
       const allOrders = [...ordersWithUpdates, ...uniqueOfflineOrders]
 
       if (allOrders.length === 0 && !navigator.onLine) {
-        showNotification('info', 'No order data available offline.')
+        showNotification('info', t('notifications.orderDataOffline'))
         return
       }
 
@@ -1598,9 +1598,9 @@ export default function Tables() {
     } catch (err) {
       console.error('Error opening order details modal:', err)
       if (!navigator.onLine) {
-        showNotification('error', 'Order details not available offline.')
+        showNotification('error', t('notifications.orderDetailsOffline'))
       } else {
-        showNotification('error', 'Failed to load order details')
+        showNotification('error', t('notifications.loadOrderDetailsFailed'))
       }
     }
   }
@@ -1613,7 +1613,7 @@ export default function Tables() {
           ? { ...t, status: 'available', payment_completed_at: null }
           : t
       ))
-      showNotification('success', `Table ${table.table_number} marked as cleaned (will sync when online)`)
+      showNotification('success', t('notifications.tableCleanedOffline', { tableNumber: table.table_number }))
       return
     }
 
@@ -1650,7 +1650,7 @@ export default function Tables() {
             ? { ...t, status: 'available', payment_completed_at: null }
             : t
         ))
-        showNotification('success', `Table ${table.table_number} marked as cleaned (will sync when online)`)
+        showNotification('success', t('notifications.tableCleanedOffline', { tableNumber: table.table_number }))
         return
       }
       showNotification('error', t('notifications.tableCleanedFailed'))
@@ -1697,7 +1697,7 @@ export default function Tables() {
       })
 
       if (itemsToDeliver.length === 0) {
-        showNotification('info', `No ready ${department} items to deliver`)
+        showNotification('info', t('notifications.noReadyItemsToDeliver', { department }))
         return
       }
 
@@ -1715,7 +1715,10 @@ export default function Tables() {
       await fetchTableOrderInfo(restaurant.id)
 
       const departmentLabel = department.charAt(0).toUpperCase() + department.slice(1)
-      showNotification('success', `${itemsToDeliver.length} ${departmentLabel} item${itemsToDeliver.length > 1 ? 's' : ''} delivered to Table ${table.table_number}!`)
+      showNotification('success', itemsToDeliver.length > 1
+          ? t('notifications.itemsDeliveredPlural', { count: itemsToDeliver.length, department: departmentLabel, tableNumber: table.table_number })
+          : t('notifications.itemsDelivered', { count: itemsToDeliver.length, department: departmentLabel, tableNumber: table.table_number })
+        )
     } catch (error) {
       console.error('Error marking items as delivered:', error)
       showNotification('error', t('notifications.itemsDeliveredFailed'))
@@ -1850,7 +1853,7 @@ export default function Tables() {
             })
             await fetchTableOrderInfo(restaurant.id)
             resetTerminalState()
-            setPaymentModal(false)
+            setShowPaymentModal(false)
             showNotification('success', t('paymentModal.paymentSuccess'))
           } else if (rows.status === 'failed') {
             clearTimeout(terminalTimerRef.current)
@@ -1917,7 +1920,7 @@ export default function Tables() {
     // OFFLINE CASH PAYMENT HANDLING
     if (!navigator.onLine) {
       if (paymentMethod !== 'cash') {
-        showNotification('error', 'Only cash payments are available offline. Card payments require internet.')
+        showNotification('error', t('notifications.offlineCardOnly'))
         return
       }
 
@@ -1979,13 +1982,13 @@ export default function Tables() {
         // This prevents stale cached orders from appearing when placing new orders
         clearOrdersCacheForTable(selectedTable.id)
 
-        showNotification('success', `Cash payment of ${formatCurrency(totalAmount)} saved offline. Will sync when internet is restored.`)
+        showNotification('success', t('notifications.offlineCashPaymentSaved', { amount: formatCurrency(totalAmount) }))
 
         // Don't show post-payment modal for offline payments (invoice generation needs internet)
         return
       } catch (offlineErr) {
         console.error('Offline payment error:', offlineErr)
-        showNotification('error', 'Failed to save offline payment. Please try again.')
+        showNotification('error', t('notifications.offlinePaymentFailed'))
         return
       }
     }
@@ -2056,8 +2059,10 @@ export default function Tables() {
       await fetchTableOrderInfo(restaurant.id)
       await fetchData()
 
-      const discountText = discountAmount > 0 ? ` (${formatCurrency(discountAmount)} discount applied)` : ''
-      showNotification('success', `Payment of ${formatCurrency(totalAmount)} processed successfully via ${paymentMethod}!${discountText}`)
+      showNotification('success', discountAmount > 0
+        ? t('notifications.paymentProcessedDiscount', { amount: formatCurrency(totalAmount), method: paymentMethod, discount: formatCurrency(discountAmount) })
+        : t('notifications.paymentProcessed', { amount: formatCurrency(totalAmount), method: paymentMethod })
+      )
 
       // Show post-payment modal (with invoice option)
       setShowPostPaymentModal(true)
@@ -2190,7 +2195,7 @@ export default function Tables() {
         return updatedSplitBills
       })
 
-      showNotification('success', `${bill.name} paid successfully: ${formatCurrency(bill.total)} via ${paymentMethod}`)
+      showNotification('success', t('notifications.splitBillPaid', { bill: bill.name, amount: formatCurrency(bill.total), method: paymentMethod }))
 
       // Refresh table order info immediately after each split bill payment
       await fetchTableOrderInfo(restaurant.id)
@@ -2326,7 +2331,7 @@ export default function Tables() {
         setSelectedTable(null)
         setUnpaidOrders([])
         setCompletedOrderIds([])
-        showNotification('success', `Invoice emailed successfully to ${clientData.email}!`)
+        showNotification('success', t('notifications.invoiceEmailed', { email: clientData.email }))
       } else {
         // Download invoice as PDF (generated client-side)
         await downloadInvoicePdf(invoice, invoiceRestaurant)
@@ -2458,10 +2463,10 @@ export default function Tables() {
       setShowTransferModal(false)
       setTransferSourceTable(null)
       await fetchTableOrderInfo(restaurant.id)
-      showNotification('success', `Order transferred from Table ${transferSourceTable.table_number} to Table ${destinationTable.table_number}`)
+      showNotification('success', t('notifications.orderTransferred', { from: transferSourceTable.table_number, to: destinationTable.table_number }))
     } catch (err) {
       console.error('Transfer error:', err)
-      showNotification('error', err.message || 'Failed to transfer order')
+      showNotification('error', err.message || t('notifications.orderTransferFailed'))
     } finally {
       setTransferring(false)
     }
@@ -2834,7 +2839,7 @@ export default function Tables() {
 
             if (itemsToSave.length === 0) {
               console.log('DEBUG: No new items to save - returning')
-              showNotification('info', 'No new items to add. Reducing quantities requires internet.')
+              showNotification('info', t('notifications.noNewItemsOffline'))
               return
             }
 
@@ -2869,7 +2874,7 @@ export default function Tables() {
               setOrderItems([])
               setItemNotes({})
               console.log('========== OFFLINE ORDER UPDATE COMPLETE ==========')
-              showNotification('success', 'Items added to order offline. Will sync when internet is restored.')
+              showNotification('success', t('notifications.offlineItemsAdded'))
               return
             }
           } else {
@@ -2899,7 +2904,7 @@ export default function Tables() {
             setCurrentOrder(null)
             setOrderItems([])
             setItemNotes({})
-            showNotification('success', 'Items added to offline order. Will sync when internet is restored.')
+            showNotification('success', t('notifications.offlineItemsAdded'))
             return
           }
 
@@ -2940,8 +2945,8 @@ export default function Tables() {
           setOrderItems([])
           setItemNotes({})
           const message = currentOrder
-            ? 'Additional items saved offline — will sync when internet is restored.'
-            : 'Order saved offline — will sync when internet is restored.'
+            ? t('notifications.offlineAdditionalItemsSaved')
+            : t('notifications.offlineOrderSaved')
           console.log('========== NEW OFFLINE ORDER COMPLETE ==========')
           showNotification('success', message)
           return
@@ -4444,7 +4449,7 @@ export default function Tables() {
 
                                 if (error) throw error
 
-                                showNotification('success', 'Guest confirmed as arrived!')
+                                showNotification('success', t('notifications.guestConfirmed'))
                                 fetchTodayReservations(restaurant.id)
 
                                 // Refresh modal reservations
@@ -4454,7 +4459,7 @@ export default function Tables() {
                                 setSelectedTableReservations(updatedReservations)
                               } catch (error) {
                                 console.error('Error confirming guest:', error)
-                                showNotification('error', 'Failed to confirm guest arrival')
+                                showNotification('error', t('notifications.guestConfirmFailed'))
                               }
                             }
                           }}
@@ -4748,7 +4753,7 @@ export default function Tables() {
                 onClick={async () => {
                   // Validate "other" option requires custom reason
                   if (cancelReasonType === 'other' && !customCancelReason.trim()) {
-                    showNotification('error', 'Please provide a reason')
+                    showNotification('error', t('notifications.provideReason'))
                     return
                   }
 
@@ -4796,7 +4801,7 @@ export default function Tables() {
                       // Don't fail the cancellation if email fails
                     }
 
-                    showNotification('success', 'Booking cancelled successfully')
+                    showNotification('success', t('notifications.bookingCancelled'))
                     fetchTodayReservations(restaurant.id)
 
                     // Refresh modal reservations
@@ -4814,7 +4819,7 @@ export default function Tables() {
                     setCustomCancelReason('')
                   } catch (error) {
                     console.error('Error cancelling booking:', error)
-                    showNotification('error', 'Failed to cancel booking')
+                    showNotification('error', t('notifications.bookingCancelFailed'))
                   }
                 }}
                 className="flex-1 bg-red-600 text-white px-4 py-3 rounded-xl font-medium hover:bg-red-700"
