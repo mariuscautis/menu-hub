@@ -1782,7 +1782,13 @@ export default function Tables() {
         })
       })
       const piData = await piRes.json()
-      if (!piRes.ok) throw new Error(piData.error || 'Failed to create payment intent')
+      if (!piRes.ok) {
+        if (piData.code === 'currency_not_supported') {
+          setTerminalStatus('currency_not_supported')
+          return
+        }
+        throw new Error(piData.error || 'Failed to create payment intent')
+      }
       const paymentIntentId = piData.paymentIntentId
       setTerminalPaymentIntentId(paymentIntentId)
 
@@ -3766,33 +3772,15 @@ export default function Tables() {
                       </svg>
                       {t('paymentModal.payWithCash')}
                     </button>
-                    {(() => {
-                      const currency = (restaurant?.invoice_settings?.currency || 'EUR').toUpperCase()
-                      if (currency === 'RON') {
-                        return (
-                          <button
-                            onClick={() => processPayment('card')}
-                            className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] flex items-center justify-center gap-2"
-                          >
-                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
-                            </svg>
-                            {t('paymentModal.payWithCard')}
-                          </button>
-                        )
-                      }
-                      return (
-                        <button
-                          onClick={fetchTerminalReaders}
-                          className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] flex items-center justify-center gap-2"
-                        >
-                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
-                          </svg>
-                          {t('paymentModal.payWithCard')}
-                        </button>
-                      )
-                    })()}
+                    <button
+                      onClick={fetchTerminalReaders}
+                      className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+                      </svg>
+                      {t('paymentModal.payWithCard')}
+                    </button>
                   </div>
                 )}
 
@@ -3904,6 +3892,34 @@ export default function Tables() {
                         className="flex-1 bg-[#6262bd] text-white py-2 rounded-xl font-semibold hover:bg-[#5252a3] text-sm"
                       >
                         {t('paymentModal.terminalTryAgain')}
+                      </button>
+                      <button
+                        onClick={() => { resetTerminalState(); processPayment('cash') }}
+                        className="flex-1 border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 py-2 rounded-xl font-semibold text-sm"
+                      >
+                        {t('paymentModal.terminalPayCash')}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {terminalStatus === 'currency_not_supported' && (
+                  <div className="flex flex-col items-center gap-4 py-4">
+                    <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
+                      <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                      </svg>
+                    </div>
+                    <div className="text-center">
+                      <p className="font-semibold text-slate-800 dark:text-slate-100">{t('paymentModal.terminalCurrencyNotSupportedTitle')}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{t('paymentModal.terminalCurrencyNotSupportedDesc')}</p>
+                    </div>
+                    <div className="flex gap-3 w-full">
+                      <button
+                        onClick={() => { resetTerminalState(); processPayment('card') }}
+                        className="flex-1 bg-[#6262bd] text-white py-2 rounded-xl font-semibold hover:bg-[#5252a3] text-sm"
+                      >
+                        {t('paymentModal.terminalFallbackManual')}
                       </button>
                       <button
                         onClick={() => { resetTerminalState(); processPayment('cash') }}

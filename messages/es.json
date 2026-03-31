@@ -655,7 +655,9 @@
       "terminalRONNotSupported": "Los pagos con lector no están disponibles para RON. Pago registrado manualmente.",
       "terminalReaderBusy": "Lector ocupado",
       "terminalNoReadersOnline": "No hay lectores de tarjetas en línea",
-      "noDiscount": "Sin descuento"
+      "noDiscount": "Sin descuento",
+      "terminalCurrencyNotSupportedTitle": "Moneda no compatible con el lector de tarjetas",
+      "terminalCurrencyNotSupportedDesc": "Tu lector de tarjetas no admite esta moneda. Puedes registrar el pago con tarjeta manualmente o cobrar en efectivo."
     },
     "transferTable": "Transferir Mesa",
     "transferModal": {

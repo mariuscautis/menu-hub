@@ -698,7 +698,9 @@
       "terminalFallbackManual": "No reader available — register card payment manually",
       "terminalRONNotSupported": "Card reader payments are not supported for RON. Payment registered manually.",
       "terminalReaderBusy": "Reader busy",
-      "terminalNoReadersOnline": "No card readers online"
+      "terminalNoReadersOnline": "No card readers online",
+      "terminalCurrencyNotSupportedTitle": "Currency not supported by card reader",
+      "terminalCurrencyNotSupportedDesc": "Your card reader does not support this currency. You can register the card payment manually or take cash instead."
     },
     "splitBillModal": {
       "title": "Split Bill - Table {tableNumber}",

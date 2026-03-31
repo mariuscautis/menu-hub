@@ -655,7 +655,9 @@
       "terminalRONNotSupported": "Plățile prin cititor nu sunt disponibile pentru RON. Plată înregistrată manual.",
       "terminalReaderBusy": "Cititor ocupat",
       "terminalNoReadersOnline": "Niciun cititor de card online",
-      "noDiscount": "Fără reducere"
+      "noDiscount": "Fără reducere",
+      "terminalCurrencyNotSupportedTitle": "Monedă neacceptată de cititorul de card",
+      "terminalCurrencyNotSupportedDesc": "Cititorul tău de card nu acceptă această monedă. Poți înregistra plata cu cardul manual sau să încasezi în numerar."
     },
     "transferTable": "Transferă Masă",
     "transferModal": {

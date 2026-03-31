@@ -57,7 +57,13 @@ export async function POST(request) {
 
     if (pi.error) {
       console.error('terminal/create-payment-intent Stripe error:', pi.error)
-      return NextResponse.json({ error: pi.error.message || 'Failed to create payment intent' }, { status: 500 })
+      const isCurrencyError =
+        pi.error.code === 'currency_not_supported' ||
+        (pi.error.message || '').toLowerCase().includes('currency')
+      return NextResponse.json(
+        { error: pi.error.message || 'Failed to create payment intent', code: isCurrencyError ? 'currency_not_supported' : pi.error.code },
+        { status: isCurrencyError ? 422 : 500 }
+      )
     }
 
     await supabaseAdmin.from('terminal_payments').insert({

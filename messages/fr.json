@@ -655,7 +655,9 @@
       "terminalRONNotSupported": "Les paiements par lecteur ne sont pas disponibles pour le RON. Paiement enregistré manuellement.",
       "terminalReaderBusy": "Lecteur occupé",
       "terminalNoReadersOnline": "Aucun lecteur de carte en ligne",
-      "noDiscount": "Sans réduction"
+      "noDiscount": "Sans réduction",
+      "terminalCurrencyNotSupportedTitle": "Devise non prise en charge par le lecteur de carte",
+      "terminalCurrencyNotSupportedDesc": "Votre lecteur de carte ne prend pas en charge cette devise. Vous pouvez enregistrer le paiement par carte manuellement ou encaisser en espèces."
     },
     "transferTable": "Transférer la Table",
     "transferModal": {
