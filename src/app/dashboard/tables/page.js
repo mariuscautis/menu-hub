@@ -7,6 +7,7 @@ import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import QRCode from 'qrcode'
 import InvoiceClientModal from '@/components/invoices/InvoiceClientModal'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import { useTheme } from '@/lib/ThemeContext'
 import { useCurrency } from '@/lib/CurrencyContext'
 import { generateInvoicePdfBase64, downloadInvoicePdf } from '@/lib/invoicePdfGenerator'
 import {
@@ -26,8 +27,30 @@ import {
   clearAllOfflineOrdersForTable,
 } from '@/lib/offlineQueue'
 
+const TOAST_STYLES = {
+  success: {
+    wrap: 'bg-green-50 dark:bg-green-900 border-2 border-green-200 dark:border-green-700',
+    icon: 'text-green-600 dark:text-green-300',
+    text: 'text-green-900 dark:text-green-100',
+    btn:  'text-green-600 dark:text-green-300 hover:text-green-800 dark:hover:text-green-100',
+  },
+  error: {
+    wrap: 'bg-red-50 dark:bg-red-900 border-2 border-red-200 dark:border-red-700',
+    icon: 'text-red-600 dark:text-red-300',
+    text: 'text-red-900 dark:text-red-100',
+    btn:  'text-red-600 dark:text-red-300 hover:text-red-800 dark:hover:text-red-100',
+  },
+  info: {
+    wrap: 'bg-blue-50 dark:bg-blue-900 border-2 border-blue-200 dark:border-blue-700',
+    icon: 'text-blue-600 dark:text-blue-300',
+    text: 'text-blue-900 dark:text-blue-100',
+    btn:  'text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-100',
+  },
+}
+
 export default function Tables() {
   const t = useTranslations('tables')
+  const { isDark } = useTheme()
   const { currencySymbol, formatCurrency } = useCurrency()
   const [tables, setTables] = useState([])
   const [restaurant, setRestaurant] = useState(null)
@@ -2769,60 +2792,45 @@ export default function Tables() {
 
       <div>
         {/* Notification Toast */}
-      {notification && (
-        <div className="fixed top-4 right-4 z-[100] transition-all duration-300 ease-out animate-in slide-in-from-right">
-          <div className={`rounded-xl shadow-lg p-4 min-w-[300px] max-w-md ${
-            notification.type === 'success'
-              ? 'bg-green-50 border-2 border-green-200'
-              : notification.type === 'error'
-              ? 'bg-red-50 border-2 border-red-200'
-              : 'bg-blue-50 border-2 border-blue-200'
-          }`}>
-            <div className="flex items-start gap-3">
-              {notification.type === 'success' && (
-                <svg className="w-6 h-6 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                </svg>
-              )}
-              {notification.type === 'error' && (
-                <svg className="w-6 h-6 text-red-600 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                </svg>
-              )}
-              {notification.type === 'info' && (
-                <svg className="w-6 h-6 text-blue-600 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
-                </svg>
-              )}
-              <div className="flex-1">
-                <p className={`text-sm font-medium ${
-                  notification.type === 'success'
-                    ? 'text-green-900'
-                    : notification.type === 'error'
-                    ? 'text-red-900'
-                    : 'text-blue-900'
-                }`}>
-                  {notification.message}
-                </p>
+      {notification && (() => {
+        const palette = {
+          success: { bg: isDark ? '#14532d' : '#f0fdf4', border: isDark ? '#166534' : '#bbf7d0', icon: isDark ? '#86efac' : '#16a34a', text: isDark ? '#dcfce7' : '#14532d' },
+          error:   { bg: isDark ? '#7f1d1d' : '#fef2f2', border: isDark ? '#991b1b' : '#fecaca', icon: isDark ? '#fca5a5' : '#dc2626', text: isDark ? '#fee2e2' : '#7f1d1d' },
+          info:    { bg: isDark ? '#1e3a5f' : '#eff6ff', border: isDark ? '#1e40af' : '#bfdbfe', icon: isDark ? '#93c5fd' : '#2563eb', text: isDark ? '#dbeafe' : '#1e3a5f' },
+        }
+        const p = palette[notification.type] || palette.info
+        return (
+          <div className="fixed top-4 right-4 z-[100] transition-all duration-300 ease-out animate-in slide-in-from-right">
+            <div className="rounded-xl shadow-lg p-4 min-w-[300px] max-w-md border-2" style={{ background: p.bg, borderColor: p.border }}>
+              <div className="flex items-start gap-3">
+                {notification.type === 'success' && (
+                  <svg className="w-6 h-6 flex-shrink-0" style={{ color: p.icon }} fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                )}
+                {notification.type === 'error' && (
+                  <svg className="w-6 h-6 flex-shrink-0" style={{ color: p.icon }} fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                  </svg>
+                )}
+                {notification.type === 'info' && (
+                  <svg className="w-6 h-6 flex-shrink-0" style={{ color: p.icon }} fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                  </svg>
+                )}
+                <div className="flex-1">
+                  <p className="text-sm font-medium" style={{ color: p.text }}>{notification.message}</p>
+                </div>
+                <button onClick={() => setNotification(null)} style={{ color: p.icon }}>
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                  </svg>
+                </button>
               </div>
-              <button
-                onClick={() => setNotification(null)}
-                className={`flex-shrink-0 ${
-                  notification.type === 'success'
-                    ? 'text-green-600 hover:text-green-800'
-                    : notification.type === 'error'
-                    ? 'text-red-600 hover:text-red-800'
-                    : 'text-blue-600 hover:text-blue-800'
-                }`}
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                </svg>
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
 
       <div className="flex flex-wrap justify-between items-start gap-3 mb-4">
         <div>
@@ -3177,15 +3185,15 @@ export default function Tables() {
                             <button
                               key={category.id}
                               onClick={() => setSelectedCategory(category)}
-                              className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-slate-50 to-slate-100 hover:from-[#6262bd]/10 hover:to-[#6262bd]/5 rounded-xl transition-all hover:shadow-md border border-slate-200 hover:border-[#6262bd]/30"
+                              className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-600 hover:from-[#6262bd]/10 hover:to-[#6262bd]/5 dark:hover:from-[#6262bd]/30 dark:hover:to-[#6262bd]/20 rounded-xl transition-all hover:shadow-md border border-slate-200 dark:border-slate-500 hover:border-[#6262bd]/30"
                             >
                               <div className="w-12 h-12 rounded-full bg-[#6262bd]/10 flex items-center justify-center mb-3">
                                 <svg className="w-6 h-6 text-[#6262bd]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                 </svg>
                               </div>
-                              <span className="font-semibold text-slate-700 text-center">{category.name}</span>
-                              <span className="text-xs text-slate-500 mt-1">{categoryItems.length} {categoryItems.length === 1 ? (t('orderModal.item') || 'item') : (t('orderModal.items') || 'items')}</span>
+                              <span className="font-semibold text-slate-700 dark:text-slate-100 text-center">{category.name}</span>
+                              <span className="text-xs text-slate-500 dark:text-slate-300 mt-1">{categoryItems.length} {categoryItems.length === 1 ? (t('orderModal.item') || 'item') : (t('orderModal.items') || 'items')}</span>
                             </button>
                           )
                         })}
@@ -3196,15 +3204,15 @@ export default function Tables() {
                           return (
                             <button
                               onClick={() => setSelectedCategory({ id: 'uncategorized', name: t('orderModal.uncategorized') || 'Other' })}
-                              className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-slate-50 to-slate-100 hover:from-[#6262bd]/10 hover:to-[#6262bd]/5 rounded-xl transition-all hover:shadow-md border border-slate-200 hover:border-[#6262bd]/30"
+                              className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-600 hover:from-[#6262bd]/10 hover:to-[#6262bd]/5 dark:hover:from-[#6262bd]/30 dark:hover:to-[#6262bd]/20 rounded-xl transition-all hover:shadow-md border border-slate-200 dark:border-slate-500 hover:border-[#6262bd]/30"
                             >
                               <div className="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center mb-3">
                                 <svg className="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                                 </svg>
                               </div>
-                              <span className="font-semibold text-slate-700 text-center">{t('orderModal.uncategorized') || 'Other'}</span>
-                              <span className="text-xs text-slate-500 mt-1">{uncategorizedItems.length} {uncategorizedItems.length === 1 ? (t('orderModal.item') || 'item') : (t('orderModal.items') || 'items')}</span>
+                              <span className="font-semibold text-slate-700 dark:text-slate-100 text-center">{t('orderModal.uncategorized') || 'Other'}</span>
+                              <span className="text-xs text-slate-500 dark:text-slate-300 mt-1">{uncategorizedItems.length} {uncategorizedItems.length === 1 ? (t('orderModal.item') || 'item') : (t('orderModal.items') || 'items')}</span>
                             </button>
                           )
                         })()}
@@ -3322,7 +3330,7 @@ export default function Tables() {
                   </div>
                 ) : (
                   <>
-                    <div className="bg-slate-50 rounded-xl p-4 mb-4 max-h-64 overflow-y-auto">
+                    <div className="bg-slate-50 dark:bg-slate-700 rounded-xl p-4 mb-4 max-h-64 overflow-y-auto">
                       {orderItems.map((item) => {
                         const newQuantity = item.isExisting ? item.quantity - item.existingQuantity : item.quantity
                         const hasNewItems = newQuantity > 0
@@ -3331,11 +3339,11 @@ export default function Tables() {
                         const instructionsLabel = menuItem?.special_instructions_label || 'Special instructions'
 
                         return (
-                          <div key={item.menu_item_id} className={`mb-3 last:mb-0 rounded-lg p-2 ${item.isExisting ? 'bg-blue-50/50 border border-blue-200' : ''}`}>
+                          <div key={item.menu_item_id} className={`mb-3 last:mb-0 rounded-lg p-2 ${item.isExisting ? 'bg-blue-50/50 dark:bg-blue-900/40 border border-blue-200 dark:border-blue-700' : ''}`}>
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1">
-                                <p className="font-medium text-slate-800 text-sm">{item.quantity}x {item.name}</p>
-                                <p className="text-xs text-slate-500">{formatCurrency(item.price_at_time || 0)} {t('orderModal.each') || 'each'}</p>
+                                <p className="font-medium text-slate-800 dark:text-slate-100 text-sm">{item.quantity}x {item.name}</p>
+                                <p className="text-xs text-slate-500 dark:text-slate-300">{formatCurrency(item.price_at_time || 0)} {t('orderModal.each') || 'each'}</p>
 
                                 {/* Show breakdown if item has both existing and new quantities */}
                                 {item.isExisting && hasNewItems && (
@@ -3381,7 +3389,7 @@ export default function Tables() {
                                         e.stopPropagation()
                                         updateItemQuantity(item.menu_item_id, item.quantity - 1)
                                       }}
-                                      className="w-6 h-6 rounded bg-slate-200 hover:bg-slate-300 flex items-center justify-center transition-colors"
+                                      className="w-6 h-6 rounded bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 text-slate-800 dark:text-slate-100 flex items-center justify-center transition-colors"
                                     >
                                       -
                                     </button>
@@ -3392,7 +3400,7 @@ export default function Tables() {
                                         e.stopPropagation()
                                         updateItemQuantity(item.menu_item_id, item.quantity + 1)
                                       }}
-                                      className="w-6 h-6 rounded bg-slate-200 hover:bg-slate-300 flex items-center justify-center transition-colors"
+                                      className="w-6 h-6 rounded bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 text-slate-800 dark:text-slate-100 flex items-center justify-center transition-colors"
                                     >
                                       +
                                     </button>
@@ -4708,7 +4716,7 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
                   👋 Waiter needed
                 </span>
               ) : hasOpenOrders ? (
-                <button onClick={onViewOrders} className="inline-flex items-center gap-1 text-xs font-semibold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full hover:bg-amber-200 transition-colors">
+                <button onClick={onViewOrders} className="inline-flex items-center gap-1 text-xs font-semibold text-amber-700 dark:text-amber-200 bg-amber-100 dark:bg-amber-700 px-2 py-0.5 rounded-full hover:bg-amber-200 dark:hover:bg-amber-600 transition-colors">
                   <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
                   Open · {formatCurrency(orderInfo.total)}
                 </button>
