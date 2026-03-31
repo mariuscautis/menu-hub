@@ -665,7 +665,24 @@
       "assignedToBills": "Assegnato ai Conti",
       "remaining": "Rimanente",
       "payCash": "Paga {currency}{amount} Contanti",
-      "payCard": "Paga {currency}{amount} Carta"
+      "payCard": "Paga {currency}{amount} Carta",
+      "terminalLookingForReaders": "Ricerca lettori di carte...",
+      "terminalSelectReader": "Seleziona lettore di carte",
+      "terminalUseReader": "Usa questo lettore",
+      "terminalOnline": "Online",
+      "terminalOffline": "Offline",
+      "terminalWaitingTitle": "In attesa del pagamento...",
+      "terminalWaitingDesc": "Segui le istruzioni sul lettore di carte.",
+      "terminalCancelPayment": "Annulla",
+      "terminalPaymentFailed": "Pagamento rifiutato",
+      "terminalTimedOut": "Tempo di pagamento scaduto",
+      "terminalTimedOutDesc": "Il lettore non ha risposto entro 2 minuti.",
+      "terminalTryAgain": "Riprova",
+      "terminalPayCash": "Paga in contanti",
+      "terminalFallbackManual": "Nessun lettore disponibile — registra il pagamento con carta manualmente",
+      "terminalRONNotSupported": "I pagamenti tramite lettore non sono disponibili per RON. Pagamento registrato manualmente.",
+      "terminalReaderBusy": "Lettore occupato",
+      "terminalNoReadersOnline": "Nessun lettore di carte online"
     },
     "orderDetailsModal": {
       "title": "Tavolo {number} - Dettagli Ordine",
@@ -2682,7 +2699,15 @@
     "step1": "Contrassegni un cliente come richiedente deposito nella dashboard prenotazioni (lista nera → deposito richiesto)",
     "step2": "Quando quel cliente prenota, gli viene chiesto di pagare il deposito prima che la prenotazione sia accettata",
     "step3": "Il cliente viene informato che il deposito verrà detratto dal suo conto e non è rimborsabile in caso di no-show",
-    "step4": "I fondi arrivano sul tuo account Stripe collegato e vengono versati sulla tua banca secondo il calendario standard di Stripe"
+    "step4": "I fondi arrivano sul tuo account Stripe collegato e vengono versati sulla tua banca secondo il calendario standard di Stripe",
+    "cardReadersTitle": "Lettori di carte",
+    "cardReadersRefresh": "Aggiorna",
+    "cardReadersRefreshing": "Aggiornamento...",
+    "cardReadersNone": "Nessun lettore registrato. Aggiungi lettori nella Dashboard Stripe in Terminal → Lettori.",
+    "cardReadersDashboardLinkText": "Dashboard Stripe",
+    "cardReadersManageNote": "Gestisci i lettori nella",
+    "cardReadersOnline": "Online",
+    "cardReadersOffline": "Offline"
   },
   "nav": {
     "overview": "Panoramica",

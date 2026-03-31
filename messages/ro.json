@@ -665,7 +665,24 @@
       "assignedToBills": "Atribuit la Note",
       "remaining": "Rămas",
       "payCash": "Plătește {currency}{amount} Cash",
-      "payCard": "Plătește {currency}{amount} Card"
+      "payCard": "Plătește {currency}{amount} Card",
+      "terminalLookingForReaders": "Caut cititoare de carduri...",
+      "terminalSelectReader": "Selectează cititor de card",
+      "terminalUseReader": "Folosește acest cititor",
+      "terminalOnline": "Online",
+      "terminalOffline": "Offline",
+      "terminalWaitingTitle": "Se așteaptă plata...",
+      "terminalWaitingDesc": "Urmează instrucțiunile de pe cititorul de card.",
+      "terminalCancelPayment": "Anulează",
+      "terminalPaymentFailed": "Plată refuzată",
+      "terminalTimedOut": "Timp de plată expirat",
+      "terminalTimedOutDesc": "Cititorul nu a răspuns în 2 minute.",
+      "terminalTryAgain": "Încearcă din nou",
+      "terminalPayCash": "Plătește cash",
+      "terminalFallbackManual": "Niciun cititor disponibil — înregistrează plata cu cardul manual",
+      "terminalRONNotSupported": "Plățile prin cititor nu sunt disponibile pentru RON. Plată înregistrată manual.",
+      "terminalReaderBusy": "Cititor ocupat",
+      "terminalNoReadersOnline": "Niciun cititor de card online"
     },
     "orderDetailsModal": {
       "title": "Masa {number} - Detalii Comandă",
@@ -2682,7 +2699,15 @@
     "step1": "Marchezi un client ca necesitând depozit în tabloul de bord rezervări (listă neagră → depozit necesar)",
     "step2": "Când acel client face o rezervare, i se cere să plătească depozitul înainte ca rezervarea să fie acceptată",
     "step3": "Clientul este informat că depozitul va fi dedus din nota de plată și nu este rambursabil dacă nu se prezintă",
-    "step4": "Fondurile ajung în contul tău Stripe conectat și sunt virate în banca ta conform programului standard Stripe"
+    "step4": "Fondurile ajung în contul tău Stripe conectat și sunt virate în banca ta conform programului standard Stripe",
+    "cardReadersTitle": "Cititoare de carduri",
+    "cardReadersRefresh": "Reîmprospătează",
+    "cardReadersRefreshing": "Se reîmprospătează...",
+    "cardReadersNone": "Niciun cititor înregistrat. Adaugă cititoare în Tabloul de bord Stripe la Terminal → Cititoare.",
+    "cardReadersDashboardLinkText": "Tabloul de bord Stripe",
+    "cardReadersManageNote": "Gestionează cititoarele în",
+    "cardReadersOnline": "Online",
+    "cardReadersOffline": "Offline"
   },
   "nav": {
     "overview": "Prezentare generală",

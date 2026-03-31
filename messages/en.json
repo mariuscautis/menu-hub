@@ -702,7 +702,24 @@
       "assignedToBills": "Assigned to Bills",
       "remaining": "Remaining",
       "payCash": "Pay {currency}{amount} Cash",
-      "payCard": "Pay {currency}{amount} Card"
+      "payCard": "Pay {currency}{amount} Card",
+      "terminalLookingForReaders": "Looking for card readers...",
+      "terminalSelectReader": "Select Card Reader",
+      "terminalUseReader": "Use this reader",
+      "terminalOnline": "Online",
+      "terminalOffline": "Offline",
+      "terminalWaitingTitle": "Waiting for payment...",
+      "terminalWaitingDesc": "Follow the prompts on the card reader.",
+      "terminalCancelPayment": "Cancel",
+      "terminalPaymentFailed": "Payment Declined",
+      "terminalTimedOut": "Payment Timed Out",
+      "terminalTimedOutDesc": "The reader did not respond within 2 minutes.",
+      "terminalTryAgain": "Try again",
+      "terminalPayCash": "Take cash instead",
+      "terminalFallbackManual": "No reader available — register card payment manually",
+      "terminalRONNotSupported": "Card reader payments are not supported for RON. Payment registered manually.",
+      "terminalReaderBusy": "Reader busy",
+      "terminalNoReadersOnline": "No card readers online"
     },
     "orderDetailsModal": {
       "title": "Table {number} - Order Details",
@@ -2703,7 +2720,15 @@
     "step1": "You mark a customer as requiring a deposit in the reservations dashboard (blacklist → fee required)",
     "step2": "When that customer books, they're asked to pay the deposit before their booking is accepted",
     "step3": "The customer is informed the deposit will be deducted from their bill and is non-refundable if they don't show up",
-    "step4": "Funds land in your connected Stripe account and are paid out to your bank on Stripe's standard schedule"
+    "step4": "Funds land in your connected Stripe account and are paid out to your bank on Stripe's standard schedule",
+    "cardReadersTitle": "Card Readers",
+    "cardReadersRefresh": "Refresh",
+    "cardReadersRefreshing": "Refreshing...",
+    "cardReadersNone": "No readers registered. Add readers in the Stripe Dashboard under Terminal → Readers.",
+    "cardReadersDashboardLinkText": "Stripe Dashboard",
+    "cardReadersManageNote": "Manage readers in the",
+    "cardReadersOnline": "Online",
+    "cardReadersOffline": "Offline"
   },
   "nav": {
     "overview": "Overview",

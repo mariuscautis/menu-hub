@@ -665,7 +665,24 @@
       "assignedToBills": "Asignado a Cuentas",
       "remaining": "Restante",
       "payCash": "Pagar {currency}{amount} Efectivo",
-      "payCard": "Pagar {currency}{amount} Tarjeta"
+      "payCard": "Pagar {currency}{amount} Tarjeta",
+      "terminalLookingForReaders": "Buscando lectores de tarjetas...",
+      "terminalSelectReader": "Seleccionar lector de tarjetas",
+      "terminalUseReader": "Usar este lector",
+      "terminalOnline": "En línea",
+      "terminalOffline": "Fuera de línea",
+      "terminalWaitingTitle": "Esperando el pago...",
+      "terminalWaitingDesc": "Sigue las instrucciones en el lector de tarjetas.",
+      "terminalCancelPayment": "Cancelar",
+      "terminalPaymentFailed": "Pago rechazado",
+      "terminalTimedOut": "Tiempo de pago agotado",
+      "terminalTimedOutDesc": "El lector no respondió en 2 minutos.",
+      "terminalTryAgain": "Intentar de nuevo",
+      "terminalPayCash": "Pagar en efectivo",
+      "terminalFallbackManual": "Sin lector disponible — registrar pago con tarjeta manualmente",
+      "terminalRONNotSupported": "Los pagos con lector no están disponibles para RON. Pago registrado manualmente.",
+      "terminalReaderBusy": "Lector ocupado",
+      "terminalNoReadersOnline": "No hay lectores de tarjetas en línea"
     },
     "orderDetailsModal": {
       "title": "Mesa {number} - Detalles del Pedido",
@@ -2682,7 +2699,15 @@
     "step1": "Marcas a un cliente como que requiere depósito en el panel de reservas (lista negra → depósito requerido)",
     "step2": "Cuando ese cliente reserva, se le pide que pague el depósito antes de que se acepte su reserva",
     "step3": "Se informa al cliente de que el depósito se deducirá de su cuenta y no es reembolsable si no se presenta",
-    "step4": "Los fondos llegan a tu cuenta de Stripe conectada y se transfieren a tu banco según el calendario estándar de Stripe"
+    "step4": "Los fondos llegan a tu cuenta de Stripe conectada y se transfieren a tu banco según el calendario estándar de Stripe",
+    "cardReadersTitle": "Lectores de tarjetas",
+    "cardReadersRefresh": "Actualizar",
+    "cardReadersRefreshing": "Actualizando...",
+    "cardReadersNone": "No hay lectores registrados. Añade lectores en el Panel de Stripe en Terminal → Lectores.",
+    "cardReadersDashboardLinkText": "Panel de Stripe",
+    "cardReadersManageNote": "Gestiona los lectores en el",
+    "cardReadersOnline": "En línea",
+    "cardReadersOffline": "Fuera de línea"
   },
   "nav": {
     "overview": "Resumen",

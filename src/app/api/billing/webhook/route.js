@@ -382,6 +382,30 @@ export async function POST(request) {
         break
       }
 
+      case 'payment_intent.succeeded': {
+        const pi = event.data.object
+        // Only handle terminal payments (identified by table_id in metadata)
+        if (!pi.metadata?.table_id) break
+        await supabaseAdmin
+          .from('terminal_payments')
+          .update({ status: 'succeeded', completed_at: new Date().toISOString() })
+          .eq('payment_intent_id', pi.id)
+        break
+      }
+
+      case 'payment_intent.payment_failed': {
+        const pi = event.data.object
+        if (!pi.metadata?.table_id) break
+        const declineCode = pi.last_payment_error?.decline_code
+          || pi.last_payment_error?.code
+          || 'card_declined'
+        await supabaseAdmin
+          .from('terminal_payments')
+          .update({ status: 'failed', decline_code: declineCode })
+          .eq('payment_intent_id', pi.id)
+        break
+      }
+
       default:
         break
     }

@@ -17,6 +17,8 @@ export default function PaymentsSettingsPage() {
   const [loading, setLoading] = useState(true)
   const [connecting, setConnecting] = useState(false)
   const [notification, setNotification] = useState(null)
+  const [readers, setReaders] = useState(null) // null = not loaded, [] = none, [...] = list
+  const [readersLoading, setReadersLoading] = useState(false)
 
   const showNotification = (type, message) => {
     setNotification({ type, message })
@@ -76,6 +78,24 @@ export default function PaymentsSettingsPage() {
     } catch {
       showNotification('error', t('notifError'))
       setConnecting(false)
+    }
+  }
+
+  const fetchReaders = async () => {
+    if (!restaurant?.id) return
+    setReadersLoading(true)
+    try {
+      const res = await fetch('/api/terminal/list-readers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ restaurantId: restaurant.id })
+      })
+      const data = await res.json()
+      setReaders(res.ok ? (data.readers || []) : [])
+    } catch {
+      setReaders([])
+    } finally {
+      setReadersLoading(false)
     }
   }
 
@@ -183,6 +203,62 @@ export default function PaymentsSettingsPage() {
                 </li>
               ))}
             </ol>
+          </div>
+
+          {/* Card Readers */}
+          <div className="bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-[#6262bd]/10 rounded-xl flex items-center justify-center">
+                  <svg className="w-6 h-6 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="font-semibold text-slate-800 dark:text-slate-200">{t('cardReadersTitle')}</h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{t('cardReadersManageNote')}</p>
+                </div>
+              </div>
+              <button
+                onClick={fetchReaders}
+                disabled={readersLoading}
+                className="text-sm text-[#6262bd] hover:underline disabled:opacity-50 font-medium"
+              >
+                {readersLoading ? t('cardReadersRefreshing') : t('cardReadersRefresh')}
+              </button>
+            </div>
+
+            {readers === null ? (
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                <button onClick={fetchReaders} className="text-[#6262bd] hover:underline">{t('cardReadersRefresh')}</button>
+                {' '}{t('cardReadersManageNote')}
+              </p>
+            ) : readersLoading ? (
+              <div className="flex items-center gap-2 text-sm text-slate-400 py-4 justify-center">
+                <div className="w-4 h-4 border-2 border-[#6262bd] border-t-transparent rounded-full animate-spin" />
+                {t('cardReadersRefreshing')}
+              </div>
+            ) : readers.length === 0 ? (
+              <p className="text-sm text-slate-500 dark:text-slate-400 py-4 text-center">{t('cardReadersNone')}</p>
+            ) : (
+              <div className="space-y-2">
+                {readers.map(reader => (
+                  <div key={reader.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
+                    <div>
+                      <p className="font-medium text-slate-800 dark:text-slate-100 text-sm">{reader.label || reader.id}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{reader.device_type}</p>
+                    </div>
+                    <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                      reader.status === 'online'
+                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                        : 'bg-slate-100 text-slate-500 dark:bg-slate-600 dark:text-slate-400'
+                    }`}>
+                      {reader.status === 'online' ? t('cardReadersOnline') : t('cardReadersOffline')}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}

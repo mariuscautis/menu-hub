@@ -665,7 +665,24 @@
       "assignedToBills": "Assigné aux Additions",
       "remaining": "Restant",
       "payCash": "Payer {currency}{amount} Espèces",
-      "payCard": "Payer {currency}{amount} Carte"
+      "payCard": "Payer {currency}{amount} Carte",
+      "terminalLookingForReaders": "Recherche de lecteurs de cartes...",
+      "terminalSelectReader": "Sélectionner un lecteur de carte",
+      "terminalUseReader": "Utiliser ce lecteur",
+      "terminalOnline": "En ligne",
+      "terminalOffline": "Hors ligne",
+      "terminalWaitingTitle": "En attente du paiement...",
+      "terminalWaitingDesc": "Suivez les instructions sur le lecteur de carte.",
+      "terminalCancelPayment": "Annuler",
+      "terminalPaymentFailed": "Paiement refusé",
+      "terminalTimedOut": "Délai de paiement dépassé",
+      "terminalTimedOutDesc": "Le lecteur n'a pas répondu dans les 2 minutes.",
+      "terminalTryAgain": "Réessayer",
+      "terminalPayCash": "Payer en espèces",
+      "terminalFallbackManual": "Aucun lecteur disponible — enregistrer le paiement par carte manuellement",
+      "terminalRONNotSupported": "Les paiements par lecteur ne sont pas disponibles pour le RON. Paiement enregistré manuellement.",
+      "terminalReaderBusy": "Lecteur occupé",
+      "terminalNoReadersOnline": "Aucun lecteur de carte en ligne"
     },
     "orderDetailsModal": {
       "title": "Table {number} - Détails de la Commande",
@@ -2682,7 +2699,15 @@
     "step1": "Vous marquez un client comme nécessitant un dépôt dans le tableau de bord des réservations (liste noire → dépôt requis)",
     "step2": "Lorsque ce client réserve, il est invité à payer le dépôt avant que sa réservation soit acceptée",
     "step3": "Le client est informé que le dépôt sera déduit de sa facture et n'est pas remboursable en cas de no-show",
-    "step4": "Les fonds arrivent sur votre compte Stripe connecté et sont virés sur votre banque selon le calendrier standard de Stripe"
+    "step4": "Les fonds arrivent sur votre compte Stripe connecté et sont virés sur votre banque selon le calendrier standard de Stripe",
+    "cardReadersTitle": "Lecteurs de carte",
+    "cardReadersRefresh": "Actualiser",
+    "cardReadersRefreshing": "Actualisation...",
+    "cardReadersNone": "Aucun lecteur enregistré. Ajoutez des lecteurs dans le Tableau de bord Stripe sous Terminal → Lecteurs.",
+    "cardReadersDashboardLinkText": "Tableau de bord Stripe",
+    "cardReadersManageNote": "Gérez les lecteurs dans le",
+    "cardReadersOnline": "En ligne",
+    "cardReadersOffline": "Hors ligne"
   },
   "nav": {
     "overview": "Vue d'ensemble",

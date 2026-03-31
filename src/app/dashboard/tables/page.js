@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase, clearOrdersCacheForTable, clearTableOrdersLocalCache, clearAllOrdersCache, wasTablePaidOffline, clearTablePaidOfflineStatus } from '@/lib/supabase'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
@@ -144,6 +144,16 @@ export default function Tables() {
   const [availableDiscounts, setAvailableDiscounts] = useState([])
   const [selectedDiscount, setSelectedDiscount] = useState(null)
   const [discountAmount, setDiscountAmount] = useState(0)
+
+  // Terminal payment state
+  const [terminalReaders, setTerminalReaders] = useState([])
+  const [selectedReader, setSelectedReader] = useState(null)
+  const [terminalPaymentIntentId, setTerminalPaymentIntentId] = useState(null)
+  const [terminalStatus, setTerminalStatus] = useState(null)
+  // null | 'loading_readers' | 'selecting_reader' | 'waiting' | 'succeeded' | 'failed' | 'timed_out'
+  const [terminalDeclineReason, setTerminalDeclineReason] = useState(null)
+  const terminalTimerRef = useRef(null)
+  const terminalPollRef = useRef(null)
 
   // Order modal UX state - category navigation and search
   const [selectedCategory, setSelectedCategory] = useState(null)
@@ -1711,6 +1721,165 @@ export default function Tables() {
       showNotification('error', t('notifications.itemsDeliveredFailed'))
     }
   }
+
+  // ── Terminal helpers ────────────────────────────────────────────────────────
+
+  const resetTerminalState = () => {
+    if (terminalTimerRef.current) clearTimeout(terminalTimerRef.current)
+    if (terminalPollRef.current) clearInterval(terminalPollRef.current)
+    terminalTimerRef.current = null
+    terminalPollRef.current = null
+    setTerminalStatus(null)
+    setTerminalReaders([])
+    setSelectedReader(null)
+    setTerminalPaymentIntentId(null)
+    setTerminalDeclineReason(null)
+  }
+
+  const fetchTerminalReaders = async () => {
+    setTerminalStatus('loading_readers')
+    try {
+      const res = await fetch('/api/terminal/list-readers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ restaurantId: restaurant.id })
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to fetch readers')
+      const online = (data.readers || []).filter(r => r.status === 'online')
+      if (online.length === 0) {
+        setTerminalStatus('no_readers')
+        return
+      }
+      setTerminalReaders(data.readers || [])
+      setTerminalStatus('selecting_reader')
+    } catch (err) {
+      console.error('fetchTerminalReaders error:', err)
+      setTerminalStatus(null)
+      showNotification('error', t('paymentModal.terminalNoReadersOnline'))
+    }
+  }
+
+  const handleTerminalPayment = async (reader) => {
+    setSelectedReader(reader)
+    setTerminalStatus('waiting')
+
+    const currency = (restaurant?.invoice_settings?.currency || 'EUR').toUpperCase()
+    const totalAmount = calculateFinalTotal()
+    const orderIds = unpaidOrders.map(o => o.id)
+
+    try {
+      // 1. Create PaymentIntent
+      const piRes = await fetch('/api/terminal/create-payment-intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          restaurantId: restaurant.id,
+          amount: totalAmount,
+          currency,
+          orderIds,
+          tableId: selectedTable.id
+        })
+      })
+      const piData = await piRes.json()
+      if (!piRes.ok) throw new Error(piData.error || 'Failed to create payment intent')
+      const paymentIntentId = piData.paymentIntentId
+      setTerminalPaymentIntentId(paymentIntentId)
+
+      // 2. Push to reader
+      const prRes = await fetch('/api/terminal/process-reader', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          restaurantId: restaurant.id,
+          readerId: reader.id,
+          paymentIntentId
+        })
+      })
+      const prData = await prRes.json()
+      if (!prRes.ok) {
+        if (prData.code === 'terminal_reader_busy') {
+          showNotification('error', t('paymentModal.terminalReaderBusy'))
+        } else {
+          showNotification('error', prData.error || t('paymentModal.terminalPaymentFailed'))
+        }
+        resetTerminalState()
+        return
+      }
+
+      // 3. Start 2-minute timeout
+      terminalTimerRef.current = setTimeout(() => {
+        if (terminalPollRef.current) clearInterval(terminalPollRef.current)
+        terminalPollRef.current = null
+        setTerminalStatus('timed_out')
+        // Best-effort cancel
+        fetch('/api/terminal/cancel-action', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ restaurantId: restaurant.id, readerId: reader.id, paymentIntentId })
+        }).catch(() => {})
+      }, 120_000)
+
+      // 4. Poll terminal_payments every 3s
+      terminalPollRef.current = setInterval(async () => {
+        try {
+          const { data: rows } = await supabase
+            .from('terminal_payments')
+            .select('status, decline_code')
+            .eq('payment_intent_id', paymentIntentId)
+            .single()
+
+          if (!rows) return
+
+          if (rows.status === 'succeeded') {
+            clearTimeout(terminalTimerRef.current)
+            clearInterval(terminalPollRef.current)
+            terminalTimerRef.current = null
+            terminalPollRef.current = null
+            // Process in Supabase (mark orders paid)
+            await supabase.rpc('process_table_payment', {
+              p_table_id: selectedTable.id,
+              p_payment_method: 'card',
+              p_order_ids: orderIds
+            })
+            await fetchTableOrderInfo(restaurant.id)
+            resetTerminalState()
+            setPaymentModal(false)
+            showNotification('success', t('paymentModal.paymentSuccess'))
+          } else if (rows.status === 'failed') {
+            clearTimeout(terminalTimerRef.current)
+            clearInterval(terminalPollRef.current)
+            terminalTimerRef.current = null
+            terminalPollRef.current = null
+            setTerminalDeclineReason(rows.decline_code || 'card_declined')
+            setTerminalStatus('failed')
+          }
+        } catch (err) {
+          console.error('Terminal poll error:', err)
+        }
+      }, 3000)
+
+    } catch (err) {
+      console.error('handleTerminalPayment error:', err)
+      showNotification('error', t('paymentModal.terminalPaymentFailed'))
+      resetTerminalState()
+    }
+  }
+
+  const handleTerminalCancel = async () => {
+    const intentId = terminalPaymentIntentId
+    const reader = selectedReader
+    resetTerminalState()
+    if (intentId && reader) {
+      fetch('/api/terminal/cancel-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ restaurantId: restaurant.id, readerId: reader.id, paymentIntentId: intentId })
+      }).catch(() => {})
+    }
+  }
+
+  // ────────────────────────────────────────────────────────────────────────────
 
   const processPayment = async (paymentMethod) => {
     if (unpaidOrders.length === 0) return
@@ -3586,26 +3755,165 @@ export default function Tables() {
                 </div>
 
                 {/* Payment Methods */}
-                <div className="space-y-3">
-                  <button
-                    onClick={() => processPayment('cash')}
-                    className="w-full bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 flex items-center justify-center gap-2"
-                  >
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
-                    </svg>
-                    {t('paymentModal.payWithCash')}
-                  </button>
-                  <button
-                    onClick={() => processPayment('card')}
-                    className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] flex items-center justify-center gap-2"
-                  >
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
-                    </svg>
-                    {t('paymentModal.payWithCard')}
-                  </button>
-                </div>
+                {!terminalStatus && (
+                  <div className="space-y-3">
+                    <button
+                      onClick={() => processPayment('cash')}
+                      className="w-full bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
+                      </svg>
+                      {t('paymentModal.payWithCash')}
+                    </button>
+                    {(() => {
+                      const currency = (restaurant?.invoice_settings?.currency || 'EUR').toUpperCase()
+                      if (currency === 'RON') {
+                        return (
+                          <button
+                            onClick={() => processPayment('card')}
+                            className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] flex items-center justify-center gap-2"
+                          >
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+                            </svg>
+                            {t('paymentModal.payWithCard')}
+                          </button>
+                        )
+                      }
+                      return (
+                        <button
+                          onClick={fetchTerminalReaders}
+                          className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] flex items-center justify-center gap-2"
+                        >
+                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+                          </svg>
+                          {t('paymentModal.payWithCard')}
+                        </button>
+                      )
+                    })()}
+                  </div>
+                )}
+
+                {/* Terminal UI */}
+                {terminalStatus === 'loading_readers' && (
+                  <div className="flex flex-col items-center gap-3 py-6">
+                    <div className="w-8 h-8 border-4 border-[#6262bd] border-t-transparent rounded-full animate-spin" />
+                    <p className="text-slate-600 dark:text-slate-300 text-sm">{t('paymentModal.terminalLookingForReaders')}</p>
+                  </div>
+                )}
+
+                {terminalStatus === 'no_readers' && (
+                  <div className="flex flex-col gap-3">
+                    <p className="text-center text-slate-600 dark:text-slate-300 text-sm py-4">{t('paymentModal.terminalNoReadersOnline')}</p>
+                    <button
+                      onClick={() => { setTerminalStatus(null); processPayment('card') }}
+                      className="w-full border-2 border-[#6262bd] text-[#6262bd] py-2 rounded-xl font-semibold hover:bg-[#6262bd]/10"
+                    >
+                      {t('paymentModal.terminalFallbackManual')}
+                    </button>
+                    <button onClick={resetTerminalState} className="w-full text-slate-500 text-sm py-2 hover:text-slate-700">
+                      {t('paymentModal.terminalPayCash')}
+                    </button>
+                  </div>
+                )}
+
+                {terminalStatus === 'selecting_reader' && (
+                  <div className="flex flex-col gap-3">
+                    <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('paymentModal.terminalSelectReader')}</p>
+                    {terminalReaders.map(reader => (
+                      <button
+                        key={reader.id}
+                        onClick={() => handleTerminalPayment(reader)}
+                        className="w-full flex items-center justify-between border-2 border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 hover:border-[#6262bd] hover:bg-[#6262bd]/5"
+                      >
+                        <span className="font-medium text-slate-800 dark:text-slate-100">{reader.label || reader.id}</span>
+                        <span className={`text-xs font-semibold px-2 py-1 rounded-full ${reader.status === 'online' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                          {reader.status === 'online' ? t('paymentModal.terminalOnline') : t('paymentModal.terminalOffline')}
+                        </span>
+                      </button>
+                    ))}
+                    <button onClick={resetTerminalState} className="w-full text-slate-500 text-sm py-2 hover:text-slate-700">
+                      ← {t('paymentModal.payWithCash')}
+                    </button>
+                  </div>
+                )}
+
+                {terminalStatus === 'waiting' && (
+                  <div className="flex flex-col items-center gap-4 py-6">
+                    <div className="w-10 h-10 border-4 border-[#6262bd] border-t-transparent rounded-full animate-spin" />
+                    <div className="text-center">
+                      <p className="font-semibold text-slate-800 dark:text-slate-100">{t('paymentModal.terminalWaitingTitle')}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{selectedReader?.label || selectedReader?.id}</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{t('paymentModal.terminalWaitingDesc')}</p>
+                    </div>
+                    <button
+                      onClick={handleTerminalCancel}
+                      className="text-red-500 text-sm hover:text-red-700 font-medium"
+                    >
+                      {t('paymentModal.terminalCancelPayment')}
+                    </button>
+                  </div>
+                )}
+
+                {terminalStatus === 'failed' && (
+                  <div className="flex flex-col items-center gap-4 py-4">
+                    <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                      <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </div>
+                    <div className="text-center">
+                      <p className="font-semibold text-slate-800 dark:text-slate-100">{t('paymentModal.terminalPaymentFailed')}</p>
+                      {terminalDeclineReason && (
+                        <p className="text-sm text-red-500 mt-1">{terminalDeclineReason.replace(/_/g, ' ')}</p>
+                      )}
+                    </div>
+                    <div className="flex gap-3 w-full">
+                      <button
+                        onClick={() => { resetTerminalState(); fetchTerminalReaders() }}
+                        className="flex-1 bg-[#6262bd] text-white py-2 rounded-xl font-semibold hover:bg-[#5252a3] text-sm"
+                      >
+                        {t('paymentModal.terminalTryAgain')}
+                      </button>
+                      <button
+                        onClick={() => { resetTerminalState(); processPayment('cash') }}
+                        className="flex-1 border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 py-2 rounded-xl font-semibold text-sm"
+                      >
+                        {t('paymentModal.terminalPayCash')}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {terminalStatus === 'timed_out' && (
+                  <div className="flex flex-col items-center gap-4 py-4">
+                    <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
+                      <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="text-center">
+                      <p className="font-semibold text-slate-800 dark:text-slate-100">{t('paymentModal.terminalTimedOut')}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{t('paymentModal.terminalTimedOutDesc')}</p>
+                    </div>
+                    <div className="flex gap-3 w-full">
+                      <button
+                        onClick={() => { resetTerminalState(); fetchTerminalReaders() }}
+                        className="flex-1 bg-[#6262bd] text-white py-2 rounded-xl font-semibold hover:bg-[#5252a3] text-sm"
+                      >
+                        {t('paymentModal.terminalTryAgain')}
+                      </button>
+                      <button
+                        onClick={() => { resetTerminalState(); processPayment('cash') }}
+                        className="flex-1 border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 py-2 rounded-xl font-semibold text-sm"
+                      >
+                        {t('paymentModal.terminalPayCash')}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </>
             )}
           </div>
