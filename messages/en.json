@@ -705,7 +705,15 @@
       "postPaymentTitle": "Payment Successful!",
       "postPaymentSubtitle": "Would you like to generate an invoice for this order?",
       "generateInvoice": "Generate Invoice",
-      "close": "Close"
+      "close": "Close",
+      "externalTerminalTitle": "External Terminal",
+      "externalTerminalDesc": "Process the payment on your own POS terminal, then confirm below.",
+      "externalTerminalConfirm": "Payment received — confirm",
+      "addCustomReference": "Add custom reference (optional)",
+      "customReferencePlaceholder": "Custom payment reference",
+      "paymentReferenceLabel": "Ref:",
+      "choosePaymentMethod": "How would you like to pay?",
+      "orDivider": "or"
     },
     "splitBillModal": {
       "title": "Split Bill - Table {tableNumber}",

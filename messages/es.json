@@ -663,7 +663,15 @@
       "postPaymentTitle": "¡Pago realizado con éxito!",
       "postPaymentSubtitle": "¿Deseas generar una factura para este pedido?",
       "generateInvoice": "Generar factura",
-      "close": "Cerrar"
+      "close": "Cerrar",
+      "externalTerminalTitle": "Terminal externo",
+      "externalTerminalDesc": "Procesa el pago en tu propio terminal POS y confirma a continuación.",
+      "externalTerminalConfirm": "Pago recibido — confirmar",
+      "addCustomReference": "Agregar referencia personalizada (opcional)",
+      "customReferencePlaceholder": "Referencia de pago personalizada",
+      "paymentReferenceLabel": "Ref:",
+      "choosePaymentMethod": "¿Cómo deseas pagar?",
+      "orDivider": "o"
     },
     "transferTable": "Transferir Mesa",
     "transferModal": {

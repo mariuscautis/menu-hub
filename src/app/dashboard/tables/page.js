@@ -154,6 +154,9 @@ export default function Tables() {
   const [terminalDeclineReason, setTerminalDeclineReason] = useState(null)
   const terminalTimerRef = useRef(null)
   const terminalPollRef = useRef(null)
+  const [showExternalTerminal, setShowExternalTerminal] = useState(false)
+  const [externalTerminalRef, setExternalTerminalRef] = useState('')
+  const [showExternalTerminalRef, setShowExternalTerminalRef] = useState(false)
 
   // Order modal UX state - category navigation and search
   const [selectedCategory, setSelectedCategory] = useState(null)
@@ -2013,6 +2016,14 @@ export default function Tables() {
         throw new Error(data.error || 'Failed to process payment')
       }
 
+      // Save external terminal reference if provided
+      if (externalTerminalRef.trim() && orderIds.length > 0) {
+        await supabase
+          .from('orders')
+          .update({ payment_reference: externalTerminalRef.trim() })
+          .eq('id', orderIds[0])
+      }
+
       // Apply discount AFTER payment processing to ensure it's not overwritten
       // This updates the discount_total on the first order
       if (selectedDiscount && discountAmount > 0 && orderIds.length > 0) {
@@ -3647,12 +3658,15 @@ export default function Tables() {
 
       {/* Payment Modal */}
       {showPaymentModal && selectedTable && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-8 w-full max-w-md">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-slate-800">
-                {t('paymentModal.title').replace('{tableNumber}', selectedTable.table_number)}
-              </h2>
+        <div className="fixed inset-0 bg-black/60 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-2xl w-full sm:max-w-sm max-h-[92vh] overflow-y-auto">
+
+            {/* Header */}
+            <div className="sticky top-0 bg-white dark:bg-slate-800 px-6 pt-5 pb-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between z-10">
+              <div>
+                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">{t('paymentModal.title').replace('{tableNumber}', selectedTable.table_number)}</p>
+                <p className="text-2xl font-bold text-slate-900 dark:text-white mt-0.5">{formatCurrency(calculateFinalTotal())}</p>
+              </div>
               <button
                 onClick={() => {
                   setShowPaymentModal(false)
@@ -3660,283 +3674,347 @@ export default function Tables() {
                   setUnpaidOrders([])
                   setSelectedDiscount(null)
                   setDiscountAmount(0)
+                  setShowExternalTerminal(false)
+                  setExternalTerminalRef('')
+                  setShowExternalTerminalRef(false)
+                  resetTerminalState()
                 }}
-                className="text-slate-400 hover:text-slate-600"
+                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
               >
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
                 </svg>
               </button>
             </div>
 
-            {unpaidOrders.length === 0 ? (
-              <div className="bg-slate-50 rounded-xl p-8 text-center mb-6">
-                <p className="text-slate-500">{t('paymentModal.noUnpaidOrders')}</p>
-              </div>
-            ) : (
-              <>
-                {/* Order Summary */}
-                <div className="mb-6">
-                  <h3 className="font-semibold text-slate-700 mb-3">{t('paymentModal.ordersSummary')}</h3>
-                  <div className="bg-slate-50 rounded-xl p-4 space-y-3 max-h-64 overflow-y-auto">
-                    {unpaidOrders.map((order, index) => {
-                      // Calculate order total from items for accuracy
-                      const orderTotal = (order.order_items || []).reduce((sum, item) => {
-                        return sum + ((item.price_at_time || 0) * (item.quantity || 0))
-                      }, 0) || order.total || 0
-                      return (
-                      <div key={order.id} className="border-b border-slate-200 pb-3 last:border-0 last:pb-0">
-                        <div className="flex justify-between items-start mb-2">
-                          <span className="text-sm font-medium text-slate-600">{t('paymentModal.orderNumber').replace('{number}', index + 1)}</span>
-                          <span className="text-sm font-semibold text-[#6262bd]">{formatCurrency(orderTotal)}</span>
-                        </div>
-                        <div className="text-xs text-slate-500 space-y-1">
-                          {order.order_items?.map((item, idx) => (
-                            <div key={idx} className="flex justify-between items-center">
-                              <span>{item.quantity}x {item.name}</span>
-                              <span className="text-slate-600 font-medium">{formatCurrency((item.price_at_time || 0) * (item.quantity || 1))}</span>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="text-xs text-slate-400 mt-1">
-                          {t('paymentModal.status')}: <span className="capitalize">{order.status}</span>
-                        </div>
-                      </div>
-                      )
-                    })}
-                  </div>
+            <div className="px-6 pb-8 pt-4">
+              {unpaidOrders.length === 0 ? (
+                <div className="py-12 text-center">
+                  <p className="text-slate-400 text-sm">{t('paymentModal.noUnpaidOrders')}</p>
                 </div>
-
-                {/* Discount Selector - Show to all staff if discounts are available */}
-                {availableDiscounts.length > 0 && (
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      {t('paymentModal.applyDiscount') || 'Apply Discount'}
-                    </label>
-                    {selectedDiscount?.is_promotion && (
-                      <div className="mb-2 flex items-center gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-lg text-xs text-orange-700 font-medium">
-                        <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-                        </svg>
-                        Promotion auto-applied
-                      </div>
-                    )}
-                    <select
-                      value={selectedDiscount?.id || 'none'}
-                      onChange={(e) => handleDiscountChange(e.target.value)}
-                      className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 bg-white"
-                    >
-                      <option value="none">{t('paymentModal.noDiscount') || 'No discount'}</option>
-                      {availableDiscounts.map((discount) => (
-                        <option key={discount.id} value={discount.id}>
-                          {discount.name} ({discount.type === 'percentage' ? `${discount.value}%` : formatCurrency(discount.value)}){discount.is_promotion ? ' 🏷️' : ''}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
-                {/* Total with Discount Breakdown */}
-                <div className="bg-[#6262bd]/10 rounded-xl p-4 mb-6">
-                  {/* Subtotal */}
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm text-slate-600">{t('paymentModal.subtotal') || 'Subtotal'}</span>
-                    <span className="text-sm font-medium text-slate-700">{formatCurrency(calculateTableTotal())}</span>
+              ) : (
+                <>
+                  {/* Order Summary */}
+                  <div className="mb-5">
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">{t('paymentModal.ordersSummary')}</p>
+                    <div className="space-y-1 max-h-48 overflow-y-auto">
+                      {unpaidOrders.map((order, index) => {
+                        const orderTotal = (order.order_items || []).reduce((sum, item) => sum + ((item.price_at_time || 0) * (item.quantity || 0)), 0) || order.total || 0
+                        return (
+                          <div key={order.id} className="rounded-xl bg-slate-50 dark:bg-slate-700/50 px-3 py-2.5">
+                            <div className="flex justify-between items-center mb-1.5">
+                              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{t('paymentModal.orderNumber').replace('{number}', index + 1)}</span>
+                              <span className="text-xs font-bold text-[#6262bd]">{formatCurrency(orderTotal)}</span>
+                            </div>
+                            <div className="space-y-0.5">
+                              {order.order_items?.map((item, idx) => (
+                                <div key={idx} className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
+                                  <span>{item.quantity}× {item.name}</span>
+                                  <span>{formatCurrency((item.price_at_time || 0) * (item.quantity || 1))}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
                   </div>
 
-                  {/* Discount (if applied) */}
-                  {selectedDiscount && discountAmount > 0 && (
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm text-green-600">
-                        {selectedDiscount.name} ({selectedDiscount.type === 'percentage' ? `${selectedDiscount.value}%` : formatCurrency(selectedDiscount.value)})
-                        {selectedDiscount.is_promotion && selectedDiscount.product_id && (() => {
-                          const promoItem = unpaidOrders.flatMap(o => o.order_items || []).find(i => i.menu_item_id === selectedDiscount.product_id)
-                          return promoItem ? <span className="text-xs text-green-500 ml-1">· {promoItem.name}</span> : null
-                        })()}
-                      </span>
-                      <span className="text-sm font-medium text-green-600">-{formatCurrency(discountAmount)}</span>
+                  {/* Discount */}
+                  {availableDiscounts.length > 0 && (
+                    <div className="mb-5">
+                      {selectedDiscount?.is_promotion && (
+                        <div className="mb-2 flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg text-xs text-orange-700 dark:text-orange-400 font-medium">
+                          <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                          </svg>
+                          Promotion auto-applied
+                        </div>
+                      )}
+                      <select
+                        value={selectedDiscount?.id || 'none'}
+                        onChange={(e) => handleDiscountChange(e.target.value)}
+                        className="w-full px-3 py-2.5 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700"
+                      >
+                        <option value="none">{t('paymentModal.noDiscount')}</option>
+                        {availableDiscounts.map((discount) => (
+                          <option key={discount.id} value={discount.id}>
+                            {discount.name} ({discount.type === 'percentage' ? `${discount.value}%` : formatCurrency(discount.value)}){discount.is_promotion ? ' 🏷️' : ''}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   )}
 
-                  {/* Final Total */}
-                  <div className="flex justify-between items-center pt-2 border-t border-[#6262bd]/20">
-                    <span className="font-semibold text-slate-700">{t('paymentModal.totalToPay')}</span>
-                    <span className="text-2xl font-bold text-[#6262bd]">{formatCurrency(calculateFinalTotal())}</span>
-                  </div>
-                </div>
-
-                {/* Payment Methods */}
-                {!terminalStatus && (
-                  <div className="space-y-3">
-                    <button
-                      onClick={() => processPayment('cash')}
-                      className="w-full bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 flex items-center justify-center gap-2"
-                    >
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
-                      </svg>
-                      {t('paymentModal.payWithCash')}
-                    </button>
-                    <button
-                      onClick={fetchTerminalReaders}
-                      className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] flex items-center justify-center gap-2"
-                    >
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
-                      </svg>
-                      {t('paymentModal.payWithCard')}
-                    </button>
-                  </div>
-                )}
-
-                {/* Terminal UI */}
-                {terminalStatus === 'loading_readers' && (
-                  <div className="flex flex-col items-center gap-3 py-6">
-                    <div className="w-8 h-8 border-4 border-[#6262bd] border-t-transparent rounded-full animate-spin" />
-                    <p className="text-slate-600 dark:text-slate-300 text-sm">{t('paymentModal.terminalLookingForReaders')}</p>
-                  </div>
-                )}
-
-                {terminalStatus === 'no_readers' && (
-                  <div className="flex flex-col gap-3">
-                    <p className="text-center text-slate-600 dark:text-slate-300 text-sm py-4">{t('paymentModal.terminalNoReadersOnline')}</p>
-                    <button
-                      onClick={() => { setTerminalStatus(null); processPayment('card') }}
-                      className="w-full border-2 border-[#6262bd] text-[#6262bd] py-2 rounded-xl font-semibold hover:bg-[#6262bd]/10"
-                    >
-                      {t('paymentModal.terminalFallbackManual')}
-                    </button>
-                    <button onClick={resetTerminalState} className="w-full text-slate-500 text-sm py-2 hover:text-slate-700">
-                      {t('paymentModal.terminalPayCash')}
-                    </button>
-                  </div>
-                )}
-
-                {terminalStatus === 'selecting_reader' && (
-                  <div className="flex flex-col gap-3">
-                    <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('paymentModal.terminalSelectReader')}</p>
-                    {terminalReaders.map(reader => (
-                      <button
-                        key={reader.id}
-                        onClick={() => handleTerminalPayment(reader)}
-                        className="w-full flex items-center justify-between border-2 border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 hover:border-[#6262bd] hover:bg-[#6262bd]/5"
-                      >
-                        <span className="font-medium text-slate-800 dark:text-slate-100">{reader.label || reader.id}</span>
-                        <span className={`text-xs font-semibold px-2 py-1 rounded-full ${reader.status === 'online' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
-                          {reader.status === 'online' ? t('paymentModal.terminalOnline') : t('paymentModal.terminalOffline')}
+                  {/* Totals */}
+                  <div className="rounded-2xl bg-slate-50 dark:bg-slate-700/50 px-4 py-3 mb-6 space-y-1.5">
+                    <div className="flex justify-between text-sm text-slate-500 dark:text-slate-400">
+                      <span>{t('paymentModal.subtotal')}</span>
+                      <span>{formatCurrency(calculateTableTotal())}</span>
+                    </div>
+                    {selectedDiscount && discountAmount > 0 && (
+                      <div className="flex justify-between text-sm text-green-600 dark:text-green-400">
+                        <span>
+                          {selectedDiscount.name}
+                          {selectedDiscount.is_promotion && selectedDiscount.product_id && (() => {
+                            const promoItem = unpaidOrders.flatMap(o => o.order_items || []).find(i => i.menu_item_id === selectedDiscount.product_id)
+                            return promoItem ? <span className="text-xs ml-1 opacity-75">· {promoItem.name}</span> : null
+                          })()}
                         </span>
+                        <span>−{formatCurrency(discountAmount)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-baseline pt-1.5 border-t border-slate-200 dark:border-slate-600">
+                      <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{t('paymentModal.totalToPay')}</span>
+                      <span className="text-xl font-bold text-[#6262bd]">{formatCurrency(calculateFinalTotal())}</span>
+                    </div>
+                  </div>
+
+                  {/* ── Payment method selection ── */}
+                  {!terminalStatus && !showExternalTerminal && (
+                    <div className="space-y-2.5">
+                      {/* Cash */}
+                      <button
+                        onClick={() => processPayment('cash')}
+                        className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-green-50 dark:bg-green-900/20 border-2 border-green-100 dark:border-green-800 hover:border-green-400 hover:bg-green-100 dark:hover:bg-green-900/40 transition-all group"
+                      >
+                        <span className="w-9 h-9 rounded-xl bg-green-600 flex items-center justify-center shrink-0">
+                          <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
+                          </svg>
+                        </span>
+                        <span className="flex-1 text-left">
+                          <span className="block text-sm font-semibold text-slate-800 dark:text-slate-100">{t('paymentModal.payWithCash')}</span>
+                        </span>
+                        <svg className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-green-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
                       </button>
-                    ))}
-                    <button onClick={resetTerminalState} className="w-full text-slate-500 text-sm py-2 hover:text-slate-700">
-                      ← {t('paymentModal.payWithCash')}
-                    </button>
-                  </div>
-                )}
 
-                {terminalStatus === 'waiting' && (
-                  <div className="flex flex-col items-center gap-4 py-6">
-                    <div className="w-10 h-10 border-4 border-[#6262bd] border-t-transparent rounded-full animate-spin" />
-                    <div className="text-center">
-                      <p className="font-semibold text-slate-800 dark:text-slate-100">{t('paymentModal.terminalWaitingTitle')}</p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{selectedReader?.label || selectedReader?.id}</p>
-                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{t('paymentModal.terminalWaitingDesc')}</p>
-                    </div>
-                    <button
-                      onClick={handleTerminalCancel}
-                      className="text-red-500 text-sm hover:text-red-700 font-medium"
-                    >
-                      {t('paymentModal.terminalCancelPayment')}
-                    </button>
-                  </div>
-                )}
+                      {/* Stripe Terminal (Card) */}
+                      <button
+                        onClick={fetchTerminalReaders}
+                        className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-[#6262bd]/5 dark:bg-[#6262bd]/10 border-2 border-[#6262bd]/20 dark:border-[#6262bd]/30 hover:border-[#6262bd]/60 hover:bg-[#6262bd]/10 dark:hover:bg-[#6262bd]/20 transition-all group"
+                      >
+                        <span className="w-9 h-9 rounded-xl bg-[#6262bd] flex items-center justify-center shrink-0">
+                          <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+                          </svg>
+                        </span>
+                        <span className="flex-1 text-left">
+                          <span className="block text-sm font-semibold text-slate-800 dark:text-slate-100">{t('paymentModal.payWithCard')}</span>
+                          <span className="block text-xs text-slate-400 dark:text-slate-500">Stripe Terminal</span>
+                        </span>
+                        <svg className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-[#6262bd] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
 
-                {terminalStatus === 'failed' && (
-                  <div className="flex flex-col items-center gap-4 py-4">
-                    <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                      <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
+                      {/* External Terminal */}
+                      <button
+                        onClick={() => setShowExternalTerminal(true)}
+                        className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all group"
+                      >
+                        <span className="w-9 h-9 rounded-xl bg-slate-700 dark:bg-slate-600 flex items-center justify-center shrink-0">
+                          <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M17 1H7c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-2-2-2zm0 18H7V5h10v14zm-5 2c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm4-19H8V3h8v-1z"/>
+                          </svg>
+                        </span>
+                        <span className="flex-1 text-left">
+                          <span className="block text-sm font-semibold text-slate-800 dark:text-slate-100">{t('paymentModal.externalTerminalTitle')}</span>
+                          <span className="block text-xs text-slate-400 dark:text-slate-500">Own POS / bank terminal</span>
+                        </span>
+                        <svg className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-slate-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
                     </div>
-                    <div className="text-center">
-                      <p className="font-semibold text-slate-800 dark:text-slate-100">{t('paymentModal.terminalPaymentFailed')}</p>
-                      {terminalDeclineReason && (
-                        <p className="text-sm text-red-500 mt-1">{terminalDeclineReason.replace(/_/g, ' ')}</p>
+                  )}
+
+                  {/* ── External Terminal confirmation ── */}
+                  {showExternalTerminal && !terminalStatus && (
+                    <div className="space-y-4">
+                      <div className="rounded-2xl bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 p-4 text-center">
+                        <p className="text-xs text-slate-400 dark:text-slate-500 mb-1">{t('paymentModal.externalTerminalTitle')}</p>
+                        <p className="text-3xl font-bold text-slate-900 dark:text-white">{formatCurrency(calculateFinalTotal())}</p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">{t('paymentModal.externalTerminalDesc')}</p>
+                      </div>
+                      {!showExternalTerminalRef ? (
+                        <button
+                          onClick={() => setShowExternalTerminalRef(true)}
+                          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-400 dark:text-slate-500 hover:border-[#6262bd] hover:text-[#6262bd] dark:hover:border-[#6262bd] dark:hover:text-[#6262bd] transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          </svg>
+                          {t('paymentModal.addCustomReference')}
+                        </button>
+                      ) : (
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={externalTerminalRef}
+                            onChange={e => setExternalTerminalRef(e.target.value)}
+                            placeholder={t('paymentModal.customReferencePlaceholder')}
+                            autoFocus
+                            className="w-full px-4 py-2.5 pr-10 border-2 border-[#6262bd] rounded-xl text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 focus:outline-none placeholder:text-slate-300 dark:placeholder:text-slate-500"
+                          />
+                          <button
+                            onClick={() => { setShowExternalTerminalRef(false); setExternalTerminalRef('') }}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500 dark:text-slate-600 dark:hover:text-slate-400 transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                            </svg>
+                          </button>
+                        </div>
                       )}
-                    </div>
-                    <div className="flex gap-3 w-full">
                       <button
-                        onClick={() => { resetTerminalState(); fetchTerminalReaders() }}
-                        className="flex-1 bg-[#6262bd] text-white py-2 rounded-xl font-semibold hover:bg-[#5252a3] text-sm"
+                        onClick={() => {
+                          processPayment('card')
+                          setShowExternalTerminal(false)
+                          setExternalTerminalRef('')
+                          setShowExternalTerminalRef(false)
+                        }}
+                        className="w-full bg-[#6262bd] text-white py-3.5 rounded-2xl font-semibold hover:bg-[#5252a3] transition-colors"
                       >
-                        {t('paymentModal.terminalTryAgain')}
+                        {t('paymentModal.externalTerminalConfirm')}
                       </button>
                       <button
-                        onClick={() => { resetTerminalState(); processPayment('cash') }}
-                        className="flex-1 border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 py-2 rounded-xl font-semibold text-sm"
+                        onClick={() => { setShowExternalTerminal(false); setExternalTerminalRef(''); setShowExternalTerminalRef(false) }}
+                        className="w-full text-slate-400 dark:text-slate-500 text-sm py-1 hover:text-slate-600 dark:hover:text-slate-300"
                       >
-                        {t('paymentModal.terminalPayCash')}
+                        ← {t('paymentModal.choosePaymentMethod')}
                       </button>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {terminalStatus === 'timed_out' && (
-                  <div className="flex flex-col items-center gap-4 py-4">
-                    <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
-                      <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
+                  {/* ── Stripe Terminal UI states ── */}
+                  {terminalStatus === 'loading_readers' && (
+                    <div className="flex flex-col items-center gap-3 py-8">
+                      <div className="w-8 h-8 border-4 border-[#6262bd] border-t-transparent rounded-full animate-spin" />
+                      <p className="text-sm text-slate-500 dark:text-slate-400">{t('paymentModal.terminalLookingForReaders')}</p>
                     </div>
-                    <div className="text-center">
-                      <p className="font-semibold text-slate-800 dark:text-slate-100">{t('paymentModal.terminalTimedOut')}</p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{t('paymentModal.terminalTimedOutDesc')}</p>
-                    </div>
-                    <div className="flex gap-3 w-full">
-                      <button
-                        onClick={() => { resetTerminalState(); fetchTerminalReaders() }}
-                        className="flex-1 bg-[#6262bd] text-white py-2 rounded-xl font-semibold hover:bg-[#5252a3] text-sm"
-                      >
-                        {t('paymentModal.terminalTryAgain')}
-                      </button>
-                      <button
-                        onClick={() => { resetTerminalState(); processPayment('cash') }}
-                        className="flex-1 border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 py-2 rounded-xl font-semibold text-sm"
-                      >
-                        {t('paymentModal.terminalPayCash')}
-                      </button>
-                    </div>
-                  </div>
-                )}
+                  )}
 
-                {terminalStatus === 'currency_not_supported' && (
-                  <div className="flex flex-col items-center gap-4 py-4">
-                    <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
-                      <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-                      </svg>
-                    </div>
-                    <div className="text-center">
-                      <p className="font-semibold text-slate-800 dark:text-slate-100">{t('paymentModal.terminalCurrencyNotSupportedTitle')}</p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{t('paymentModal.terminalCurrencyNotSupportedDesc')}</p>
-                    </div>
-                    <div className="flex gap-3 w-full">
+                  {terminalStatus === 'no_readers' && (
+                    <div className="space-y-3">
+                      <p className="text-center text-slate-500 dark:text-slate-400 text-sm py-4">{t('paymentModal.terminalNoReadersOnline')}</p>
                       <button
-                        onClick={() => { resetTerminalState(); processPayment('card') }}
-                        className="flex-1 bg-[#6262bd] text-white py-2 rounded-xl font-semibold hover:bg-[#5252a3] text-sm"
+                        onClick={() => { setTerminalStatus(null); processPayment('card') }}
+                        className="w-full border-2 border-[#6262bd] text-[#6262bd] py-3 rounded-2xl font-semibold hover:bg-[#6262bd]/10 transition-colors text-sm"
                       >
                         {t('paymentModal.terminalFallbackManual')}
                       </button>
-                      <button
-                        onClick={() => { resetTerminalState(); processPayment('cash') }}
-                        className="flex-1 border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 py-2 rounded-xl font-semibold text-sm"
-                      >
-                        {t('paymentModal.terminalPayCash')}
+                      <button onClick={resetTerminalState} className="w-full text-slate-400 text-sm py-2 hover:text-slate-600 dark:hover:text-slate-300">
+                        ← {t('paymentModal.choosePaymentMethod')}
                       </button>
                     </div>
-                  </div>
-                )}
-              </>
-            )}
+                  )}
+
+                  {terminalStatus === 'selecting_reader' && (
+                    <div className="space-y-2">
+                      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">{t('paymentModal.terminalSelectReader')}</p>
+                      {terminalReaders.map(reader => (
+                        <button
+                          key={reader.id}
+                          onClick={() => handleTerminalPayment(reader)}
+                          className="w-full flex items-center justify-between border-2 border-slate-200 dark:border-slate-600 rounded-2xl px-4 py-3.5 hover:border-[#6262bd] hover:bg-[#6262bd]/5 transition-all"
+                        >
+                          <span className="font-medium text-sm text-slate-800 dark:text-slate-100">{reader.label || reader.id}</span>
+                          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${reader.status === 'online' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' : 'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400'}`}>
+                            {reader.status === 'online' ? t('paymentModal.terminalOnline') : t('paymentModal.terminalOffline')}
+                          </span>
+                        </button>
+                      ))}
+                      <button onClick={resetTerminalState} className="w-full text-slate-400 text-sm py-2 hover:text-slate-600 dark:hover:text-slate-300">
+                        ← {t('paymentModal.choosePaymentMethod')}
+                      </button>
+                    </div>
+                  )}
+
+                  {terminalStatus === 'waiting' && (
+                    <div className="flex flex-col items-center gap-4 py-8">
+                      <div className="w-12 h-12 border-4 border-[#6262bd] border-t-transparent rounded-full animate-spin" />
+                      <div className="text-center">
+                        <p className="font-semibold text-slate-800 dark:text-slate-100">{t('paymentModal.terminalWaitingTitle')}</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{selectedReader?.label || selectedReader?.id}</p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{t('paymentModal.terminalWaitingDesc')}</p>
+                      </div>
+                      <button onClick={handleTerminalCancel} className="text-sm text-red-400 hover:text-red-600 font-medium">
+                        {t('paymentModal.terminalCancelPayment')}
+                      </button>
+                    </div>
+                  )}
+
+                  {terminalStatus === 'failed' && (
+                    <div className="flex flex-col items-center gap-4 py-6">
+                      <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+                        <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </div>
+                      <div className="text-center">
+                        <p className="font-semibold text-slate-800 dark:text-slate-100">{t('paymentModal.terminalPaymentFailed')}</p>
+                        {terminalDeclineReason && <p className="text-sm text-red-400 mt-1">{terminalDeclineReason.replace(/_/g, ' ')}</p>}
+                      </div>
+                      <div className="flex gap-2 w-full">
+                        <button onClick={() => { resetTerminalState(); fetchTerminalReaders() }} className="flex-1 bg-[#6262bd] text-white py-2.5 rounded-2xl font-semibold hover:bg-[#5252a3] text-sm transition-colors">
+                          {t('paymentModal.terminalTryAgain')}
+                        </button>
+                        <button onClick={() => { resetTerminalState(); processPayment('cash') }} className="flex-1 border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 py-2.5 rounded-2xl font-semibold text-sm">
+                          {t('paymentModal.terminalPayCash')}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {terminalStatus === 'timed_out' && (
+                    <div className="flex flex-col items-center gap-4 py-6">
+                      <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center">
+                        <svg className="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div className="text-center">
+                        <p className="font-semibold text-slate-800 dark:text-slate-100">{t('paymentModal.terminalTimedOut')}</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{t('paymentModal.terminalTimedOutDesc')}</p>
+                      </div>
+                      <div className="flex gap-2 w-full">
+                        <button onClick={() => { resetTerminalState(); fetchTerminalReaders() }} className="flex-1 bg-[#6262bd] text-white py-2.5 rounded-2xl font-semibold hover:bg-[#5252a3] text-sm transition-colors">
+                          {t('paymentModal.terminalTryAgain')}
+                        </button>
+                        <button onClick={() => { resetTerminalState(); processPayment('cash') }} className="flex-1 border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 py-2.5 rounded-2xl font-semibold text-sm">
+                          {t('paymentModal.terminalPayCash')}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {terminalStatus === 'currency_not_supported' && (
+                    <div className="flex flex-col items-center gap-4 py-6">
+                      <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center">
+                        <svg className="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                        </svg>
+                      </div>
+                      <div className="text-center">
+                        <p className="font-semibold text-slate-800 dark:text-slate-100">{t('paymentModal.terminalCurrencyNotSupportedTitle')}</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{t('paymentModal.terminalCurrencyNotSupportedDesc')}</p>
+                      </div>
+                      <div className="flex gap-2 w-full">
+                        <button onClick={() => { resetTerminalState(); setShowExternalTerminal(true) }} className="flex-1 bg-[#6262bd] text-white py-2.5 rounded-2xl font-semibold hover:bg-[#5252a3] text-sm transition-colors">
+                          {t('paymentModal.externalTerminalTitle')}
+                        </button>
+                        <button onClick={() => { resetTerminalState(); processPayment('cash') }} className="flex-1 border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 py-2.5 rounded-2xl font-semibold text-sm">
+                          {t('paymentModal.terminalPayCash')}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}

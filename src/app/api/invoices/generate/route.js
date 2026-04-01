@@ -226,7 +226,7 @@ export async function POST(request) {
 
         // Metadata
         table_number: order.tables?.table_number || null,
-        notes: clientData?.notes || null,
+        notes: [clientData?.notes, order.payment_reference ? `Ref: ${order.payment_reference}` : null].filter(Boolean).join('\n') || null,
         footer_text: restaurant.invoice_settings.footer_text || ''
       };
 

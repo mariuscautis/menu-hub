@@ -663,7 +663,15 @@
       "postPaymentTitle": "Plată efectuată cu succes!",
       "postPaymentSubtitle": "Dorești să generezi o factură pentru această comandă?",
       "generateInvoice": "Generează factură",
-      "close": "Închide"
+      "close": "Închide",
+      "externalTerminalTitle": "Terminal extern",
+      "externalTerminalDesc": "Procesează plata pe propriul tău terminal POS, apoi confirmă mai jos.",
+      "externalTerminalConfirm": "Plată primită — confirmă",
+      "addCustomReference": "Adaugă referință personalizată (opțional)",
+      "customReferencePlaceholder": "Referință de plată personalizată",
+      "paymentReferenceLabel": "Ref:",
+      "choosePaymentMethod": "Cum doriți să plătiți?",
+      "orDivider": "sau"
     },
     "transferTable": "Transferă Masă",
     "transferModal": {
