@@ -3,12 +3,14 @@
 import Link from 'next/link'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import InfoTooltip from '@/components/InfoTooltip'
 import PageTabs from '@/components/PageTabs'
 import { analyticsTabs } from '@/components/PageTabsConfig'
 
 export default function LossesHubPage() {
   useModuleGuard('analytics')
   const t = useTranslations('lossesAnalytics')
+  const tg = useTranslations('guide')
 
   const tiles = [
     {
@@ -42,8 +44,9 @@ export default function LossesHubPage() {
       <PageTabs tabs={analyticsTabs} />
       <div className="max-w-2xl mx-auto mt-8">
         <div className="mb-10 text-center">
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-2">
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-2 flex justify-center items-center gap-2">
             {t('lossesHubTitle')}
+            <InfoTooltip text={tg('analytics_losses_desc')} />
           </h1>
           <p className="text-slate-500 dark:text-slate-400">
             {t('lossesHubSubtitle')}

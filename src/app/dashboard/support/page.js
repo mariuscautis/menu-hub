@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import InfoTooltip from '@/components/InfoTooltip'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import { supabase } from '@/lib/supabase'
@@ -27,6 +28,7 @@ function formatDate(ts) {
 
 export default function SupportPage() {
   const t = useTranslations('support')
+  const tg = useTranslations('guide')
   const restaurantCtx = useRestaurant()
   const adminSupabase = useAdminSupabase()
   const [restaurant, setRestaurant] = useState(null)
@@ -288,7 +290,10 @@ export default function SupportPage() {
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-100 mb-1">{t('title')}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-100 mb-1 flex items-center gap-2">
+              {t('title')}
+              <InfoTooltip text={tg('support_desc')} />
+            </h1>
             <p className="text-slate-500 dark:text-slate-400 text-sm">{t('subtitle')}</p>
           </div>
           <button

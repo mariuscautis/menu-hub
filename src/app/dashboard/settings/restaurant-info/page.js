@@ -7,9 +7,11 @@ import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import PageTabs from '@/components/PageTabs'
 import { settingsTabs } from '@/components/PageTabsConfig'
+import InfoTooltip from '@/components/InfoTooltip'
 
 export default function RestaurantInfo() {
   const t = useTranslations('restaurantInfo')
+  const tg = useTranslations('guide')
   const restaurantCtx = useRestaurant()
   const supabase = useAdminSupabase()
   const [restaurant, setRestaurant] = useState(null)
@@ -157,7 +159,7 @@ export default function RestaurantInfo() {
     <div>
       <PageTabs tabs={settingsTabs} />
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800">{t('pageTitle')}</h1>
+        <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">{t('pageTitle')}<InfoTooltip text={tg('restaurant_info_desc')} /></h1>
         <p className="text-slate-500">{t('pageSubtitle')}</p>
       </div>
       {message && (

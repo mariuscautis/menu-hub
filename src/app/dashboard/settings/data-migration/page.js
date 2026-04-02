@@ -6,6 +6,7 @@ import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
 import PageTabs from '@/components/PageTabs'
 import { settingsTabs } from '@/components/PageTabsConfig'
+import InfoTooltip from '@/components/InfoTooltip'
 
 // --- CSV helpers ---
 
@@ -92,6 +93,7 @@ function validateStockRows(rows) {
 export default function DataMigration() {
   useModuleGuard('ordering')
   const t = useTranslations('dataMigration')
+  const tg = useTranslations('guide')
   const restaurantCtx = useRestaurant()
   const restaurant = restaurantCtx?.restaurant
 
@@ -218,7 +220,7 @@ export default function DataMigration() {
     <div>
       <PageTabs tabs={settingsTabs} />
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
+        <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">{t('title')}<InfoTooltip text={tg('data_migration_desc')} /></h1>
         <p className="text-slate-500">{t('subtitle')}</p>
       </div>
 

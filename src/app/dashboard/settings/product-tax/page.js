@@ -8,10 +8,12 @@ import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
 import PageTabs from '@/components/PageTabs'
 import { settingsTabs } from '@/components/PageTabsConfig'
+import InfoTooltip from '@/components/InfoTooltip'
 
 export default function ProductTaxSettings() {
   useModuleGuard('ordering')
   const t = useTranslations('productTax')
+  const tg = useTranslations('guide')
   const tc = useTranslations('common')
   const { currencySymbol } = useCurrency()
   const restaurantCtx = useRestaurant()
@@ -267,8 +269,9 @@ export default function ProductTaxSettings() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
             {t('title') || 'Tax Categories'}
+            <InfoTooltip text={tg('product_tax_desc')} />
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
             {t('pageSubtitle') || 'Manage tax rates applied to your sales and stock purchases.'}

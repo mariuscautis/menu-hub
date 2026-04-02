@@ -3,12 +3,14 @@
 import { useState, useEffect } from 'react'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations, useLanguage } from '@/lib/i18n/LanguageContext'
+import InfoTooltip from '@/components/InfoTooltip'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
 export default function PaymentsSettingsPage() {
   const { messages } = useLanguage()
   const t = useTranslations('payments')
+  const tg = useTranslations('guide')
   const restaurantCtx = useRestaurant()
   const restaurant = restaurantCtx?.restaurant
   const searchParams = useSearchParams()
@@ -109,7 +111,10 @@ export default function PaymentsSettingsPage() {
         {t('back')}
       </Link>
 
-      <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-2">{t('title')}</h1>
+      <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-2 flex items-center gap-2">
+        {t('title')}
+        <InfoTooltip text={tg('payments_desc')} />
+      </h1>
       <p className="text-slate-500 dark:text-slate-400 mb-8">{t('subtitle')}</p>
 
       {/* Notification */}

@@ -6,10 +6,12 @@ import PageTabs from '@/components/PageTabs'
 import { menuNavTabs } from '@/components/PageTabsConfig'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import InfoTooltip from '@/components/InfoTooltip'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 
 export default function MenuCategories() {
   const t = useTranslations('menuCategories')
+  const tg = useTranslations('guide')
   const restaurantCtx = useRestaurant()
   const supabase = useAdminSupabase()
   const [categories, setCategories] = useState([])
@@ -135,7 +137,10 @@ export default function MenuCategories() {
       <PageTabs tabs={menuNavTabs} />
       <div className="flex flex-wrap justify-between items-start gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200">{t('title')}</h1>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+            {t('title')}
+            <InfoTooltip text={tg('menu_categories_desc')} />
+          </h1>
           <p className="text-slate-500 dark:text-slate-400">{t('subtitle')}</p>
         </div>
         <button

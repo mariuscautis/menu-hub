@@ -8,10 +8,12 @@ import Link from 'next/link'
 import PageTabs from '@/components/PageTabs'
 import { analyticsTabs } from '@/components/PageTabsConfig'
 import { useTranslations, useLanguage } from '@/lib/i18n/LanguageContext'
+import InfoTooltip from '@/components/InfoTooltip'
 
 export default function StockItemLosses() {
   useModuleGuard('analytics')
   const t = useTranslations('lossesAnalytics')
+  const tg = useTranslations('guide')
   const { locale } = useLanguage()
   const { formatCurrency } = useCurrency()
   const restaurantCtx = useRestaurant()
@@ -70,7 +72,7 @@ export default function StockItemLosses() {
       </div>
 
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200">{t('stockItemLossesTitle')}</h1>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">{t('stockItemLossesTitle')}<InfoTooltip text={tg('analytics_losses_stock_desc')} /></h1>
         <p className="text-slate-500 dark:text-slate-400">{t('stockItemLossesDesc')}</p>
       </div>
 

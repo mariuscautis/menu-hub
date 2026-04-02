@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations, useLanguage } from '@/lib/i18n/LanguageContext'
+import InfoTooltip from '@/components/InfoTooltip'
 import { useOrderSounds } from '@/hooks/useOrderSounds'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
@@ -12,6 +13,7 @@ export default function Reservations() {
   useModuleGuard('reservations')
   const t = useTranslations('reservations')
   const tc = useTranslations('common')
+  const tg = useTranslations('guide')
   const { locale } = useLanguage()
   const adminSupabase = useAdminSupabase()
   const [restaurant, setRestaurant] = useState(null)
@@ -663,7 +665,10 @@ export default function Reservations() {
       {/* Header */}
       <div className="flex flex-wrap justify-between items-start gap-3 mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-2">{t('title')}</h1>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-2 flex items-center gap-2">
+            {t('title')}
+            <InfoTooltip text={tg('reservations_desc')} />
+          </h1>
           <p className="text-slate-500 dark:text-slate-400">{t('subtitle')}</p>
         </div>
         {soundSettings?.enabled && soundSettings?.reservationSound !== 'silent' && (

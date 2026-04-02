@@ -7,6 +7,7 @@ import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import QRCode from 'qrcode'
 import InvoiceClientModal from '@/components/invoices/InvoiceClientModal'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import InfoTooltip from '@/components/InfoTooltip'
 import { useTheme } from '@/lib/ThemeContext'
 import { useCurrency } from '@/lib/CurrencyContext'
 import { generateInvoicePdfBase64, downloadInvoicePdf } from '@/lib/invoicePdfGenerator'
@@ -50,6 +51,7 @@ const TOAST_STYLES = {
 
 export default function Tables() {
   const t = useTranslations('tables')
+  const tg = useTranslations('guide')
   const { isDark } = useTheme()
   const { currencySymbol, formatCurrency } = useCurrency()
   const [tables, setTables] = useState([])
@@ -3025,7 +3027,10 @@ export default function Tables() {
 
       <div className="flex flex-wrap justify-between items-start gap-3 mb-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
+          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+            {t('title')}
+            <InfoTooltip text={tg('tables_desc')} />
+          </h1>
           <p className="text-slate-500">{t('subtitle')}</p>
         </div>
         <div className="flex flex-wrap gap-2 items-center">

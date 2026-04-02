@@ -6,6 +6,7 @@ import PageTabs from '@/components/PageTabs'
 import { stockNavTabs } from '@/components/PageTabsConfig'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import InfoTooltip from '@/components/InfoTooltip'
 import { useCurrency } from '@/lib/CurrencyContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
@@ -13,6 +14,7 @@ import { useModuleGuard } from '@/hooks/useModuleGuard'
 export default function PurchasingInvoices() {
   useModuleGuard('ordering')
   const t = useTranslations('purchasingInvoices')
+  const tg = useTranslations('guide')
   const { currencySymbol, formatCurrency } = useCurrency()
   const restaurantCtx = useRestaurant()
   const supabase = useAdminSupabase()
@@ -331,7 +333,10 @@ export default function PurchasingInvoices() {
       <PageTabs tabs={stockNavTabs} />
       <div className="flex flex-wrap justify-between items-start gap-3 mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
+          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+            {t('title')}
+            <InfoTooltip text={tg('stock_invoices_desc')} />
+          </h1>
           <p className="text-slate-500">{t('subtitle')}</p>
         </div>
         <button

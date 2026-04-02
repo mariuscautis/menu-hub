@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import InfoTooltip from '@/components/InfoTooltip'
 import { useCurrency } from '@/lib/CurrencyContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
@@ -35,6 +36,7 @@ export default function DiscountsSettings() {
   useModuleGuard('ordering')
   const t = useTranslations('discounts')
   const tc = useTranslations('common')
+  const tg = useTranslations('guide')
   const { currencySymbol } = useCurrency()
   const restaurantCtx = useRestaurant()
   const supabase = useAdminSupabase()
@@ -299,8 +301,9 @@ export default function DiscountsSettings() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
             {t('title') || 'Discount Templates'}
+            <InfoTooltip text={tg('discounts_desc')} />
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
             {t('description') || 'Create discount templates that can be applied to orders at payment time.'}

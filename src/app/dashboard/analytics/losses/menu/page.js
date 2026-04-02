@@ -8,10 +8,12 @@ import { useModuleGuard } from '@/hooks/useModuleGuard'
 import Link from 'next/link'
 import PageTabs from '@/components/PageTabs'
 import { analyticsTabs } from '@/components/PageTabsConfig'
+import InfoTooltip from '@/components/InfoTooltip'
 
 export default function MenuItemLosses() {
   useModuleGuard('analytics')
   const t = useTranslations('lossesAnalytics')
+  const tg = useTranslations('guide')
   const { formatCurrency } = useCurrency()
   const restaurantCtx = useRestaurant()
   const [restaurant, setRestaurant] = useState(null)
@@ -103,7 +105,7 @@ export default function MenuItemLosses() {
       </div>
 
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200">Menu Item Losses</h1>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">Menu Item Losses<InfoTooltip text={tg('analytics_losses_menu_desc')} /></h1>
         <p className="text-slate-500 dark:text-slate-400">{t('subtitle')}</p>
       </div>
 

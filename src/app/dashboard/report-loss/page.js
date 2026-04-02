@@ -3,12 +3,14 @@
 import { useState, useEffect } from 'react'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import InfoTooltip from '@/components/InfoTooltip'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
 
 export default function ReportLoss() {
   useModuleGuard('ordering')
   const t = useTranslations('reportLoss')
+  const tg = useTranslations('guide')
   const restaurantCtx = useRestaurant()
   const supabase = useAdminSupabase()
   const [restaurant, setRestaurant] = useState(null)
@@ -179,7 +181,10 @@ export default function ReportLoss() {
   return (
     <div className="max-w-lg mx-auto">
       <div className="mb-8 text-center">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200">{t('title')}</h1>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+          {t('title')}
+          <InfoTooltip text={tg('report_loss_desc')} />
+        </h1>
         <p className="text-slate-500 dark:text-slate-400">{t('subtitle')}</p>
         {staffDepartment && (
           <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">

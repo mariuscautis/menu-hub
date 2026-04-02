@@ -9,6 +9,7 @@ import ClockInOut from './ClockInOut';
 import WorkHistory from './WorkHistory';
 import TimeOffRequestModal from './TimeOffRequestModal';
 import RequestHistory from './RequestHistory';
+import InfoTooltip from '@/components/InfoTooltip';
 
 const TABS = ['shifts', 'leave', 'history'];
 
@@ -26,6 +27,7 @@ export default function MyRotaPage() {
   const [leaveHistory, setLeaveHistory] = useState([]);
   const [activeTab, setActiveTab] = useState('shifts');
   const t = useTranslations('myRota');
+  const tg = useTranslations('guide');
 
   useEffect(() => {
     const staffSessionData = localStorage.getItem('staff_session');
@@ -224,7 +226,7 @@ export default function MyRotaPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-6 md:p-8">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-200">{t('pageTitle') || 'My Rota'}</h1>
+        <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">{t('pageTitle') || 'My Rota'}<InfoTooltip text={tg('my_rota_desc')} /></h1>
         <p className="text-slate-600 dark:text-slate-400 mt-1">{t('pageSubtitle') || 'View your upcoming shifts and manage requests'}</p>
       </div>
 

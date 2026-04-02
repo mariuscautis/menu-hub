@@ -9,10 +9,12 @@ import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
 import PageTabs from '@/components/PageTabs'
 import { settingsTabs } from '@/components/PageTabsConfig'
+import InfoTooltip from '@/components/InfoTooltip'
 
 export default function OtherOptionsSettings() {
   useModuleGuard('ordering')
   const t = useTranslations('otherOptions')
+  const tg = useTranslations('guide')
   const tc = useTranslations('common')
   const restaurantCtx = useRestaurant()
   const supabase = useAdminSupabase()
@@ -118,7 +120,7 @@ export default function OtherOptionsSettings() {
     <div>
       <PageTabs tabs={settingsTabs} />
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800">{t('title') || 'Other Options'}</h1>
+        <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">{t('title') || 'Other Options'}<InfoTooltip text={tg('other_options_desc')} /></h1>
         <p className="text-slate-500">{t('subtitle') || 'Configure additional restaurant features and notifications'}</p>
       </div>
 

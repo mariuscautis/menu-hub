@@ -4,12 +4,15 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAdminSupabase } from '@/hooks/useAdminSupabase';
 import { useModuleGuard } from '@/hooks/useModuleGuard';
+import { useTranslations } from '@/lib/i18n/LanguageContext';
+import InfoTooltip from '@/components/InfoTooltip';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 export default function MyAvailabilityPage() {
   useModuleGuard('rota')
   const supabase = useAdminSupabase();
+  const tg = useTranslations('guide');
   const [staff, setStaff] = useState(null);
   const [availability, setAvailability] = useState({});
   const [saving, setSaving] = useState(false);
@@ -118,7 +121,7 @@ export default function MyAvailabilityPage() {
     <div className="min-h-screen bg-gray-50 p-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">My Availability</h1>
+        <h1 className="text-3xl font-bold text-slate-800 mb-2 flex items-center gap-2">My Availability<InfoTooltip text={tg('my_availability_desc')} /></h1>
         <p className="text-slate-600">Set your weekly availability preferences</p>
       </div>
 

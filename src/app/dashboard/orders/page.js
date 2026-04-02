@@ -11,10 +11,12 @@ import { onSyncEvent } from '@/lib/syncManager'
 import { useOrderSounds } from '@/hooks/useOrderSounds'
 import { useCurrency } from '@/lib/CurrencyContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
+import InfoTooltip from '@/components/InfoTooltip'
 
 export default function Orders() {
   const t = useTranslations('orders')
   const tc = useTranslations('common')
+  const tg = useTranslations('guide')
   const { currencySymbol, formatCurrency } = useCurrency()
   const [orders, setOrders] = useState([])
   const [restaurant, setRestaurant] = useState(null)
@@ -901,7 +903,10 @@ export default function Orders() {
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
+            <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+              {t('title')}
+              <InfoTooltip text={tg('orders_desc')} position="right" />
+            </h1>
             <p className="text-slate-500 text-sm">{t('subtitle')}</p>
           </div>
           <div className="flex items-center gap-2">
@@ -972,7 +977,10 @@ export default function Orders() {
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-4 mb-6">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Status</span>
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide flex items-center gap-1">
+              Status
+              <InfoTooltip text={tg('orders_status_filter_desc')} position="bottom" />
+            </span>
             <div className="flex bg-slate-100 rounded-xl p-1 gap-0.5">
               {['active', 'completed', 'all'].map((f) => (
                 <button
@@ -989,7 +997,10 @@ export default function Orders() {
           </div>
           <div className="w-px h-6 bg-slate-200 hidden sm:block"></div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Type</span>
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide flex items-center gap-1">
+              Type
+              <InfoTooltip text={tg('orders_type_filter_desc')} position="bottom" />
+            </span>
             <div className="flex bg-slate-100 rounded-xl p-1 gap-0.5">
               {[
                 { value: 'all',      label: t('allOrders') || 'All' },

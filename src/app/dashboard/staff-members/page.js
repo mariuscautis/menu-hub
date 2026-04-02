@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import InfoTooltip from '@/components/InfoTooltip'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import { supabase } from '@/lib/supabase'
 import PageTabs from '@/components/PageTabs'
@@ -25,6 +26,7 @@ function StaffAvatar({ avatarUrl, name, size = 'md' }) {
 export default function StaffMembers() {
   const t = useTranslations('staff')
   const tc = useTranslations('common')
+  const tg = useTranslations('guide')
   const restaurantCtx = useRestaurant()
   const supabase = useAdminSupabase()
   const [staff, setStaff] = useState([])
@@ -334,7 +336,10 @@ export default function StaffMembers() {
       <PageTabs tabs={staffTabs} />
       <div className="flex flex-wrap justify-between items-start gap-3 mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
+          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+            {t('title')}
+            <InfoTooltip text={tg('staff_rota_desc')} />
+          </h1>
           <p className="text-slate-500">{t('subtitle').replace('{restaurantName}', restaurant.name)}</p>
         </div>
         <button

@@ -8,6 +8,7 @@ import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
 import PageTabs from '@/components/PageTabs'
 import { staffTabs } from '@/components/PageTabsConfig'
+import InfoTooltip from '@/components/InfoTooltip'
 
 const STATUS_CONFIG = {
   pending:   { label: 'Pending',   bg: 'bg-amber-100 dark:bg-amber-900/30',  text: 'text-amber-700 dark:text-amber-400',  dot: 'bg-amber-500',  border: 'border-amber-200 dark:border-amber-800' },
@@ -28,6 +29,7 @@ const LEAVE_LABELS = {
 export default function TimeOffRequestsPage() {
   useModuleGuard('rota')
   const t = useTranslations('timeOffRequests')
+  const tg = useTranslations('guide')
   const restaurantCtx = useRestaurant()
   const [user, setUser] = useState(null)
   const [restaurantData, setRestaurantData] = useState(null)
@@ -208,7 +210,7 @@ export default function TimeOffRequestsPage() {
 
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-200">{t('title')}</h1>
+          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">{t('title')}<InfoTooltip text={tg('time_off_desc')} /></h1>
           <p className="text-slate-500 dark:text-slate-400 mt-1">{t('subtitle')}</p>
         </div>
 

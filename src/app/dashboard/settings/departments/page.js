@@ -4,12 +4,14 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRestaurant } from '@/lib/RestaurantContext';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
+import InfoTooltip from '@/components/InfoTooltip';
 import { useAdminSupabase } from '@/hooks/useAdminSupabase';
 import PageTabs from '@/components/PageTabs';
 import { staffTabs } from '@/components/PageTabsConfig';
 
 export default function DepartmentsSettingsPage() {
   const t = useTranslations('departmentsSettings');
+  const tg = useTranslations('guide');
   const restaurantCtx = useRestaurant();
   const supabase = useAdminSupabase();
 
@@ -183,7 +185,10 @@ export default function DepartmentsSettingsPage() {
       <PageTabs tabs={staffTabs} />
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">{t('title')}</h1>
+        <h1 className="text-3xl font-bold text-slate-800 mb-2 flex items-center gap-2">
+          {t('title')}
+          <InfoTooltip text={tg('departments_desc')} />
+        </h1>
         <p className="text-slate-600">{t('subtitle')}</p>
       </div>
       {/* Message */}

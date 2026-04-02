@@ -21,6 +21,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { useRestaurant } from '@/lib/RestaurantContext';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
+import InfoTooltip from '@/components/InfoTooltip';
 import { useCurrency } from '@/lib/CurrencyContext';
 
 import { useModuleGuard } from '@/hooks/useModuleGuard'
@@ -30,7 +31,8 @@ import { reportsNavTabs } from '@/components/PageTabsConfig'
 export default function XReportPage() {
   useModuleGuard('reports')
   const t = useTranslations('xReport');
-  const tZ = useTranslations('zReport'); // Reuse Z-Report translations for common terms
+  const tZ = useTranslations('zReport');
+  const tg = useTranslations('guide'); // Reuse Z-Report translations for common terms
   const { currencySymbol, formatCurrency } = useCurrency();
   const restaurantCtx = useRestaurant();
 
@@ -291,8 +293,9 @@ export default function XReportPage() {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-4 md:p-8">
         <div className="mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-2">
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-2 flex items-center gap-2">
             {t('title') || 'X-Report'}
+            <InfoTooltip text={tg('xreport_desc')} />
           </h1>
         </div>
 

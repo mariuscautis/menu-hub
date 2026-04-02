@@ -6,6 +6,7 @@ import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import PageTabs from '@/components/PageTabs'
 import { settingsTabs } from '@/components/PageTabsConfig'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import InfoTooltip from '@/components/InfoTooltip'
 
 const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
 
@@ -66,6 +67,7 @@ const PADDING_OPTIONS = [
 
 export default function ReservationSettingsPage() {
   const t = useTranslations('reservationSettings')
+  const tg = useTranslations('guide')
   const restaurantCtx = useRestaurant()
   const supabase = useAdminSupabase()
 
@@ -216,7 +218,7 @@ export default function ReservationSettingsPage() {
       <PageTabs tabs={settingsTabs} />
 
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200">{t('title')}</h1>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">{t('title')}<InfoTooltip text={tg('reservation_settings_desc')} /></h1>
         <p className="text-slate-500 dark:text-slate-400">{t('subtitle')}</p>
       </div>
 

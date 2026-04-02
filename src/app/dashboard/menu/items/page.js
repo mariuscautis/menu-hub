@@ -6,12 +6,14 @@ import PageTabs from '@/components/PageTabs'
 import { menuNavTabs } from '@/components/PageTabsConfig'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import InfoTooltip from '@/components/InfoTooltip'
 import { useCurrency } from '@/lib/CurrencyContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 
 export default function Menu() {
   const t = useTranslations('menu')
   const tc = useTranslations('common')
+  const tg = useTranslations('guide')
   const { currencySymbol } = useCurrency()
   const supabase = useAdminSupabase()
   const [menuItems, setMenuItems] = useState([])
@@ -536,7 +538,10 @@ export default function Menu() {
       <PageTabs tabs={menuNavTabs} />
       <div className="flex flex-wrap justify-between items-start gap-3 mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
+          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+            {t('title')}
+            <InfoTooltip text={tg('menu_items_desc')} />
+          </h1>
           <p className="text-slate-500">{t('subtitle')}</p>
         </div>
         <button

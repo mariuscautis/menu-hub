@@ -9,10 +9,12 @@ import { useCurrency } from '@/lib/CurrencyContext';
 import { useModuleGuard } from '@/hooks/useModuleGuard'
 import PageTabs from '@/components/PageTabs'
 import { analyticsTabs } from '@/components/PageTabsConfig'
+import InfoTooltip from '@/components/InfoTooltip'
 
 export default function LaborAnalyticsPage() {
   useModuleGuard('analytics')
   const t = useTranslations('laborAnalytics');
+  const tg = useTranslations('guide');
   const { currencySymbol, formatCurrency } = useCurrency();
   const restaurantCtx = useRestaurant();
   const [restaurant, setRestaurant] = useState(null);
@@ -275,7 +277,7 @@ export default function LaborAnalyticsPage() {
       <PageTabs tabs={analyticsTabs} />
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">{t('title')}</h1>
+        <h1 className="text-3xl font-bold text-slate-800 mb-2 flex items-center gap-2">{t('title')}<InfoTooltip text={tg('analytics_labor_desc')} /></h1>
         <p className="text-slate-600">{t('subtitle')}</p>
       </div>
 

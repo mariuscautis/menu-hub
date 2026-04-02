@@ -5,6 +5,7 @@ import { useRestaurant } from '@/lib/RestaurantContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
 import { useTranslations, useLanguage } from '@/lib/i18n/LanguageContext'
+import InfoTooltip from '@/components/InfoTooltip'
 
 const RESTRICTION_LABELS = {
   blocked:      { label: 'Blocked',  cls: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800' },
@@ -24,6 +25,7 @@ export default function CustomersPage() {
   const restaurant = restaurantCtx?.restaurant
   const adminSupabase = useAdminSupabase()
   const t = useTranslations('customers')
+  const tg = useTranslations('guide')
   const { locale } = useLanguage()
 
   const [customers, setCustomers] = useState([])
@@ -284,7 +286,10 @@ export default function CustomersPage() {
       <div className={`flex-1 min-w-0 ${selected ? 'hidden md:block' : ''}`}>
         <div className="mb-6 flex items-center justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200">{t('title')}</h1>
+            <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+              {t('title')}
+              <InfoTooltip text={tg('customers_desc')} />
+            </h1>
             <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{t('subtitle', { count: customers.length })}</p>
           </div>
         </div>

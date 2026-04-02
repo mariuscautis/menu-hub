@@ -21,6 +21,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRestaurant } from '@/lib/RestaurantContext';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
+import InfoTooltip from '@/components/InfoTooltip';
 import { useCurrency } from '@/lib/CurrencyContext';
 
 import { useModuleGuard } from '@/hooks/useModuleGuard'
@@ -30,6 +31,7 @@ import { reportsNavTabs } from '@/components/PageTabsConfig'
 export default function ZReportPage() {
   useModuleGuard('reports')
   const t = useTranslations('zReport');
+  const tg = useTranslations('guide');
   const { currencySymbol, formatCurrency } = useCurrency();
   const restaurantCtx = useRestaurant();
   // Restaurant state
@@ -479,8 +481,9 @@ export default function ZReportPage() {
       <PageTabs tabs={reportsNavTabs} />
       <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200">
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
             {t('title') || 'Z-Report'}
+            <InfoTooltip text={tg('zreport_desc')} />
           </h1>
           <p className="text-slate-600 dark:text-slate-400">
             {t('subtitle')?.replace('{date}', formatDate(selectedDate)) || `Daily closeout report for ${formatDate(selectedDate)}`}

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
+import InfoTooltip from '@/components/InfoTooltip'
 import RevenueChart from '@/components/analytics/RevenueChart'
 import PeakHoursChart from '@/components/analytics/PeakHoursChart'
 import CategoryPieChart from '@/components/analytics/CategoryPieChart'
@@ -17,6 +18,7 @@ import { analyticsTabs } from '@/components/PageTabsConfig'
 export default function AnalyticsOverviewPage() {
   useModuleGuard('analytics')
   const t = useTranslations('analytics')
+  const tg = useTranslations('guide')
   const restaurantCtx = useRestaurant()
   const [loading, setLoading] = useState(true)
   const [restaurant, setRestaurant] = useState(null)
@@ -124,7 +126,7 @@ export default function AnalyticsOverviewPage() {
       <PageTabs tabs={analyticsTabs} />
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
+          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">{t('title')}<InfoTooltip text={tg('analytics_overview_desc')} /></h1>
           <p className="text-slate-500">{t('subtitle').replace('{restaurantName}', restaurant.name)}</p>
         </div>
         <ExportButton

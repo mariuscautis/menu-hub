@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations, useLanguage } from '@/lib/i18n/LanguageContext'
+import InfoTooltip from '@/components/InfoTooltip'
 import PageTabs from '@/components/PageTabs'
 import { settingsTabs } from '@/components/PageTabsConfig'
 
@@ -67,6 +68,7 @@ function formatDate(iso) {
 export default function BillingPage() {
   const { messages } = useLanguage()
   const t = useTranslations('billing')
+  const tg = useTranslations('guide')
   const restaurantCtx = useRestaurant()
   const searchParams  = useSearchParams()
 
@@ -254,7 +256,10 @@ export default function BillingPage() {
     <div>
       <PageTabs tabs={settingsTabs} />
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-white">{t('title')}</h1>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+          {t('title')}
+          <InfoTooltip text={tg('billing_desc')} />
+        </h1>
         <p className="text-slate-500 dark:text-slate-400">{t('subtitle')}</p>
       </div>
 

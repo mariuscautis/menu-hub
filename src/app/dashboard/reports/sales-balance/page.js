@@ -41,10 +41,12 @@ import { useModuleGuard } from '@/hooks/useModuleGuard'
 import PageTabs from '@/components/PageTabs'
 import { reportsNavTabs } from '@/components/PageTabsConfig'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import InfoTooltip from '@/components/InfoTooltip'
 
 export default function SalesBalanceReport() {
   useModuleGuard('reports')
   const t = useTranslations('salesBalance')
+  const tg = useTranslations('guide');
   const { formatCurrency } = useCurrency();
   const restaurantCtx = useRestaurant();
 
@@ -466,8 +468,9 @@ export default function SalesBalanceReport() {
       <PageTabs tabs={reportsNavTabs} />
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-1">
+        <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-1 flex items-center gap-2">
           {t('title')}
+          <InfoTooltip text={tg('reports_sales_balance_desc')} />
         </h1>
         <p className="text-slate-500 dark:text-slate-400 text-sm">
           {t('subtitle')}

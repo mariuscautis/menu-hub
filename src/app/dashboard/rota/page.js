@@ -14,6 +14,7 @@ import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import { supabase } from '@/lib/supabase';
 import { useRestaurant } from '@/lib/RestaurantContext';
 import { useTranslations, useLanguage } from '@/lib/i18n/LanguageContext';
+import InfoTooltip from '@/components/InfoTooltip';
 import { useModuleGuard } from '@/hooks/useModuleGuard';
 
 import ShiftModal from './ShiftModal';
@@ -30,6 +31,7 @@ const DnDCalendar = withDragAndDrop(Calendar);
 export default function RotaPage() {
   useModuleGuard('rota')
   const t = useTranslations('rota');
+  const tg = useTranslations('guide');
   const { locale } = useLanguage();
 
   // Set moment locale and create localizer based on current language
@@ -357,7 +359,10 @@ export default function RotaPage() {
       {/* Header */}
       <div className="flex flex-wrap justify-between items-start gap-3 mb-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200">{t('title')}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+            {t('title')}
+            <InfoTooltip text={tg('staff_rota_desc')} />
+          </h1>
           <p className="text-slate-600 dark:text-slate-400 mt-1">{t('subtitle')}</p>
         </div>
         <div className="flex flex-wrap gap-2">

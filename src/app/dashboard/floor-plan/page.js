@@ -6,6 +6,8 @@ import { CSS } from '@dnd-kit/utilities'
 import { supabase } from '@/lib/supabase'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
+import { useTranslations } from '@/lib/i18n/LanguageContext'
+import InfoTooltip from '@/components/InfoTooltip'
 
 // Draggable Table Component
 function DraggableTable({ table, isSelected, onClick }) {
@@ -123,6 +125,7 @@ function DecorativeElement({ element, isSelected, onClick }) {
 export default function FloorPlanPage() {
   const restaurantCtx = useRestaurant()
   const supabase = useAdminSupabase()
+  const tg = useTranslations('guide')
   const [restaurant, setRestaurant] = useState(null)
   const [floors, setFloors] = useState([])
   const [currentFloor, setCurrentFloor] = useState(null)
@@ -622,7 +625,7 @@ export default function FloorPlanPage() {
     return (
       <>
         <div className="p-8 max-w-2xl">
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-4">Floor Plan Designer</h1>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">Floor Plan Designer<InfoTooltip text={tg('floor_plan_desc')} /></h1>
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
             <p className="text-slate-700 dark:text-slate-300 mb-4">
               No floors found for your restaurant. Create your first floor to start designing your floor plan.

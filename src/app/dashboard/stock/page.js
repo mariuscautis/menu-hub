@@ -3,10 +3,12 @@
 import Link from 'next/link'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
+import InfoTooltip from '@/components/InfoTooltip'
 
 export default function StockHubPage() {
   useModuleGuard('ordering')
   const t = useTranslations('stock')
+  const tg = useTranslations('guide')
 
   const sections = [
     {
@@ -51,8 +53,9 @@ export default function StockHubPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-4 md:p-8">
       <div className="max-w-3xl mx-auto">
         <div className="mb-10 text-center">
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-2">
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-2 flex items-center justify-center gap-2">
             {t('hubTitle')}
+            <InfoTooltip text={tg('stock_desc')} />
           </h1>
           <p className="text-slate-500 dark:text-slate-400">
             {t('hubSubtitle')}

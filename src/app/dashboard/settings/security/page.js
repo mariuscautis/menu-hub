@@ -10,9 +10,11 @@ import { useTranslations } from '@/lib/i18n/LanguageContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import PageTabs from '@/components/PageTabs'
 import { settingsTabs } from '@/components/PageTabsConfig'
+import InfoTooltip from '@/components/InfoTooltip'
 
 export default function Security() {
   const t = useTranslations('security')
+  const tg = useTranslations('guide')
   const tc = useTranslations('common')
   const restaurantCtx = useRestaurant()
   const supabase = useAdminSupabase()
@@ -203,7 +205,7 @@ export default function Security() {
     <div>
       <PageTabs tabs={settingsTabs} />
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800">{t('title') || 'Security & Authentication'}</h1>
+        <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">{t('title') || 'Security & Authentication'}<InfoTooltip text={tg('security_desc')} /></h1>
         <p className="text-slate-500">{t('subtitle') || 'Manage staff login security and access control'}</p>
       </div>
 

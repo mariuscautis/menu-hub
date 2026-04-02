@@ -20,10 +20,12 @@ import { useTranslations } from '@/lib/i18n/LanguageContext';
 import { useCurrency } from '@/lib/CurrencyContext';
 import { useAdminSupabase } from '@/hooks/useAdminSupabase';
 import { useModuleGuard } from '@/hooks/useModuleGuard';
+import InfoTooltip from '@/components/InfoTooltip';
 
 export default function CashDrawerPage() {
   useModuleGuard('cash_drawer')
   const t = useTranslations('cashDrawer');
+  const tg = useTranslations('guide');
   const { currencySymbol, formatCurrency } = useCurrency();
   const restaurantCtx = useRestaurant();
   const supabase = useAdminSupabase();
@@ -362,8 +364,9 @@ export default function CashDrawerPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-4 md:p-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-2">
+        <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-2 flex items-center gap-2">
           {t('title') || 'Cash Drawer'}
+          <InfoTooltip text={tg('cash_drawer_desc')} />
         </h1>
         <p className="text-slate-600 dark:text-slate-400">
           {t('subtitle') || 'Manage cash drawer sessions and track variance'}

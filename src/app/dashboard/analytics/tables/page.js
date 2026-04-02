@@ -11,10 +11,12 @@ import { useCurrency } from '@/lib/CurrencyContext'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
 import PageTabs from '@/components/PageTabs'
 import { analyticsTabs } from '@/components/PageTabsConfig'
+import InfoTooltip from '@/components/InfoTooltip'
 
 export default function TableAnalyticsPage() {
   useModuleGuard('analytics')
   const t = useTranslations('tableAnalytics')
+  const tg = useTranslations('guide')
   const { currencySymbol, formatCurrency } = useCurrency()
   const restaurantCtx = useRestaurant()
   const [loading, setLoading] = useState(true)
@@ -100,7 +102,7 @@ export default function TableAnalyticsPage() {
             </button>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-slate-800">{t('title')}</h1>
+            <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">{t('title')}<InfoTooltip text={tg('analytics_tables_desc')} /></h1>
             <p className="text-slate-500">{t('subtitle').replace('{restaurantName}', restaurant.name)}</p>
           </div>
         </div>

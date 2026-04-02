@@ -16,6 +16,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRestaurant } from '@/lib/RestaurantContext';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
+import InfoTooltip from '@/components/InfoTooltip';
 import { useCurrency } from '@/lib/CurrencyContext';
 
 import { useModuleGuard } from '@/hooks/useModuleGuard'
@@ -25,6 +26,7 @@ import { reportsNavTabs } from '@/components/PageTabsConfig'
 export default function MonthlyReportPage() {
   useModuleGuard('reports')
   const t = useTranslations('monthlyReport');
+  const tg = useTranslations('guide');
   const { currencySymbol, formatCurrency } = useCurrency();
   const restaurantCtx = useRestaurant();
 
@@ -380,8 +382,9 @@ export default function MonthlyReportPage() {
       <PageTabs tabs={reportsNavTabs} />
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-2">
+        <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-2 flex items-center gap-2">
           {t('title') || 'Monthly Summary'}
+          <InfoTooltip text={tg('reports_monthly_desc')} />
         </h1>
         <p className="text-slate-600 dark:text-slate-400">
           {t('subtitle')?.replace('{month}', formatMonth(selectedMonth)) ||

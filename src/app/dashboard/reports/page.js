@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
+import InfoTooltip from '@/components/InfoTooltip';
 import { useModuleGuard } from '@/hooks/useModuleGuard';
 
 const reportKeys = [
@@ -94,13 +95,15 @@ const reportKeys = [
 export default function ReportsPage() {
   useModuleGuard('reports')
   const t = useTranslations('reports');
+  const tg = useTranslations('guide');
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-4 md:p-8">
       <div className="max-w-5xl mx-auto">
         <div className="mb-10 text-center">
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-2">
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-2 flex items-center justify-center gap-2">
             {t('title')}
+            <InfoTooltip text={tg('reports_desc')} />
           </h1>
           <p className="text-slate-500 dark:text-slate-400">
             {t('subtitle')}

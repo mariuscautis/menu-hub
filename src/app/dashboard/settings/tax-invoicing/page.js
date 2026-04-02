@@ -9,10 +9,12 @@ import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
 import PageTabs from '@/components/PageTabs'
 import { settingsTabs } from '@/components/PageTabsConfig'
+import InfoTooltip from '@/components/InfoTooltip'
 
 export default function TaxInvoicing() {
   useModuleGuard('ordering')
   const t = useTranslations('taxInvoicing')
+  const tg = useTranslations('guide')
   const restaurantCtx = useRestaurant()
   const supabase = useAdminSupabase()
   const [restaurant, setRestaurant] = useState(null)
@@ -107,7 +109,7 @@ export default function TaxInvoicing() {
     <div>
       <PageTabs tabs={settingsTabs} />
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800">{t('pageTitle')}</h1>
+        <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">{t('pageTitle')}<InfoTooltip text={tg('tax_invoicing_desc')} /></h1>
         <p className="text-slate-500">{t('pageSubtitle')}</p>
       </div>
 

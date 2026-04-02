@@ -6,6 +6,8 @@ import { usePathname, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import NotificationBell from '@/components/NotificationBell'
 import ThemeToggle from '@/components/ThemeToggle'
+import GuideToggle from '@/components/GuideToggle'
+import { GuideProvider } from '@/lib/GuideContext'
 import OfflineIndicator from '@/components/OfflineIndicator'
 import HubConnectionStatus from '@/components/HubConnectionStatus'
 import { initAutoSync } from '@/lib/syncManager'
@@ -925,6 +927,19 @@ export default function DashboardLayout({ children }) {
 
     if (userType === 'owner' || userType === 'staff-admin') {
       items.push({
+        href: '/dashboard/guide',
+        labelKey: 'guide',
+        label: 'Guide',
+        icon: (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+        )
+      })
+    }
+
+    if (userType === 'owner' || userType === 'staff-admin') {
+      items.push({
         href: '/dashboard/support',
         labelKey: 'support',
         label: 'Support',
@@ -1019,6 +1034,7 @@ export default function DashboardLayout({ children }) {
   const restaurantCurrency = restaurant?.invoice_settings?.currency || 'EUR'
 
   return (
+    <GuideProvider>
     <CurrencyProvider currency={restaurantCurrency}>
     <LanguageProvider>
       <div className={`min-h-screen bg-slate-50 dark:bg-slate-950 flex relative${isImpersonating ? ' pt-10' : ''}`}>
@@ -1582,6 +1598,7 @@ export default function DashboardLayout({ children }) {
                 <div className="flex-1">
                   <LanguageSelector className="w-full" />
                 </div>
+                <GuideToggle />
                 <ThemeToggle />
               </div>
 
@@ -1599,9 +1616,10 @@ export default function DashboardLayout({ children }) {
               </div>
             </>
           ) : (
-            /* Collapsed bottom cluster: language + theme + notification + red logout dot */
+            /* Collapsed bottom cluster: language + theme + guide + notification + red logout dot */
             <div className="flex flex-col items-center gap-1 py-3">
               <LanguageSelector collapsed />
+              <GuideToggle collapsed />
               <ThemeToggle />
               <NotificationBell />
               <button
@@ -1639,5 +1657,6 @@ export default function DashboardLayout({ children }) {
       </div>
     </LanguageProvider>
     </CurrencyProvider>
+    </GuideProvider>
   )
 }
