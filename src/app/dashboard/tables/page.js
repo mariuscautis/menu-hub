@@ -156,6 +156,7 @@ export default function Tables() {
   const [terminalDeclineReason, setTerminalDeclineReason] = useState(null)
   const terminalTimerRef = useRef(null)
   const terminalPollRef = useRef(null)
+  const fetchOrderInfoInProgress = useRef(false)
   const [showExternalTerminal, setShowExternalTerminal] = useState(false)
   const [externalTerminalRef, setExternalTerminalRef] = useState('')
   const [showExternalTerminalRef, setShowExternalTerminalRef] = useState(false)
@@ -175,7 +176,7 @@ export default function Tables() {
 
   useEffect(() => {
     fetchData()
-  }, [restaurantCtx])
+  }, [restaurantCtx?.restaurant?.id])
 
   // Debug: Log when orderItems changes to detect duplicates
   useEffect(() => {
@@ -386,7 +387,7 @@ export default function Tables() {
       supabase.removeChannel(splitBillsChannel)
       clearInterval(pollingInterval)
     }
-  }, [restaurant])
+  }, [restaurant?.id])
 
   const fetchData = async () => {
     if (!restaurantCtx?.restaurant) return
@@ -434,7 +435,12 @@ export default function Tables() {
   }
 
   const fetchTableOrderInfo = async (restaurantId) => {
-    // Get all unpaid, non-cancelled orders with their items
+    // Guard against concurrent calls — only one fetch at a time
+    if (fetchOrderInfoInProgress.current) return
+    fetchOrderInfoInProgress.current = true
+
+    try {
+      // Get all unpaid, non-cancelled orders with their items
     const { data: orders } = await supabase
       .from('orders')
       .select(`
@@ -538,8 +544,8 @@ export default function Tables() {
       }
     })
 
-    // Merge with pending offline orders (so they persist in UI when offline)
-    try {
+    // Merge with pending offline orders (only when offline — skip IDB when online)
+    if (!navigator.onLine) try {
       const offlineOrdersByTable = await Promise.race([
         getAllPendingOrdersByTable(),
         new Promise((_, reject) => setTimeout(() => reject(new Error('idb_timeout')), 3000))
@@ -562,8 +568,8 @@ export default function Tables() {
       console.warn('Failed to get offline orders for merge:', err)
     }
 
-    // Also merge pending order updates (items added to existing orders while offline)
-    try {
+    // Also merge pending order updates (only when offline — skip IDB when online)
+    if (!navigator.onLine) try {
       const offlineUpdatesByTable = await Promise.race([
         getAllPendingOrderUpdatesByTable(),
         new Promise((_, reject) => setTimeout(() => reject(new Error('idb_timeout')), 3000))
@@ -587,6 +593,9 @@ export default function Tables() {
 
     console.log('fetchTableOrderInfo result:', orderInfo)
     setTableOrderInfo(orderInfo)
+    } finally {
+      fetchOrderInfoInProgress.current = false
+    }
   }
 
   const fetchTodayReservations = async (restaurantId) => {
