@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
@@ -1041,6 +1041,17 @@ export default function DashboardLayout({ children }) {
   const departmentLabel = getDepartmentLabel()
   const restaurantCurrency = restaurant?.invoice_settings?.currency || 'EUR'
 
+  // Memoize the context value so that 60fps rAF re-renders from useInactivityTimeout
+  // don't create a new context object every frame and cause all context consumers to re-render.
+  const restaurantContextValue = useMemo(() => ({
+    restaurant,
+    userType,
+    staffDepartment,
+    departmentPermissions,
+    isPlatformAdmin,
+    enabledModules: restaurant?.enabled_modules || {},
+  }), [restaurant, userType, staffDepartment, departmentPermissions, isPlatformAdmin])
+
   return (
     <GuideProvider>
     <CurrencyProvider currency={restaurantCurrency}>
@@ -1672,7 +1683,7 @@ export default function DashboardLayout({ children }) {
       `}>
         {/* Full-width wrapper for the content */}
         <div className={`${fullWidthMode ? 'h-[calc(100vh-4rem)] overflow-auto' : ''}`}>
-          <RestaurantProvider value={{ restaurant, userType, staffDepartment, departmentPermissions, isPlatformAdmin, enabledModules: restaurant?.enabled_modules || {} }}>
+          <RestaurantProvider value={restaurantContextValue}>
             {children}
           </RestaurantProvider>
         </div>
