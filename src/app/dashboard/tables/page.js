@@ -853,7 +853,10 @@ export default function Tables() {
     // CRITICAL CHECK: If there's a pending payment for this table, it means the table
     // was just paid (even if offline). Don't load any cached order data - start fresh.
     try {
-      const pendingPayments = await getPendingPaymentsForTable(table.id)
+      const pendingPayments = await Promise.race([
+        getPendingPaymentsForTable(table.id),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('idb_timeout')), 3000))
+      ])
       if (pendingPayments && pendingPayments.length > 0) {
         console.log('Table has pending payment - starting fresh (table was paid offline)')
         setShowOrderModal(true)
@@ -868,7 +871,10 @@ export default function Tables() {
     // NOTE: Don't return early - we need to also check for cached online orders
     let pendingOfflineOrders = []
     try {
-      pendingOfflineOrders = await getPendingOrdersForTable(table.id) || []
+      pendingOfflineOrders = await Promise.race([
+        getPendingOrdersForTable(table.id),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('idb_timeout')), 3000))
+      ]) || []
       if (pendingOfflineOrders.length > 0) {
         console.log('Found pending offline orders:', pendingOfflineOrders.length)
       }
@@ -1054,7 +1060,10 @@ export default function Tables() {
       // ONLY do this when OFFLINE - when online, Supabase has the source of truth
       if (!navigator.onLine) {
         try {
-          const pendingUpdates = await getPendingOrderUpdatesForTable(table.id)
+          const pendingUpdates = await Promise.race([
+            getPendingOrderUpdatesForTable(table.id),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('idb_timeout')), 3000))
+          ])
           const orderUpdates = pendingUpdates.filter(u => u.order_id === existingOrder.id)
           if (orderUpdates.length > 0) {
             console.log('OFFLINE: Found pending order updates:', orderUpdates.length)
