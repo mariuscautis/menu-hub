@@ -20,6 +20,8 @@ function NavLabel({ labelKey }) {
 import { CurrencyProvider } from '@/lib/CurrencyContext'
 import LanguageSelector from '@/components/LanguageSelector'
 import { useSessionValidator } from '@/hooks/useSessionValidator'
+import { useInactivityTimeout } from '@/hooks/useInactivityTimeout'
+import InactivityRing from '@/components/InactivityRing'
 import PlatformLogo from '@/components/PlatformLogo'
 import { RestaurantProvider } from '@/lib/RestaurantContext'
 
@@ -54,6 +56,12 @@ export default function DashboardLayout({ children }) {
   useSessionValidator({
     enabled: userType === 'staff' || userType === 'staff-admin',
     validateInterval: 30000 // 30 seconds
+  })
+
+  // Inactivity auto-logout for staff users (PIN-based login only)
+  const isStaffUser = userType === 'staff' || userType === 'staff-admin'
+  const { progress: inactivityProgress, timeRemaining: inactivityTimeRemaining, setting: inactivitySetting, updateSetting: updateInactivitySetting } = useInactivityTimeout({
+    enabled: isStaffUser && !loading
   })
 
   // Detect screen size for initial sidebar state
@@ -1598,6 +1606,15 @@ export default function DashboardLayout({ children }) {
                 <div className="flex-1">
                   <LanguageSelector className="w-full" />
                 </div>
+                {isStaffUser && (
+                  <InactivityRing
+                    progress={inactivityProgress}
+                    timeRemaining={inactivityTimeRemaining}
+                    setting={inactivitySetting}
+                    onSettingChange={updateInactivitySetting}
+                    sidebarOpen={false}
+                  />
+                )}
                 <GuideToggle />
                 <ThemeToggle />
               </div>
@@ -1622,6 +1639,15 @@ export default function DashboardLayout({ children }) {
               <GuideToggle collapsed />
               <ThemeToggle />
               <NotificationBell />
+              {isStaffUser && (
+                <InactivityRing
+                  progress={inactivityProgress}
+                  timeRemaining={inactivityTimeRemaining}
+                  setting={inactivitySetting}
+                  onSettingChange={updateInactivitySetting}
+                  sidebarOpen={false}
+                />
+              )}
               <button
                 onClick={handleLogout}
                 title="Log out"
