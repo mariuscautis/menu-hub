@@ -308,7 +308,7 @@ export default function CustomerMenu({ params }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ orderId: order.id, restaurantId: restaurant.id }),
-      }).catch(() => {}) // Non-blocking — a print failure must never block the order
+      }).then(r => r.json()).then(d => console.log('[print-jobs]', d)).catch(e => console.error('[print-jobs] error', e))
 
       setOrderPlaced(true)
       setCart([])
