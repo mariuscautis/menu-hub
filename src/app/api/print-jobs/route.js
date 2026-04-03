@@ -49,10 +49,10 @@ export async function POST(request) {
     return NextResponse.json({ created: 0 })
   }
 
-  // Fetch order items with their menu item departments
+  // Fetch order items — department is stored directly on the row
   const { data: orderItems, error: itemsError } = await supabase
     .from('order_items')
-    .select('id, menu_item_id, menu_items(department)')
+    .select('id, department')
     .eq('order_id', orderId)
 
   if (itemsError) {
@@ -61,7 +61,7 @@ export async function POST(request) {
 
   // Collect which departments are actually present in this order
   const departmentsInOrder = new Set(
-    (orderItems || []).map(oi => oi.menu_items?.department || 'universal')
+    (orderItems || []).map(oi => oi.department || 'universal')
   )
 
   // For each printer, create a job only if the order contains items for that department

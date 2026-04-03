@@ -293,7 +293,8 @@ export default function CustomerMenu({ params }) {
         name: item.name,
         quantity: item.quantity,
         price_at_time: item.price,
-        special_instructions: item.special_instructions || null
+        special_instructions: item.special_instructions || null,
+        department: item.department || 'universal'
       }))
 
       const { error: itemsError } = await supabase

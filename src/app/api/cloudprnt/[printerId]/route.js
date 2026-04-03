@@ -35,7 +35,7 @@ export async function GET(request, { params }) {
         orders (
           id, created_at, notes, order_type, customer_name,
           tables ( table_number ),
-          order_items ( id, name, quantity, special_instructions )
+          order_items ( id, name, quantity, special_instructions, department )
         )
       `)
       .eq('id', jobToken)
@@ -64,26 +64,9 @@ export async function GET(request, { params }) {
     const printerName = printer.data?.name || ''
 
     // Filter order items to only this printer's department
-    // 'universal' items print on all printers
-    // We fetch menu_items.department via a separate lookup
-    const itemIds = order.order_items.map(i => i.id)
-    let departmentByItemId = {}
-
-    if (itemIds.length > 0) {
-      const { data: menuItems } = await supabase
-        .from('order_items')
-        .select('id, menu_item_id, menu_items(department)')
-        .in('id', itemIds)
-
-      if (menuItems) {
-        menuItems.forEach(oi => {
-          departmentByItemId[oi.id] = oi.menu_items?.department || 'universal'
-        })
-      }
-    }
-
+    // department is stored directly on each order_item row
     const relevantItems = order.order_items.filter(item => {
-      const dept = departmentByItemId[item.id] || 'universal'
+      const dept = item.department || 'universal'
       return dept === department || dept === 'universal'
     })
 
