@@ -401,10 +401,8 @@ export default function Tables() {
       .select('*')
       .eq('restaurant_id', restaurantData.id)
       .order('table_number')
-
     setTables(tablesData || [])
 
-    // Fetch floors for filter tabs
     const { data: floorsData } = await supabase
       .from('floors')
       .select('id, name, level')
@@ -412,59 +410,25 @@ export default function Tables() {
       .order('level', { ascending: true })
     setFloors(floorsData || [])
 
-    // Fetch menu items for order placement (only in-stock items)
-    const { data: items, error: itemsError } = await supabase
-      .rpc('get_available_menu_items', { p_restaurant_id: restaurantData.id })
+    const { data: allMenuItems } = await supabase
+      .from('menu_items')
+      .select('id, name, price, available, department, category_id, sort_order, requires_special_instructions, special_instructions_label')
+      .eq('restaurant_id', restaurantData.id)
+      .eq('available', true)
+      .order('sort_order')
+    setMenuItems(allMenuItems || [])
 
     const { data: cats, error: catsError } = await supabase
       .from('menu_categories')
       .select('*')
       .eq('restaurant_id', restaurantData.id)
       .order('sort_order')
-
-    if (itemsError) {
-      console.error('Menu items error:', itemsError)
-      // Fallback to regular query if RPC fails
-      const { data: fallbackItems } = await supabase
-        .from('menu_items')
-        .select('*')
-        .eq('restaurant_id', restaurantData.id)
-        .eq('available', true)
-        .order('sort_order')
-      setMenuItems(fallbackItems || [])
-    } else {
-      console.log('Menu items loaded (in stock only):', items)
-      // RPC might not return special_instructions fields, fetch them separately and merge
-      const { data: menuItemsWithInstructions } = await supabase
-        .from('menu_items')
-        .select('id, requires_special_instructions, special_instructions_label')
-        .eq('restaurant_id', restaurantData.id)
-
-      // Merge special instructions data into the items from RPC
-      const mergedItems = (items || []).map(item => {
-        const extra = menuItemsWithInstructions?.find(mi => mi.id === item.id)
-        return {
-          ...item,
-          requires_special_instructions: extra?.requires_special_instructions || false,
-          special_instructions_label: extra?.special_instructions_label || null
-        }
-      })
-      setMenuItems(mergedItems)
-    }
-
     if (catsError) console.error('Categories error:', catsError)
-    console.log('Categories loaded:', cats)
-
     setCategories(cats || [])
 
-    // Fetch unpaid order info for all tables
-    await fetchTableOrderInfo(restaurantData.id)
-
-    // Fetch today's reservations for all tables
-    await fetchTodayReservations(restaurantData.id)
-
-    // Fetch pending waiter calls for all tables
-    await fetchWaiterCalls(restaurantData.id)
+    try { await fetchTableOrderInfo(restaurantData.id) } catch (e) { console.warn('fetchTableOrderInfo failed:', e) }
+    try { await fetchTodayReservations(restaurantData.id) } catch (e) { console.warn('fetchTodayReservations failed:', e) }
+    try { await fetchWaiterCalls(restaurantData.id) } catch (e) { console.warn('fetchWaiterCalls failed:', e) }
 
     setLoading(false)
   }
@@ -493,7 +457,6 @@ export default function Tables() {
       .eq('restaurant_id', restaurantId)
       .eq('paid', false)
       .neq('status', 'cancelled')
-
     // Build a set of all order_item ids from the current unpaid orders
     const unpaidOrderItemIds = new Set()
     orders?.forEach(order => {
@@ -503,8 +466,6 @@ export default function Tables() {
     })
 
     // Get completed split bills whose items belong to the current unpaid orders only.
-    // Fetching split_bill_items lets us match by order_item_id so old paid sessions
-    // on the same table don't bleed into a new open order.
     let splitBillTotalsByTable = {}
     if (unpaidOrderItemIds.size > 0) {
       const { data: splitBills } = await supabase
@@ -579,7 +540,10 @@ export default function Tables() {
 
     // Merge with pending offline orders (so they persist in UI when offline)
     try {
-      const offlineOrdersByTable = await getAllPendingOrdersByTable()
+      const offlineOrdersByTable = await Promise.race([
+        getAllPendingOrdersByTable(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('idb_timeout')), 3000))
+      ])
       Object.entries(offlineOrdersByTable).forEach(([tableId, offlineData]) => {
         if (orderInfo[tableId]) {
           // Add offline orders to existing table data
@@ -600,7 +564,10 @@ export default function Tables() {
 
     // Also merge pending order updates (items added to existing orders while offline)
     try {
-      const offlineUpdatesByTable = await getAllPendingOrderUpdatesByTable()
+      const offlineUpdatesByTable = await Promise.race([
+        getAllPendingOrderUpdatesByTable(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('idb_timeout')), 3000))
+      ])
       Object.entries(offlineUpdatesByTable).forEach(([tableId, updateData]) => {
         if (orderInfo[tableId]) {
           // Add offline update totals to existing table data
