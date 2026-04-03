@@ -147,6 +147,13 @@ export default function useOfflineOrder() {
           console.error('Failed to send confirmation email:', emailErr)
         }
 
+        // Trigger CloudPRNT print jobs (fire-and-forget)
+        fetch('/api/print-jobs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId: order.id, restaurantId: restaurant.id }),
+        }).catch(() => {})
+
         return { success: true, pickupCode, offline: false, via: 'supabase' }
       } catch (err) {
         // If the online attempt fails (e.g., network dropped mid-request),

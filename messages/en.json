@@ -2737,6 +2737,8 @@
     "reservationsDesc": "Booking slots, operating hours and availability",
     "payments": "Payments",
     "paymentsDesc": "Connect your Stripe account to collect booking deposits",
+    "printers": "Printers",
+    "printersDesc": "CloudPRNT kitchen and bar ticket printers",
     "dataMigration": "Data Migration",
     "dataMigrationDesc": "Import or export your restaurant data"
   },

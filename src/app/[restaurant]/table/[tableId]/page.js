@@ -302,6 +302,13 @@ export default function CustomerMenu({ params }) {
 
       if (itemsError) throw itemsError
 
+      // Trigger print jobs for any configured CloudPRNT printers (fire-and-forget)
+      fetch('/api/print-jobs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: order.id, restaurantId: restaurant.id }),
+      }).catch(() => {}) // Non-blocking — a print failure must never block the order
+
       setOrderPlaced(true)
       setCart([])
       setShowCart(false)
