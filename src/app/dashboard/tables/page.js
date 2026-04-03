@@ -156,7 +156,6 @@ export default function Tables() {
   const [terminalDeclineReason, setTerminalDeclineReason] = useState(null)
   const terminalTimerRef = useRef(null)
   const terminalPollRef = useRef(null)
-  const fetchOrderInfoInProgress = useRef(false)
   const [showExternalTerminal, setShowExternalTerminal] = useState(false)
   const [externalTerminalRef, setExternalTerminalRef] = useState('')
   const [showExternalTerminalRef, setShowExternalTerminalRef] = useState(false)
@@ -176,7 +175,7 @@ export default function Tables() {
 
   useEffect(() => {
     fetchData()
-  }, [restaurantCtx?.restaurant?.id])
+  }, [restaurantCtx])
 
   // Debug: Log when orderItems changes to detect duplicates
   useEffect(() => {
@@ -387,7 +386,7 @@ export default function Tables() {
       supabase.removeChannel(splitBillsChannel)
       clearInterval(pollingInterval)
     }
-  }, [restaurant?.id])
+  }, [restaurant])
 
   const fetchData = async () => {
     if (!restaurantCtx?.restaurant) return
@@ -402,8 +401,10 @@ export default function Tables() {
       .select('*')
       .eq('restaurant_id', restaurantData.id)
       .order('table_number')
+
     setTables(tablesData || [])
 
+    // Fetch floors for filter tabs
     const { data: floorsData } = await supabase
       .from('floors')
       .select('id, name, level')
@@ -411,36 +412,65 @@ export default function Tables() {
       .order('level', { ascending: true })
     setFloors(floorsData || [])
 
-    const { data: allMenuItems } = await supabase
-      .from('menu_items')
-      .select('id, name, price, available, department, category_id, sort_order, requires_special_instructions, special_instructions_label')
-      .eq('restaurant_id', restaurantData.id)
-      .eq('available', true)
-      .order('sort_order')
-    setMenuItems(allMenuItems || [])
+    // Fetch menu items for order placement (only in-stock items)
+    const { data: items, error: itemsError } = await supabase
+      .rpc('get_available_menu_items', { p_restaurant_id: restaurantData.id })
 
     const { data: cats, error: catsError } = await supabase
       .from('menu_categories')
       .select('*')
       .eq('restaurant_id', restaurantData.id)
       .order('sort_order')
+
+    if (itemsError) {
+      console.error('Menu items error:', itemsError)
+      // Fallback to regular query if RPC fails
+      const { data: fallbackItems } = await supabase
+        .from('menu_items')
+        .select('*')
+        .eq('restaurant_id', restaurantData.id)
+        .eq('available', true)
+        .order('sort_order')
+      setMenuItems(fallbackItems || [])
+    } else {
+      console.log('Menu items loaded (in stock only):', items)
+      // RPC might not return special_instructions fields, fetch them separately and merge
+      const { data: menuItemsWithInstructions } = await supabase
+        .from('menu_items')
+        .select('id, requires_special_instructions, special_instructions_label')
+        .eq('restaurant_id', restaurantData.id)
+
+      // Merge special instructions data into the items from RPC
+      const mergedItems = (items || []).map(item => {
+        const extra = menuItemsWithInstructions?.find(mi => mi.id === item.id)
+        return {
+          ...item,
+          requires_special_instructions: extra?.requires_special_instructions || false,
+          special_instructions_label: extra?.special_instructions_label || null
+        }
+      })
+      setMenuItems(mergedItems)
+    }
+
     if (catsError) console.error('Categories error:', catsError)
+    console.log('Categories loaded:', cats)
+
     setCategories(cats || [])
 
-    try { await fetchTableOrderInfo(restaurantData.id) } catch (e) { console.warn('fetchTableOrderInfo failed:', e) }
-    try { await fetchTodayReservations(restaurantData.id) } catch (e) { console.warn('fetchTodayReservations failed:', e) }
-    try { await fetchWaiterCalls(restaurantData.id) } catch (e) { console.warn('fetchWaiterCalls failed:', e) }
+    // Fetch unpaid order info for all tables
+    await fetchTableOrderInfo(restaurantData.id)
+
+    // Fetch today's reservations for all tables
+    await fetchTodayReservations(restaurantData.id)
+
+    // Fetch pending waiter calls for all tables
+    await fetchWaiterCalls(restaurantData.id)
 
     setLoading(false)
   }
 
   const fetchTableOrderInfo = async (restaurantId) => {
-    // Guard against concurrent calls — only one fetch at a time
-    if (fetchOrderInfoInProgress.current) return
-    fetchOrderInfoInProgress.current = true
-
-    try {
-      // Get all unpaid, non-cancelled orders with their items
+    // Get all unpaid, non-cancelled orders with their items
     const { data: orders } = await supabase
       .from('orders')
       .select(`
@@ -463,6 +493,7 @@ export default function Tables() {
       .eq('restaurant_id', restaurantId)
       .eq('paid', false)
       .neq('status', 'cancelled')
+
     // Build a set of all order_item ids from the current unpaid orders
     const unpaidOrderItemIds = new Set()
     orders?.forEach(order => {
@@ -472,6 +503,8 @@ export default function Tables() {
     })
 
     // Get completed split bills whose items belong to the current unpaid orders only.
+    // Fetching split_bill_items lets us match by order_item_id so old paid sessions
+    // on the same table don't bleed into a new open order.
     let splitBillTotalsByTable = {}
     if (unpaidOrderItemIds.size > 0) {
       const { data: splitBills } = await supabase
@@ -544,12 +577,9 @@ export default function Tables() {
       }
     })
 
-    // Merge with pending offline orders (only when offline — skip IDB when online)
-    if (!navigator.onLine) try {
-      const offlineOrdersByTable = await Promise.race([
-        getAllPendingOrdersByTable(),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('idb_timeout')), 3000))
-      ])
+    // Merge with pending offline orders (so they persist in UI when offline)
+    try {
+      const offlineOrdersByTable = await getAllPendingOrdersByTable()
       Object.entries(offlineOrdersByTable).forEach(([tableId, offlineData]) => {
         if (orderInfo[tableId]) {
           // Add offline orders to existing table data
@@ -568,12 +598,9 @@ export default function Tables() {
       console.warn('Failed to get offline orders for merge:', err)
     }
 
-    // Also merge pending order updates (only when offline — skip IDB when online)
-    if (!navigator.onLine) try {
-      const offlineUpdatesByTable = await Promise.race([
-        getAllPendingOrderUpdatesByTable(),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('idb_timeout')), 3000))
-      ])
+    // Also merge pending order updates (items added to existing orders while offline)
+    try {
+      const offlineUpdatesByTable = await getAllPendingOrderUpdatesByTable()
       Object.entries(offlineUpdatesByTable).forEach(([tableId, updateData]) => {
         if (orderInfo[tableId]) {
           // Add offline update totals to existing table data
@@ -593,9 +620,6 @@ export default function Tables() {
 
     console.log('fetchTableOrderInfo result:', orderInfo)
     setTableOrderInfo(orderInfo)
-    } finally {
-      fetchOrderInfoInProgress.current = false
-    }
   }
 
   const fetchTodayReservations = async (restaurantId) => {
@@ -862,10 +886,7 @@ export default function Tables() {
     // CRITICAL CHECK: If there's a pending payment for this table, it means the table
     // was just paid (even if offline). Don't load any cached order data - start fresh.
     try {
-      const pendingPayments = await Promise.race([
-        getPendingPaymentsForTable(table.id),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('idb_timeout')), 3000))
-      ])
+      const pendingPayments = await getPendingPaymentsForTable(table.id)
       if (pendingPayments && pendingPayments.length > 0) {
         console.log('Table has pending payment - starting fresh (table was paid offline)')
         setShowOrderModal(true)
@@ -880,10 +901,7 @@ export default function Tables() {
     // NOTE: Don't return early - we need to also check for cached online orders
     let pendingOfflineOrders = []
     try {
-      pendingOfflineOrders = await Promise.race([
-        getPendingOrdersForTable(table.id),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('idb_timeout')), 3000))
-      ]) || []
+      pendingOfflineOrders = await getPendingOrdersForTable(table.id) || []
       if (pendingOfflineOrders.length > 0) {
         console.log('Found pending offline orders:', pendingOfflineOrders.length)
       }
@@ -1069,10 +1087,7 @@ export default function Tables() {
       // ONLY do this when OFFLINE - when online, Supabase has the source of truth
       if (!navigator.onLine) {
         try {
-          const pendingUpdates = await Promise.race([
-            getPendingOrderUpdatesForTable(table.id),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('idb_timeout')), 3000))
-          ])
+          const pendingUpdates = await getPendingOrderUpdatesForTable(table.id)
           const orderUpdates = pendingUpdates.filter(u => u.order_id === existingOrder.id)
           if (orderUpdates.length > 0) {
             console.log('OFFLINE: Found pending order updates:', orderUpdates.length)

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
@@ -1023,18 +1023,6 @@ export default function DashboardLayout({ children }) {
     }
   }
 
-  // Memoize the context value so that 60fps rAF re-renders from useInactivityTimeout
-  // don't create a new context object every frame and cause all context consumers to re-render.
-  // Must be before any conditional return to satisfy Rules of Hooks.
-  const restaurantContextValue = useMemo(() => ({
-    restaurant,
-    userType,
-    staffDepartment,
-    departmentPermissions,
-    isPlatformAdmin,
-    enabledModules: restaurant?.enabled_modules || {},
-  }), [restaurant, userType, staffDepartment, departmentPermissions, isPlatformAdmin])
-
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-6">
@@ -1684,7 +1672,7 @@ export default function DashboardLayout({ children }) {
       `}>
         {/* Full-width wrapper for the content */}
         <div className={`${fullWidthMode ? 'h-[calc(100vh-4rem)] overflow-auto' : ''}`}>
-          <RestaurantProvider value={restaurantContextValue}>
+          <RestaurantProvider value={{ restaurant, userType, staffDepartment, departmentPermissions, isPlatformAdmin, enabledModules: restaurant?.enabled_modules || {} }}>
             {children}
           </RestaurantProvider>
         </div>

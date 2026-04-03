@@ -293,8 +293,7 @@ export default function CustomerMenu({ params }) {
         name: item.name,
         quantity: item.quantity,
         price_at_time: item.price,
-        special_instructions: item.special_instructions || null,
-        department: item.department || 'universal'
+        special_instructions: item.special_instructions || null
       }))
 
       const { error: itemsError } = await supabase
@@ -302,13 +301,6 @@ export default function CustomerMenu({ params }) {
         .insert(orderItems)
 
       if (itemsError) throw itemsError
-
-      // Trigger print jobs for any configured CloudPRNT printers (fire-and-forget)
-      fetch('/api/print-jobs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: order.id, restaurantId: restaurant.id }),
-      }).then(r => r.json()).then(d => console.log('[print-jobs]', d)).catch(e => console.error('[print-jobs] error', e))
 
       setOrderPlaced(true)
       setCart([])
