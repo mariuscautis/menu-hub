@@ -578,8 +578,12 @@ export default function Tables() {
     })
 
     // Merge with pending offline orders (so they persist in UI when offline)
+    // Use a timeout so a broken/unavailable IndexedDB never hangs the page
     try {
-      const offlineOrdersByTable = await getAllPendingOrdersByTable()
+      const offlineOrdersByTable = await Promise.race([
+        getAllPendingOrdersByTable(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('idb_timeout')), 3000))
+      ])
       Object.entries(offlineOrdersByTable).forEach(([tableId, offlineData]) => {
         if (orderInfo[tableId]) {
           // Add offline orders to existing table data
@@ -600,7 +604,10 @@ export default function Tables() {
 
     // Also merge pending order updates (items added to existing orders while offline)
     try {
-      const offlineUpdatesByTable = await getAllPendingOrderUpdatesByTable()
+      const offlineUpdatesByTable = await Promise.race([
+        getAllPendingOrderUpdatesByTable(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('idb_timeout')), 3000))
+      ])
       Object.entries(offlineUpdatesByTable).forEach(([tableId, updateData]) => {
         if (orderInfo[tableId]) {
           // Add offline update totals to existing table data
