@@ -1023,6 +1023,18 @@ export default function DashboardLayout({ children }) {
     }
   }
 
+  // Memoize the context value so that 60fps rAF re-renders from useInactivityTimeout
+  // don't create a new context object every frame and cause all context consumers to re-render.
+  // Must be before any conditional return to satisfy Rules of Hooks.
+  const restaurantContextValue = useMemo(() => ({
+    restaurant,
+    userType,
+    staffDepartment,
+    departmentPermissions,
+    isPlatformAdmin,
+    enabledModules: restaurant?.enabled_modules || {},
+  }), [restaurant, userType, staffDepartment, departmentPermissions, isPlatformAdmin])
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-6">
@@ -1040,17 +1052,6 @@ export default function DashboardLayout({ children }) {
   const userLabel = getUserLabel()
   const departmentLabel = getDepartmentLabel()
   const restaurantCurrency = restaurant?.invoice_settings?.currency || 'EUR'
-
-  // Memoize the context value so that 60fps rAF re-renders from useInactivityTimeout
-  // don't create a new context object every frame and cause all context consumers to re-render.
-  const restaurantContextValue = useMemo(() => ({
-    restaurant,
-    userType,
-    staffDepartment,
-    departmentPermissions,
-    isPlatformAdmin,
-    enabledModules: restaurant?.enabled_modules || {},
-  }), [restaurant, userType, staffDepartment, departmentPermissions, isPlatformAdmin])
 
   return (
     <GuideProvider>
