@@ -6,6 +6,7 @@ import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
 import { useTranslations, useLanguage } from '@/lib/i18n/LanguageContext'
 import InfoTooltip from '@/components/InfoTooltip'
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 const RESTRICTION_LABELS = {
   blocked:      { label: 'Blocked',  cls: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800' },
@@ -281,6 +282,7 @@ export default function CustomersPage() {
   if (loading) return <div className="text-slate-500 p-8">{t('loadingCustomers')}</div>
 
   return (
+    <OfflinePageGuard>
     <div className="flex h-full gap-0">
       {/* Main list */}
       <div className={`flex-1 min-w-0 ${selected ? 'hidden md:block' : ''}`}>
@@ -626,5 +628,6 @@ export default function CustomersPage() {
         </div>
       )}
     </div>
+    </OfflinePageGuard>
   )
 }

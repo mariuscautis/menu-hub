@@ -8,6 +8,7 @@ import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import { supabase } from '@/lib/supabase'
 import PageTabs from '@/components/PageTabs'
 import { staffTabs } from '@/components/PageTabsConfig'
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 function StaffAvatar({ avatarUrl, name, size = 'md' }) {
   const sizeClasses = size === 'sm' ? 'w-8 h-8 text-xs' : 'w-10 h-10 text-sm'
@@ -332,6 +333,7 @@ export default function StaffMembers() {
   if (!restaurant) return <div className="text-slate-500">{t('noPermission')}</div>
 
   return (
+    <OfflinePageGuard>
     <div>
       <PageTabs tabs={staffTabs} />
       <div className="flex flex-wrap justify-between items-start gap-3 mb-8">
@@ -607,5 +609,6 @@ export default function StaffMembers() {
         </div>
       )}
     </div>
+    </OfflinePageGuard>
   )
 }

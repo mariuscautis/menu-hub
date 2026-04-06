@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRestaurant } from '@/lib/RestaurantContext';
 import { useAdminSupabase } from '@/hooks/useAdminSupabase';
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 export default function StaffLeaveSettings() {
   const restaurantCtx = useRestaurant();
@@ -141,6 +142,7 @@ export default function StaffLeaveSettings() {
   }
 
   return (
+    <OfflinePageGuard>
     <div className="p-4 sm:p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
@@ -351,5 +353,6 @@ export default function StaffLeaveSettings() {
         )}
       </div>
     </div>
+    </OfflinePageGuard>
   );
 }

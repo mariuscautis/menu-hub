@@ -8,6 +8,7 @@ import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import PageTabs from '@/components/PageTabs'
 import { settingsTabs } from '@/components/PageTabsConfig'
 import InfoTooltip from '@/components/InfoTooltip'
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 export default function RestaurantInfo() {
   const t = useTranslations('restaurantInfo')
@@ -156,6 +157,7 @@ export default function RestaurantInfo() {
     )
   }
   return (
+    <OfflinePageGuard>
     <div>
       <PageTabs tabs={settingsTabs} />
       <div className="mb-8">
@@ -338,5 +340,6 @@ export default function RestaurantInfo() {
         </div>
       </div>
     </div>
+    </OfflinePageGuard>
   )
 }

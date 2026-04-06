@@ -8,6 +8,7 @@ import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import InfoTooltip from '@/components/InfoTooltip'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 export default function MenuCategories() {
   const t = useTranslations('menuCategories')
@@ -133,6 +134,7 @@ export default function MenuCategories() {
   }
 
   return (
+    <OfflinePageGuard>
     <div>
       <PageTabs tabs={menuNavTabs} />
       <div className="flex flex-wrap justify-between items-start gap-3 mb-6">
@@ -302,5 +304,6 @@ export default function MenuCategories() {
         </div>
       )}
     </div>
+    </OfflinePageGuard>
   )
 }

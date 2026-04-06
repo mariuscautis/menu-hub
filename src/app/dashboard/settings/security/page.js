@@ -11,6 +11,7 @@ import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import PageTabs from '@/components/PageTabs'
 import { settingsTabs } from '@/components/PageTabsConfig'
 import InfoTooltip from '@/components/InfoTooltip'
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 export default function Security() {
   const t = useTranslations('security')
@@ -202,6 +203,7 @@ export default function Security() {
   }
 
   return (
+    <OfflinePageGuard>
     <div>
       <PageTabs tabs={settingsTabs} />
       <div className="mb-8">
@@ -424,5 +426,6 @@ export default function Security() {
         </div>
       </div>}
     </div>
+    </OfflinePageGuard>
   )
 }

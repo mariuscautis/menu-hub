@@ -9,6 +9,7 @@ import { useCurrency } from '@/lib/CurrencyContext';
 import { useModuleGuard } from '@/hooks/useModuleGuard'
 import PageTabs from '@/components/PageTabs'
 import { analyticsTabs } from '@/components/PageTabsConfig'
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 import InfoTooltip from '@/components/InfoTooltip'
 
 export default function LaborAnalyticsPage() {
@@ -273,6 +274,7 @@ export default function LaborAnalyticsPage() {
   }
 
   return (
+    <OfflinePageGuard>
     <div className="min-h-screen bg-gray-50 p-4 sm:p-8">
       <PageTabs tabs={analyticsTabs} />
       {/* Header */}
@@ -498,5 +500,6 @@ export default function LaborAnalyticsPage() {
         </>
       )}
     </div>
+    </OfflinePageGuard>
   );
 }

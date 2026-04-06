@@ -6,6 +6,7 @@ import { useTranslations } from '@/lib/i18n/LanguageContext'
 import InfoTooltip from '@/components/InfoTooltip'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 export default function ReportLoss() {
   useModuleGuard('ordering')
@@ -179,6 +180,7 @@ export default function ReportLoss() {
   if (!restaurant) return <div className="text-red-600">{t('noRestaurant')}</div>
 
   return (
+    <OfflinePageGuard>
     <div className="max-w-lg mx-auto">
       <div className="mb-8 text-center">
         <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
@@ -455,6 +457,7 @@ export default function ReportLoss() {
         </div>
       </div>}
     </div>
+    </OfflinePageGuard>
   )
 }
 

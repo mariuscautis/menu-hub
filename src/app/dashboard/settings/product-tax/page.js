@@ -9,6 +9,7 @@ import { useModuleGuard } from '@/hooks/useModuleGuard'
 import PageTabs from '@/components/PageTabs'
 import { settingsTabs } from '@/components/PageTabsConfig'
 import InfoTooltip from '@/components/InfoTooltip'
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 export default function ProductTaxSettings() {
   useModuleGuard('ordering')
@@ -264,6 +265,7 @@ export default function ProductTaxSettings() {
   ]
 
   return (
+    <OfflinePageGuard>
     <div className="p-8">
       <PageTabs tabs={settingsTabs} />
       <div className="max-w-4xl mx-auto">
@@ -606,5 +608,6 @@ export default function ProductTaxSettings() {
         )}
       </div>
     </div>
+    </OfflinePageGuard>
   )
 }

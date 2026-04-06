@@ -10,6 +10,7 @@ import WorkHistory from './WorkHistory';
 import TimeOffRequestModal from './TimeOffRequestModal';
 import RequestHistory from './RequestHistory';
 import InfoTooltip from '@/components/InfoTooltip';
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 const TABS = ['shifts', 'leave', 'history'];
 
@@ -223,6 +224,7 @@ export default function MyRotaPage() {
   const pastLeave = leaveHistory.filter(r => r.status === 'approved' || r.status === 'rejected');
 
   return (
+    <OfflinePageGuard>
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-6 md:p-8">
       {/* Header */}
       <div className="mb-6">
@@ -510,5 +512,6 @@ export default function MyRotaPage() {
         </div>
       )}
     </div>
+    </OfflinePageGuard>
   );
 }

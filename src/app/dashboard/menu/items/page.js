@@ -9,6 +9,7 @@ import { useTranslations } from '@/lib/i18n/LanguageContext'
 import InfoTooltip from '@/components/InfoTooltip'
 import { useCurrency } from '@/lib/CurrencyContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 export default function Menu() {
   const t = useTranslations('menu')
@@ -534,6 +535,7 @@ export default function Menu() {
     return <div className="text-slate-500">{t('loadingMenu')}</div>
   }
   return (
+    <OfflinePageGuard>
     <div>
       <PageTabs tabs={menuNavTabs} />
       <div className="flex flex-wrap justify-between items-start gap-3 mb-8">
@@ -1415,5 +1417,6 @@ export default function Menu() {
         </div>
       )}
     </div>
+    </OfflinePageGuard>
   )
 }

@@ -22,6 +22,7 @@ import { useCurrency } from '@/lib/CurrencyContext';
 import { useModuleGuard } from '@/hooks/useModuleGuard'
 import PageTabs from '@/components/PageTabs'
 import { reportsNavTabs } from '@/components/PageTabsConfig'
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 export default function MonthlyReportPage() {
   useModuleGuard('reports')
@@ -378,6 +379,7 @@ export default function MonthlyReportPage() {
   }
 
   return (
+    <OfflinePageGuard>
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-4 md:p-8">
       <PageTabs tabs={reportsNavTabs} />
       {/* Header */}
@@ -636,5 +638,6 @@ export default function MonthlyReportPage() {
         </div>
       )}
     </div>
+    </OfflinePageGuard>
   );
 }

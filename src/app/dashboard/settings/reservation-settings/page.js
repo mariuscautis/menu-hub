@@ -7,6 +7,7 @@ import PageTabs from '@/components/PageTabs'
 import { settingsTabs } from '@/components/PageTabsConfig'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import InfoTooltip from '@/components/InfoTooltip'
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
 
@@ -214,6 +215,7 @@ export default function ReservationSettingsPage() {
   if (!restaurant) return <div className="text-red-600">{t('noRestaurant')}</div>
 
   return (
+    <OfflinePageGuard>
     <div>
       <PageTabs tabs={settingsTabs} />
 
@@ -656,5 +658,6 @@ export default function ReservationSettingsPage() {
         {saving ? t('saving') : t('saveButton')}
       </button>
     </div>
+    </OfflinePageGuard>
   )
 }

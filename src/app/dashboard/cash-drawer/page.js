@@ -21,6 +21,7 @@ import { useCurrency } from '@/lib/CurrencyContext';
 import { useAdminSupabase } from '@/hooks/useAdminSupabase';
 import { useModuleGuard } from '@/hooks/useModuleGuard';
 import InfoTooltip from '@/components/InfoTooltip';
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 export default function CashDrawerPage() {
   useModuleGuard('cash_drawer')
@@ -361,6 +362,7 @@ export default function CashDrawerPage() {
   }
 
   return (
+    <OfflinePageGuard>
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-4 md:p-8">
       {/* Header */}
       <div className="mb-8">
@@ -726,5 +728,6 @@ export default function CashDrawerPage() {
         </div>
       )}
     </div>
+    </OfflinePageGuard>
   );
 }

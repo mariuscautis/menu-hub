@@ -46,6 +46,29 @@ export default function DashboardLayout({ children }) {
   const [staffAvatar, setStaffAvatar] = useState(null)
   const [staffName, setStaffName] = useState('')
 
+  // Connectivity border indicator
+  const [isOnline, setIsOnline] = useState(true)
+  const [backOnline, setBackOnline] = useState(false)
+
+  useEffect(() => {
+    setIsOnline(navigator.onLine)
+    const handleOnline = () => {
+      setIsOnline(true)
+      setBackOnline(true)
+      setTimeout(() => setBackOnline(false), 5000)
+    }
+    const handleOffline = () => {
+      setIsOnline(false)
+      setBackOnline(false)
+    }
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
+  }, [])
+
   // Responsive state - works on all devices
   const [sidebarOpen, setSidebarOpen] = useState(true) // Start with sidebar open on desktop
   const [fullWidthMode, setFullWidthMode] = useState(false)
@@ -542,10 +565,76 @@ export default function DashboardLayout({ children }) {
 
     async function warmCache() {
       const urls = [
-        // Dashboard core pages
+        // Primary operational pages (staff use daily)
+        `${origin}/dashboard`,
         `${origin}/dashboard/orders`,
-        `${origin}/dashboard/reservations`,
+        `${origin}/dashboard/tables`,
         `${origin}/dashboard/floor-plan`,
+        `${origin}/dashboard/tables-floor-plan`,
+        `${origin}/dashboard/reservations`,
+        `${origin}/dashboard/cash-drawer`,
+
+        // Menu management
+        `${origin}/dashboard/menu`,
+        `${origin}/dashboard/menu/items`,
+        `${origin}/dashboard/menu/categories`,
+
+        // Staff & rota
+        `${origin}/dashboard/staff`,
+        `${origin}/dashboard/staff-members`,
+        `${origin}/dashboard/rota`,
+        `${origin}/dashboard/my-rota`,
+        `${origin}/dashboard/my-availability`,
+        `${origin}/dashboard/time-off-requests`,
+
+        // Reports hub (index pages are static nav — cache the shells)
+        `${origin}/dashboard/reports`,
+        `${origin}/dashboard/reports/z-report`,
+        `${origin}/dashboard/reports/x-report`,
+        `${origin}/dashboard/reports/weekly`,
+        `${origin}/dashboard/reports/monthly`,
+        `${origin}/dashboard/reports/tax`,
+        `${origin}/dashboard/reports/sales-balance`,
+        `${origin}/dashboard/reports/stock-movement`,
+
+        // Analytics hub
+        `${origin}/dashboard/analytics`,
+        `${origin}/dashboard/analytics/overview`,
+        `${origin}/dashboard/analytics/tables`,
+        `${origin}/dashboard/analytics/staff`,
+        `${origin}/dashboard/analytics/labor`,
+        `${origin}/dashboard/analytics/losses`,
+        `${origin}/dashboard/analytics/losses/menu`,
+        `${origin}/dashboard/analytics/losses/stock`,
+
+        // Stock
+        `${origin}/dashboard/stock`,
+        `${origin}/dashboard/stock/products`,
+        `${origin}/dashboard/stock/inventory`,
+        `${origin}/dashboard/stock/purchasing-invoices`,
+        `${origin}/dashboard/report-loss`,
+
+        // Customers
+        `${origin}/dashboard/customers`,
+
+        // Settings hub pages (static nav, no data)
+        `${origin}/dashboard/settings`,
+        `${origin}/dashboard/settings/restaurant-info`,
+        `${origin}/dashboard/settings/departments`,
+        `${origin}/dashboard/settings/discounts`,
+        `${origin}/dashboard/settings/payments`,
+        `${origin}/dashboard/settings/security`,
+        `${origin}/dashboard/settings/reservation-settings`,
+        `${origin}/dashboard/settings/other-options`,
+        `${origin}/dashboard/settings/tax-invoicing`,
+        `${origin}/dashboard/settings/product-tax`,
+        `${origin}/dashboard/settings/billing`,
+        `${origin}/dashboard/settings/staff-leave`,
+
+        // Misc
+        `${origin}/dashboard/guide`,
+        `${origin}/dashboard/support`,
+
         // Customer-facing ordering + booking pages
         `${origin}/${slug}/menu`,
         `${origin}/${slug}/takeaway`,
@@ -1050,7 +1139,7 @@ export default function DashboardLayout({ children }) {
     <GuideProvider>
     <CurrencyProvider currency={restaurantCurrency}>
     <LanguageProvider>
-      <div className={`min-h-screen bg-slate-50 dark:bg-slate-950 flex relative${isImpersonating ? ' pt-10' : ''}`}>
+      <div className={`min-h-screen bg-slate-50 dark:bg-slate-950 flex relative${isImpersonating ? ' pt-10' : ''}${!isOnline ? ' ring-2 ring-inset ring-amber-400 shadow-[inset_0_0_40px_rgba(251,191,36,0.08)]' : backOnline ? ' ring-2 ring-inset ring-green-400 shadow-[inset_0_0_40px_rgba(74,222,128,0.08)]' : ''} transition-shadow duration-500`}>
 
       {/* Impersonation banner */}
       {isImpersonating && (

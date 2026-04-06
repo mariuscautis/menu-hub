@@ -6,6 +6,7 @@ import InfoTooltip from '@/components/InfoTooltip'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import { supabase } from '@/lib/supabase'
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 const STATUS_STYLES = {
   open:        { key: 'statusOpen',       cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' },
@@ -286,6 +287,7 @@ export default function SupportPage() {
 
   // List view
   return (
+    <OfflinePageGuard>
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-4 md:p-8">
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center justify-between mb-8">
@@ -410,5 +412,6 @@ export default function SupportPage() {
         )}
       </div>
     </div>
+    </OfflinePageGuard>
   )
 }

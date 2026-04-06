@@ -27,6 +27,7 @@ import { useCurrency } from '@/lib/CurrencyContext';
 import { useModuleGuard } from '@/hooks/useModuleGuard'
 import PageTabs from '@/components/PageTabs'
 import { reportsNavTabs } from '@/components/PageTabsConfig'
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 export default function ZReportPage() {
   useModuleGuard('reports')
@@ -477,6 +478,7 @@ export default function ZReportPage() {
   }
 
   return (
+    <OfflinePageGuard>
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-4 md:p-8">
       <PageTabs tabs={reportsNavTabs} />
       <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -794,5 +796,6 @@ export default function ZReportPage() {
         </div>
       )}
     </div>
+    </OfflinePageGuard>
   );
 }

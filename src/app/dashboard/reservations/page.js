@@ -8,6 +8,7 @@ import InfoTooltip from '@/components/InfoTooltip'
 import { useOrderSounds } from '@/hooks/useOrderSounds'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 export default function Reservations() {
   useModuleGuard('reservations')
@@ -661,6 +662,7 @@ export default function Reservations() {
   if (!restaurant) return <div className="text-red-600">No restaurant found</div>
 
   return (
+    <OfflinePageGuard>
     <div onClick={resumeAudio}>
       {/* Header */}
       <div className="flex flex-wrap justify-between items-start gap-3 mb-8">
@@ -1404,5 +1406,6 @@ export default function Reservations() {
         </div>
       )}
     </div>
+    </OfflinePageGuard>
   )
 }

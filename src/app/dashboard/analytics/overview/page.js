@@ -14,6 +14,7 @@ import DateRangeSelector from '@/components/analytics/DateRangeSelector'
 import ExportButton from '@/components/analytics/ExportButton'
 import PageTabs from '@/components/PageTabs'
 import { analyticsTabs } from '@/components/PageTabsConfig'
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 export default function AnalyticsOverviewPage() {
   useModuleGuard('analytics')
@@ -122,6 +123,7 @@ export default function AnalyticsOverviewPage() {
   }
 
   return (
+    <OfflinePageGuard>
     <div className="space-y-6">
       <PageTabs tabs={analyticsTabs} />
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -218,5 +220,6 @@ export default function AnalyticsOverviewPage() {
         <TopProductsTable data={topProducts} />
       </div>
     </div>
+    </OfflinePageGuard>
   )
 }

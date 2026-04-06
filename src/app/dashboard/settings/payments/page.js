@@ -6,6 +6,7 @@ import { useTranslations, useLanguage } from '@/lib/i18n/LanguageContext'
 import InfoTooltip from '@/components/InfoTooltip'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 export default function PaymentsSettingsPage() {
   const { messages } = useLanguage()
@@ -102,6 +103,7 @@ export default function PaymentsSettingsPage() {
   }
 
   return (
+    <OfflinePageGuard>
     <div className="max-w-2xl mx-auto py-8 px-4">
       {/* Back */}
       <Link href="/dashboard/settings" className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-[#6262bd] mb-6 transition-colors">
@@ -268,5 +270,6 @@ export default function PaymentsSettingsPage() {
         </div>
       )}
     </div>
+    </OfflinePageGuard>
   )
 }

@@ -9,6 +9,7 @@ import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
 import PageTabs from '@/components/PageTabs'
 import { settingsTabs } from '@/components/PageTabsConfig'
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 const DAYS_OF_WEEK = [
   { label: 'Sun', value: 0 },
@@ -517,6 +518,7 @@ function DiscountForm({ state, setState, menuItems, currencySymbol, onSave, onCa
   const selectedItemName = menuItems.find(i => i.id === state.product_id)?.name || ''
 
   return (
+    <OfflinePageGuard>
     <div className="space-y-4">
       {/* Name + Type */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -767,5 +769,6 @@ function DiscountForm({ state, setState, menuItems, currencySymbol, onSave, onCa
         </button>
       </div>
     </div>
+    </OfflinePageGuard>
   )
 }

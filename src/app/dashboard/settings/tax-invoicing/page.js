@@ -10,6 +10,7 @@ import { useModuleGuard } from '@/hooks/useModuleGuard'
 import PageTabs from '@/components/PageTabs'
 import { settingsTabs } from '@/components/PageTabsConfig'
 import InfoTooltip from '@/components/InfoTooltip'
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 export default function TaxInvoicing() {
   useModuleGuard('ordering')
@@ -106,6 +107,7 @@ export default function TaxInvoicing() {
   }
 
   return (
+    <OfflinePageGuard>
     <div>
       <PageTabs tabs={settingsTabs} />
       <div className="mb-8">
@@ -337,5 +339,6 @@ export default function TaxInvoicing() {
         )}
       </div>
     </div>
+    </OfflinePageGuard>
   )
 }

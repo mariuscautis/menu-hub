@@ -6,6 +6,7 @@ import { useAdminSupabase } from '@/hooks/useAdminSupabase';
 import { useModuleGuard } from '@/hooks/useModuleGuard';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
 import InfoTooltip from '@/components/InfoTooltip';
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -118,6 +119,7 @@ export default function MyAvailabilityPage() {
   }
 
   return (
+    <OfflinePageGuard>
     <div className="min-h-screen bg-gray-50 p-8">
       {/* Header */}
       <div className="mb-8">
@@ -242,5 +244,6 @@ export default function MyAvailabilityPage() {
         </ul>
       </div>
     </div>
+    </OfflinePageGuard>
   );
 }

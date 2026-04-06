@@ -8,6 +8,7 @@ import InfoTooltip from '@/components/InfoTooltip';
 import { useAdminSupabase } from '@/hooks/useAdminSupabase';
 import PageTabs from '@/components/PageTabs';
 import { staffTabs } from '@/components/PageTabsConfig';
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 export default function DepartmentsSettingsPage() {
   const t = useTranslations('departmentsSettings');
@@ -181,6 +182,7 @@ export default function DepartmentsSettingsPage() {
     );
   }
   return (
+    <OfflinePageGuard>
     <div className="min-h-screen bg-gray-50 p-4 sm:p-8">
       <PageTabs tabs={staffTabs} />
       {/* Header */}
@@ -332,5 +334,6 @@ export default function DepartmentsSettingsPage() {
         </button>
       </div>
     </div>
+    </OfflinePageGuard>
   );
 }

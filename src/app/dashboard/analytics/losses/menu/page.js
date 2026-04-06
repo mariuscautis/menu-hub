@@ -8,6 +8,7 @@ import { useModuleGuard } from '@/hooks/useModuleGuard'
 import Link from 'next/link'
 import PageTabs from '@/components/PageTabs'
 import { analyticsTabs } from '@/components/PageTabsConfig'
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 import InfoTooltip from '@/components/InfoTooltip'
 
 export default function MenuItemLosses() {
@@ -88,6 +89,7 @@ export default function MenuItemLosses() {
   if (!restaurant) return <div className="text-red-600">{t('noRestaurant')}</div>
 
   return (
+    <OfflinePageGuard>
     <div>
       <PageTabs tabs={analyticsTabs} />
       <div className="mb-6 flex items-center gap-3">
@@ -318,5 +320,6 @@ export default function MenuItemLosses() {
         </div>
       )}
     </div>
+    </OfflinePageGuard>
   )
 }

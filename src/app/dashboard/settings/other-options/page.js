@@ -10,6 +10,7 @@ import { useModuleGuard } from '@/hooks/useModuleGuard'
 import PageTabs from '@/components/PageTabs'
 import { settingsTabs } from '@/components/PageTabsConfig'
 import InfoTooltip from '@/components/InfoTooltip'
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 export default function OtherOptionsSettings() {
   useModuleGuard('ordering')
@@ -117,6 +118,7 @@ export default function OtherOptionsSettings() {
   }
 
   return (
+    <OfflinePageGuard>
     <div>
       <PageTabs tabs={settingsTabs} />
       <div className="mb-8">
@@ -384,5 +386,6 @@ export default function OtherOptionsSettings() {
         <p className="text-sm text-slate-300 mt-1">{t('moreOptionsHint') || 'Additional features will be added here'}</p>
       </div>
     </div>
+    </OfflinePageGuard>
   )
 }

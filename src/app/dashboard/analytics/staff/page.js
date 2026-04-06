@@ -11,6 +11,7 @@ import { useCurrency } from '@/lib/CurrencyContext'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
 import PageTabs from '@/components/PageTabs'
 import { analyticsTabs } from '@/components/PageTabsConfig'
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 import InfoTooltip from '@/components/InfoTooltip'
 
 export default function StaffAnalyticsPage() {
@@ -97,6 +98,7 @@ export default function StaffAnalyticsPage() {
   const sortedData = getSortedData()
 
   return (
+    <OfflinePageGuard>
     <div className="space-y-6">
       <PageTabs tabs={analyticsTabs} />
       {/* Header with Back Button */}
@@ -351,5 +353,6 @@ export default function StaffAnalyticsPage() {
         </>
       )}
     </div>
+    </OfflinePageGuard>
   )
 }

@@ -33,11 +33,8 @@ export default function OfflineIndicator() {
       setShowNotification(true)
       setTimeout(() => setShowNotification(false), 3000)
 
-      // Refresh pending count immediately
+      // Refresh pending count immediately (sync is handled by initAutoSync in layout)
       await refreshPendingCount()
-
-      // Auto-sync when coming back online
-      syncAll()
     }
 
     const handleOffline = () => {

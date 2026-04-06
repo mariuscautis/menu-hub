@@ -25,6 +25,7 @@ import MobileRotaView from './MobileRotaView';
 import StaffAvailabilityCalendar from './StaffAvailabilityCalendar';
 import PageTabs from '@/components/PageTabs'
 import { staffTabs } from '@/components/PageTabsConfig'
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 const DnDCalendar = withDragAndDrop(Calendar);
 
@@ -354,6 +355,7 @@ export default function RotaPage() {
   }
 
   return (
+    <OfflinePageGuard>
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-4 sm:p-8">
       <PageTabs tabs={staffTabs} />
       {/* Header */}
@@ -555,5 +557,6 @@ export default function RotaPage() {
         />
       )}
     </div>
+    </OfflinePageGuard>
   );
 }

@@ -10,6 +10,7 @@ import InfoTooltip from '@/components/InfoTooltip'
 import { useCurrency } from '@/lib/CurrencyContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 export default function PurchasingInvoices() {
   useModuleGuard('ordering')
@@ -329,6 +330,7 @@ export default function PurchasingInvoices() {
   }
 
   return (
+    <OfflinePageGuard>
     <div>
       <PageTabs tabs={stockNavTabs} />
       <div className="flex flex-wrap justify-between items-start gap-3 mb-8">
@@ -781,5 +783,6 @@ export default function PurchasingInvoices() {
         </div>
       )}
     </div>
+    </OfflinePageGuard>
   )
 }

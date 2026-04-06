@@ -40,6 +40,7 @@ const PRESETS = [
 import { useModuleGuard } from '@/hooks/useModuleGuard'
 import PageTabs from '@/components/PageTabs'
 import { reportsNavTabs } from '@/components/PageTabsConfig'
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import InfoTooltip from '@/components/InfoTooltip'
 
@@ -470,6 +471,7 @@ export default function StockMovementReport() {
   }
 
   return (
+    <OfflinePageGuard>
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-4 md:p-8">
       <PageTabs tabs={reportsNavTabs} />
       {/* Header */}
@@ -833,5 +835,6 @@ export default function StockMovementReport() {
         </>
       )}
     </div>
+    </OfflinePageGuard>
   );
 }

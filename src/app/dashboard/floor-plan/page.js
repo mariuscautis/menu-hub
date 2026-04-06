@@ -8,6 +8,7 @@ import { useRestaurant } from '@/lib/RestaurantContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import InfoTooltip from '@/components/InfoTooltip'
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 // Draggable Table Component
 function DraggableTable({ table, isSelected, onClick }) {
@@ -764,6 +765,7 @@ export default function FloorPlanPage() {
   }
 
   return (
+    <OfflinePageGuard>
     <div className="h-screen flex flex-col bg-slate-50 dark:bg-slate-950">
       {/* Header */}
       <div className="bg-white dark:bg-slate-900 border-b-2 border-slate-100 dark:border-slate-800 p-4">
@@ -1205,5 +1207,6 @@ export default function FloorPlanPage() {
         </div>
       )}
     </div>
+    </OfflinePageGuard>
   )
 }

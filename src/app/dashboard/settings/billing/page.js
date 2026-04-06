@@ -7,6 +7,7 @@ import { useTranslations, useLanguage } from '@/lib/i18n/LanguageContext'
 import InfoTooltip from '@/components/InfoTooltip'
 import PageTabs from '@/components/PageTabs'
 import { settingsTabs } from '@/components/PageTabsConfig'
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 const PLAN_DEFS = [
   {
@@ -253,6 +254,7 @@ export default function BillingPage() {
   const statusConfig = STATUS_CONFIG[subscriptionStatus] || STATUS_CONFIG.trialing
 
   return (
+    <OfflinePageGuard>
     <div>
       <PageTabs tabs={settingsTabs} />
       <div className="mb-8">
@@ -639,5 +641,6 @@ export default function BillingPage() {
         {t('trialNote')}
       </p>
     </div>
+    </OfflinePageGuard>
   )
 }

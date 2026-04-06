@@ -7,6 +7,7 @@ import { useModuleGuard } from '@/hooks/useModuleGuard'
 import PageTabs from '@/components/PageTabs'
 import { settingsTabs } from '@/components/PageTabsConfig'
 import InfoTooltip from '@/components/InfoTooltip'
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 // --- CSV helpers ---
 
@@ -217,6 +218,7 @@ export default function DataMigration() {
   }
 
   return (
+    <OfflinePageGuard>
     <div>
       <PageTabs tabs={settingsTabs} />
       <div className="mb-8">
@@ -674,5 +676,6 @@ export default function DataMigration() {
         </div>
       )}
     </div>
+    </OfflinePageGuard>
   )
 }

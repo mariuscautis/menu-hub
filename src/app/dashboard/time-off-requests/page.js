@@ -9,6 +9,7 @@ import { useModuleGuard } from '@/hooks/useModuleGuard'
 import PageTabs from '@/components/PageTabs'
 import { staffTabs } from '@/components/PageTabsConfig'
 import InfoTooltip from '@/components/InfoTooltip'
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 const STATUS_CONFIG = {
   pending:   { label: 'Pending',   bg: 'bg-amber-100 dark:bg-amber-900/30',  text: 'text-amber-700 dark:text-amber-400',  dot: 'bg-amber-500',  border: 'border-amber-200 dark:border-amber-800' },
@@ -204,6 +205,7 @@ export default function TimeOffRequestsPage() {
   }
 
   return (
+    <OfflinePageGuard>
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 md:p-8">
       <PageTabs tabs={staffTabs} />
       <div className="max-w-5xl mx-auto">
@@ -543,5 +545,6 @@ export default function TimeOffRequestsPage() {
         </div>
       )}
     </div>
+    </OfflinePageGuard>
   )
 }
