@@ -163,6 +163,7 @@ export default function Tables() {
   // Order modal UX state - category navigation and search
   const [selectedCategory, setSelectedCategory] = useState(null)
   const [productSearch, setProductSearch] = useState('')
+  const [orderModalLoading, setOrderModalLoading] = useState(false)
 
   // Show notification helper
   const showNotification = (type, message) => {
@@ -174,27 +175,9 @@ export default function Tables() {
   const supabase = useAdminSupabase()
 
   useEffect(() => {
-    fetchData()
-  }, [restaurantCtx])
+    if (restaurantCtx?.restaurant?.id) fetchData()
+  }, [restaurantCtx?.restaurant?.id])
 
-  // Debug: Log when orderItems changes to detect duplicates
-  useEffect(() => {
-    console.log('>>>>> orderItems changed. Count:', orderItems.length)
-    if (orderItems.length > 0) {
-      console.log('>>>>> Current orderItems:', orderItems.map(i => `${i.name} (x${i.quantity})`))
-      const itemIds = orderItems.map(item => item.menu_item_id)
-      const uniqueIds = new Set(itemIds)
-      if (itemIds.length !== uniqueIds.size) {
-        console.error('🚨🚨🚨 DUPLICATE DETECTED IN ORDER ITEMS! 🚨🚨🚨')
-        console.error('Total items:', itemIds.length, 'Unique items:', uniqueIds.size)
-        console.error('Full orderItems array:', orderItems)
-
-        // Show which items are duplicated
-        const duplicates = itemIds.filter((id, index) => itemIds.indexOf(id) !== index)
-        console.error('Duplicated menu_item_ids:', [...new Set(duplicates)])
-      }
-    }
-  }, [orderItems])
 
   // Real-time subscriptions for live order updates
   useEffect(() => {
@@ -370,13 +353,6 @@ export default function Tables() {
         console.log('Tables page split bills subscription status:', status)
       })
 
-    // Polling fallback: Refresh order info every 15 seconds as a safety net
-    // This ensures table indicators update even if real-time subscriptions fail
-    const pollingInterval = setInterval(() => {
-      console.log('Tables page - Polling fallback: refreshing table order info')
-      fetchTableOrderInfo(restaurantId)
-    }, 15000) // 15 seconds
-
     return () => {
       supabase.removeChannel(ordersChannel)
       supabase.removeChannel(orderItemsChannel)
@@ -384,9 +360,8 @@ export default function Tables() {
       supabase.removeChannel(reservationsChannel)
       supabase.removeChannel(waiterCallsChannel)
       supabase.removeChannel(splitBillsChannel)
-      clearInterval(pollingInterval)
     }
-  }, [restaurant])
+  }, [restaurant?.id])
 
   const fetchData = async () => {
     if (!restaurantCtx?.restaurant) return
@@ -396,31 +371,21 @@ export default function Tables() {
     setUserType(restaurantCtx.userType)
     setStaffDepartment(restaurantCtx.staffDepartment)
 
-    const { data: tablesData } = await supabase
-      .from('tables')
-      .select('*')
-      .eq('restaurant_id', restaurantData.id)
-      .order('table_number')
+    // Fetch tables, floors, menu items, categories, and order info all in parallel
+    const [
+      { data: tablesData },
+      { data: floorsData },
+      { data: items, error: itemsError },
+      { data: cats, error: catsError },
+    ] = await Promise.all([
+      supabase.from('tables').select('*').eq('restaurant_id', restaurantData.id).order('table_number'),
+      supabase.from('floors').select('id, name, level').eq('restaurant_id', restaurantData.id).order('level', { ascending: true }),
+      supabase.rpc('get_available_menu_items', { p_restaurant_id: restaurantData.id }),
+      supabase.from('menu_categories').select('*').eq('restaurant_id', restaurantData.id).order('sort_order'),
+    ])
 
     setTables(tablesData || [])
-
-    // Fetch floors for filter tabs
-    const { data: floorsData } = await supabase
-      .from('floors')
-      .select('id, name, level')
-      .eq('restaurant_id', restaurantData.id)
-      .order('level', { ascending: true })
     setFloors(floorsData || [])
-
-    // Fetch menu items for order placement (only in-stock items)
-    const { data: items, error: itemsError } = await supabase
-      .rpc('get_available_menu_items', { p_restaurant_id: restaurantData.id })
-
-    const { data: cats, error: catsError } = await supabase
-      .from('menu_categories')
-      .select('*')
-      .eq('restaurant_id', restaurantData.id)
-      .order('sort_order')
 
     if (itemsError) {
       console.error('Menu items error:', itemsError)
@@ -457,14 +422,12 @@ export default function Tables() {
 
     setCategories(cats || [])
 
-    // Fetch unpaid order info for all tables
-    await fetchTableOrderInfo(restaurantData.id)
-
-    // Fetch today's reservations for all tables
-    await fetchTodayReservations(restaurantData.id)
-
-    // Fetch pending waiter calls for all tables
-    await fetchWaiterCalls(restaurantData.id)
+    // Fetch order info, reservations, and waiter calls in parallel
+    await Promise.all([
+      fetchTableOrderInfo(restaurantData.id),
+      fetchTodayReservations(restaurantData.id),
+      fetchWaiterCalls(restaurantData.id),
+    ])
 
     setLoading(false)
   }
@@ -578,54 +541,33 @@ export default function Tables() {
     })
 
     // Merge with pending offline orders (so they persist in UI when offline)
-    // Use a timeout so a broken/unavailable IndexedDB never hangs the page
-    try {
-      const offlineOrdersByTable = await Promise.race([
-        getAllPendingOrdersByTable(),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('idb_timeout')), 3000))
-      ])
-      Object.entries(offlineOrdersByTable).forEach(([tableId, offlineData]) => {
-        if (orderInfo[tableId]) {
-          // Add offline orders to existing table data
-          orderInfo[tableId].count += offlineData.count
-          orderInfo[tableId].total += offlineData.total
-        } else {
-          // Table only has offline orders
-          orderInfo[tableId] = {
-            count: offlineData.count,
-            total: offlineData.total,
-            readyDepartments: [], // Offline orders are never "ready" (not prepared yet)
+    // Only merge offline IDB data when offline — online, Supabase is authoritative
+    if (!navigator.onLine) {
+      try {
+        const [offlineOrdersByTable, offlineUpdatesByTable] = await Promise.all([
+          getAllPendingOrdersByTable(),
+          getAllPendingOrderUpdatesByTable(),
+        ])
+        Object.entries(offlineOrdersByTable).forEach(([tableId, offlineData]) => {
+          if (orderInfo[tableId]) {
+            orderInfo[tableId].count += offlineData.count
+            orderInfo[tableId].total += offlineData.total
+          } else {
+            orderInfo[tableId] = { count: offlineData.count, total: offlineData.total, readyDepartments: [] }
           }
-        }
-      })
-    } catch (err) {
-      console.warn('Failed to get offline orders for merge:', err)
+        })
+        Object.entries(offlineUpdatesByTable).forEach(([tableId, updateData]) => {
+          if (orderInfo[tableId]) {
+            orderInfo[tableId].total += updateData.total
+          } else {
+            orderInfo[tableId] = { count: 0, total: updateData.total, readyDepartments: [] }
+          }
+        })
+      } catch (err) {
+        console.warn('Failed to merge offline orders:', err)
+      }
     }
 
-    // Also merge pending order updates (items added to existing orders while offline)
-    try {
-      const offlineUpdatesByTable = await Promise.race([
-        getAllPendingOrderUpdatesByTable(),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('idb_timeout')), 3000))
-      ])
-      Object.entries(offlineUpdatesByTable).forEach(([tableId, updateData]) => {
-        if (orderInfo[tableId]) {
-          // Add offline update totals to existing table data
-          orderInfo[tableId].total += updateData.total
-        } else {
-          // Table has only offline updates (order exists in Supabase but wasn't fetched)
-          orderInfo[tableId] = {
-            count: 0, // Don't add count, the order already exists
-            total: updateData.total,
-            readyDepartments: [],
-          }
-        }
-      })
-    } catch (err) {
-      console.warn('Failed to get offline order updates for merge:', err)
-    }
-
-    console.log('fetchTableOrderInfo result:', orderInfo)
     setTableOrderInfo(orderInfo)
   }
 
@@ -856,146 +798,53 @@ export default function Tables() {
   }
 
   const openOrderModal = async (table) => {
-    // DEPLOYMENT TEST: This alert confirms the latest code is deployed
-    // Remove this after confirming deployment works
-    if (typeof window !== 'undefined') {
-      window.__DEPLOYMENT_VERSION__ = 'v6-preserve-cache-offline'
-      console.log('%c DEPLOYMENT VERSION: v6-preserve-cache-offline ', 'background: blue; color: white; font-size: 20px;')
-    }
-    console.log('========== OPENING ORDER MODAL ==========')
-    console.log('Table:', table.table_number, 'ID:', table.id)
-
-    // IMPORTANT: Clear state FIRST to prevent duplicates from previous modal opens
-    console.log('STEP 1: Clearing ALL state completely')
+    // Clear state from any previous modal open
     setOrderItems([])
     setItemNotes({})
     setCurrentOrder(null)
-    setSelectedTable(null)
-
-    // AGGRESSIVE CACHE CLEARING: Clear ALL order caches to prevent stale data
-    // This is critical because cached Supabase responses may show orders as unpaid
-    // when they've actually been paid (after offline payment + sync)
-    // IMPORTANT: Only clear cache when ONLINE - when offline we NEED the cached data!
-    if (navigator.onLine) {
-      console.log('ONLINE: Clearing order caches to fetch fresh data')
-      clearAllOrdersCache()
-      clearTableOrdersLocalCache(table.id)
-    } else {
-      console.log('OFFLINE: Preserving order caches - will use cached data for offline items')
-    }
-
-    // Small delay to ensure React has processed the state clears
-    await new Promise(resolve => setTimeout(resolve, 0))
-
-    console.log('STEP 2: Setting selected table')
     setSelectedTable(table)
 
-    // CRITICAL CHECK: If there's a pending payment for this table, it means the table
-    // was just paid (even if offline). Don't load any cached order data - start fresh.
-    try {
-      const pendingPayments = await getPendingPaymentsForTable(table.id)
-      if (pendingPayments && pendingPayments.length > 0) {
-        console.log('Table has pending payment - starting fresh (table was paid offline)')
+    if (!navigator.onLine) {
+      // OFFLINE MODE: load from cache/IDB synchronously then open
+      const cacheKey = `table_orders_${table.id}`
+      let pendingPayments = []
+      let pendingOfflineOrders = []
+      try {
+        ;[pendingPayments, pendingOfflineOrders] = await Promise.all([
+          getPendingPaymentsForTable(table.id).catch(() => []),
+          getPendingOrdersForTable(table.id).catch(() => []),
+        ])
+      } catch (err) {
+        console.warn('Error checking IDB:', err)
+      }
+
+      if (pendingPayments.length > 0) {
         setShowOrderModal(true)
         return
       }
-    } catch (err) {
-      console.warn('Error checking pending payments:', err)
-    }
 
-    // Check for pending offline orders for this table in IndexedDB
-    // These are orders created offline that haven't been synced yet
-    // NOTE: Don't return early - we need to also check for cached online orders
-    let pendingOfflineOrders = []
-    try {
-      pendingOfflineOrders = await getPendingOrdersForTable(table.id) || []
-      if (pendingOfflineOrders.length > 0) {
-        console.log('Found pending offline orders:', pendingOfflineOrders.length)
-      }
-    } catch (err) {
-      console.warn('Error checking offline orders:', err)
-    }
-
-    // Check for existing orders - try localStorage cache first when offline
-    // DEBUG BUILD: 2026-02-02-v6-preserve-cache-offline
-    console.log('========== STEP 3: Fetching existing order ==========')
-    console.log('Table ID:', table.id)
-    console.log('navigator.onLine:', navigator.onLine)
-
-    let existingOrder = null
-    const cacheKey = `table_orders_${table.id}`
-
-    // DEBUG: Show all localStorage keys related to orders
-    console.log('DEBUG: Checking localStorage for cache key:', cacheKey)
-    const allKeys = []
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i)
-      if (key && (key.includes('table_orders') || key.includes('sbcache'))) {
-        allKeys.push(key)
-      }
-    }
-    console.log('DEBUG: All order-related localStorage keys:', allKeys)
-
-    if (!navigator.onLine) {
-      // OFFLINE MODE: Try to load existing order from localStorage cache
-      // This handles the case where user ordered online, then went offline
-      console.log('========== OFFLINE MODE ==========')
-      console.log('Checking localStorage cache for existing orders...')
+      let existingOrder = null
       try {
         const cached = localStorage.getItem(cacheKey)
-        console.log('DEBUG: Raw cached value exists:', !!cached)
         if (cached) {
-          console.log('DEBUG: Cache found, length:', cached.length)
           const cachedOrders = JSON.parse(cached)
-          console.log('DEBUG: Parsed cached orders:', cachedOrders.length, 'orders')
-          console.log('DEBUG: Cached orders:', cachedOrders.map(o => ({
-            id: o.id,
-            table_id: o.table_id,
-            status: o.status,
-            paid: o.paid,
-            items: o.order_items?.length || 0
-          })))
-
-          // Find unpaid orders for this table
-          const unpaidOrders = cachedOrders.filter(order =>
-            order.table_id === table.id &&
-            !order.paid &&
-            ['pending', 'preparing', 'ready'].includes(order.status)
+          const unpaidCached = cachedOrders.filter(o =>
+            o.table_id === table.id && !o.paid && ['pending', 'preparing', 'ready'].includes(o.status)
           )
-          console.log('DEBUG: Filtered unpaid orders:', unpaidOrders.length)
-
-          if (unpaidOrders.length > 0) {
-            // Use the most recent order
-            existingOrder = unpaidOrders[unpaidOrders.length - 1]
-            console.log('SUCCESS: Found cached order:', existingOrder.id)
-            console.log('DEBUG: Cached order items:', existingOrder.order_items?.map(i => ({
-              menu_item_id: i.menu_item_id,
-              name: i.name,
-              quantity: i.quantity
-            })))
-          } else {
-            console.log('DEBUG: No unpaid orders found in cache')
-          }
-        } else {
-          console.log('DEBUG: No cache found for key:', cacheKey)
+          if (unpaidCached.length > 0) existingOrder = unpaidCached[unpaidCached.length - 1]
         }
       } catch (e) {
-        console.error('ERROR: Failed to load cached orders:', e)
+        console.error('Failed to load cached orders:', e)
       }
 
-      // If no cached online order found, check if we have pending offline orders
       if (!existingOrder && pendingOfflineOrders.length > 0) {
-        console.log('OFFLINE MODE: No cached online orders but found pending offline orders')
         const latestOfflineOrder = pendingOfflineOrders[pendingOfflineOrders.length - 1]
-        console.log('Using pending offline order:', latestOfflineOrder.client_id)
-
         setCurrentOrder({
           client_id: latestOfflineOrder.client_id,
           table_id: latestOfflineOrder.table_id,
           order_items: latestOfflineOrder.order_items || [],
           isOfflineOrder: true
         })
-
         const itemsMap = {}
         latestOfflineOrder.order_items?.forEach(item => {
           itemsMap[item.menu_item_id] = {
@@ -1012,73 +861,18 @@ export default function Tables() {
         return
       }
 
-      // If no cached order AND no offline orders, start fresh
       if (!existingOrder) {
-        console.log('OFFLINE MODE: No cached orders and no offline orders - starting fresh')
-        console.log('========== OPENING MODAL (FRESH) ==========')
         setShowOrderModal(true)
         return
       }
-    } else {
-      // ONLINE MODE: Fetch fresh data from Supabase
-      try {
-        const { data: existingOrders, error: fetchError } = await supabase
-          .from('orders')
-          .select('*, order_items(*)')
-          .eq('table_id', table.id)
-          .in('status', ['pending', 'preparing', 'ready'])
-          .is('paid', false)
-          .order('created_at', { ascending: false })
-          .limit(1)
 
-        if (fetchError) {
-          console.error('Error fetching existing order:', fetchError)
-          // Don't throw - we'll proceed with empty order
-        } else {
-          existingOrder = existingOrders && existingOrders.length > 0 ? existingOrders[0] : null
-
-          // CRITICAL VALIDATION: Ensure the returned order actually belongs to this table
-          // This prevents cached responses from other tables being used incorrectly
-          if (existingOrder && existingOrder.table_id !== table.id) {
-            console.error('CACHE MISMATCH: Order table_id', existingOrder.table_id, 'does not match selected table', table.id)
-            console.error('Discarding stale cached order to prevent cross-table pollution')
-            existingOrder = null
-          }
-        }
-
-        console.log('STEP 4: Existing order found?', !!existingOrder)
-        if (!existingOrder) {
-          // Debug: Let's see ALL orders for this table to understand why
-          const { data: allOrders } = await supabase
-            .from('orders')
-            .select('id, status, paid, created_at')
-            .eq('table_id', table.id)
-            .order('created_at', { ascending: false })
-            .limit(5)
-          console.log('All recent orders for this table:', allOrders)
-        }
-      } catch (err) {
-        // Network error - offline mode
-        console.warn('Offline: could not fetch existing order for table', table.table_number)
-        showNotification('info', t('notifications.offlineModeNewOrder'))
-        // existingOrder remains null, so we'll start with empty order
-      }
-    }
-
-    if (existingOrder) {
-      console.log('Existing order ID:', existingOrder.id)
-      console.log('Raw order_items from DB:', existingOrder.order_items)
-
-      // Consolidate existing order items (in case there are duplicates in DB)
+      // Build items from cached order
       const itemsMap = {}
       existingOrder.order_items?.forEach(item => {
         if (itemsMap[item.menu_item_id]) {
-          // If duplicate exists, sum quantities
-          console.warn('DUPLICATE FOUND IN DB:', item.menu_item_id, item.name)
           itemsMap[item.menu_item_id].quantity += item.quantity
           itemsMap[item.menu_item_id].existingQuantity += item.quantity
         } else {
-          // New item
           itemsMap[item.menu_item_id] = {
             menu_item_id: item.menu_item_id,
             name: item.name,
@@ -1090,46 +884,12 @@ export default function Tables() {
         }
       })
 
-      // ALSO merge any pending order updates (items added offline to this order)
-      // ONLY do this when OFFLINE - when online, Supabase has the source of truth
-      if (!navigator.onLine) {
-        try {
-          const pendingUpdates = await getPendingOrderUpdatesForTable(table.id)
-          const orderUpdates = pendingUpdates.filter(u => u.order_id === existingOrder.id)
-          if (orderUpdates.length > 0) {
-            console.log('OFFLINE: Found pending order updates:', orderUpdates.length)
-            for (const update of orderUpdates) {
-              for (const item of update.items || []) {
-                if (itemsMap[item.menu_item_id]) {
-                  // Add to existing item quantity
-                  itemsMap[item.menu_item_id].quantity += item.quantity
-                  // ALSO update existingQuantity so these aren't treated as "new" on next submit
-                  itemsMap[item.menu_item_id].existingQuantity += item.quantity
-                } else {
-                  // New item from offline update
-                  itemsMap[item.menu_item_id] = {
-                    menu_item_id: item.menu_item_id,
-                    name: item.name,
-                    price_at_time: item.price_at_time,
-                    quantity: item.quantity,
-                    isExisting: true, // Mark as existing so staff can't reduce
-                    existingQuantity: item.quantity
-                  }
-                }
-              }
-            }
-          }
-        } catch (err) {
-          console.warn('Failed to get pending order updates:', err)
-        }
-      }
-
-      // ALSO merge any pending offline ORDERS (full orders created while offline)
-      // ONLY do this when OFFLINE - when online, Supabase has the source of truth
-      if (!navigator.onLine && pendingOfflineOrders.length > 0) {
-        console.log('OFFLINE: Merging pending offline orders into existing online order:', pendingOfflineOrders.length)
-        for (const offlineOrder of pendingOfflineOrders) {
-          for (const item of offlineOrder.order_items || []) {
+      // Merge pending order updates
+      try {
+        const pendingUpdates = await getPendingOrderUpdatesForTable(table.id)
+        const orderUpdates = pendingUpdates.filter(u => u.order_id === existingOrder.id)
+        for (const update of orderUpdates) {
+          for (const item of update.items || []) {
             if (itemsMap[item.menu_item_id]) {
               itemsMap[item.menu_item_id].quantity += item.quantity
               itemsMap[item.menu_item_id].existingQuantity += item.quantity
@@ -1145,38 +905,96 @@ export default function Tables() {
             }
           }
         }
+      } catch (err) {
+        console.warn('Failed to get pending order updates:', err)
+      }
+
+      // Merge pending offline orders
+      for (const offlineOrder of pendingOfflineOrders) {
+        for (const item of offlineOrder.order_items || []) {
+          if (itemsMap[item.menu_item_id]) {
+            itemsMap[item.menu_item_id].quantity += item.quantity
+            itemsMap[item.menu_item_id].existingQuantity += item.quantity
+          } else {
+            itemsMap[item.menu_item_id] = {
+              menu_item_id: item.menu_item_id,
+              name: item.name,
+              price_at_time: item.price_at_time,
+              quantity: item.quantity,
+              isExisting: true,
+              existingQuantity: item.quantity
+            }
+          }
+        }
       }
 
       const normalizedItems = Object.values(itemsMap)
-      console.log('STEP 5: Setting orderItems to:', normalizedItems.length, 'items')
-      console.log('Items:', normalizedItems.map(i => `${i.name} x${i.quantity}`))
-
-      // CRITICAL: Update currentOrder.order_items to include merged offline items
-      // This ensures that when submitting, the comparison uses ALL existing items
-      // (both from Supabase AND from pending offline updates) to avoid creating
-      // duplicate pending updates for items that were already added offline
       const mergedOrderItems = normalizedItems.map(item => ({
         menu_item_id: item.menu_item_id,
         name: item.name,
         price_at_time: item.price_at_time,
-        quantity: item.quantity, // Use the merged quantity (online + offline)
+        quantity: item.quantity,
       }))
-      setCurrentOrder({
-        ...existingOrder,
-        order_items: mergedOrderItems
-      })
-
+      setCurrentOrder({ ...existingOrder, order_items: mergedOrderItems })
       setOrderItems(normalizedItems)
-    } else {
-      console.log('STEP 5: No existing order - confirmed empty orderItems')
-      setCurrentOrder(null)
-      setOrderItems([])
-      setItemNotes({})
+      setShowOrderModal(true)
+      return
     }
 
-    console.log('STEP 6: Opening modal')
+    // ONLINE MODE: Open modal immediately, fetch existing order in background
+    clearAllOrdersCache()
+    clearTableOrdersLocalCache(table.id)
+    setOrderModalLoading(true)
     setShowOrderModal(true)
-    console.log('========== MODAL OPEN COMPLETE ==========')
+
+    try {
+      const { data: existingOrders, error: fetchError } = await supabase
+        .from('orders')
+        .select('*, order_items(*)')
+        .eq('table_id', table.id)
+        .in('status', ['pending', 'preparing', 'ready'])
+        .is('paid', false)
+        .order('created_at', { ascending: false })
+        .limit(1)
+
+      let existingOrder = null
+      if (!fetchError) {
+        existingOrder = existingOrders && existingOrders.length > 0 ? existingOrders[0] : null
+        if (existingOrder && existingOrder.table_id !== table.id) existingOrder = null
+      }
+
+      if (existingOrder) {
+        const itemsMap = {}
+        existingOrder.order_items?.forEach(item => {
+          if (itemsMap[item.menu_item_id]) {
+            itemsMap[item.menu_item_id].quantity += item.quantity
+            itemsMap[item.menu_item_id].existingQuantity += item.quantity
+          } else {
+            itemsMap[item.menu_item_id] = {
+              menu_item_id: item.menu_item_id,
+              name: item.name,
+              price_at_time: item.price_at_time,
+              quantity: item.quantity,
+              isExisting: true,
+              existingQuantity: item.quantity
+            }
+          }
+        })
+        const normalizedItems = Object.values(itemsMap)
+        const mergedOrderItems = normalizedItems.map(item => ({
+          menu_item_id: item.menu_item_id,
+          name: item.name,
+          price_at_time: item.price_at_time,
+          quantity: item.quantity,
+        }))
+        setCurrentOrder({ ...existingOrder, order_items: mergedOrderItems })
+        setOrderItems(normalizedItems)
+      }
+    } catch (err) {
+      console.warn('Could not fetch existing order:', err)
+    } finally {
+      setOrderModalLoading(false)
+    }
   }
 
   const openPaymentModal = async (table) => {
@@ -1256,11 +1074,19 @@ export default function Tables() {
         }
       }
 
-      // Also get pending offline orders for this table
-      const offlineOrders = await getPendingOrdersForTable(table.id)
-
-      // Get pending order updates (items added to existing orders while offline)
-      const pendingUpdates = await getPendingOrderUpdatesForTable(table.id)
+      // Also get pending offline orders for this table (only needed when offline)
+      let offlineOrders = []
+      let pendingUpdates = []
+      if (!navigator.onLine) {
+        try {
+          ;[offlineOrders, pendingUpdates] = await Promise.all([
+            getPendingOrdersForTable(table.id).catch(() => []),
+            getPendingOrderUpdatesForTable(table.id).catch(() => []),
+          ])
+        } catch (err) {
+          console.warn('Failed to load offline orders for payment modal:', err)
+        }
+      }
 
       // Convert offline orders to the same format as Supabase orders
       const formattedOfflineOrders = offlineOrders.map(order => ({
@@ -1535,7 +1361,14 @@ export default function Tables() {
       }
 
       // Get pending order updates (items added to existing orders while offline)
-      const pendingUpdates = await getPendingOrderUpdatesForTable(table.id)
+      let pendingUpdates = []
+      if (!navigator.onLine) {
+        try {
+          pendingUpdates = await getPendingOrderUpdatesForTable(table.id).catch(() => [])
+        } catch (err) {
+          console.warn('Failed to load pending updates for order details:', err)
+        }
+      }
 
       // Merge pending order updates into their parent orders
       const ordersWithUpdates = orders.map(order => {
@@ -2066,11 +1899,15 @@ export default function Tables() {
       // Store completed order IDs for invoice generation
       setCompletedOrderIds(orderIds)
 
-      // Clean up any stale offline orders for this table
-      await clearPaidOfflineOrders(selectedTable.id)
-
-      // Clear any pending order updates for this table
-      await clearPendingOrderUpdates(selectedTable.id)
+      // Clean up any stale offline orders for this table (only needed when IDB is available)
+      if (!navigator.onLine) {
+        try {
+          await clearPaidOfflineOrders(selectedTable.id)
+          await clearPendingOrderUpdates(selectedTable.id)
+        } catch (err) {
+          console.warn('Failed to clear offline data after payment:', err)
+        }
+      }
 
       // Clear the localStorage cache for this table
       localStorage.removeItem(`table_orders_${selectedTable.id}`)
@@ -2375,44 +2212,26 @@ export default function Tables() {
   }
 
   const addItemToOrder = (item) => {
-    console.log('===== ADD ITEM TO ORDER =====')
-    console.log('Item to add:', item.name, 'ID:', item.id)
-
     setOrderItems(prevItems => {
-      console.log('Current orderItems before add:', prevItems.length)
-      console.log('Current items:', prevItems.map(i => `${i.name} x${i.quantity} (ID: ${i.menu_item_id})`))
-
-      // Check for existing item
       const existingItemIndex = prevItems.findIndex(oi => oi.menu_item_id === item.id)
-      console.log('Existing item index:', existingItemIndex)
-
       if (existingItemIndex !== -1) {
-        // Update existing item's quantity
-        console.log('Item already exists, incrementing quantity from', prevItems[existingItemIndex].quantity, 'to', prevItems[existingItemIndex].quantity + 1)
         const updated = [...prevItems]
         updated[existingItemIndex] = {
           ...updated[existingItemIndex],
           quantity: updated[existingItemIndex].quantity + 1
         }
-        console.log('After update, total items:', updated.length)
         return updated
       } else {
-        // Add new item
-        console.log('Adding new item with quantity 1')
-        const newItem = {
+        return [...prevItems, {
           menu_item_id: item.id,
           name: item.name,
           price_at_time: item.price,
           quantity: 1,
           isExisting: false,
           existingQuantity: 0
-        }
-        const newItems = [...prevItems, newItem]
-        console.log('After add, total items:', newItems.length)
-        return newItems
+        }]
       }
     })
-    console.log('===== ADD ITEM COMPLETE =====')
   }
 
   const updateItemQuantity = (menuItemId, newQuantity) => {
@@ -2623,40 +2442,32 @@ export default function Tables() {
           // Skip the normal insert flow
           console.log('UPSERT complete - skipping normal insert')
 
-          // Cache orders for this table
-          try {
-            const { data: ordersData } = await supabase
-              .from('orders')
-              .select('*, order_items(*)')
-              .eq('table_id', selectedTable.id)
-              .is('paid', false)
-              .neq('status', 'cancelled')
-              .order('created_at', { ascending: true })
-
-            if (ordersData && ordersData.length > 0) {
-              const cacheKey = `table_orders_${selectedTable.id}`
-              localStorage.setItem(cacheKey, JSON.stringify(ordersData))
-            }
-          } catch (e) {
-            console.warn('Failed to cache orders:', e)
-          }
-
-          // Clear offline data
-          try {
-            await clearAllOfflineOrdersForTable(selectedTable.id)
-          } catch (err) {
-            console.warn('Failed to clear offline data:', err)
-          }
-
-          // Close modal and reset
+          // Close modal immediately, then refresh in background
           setShowOrderModal(false)
+          setOrderModalLoading(false)
           setSelectedTable(null)
           setCurrentOrder(null)
           setOrderItems([])
           setItemNotes({})
-
-          await fetchTableOrderInfo(restaurant.id)
           showNotification('success', t('notifications.orderUpdated'))
+
+          // Background: cache + clear offline data + refresh badges
+          ;(async () => {
+            try {
+              const { data: ordersData } = await supabase
+                .from('orders')
+                .select('*, order_items(*)')
+                .eq('table_id', selectedTable.id)
+                .is('paid', false)
+                .neq('status', 'cancelled')
+                .order('created_at', { ascending: true })
+              if (ordersData && ordersData.length > 0) {
+                localStorage.setItem(`table_orders_${selectedTable.id}`, JSON.stringify(ordersData))
+              }
+            } catch (e) { console.warn('Failed to cache orders:', e) }
+            try { await clearAllOfflineOrdersForTable(selectedTable.id) } catch {}
+            fetchTableOrderInfo(restaurant.id)
+          })()
           return  // Exit early - we used UPSERT instead
         }
 
@@ -2738,62 +2549,34 @@ export default function Tables() {
         if (itemsError) throw itemsError
       }
 
-      // Cache orders for this table (for offline payment support)
-      console.log('========== CACHING ORDERS FOR OFFLINE USE ==========')
-      try {
-        const { data: ordersData } = await supabase
-          .from('orders')
-          .select('*, order_items(*)')
-          .eq('table_id', selectedTable.id)
-          .is('paid', false)
-          .neq('status', 'cancelled')
-          .order('created_at', { ascending: true })
-        console.log('DEBUG: Orders to cache:', ordersData?.length || 0)
-        if (ordersData && ordersData.length > 0) {
-          const cacheKey = `table_orders_${selectedTable.id}`
-          console.log('DEBUG: Caching to key:', cacheKey)
-          console.log('DEBUG: Orders being cached:', ordersData.map(o => ({
-            id: o.id,
-            table_id: o.table_id,
-            status: o.status,
-            items: o.order_items?.map(i => ({ name: i.name, qty: i.quantity }))
-          })))
-          localStorage.setItem(cacheKey, JSON.stringify(ordersData))
-          console.log('SUCCESS: Orders cached successfully')
-          // Verify the cache was saved
-          const verify = localStorage.getItem(cacheKey)
-          console.log('DEBUG: Cache verification - exists:', !!verify, 'length:', verify?.length)
-        } else {
-          console.log('DEBUG: No orders to cache')
-        }
-      } catch (e) {
-        console.error('ERROR: Failed to cache orders:', e)
-      }
-
-      // ========== CRITICAL: Clear all offline data for this table ==========
-      // After a successful ONLINE submit, we must clear any pending offline data
-      // (orders and order updates) to prevent them from being merged on next load.
-      // This is the ROOT CAUSE of the duplication bug: stale offline data was being
-      // merged with fresh Supabase data on each load!
-      console.log('Clearing all offline data for table:', selectedTable.id)
-      try {
-        await clearAllOfflineOrdersForTable(selectedTable.id)
-        console.log('Cleared offline orders and updates for table')
-      } catch (err) {
-        console.warn('Failed to clear offline data:', err)
-      }
-
-      // Close modal and reset
+      // Close modal immediately
+      const tableIdForCache = selectedTable.id
+      const restaurantIdForRefresh = restaurant.id
       setShowOrderModal(false)
+      setOrderModalLoading(false)
       setSelectedTable(null)
       setCurrentOrder(null)
       setOrderItems([])
       setItemNotes({})
-
-      // Refresh table order info
-      await fetchTableOrderInfo(restaurant.id)
-
       showNotification('success', currentOrder ? t('notifications.orderUpdated') : t('notifications.orderPlaced'))
+
+      // Background: cache orders + clear offline data + refresh badges
+      ;(async () => {
+        try {
+          const { data: ordersData } = await supabase
+            .from('orders')
+            .select('*, order_items(*)')
+            .eq('table_id', tableIdForCache)
+            .is('paid', false)
+            .neq('status', 'cancelled')
+            .order('created_at', { ascending: true })
+          if (ordersData && ordersData.length > 0) {
+            localStorage.setItem(`table_orders_${tableIdForCache}`, JSON.stringify(ordersData))
+          }
+        } catch (e) { console.warn('Failed to cache orders:', e) }
+        try { await clearAllOfflineOrdersForTable(tableIdForCache) } catch {}
+        fetchTableOrderInfo(restaurantIdForRefresh)
+      })()
     } catch (error) {
       console.log('========== ORDER SUBMISSION ERROR ==========')
       console.log('Error:', error?.message || error)
@@ -3229,6 +3012,7 @@ export default function Tables() {
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto animate-fade-in"
           onClick={() => {
             setShowOrderModal(false)
+            setOrderModalLoading(false)
             setSelectedTable(null)
             setCurrentOrder(null)
             setOrderItems([])
@@ -3238,9 +3022,14 @@ export default function Tables() {
           }}
         >
           <div
-            className="bg-white rounded-2xl p-6 w-full max-w-6xl my-4 max-h-[90vh] flex flex-col animate-zoom-in"
+            className="bg-white rounded-2xl p-6 w-full max-w-6xl my-4 max-h-[90vh] flex flex-col animate-zoom-in relative"
             onClick={(e) => e.stopPropagation()}
           >
+            {orderModalLoading && (
+              <div className="absolute inset-0 bg-white/80 rounded-2xl flex items-center justify-center z-10">
+                <div className="w-8 h-8 border-4 border-[#6262bd]/20 border-t-[#6262bd] rounded-full animate-spin" />
+              </div>
+            )}
             <div className="flex justify-between items-center mb-6">
               <div>
                 <h2 className="text-xl font-bold text-slate-800">
@@ -3253,6 +3042,7 @@ export default function Tables() {
               <button
                 onClick={() => {
                   setShowOrderModal(false)
+                  setOrderModalLoading(false)
                   setSelectedTable(null)
                   setCurrentOrder(null)
                   setOrderItems([])
@@ -3571,18 +3361,6 @@ export default function Tables() {
                               </div>
 
                               <div className="flex items-center gap-2">
-                                {(() => {
-                                  // Debug: Only log once per render
-                                  if (orderItems.indexOf(item) === 0) {
-                                    console.log('🔍 Modal Controls Debug:', {
-                                      userType,
-                                      currentOrder: !!currentOrder,
-                                      condition: userType === 'owner' || !currentOrder,
-                                      willShowOwnerControls: userType === 'owner' || !currentOrder
-                                    })
-                                  }
-                                  return null
-                                })()}
                                 {userType === 'owner' || !currentOrder ? (
                                   // Owners can always modify, staff can only modify NEW orders
                                   <>
@@ -5065,10 +4843,6 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
   const hasOpenOrders = orderInfo && orderInfo.count > 0
   const needsCleaning = table.status === 'needs_cleaning'
 
-  // Debug logging
-  if (orderInfo) {
-    console.log(`Table ${table.table_number} orderInfo:`, orderInfo, 'hasOpenOrders:', hasOpenOrders, 'total:', orderInfo.total, 'count:', orderInfo.count)
-  }
   const hasReservationsToday = reservations && reservations.length > 0
   const hasWaiterCall = waiterCalls && waiterCalls.length > 0
   const readyDepartments = orderInfo?.readyDepartments || []

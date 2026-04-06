@@ -1038,12 +1038,6 @@ export default function Orders() {
             {filteredOrders.map((order) => {
               const filteredItems = filterOrderItems(order.order_items)
 
-              console.log(`📋 Order ${order.id.slice(0, 8)} filteredItems:`, filteredItems.map(i => ({
-                name: i.name,
-                preparing_started_at: i.preparing_started_at,
-                marked_ready_at: i.marked_ready_at
-              })))
-
               if (filteredItems.length === 0 && staffDepartment && staffDepartment !== 'universal' && userType !== 'owner') {
                 return null
               }
@@ -1234,14 +1228,6 @@ export default function Orders() {
                           if (item.preparing_started_at) deptGroups[dept].hasStartedPreparing = true
                           if (item.marked_ready_at) deptGroups[dept].hasMarkedReady = true
                         })
-
-                        console.log('🔍 Order', order.id.slice(0, 8), 'status:', order.status)
-                        console.log('🔍 Dept groups:', Object.keys(deptGroups).map(dept => ({
-                          dept,
-                          hasStarted: deptGroups[dept].hasStartedPreparing,
-                          hasReady: deptGroups[dept].hasMarkedReady,
-                          items: deptGroups[dept].items.map(i => ({ name: i.name, preparing_started_at: i.preparing_started_at, marked_ready_at: i.marked_ready_at }))
-                        })))
 
                         const buttons = []
                         Object.keys(deptGroups).forEach(dept => {

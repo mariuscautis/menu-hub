@@ -15,6 +15,9 @@ const ORDER_UPDATES_STORE = 'pending_order_updates'
 
 function openDB() {
   return new Promise((resolve, reject) => {
+    // Timeout so a blocked/unavailable IDB never hangs callers
+    const timeout = setTimeout(() => reject(new Error('idb_open_timeout')), 2000)
+
     const request = indexedDB.open(DB_NAME, DB_VERSION)
 
     request.onupgradeneeded = (event) => {
@@ -60,8 +63,8 @@ function openDB() {
       }
     }
 
-    request.onsuccess = () => resolve(request.result)
-    request.onerror = () => reject(request.error)
+    request.onsuccess = () => { clearTimeout(timeout); resolve(request.result) }
+    request.onerror = () => { clearTimeout(timeout); reject(request.error) }
   })
 }
 

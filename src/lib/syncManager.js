@@ -464,24 +464,37 @@ export function initAutoSync() {
   if (typeof window === 'undefined') return () => {}
 
   let intervalId = null
+  // Only sync if the device has actually gone offline this session.
+  // Avoids hammering IDB every 30s for users who are always online.
+  let hasGoneOffline = !navigator.onLine
 
   const handleOnline = () => {
+    if (!hasGoneOffline) return
     console.log('[SyncManager] Back online — triggering sync')
     syncAll()
   }
 
-  window.addEventListener('online', handleOnline)
+  const handleOffline = () => {
+    hasGoneOffline = true
+  }
 
-  // Periodic sync every 30s when online
+  window.addEventListener('online', handleOnline)
+  window.addEventListener('offline', handleOffline)
+
+  // Periodic sync every 30s — only runs if device has been offline this session
   intervalId = setInterval(() => {
-    if (navigator.onLine) {
+    if (navigator.onLine && hasGoneOffline) {
       syncAll()
     }
   }, 30000)
 
-  // Initial sync attempt
-  if (navigator.onLine) {
-    syncAll()
+  // Initial sync attempt — only if we started offline (e.g. app launched offline)
+  if (!navigator.onLine) {
+    hasGoneOffline = true
+  } else {
+    // Started online: do one sync attempt in case there's leftover data from a
+    // previous offline session, then rely on the offline/online events going forward.
+    syncAll().catch(() => {})
   }
 
   // Register Background Sync and send Supabase config to SW
@@ -529,6 +542,7 @@ export function initAutoSync() {
 
     const cleanup = () => {
       window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
       if (intervalId) clearInterval(intervalId)
       navigator.serviceWorker.removeEventListener('message', handleSWMessage)
     }
@@ -538,6 +552,7 @@ export function initAutoSync() {
 
   return () => {
     window.removeEventListener('online', handleOnline)
+    window.removeEventListener('offline', handleOffline)
     if (intervalId) clearInterval(intervalId)
   }
 }

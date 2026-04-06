@@ -237,11 +237,11 @@ export default function DashboardLayout({ children }) {
         setUserEmail(user.email)
         let debugText = `User: ${user.email} (${user.id})\n\n`
 
-        // Check if platform admin
-        const { data: admin } = await supabase
-          .from('admins')
-          .select('id')
-          .eq('user_id', user.id)
+        // Run admin check and restaurant owner check in parallel — saves one full round-trip
+        const [{ data: admin }, { data: ownedRestaurant, error: ownedError }] = await Promise.all([
+          supabase.from('admins').select('id').eq('user_id', user.id),
+          supabase.from('restaurants').select('*').eq('owner_id', user.id).maybeSingle(),
+        ])
 
         const isPlatAdmin = admin && admin.length > 0
         setIsPlatformAdmin(isPlatAdmin)
@@ -272,13 +272,6 @@ export default function DashboardLayout({ children }) {
             sessionStorage.removeItem('impersonation_session')
           }
         }
-
-        // Check if restaurant owner
-        const { data: ownedRestaurant, error: ownedError } = await supabase
-          .from('restaurants')
-          .select('*')
-          .eq('owner_id', user.id)
-          .maybeSingle()
 
         debugText += `Owned Restaurant Query:\n`
         debugText += `  Result: ${JSON.stringify(ownedRestaurant)}\n`
