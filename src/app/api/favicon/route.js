@@ -8,6 +8,19 @@ function getSupabaseClient() {
   )
 }
 
+async function fetchImageAsResponse(url) {
+  const res = await fetch(url)
+  if (!res.ok) return null
+  const buffer = await res.arrayBuffer()
+  const contentType = res.headers.get('content-type') || 'image/png'
+  return new NextResponse(buffer, {
+    headers: {
+      'Content-Type': contentType,
+      'Cache-Control': 'public, max-age=3600',
+    },
+  })
+}
+
 export async function GET(request) {
   try {
     const supabase = getSupabaseClient()
@@ -21,16 +34,24 @@ export async function GET(request) {
     const faviconUrl = brandingData?.value?.favicon_url
 
     if (faviconUrl) {
-      return NextResponse.redirect(faviconUrl)
+      const response = await fetchImageAsResponse(faviconUrl)
+      if (response) return response
     }
 
     // Fall back to the default app icon
     const defaultIconUrl = new URL('/icon-192x192.png', request.url)
-    return NextResponse.redirect(defaultIconUrl)
+    const response = await fetchImageAsResponse(defaultIconUrl.toString())
+    if (response) return response
+
+    return new NextResponse(null, { status: 404 })
   } catch (error) {
     console.error('Error fetching favicon:', error)
-    const defaultIconUrl = new URL('/icon-192x192.png', request.url)
-    return NextResponse.redirect(defaultIconUrl)
+    try {
+      const defaultIconUrl = new URL('/icon-192x192.png', request.url)
+      const response = await fetchImageAsResponse(defaultIconUrl.toString())
+      if (response) return response
+    } catch {}
+    return new NextResponse(null, { status: 404 })
   }
 }
 
