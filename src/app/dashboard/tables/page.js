@@ -464,16 +464,49 @@ export default function Tables() {
   }
 
   const fetchTableOrderInfo = async (restaurantId) => {
-    // ── OFFLINE: skip Supabase entirely, build from IDB ──────────────────────
+    // ── OFFLINE: skip Supabase entirely, build from cache + IDB ─────────────
     if (!navigator.onLine) {
       const orderInfo = {}
+
+      // Step 1: reconstruct from per-table localStorage caches (orders placed while online)
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i)
+          if (!key || !key.startsWith('table_orders_')) continue
+          const tableId = key.replace('table_orders_', '')
+          const cached = JSON.parse(localStorage.getItem(key) || '[]')
+          const unpaid = cached.filter(o => !o.paid && o.status !== 'cancelled')
+          if (unpaid.length === 0) continue
+          let total = 0
+          const readyDepartments = []
+          unpaid.forEach(order => {
+            order.order_items?.forEach(item => {
+              total += (item.quantity || 0) * (item.price_at_time || 0)
+              if (item.marked_ready_at && !item.delivered_at) {
+                const dept = item.menu_items?.department || 'kitchen'
+                if (!readyDepartments.includes(dept)) readyDepartments.push(dept)
+              }
+            })
+          })
+          orderInfo[tableId] = { count: unpaid.length, total, readyDepartments }
+        }
+      } catch (err) {
+        console.warn('Failed to read table order caches:', err)
+      }
+
+      // Step 2: layer IDB pending orders and updates on top
       try {
         const [offlineOrdersByTable, offlineUpdatesByTable] = await Promise.all([
           getAllPendingOrdersByTable(),
           getAllPendingOrderUpdatesByTable(),
         ])
         Object.entries(offlineOrdersByTable).forEach(([tableId, offlineData]) => {
-          orderInfo[tableId] = { count: offlineData.count, total: offlineData.total, readyDepartments: [] }
+          if (orderInfo[tableId]) {
+            orderInfo[tableId].count += offlineData.count
+            orderInfo[tableId].total += offlineData.total
+          } else {
+            orderInfo[tableId] = { count: offlineData.count, total: offlineData.total, readyDepartments: [] }
+          }
         })
         Object.entries(offlineUpdatesByTable).forEach(([tableId, updateData]) => {
           if (orderInfo[tableId]) {
@@ -483,8 +516,9 @@ export default function Tables() {
           }
         })
       } catch (err) {
-        console.warn('Failed to load offline order info:', err)
+        console.warn('Failed to load offline order info from IDB:', err)
       }
+
       setTableOrderInfo(orderInfo)
       return
     }
@@ -598,6 +632,20 @@ export default function Tables() {
     })
 
     setTableOrderInfo(orderInfo)
+
+    // Cache orders grouped by table so the offline path can reconstruct indicators
+    if (orders && orders.length > 0) {
+      try {
+        const byTable = {}
+        orders.forEach(order => {
+          if (!byTable[order.table_id]) byTable[order.table_id] = []
+          byTable[order.table_id].push(order)
+        })
+        Object.entries(byTable).forEach(([tableId, tableOrders]) => {
+          localStorage.setItem(`table_orders_${tableId}`, JSON.stringify(tableOrders))
+        })
+      } catch {}
+    }
   }
 
   const fetchTodayReservations = async (restaurantId) => {
@@ -971,12 +1019,66 @@ export default function Tables() {
     }
 
     // ONLINE MODE: Open modal immediately, fetch existing order in background
+    // Use a 4s timeout so a dropped connection falls back to cache quickly
     clearAllOrdersCache()
     clearTableOrdersLocalCache(table.id)
     setOrderModalLoading(true)
     setShowOrderModal(true)
 
+    const loadFromCacheAndIDB = async () => {
+      const itemsMap = {}
+      // Pull items from per-table localStorage cache
+      try {
+        const cached = localStorage.getItem(`table_orders_${table.id}`)
+        if (cached) {
+          const cachedOrders = JSON.parse(cached)
+          const unpaid = cachedOrders.filter(o =>
+            o.table_id === table.id && !o.paid && ['pending', 'preparing', 'ready'].includes(o.status)
+          )
+          const latest = unpaid[unpaid.length - 1]
+          if (latest) {
+            latest.order_items?.forEach(item => {
+              itemsMap[item.menu_item_id] = {
+                menu_item_id: item.menu_item_id,
+                name: item.name,
+                price_at_time: item.price_at_time,
+                quantity: item.quantity,
+                isExisting: true,
+                existingQuantity: item.quantity,
+              }
+            })
+            const normalizedItems = Object.values(itemsMap)
+            setCurrentOrder({ ...latest, order_items: normalizedItems.map(i => ({ menu_item_id: i.menu_item_id, name: i.name, price_at_time: i.price_at_time, quantity: i.quantity })) })
+            setOrderItems(normalizedItems)
+            return
+          }
+        }
+      } catch {}
+      // Fall back to IDB pending orders
+      try {
+        const pendingOfflineOrders = await getPendingOrdersForTable(table.id).catch(() => [])
+        if (pendingOfflineOrders.length > 0) {
+          const latest = pendingOfflineOrders[pendingOfflineOrders.length - 1]
+          latest.order_items?.forEach(item => {
+            itemsMap[item.menu_item_id] = {
+              menu_item_id: item.menu_item_id,
+              name: item.name,
+              price_at_time: item.price_at_time,
+              quantity: item.quantity,
+              isExisting: true,
+              existingQuantity: item.quantity,
+            }
+          })
+          setCurrentOrder({ client_id: latest.client_id, table_id: latest.table_id, order_items: Object.values(itemsMap), isOfflineOrder: true })
+          setOrderItems(Object.values(itemsMap))
+        }
+      } catch {}
+    }
+
     try {
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 4000)
+
       const { data: existingOrders, error: fetchError } = await supabase
         .from('orders')
         .select('*, order_items(*)')
@@ -985,6 +1087,9 @@ export default function Tables() {
         .is('paid', false)
         .order('created_at', { ascending: false })
         .limit(1)
+        .abortSignal(controller.signal)
+
+      clearTimeout(timeout)
 
       let existingOrder = null
       if (!fetchError) {
@@ -1020,7 +1125,8 @@ export default function Tables() {
         setOrderItems(normalizedItems)
       }
     } catch (err) {
-      console.warn('Could not fetch existing order:', err)
+      console.warn('Could not fetch existing order (falling back to cache):', err)
+      await loadFromCacheAndIDB()
     } finally {
       setOrderModalLoading(false)
     }
