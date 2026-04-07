@@ -535,29 +535,43 @@ export default function Tables() {
     }
 
     // ── ONLINE: fetch from Supabase ───────────────────────────────────────────
-    // Get all unpaid, non-cancelled orders with their items
-    const { data: orders, error: ordersError } = await supabase
-      .from('orders')
-      .select(`
-        id,
-        table_id,
-        total,
-        status,
-        delivered_at,
-        order_items (
+    // 4-second timeout so a dropped connection falls through to cache quickly
+    const abortController = new AbortController()
+    const abortTimer = setTimeout(() => abortController.abort(), 4000)
+    let orders = null
+    let ordersError = null
+    try {
+      const result = await supabase
+        .from('orders')
+        .select(`
           id,
-          quantity,
-          price_at_time,
-          marked_ready_at,
+          table_id,
+          total,
+          status,
+          paid,
           delivered_at,
-          menu_items (
-            department
+          order_items (
+            id,
+            quantity,
+            price_at_time,
+            marked_ready_at,
+            delivered_at,
+            menu_items (
+              department
+            )
           )
-        )
-      `)
-      .eq('restaurant_id', restaurantId)
-      .eq('paid', false)
-      .neq('status', 'cancelled')
+        `)
+        .eq('restaurant_id', restaurantId)
+        .eq('paid', false)
+        .neq('status', 'cancelled')
+        .abortSignal(abortController.signal)
+      orders = result.data
+      ordersError = result.error
+    } catch (fetchErr) {
+      ordersError = fetchErr
+    } finally {
+      clearTimeout(abortTimer)
+    }
 
     // If Supabase failed (network dropped after the online check), fall back to
     // the cache-based offline path rather than wiping tableOrderInfo with {}
