@@ -1222,49 +1222,66 @@ export default function Tables() {
         // Clear Supabase cache ONLY when online (before fresh fetch)
         // Don't clear when offline - we need the cached data!
         clearOrdersCacheForTable(table.id)
-        // Online: fetch from Supabase and cache
-        const { data: ordersData, error: ordersError } = await supabase
-          .from('orders')
-          .select('*, order_items(*)')
-          .eq('table_id', table.id)
-          .is('paid', false)
-          .neq('status', 'cancelled')
-          .order('created_at', { ascending: true })
+        // Online: fetch from Supabase and cache (4s timeout so a dropped connection
+        // falls through to the offline/cache path rather than showing "Payment failed")
+        const payAbort = new AbortController()
+        const payAbortTimer = setTimeout(() => payAbort.abort(), 4000)
+        let ordersData, ordersError
+        try {
+          const result = await supabase
+            .from('orders')
+            .select('*, order_items(*)')
+            .eq('table_id', table.id)
+            .is('paid', false)
+            .neq('status', 'cancelled')
+            .order('created_at', { ascending: true })
+            .abortSignal(payAbort.signal)
+          ordersData = result.data
+          ordersError = result.error
+        } catch (fetchErr) {
+          ordersError = fetchErr
+        } finally {
+          clearTimeout(payAbortTimer)
+        }
 
         if (ordersError) {
-          throw ordersError
-        }
-
-        // CRITICAL VALIDATION: Filter to only orders that actually belong to this table
-        // This prevents cached responses from other tables being used incorrectly
-        orders = (ordersData || []).filter(order => order.table_id === table.id)
-
-        if (orders.length !== (ordersData || []).length) {
-          console.warn('CACHE MISMATCH: Filtered out', (ordersData || []).length - orders.length, 'orders with wrong table_id')
-        }
-
-        // Cache the orders for offline use
-        if (orders.length > 0) {
-          try {
-            localStorage.setItem(cacheKey, JSON.stringify(orders))
-          } catch (e) {
-            console.warn('Failed to cache orders:', e)
-          }
+          // Network dropped — fall through to offline cache path
+          console.warn('openPaymentModal: Supabase error, falling back to cache', ordersError?.message)
+          const cached = localStorage.getItem(cacheKey)
+          orders = cached
+            ? JSON.parse(cached).filter(o => o.table_id === table.id)
+            : []
+          existingSplitBills = []
         } else {
-          // Clear cache if no orders
-          localStorage.removeItem(cacheKey)
-        }
+          // CRITICAL VALIDATION: Filter to only orders that actually belong to this table
+          orders = (ordersData || []).filter(order => order.table_id === table.id)
 
-        // Also fetch split bills when online
-        try {
-          const { data: splitBillsData } = await supabase
-            .from('split_bills')
-            .select('*, split_bill_items(*)')
-            .eq('table_id', table.id)
-            .eq('payment_status', 'completed')
-          existingSplitBills = splitBillsData || []
-        } catch {
-          // Ignore split bills fetch error
+          if (orders.length !== (ordersData || []).length) {
+            console.warn('CACHE MISMATCH: Filtered out', (ordersData || []).length - orders.length, 'orders with wrong table_id')
+          }
+
+          // Cache the orders for offline use
+          if (orders.length > 0) {
+            try {
+              localStorage.setItem(cacheKey, JSON.stringify(orders))
+            } catch (e) {
+              console.warn('Failed to cache orders:', e)
+            }
+          } else {
+            localStorage.removeItem(cacheKey)
+          }
+
+          // Also fetch split bills when online
+          try {
+            const { data: splitBillsData } = await supabase
+              .from('split_bills')
+              .select('*, split_bill_items(*)')
+              .eq('table_id', table.id)
+              .eq('payment_status', 'completed')
+            existingSplitBills = splitBillsData || []
+          } catch {
+            // Ignore split bills fetch error
+          }
         }
       } else {
         // Offline: try to use cached data
@@ -1272,12 +1289,10 @@ export default function Tables() {
           const cached = localStorage.getItem(cacheKey)
           if (cached) {
             const cachedOrders = JSON.parse(cached)
-            // CRITICAL VALIDATION: Filter to only orders that belong to this table
             orders = cachedOrders.filter(order => order.table_id === table.id)
 
             if (orders.length !== cachedOrders.length) {
               console.warn('CACHE MISMATCH: Filtered out', cachedOrders.length - orders.length, 'cached orders with wrong table_id')
-              // Clear the corrupted cache
               localStorage.removeItem(cacheKey)
             }
           }
