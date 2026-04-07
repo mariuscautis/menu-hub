@@ -59,6 +59,7 @@ export default function OfflineHubSettings() {
   const [confirmHubEnable, setConfirmHubEnable] = useState(false) // show confirm dialog
   const [detectingIp, setDetectingIp] = useState(false)
   const [detectedIps, setDetectedIps] = useState([]) // list of candidate LAN IPs
+  const [detectionAttempted, setDetectionAttempted] = useState(false)
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -110,6 +111,7 @@ export default function OfflineHubSettings() {
   const handleDetectIp = async () => {
     setDetectingIp(true)
     setDetectedIps([])
+    setDetectionAttempted(false)
     try {
       const ips = await getLocalIPs()
       setDetectedIps(ips)
@@ -117,6 +119,7 @@ export default function OfflineHubSettings() {
       setDetectedIps([])
     }
     setDetectingIp(false)
+    setDetectionAttempted(true)
   }
 
   const handleUseIp = (ip) => {
@@ -244,7 +247,6 @@ export default function OfflineHubSettings() {
                         <button
                           key={ip}
                           onClick={() => {
-                            // Copy to clipboard
                             navigator.clipboard?.writeText(ip).catch(() => {})
                             setMessage({ type: 'success', text: `IP address ${ip} copied to clipboard.` })
                             setTimeout(() => setMessage(null), 4000)
@@ -260,10 +262,23 @@ export default function OfflineHubSettings() {
                       ))}
                     </div>
                   )}
-                  {!detectingIp && detectedIps.length === 0 && (
+                  {!detectingIp && !detectionAttempted && (
                     <p className="mt-1.5 text-xs text-indigo-500 dark:text-indigo-400">
                       Tap &quot;Detect my IP&quot; to find your local IP address automatically.
                     </p>
+                  )}
+                  {!detectingIp && detectionAttempted && detectedIps.length === 0 && (
+                    <div className="mt-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                      <p className="text-xs font-medium text-amber-800 dark:text-amber-300 mb-1.5">
+                        Automatic detection not supported on this browser. Find your IP manually:
+                      </p>
+                      <ul className="text-xs text-amber-700 dark:text-amber-400 space-y-1">
+                        <li><span className="font-medium">Windows:</span> Open Command Prompt → type <code className="bg-amber-100 dark:bg-amber-900/40 px-1 rounded">ipconfig</code> → look for &quot;IPv4 Address&quot;</li>
+                        <li><span className="font-medium">Mac:</span> System Settings → Wi-Fi → your network → IP Address</li>
+                        <li><span className="font-medium">iPhone/iPad:</span> Settings → Wi-Fi → tap your network → IP Address</li>
+                        <li><span className="font-medium">Android:</span> Settings → Wi-Fi → tap your network → Advanced → IP Address</li>
+                      </ul>
+                    </div>
                   )}
                 </div>
                 <div className="flex items-start gap-2 text-sm text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-xl px-4 py-3">
