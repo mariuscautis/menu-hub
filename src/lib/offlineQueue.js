@@ -561,7 +561,7 @@ export async function addPendingPayment(paymentData) {
     order_ids: paymentData.order_ids || [], // Real order IDs from DB
     order_client_ids: paymentData.order_client_ids || [], // Offline order client_ids
     total_amount: paymentData.total_amount,
-    payment_method: 'cash', // Only cash works offline
+    payment_method: paymentData.payment_method || 'cash',
     staff_name: paymentData.staff_name || 'Staff',
     user_id: paymentData.user_id || null,
   }

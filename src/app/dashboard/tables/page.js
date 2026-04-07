@@ -27,6 +27,7 @@ import {
   clearPendingOrderUpdates,
   clearAllOfflineOrdersForTable,
 } from '@/lib/offlineQueue'
+import { onSyncEvent } from '@/lib/syncManager'
 
 const TOAST_STYLES = {
   success: {
@@ -183,11 +184,22 @@ export default function Tables() {
   useEffect(() => {
     if (!restaurant?.id) return
     const handleOffline = () => {
-      console.log('Tables page - offline event, rebuilding indicators from cache')
       fetchTableOrderInfo(restaurant.id)
     }
     window.addEventListener('offline', handleOffline)
     return () => window.removeEventListener('offline', handleOffline)
+  }, [restaurant?.id])
+
+  // After sync completes (payments/orders pushed to Supabase), refresh the page
+  // so paid orders don't reappear as unpaid
+  useEffect(() => {
+    if (!restaurant?.id) return
+    const unsubscribe = onSyncEvent('sync-complete', () => {
+      if (navigator.onLine) {
+        fetchData()
+      }
+    })
+    return unsubscribe
   }, [restaurant?.id])
 
   // Real-time subscriptions for live order updates
@@ -1215,104 +1227,67 @@ export default function Tables() {
     const cacheKey = `table_orders_${table.id}`
 
     try {
-      let orders = []
       let existingSplitBills = []
 
-      if (navigator.onLine) {
-        // Clear Supabase cache ONLY when online (before fresh fetch)
-        // Don't clear when offline - we need the cached data!
-        clearOrdersCacheForTable(table.id)
-        // Online: fetch from Supabase and cache (2s timeout so a dropped connection
-        // falls through to the offline/cache path rather than showing "Payment failed")
-        const payAbort = new AbortController()
-        const payAbortTimer = setTimeout(() => payAbort.abort(), 2000)
-        let ordersData, ordersError
-        try {
-          const result = await supabase
-            .from('orders')
-            .select('*, order_items(*)')
-            .eq('table_id', table.id)
-            .is('paid', false)
-            .neq('status', 'cancelled')
-            .order('created_at', { ascending: true })
-            .abortSignal(payAbort.signal)
-          ordersData = result.data
-          ordersError = result.error
-        } catch (fetchErr) {
-          ordersError = fetchErr
-        } finally {
-          clearTimeout(payAbortTimer)
+      // Step 1: Load from localStorage cache immediately (instant, no network wait)
+      let orders = []
+      try {
+        const cached = localStorage.getItem(cacheKey)
+        if (cached) {
+          orders = JSON.parse(cached).filter(o => o.table_id === table.id)
         }
+      } catch {}
 
-        if (ordersError) {
-          // Network dropped — fall through to offline cache path
-          console.warn('openPaymentModal: Supabase error, falling back to cache', ordersError?.message)
-          const cached = localStorage.getItem(cacheKey)
-          orders = cached
-            ? JSON.parse(cached).filter(o => o.table_id === table.id)
-            : []
-          existingSplitBills = []
-        } else {
-          // CRITICAL VALIDATION: Filter to only orders that actually belong to this table
-          orders = (ordersData || []).filter(order => order.table_id === table.id)
-
-          if (orders.length !== (ordersData || []).length) {
-            console.warn('CACHE MISMATCH: Filtered out', (ordersData || []).length - orders.length, 'orders with wrong table_id')
-          }
-
-          // Cache the orders for offline use
-          if (orders.length > 0) {
-            try {
-              localStorage.setItem(cacheKey, JSON.stringify(orders))
-            } catch (e) {
-              console.warn('Failed to cache orders:', e)
-            }
-          } else {
-            localStorage.removeItem(cacheKey)
-          }
-
-          // Also fetch split bills when online
-          try {
-            const { data: splitBillsData } = await supabase
-              .from('split_bills')
-              .select('*, split_bill_items(*)')
-              .eq('table_id', table.id)
-              .eq('payment_status', 'completed')
-            existingSplitBills = splitBillsData || []
-          } catch {
-            // Ignore split bills fetch error
-          }
-        }
-      } else {
-        // Offline: try to use cached data
-        try {
-          const cached = localStorage.getItem(cacheKey)
-          if (cached) {
-            const cachedOrders = JSON.parse(cached)
-            orders = cachedOrders.filter(order => order.table_id === table.id)
-
-            if (orders.length !== cachedOrders.length) {
-              console.warn('CACHE MISMATCH: Filtered out', cachedOrders.length - orders.length, 'cached orders with wrong table_id')
-              localStorage.removeItem(cacheKey)
-            }
-          }
-        } catch (e) {
-          console.warn('Failed to load cached orders:', e)
-        }
-      }
-
-      // Also get pending offline orders for this table (only needed when offline)
+      // Step 2: Always load IDB pending orders (needed both online and offline —
+      // e.g. orders placed offline whose payment was just queued)
       let offlineOrders = []
       let pendingUpdates = []
-      if (!navigator.onLine) {
-        try {
-          ;[offlineOrders, pendingUpdates] = await Promise.all([
-            getPendingOrdersForTable(table.id).catch(() => []),
-            getPendingOrderUpdatesForTable(table.id).catch(() => []),
-          ])
-        } catch (err) {
-          console.warn('Failed to load offline orders for payment modal:', err)
-        }
+      try {
+        ;[offlineOrders, pendingUpdates] = await Promise.all([
+          getPendingOrdersForTable(table.id).catch(() => []),
+          getPendingOrderUpdatesForTable(table.id).catch(() => []),
+        ])
+      } catch (err) {
+        console.warn('Failed to load offline orders for payment modal:', err)
+      }
+
+      // Step 3: If online, refresh cache from Supabase in the background (non-blocking)
+      // The modal opens immediately from cache; the fresh data updates it if available
+      if (navigator.onLine) {
+        ;(async () => {
+          try {
+            const freshAbort = new AbortController()
+            const freshTimer = setTimeout(() => freshAbort.abort(), 5000)
+            const [ordersResult, splitBillsResult] = await Promise.all([
+              supabase
+                .from('orders')
+                .select('*, order_items(*)')
+                .eq('table_id', table.id)
+                .is('paid', false)
+                .neq('status', 'cancelled')
+                .order('created_at', { ascending: true })
+                .abortSignal(freshAbort.signal),
+              supabase
+                .from('split_bills')
+                .select('*, split_bill_items(*)')
+                .eq('table_id', table.id)
+                .eq('payment_status', 'completed')
+                .abortSignal(freshAbort.signal),
+            ])
+            clearTimeout(freshTimer)
+            if (!ordersResult.error && ordersResult.data) {
+              const fresh = ordersResult.data.filter(o => o.table_id === table.id)
+              try { localStorage.setItem(cacheKey, JSON.stringify(fresh)) } catch {}
+              // Only update unpaidOrders state if the payment modal is still open
+              setUnpaidOrders(prev => prev.length > 0 ? fresh : prev)
+            }
+            if (!splitBillsResult.error) {
+              existingSplitBills = splitBillsResult.data || []
+            }
+          } catch {
+            // Network gone — cache is sufficient, ignore
+          }
+        })()
       }
 
       // Convert offline orders to the same format as Supabase orders
