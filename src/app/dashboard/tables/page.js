@@ -1222,10 +1222,10 @@ export default function Tables() {
         // Clear Supabase cache ONLY when online (before fresh fetch)
         // Don't clear when offline - we need the cached data!
         clearOrdersCacheForTable(table.id)
-        // Online: fetch from Supabase and cache (4s timeout so a dropped connection
+        // Online: fetch from Supabase and cache (2s timeout so a dropped connection
         // falls through to the offline/cache path rather than showing "Payment failed")
         const payAbort = new AbortController()
-        const payAbortTimer = setTimeout(() => payAbort.abort(), 4000)
+        const payAbortTimer = setTimeout(() => payAbort.abort(), 2000)
         let ordersData, ordersError
         try {
           const result = await supabase
@@ -1989,80 +1989,58 @@ export default function Tables() {
     const subtotalAmount = calculateTableTotal()
     const totalAmount = calculateFinalTotal() // After discount
 
-    // OFFLINE CASH PAYMENT HANDLING
-    if (!navigator.onLine) {
-      if (paymentMethod !== 'cash') {
-        showNotification('error', t('notifications.offlineCardOnly'))
-        return
+    // Only card payments require internet; cash and external_terminal can be queued offline
+    if (!navigator.onLine && paymentMethod === 'card') {
+      showNotification('error', t('notifications.offlineCardOnly'))
+      return
+    }
+
+    // Helper: store payment locally and update UI (used for offline path and online-failure fallback)
+    const processPaymentOffline = async () => {
+      const orderIds = unpaidOrders
+        .filter(o => o.id && !o.id.toString().startsWith('offline_'))
+        .map(o => o.id)
+      const orderClientIds = unpaidOrders
+        .filter(o => o.client_id && !o.id)
+        .map(o => o.client_id)
+
+      await addPendingPayment({
+        restaurant_id: restaurant.id,
+        table_id: selectedTable.id,
+        order_ids: orderIds,
+        order_client_ids: orderClientIds,
+        total_amount: totalAmount,
+        payment_method: paymentMethod,
+        staff_name: userName,
+        user_id: userId,
+      })
+
+      if (orderClientIds.length > 0) {
+        await markOrdersPaidOffline(orderClientIds)
       }
 
+      setTableOrderInfo(prev => { const u = { ...prev }; delete u[selectedTable.id]; return u })
+      setTables(prev => prev.map(t =>
+        t.id === selectedTable.id
+          ? { ...t, status: 'needs_cleaning', payment_completed_at: new Date().toISOString() }
+          : t
+      ))
+      setShowPaymentModal(false)
+      setUnpaidOrders([])
+      await clearAllOfflineOrdersForTable(selectedTable.id)
+      localStorage.removeItem(`table_orders_${selectedTable.id}`)
+      clearOrdersCacheForTable(selectedTable.id)
+      showNotification('success', t('notifications.offlineCashPaymentSaved', { amount: formatCurrency(totalAmount) }))
+    }
+
+    if (!navigator.onLine) {
       try {
-        // Separate orders by type:
-        // - Orders with real ID (from Supabase) go to orderIds - these need to be processed by RPC on sync
-        // - Orders with only client_id (pure offline, not yet synced) go to orderClientIds
-        // Note: Synced orders have BOTH id and client_id - they should go to orderIds since they exist in Supabase
-        const orderIds = unpaidOrders
-          .filter(o => o.id && !o.id.toString().startsWith('offline_'))
-          .map(o => o.id)
-        const orderClientIds = unpaidOrders
-          .filter(o => o.client_id && !o.id) // Only pure offline orders (no Supabase ID yet)
-          .map(o => o.client_id)
-
-        // Store payment locally for later sync
-        await addPendingPayment({
-          restaurant_id: restaurant.id,
-          table_id: selectedTable.id,
-          order_ids: orderIds,
-          order_client_ids: orderClientIds,
-          total_amount: totalAmount,
-          payment_method: 'cash',
-          staff_name: userName,
-          user_id: userId,
-        })
-
-        // Mark pure offline orders as paid locally (these are in IndexedDB)
-        if (orderClientIds.length > 0) {
-          await markOrdersPaidOffline(orderClientIds)
-        }
-
-        // Update local table state immediately
-        setTableOrderInfo(prev => {
-          const updated = { ...prev }
-          delete updated[selectedTable.id] // Remove this table's order info (it's now paid)
-          return updated
-        })
-
-        // Update table to show as needing cleaning
-        setTables(prev => prev.map(t =>
-          t.id === selectedTable.id
-            ? { ...t, status: 'needs_cleaning', payment_completed_at: new Date().toISOString() }
-            : t
-        ))
-
-        // Close payment modal
-        setShowPaymentModal(false)
-        setUnpaidOrders([])
-
-        // AGGRESSIVE CLEANUP: Remove ALL offline data for this table to prevent stale orders
-        // This is critical because old orders must not appear when creating new orders
-        await clearAllOfflineOrdersForTable(selectedTable.id)
-
-        // Also clear localStorage cache for this table
-        localStorage.removeItem(`table_orders_${selectedTable.id}`)
-
-        // Clear the Supabase query cache for this table's orders
-        // This prevents stale cached orders from appearing when placing new orders
-        clearOrdersCacheForTable(selectedTable.id)
-
-        showNotification('success', t('notifications.offlineCashPaymentSaved', { amount: formatCurrency(totalAmount) }))
-
-        // Don't show post-payment modal for offline payments (invoice generation needs internet)
-        return
+        await processPaymentOffline()
       } catch (offlineErr) {
         console.error('Offline payment error:', offlineErr)
         showNotification('error', t('notifications.offlinePaymentFailed'))
-        return
       }
+      return
     }
 
     // ONLINE PAYMENT HANDLING
@@ -2070,16 +2048,36 @@ export default function Tables() {
       // Get order IDs - filter out offline-only orders that don't have real IDs
       const orderIds = unpaidOrders.filter(order => order.id && !order.id.toString().startsWith('offline_')).map(order => order.id)
 
-      // Use RPC function to process payment (bypasses RLS)
-      // This function also marks the table as needs cleaning
-      const { data, error } = await supabase.rpc('process_table_payment', {
-        p_order_ids: orderIds,
-        p_payment_method: paymentMethod,
-        p_staff_name: userName,
-        p_user_id: userId
-      })
+      // Use RPC function to process payment with a 6s timeout
+      const rpcAbort = new AbortController()
+      const rpcAbortTimer = setTimeout(() => rpcAbort.abort(), 6000)
+      let data, error
+      try {
+        const result = await supabase.rpc('process_table_payment', {
+          p_order_ids: orderIds,
+          p_payment_method: paymentMethod,
+          p_staff_name: userName,
+          p_user_id: userId
+        }, { signal: rpcAbort.signal })
+        data = result.data
+        error = result.error
+      } catch (rpcErr) {
+        error = rpcErr
+      } finally {
+        clearTimeout(rpcAbortTimer)
+      }
 
-      if (error) throw error
+      // If the RPC failed because the network dropped mid-payment, queue it offline
+      if (error) {
+        console.warn('process_table_payment RPC failed, queuing offline:', error?.message)
+        try {
+          await processPaymentOffline()
+        } catch (offlineErr) {
+          console.error('Offline payment fallback error:', offlineErr)
+          showNotification('error', t('notifications.offlinePaymentFailed'))
+        }
+        return
+      }
 
       if (data && !data.success) {
         throw new Error(data.error || 'Failed to process payment')
