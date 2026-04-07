@@ -2,15 +2,17 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
-import { addPendingOrder, getPendingOrders, getPendingCount } from '@/lib/offlineQueue'
+import { addPendingOrder, getPendingCount } from '@/lib/offlineQueue'
 import { syncPendingOrders, onSyncEvent, initAutoSync } from '@/lib/syncManager'
+import { isHubConfigured, getHubOrderUrl } from '@/lib/localHub'
 
 /**
  * Hook for offline-aware order placement.
  *
  * Priority order:
- * 1. Supabase (if online) - cloud sync
- * 2. IndexedDB (if offline) - queue for later sync
+ * 1.   Supabase (if online) - cloud sync
+ * 1.5. Hub device (if offline AND hub IP configured) - local WiFi hub
+ * 2.   IndexedDB (fallback) - queue for later sync
  *
  * @returns {Object} { placeOrder, pendingCount, isOnline, isSyncing, syncNow }
  */
@@ -57,11 +59,11 @@ export default function useOfflineOrder() {
   }, [])
 
   /**
-   * Place an order — via Supabase or offline queue.
+   * Place an order via Supabase, hub, or local offline queue.
    *
    * @param {Object} params
-   * @param {Object} params.restaurant - Restaurant object
-   * @param {Array} params.cart - Cart items (with id, name, price, quantity)
+   * @param {Object} params.restaurant
+   * @param {Array}  params.cart
    * @param {string} params.customerName
    * @param {string} params.customerEmail
    * @param {string} params.customerPhone
@@ -152,6 +154,26 @@ export default function useOfflineOrder() {
         // If the online attempt fails (e.g., network dropped mid-request),
         // fall through to offline queue
         console.warn('[useOfflineOrder] Supabase placement failed, queuing offline:', err.message)
+      }
+    }
+
+    // PRIORITY 1.5: Send to hub device via local WiFi (if configured and reachable)
+    if (isHubConfigured()) {
+      const hubUrl = getHubOrderUrl()
+      try {
+        console.log('[useOfflineOrder] Sending order to hub at', hubUrl)
+        const res = await fetch(hubUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderData, orderItems }),
+          signal: AbortSignal.timeout(5000),
+        })
+        if (res.ok) {
+          return { success: true, pickupCode, offline: true, via: 'hub' }
+        }
+        console.warn('[useOfflineOrder] Hub returned non-OK status:', res.status)
+      } catch (err) {
+        console.warn('[useOfflineOrder] Hub unreachable, falling back to IndexedDB:', err.message)
       }
     }
 

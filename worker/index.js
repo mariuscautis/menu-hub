@@ -186,6 +186,128 @@ function removeOrderFromDB(db, clientId) {
   })
 }
 
+// ─── Hub API constants ───────────────────────────────────────────────────────
+const HUB_ORDERS_STORE = 'hub_pending_orders'
+const HUB_DB_NAME = 'menuhub-hub'
+const HUB_DB_VERSION = 1
+
+function openHubDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(HUB_DB_NAME, HUB_DB_VERSION)
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result
+      if (!db.objectStoreNames.contains(HUB_ORDERS_STORE)) {
+        const store = db.createObjectStore(HUB_ORDERS_STORE, { keyPath: 'client_id' })
+        store.createIndex('received_at', 'received_at', { unique: false })
+        store.createIndex('synced', 'synced', { unique: false })
+      }
+    }
+    request.onsuccess = () => resolve(request.result)
+    request.onerror = () => reject(request.error)
+  })
+}
+
+function jsonResponse(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+    },
+  })
+}
+
+/**
+ * Handle hub API requests intercepted by the service worker.
+ * The hub device's SW acts as a local HTTP server for spoke devices on the
+ * same WiFi network.
+ *
+ * Routes:
+ *   GET  /offline-hub/ping         — liveness check
+ *   POST /offline-hub/order        — receive an order from a spoke device
+ *   GET  /offline-hub/orders       — list all unsynced hub orders (for debug)
+ */
+async function handleHubRequest(request) {
+  const url = new URL(request.url)
+  const path = url.pathname
+
+  // CORS preflight
+  if (request.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
+    })
+  }
+
+  // GET /offline-hub/ping — liveness check
+  if (path === '/offline-hub/ping' && request.method === 'GET') {
+    return jsonResponse({ ok: true, hub: true, ts: Date.now() })
+  }
+
+  // POST /offline-hub/order — spoke sends an order to the hub
+  if (path === '/offline-hub/order' && request.method === 'POST') {
+    try {
+      const body = await request.json()
+      if (!body || !body.orderData || !body.orderItems) {
+        return jsonResponse({ error: 'Missing orderData or orderItems' }, 400)
+      }
+
+      const db = await openHubDB()
+      const record = {
+        client_id: body.orderData.client_id,
+        orderData: body.orderData,
+        orderItems: body.orderItems,
+        received_at: new Date().toISOString(),
+        synced: false,
+        retry_count: 0,
+      }
+
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(HUB_ORDERS_STORE, 'readwrite')
+        const store = tx.objectStore(HUB_ORDERS_STORE)
+        store.put(record)
+        tx.oncomplete = () => resolve()
+        tx.onerror = () => reject(tx.error)
+      })
+
+      db.close()
+
+      // If we have internet, also kick off a sync attempt
+      if (navigator.onLine) {
+        syncAllOrders().catch(() => {})
+      }
+
+      return jsonResponse({ ok: true, client_id: record.client_id })
+    } catch (err) {
+      return jsonResponse({ error: err.message }, 500)
+    }
+  }
+
+  // GET /offline-hub/orders — return pending hub orders (for diagnostics)
+  if (path === '/offline-hub/orders' && request.method === 'GET') {
+    try {
+      const db = await openHubDB()
+      const orders = await new Promise((resolve, reject) => {
+        const tx = db.transaction(HUB_ORDERS_STORE, 'readonly')
+        const store = tx.objectStore(HUB_ORDERS_STORE)
+        const req = store.getAll()
+        req.onsuccess = () => resolve(req.result || [])
+        req.onerror = () => reject(req.error)
+      })
+      db.close()
+      return jsonResponse({ orders })
+    } catch (err) {
+      return jsonResponse({ error: err.message }, 500)
+    }
+  }
+
+  return jsonResponse({ error: 'Not found' }, 404)
+}
+
 /**
  * Serve pre-warmed pages from the 'precache-on-demand' cache as a fallback
  * when the network is unavailable and the workbox runtime cache misses.
@@ -193,6 +315,14 @@ function removeOrderFromDB(db, clientId) {
  */
 self.addEventListener('fetch', (event) => {
   const { request } = event
+  const url = new URL(request.url)
+
+  // Intercept /offline-hub/* requests (hub local API)
+  if (url.pathname.startsWith('/offline-hub/')) {
+    event.respondWith(handleHubRequest(request))
+    return
+  }
+
   // Only intercept same-origin GET navigation requests
   if (
     request.method !== 'GET' ||

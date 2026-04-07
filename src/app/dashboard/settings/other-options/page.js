@@ -11,6 +11,7 @@ import PageTabs from '@/components/PageTabs'
 import { settingsTabs } from '@/components/PageTabsConfig'
 import InfoTooltip from '@/components/InfoTooltip'
 import OfflinePageGuard from '@/components/OfflinePageGuard'
+import { isHubDevice, getHubIp, setHubMode, setHubIp, pingHub } from '@/lib/localHub'
 
 export default function OtherOptionsSettings() {
   useModuleGuard('ordering')
@@ -24,6 +25,11 @@ export default function OtherOptionsSettings() {
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState(null)
 
+  // Hub settings state (localStorage — device-local)
+  const [hubMode, setHubModeState] = useState(false)
+  const [hubIpInput, setHubIpInput] = useState('')
+  const [hubPingStatus, setHubPingStatus] = useState(null) // null | 'pinging' | 'ok' | 'fail'
+
   // Sound settings state
   const [soundEnabled, setSoundEnabled] = useState(false)
   const [kitchenSound, setKitchenSound] = useState('bell')
@@ -33,6 +39,39 @@ export default function OtherOptionsSettings() {
   const [volume, setVolume] = useState(0.7)
 
   const { testSound, resumeAudio } = useOrderSounds(restaurant?.id)
+
+  // Load hub settings from localStorage on mount
+  useEffect(() => {
+    setHubModeState(isHubDevice())
+    setHubIpInput(getHubIp() || '')
+  }, [])
+
+  const handleHubModeToggle = (enabled) => {
+    setHubMode(enabled)
+    setHubModeState(enabled)
+    if (enabled) setHubIpInput('')
+    setHubPingStatus(null)
+  }
+
+  const handleHubIpSave = () => {
+    setHubIp(hubIpInput)
+    setHubModeState(false)
+    setHubPingStatus(null)
+    setMessage({ type: 'success', text: 'Hub IP saved on this device.' })
+    setTimeout(() => setMessage(null), 4000)
+  }
+
+  const handleHubIpClear = () => {
+    setHubIp('')
+    setHubIpInput('')
+    setHubPingStatus(null)
+  }
+
+  const handlePingHub = async () => {
+    setHubPingStatus('pinging')
+    const ok = await pingHub()
+    setHubPingStatus(ok ? 'ok' : 'fail')
+  }
 
   useEffect(() => {
     if (!restaurantCtx?.restaurant) return
@@ -377,13 +416,147 @@ export default function OtherOptionsSettings() {
         )}
       </div>
 
-      {/* Future Options Placeholder */}
-      <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center">
-        <svg className="w-12 h-12 mx-auto mb-3 text-slate-300" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
-        </svg>
-        <p className="text-slate-400 font-medium">{t('moreOptionsSoon') || 'More options coming soon'}</p>
-        <p className="text-sm text-slate-300 mt-1">{t('moreOptionsHint') || 'Additional features will be added here'}</p>
+      {/* Offline Hub Settings */}
+      <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
+        <div className="mb-6">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-bold text-slate-700 mb-2 flex items-center gap-2">
+                <svg className="w-6 h-6 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/>
+                </svg>
+                Offline Hub
+              </h2>
+              <p className="text-sm text-slate-500">
+                Allow devices on the same WiFi to relay orders through a central hub when internet is unavailable.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          {/* Hub Mode toggle */}
+          <div className="p-4 bg-indigo-50 rounded-xl border border-indigo-100">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="font-semibold text-indigo-800 mb-1">This device is the Hub</h3>
+                <p className="text-xs text-indigo-600">
+                  Enable this on the device that will receive and queue orders from other staff devices on the same WiFi network.
+                  This device must stay online periodically to sync orders to the cloud.
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                <input
+                  type="checkbox"
+                  checked={hubMode}
+                  onChange={(e) => handleHubModeToggle(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#6262bd]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#6262bd]"></div>
+              </label>
+            </div>
+            {hubMode && (
+              <div className="mt-3 flex items-center gap-2 text-sm text-indigo-700 bg-indigo-100 rounded-lg px-3 py-2">
+                <svg className="w-4 h-4 text-indigo-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                </svg>
+                Hub mode is active on this device. Other devices can send orders to this device&apos;s local IP address.
+              </div>
+            )}
+          </div>
+
+          {/* Spoke: configure hub IP */}
+          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+            <h3 className="font-semibold text-slate-700 mb-1">Connect to a Hub (spoke device)</h3>
+            <p className="text-xs text-slate-500 mb-3">
+              Enter the local IP address of the hub device on your WiFi network. Leave blank to queue orders locally on this device instead.
+            </p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={hubIpInput}
+                onChange={(e) => { setHubIpInput(e.target.value); setHubPingStatus(null) }}
+                placeholder="e.g. 192.168.1.5"
+                disabled={hubMode}
+                className="flex-1 px-4 py-2.5 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 text-sm disabled:opacity-40 disabled:cursor-not-allowed bg-white"
+              />
+              <button
+                onClick={handleHubIpSave}
+                disabled={hubMode || !hubIpInput.trim()}
+                className="px-4 py-2.5 bg-[#6262bd] text-white rounded-xl font-medium text-sm hover:bg-[#5252a3] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                Save
+              </button>
+              {hubIpInput && !hubMode && (
+                <button
+                  onClick={handleHubIpClear}
+                  className="px-4 py-2.5 bg-slate-200 text-slate-600 rounded-xl font-medium text-sm hover:bg-slate-300 transition-colors"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+
+            {/* Ping / test connection */}
+            {hubIpInput && !hubMode && (
+              <div className="mt-3 flex items-center gap-3">
+                <button
+                  onClick={handlePingHub}
+                  disabled={hubPingStatus === 'pinging'}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 text-slate-600 rounded-lg text-xs font-medium hover:bg-slate-50 transition-colors disabled:opacity-50"
+                >
+                  {hubPingStatus === 'pinging' ? (
+                    <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
+                  ) : (
+                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/>
+                    </svg>
+                  )}
+                  Test connection
+                </button>
+                {hubPingStatus === 'ok' && (
+                  <span className="flex items-center gap-1 text-xs text-green-600 font-medium">
+                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                    </svg>
+                    Hub reachable
+                  </span>
+                )}
+                {hubPingStatus === 'fail' && (
+                  <span className="flex items-center gap-1 text-xs text-red-500 font-medium">
+                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/>
+                    </svg>
+                    Hub not reachable
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Info box */}
+          <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
+            <div className="flex gap-3">
+              <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+              </svg>
+              <div className="text-sm text-blue-800">
+                <p className="font-medium mb-1">How the Hub works</p>
+                <ul className="text-xs text-blue-700 space-y-1 list-disc list-inside">
+                  <li>Designate one device (e.g. the manager&apos;s tablet) as the Hub</li>
+                  <li>On all other staff devices, enter the Hub&apos;s local WiFi IP address</li>
+                  <li>When internet is lost, orders are sent to the Hub over WiFi</li>
+                  <li>The Hub queues all orders and syncs them to the cloud when internet returns</li>
+                  <li>If the Hub is also unreachable, orders are saved locally and sync later</li>
+                  <li>Settings are saved per device and do not affect other devices</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     </OfflinePageGuard>
