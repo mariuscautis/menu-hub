@@ -2452,7 +2452,8 @@
     "billing": "Billing",
     "otherOptions": "Other Options",
     "reservations": "Reservations",
-    "dataMigration": "Data Migration"
+    "dataMigration": "Data Migration",
+    "offlineHub": "Offline Hub"
   },
   "salesBalance": {
     "title": "Sales & Tax Balance Report",
@@ -2738,7 +2739,9 @@
     "payments": "Payments",
     "paymentsDesc": "Connect your Stripe account to collect booking deposits",
     "dataMigration": "Data Migration",
-    "dataMigrationDesc": "Import or export your restaurant data"
+    "dataMigrationDesc": "Import or export your restaurant data",
+    "offlineHub": "Offline Hub",
+    "offlineHubDesc": "Configure local WiFi hub for offline order relay"
   },
   "payments": {
     "back": "Settings",

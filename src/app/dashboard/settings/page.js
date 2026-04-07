@@ -133,6 +133,18 @@ export default function SettingsHubPage() {
       color: 'text-teal-500',
       bg: 'bg-teal-50 dark:bg-teal-900/30',
     },
+    {
+      titleKey: 'offlineHub',
+      descKey: 'offlineHubDesc',
+      href: '/dashboard/settings/offline-hub',
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
+        </svg>
+      ),
+      color: 'text-indigo-500',
+      bg: 'bg-indigo-50 dark:bg-indigo-900/30',
+    },
   ]
 
   return (

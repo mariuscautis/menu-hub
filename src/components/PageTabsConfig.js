@@ -143,4 +143,9 @@ export const settingsTabs = [
     labelKey: 'dataMigration',
     icon: icon('M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12'),
   },
+  {
+    href: '/dashboard/settings/offline-hub',
+    labelKey: 'offlineHub',
+    icon: icon('M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0'),
+  },
 ]
