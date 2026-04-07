@@ -4,15 +4,13 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { addPendingOrder, getPendingCount } from '@/lib/offlineQueue'
 import { syncPendingOrders, onSyncEvent, initAutoSync } from '@/lib/syncManager'
-import { isHubConfigured, getHubOrderUrl } from '@/lib/localHub'
 
 /**
  * Hook for offline-aware order placement.
  *
  * Priority order:
- * 1.   Supabase (if online) - cloud sync
- * 1.5. Hub device (if offline AND hub IP configured) - local WiFi hub
- * 2.   IndexedDB (fallback) - queue for later sync
+ * 1. Supabase (if online) - cloud sync
+ * 2. IndexedDB (fallback) - queue for later sync when internet returns
  *
  * @returns {Object} { placeOrder, pendingCount, isOnline, isSyncing, syncNow }
  */
@@ -59,20 +57,7 @@ export default function useOfflineOrder() {
   }, [])
 
   /**
-   * Place an order via Supabase, hub, or local offline queue.
-   *
-   * @param {Object} params
-   * @param {Object} params.restaurant
-   * @param {Array}  params.cart
-   * @param {string} params.customerName
-   * @param {string} params.customerEmail
-   * @param {string} params.customerPhone
-   * @param {string} params.orderNotes
-   * @param {string} params.pickupCode
-   * @param {string} params.locale
-   * @param {number} params.total
-   *
-   * @returns {{ success: boolean, pickupCode: string, offline: boolean, via: string, error?: string }}
+   * Place an order via Supabase (online) or local IndexedDB queue (offline).
    */
   const placeOrder = useCallback(async ({
     restaurant,
@@ -114,7 +99,6 @@ export default function useOfflineOrder() {
     // PRIORITY 1: Try Supabase directly (if online)
     if (navigator.onLine) {
       try {
-        console.log('[useOfflineOrder] Placing order via Supabase')
         const { data: order, error: orderError } = await supabase
           .from('orders')
           .insert(orderData)
@@ -151,35 +135,13 @@ export default function useOfflineOrder() {
 
         return { success: true, pickupCode, offline: false, via: 'supabase' }
       } catch (err) {
-        // If the online attempt fails (e.g., network dropped mid-request),
-        // fall through to offline queue
+        // Network dropped mid-request — fall through to offline queue
         console.warn('[useOfflineOrder] Supabase placement failed, queuing offline:', err.message)
       }
     }
 
-    // PRIORITY 1.5: Send to hub device via local WiFi (if configured and reachable)
-    if (isHubConfigured()) {
-      const hubUrl = getHubOrderUrl()
-      try {
-        console.log('[useOfflineOrder] Sending order to hub at', hubUrl)
-        const res = await fetch(hubUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ orderData, orderItems }),
-          signal: AbortSignal.timeout(5000),
-        })
-        if (res.ok) {
-          return { success: true, pickupCode, offline: true, via: 'hub' }
-        }
-        console.warn('[useOfflineOrder] Hub returned non-OK status:', res.status)
-      } catch (err) {
-        console.warn('[useOfflineOrder] Hub unreachable, falling back to IndexedDB:', err.message)
-      }
-    }
-
-    // PRIORITY 2: Queue locally in IndexedDB (offline or all else failed)
+    // PRIORITY 2: Queue locally in IndexedDB (offline or Supabase failed)
     try {
-      console.log('[useOfflineOrder] Queueing order in IndexedDB')
       await addPendingOrder(orderData, orderItems)
       const count = await getPendingCount()
       setPendingCount(count)
