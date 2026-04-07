@@ -7,6 +7,45 @@ import OfflinePageGuard from '@/components/OfflinePageGuard'
 import { isHubDevice, getHubIp, setHubMode, setHubIp, pingHub } from '@/lib/localHub'
 import { useRestaurant } from '@/lib/RestaurantContext'
 
+/**
+ * Detect this device's local LAN IP addresses using WebRTC.
+ * Returns an array of IPv4 addresses on the local network (e.g. ["192.168.1.5"]).
+ * Works without any server — the browser exposes local IPs via ICE candidates.
+ */
+function getLocalIPs() {
+  return new Promise((resolve) => {
+    const ips = new Set()
+    let done = false
+
+    const finish = () => {
+      if (done) return
+      done = true
+      // Filter to private LAN ranges only (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
+      const lan = [...ips].filter(ip =>
+        /^192\.168\./.test(ip) ||
+        /^10\./.test(ip) ||
+        /^172\.(1[6-9]|2\d|3[01])\./.test(ip)
+      )
+      resolve(lan.length > 0 ? lan : [...ips].filter(ip => !ip.includes(':')))
+    }
+
+    try {
+      const pc = new RTCPeerConnection({ iceServers: [] })
+      pc.createDataChannel('')
+      pc.createOffer().then(offer => pc.setLocalDescription(offer))
+      pc.onicecandidate = (e) => {
+        if (!e.candidate) { pc.close(); finish(); return }
+        const match = /([0-9]{1,3}(\.[0-9]{1,3}){3})/.exec(e.candidate.candidate)
+        if (match) ips.add(match[1])
+      }
+      // Resolve after 2 seconds regardless
+      setTimeout(() => { try { pc.close() } catch {} finish() }, 2000)
+    } catch {
+      resolve([])
+    }
+  })
+}
+
 export default function OfflineHubSettings() {
   const restaurantCtx = useRestaurant()
   const isOwnerOrAdmin = restaurantCtx?.userType === 'owner' || restaurantCtx?.userType === 'staff-admin'
@@ -18,6 +57,8 @@ export default function OfflineHubSettings() {
   const [hubIpInput, setHubIpInput] = useState('')
   const [hubPingStatus, setHubPingStatus] = useState(null) // null | 'pinging' | 'ok' | 'fail'
   const [confirmHubEnable, setConfirmHubEnable] = useState(false) // show confirm dialog
+  const [detectingIp, setDetectingIp] = useState(false)
+  const [detectedIps, setDetectedIps] = useState([]) // list of candidate LAN IPs
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -63,6 +104,25 @@ export default function OfflineHubSettings() {
     setHubPingStatus('pinging')
     const ok = await pingHub()
     setHubPingStatus(ok ? 'ok' : 'fail')
+  }
+
+  // Detect this device's local LAN IP using WebRTC (no server needed)
+  const handleDetectIp = async () => {
+    setDetectingIp(true)
+    setDetectedIps([])
+    try {
+      const ips = await getLocalIPs()
+      setDetectedIps(ips)
+    } catch {
+      setDetectedIps([])
+    }
+    setDetectingIp(false)
+  }
+
+  const handleUseIp = (ip) => {
+    setHubIpInput(ip)
+    setDetectedIps([])
+    setHubPingStatus(null)
   }
 
   return (
@@ -155,12 +215,56 @@ export default function OfflineHubSettings() {
               </label>
             </div>
             {hubMode && (
-              <div className="mt-4 space-y-2">
-                <div className="flex items-start gap-2 text-sm text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl px-4 py-3">
-                  <svg className="w-5 h-5 text-indigo-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                  </svg>
-                  Hub mode is active. Find this device&apos;s local IP in WiFi settings and share it with spoke devices.
+              <div className="mt-4 space-y-3">
+                {/* Detect IP section */}
+                <div className="bg-indigo-50 dark:bg-indigo-900/30 rounded-xl px-4 py-3">
+                  <p className="text-sm text-indigo-700 dark:text-indigo-300 mb-2">
+                    Share this device&apos;s local IP address with spoke devices so they can connect to this hub.
+                  </p>
+                  <button
+                    onClick={handleDetectIp}
+                    disabled={detectingIp}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-indigo-900/50 border border-indigo-200 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300 rounded-lg text-xs font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900 transition-colors disabled:opacity-50"
+                  >
+                    {detectingIp ? (
+                      <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                      </svg>
+                    ) : (
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9" />
+                      </svg>
+                    )}
+                    {detectingIp ? 'Detecting…' : 'Detect my IP'}
+                  </button>
+                  {detectedIps.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {detectedIps.map(ip => (
+                        <button
+                          key={ip}
+                          onClick={() => {
+                            // Copy to clipboard
+                            navigator.clipboard?.writeText(ip).catch(() => {})
+                            setMessage({ type: 'success', text: `IP address ${ip} copied to clipboard.` })
+                            setTimeout(() => setMessage(null), 4000)
+                          }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 border border-indigo-200 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300 rounded-lg text-xs font-mono font-medium hover:bg-indigo-50 dark:hover:bg-indigo-900/50 transition-colors"
+                          title="Tap to copy"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                          {ip}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {!detectingIp && detectedIps.length === 0 && (
+                    <p className="mt-1.5 text-xs text-indigo-500 dark:text-indigo-400">
+                      Tap &quot;Detect my IP&quot; to find your local IP address automatically.
+                    </p>
+                  )}
                 </div>
                 <div className="flex items-start gap-2 text-sm text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-xl px-4 py-3">
                   <svg className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">

@@ -178,6 +178,17 @@ export default function Tables() {
     if (restaurantCtx?.restaurant?.id) fetchData()
   }, [restaurantCtx?.restaurant?.id])
 
+  // When the browser goes offline, immediately rebuild table indicators from
+  // cache so they don't disappear while waiting for Supabase to time out
+  useEffect(() => {
+    if (!restaurant?.id) return
+    const handleOffline = () => {
+      console.log('Tables page - offline event, rebuilding indicators from cache')
+      fetchTableOrderInfo(restaurant.id)
+    }
+    window.addEventListener('offline', handleOffline)
+    return () => window.removeEventListener('offline', handleOffline)
+  }, [restaurant?.id])
 
   // Real-time subscriptions for live order updates
   useEffect(() => {
@@ -525,7 +536,7 @@ export default function Tables() {
 
     // ── ONLINE: fetch from Supabase ───────────────────────────────────────────
     // Get all unpaid, non-cancelled orders with their items
-    const { data: orders } = await supabase
+    const { data: orders, error: ordersError } = await supabase
       .from('orders')
       .select(`
         id,
@@ -547,6 +558,58 @@ export default function Tables() {
       .eq('restaurant_id', restaurantId)
       .eq('paid', false)
       .neq('status', 'cancelled')
+
+    // If Supabase failed (network dropped after the online check), fall back to
+    // the cache-based offline path rather than wiping tableOrderInfo with {}
+    if (ordersError || orders === null) {
+      console.warn('fetchTableOrderInfo: Supabase error, rebuilding from cache', ordersError?.message)
+      const orderInfo = {}
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i)
+          if (!key || !key.startsWith('table_orders_')) continue
+          const tableId = key.replace('table_orders_', '')
+          const cached = JSON.parse(localStorage.getItem(key) || '[]')
+          const unpaid = cached.filter(o => !o.paid && o.status !== 'cancelled')
+          if (unpaid.length === 0) continue
+          let total = 0
+          const readyDepartments = []
+          unpaid.forEach(order => {
+            order.order_items?.forEach(item => {
+              total += (item.quantity || 0) * (item.price_at_time || 0)
+              if (item.marked_ready_at && !item.delivered_at) {
+                const dept = item.menu_items?.department || 'kitchen'
+                if (!readyDepartments.includes(dept)) readyDepartments.push(dept)
+              }
+            })
+          })
+          orderInfo[tableId] = { count: unpaid.length, total, readyDepartments }
+        }
+      } catch {}
+      try {
+        const [offlineOrdersByTable, offlineUpdatesByTable] = await Promise.all([
+          getAllPendingOrdersByTable(),
+          getAllPendingOrderUpdatesByTable(),
+        ])
+        Object.entries(offlineOrdersByTable).forEach(([tableId, offlineData]) => {
+          if (orderInfo[tableId]) {
+            orderInfo[tableId].count += offlineData.count
+            orderInfo[tableId].total += offlineData.total
+          } else {
+            orderInfo[tableId] = { count: offlineData.count, total: offlineData.total, readyDepartments: [] }
+          }
+        })
+        Object.entries(offlineUpdatesByTable).forEach(([tableId, updateData]) => {
+          if (orderInfo[tableId]) {
+            orderInfo[tableId].total += updateData.total
+          } else {
+            orderInfo[tableId] = { count: 0, total: updateData.total, readyDepartments: [] }
+          }
+        })
+      } catch {}
+      setTableOrderInfo(orderInfo)
+      return
+    }
 
     // Build a set of all order_item ids from the current unpaid orders
     const unpaidOrderItemIds = new Set()
