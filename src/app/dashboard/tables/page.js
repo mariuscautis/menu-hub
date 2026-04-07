@@ -371,42 +371,72 @@ export default function Tables() {
     setUserType(restaurantCtx.userType)
     setStaffDepartment(restaurantCtx.staffDepartment)
 
-    // Fetch tables, floors, menu items, categories, and order info all in parallel
+    const rid = restaurantData.id
+    const cacheKeyTables = `tables_cache_${rid}`
+    const cacheKeyFloors = `floors_cache_${rid}`
+    const cacheKeyMenu   = `menu_items_cache_${rid}`
+    const cacheKeyCats   = `categories_cache_${rid}`
+
+    // ── OFFLINE: load everything from localStorage cache ──────────────────────
+    if (!navigator.onLine) {
+      try {
+        const cachedTables = JSON.parse(localStorage.getItem(cacheKeyTables) || '[]')
+        const cachedFloors = JSON.parse(localStorage.getItem(cacheKeyFloors) || '[]')
+        const cachedMenu   = JSON.parse(localStorage.getItem(cacheKeyMenu)   || '[]')
+        const cachedCats   = JSON.parse(localStorage.getItem(cacheKeyCats)   || '[]')
+        setTables(cachedTables)
+        setFloors(cachedFloors)
+        setMenuItems(cachedMenu)
+        setCategories(cachedCats)
+      } catch (e) {
+        console.warn('Failed to load cached table data:', e)
+      }
+      // fetchTableOrderInfo skips Supabase when offline and reads IDB directly
+      await fetchTableOrderInfo(rid)
+      setLoading(false)
+      return
+    }
+
+    // ── ONLINE: fetch from Supabase, then cache results ───────────────────────
     const [
       { data: tablesData },
       { data: floorsData },
       { data: items, error: itemsError },
       { data: cats, error: catsError },
     ] = await Promise.all([
-      supabase.from('tables').select('*').eq('restaurant_id', restaurantData.id).order('table_number'),
-      supabase.from('floors').select('id, name, level').eq('restaurant_id', restaurantData.id).order('level', { ascending: true }),
-      supabase.rpc('get_available_menu_items', { p_restaurant_id: restaurantData.id }),
-      supabase.from('menu_categories').select('*').eq('restaurant_id', restaurantData.id).order('sort_order'),
+      supabase.from('tables').select('*').eq('restaurant_id', rid).order('table_number'),
+      supabase.from('floors').select('id, name, level').eq('restaurant_id', rid).order('level', { ascending: true }),
+      supabase.rpc('get_available_menu_items', { p_restaurant_id: rid }),
+      supabase.from('menu_categories').select('*').eq('restaurant_id', rid).order('sort_order'),
     ])
 
     setTables(tablesData || [])
     setFloors(floorsData || [])
+    try { localStorage.setItem(cacheKeyTables, JSON.stringify(tablesData || [])) } catch {}
+    try { localStorage.setItem(cacheKeyFloors, JSON.stringify(floorsData || [])) } catch {}
 
+    let finalMenuItems = []
     if (itemsError) {
       console.error('Menu items error:', itemsError)
       // Fallback to regular query if RPC fails
       const { data: fallbackItems } = await supabase
         .from('menu_items')
         .select('*')
-        .eq('restaurant_id', restaurantData.id)
+        .eq('restaurant_id', rid)
         .eq('available', true)
         .order('sort_order')
-      setMenuItems(fallbackItems || [])
+      finalMenuItems = fallbackItems || []
+      setMenuItems(finalMenuItems)
     } else {
       console.log('Menu items loaded (in stock only):', items)
       // RPC might not return special_instructions fields, fetch them separately and merge
       const { data: menuItemsWithInstructions } = await supabase
         .from('menu_items')
         .select('id, requires_special_instructions, special_instructions_label')
-        .eq('restaurant_id', restaurantData.id)
+        .eq('restaurant_id', rid)
 
       // Merge special instructions data into the items from RPC
-      const mergedItems = (items || []).map(item => {
+      finalMenuItems = (items || []).map(item => {
         const extra = menuItemsWithInstructions?.find(mi => mi.id === item.id)
         return {
           ...item,
@@ -414,25 +444,52 @@ export default function Tables() {
           special_instructions_label: extra?.special_instructions_label || null
         }
       })
-      setMenuItems(mergedItems)
+      setMenuItems(finalMenuItems)
     }
+    try { localStorage.setItem(cacheKeyMenu, JSON.stringify(finalMenuItems)) } catch {}
 
     if (catsError) console.error('Categories error:', catsError)
     console.log('Categories loaded:', cats)
-
     setCategories(cats || [])
+    try { localStorage.setItem(cacheKeyCats, JSON.stringify(cats || [])) } catch {}
 
     // Fetch order info, reservations, and waiter calls in parallel
     await Promise.all([
-      fetchTableOrderInfo(restaurantData.id),
-      fetchTodayReservations(restaurantData.id),
-      fetchWaiterCalls(restaurantData.id),
+      fetchTableOrderInfo(rid),
+      fetchTodayReservations(rid),
+      fetchWaiterCalls(rid),
     ])
 
     setLoading(false)
   }
 
   const fetchTableOrderInfo = async (restaurantId) => {
+    // ── OFFLINE: skip Supabase entirely, build from IDB ──────────────────────
+    if (!navigator.onLine) {
+      const orderInfo = {}
+      try {
+        const [offlineOrdersByTable, offlineUpdatesByTable] = await Promise.all([
+          getAllPendingOrdersByTable(),
+          getAllPendingOrderUpdatesByTable(),
+        ])
+        Object.entries(offlineOrdersByTable).forEach(([tableId, offlineData]) => {
+          orderInfo[tableId] = { count: offlineData.count, total: offlineData.total, readyDepartments: [] }
+        })
+        Object.entries(offlineUpdatesByTable).forEach(([tableId, updateData]) => {
+          if (orderInfo[tableId]) {
+            orderInfo[tableId].total += updateData.total
+          } else {
+            orderInfo[tableId] = { count: 0, total: updateData.total, readyDepartments: [] }
+          }
+        })
+      } catch (err) {
+        console.warn('Failed to load offline order info:', err)
+      }
+      setTableOrderInfo(orderInfo)
+      return
+    }
+
+    // ── ONLINE: fetch from Supabase ───────────────────────────────────────────
     // Get all unpaid, non-cancelled orders with their items
     const { data: orders } = await supabase
       .from('orders')
@@ -539,34 +596,6 @@ export default function Tables() {
         }
       }
     })
-
-    // Merge with pending offline orders (so they persist in UI when offline)
-    // Only merge offline IDB data when offline — online, Supabase is authoritative
-    if (!navigator.onLine) {
-      try {
-        const [offlineOrdersByTable, offlineUpdatesByTable] = await Promise.all([
-          getAllPendingOrdersByTable(),
-          getAllPendingOrderUpdatesByTable(),
-        ])
-        Object.entries(offlineOrdersByTable).forEach(([tableId, offlineData]) => {
-          if (orderInfo[tableId]) {
-            orderInfo[tableId].count += offlineData.count
-            orderInfo[tableId].total += offlineData.total
-          } else {
-            orderInfo[tableId] = { count: offlineData.count, total: offlineData.total, readyDepartments: [] }
-          }
-        })
-        Object.entries(offlineUpdatesByTable).forEach(([tableId, updateData]) => {
-          if (orderInfo[tableId]) {
-            orderInfo[tableId].total += updateData.total
-          } else {
-            orderInfo[tableId] = { count: 0, total: updateData.total, readyDepartments: [] }
-          }
-        })
-      } catch (err) {
-        console.warn('Failed to merge offline orders:', err)
-      }
-    }
 
     setTableOrderInfo(orderInfo)
   }
@@ -2341,6 +2370,84 @@ export default function Tables() {
     // Consolidate items before submitting
     const consolidatedItems = consolidateOrderItems(orderItems)
     const total = consolidatedItems.reduce((sum, item) => sum + ((item.price_at_time || 0) * (item.quantity || 0)), 0)
+
+    // ── OFFLINE: skip Supabase entirely, go straight to IDB queue ─────────────
+    if (!navigator.onLine) {
+      try {
+        let itemsToSave = consolidatedItems
+        let totalToSave = total
+
+        if (currentOrder) {
+          const originalItems = currentOrder.order_items || []
+          itemsToSave = consolidatedItems.filter(newItem => {
+            const original = originalItems.find(o => o.menu_item_id === newItem.menu_item_id)
+            if (!original) return true
+            return newItem.quantity > original.quantity
+          }).map(newItem => {
+            const original = originalItems.find(o => o.menu_item_id === newItem.menu_item_id)
+            if (!original) return newItem
+            return { ...newItem, quantity: newItem.quantity - original.quantity }
+          }).filter(item => item.quantity > 0)
+
+          if (itemsToSave.length === 0) {
+            showNotification('info', t('notifications.noNewItemsOffline'))
+            return
+          }
+          totalToSave = itemsToSave.reduce((sum, item) => sum + ((item.price_at_time || 0) * (item.quantity || 0)), 0)
+
+          // Existing Supabase order — queue as an update
+          if (currentOrder.id) {
+            await addPendingOrderUpdate(currentOrder.id, selectedTable.id, itemsToSave.map(item => ({
+              menu_item_id: item.menu_item_id,
+              name: item.name,
+              quantity: item.quantity,
+              price_at_time: item.price_at_time,
+            })))
+            await fetchTableOrderInfo(restaurant.id)
+            setShowOrderModal(false); setSelectedTable(null); setCurrentOrder(null); setOrderItems([]); setItemNotes({})
+            showNotification('success', t('notifications.offlineItemsAdded'))
+            return
+          }
+
+          // Existing offline order (not yet synced) — update IDB record
+          if (currentOrder.client_id && !currentOrder.id) {
+            await updatePendingOrder(currentOrder.client_id, itemsToSave.map(item => ({
+              menu_item_id: item.menu_item_id,
+              name: item.name,
+              quantity: item.quantity,
+              price_at_time: item.price_at_time,
+            })), totalToSave)
+            await fetchTableOrderInfo(restaurant.id)
+            setShowOrderModal(false); setSelectedTable(null); setCurrentOrder(null); setOrderItems([]); setItemNotes({})
+            showNotification('success', t('notifications.offlineItemsAdded'))
+            return
+          }
+        }
+
+        // New order
+        const clientId = generateClientId()
+        await addPendingOrder({
+          client_id: clientId,
+          restaurant_id: restaurant.id,
+          table_id: selectedTable.id,
+          total: totalToSave,
+          status: 'pending',
+          order_type: 'dine_in',
+        }, itemsToSave.map(item => ({
+          menu_item_id: item.menu_item_id,
+          name: item.name,
+          quantity: item.quantity,
+          price_at_time: item.price_at_time,
+        })))
+        await fetchTableOrderInfo(restaurant.id)
+        setShowOrderModal(false); setSelectedTable(null); setCurrentOrder(null); setOrderItems([]); setItemNotes({})
+        showNotification('success', currentOrder ? t('notifications.offlineAdditionalItemsSaved') : t('notifications.offlineOrderSaved'))
+      } catch (offlineErr) {
+        console.error('Failed to save order offline:', offlineErr)
+        showNotification('error', t('notifications.offlineOrderFailed') || 'Failed to save order offline')
+      }
+      return
+    }
 
     try {
       if (currentOrder) {
