@@ -92,6 +92,9 @@ function getSyncSupabase() {
 
 let isSyncing = false
 
+/** Returns true while syncAll / syncPendingOrders is running */
+export function isSyncInProgress() { return isSyncing }
+
 /**
  * Sync all pending orders to Supabase.
  * Safe to call multiple times — will skip if already syncing.

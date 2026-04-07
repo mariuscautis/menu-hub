@@ -27,7 +27,7 @@ import {
   clearPendingOrderUpdates,
   clearAllOfflineOrdersForTable,
 } from '@/lib/offlineQueue'
-import { onSyncEvent } from '@/lib/syncManager'
+import { onSyncEvent, isSyncInProgress } from '@/lib/syncManager'
 
 const TOAST_STYLES = {
   success: {
@@ -190,13 +190,13 @@ export default function Tables() {
     return () => window.removeEventListener('offline', handleOffline)
   }, [restaurant?.id])
 
-  // After sync completes (payments/orders pushed to Supabase), refresh the page
-  // so paid orders don't reappear as unpaid
+  // After sync completes (payments pushed to Supabase), refresh table indicators
+  // so paid orders don't reappear as unpaid when Realtime fires
   useEffect(() => {
     if (!restaurant?.id) return
     const unsubscribe = onSyncEvent('sync-complete', () => {
       if (navigator.onLine) {
-        fetchData()
+        fetchTableOrderInfo(restaurant.id)
       }
     })
     return unsubscribe
@@ -221,14 +221,11 @@ export default function Tables() {
         },
         (payload) => {
           console.log('Tables page - Order changed:', payload)
-          // Skip refetch when offline to preserve local state
-          if (!navigator.onLine) {
-            console.log('Tables page - Skipping refetch (offline)')
+          if (!navigator.onLine || isSyncInProgress()) {
+            console.log('Tables page - Skipping refetch (offline or syncing)')
             return
           }
-          // Small delay to ensure database has committed the changes
           setTimeout(() => {
-            console.log('Tables page - Fetching updated table order info after order change')
             fetchTableOrderInfo(restaurantId)
           }, 100)
         }
@@ -249,14 +246,11 @@ export default function Tables() {
         },
         (payload) => {
           console.log('Tables page - Order item changed:', payload)
-          // Skip refetch when offline to preserve local state
-          if (!navigator.onLine) {
-            console.log('Tables page - Skipping refetch (offline)')
+          if (!navigator.onLine || isSyncInProgress()) {
+            console.log('Tables page - Skipping refetch (offline or syncing)')
             return
           }
-          // Refetch when items are added or updated (marked ready, delivered, etc.)
           setTimeout(() => {
-            console.log('Tables page - Fetching updated table order info after order item change')
             fetchTableOrderInfo(restaurantId)
           }, 100)
         }
@@ -1402,41 +1396,37 @@ export default function Tables() {
 
       setUnpaidOrders(filteredOrders || [])
 
-      // Reset discount state
       setSelectedDiscount(null)
       setDiscountAmount(0)
+      setAvailableDiscounts([])
 
-      // Fetch available discounts for this restaurant
+      // Open the modal immediately — don't wait for the discounts network fetch
+      setShowPaymentModal(true)
+
+      // Fetch discounts in the background (non-blocking — modal is already open)
       if (restaurant && navigator.onLine) {
-        try {
-          const { data: discountsData, error: discountsError } = await supabase
-            .from('discounts')
-            .select('*')
-            .eq('restaurant_id', restaurant.id)
-            .eq('active', true)
-            .order('name')
+        ;(async () => {
+          try {
+            const { data: discountsData, error: discountsError } = await supabase
+              .from('discounts')
+              .select('*')
+              .eq('restaurant_id', restaurant.id)
+              .eq('active', true)
+              .order('name')
 
-          if (discountsError) {
-            console.error('Error fetching discounts:', discountsError)
-            setAvailableDiscounts([])
-          } else {
-            console.log('Fetched discounts:', discountsData?.length || 0, 'items')
-            const discounts = discountsData || []
-            setAvailableDiscounts(discounts)
+            if (discountsError || !discountsData) return
 
-            // Auto-apply a promotion if it is active today and matches an item in the order
+            setAvailableDiscounts(discountsData)
+
             const today = new Date()
             today.setHours(0, 0, 0, 0)
             const todayDay = today.getDay()
 
-            const activePromo = discounts.find(d => {
+            const activePromo = discountsData.find(d => {
               if (!d.is_promotion) return false
-              // Check date range
               if (d.promo_start_date && new Date(d.promo_start_date) > today) return false
               if (d.promo_end_date && new Date(d.promo_end_date) < today) return false
-              // Check day of week (null = every day)
               if (d.promo_days && d.promo_days.length > 0 && !d.promo_days.includes(todayDay)) return false
-              // Check if the linked product is in the order
               if (!d.product_id) return false
               return filteredOrders.some(order =>
                 order.order_items?.some(item => item.menu_item_id === d.product_id)
@@ -1444,7 +1434,6 @@ export default function Tables() {
             })
 
             if (activePromo) {
-              // Only discount the matched product's items, not the whole table
               const promoBase = filteredOrders.reduce((sum, o) =>
                 sum + (o.order_items || [])
                   .filter(i => i.menu_item_id === activePromo.product_id)
@@ -1456,16 +1445,11 @@ export default function Tables() {
               setSelectedDiscount(activePromo)
               setDiscountAmount(amount)
             }
+          } catch {
+            // Discounts unavailable offline — not a problem, modal is already open
           }
-        } catch (discountErr) {
-          console.warn('Failed to fetch discounts:', discountErr)
-          setAvailableDiscounts([])
-        }
-      } else {
-        setAvailableDiscounts([])
+        })()
       }
-
-      setShowPaymentModal(true)
     } catch (err) {
       console.error('Error opening payment modal:', err)
       showNotification('error', t('notifications.paymentFailed'))
