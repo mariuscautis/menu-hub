@@ -5,8 +5,12 @@ import PageTabs from '@/components/PageTabs'
 import { settingsTabs } from '@/components/PageTabsConfig'
 import OfflinePageGuard from '@/components/OfflinePageGuard'
 import { isHubDevice, getHubIp, setHubMode, setHubIp, pingHub } from '@/lib/localHub'
+import { useRestaurant } from '@/lib/RestaurantContext'
 
 export default function OfflineHubSettings() {
+  const restaurantCtx = useRestaurant()
+  const isOwnerOrAdmin = restaurantCtx?.userType === 'owner' || restaurantCtx?.userType === 'staff-admin'
+
   const [message, setMessage] = useState(null)
 
   // Hub settings state (localStorage — device-local, no server save needed)
