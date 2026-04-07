@@ -101,7 +101,7 @@ export function isSyncInProgress() { return isSyncing }
  *
  * @returns {{ synced: number, failed: number }}
  */
-export async function syncPendingOrders() {
+export async function syncPendingOrders({ emitOnComplete = true } = {}) {
   if (isSyncing) return { synced: 0, failed: 0, skipped: true }
   if (!navigator.onLine) return { synced: 0, failed: 0, offline: true }
 
@@ -220,9 +220,12 @@ export async function syncPendingOrders() {
     emitSyncEvent('sync-error', { error: err.message })
   } finally {
     isSyncing = false
-    const pendingCount = await getPendingCount()
-    emitSyncEvent('sync-complete', { synced, failed, pendingCount })
-    emitSyncEvent('pending-count-change', { count: pendingCount })
+    if (emitOnComplete) {
+      const [orderCount, paymentCount] = await Promise.all([getPendingCount(), getPendingPaymentCount()])
+      const pendingCount = orderCount + paymentCount
+      emitSyncEvent('sync-complete', { synced, failed, pendingCount })
+      emitSyncEvent('pending-count-change', { count: pendingCount })
+    }
   }
 
   return { synced, failed }
@@ -430,23 +433,28 @@ export async function syncPendingOrderUpdates() {
  * Orders are synced first, then updates, then payments.
  */
 export async function syncAll() {
-  const ordersResult = await syncPendingOrders()
+  // Run all three phases; suppress the intermediate sync-complete from
+  // syncPendingOrders so we can emit one final event after payments too
+  const ordersResult = await syncPendingOrders({ emitOnComplete: false })
   const orderUpdatesResult = await syncPendingOrderUpdates()
   const paymentsResult = await syncPendingPayments()
 
-  // Clear offline paid tables tracking after successful sync
-  // (the data is now in sync with the server)
   if (paymentsResult.synced > 0) {
     clearAllOfflinePaidTables()
   }
 
-  // If any orders, updates, or payments were synced, clear all order caches
-  // This is an aggressive but safe approach to ensure no stale data remains
   const totalSynced = (ordersResult.synced || 0) + (orderUpdatesResult.synced || 0) + (paymentsResult.synced || 0)
+  const totalFailed = (ordersResult.failed || 0) + (orderUpdatesResult.failed || 0) + (paymentsResult.failed || 0)
+
   if (totalSynced > 0) {
     clearAllOrdersCache()
-    console.log(`[SyncManager] Cleared all order caches after syncing ${totalSynced} items`)
   }
+
+  // Emit a single sync-complete after all phases, with the true remaining count
+  const [orderCount, paymentCount] = await Promise.all([getPendingCount(), getPendingPaymentCount()])
+  const pendingCount = orderCount + paymentCount
+  emitSyncEvent('sync-complete', { synced: totalSynced, failed: totalFailed, pendingCount })
+  emitSyncEvent('pending-count-change', { count: pendingCount })
 
   return {
     orders: ordersResult,
