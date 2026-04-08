@@ -80,7 +80,8 @@ export function useVenoBridge(restaurant) {
     ws.onopen = () => {
       clearTimeout(tid);
       if (!mountedRef.current) { ws.close(); settle(false); return; }
-      const token = restaurantRef.current?.bridge_ws_token || "";
+      // Send token if available; Bridge accepts empty token until token sync completes
+      const token = restaurantRef.current?.bridge_ws_token ?? "";
       ws.send(JSON.stringify({ type: "bridge:auth", token, user_agent: navigator.userAgent }));
     };
 
