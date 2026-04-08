@@ -10,6 +10,7 @@ import { useTranslations } from '@/lib/i18n/LanguageContext'
 import InfoTooltip from '@/components/InfoTooltip'
 import { useTheme } from '@/lib/ThemeContext'
 import { useCurrency } from '@/lib/CurrencyContext'
+import { useVenoBridge } from '@/hooks/useVenoBridge'
 import { generateInvoicePdfBase64, downloadInvoicePdf } from '@/lib/invoicePdfGenerator'
 import {
   addPendingOrder,
@@ -174,6 +175,7 @@ export default function Tables() {
 
   const restaurantCtx = useRestaurant()
   const supabase = useAdminSupabase()
+  const { sendPrintJob } = useVenoBridge()
 
   useEffect(() => {
     if (restaurantCtx?.restaurant?.id) fetchData()
@@ -2082,6 +2084,33 @@ export default function Tables() {
 
       // Store completed order IDs for invoice generation
       setCompletedOrderIds(orderIds)
+
+      // Send print job to VenoApp Bridge if connected
+      const invoiceSettings = restaurant?.invoice_settings || {}
+      const defaultTaxRate = (invoiceSettings.tax_rates || []).find(r => r.is_default) || invoiceSettings.tax_rates?.[0]
+      const subtotal = totalAmount / (1 + (defaultTaxRate?.rate || 0) / 100)
+      const taxAmount = totalAmount - subtotal
+      sendPrintJob({
+        venue_name: restaurant?.name || '',
+        order_type: unpaidOrders[0]?.order_type || 'dine-in',
+        table_number: selectedTable?.table_number?.toString() || null,
+        items: unpaidOrders.flatMap(o => (o.order_items || []).map(item => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price_at_time,
+        }))),
+        subtotal: parseFloat(subtotal.toFixed(2)),
+        tax_rate: defaultTaxRate?.rate || 0,
+        tax_label: invoiceSettings.tax_system || 'VAT',
+        tax_amount: parseFloat(taxAmount.toFixed(2)),
+        total: totalAmount,
+        currency: invoiceSettings.currency || 'EUR',
+        locale: invoiceSettings.locale || 'en-GB',
+        vat_number: invoiceSettings.vat_number || null,
+        tax_id: invoiceSettings.tax_id || null,
+        footer_text: invoiceSettings.footer_text || null,
+        timestamp: new Date().toISOString(),
+      })
 
       // Clean up any stale offline orders for this table (only needed when IDB is available)
       if (!navigator.onLine) {
