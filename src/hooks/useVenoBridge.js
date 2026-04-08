@@ -1,35 +1,31 @@
 /**
  * useVenoBridge.js
  *
- * Connects to a local VenoApp Bridge WebSocket server at ws://venobridge.local:3355.
+ * Connects to a local VenoApp Bridge WebSocket server.
  * The Bridge acts as a LAN hub for receipt printing and offline order sync.
  *
- * Usage:
- *   const { isConnected, sendPrintJob, sendOrderEvent } = useVenoBridge(restaurant);
- *
- *   // Send a print job (falls back silently if not connected)
- *   sendPrintJob(receiptPayload);
- *
- *   // Broadcast an order event (falls back to Supabase in your own code)
- *   const sent = sendOrderEvent("order:insert", orderPayload);
- *   if (!sent) { // do Supabase insert instead }
+ * Connection strategy (handles Windows/Android where mDNS .local fails):
+ *   1. Try ws://venobridge.local:3355  (works on macOS/Linux)
+ *   2. If that times out, try ws://{restaurant.bridge_hub_ip}:3355 (direct IP)
+ *   Both attempts happen on every reconnect cycle.
  *
  * Authentication:
- *   The Bridge requires the first message to be a bridge:auth message carrying the
- *   ws_token stored in the restaurant record (pushed there by the Bridge on setup).
- *   Pass the restaurant object from useRestaurant() — the hook reads bridge_ws_token.
+ *   First message after connect must be bridge:auth with bridge_ws_token from
+ *   the restaurant record (pushed there by the Bridge on setup via Supabase RPC).
  */
 
 import { useEffect, useRef, useState, useCallback } from "react";
 
-const BRIDGE_WS_URL   = "ws://venobridge.local:3355";
-const RECONNECT_MS    = 5_000;   // wait before re-attempting
-const PING_INTERVAL   = 20_000;  // heartbeat interval
-const CONNECT_TIMEOUT = 3_000;   // give up on each connection attempt after this
+const BRIDGE_PORT      = 3355;
+const MDNS_HOST        = "venobridge.local";
+const RECONNECT_MS     = 8_000;   // wait before re-attempting after full failure
+const PING_INTERVAL    = 20_000;  // heartbeat interval
+const MDNS_TIMEOUT_MS  = 3_000;   // give up on mDNS attempt after this
+const IP_TIMEOUT_MS    = 4_000;   // give up on direct-IP attempt after this
 
 /**
  * @param {object|null} restaurant  The restaurant object from useRestaurant().
- *                                  Must have bridge_ws_token for auth to succeed.
+ *                                  Uses bridge_ws_token (auth) and bridge_hub_ip (fallback).
  * @returns {{
  *   isConnected: boolean,
  *   bridgeStatus: { connected_devices: Array, duplicate_hub: boolean } | null,
@@ -45,7 +41,6 @@ export function useVenoBridge(restaurant) {
   const mountedRef    = useRef(true);
   const restaurantRef = useRef(restaurant);
 
-  // Keep restaurantRef in sync so connect() always uses latest token
   useEffect(() => { restaurantRef.current = restaurant; }, [restaurant]);
 
   const [isConnected, setIsConnected]   = useState(false);
@@ -55,115 +50,100 @@ export function useVenoBridge(restaurant) {
   const send = useCallback((obj) => {
     const ws = wsRef.current;
     if (!ws || ws.readyState !== WebSocket.OPEN) return false;
-    try {
-      ws.send(JSON.stringify(obj));
-      return true;
-    } catch {
-      return false;
-    }
+    try { ws.send(JSON.stringify(obj)); return true; }
+    catch { return false; }
   }, []);
 
-  // ── Public: send a print job ────────────────────────────────────────────────
-  const sendPrintJob = useCallback(
-    (receiptPayload) => send({ type: "print:receipt", payload: receiptPayload }),
-    [send]
-  );
+  // ── Public API ──────────────────────────────────────────────────────────────
+  const sendPrintJob   = useCallback((p) => send({ type: "print:receipt", payload: p }), [send]);
+  const sendOrderEvent = useCallback((type, p) => send({ type, payload: p }), [send]);
+  const requestStatus  = useCallback(() => send({ type: "bridge:get_status" }), [send]);
 
-  // ── Public: send an order event ─────────────────────────────────────────────
-  const sendOrderEvent = useCallback(
-    (type, payload) => send({ type, payload }),
-    [send]
-  );
-
-  // ── Public: request live status from Bridge ──────────────────────────────────
-  const requestStatus = useCallback(
-    () => send({ type: "bridge:get_status" }),
-    [send]
-  );
-
-  // ── Connection management ───────────────────────────────────────────────────
-  const clearTimers = () => {
+  // ── Timers ──────────────────────────────────────────────────────────────────
+  const clearTimers = useCallback(() => {
     clearInterval(pingTimerRef.current);
     clearTimeout(reconnectRef.current);
-  };
+  }, []);
 
-  const connect = useCallback(() => {
-    if (!mountedRef.current) return;
+  // ── Try a single WebSocket URL ──────────────────────────────────────────────
+  // Returns a promise that resolves to true if auth succeeded, false otherwise.
+  const tryUrl = useCallback((url, timeoutMs) => new Promise((resolve) => {
+    let settled = false;
+    const settle = (val) => { if (!settled) { settled = true; resolve(val); } };
 
-    // Bail if already open / connecting
-    const existing = wsRef.current;
-    if (existing && (existing.readyState === WebSocket.OPEN ||
-                     existing.readyState === WebSocket.CONNECTING)) {
-      return;
-    }
-
-    let connectTimeoutId;
     let ws;
+    try { ws = new WebSocket(url); }
+    catch { settle(false); return; }
 
-    try {
-      ws = new WebSocket(BRIDGE_WS_URL);
-    } catch {
-      scheduleReconnect();
-      return;
-    }
-
-    wsRef.current = ws;
-
-    // Hard timeout — if the connection hasn't opened within CONNECT_TIMEOUT ms,
-    // close and retry. Prevents 30+ second browser TCP timeout.
-    connectTimeoutId = setTimeout(() => {
-      if (ws.readyState !== WebSocket.OPEN) ws.close();
-    }, CONNECT_TIMEOUT);
+    const tid = setTimeout(() => { ws.close(); settle(false); }, timeoutMs);
 
     ws.onopen = () => {
-      clearTimeout(connectTimeoutId);
-      if (!mountedRef.current) { ws.close(); return; }
-
-      // Send auth token as the very first message
+      clearTimeout(tid);
+      if (!mountedRef.current) { ws.close(); settle(false); return; }
       const token = restaurantRef.current?.bridge_ws_token || "";
-      ws.send(JSON.stringify({
-        type:       "bridge:auth",
-        token,
-        user_agent: navigator.userAgent,
-      }));
-
-      // We wait for bridge:auth_ok before marking as connected (see onmessage)
+      ws.send(JSON.stringify({ type: "bridge:auth", token, user_agent: navigator.userAgent }));
     };
 
-    ws.onclose = () => {
-      clearTimeout(connectTimeoutId);
-      clearTimers();
-      if (!mountedRef.current) return;
-      setIsConnected(false);
-      wsRef.current = null;
-      scheduleReconnect();
-    };
+    ws.onerror = () => {};  // onclose handles cleanup
 
-    ws.onerror = () => {
-      // onclose will fire after onerror — suppress console noise
-    };
+    ws.onclose = () => { clearTimeout(tid); settle(false); };
 
     ws.onmessage = (event) => {
       try {
         const msg = JSON.parse(event.data);
         if (msg.type === "bridge:auth_ok") {
+          // Success — hand the socket back to the main connection manager
+          wsRef.current = ws;
           setIsConnected(true);
-          // Start heartbeat
-          pingTimerRef.current = setInterval(() => {
-            send({ type: "bridge:ping" });
-          }, PING_INTERVAL);
+          pingTimerRef.current = setInterval(() => send({ type: "bridge:ping" }), PING_INTERVAL);
+
+          // Re-wire handlers for the live session
+          ws.onclose = () => {
+            clearTimers();
+            if (!mountedRef.current) return;
+            setIsConnected(false);
+            wsRef.current = null;
+            scheduleReconnect();
+          };
+          ws.onmessage = (e) => {
+            try {
+              const m = JSON.parse(e.data);
+              if (m.type === "bridge:status")  setBridgeStatus(m.payload || null);
+              // bridge:pong — nothing to do
+            } catch {}
+          };
+          settle(true);
         } else if (msg.type === "bridge:auth_failed") {
-          // Wrong token — close without scheduling reconnect until token changes
           ws.close();
-        } else if (msg.type === "bridge:status") {
-          setBridgeStatus(msg.payload || null);
+          settle(false);
         }
-        // bridge:pong — heartbeat acknowledged, nothing to do
-      } catch {
-        // ignore malformed messages
-      }
+      } catch {}
     };
-  }, [send]);
+  }), [send, clearTimers]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Main connect: try mDNS, then direct IP ──────────────────────────────────
+  const connect = useCallback(async () => {
+    if (!mountedRef.current) return;
+
+    // Bail if already open / connecting
+    const existing = wsRef.current;
+    if (existing && (existing.readyState === WebSocket.OPEN ||
+                     existing.readyState === WebSocket.CONNECTING)) return;
+
+    // 1. Try mDNS hostname
+    const mdnsOk = await tryUrl(`ws://${MDNS_HOST}:${BRIDGE_PORT}`, MDNS_TIMEOUT_MS);
+    if (mdnsOk || !mountedRef.current) return;
+
+    // 2. Fall back to direct IP (if hub IP is known)
+    const hubIp = restaurantRef.current?.bridge_hub_ip;
+    if (hubIp && hubIp !== "unknown") {
+      const ipOk = await tryUrl(`ws://${hubIp}:${BRIDGE_PORT}`, IP_TIMEOUT_MS);
+      if (ipOk || !mountedRef.current) return;
+    }
+
+    // Both failed — schedule retry
+    scheduleReconnect();
+  }, [tryUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const scheduleReconnect = useCallback(() => {
     if (!mountedRef.current) return;
@@ -174,7 +154,6 @@ export function useVenoBridge(restaurant) {
   useEffect(() => {
     mountedRef.current = true;
     connect();
-
     return () => {
       mountedRef.current = false;
       clearTimers();
@@ -184,13 +163,14 @@ export function useVenoBridge(restaurant) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Reconnect when the restaurant (and its token) loads for the first time
+  // Reconnect when restaurant data loads (token/IP now available)
   useEffect(() => {
-    if (restaurant?.bridge_ws_token && !isConnected && !wsRef.current) {
+    if ((restaurant?.bridge_ws_token || restaurant?.bridge_hub_ip) &&
+        !isConnected && !wsRef.current) {
       connect();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [restaurant?.bridge_ws_token]);
+  }, [restaurant?.bridge_ws_token, restaurant?.bridge_hub_ip]);
 
   return { isConnected, bridgeStatus, sendPrintJob, sendOrderEvent, requestStatus };
 }
