@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import PageTabs from '@/components/PageTabs'
 import { settingsTabs } from '@/components/PageTabsConfig'
 import OfflinePageGuard from '@/components/OfflinePageGuard'
@@ -14,12 +14,18 @@ function formatBridgeCode(code) {
 }
 
 export default function OfflineHubSettings() {
-  const restaurantCtx = useRestaurant()
+  const restaurantCtx  = useRestaurant()
+  const restaurant     = restaurantCtx?.restaurant
   const isOwnerOrAdmin = restaurantCtx?.userType === 'owner' || restaurantCtx?.userType === 'staff-admin'
-  const { isConnected } = useVenoBridge()
-  const [copied, setCopied] = useState(false)
+  const { isConnected, bridgeStatus, requestStatus } = useVenoBridge(restaurant)
 
-  const bridgeCode = formatBridgeCode(restaurantCtx?.restaurant?.bridge_code)
+  const [copied, setCopied] = useState(false)
+  const [os, setOs]         = useState(null)
+  const pollRef             = useRef(null)
+
+  const bridgeCode       = formatBridgeCode(restaurant?.bridge_code)
+  const connectedDevices = bridgeStatus?.connected_devices || []
+  const duplicateHub     = bridgeStatus?.duplicate_hub || false
 
   const copyCode = () => {
     if (!bridgeCode) return
@@ -28,16 +34,26 @@ export default function OfflineHubSettings() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const [os, setOs] = useState(null)
-
   useEffect(() => {
     const ua = navigator.userAgent
-    if (/android/i.test(ua)) setOs('android')
-    else if (/linux/i.test(ua)) setOs('linux')
-    else if (/mac/i.test(ua)) setOs('mac')
-    else if (/win/i.test(ua)) setOs('windows')
-    else setOs('other')
+    if (/android/i.test(ua))     setOs('android')
+    else if (/linux/i.test(ua))  setOs('linux')
+    else if (/mac/i.test(ua))    setOs('mac')
+    else if (/win/i.test(ua))    setOs('windows')
+    else                         setOs('other')
   }, [])
+
+  // Poll bridge status every 4 s when connected
+  useEffect(() => {
+    if (!isConnected) {
+      clearInterval(pollRef.current)
+      return
+    }
+    requestStatus()
+    pollRef.current = setInterval(requestStatus, 4000)
+    return () => clearInterval(pollRef.current)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isConnected])
 
   return (
     <OfflinePageGuard>
@@ -58,6 +74,36 @@ export default function OfflineHubSettings() {
 
         <div className="space-y-6">
 
+          {/* One-hub-only warning banner */}
+          <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl flex gap-3">
+            <svg className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            </svg>
+            <div>
+              <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">Install Bridge on one device only</p>
+              <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
+                Only the main venue device (till tablet, PC, or always-on Android) should run VenoApp Bridge.
+                Running it on multiple devices causes order duplication and printing conflicts.
+                All other devices connect to this Hub automatically.
+              </p>
+            </div>
+          </div>
+
+          {/* Duplicate hub warning */}
+          {duplicateHub && (
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl flex gap-3">
+              <svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <p className="text-sm font-semibold text-red-700 dark:text-red-300">Duplicate Bridge detected</p>
+                <p className="text-xs text-red-600 dark:text-red-400 mt-0.5">
+                  Another VenoApp Bridge was found on your network. Please close it and leave only one running.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* VenoApp Bridge — main card */}
           <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6">
             <div className="flex items-start justify-between gap-4 mb-6">
@@ -72,7 +118,7 @@ export default function OfflineHubSettings() {
                   ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                   : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
               }`}>
-                <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-slate-400'}`} />
+                <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500 animate-pulse' : 'bg-slate-400'}`} />
                 {isConnected ? 'Bridge connected' : 'Not detected'}
               </div>
             </div>
@@ -137,7 +183,7 @@ export default function OfflineHubSettings() {
                 </button>
               </div>
               <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">
-                This code is unique to your venue and never changes. Keep it private.
+                This code is unique to your venue and never changes. Keep it private — anyone with this code could link their Bridge to your account.
               </p>
             </div>
 
@@ -194,7 +240,7 @@ export default function OfflineHubSettings() {
                 <ol className="space-y-2">
                   {[
                     'Open VenoApp Bridge — it launches a small setup screen.',
-                    'Enter your restaurant code (shown above) and your printer\'s IP address (found in your printer\'s network settings).',
+                    "Enter your restaurant code (shown above) and your printer's IP address (found in your printer's network settings).",
                     'Tap Save & Start. Bridge minimises to the background and starts automatically from now on.',
                     'Refresh this page — the status above will turn green when Bridge is detected.',
                   ].map((step, i) => (
@@ -208,7 +254,48 @@ export default function OfflineHubSettings() {
             </div>
           </div>
 
-          {/* Per-device offline mode — existing explanation, preserved */}
+          {/* Connected devices — only shown when Bridge is connected */}
+          {isConnected && (
+            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200">Connected devices</h2>
+                <span className="text-xs text-slate-400 dark:text-slate-500">Updates every 4 s</span>
+              </div>
+
+              {connectedDevices.length === 0 ? (
+                <p className="text-sm text-slate-400 dark:text-slate-500">No other devices connected to Bridge right now.</p>
+              ) : (
+                <div className="space-y-3">
+                  {connectedDevices.map((device) => (
+                    <div key={device.id} className="flex items-start gap-4 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                      <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center flex-shrink-0">
+                        <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">
+                          {device.ip}
+                        </p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500 truncate mt-0.5">
+                          {device.user_agent}
+                        </p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                          Connected {new Date(device.connected_at).toLocaleTimeString()}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-4">
+                These are all VenoApp devices currently connected to Bridge on your local network.
+              </p>
+            </div>
+          )}
+
+          {/* Per-device offline mode */}
           <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6">
             <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-4">Per-device offline mode</h2>
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">

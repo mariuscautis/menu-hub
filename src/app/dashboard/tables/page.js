@@ -175,7 +175,7 @@ export default function Tables() {
 
   const restaurantCtx = useRestaurant()
   const supabase = useAdminSupabase()
-  const { sendPrintJob } = useVenoBridge()
+  const { sendPrintJob } = useVenoBridge(restaurantCtx?.restaurant)
 
   useEffect(() => {
     if (restaurantCtx?.restaurant?.id) fetchData()

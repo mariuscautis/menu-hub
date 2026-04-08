@@ -1,10 +1,11 @@
 /**
  * useVenoBridge.js
  *
- * Drop this file into your VenoApp PWA at: src/hooks/useVenoBridge.js
+ * Connects to a local VenoApp Bridge WebSocket server at ws://venobridge.local:3355.
+ * The Bridge acts as a LAN hub for receipt printing and offline order sync.
  *
  * Usage:
- *   const { isConnected, sendPrintJob, sendOrderEvent } = useVenoBridge();
+ *   const { isConnected, sendPrintJob, sendOrderEvent } = useVenoBridge(restaurant);
  *
  *   // Send a print job (falls back silently if not connected)
  *   sendPrintJob(receiptPayload);
@@ -12,29 +13,43 @@
  *   // Broadcast an order event (falls back to Supabase in your own code)
  *   const sent = sendOrderEvent("order:insert", orderPayload);
  *   if (!sent) { // do Supabase insert instead }
+ *
+ * Authentication:
+ *   The Bridge requires the first message to be a bridge:auth message carrying the
+ *   ws_token stored in the restaurant record (pushed there by the Bridge on setup).
+ *   Pass the restaurant object from useRestaurant() — the hook reads bridge_ws_token.
  */
 
 import { useEffect, useRef, useState, useCallback } from "react";
 
-const BRIDGE_WS_URL  = "ws://venobridge.local:3355";
-const RECONNECT_MS   = 5_000;   // how long to wait before re-attempting
-const PING_INTERVAL  = 20_000;  // heartbeat interval
-const CONNECT_TIMEOUT = 3_000;  // give up on each connection attempt after this
+const BRIDGE_WS_URL   = "ws://venobridge.local:3355";
+const RECONNECT_MS    = 5_000;   // wait before re-attempting
+const PING_INTERVAL   = 20_000;  // heartbeat interval
+const CONNECT_TIMEOUT = 3_000;   // give up on each connection attempt after this
 
 /**
+ * @param {object|null} restaurant  The restaurant object from useRestaurant().
+ *                                  Must have bridge_ws_token for auth to succeed.
  * @returns {{
  *   isConnected: boolean,
+ *   bridgeStatus: { connected_devices: Array, duplicate_hub: boolean } | null,
  *   sendPrintJob: (receiptPayload: object) => boolean,
- *   sendOrderEvent: (type: string, payload: object) => boolean
+ *   sendOrderEvent: (type: string, payload: object) => boolean,
+ *   requestStatus: () => void
  * }}
  */
-export function useVenoBridge() {
-  const wsRef        = useRef(null);
-  const pingTimerRef = useRef(null);
-  const reconnectRef = useRef(null);
-  const mountedRef   = useRef(true);
+export function useVenoBridge(restaurant) {
+  const wsRef         = useRef(null);
+  const pingTimerRef  = useRef(null);
+  const reconnectRef  = useRef(null);
+  const mountedRef    = useRef(true);
+  const restaurantRef = useRef(restaurant);
 
-  const [isConnected, setIsConnected] = useState(false);
+  // Keep restaurantRef in sync so connect() always uses latest token
+  useEffect(() => { restaurantRef.current = restaurant; }, [restaurant]);
+
+  const [isConnected, setIsConnected]   = useState(false);
+  const [bridgeStatus, setBridgeStatus] = useState(null);
 
   // ── Send a raw JSON message ─────────────────────────────────────────────────
   const send = useCallback((obj) => {
@@ -60,6 +75,12 @@ export function useVenoBridge() {
     [send]
   );
 
+  // ── Public: request live status from Bridge ──────────────────────────────────
+  const requestStatus = useCallback(
+    () => send({ type: "bridge:get_status" }),
+    [send]
+  );
+
   // ── Connection management ───────────────────────────────────────────────────
   const clearTimers = () => {
     clearInterval(pingTimerRef.current);
@@ -82,7 +103,6 @@ export function useVenoBridge() {
     try {
       ws = new WebSocket(BRIDGE_WS_URL);
     } catch {
-      // WebSocket constructor threw (e.g. invalid URL in some environments)
       scheduleReconnect();
       return;
     }
@@ -90,22 +110,24 @@ export function useVenoBridge() {
     wsRef.current = ws;
 
     // Hard timeout — if the connection hasn't opened within CONNECT_TIMEOUT ms,
-    // close and retry.  This prevents a 30+ second browser TCP timeout.
+    // close and retry. Prevents 30+ second browser TCP timeout.
     connectTimeoutId = setTimeout(() => {
-      if (ws.readyState !== WebSocket.OPEN) {
-        ws.close();
-      }
+      if (ws.readyState !== WebSocket.OPEN) ws.close();
     }, CONNECT_TIMEOUT);
 
     ws.onopen = () => {
       clearTimeout(connectTimeoutId);
       if (!mountedRef.current) { ws.close(); return; }
-      setIsConnected(true);
 
-      // Start heartbeat
-      pingTimerRef.current = setInterval(() => {
-        send({ type: "bridge:ping" });
-      }, PING_INTERVAL);
+      // Send auth token as the very first message
+      const token = restaurantRef.current?.bridge_ws_token || "";
+      ws.send(JSON.stringify({
+        type:       "bridge:auth",
+        token,
+        user_agent: navigator.userAgent,
+      }));
+
+      // We wait for bridge:auth_ok before marking as connected (see onmessage)
     };
 
     ws.onclose = () => {
@@ -118,16 +140,25 @@ export function useVenoBridge() {
     };
 
     ws.onerror = () => {
-      // onclose will fire after onerror — just suppress the console noise
+      // onclose will fire after onerror — suppress console noise
     };
 
     ws.onmessage = (event) => {
       try {
         const msg = JSON.parse(event.data);
-        // Reserved for future inbound handling (e.g. order updates pushed from bridge)
-        if (msg.type === "bridge:pong") {
-          // heartbeat acknowledged — nothing to do
+        if (msg.type === "bridge:auth_ok") {
+          setIsConnected(true);
+          // Start heartbeat
+          pingTimerRef.current = setInterval(() => {
+            send({ type: "bridge:ping" });
+          }, PING_INTERVAL);
+        } else if (msg.type === "bridge:auth_failed") {
+          // Wrong token — close without scheduling reconnect until token changes
+          ws.close();
+        } else if (msg.type === "bridge:status") {
+          setBridgeStatus(msg.payload || null);
         }
+        // bridge:pong — heartbeat acknowledged, nothing to do
       } catch {
         // ignore malformed messages
       }
@@ -153,7 +184,15 @@ export function useVenoBridge() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return { isConnected, sendPrintJob, sendOrderEvent };
+  // Reconnect when the restaurant (and its token) loads for the first time
+  useEffect(() => {
+    if (restaurant?.bridge_ws_token && !isConnected && !wsRef.current) {
+      connect();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [restaurant?.bridge_ws_token]);
+
+  return { isConnected, bridgeStatus, sendPrintJob, sendOrderEvent, requestStatus };
 }
 
 export default useVenoBridge;
