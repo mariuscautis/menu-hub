@@ -114,8 +114,10 @@ export function useVenoBridge(restaurant) {
           };
           settle(true);
         } else if (msg.type === "bridge:auth_failed") {
+          // Token mismatch — close this attempt and let the cycle retry normally.
+          // The token may not have propagated to the restaurant record yet.
           ws.close();
-          settle(false);
+          settle(false);  // will fall through to scheduleReconnect
         }
       } catch {}
     };
