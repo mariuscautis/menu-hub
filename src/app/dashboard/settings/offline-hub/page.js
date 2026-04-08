@@ -275,16 +275,16 @@ export default function OfflineHubSettings() {
                     <p className="text-xs font-semibold text-green-800 dark:text-green-300 mb-2">Which Raspberry Pi to buy</p>
                     <div className="space-y-2">
                       {[
-                        { model: 'Raspberry Pi 5 (recommended)', price: '~£75 board + £30 kit', desc: 'Fastest, handles everything. Best if you also connect a receipt printer directly.' },
-                        { model: 'Raspberry Pi 4 (2GB)', price: '~£45 board + £25 kit', desc: 'Great balance of price and performance. More than enough for Bridge.' },
-                        { model: 'Raspberry Pi Zero 2 W (cheapest)', price: '~£15 board + £15 kit', desc: 'Smallest and cheapest. Perfect if you only need order sync — no direct printer.' },
+                        { model: 'Raspberry Pi 5 (recommended)', desc: 'Fastest, handles everything. Best if you also connect a receipt printer directly.' },
+                        { model: 'Raspberry Pi 4 (2GB)', desc: 'Great balance of price and performance. More than enough for Bridge.' },
+                        { model: 'Raspberry Pi Zero 2 W (cheapest)', desc: 'Smallest and cheapest. Perfect if you only need order sync — no direct printer.' },
                       ].map((p, i) => (
                         <div key={i} className="flex gap-3">
                           <span className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 mt-0.5 ${i === 0 ? 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400'}`}>
                             {i === 0 ? '★ Best' : i === 1 ? 'Good' : 'Budget'}
                           </span>
                           <div>
-                            <p className="text-xs font-medium text-slate-700 dark:text-slate-200">{p.model} <span className="font-normal text-slate-400">{p.price}</span></p>
+                            <p className="text-xs font-medium text-slate-700 dark:text-slate-200">{p.model}</p>
                             <p className="text-xs text-slate-500 dark:text-slate-400">{p.desc}</p>
                           </div>
                         </div>
