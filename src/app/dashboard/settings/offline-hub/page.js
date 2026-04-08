@@ -36,11 +36,20 @@ export default function OfflineHubSettings() {
 
   useEffect(() => {
     const ua = navigator.userAgent
-    if (/android/i.test(ua))     setOs('android')
-    else if (/linux/i.test(ua))  setOs('linux')
-    else if (/mac/i.test(ua))    setOs('mac')
-    else if (/win/i.test(ua))    setOs('windows')
-    else                         setOs('other')
+    // Android must be checked before Linux — Android UAs contain "Linux" too.
+    // Also check for common Android identifiers in case of Samsung DeX / desktop mode.
+    if (/android/i.test(ua) || /samsung|SM-|tablet.*android|android.*tablet/i.test(ua))
+      setOs('android')
+    else if (/ipad|iphone|ipod/i.test(ua))
+      setOs('mac')
+    else if (/win/i.test(ua))
+      setOs('windows')
+    else if (/mac/i.test(ua))
+      setOs('mac')
+    else if (/linux/i.test(ua))
+      setOs('linux')
+    else
+      setOs('other')
   }, [])
 
   // Poll bridge status every 4 s when connected
@@ -204,7 +213,7 @@ export default function OfflineHubSettings() {
                     <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Android</span>
                     {os === 'android' && <span className="text-xs bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full font-medium">This device</span>}
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">Download the APK, open it to install, then launch once to set up.</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">For Samsung, Lenovo, or any Android tablet/phone. Download the APK file, open it to install, then launch once to set up.</p>
                   <a
                     href="https://github.com/mariuscautis/venoapp-bridge/releases/latest/download/venoapp-bridge.apk"
                     className="flex items-center justify-center gap-2 w-full bg-[#6262bd] text-white py-2 rounded-xl text-sm font-medium hover:bg-[#5252a3] transition-colors"
