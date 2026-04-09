@@ -108,8 +108,14 @@ function createCachingFetch() {
   return async (input, init) => {
     const key = cacheKeyFor(input, init)
 
+    // Abort after 3 seconds so offline devices fall back to cache quickly
+    // instead of waiting for the OS-level TCP timeout (which can be minutes).
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 3000)
+
     try {
-      const response = await fetch(input, init)
+      const response = await fetch(input, { ...init, signal: controller.signal })
+      clearTimeout(timeoutId)
 
       // Cache successful GET responses
       if (key && response.ok) {
@@ -121,7 +127,8 @@ function createCachingFetch() {
 
       return response
     } catch (err) {
-      // Network error — try to serve from cache for GET requests
+      clearTimeout(timeoutId)
+      // Network error or timeout — try to serve from cache for GET requests
       if (key) {
         const cached = readCache(key)
         if (cached) {

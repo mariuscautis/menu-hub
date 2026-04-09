@@ -60,7 +60,7 @@ const pwaConfig = withPWA({
           maxEntries: 100,
           maxAgeSeconds: 24 * 60 * 60 // 1 day
         },
-        networkTimeoutSeconds: 5,
+        networkTimeoutSeconds: 2,
       }
     },
     // Cache customer-facing ordering + reservation pages
@@ -73,7 +73,7 @@ const pwaConfig = withPWA({
           maxEntries: 100,
           maxAgeSeconds: 24 * 60 * 60 // 1 day
         },
-        networkTimeoutSeconds: 5,
+        networkTimeoutSeconds: 2,
       }
     },
     {
@@ -85,7 +85,7 @@ const pwaConfig = withPWA({
           maxEntries: 64,
           maxAgeSeconds: 24 * 60 * 60 // 24 hours
         },
-        networkTimeoutSeconds: 10
+        networkTimeoutSeconds: 3,
       }
     },
     {
@@ -130,7 +130,7 @@ const pwaConfig = withPWA({
           maxEntries: 32,
           maxAgeSeconds: 24 * 60 * 60
         },
-        networkTimeoutSeconds: 10
+        networkTimeoutSeconds: 3,
       }
     }
   ]
