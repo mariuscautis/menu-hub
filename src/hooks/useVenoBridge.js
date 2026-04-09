@@ -143,15 +143,26 @@ export function useVenoBridge(restaurant) {
 
     connectingRef.current = true;
 
-    // 1. Try mDNS hostname
-    const mdnsOk = await tryUrl(`ws://${MDNS_HOST}:${BRIDGE_PORT}`, MDNS_TIMEOUT_MS);
-    if (mdnsOk || !mountedRef.current) return;
-
-    // 2. Fall back to direct IP (if hub IP is known)
     const hubIp = restaurantRef.current?.bridge_hub_ip;
+
+    // Try wss:// first (required when PWA is served over https), then ws:// fallback
+    // 1. mDNS wss
+    const mdnsWssOk = await tryUrl(`wss://${MDNS_HOST}:${BRIDGE_PORT}`, MDNS_TIMEOUT_MS);
+    if (mdnsWssOk || !mountedRef.current) return;
+
+    // 2. Direct IP wss
     if (hubIp && hubIp !== "unknown") {
-      const ipOk = await tryUrl(`ws://${hubIp}:${BRIDGE_PORT}`, IP_TIMEOUT_MS);
-      if (ipOk || !mountedRef.current) return;
+      const ipWssOk = await tryUrl(`wss://${hubIp}:${BRIDGE_PORT}`, IP_TIMEOUT_MS);
+      if (ipWssOk || !mountedRef.current) return;
+    }
+
+    // 3. ws:// fallbacks (for http-served environments)
+    const mdnsWsOk = await tryUrl(`ws://${MDNS_HOST}:${BRIDGE_PORT}`, MDNS_TIMEOUT_MS);
+    if (mdnsWsOk || !mountedRef.current) return;
+
+    if (hubIp && hubIp !== "unknown") {
+      const ipWsOk = await tryUrl(`ws://${hubIp}:${BRIDGE_PORT}`, IP_TIMEOUT_MS);
+      if (ipWsOk || !mountedRef.current) return;
     }
 
     // Both failed — schedule retry
