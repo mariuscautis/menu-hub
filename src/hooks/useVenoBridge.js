@@ -39,6 +39,7 @@ export function useVenoBridge(restaurant) {
   const pingTimerRef  = useRef(null);
   const reconnectRef  = useRef(null);
   const mountedRef    = useRef(true);
+  const connectingRef = useRef(false);
   const restaurantRef = useRef(restaurant);
 
   useEffect(() => { restaurantRef.current = restaurant; }, [restaurant]);
@@ -93,14 +94,20 @@ export function useVenoBridge(restaurant) {
       try {
         const msg = JSON.parse(event.data);
         if (msg.type === "bridge:auth_ok") {
+          // If another socket already won the race, close this one
+          if (wsRef.current && wsRef.current !== ws) { ws.close(); settle(false); return; }
           // Success — hand the socket back to the main connection manager
           wsRef.current = ws;
+          connectingRef.current = false;
           setIsConnected(true);
+          // Request status immediately so dashboard updates without waiting for poll
+          ws.send(JSON.stringify({ type: "bridge:get_status" }));
           pingTimerRef.current = setInterval(() => send({ type: "bridge:ping" }), PING_INTERVAL);
 
           // Re-wire handlers for the live session
           ws.onclose = () => {
             clearTimers();
+            connectingRef.current = false;
             if (!mountedRef.current) return;
             setIsConnected(false);
             wsRef.current = null;
@@ -127,11 +134,14 @@ export function useVenoBridge(restaurant) {
   // ── Main connect: try mDNS, then direct IP ──────────────────────────────────
   const connect = useCallback(async () => {
     if (!mountedRef.current) return;
+    if (connectingRef.current) return;
 
     // Bail if already open / connecting
     const existing = wsRef.current;
     if (existing && (existing.readyState === WebSocket.OPEN ||
                      existing.readyState === WebSocket.CONNECTING)) return;
+
+    connectingRef.current = true;
 
     // 1. Try mDNS hostname
     const mdnsOk = await tryUrl(`ws://${MDNS_HOST}:${BRIDGE_PORT}`, MDNS_TIMEOUT_MS);
@@ -145,6 +155,7 @@ export function useVenoBridge(restaurant) {
     }
 
     // Both failed — schedule retry
+    connectingRef.current = false;
     scheduleReconnect();
   }, [tryUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
