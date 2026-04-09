@@ -8,6 +8,7 @@ import { supabase, clearOrdersCacheForTable, clearAllOrdersCache, clearTableOrde
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import InvoiceClientModal from '@/components/invoices/InvoiceClientModal'
+import OfflinePageGuard from '@/components/OfflinePageGuard'
 import { generateInvoicePdfBase64, downloadInvoicePdf } from '@/lib/invoicePdfGenerator'
 import {
   addPendingOrder,
@@ -255,7 +256,6 @@ export default function StaffFloorPlanPage() {
   const [elements, setElements] = useState([])
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
-  const [isOnline, setIsOnline] = useState(typeof window !== 'undefined' ? navigator.onLine : true)
   const [selectedTable, setSelectedTable] = useState(null)
   const [tableOrderInfo, setTableOrderInfo] = useState({})
   const [todayReservations, setTodayReservations] = useState({})
@@ -366,17 +366,6 @@ export default function StaffFloorPlanPage() {
     })
 
     return () => observer.disconnect()
-  }, [])
-
-  useEffect(() => {
-    const handleOnline = () => setIsOnline(true)
-    const handleOffline = () => setIsOnline(false)
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
-    return () => {
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
-    }
   }, [])
 
   useEffect(() => {
@@ -2720,30 +2709,6 @@ export default function StaffFloorPlanPage() {
     )
   }
 
-  if (!isOnline) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-950 p-6">
-        <div className="text-center max-w-sm">
-          <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636a9 9 0 010 12.728M15.536 8.464a5 5 0 010 7.072M6.343 6.343a9 9 0 000 12.728M9.172 9.172a5 5 0 000 7.072M12 12h.01" />
-            </svg>
-          </div>
-          <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-2">Floor Plan Unavailable Offline</h2>
-          <p className="text-slate-500 dark:text-slate-400 mb-6 text-sm">
-            The floor plan requires an internet connection. Please use the Tables page to manage orders while offline.
-          </p>
-          <a
-            href="/dashboard/tables"
-            className="inline-block bg-[#6262bd] text-white px-6 py-3 rounded-xl font-medium hover:bg-[#5252a3]"
-          >
-            Go to Tables
-          </a>
-        </div>
-      </div>
-    )
-  }
-
   if (!currentFloor) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -2756,6 +2721,7 @@ export default function StaffFloorPlanPage() {
   }
 
   return (
+    <OfflinePageGuard>
     <div className="flex flex-col h-screen bg-slate-100 dark:bg-slate-950">
       {/* Header */}
       <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shrink-0">
@@ -4502,5 +4468,6 @@ export default function StaffFloorPlanPage() {
         </div>
       )}
     </div>
+    </OfflinePageGuard>
   )
 }

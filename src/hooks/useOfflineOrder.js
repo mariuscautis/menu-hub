@@ -101,12 +101,19 @@ export default function useOfflineOrder() {
     // PRIORITY 1: Try Supabase directly (if online)
     if (navigator.onLine) {
       try {
+        // 5-second timeout — if internet dropped, fail fast and fall through to IndexedDB
+        // rather than hanging for the OS-level TCP timeout (minutes)
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 5000)
+
         const { data: order, error: orderError } = await supabase
           .from('orders')
           .insert(orderData)
           .select()
           .single()
+          .abortSignal(controller.signal)
 
+        clearTimeout(timeoutId)
         if (orderError) throw orderError
 
         const items = orderItems.map((item) => ({
@@ -117,6 +124,7 @@ export default function useOfflineOrder() {
         const { error: itemsError } = await supabase
           .from('order_items')
           .insert(items)
+          .abortSignal(controller.signal)
 
         if (itemsError) throw itemsError
 
