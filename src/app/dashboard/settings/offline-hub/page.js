@@ -205,10 +205,10 @@ export default function OfflineHubSettings() {
               {activeTab === 'windows' && (
                 <div className="space-y-4">
                   <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl text-xs text-blue-800 dark:text-blue-300">
-                    Suitable for any Windows 10 or 11 PC or laptop that stays on at the venue — the till PC, a back-office computer, or a dedicated mini PC.
+                    Suitable for any Windows 10 or 11 PC or laptop that stays on at the venue — the till PC, a back-office computer, or a dedicated mini PC. No installation required.
                   </div>
                   <a
-                    href="https://github.com/mariuscautis/venoapp-bridge/releases/latest/download/venoapp-bridge.exe"
+                    href="https://github.com/mariuscautis/venoapp-bridge/releases/latest/download/venoapp-bridge-windows.exe"
                     className="flex items-center justify-center gap-2 w-full bg-[#6262bd] text-white py-2.5 rounded-xl text-sm font-medium hover:bg-[#5252a3] transition-colors"
                   >
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
@@ -218,9 +218,10 @@ export default function OfflineHubSettings() {
                     <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3">Setup steps:</p>
                     <ol className="space-y-2">
                       {[
-                        'Double-click the downloaded .exe to install. If Windows SmartScreen appears, click "More info" then "Run anyway".',
-                        'VenoApp Bridge opens automatically after install. Enter your restaurant code and printer IP, then click Save & Start.',
-                        'Bridge minimises to the system tray (bottom-right corner). It starts automatically every time Windows boots.',
+                        'Download the .exe file and double-click it. If SmartScreen appears, click "More info" then "Run anyway" — no installation needed.',
+                        'A terminal window opens and your browser automatically loads the setup page at http://localhost:3355.',
+                        'Enter your restaurant code and printer IP in the browser, then click Save & Start.',
+                        'Keep the terminal window open — it must stay running for Bridge to work. Minimise it to the taskbar.',
                         'On any staff device on the same WiFi, open the VenoApp dashboard — the status above will turn green.',
                       ].map((step, i) => (
                         <li key={i} className="flex gap-3 text-xs text-slate-500 dark:text-slate-400">
