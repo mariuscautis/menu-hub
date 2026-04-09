@@ -132,13 +132,25 @@ export default function OfflineHubSettings() {
                   A lightweight background app that turns any Windows PC, Linux computer, or Raspberry Pi into a local hub for your venue.
                 </p>
               </div>
-              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold flex-shrink-0 ${
-                isConnected
-                  ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                  : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
-              }`}>
-                <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500 animate-pulse' : 'bg-slate-400'}`} />
-                {isConnected ? 'Bridge connected' : 'Not detected'}
+              <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold ${
+                  isConnected
+                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                    : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                }`}>
+                  <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500 animate-pulse' : 'bg-slate-400'}`} />
+                  {isConnected ? 'Bridge connected' : 'Not detected'}
+                </div>
+                {!isConnected && restaurant?.bridge_hub_ip && (
+                  <a
+                    href={`https://${restaurant.bridge_hub_ip}:3355`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs px-3 py-1.5 bg-[#6262bd] text-white rounded-full font-medium hover:bg-[#5252a3] transition-colors"
+                  >
+                    Trust certificate →
+                  </a>
+                )}
               </div>
             </div>
 
