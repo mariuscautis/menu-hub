@@ -4,6 +4,7 @@ export const runtime = 'edge'
 import { useState, useEffect, use } from 'react'
 import { supabase } from '@/lib/supabase'
 import { CURRENCY_SYMBOLS } from '@/lib/currencyUtils'
+import useOfflineOrder from '@/hooks/useOfflineOrder'
 
 export default function CustomerMenu({ params }) {
   const { restaurant: slug, tableId } = use(params)
@@ -22,6 +23,9 @@ export default function CustomerMenu({ params }) {
   const [waiterCalled, setWaiterCalled] = useState(false)
   const [expandedCategories, setExpandedCategories] = useState({})
   const [itemNotes, setItemNotes] = useState({}) // Track notes for items requiring special instructions
+  const [orderPlacedOffline, setOrderPlacedOffline] = useState(false)
+
+  const { placeOrder: placeOfflineOrder, isOnline } = useOfflineOrder()
 
   const currencySymbol = CURRENCY_SYMBOLS[restaurant?.invoice_settings?.currency] || '€'
 
@@ -269,44 +273,27 @@ export default function CustomerMenu({ params }) {
   const placeOrder = async () => {
     if (cart.length === 0) return
 
-    try {
-      // Create order
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          restaurant_id: restaurant.id,
-          table_id: table.id,
-          total: getCartTotal(),
-          customer_name: customerName || null,
-          notes: orderNotes || null,
-          status: 'pending'
-        })
-        .select()
-        .single()
+    const result = await placeOfflineOrder({
+      restaurant,
+      cart,
+      customerName: customerName || '',
+      customerEmail: '',
+      customerPhone: '',
+      orderNotes: orderNotes || '',
+      total: getCartTotal(),
+      tableId: table.id,
+      orderType: 'table',
+    })
 
-      if (orderError) throw orderError
-
-      // Create order items
-      const orderItems = cart.map(item => ({
-        order_id: order.id,
-        menu_item_id: item.id,
-        name: item.name,
-        quantity: item.quantity,
-        price_at_time: item.price,
-        special_instructions: item.special_instructions || null
-      }))
-
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(orderItems)
-
-      if (itemsError) throw itemsError
-
-      setOrderPlaced(true)
+    if (result.success) {
       setCart([])
       setShowCart(false)
-
-    } catch (err) {
+      if (result.offline) {
+        setOrderPlacedOffline(true)
+      } else {
+        setOrderPlaced(true)
+      }
+    } else {
       alert('Failed to place order. Please try again.')
     }
   }
@@ -351,6 +338,30 @@ export default function CustomerMenu({ params }) {
           </div>
           <h1 className="text-xl font-bold text-slate-800 mb-2">{error}</h1>
           <p className="text-slate-500">Please scan the QR code again or ask staff for help.</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (orderPlacedOffline) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+        <div className="text-center max-w-md">
+          <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg className="w-10 h-10 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-slate-800 mb-2">Order Saved Offline</h1>
+          <p className="text-slate-500 mb-6">
+            You're currently offline. Your order has been saved and will be sent to the kitchen as soon as the connection is restored.
+          </p>
+          <button
+            onClick={() => setOrderPlacedOffline(false)}
+            className="bg-[#6262bd] text-white px-6 py-3 rounded-xl font-medium hover:bg-[#5252a3]"
+          >
+            Order More
+          </button>
         </div>
       </div>
     )

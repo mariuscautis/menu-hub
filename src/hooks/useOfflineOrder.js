@@ -69,19 +69,21 @@ export default function useOfflineOrder() {
     pickupCode,
     locale,
     total,
+    tableId = null,
+    orderType = 'takeaway',
   }) => {
     const orderData = {
       restaurant_id: restaurant.id,
-      table_id: null,
+      table_id: tableId,
       total,
-      customer_name: customerName.trim(),
-      customer_email: customerEmail.trim().toLowerCase(),
-      customer_phone: customerPhone.trim() || null,
-      notes: orderNotes.trim() || null,
+      customer_name: customerName ? customerName.trim() : null,
+      customer_email: customerEmail ? customerEmail.trim().toLowerCase() : null,
+      customer_phone: customerPhone ? customerPhone.trim() || null : null,
+      notes: orderNotes ? orderNotes.trim() || null : null,
       status: 'pending',
-      order_type: 'takeaway',
-      pickup_code: pickupCode,
-      locale,
+      order_type: orderType,
+      pickup_code: pickupCode || null,
+      locale: locale || null,
     }
 
     const orderItems = cart.map((item) => ({
