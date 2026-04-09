@@ -781,7 +781,7 @@ export default function StaffFloorPlanPage() {
     } catch (error) {
       console.error('Error marking table as cleaned:', error)
       // If network failed mid-request, update local state anyway
-      if (error.message?.includes('fetch') || error.message?.includes('network')) {
+      if (error.name === 'AbortError' || error.message?.includes('fetch') || error.message?.includes('network') || !navigator.onLine) {
         setTables(prev => prev.map(t =>
           t.id === table.id
             ? { ...t, status: 'available', payment_completed_at: null }

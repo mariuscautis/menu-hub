@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { supabase, clearOrdersCacheForTable, clearTableOrdersLocalCache, clearAllOrdersCache, wasTablePaidOffline, clearTablePaidOfflineStatus } from '@/lib/supabase'
+import { supabase, clearOrdersCacheForTable, clearTableOrdersLocalCache, clearAllOrdersCache, wasTablePaidOffline, clearTablePaidOfflineStatus, markTableCleanedOffline } from '@/lib/supabase'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import QRCode from 'qrcode'
@@ -1677,12 +1677,13 @@ export default function Tables() {
     } catch (error) {
       console.error('Error marking table as cleaned:', error)
       // If network failed mid-request, update local state anyway
-      if (error.message?.includes('fetch') || error.message?.includes('network')) {
+      if (error.name === 'AbortError' || error.message?.includes('fetch') || error.message?.includes('network') || !navigator.onLine) {
         setTables(prev => prev.map(t =>
           t.id === table.id
             ? { ...t, status: 'available', payment_completed_at: null }
             : t
         ))
+        markTableCleanedOffline(table.id)
         showNotification('success', t('notifications.tableCleanedOffline', { tableNumber: table.table_number }))
         return
       }
