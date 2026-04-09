@@ -220,7 +220,7 @@ export default function OfflineHubSettings() {
                     Suitable for any Windows 10 or 11 PC or laptop that stays on at the venue — the till PC, a back-office computer, or a dedicated mini PC. No installation required.
                   </div>
                   <a
-                    href="https://github.com/mariuscautis/venoapp-bridge/releases/latest/download/venoapp-bridge-windows.exe"
+                    href="https://github.com/mariuscautis/venoapp-bridge/releases/latest/download/venoapp-bridge-windows-setup.exe"
                     className="flex items-center justify-center gap-2 w-full bg-[#6262bd] text-white py-2.5 rounded-xl text-sm font-medium hover:bg-[#5252a3] transition-colors"
                   >
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
