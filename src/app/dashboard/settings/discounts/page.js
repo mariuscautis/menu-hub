@@ -297,7 +297,7 @@ export default function DiscountsSettings() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-2 sm:p-8">
       <PageTabs tabs={settingsTabs} />
       <div className="max-w-4xl mx-auto">
         {/* Header */}
