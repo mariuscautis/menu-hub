@@ -1587,6 +1587,10 @@ export default function DashboardLayout({ children }) {
                       </span>
                       {staffAvatar ? (
                         <img src={staffAvatar} alt={staffName} className="w-14 h-14 rounded-full object-cover border-2 border-[#6262bd]/20 relative z-10" />
+                      ) : userType === 'owner' && restaurant?.logo_url ? (
+                        <div className="w-8 h-8 rounded-xl flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800 relative z-10">
+                          <img src={restaurant.logo_url} alt={restaurant.name} className="max-w-full max-h-full object-contain" />
+                        </div>
                       ) : (
                         <div className="w-14 h-14 rounded-full bg-[#6262bd]/10 dark:bg-[#6262bd]/20 flex items-center justify-center relative z-10">
                           <svg className="w-7 h-7 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24">
@@ -1636,6 +1640,8 @@ export default function DashboardLayout({ children }) {
                         </span>
                         {staffAvatar ? (
                           <img src={staffAvatar} alt={staffName} className="w-6 h-6 object-cover rounded-full absolute inset-0 m-auto z-10" />
+                        ) : userType === 'owner' && restaurant?.logo_url ? (
+                          <img src={restaurant.logo_url} alt={restaurant.name} className="w-6 h-6 object-contain absolute inset-0 m-auto z-10" />
                         ) : (
                           <div className="w-8 h-8 rounded-full bg-[#6262bd]/10 dark:bg-[#6262bd]/20 flex items-center justify-center relative z-10">
                             <svg className="w-4 h-4 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24">
