@@ -718,10 +718,12 @@ export default function Tables() {
 
     setTableOrderInfo(orderInfo)
 
-    // Cache orders grouped by table so the offline path can reconstruct indicators
-    if (orders && orders.length > 0) {
-      try {
-        const byTable = {}
+    // Cache orders grouped by table so the offline path can reconstruct indicators.
+    // Also clears stale keys for tables that no longer have active orders — without
+    // this, paid orders remain in localStorage and appear as ghosts when offline.
+    try {
+      const byTable = {}
+      if (orders && orders.length > 0) {
         orders.forEach(order => {
           if (!byTable[order.table_id]) byTable[order.table_id] = []
           byTable[order.table_id].push(order)
@@ -729,8 +731,19 @@ export default function Tables() {
         Object.entries(byTable).forEach(([tableId, tableOrders]) => {
           localStorage.setItem(`table_orders_${tableId}`, JSON.stringify(tableOrders))
         })
-      } catch {}
-    }
+      }
+      // Remove any table_orders_* keys that are no longer in the fresh fetch
+      const activeTableIds = new Set(Object.keys(byTable))
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i)
+        if (key && key.startsWith('table_orders_')) {
+          const tableId = key.replace('table_orders_', '')
+          if (!activeTableIds.has(tableId)) {
+            localStorage.removeItem(key)
+          }
+        }
+      }
+    } catch {}
   }
 
   const fetchTodayReservations = async (restaurantId) => {
