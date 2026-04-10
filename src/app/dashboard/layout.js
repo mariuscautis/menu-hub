@@ -1174,7 +1174,12 @@ export default function DashboardLayout({ children }) {
     <GuideProvider>
     <CurrencyProvider currency={restaurantCurrency}>
     <LanguageProvider>
-      <div className={`min-h-screen bg-slate-50 dark:bg-slate-950 flex relative${isImpersonating ? ' pt-10' : ''}${!isOnline ? ' ring-2 ring-inset ring-amber-400 shadow-[inset_0_0_40px_rgba(251,191,36,0.08)]' : backOnline ? ' ring-2 ring-inset ring-green-400 shadow-[inset_0_0_40px_rgba(74,222,128,0.08)]' : ''} transition-shadow duration-500`}>
+      {/* Full-screen connectivity border overlay — fixed so all 4 sides are always visible */}
+      {(!isOnline || backOnline) && (
+        <div className={`fixed inset-0 z-[9989] pointer-events-none border-4 transition-colors duration-500 ${!isOnline ? 'border-amber-400' : 'border-green-400'}`} />
+      )}
+
+      <div className={`min-h-screen bg-slate-50 dark:bg-slate-950 flex relative${isImpersonating ? ' pt-10' : ''} transition-shadow duration-500`}>
 
       {/* Connectivity banner — fixed so it's always visible even in full-width mode */}
       {!isOnline && (
@@ -1537,22 +1542,22 @@ export default function DashboardLayout({ children }) {
 
       {/* Full-width mode floating buttons */}
       {fullWidthMode && (
-        <div className="fixed top-4 right-4 z-50 flex gap-2">
+        <div className="fixed bottom-4 right-4 z-50 flex gap-2">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="p-3 bg-white dark:bg-slate-800 rounded-full shadow-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+            className="p-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-lg shadow border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-700 transition-colors"
             title="Open menu"
           >
-            <svg className="w-5 h-5 text-slate-600 dark:text-slate-400" fill="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-slate-500 dark:text-slate-400" fill="currentColor" viewBox="0 0 24 24">
               <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
             </svg>
           </button>
           <button
             onClick={toggleFullWidth}
-            className="p-3 bg-white dark:bg-slate-800 rounded-full shadow-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+            className="p-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-lg shadow border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-700 transition-colors"
             title="Exit full-width mode"
           >
-            <svg className="w-5 h-5 text-slate-600 dark:text-slate-400" fill="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-slate-500 dark:text-slate-400" fill="currentColor" viewBox="0 0 24 24">
               <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>
             </svg>
           </button>
