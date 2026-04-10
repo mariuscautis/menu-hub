@@ -183,7 +183,7 @@ export default function ReportLoss() {
     <OfflinePageGuard>
     <div className="max-w-lg mx-auto">
       <div className="mb-8 text-center">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200 flex items-center justify-center gap-2">
           {t('title')}
           <InfoTooltip text={tg('report_loss_desc')} />
         </h1>
@@ -210,7 +210,7 @@ export default function ReportLoss() {
       )}
 
       {/* Type selector tiles */}
-      <div className="grid grid-cols-2 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
         <button
           onClick={() => { setLossType('menu'); setMessage(null) }}
           className={`group flex flex-col items-center text-center gap-3 rounded-2xl border-2 p-5 transition-all ${

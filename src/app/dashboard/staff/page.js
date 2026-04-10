@@ -72,7 +72,7 @@ export default function StaffHub() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {sections.map((section) => (
             <Link
               key={section.href}

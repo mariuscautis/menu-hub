@@ -877,6 +877,7 @@ export default function DashboardLayout({ children }) {
         href: '/dashboard/floor-plan',
         labelKey: 'floorPlan',
         label: 'Floor Plan',
+        mobileHidden: true,
         icon: (
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M19 2H9c-1.1 0-2 .9-2 2v5.5h2V4h10v16h-5v2h5c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM2 10v11c0 1.1.9 2 2 2h9c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2zm11 11H4v-2h9v2zm0-3.5H4v-2h9v2zM13 14H4v-2h9v2zm0-3.5H4V9h9v1.5z"/>
@@ -891,6 +892,7 @@ export default function DashboardLayout({ children }) {
         href: '/dashboard/tables-floor-plan',
         labelKey: 'floorPlan',
         label: 'Floor Plan',
+        mobileHidden: true,
         icon: (
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M19 2H9c-1.1 0-2 .9-2 2v5.5h2V4h10v16h-5v2h5c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM2 10v11c0 1.1.9 2 2 2h9c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2zm11 11H4v-2h9v2zm0-3.5H4v-2h9v2zM13 14H4v-2h9v2zm0-3.5H4V9h9v1.5z"/>
@@ -1608,15 +1610,22 @@ export default function DashboardLayout({ children }) {
                 )}
               </div>
             ) : (
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800 relative">
                 {(userType === 'staff' || userType === 'staff-admin') ? (
-                  staffAvatar ? (
-                    <img src={staffAvatar} alt={staffName} className="w-full h-full object-cover rounded-full" />
-                  ) : (
-                    <svg className="w-5 h-5 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                    </svg>
-                  )
+                  <button onClick={toggleFullWidth} className="relative w-full h-full focus:outline-none" title="Tap to enter full-screen mode">
+                    {staffAvatar ? (
+                      <img src={staffAvatar} alt={staffName} className="w-full h-full object-cover rounded-full" />
+                    ) : (
+                      <svg className="w-5 h-5 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                      </svg>
+                    )}
+                    <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-[#6262bd] rounded-full flex items-center justify-center shadow">
+                      <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+                      </svg>
+                    </span>
+                  </button>
                 ) : restaurant?.logo_url ? (
                   <img src={restaurant.logo_url} alt={restaurant.name} className="max-w-full max-h-full object-contain" />
                 ) : (
@@ -1646,7 +1655,7 @@ export default function DashboardLayout({ children }) {
                 ? pathname === '/dashboard'
                 : pathname.startsWith(item.href)
               return (
-              <li key={item.href}>
+              <li key={item.href} className={item.mobileHidden ? 'hidden sm:block' : ''}>
                 <Link
                   href={item.href}
                   title={!sidebarOpen ? item.label : undefined}

@@ -76,7 +76,7 @@ export default function OfflineHubSettings() {
 
   return (
     <OfflinePageGuard>
-      <div>
+      <div className="overflow-x-hidden">
         {isOwnerOrAdmin && <PageTabs tabs={settingsTabs} />}
 
         <div className="mb-8">
@@ -124,7 +124,7 @@ export default function OfflineHubSettings() {
           )}
 
           {/* Main Bridge card */}
-          <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6">
+          <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4 sm:p-6">
             <div className="flex items-start justify-between gap-4 mb-6">
               <div>
                 <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200">VenoApp Bridge</h2>
@@ -195,10 +195,9 @@ export default function OfflineHubSettings() {
               <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-4">Download &amp; setup instructions</h3>
 
               {/* Tab bar */}
-              <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl mb-5 w-fit">
+              <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl mb-5 w-full sm:w-fit overflow-x-auto">
                 {tabBtn('windows', 'Windows')}
                 {tabBtn('linux', 'Linux')}
-                {tabBtn('pi', 'Raspberry Pi')}
               </div>
 
               {/* Trust certificate banner — shown when hub IP is known */}
@@ -285,67 +284,13 @@ export default function OfflineHubSettings() {
                 </div>
               )}
 
-              {/* Raspberry Pi */}
-              {activeTab === 'pi' && (
-                <div className="space-y-4">
-
-                  {/* Which Pi */}
-                  <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 rounded-xl">
-                    <p className="text-xs font-semibold text-green-800 dark:text-green-300 mb-2">Which Raspberry Pi to buy</p>
-                    <div className="space-y-2">
-                      {[
-                        { model: 'Raspberry Pi 5 (recommended)', desc: 'Fastest, handles everything. Best if you also connect a receipt printer directly.' },
-                        { model: 'Raspberry Pi 4 (2GB)', desc: 'Great balance of price and performance. More than enough for Bridge.' },
-                        { model: 'Raspberry Pi Zero 2 W (cheapest)', desc: 'Smallest and cheapest. Perfect if you only need order sync — no direct printer.' },
-                      ].map((p, i) => (
-                        <div key={i} className="flex gap-3">
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 mt-0.5 ${i === 0 ? 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400'}`}>
-                            {i === 0 ? '★ Best' : i === 1 ? 'Good' : 'Budget'}
-                          </span>
-                          <div>
-                            <p className="text-xs font-medium text-slate-700 dark:text-slate-200">{p.model}</p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">{p.desc}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <p className="text-xs text-green-700 dark:text-green-400 mt-3">
-                      Buy from <strong>raspberrypi.com</strong> or resellers like Pimoroni (UK) or The Pi Hut. You also need: a microSD card (16GB+), a USB-C power supply, and optionally a small case.
-                    </p>
-                  </div>
-
-                  {/* Setup steps */}
-                  <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
-                    <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3">Setup steps:</p>
-                    <ol className="space-y-2">
-                      {[
-                        'Download Raspberry Pi Imager from raspberrypi.com/software on your PC or Mac.',
-                        'Insert the microSD card, open Imager, choose "Raspberry Pi OS Lite (64-bit)", select your card, and click Write. When prompted, set a hostname, enable SSH, and enter your WiFi name and password.',
-                        'Insert the SD card into the Pi and power it on. Wait 2 minutes for first boot.',
-                        'From your PC, open a terminal (or PuTTY on Windows) and connect: ssh pi@raspberrypi.local',
-                        'Download and run the Bridge: wget https://github.com/mariuscautis/venoapp-bridge/releases/latest/download/venoapp-bridge.AppImage && chmod +x venoapp-bridge.AppImage',
-                        'For initial setup, connect the Pi to a monitor and keyboard. Open VenoApp Bridge, enter your restaurant code and printer IP, then click Save & Start. Once configured you can run it headlessly — disconnect the monitor.',
-                        'To auto-start on boot: sudo nano /etc/rc.local and add the AppImage path before "exit 0".',
-                      ].map((step, i) => (
-                        <li key={i} className="flex gap-3 text-xs text-slate-500 dark:text-slate-400">
-                          <span className="w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0 font-bold text-xs">{i + 1}</span>
-                          {step}
-                        </li>
-                      ))}
-                    </ol>
-                  </div>
-
-                  <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 rounded-xl text-xs text-amber-700 dark:text-amber-400">
-                    <strong>Note:</strong> The Raspberry Pi headless setup (step 6) is coming soon. For now, connect a monitor and keyboard to the Pi for initial setup, or use a Pi 4/5 with Raspberry Pi OS Desktop.
-                  </div>
-                </div>
-              )}
+              {/* Raspberry Pi tab hidden for now */}
             </div>
           </div>
 
           {/* Connected devices */}
           {isConnected && (
-            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6">
+            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4 sm:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200">Connected devices</h2>
                 <span className="text-xs text-slate-400 dark:text-slate-500">Updates every 4 s</span>
@@ -374,7 +319,7 @@ export default function OfflineHubSettings() {
           )}
 
           {/* Per-device offline mode */}
-          <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6">
+          <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4 sm:p-6">
             <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">Per-device offline mode</h2>
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
               Even without VenoApp Bridge, every device handles internet outages independently.
