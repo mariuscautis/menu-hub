@@ -705,7 +705,7 @@ export default function StaffLogin() {
               maxLength={3}
               required
               autoFocus
-              className="w-full px-6 py-6 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 font-mono text-4xl text-center tracking-[0.5em]"
+              className="w-full px-6 py-6 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-slate-200 focus:shadow-[0_0_0_4px_rgba(98,98,189,0.35)] text-slate-700 font-mono text-4xl text-center tracking-[0.5em] caret-transparent transition-shadow"
             />
           </div>
 
