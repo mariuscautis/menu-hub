@@ -1565,7 +1565,7 @@ export default function DashboardLayout({ children }) {
           <div className={`flex items-center ${sidebarOpen ? 'justify-between' : 'justify-center'}`}>
             {sidebarOpen ? (
               <div className="flex items-center space-x-2 flex-1 min-w-0">
-                {(userType === 'staff' || userType === 'staff-admin') ? (
+                {(userType === 'staff' || userType === 'staff-admin' || userType === 'owner') ? (
                   <div className="flex flex-col items-center w-full">
                     <button
                       onClick={toggleFullWidth}
@@ -1618,7 +1618,7 @@ export default function DashboardLayout({ children }) {
               </div>
             ) : (
               <div className="flex flex-col items-center gap-2">
-                {(userType === 'staff' || userType === 'staff-admin') ? (
+                {(userType === 'staff' || userType === 'staff-admin' || userType === 'owner') ? (
                   <>
                     <button onClick={toggleFullWidth} className="relative focus:outline-none" title="Tap to enter full-screen mode">
                       {/* Avatar with expand arrows visible around it */}
