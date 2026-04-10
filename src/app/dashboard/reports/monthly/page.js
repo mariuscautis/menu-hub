@@ -561,8 +561,8 @@ export default function MonthlyReportPage() {
               <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4">
                 {t('weeklyBreakdown') || 'Weekly Breakdown'}
               </h2>
-              <div className="overflow-x-auto">
-                <table className="w-full">
+              <div className="overflow-x-auto -mx-2">
+                <table className="w-full min-w-[380px]">
                   <thead>
                     <tr className="border-b-2 border-slate-100 dark:border-slate-800">
                       <th className="text-left py-3 px-4 text-sm font-medium text-slate-700 dark:text-slate-300">{t('week') || 'Week'}</th>

@@ -485,7 +485,7 @@ export default function SalesBalanceReport() {
           {t('timeFrame')}
         </h2>
         {/* Quick picks */}
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 mb-4">
           {PRESETS.map(p => (
             <button
               key={p.key}
@@ -511,8 +511,8 @@ export default function SalesBalanceReport() {
           </button>
         </div>
         {/* Date inputs */}
-        <div className="flex flex-col sm:flex-row gap-3 items-end">
-          <div className="flex-1">
+        <div className="grid grid-cols-2 sm:flex sm:flex-row gap-3 sm:items-end">
+          <div>
             <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{t('from')}</label>
             <input
               type="date"
@@ -521,7 +521,7 @@ export default function SalesBalanceReport() {
               className="w-full px-3 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-sm focus:outline-none focus:border-[#6262bd]"
             />
           </div>
-          <div className="flex-1">
+          <div>
             <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{t('to')}</label>
             <input
               type="date"
@@ -534,7 +534,7 @@ export default function SalesBalanceReport() {
           <button
             onClick={fetchReport}
             disabled={loading}
-            className="px-5 py-2 bg-[#6262bd] hover:bg-[#5252ad] text-white font-medium rounded-xl transition-colors disabled:opacity-50 text-sm whitespace-nowrap"
+            className="col-span-2 sm:col-span-1 w-full sm:w-auto px-5 py-2 bg-[#6262bd] hover:bg-[#5252ad] text-white font-medium rounded-xl transition-colors disabled:opacity-50 text-sm whitespace-nowrap"
           >
             {loading ? t('loading') : t('generateReport')}
           </button>

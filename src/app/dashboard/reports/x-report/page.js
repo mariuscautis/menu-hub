@@ -358,7 +358,7 @@ export default function XReportPage() {
       </div>
 
       {/* Shift Status Banner */}
-      <div className="mb-6 bg-green-50 dark:bg-green-900/30 border-2 border-green-200 dark:border-green-800 rounded-2xl p-4 flex items-center justify-between">
+      <div className="mb-6 bg-green-50 dark:bg-green-900/30 border-2 border-green-200 dark:border-green-800 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div className="flex items-center gap-3">
           <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
           <div>
@@ -407,7 +407,7 @@ export default function XReportPage() {
           <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4">
             {tZ('paymentBreakdown') || 'Payment Breakdown'}
           </h2>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="bg-green-50 dark:bg-green-900/30 rounded-xl p-4 text-center">
               <p className="text-sm text-green-600 dark:text-green-400">{tZ('cash') || 'Cash'}</p>
               <p className="text-xl font-bold text-green-600 dark:text-green-400">{formatCurrency(reportData.cashTotal)}</p>

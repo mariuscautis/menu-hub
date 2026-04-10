@@ -239,7 +239,7 @@ export default function TaxReportPage() {
         <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-4">
           {t('dateRange') || 'Date Range'}
         </h2>
-        <div className="flex flex-col md:flex-row gap-4 items-end">
+        <div className="flex flex-col md:flex-row gap-4 md:items-end">
           <div className="flex-1">
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
               {t('startDate') || 'Start Date'}
@@ -266,7 +266,7 @@ export default function TaxReportPage() {
           <button
             onClick={handleGenerateReport}
             disabled={loading}
-            className="px-6 py-2 bg-[#6262bd] hover:bg-[#5252ad] text-white font-medium rounded-xl transition-colors disabled:opacity-50"
+            className="w-full md:w-auto px-6 py-2 bg-[#6262bd] hover:bg-[#5252ad] text-white font-medium rounded-xl transition-colors disabled:opacity-50"
           >
             {loading ? (t('loading') || 'Loading...') : (t('generateReport') || 'Generate Report')}
           </button>
