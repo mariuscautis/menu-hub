@@ -7,7 +7,7 @@ import { useSeoSettings } from '@/lib/useSeoSettings'
 export default function OfflineHubPage() {
   const seo = useSeoSettings('services_offline_hub', {
     title: 'Keep Serving Even Without Internet — Veno App Offline Hub',
-    description: 'Veno App keeps working even when your internet goes down. Orders, kitchen displays, and staff management all stay live — then sync automatically when you reconnect.',
+    description: 'Veno App keeps working even when your internet goes down. Orders and kitchen displays stay live on your local network — then sync automatically the moment you reconnect.',
   })
   return (
     <>
@@ -51,7 +51,7 @@ export default function OfflineHubPage() {
               </h1>
 
               <p className="text-xl text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
-                Internet outages happen at the worst times. With Veno App's Offline Hub, your restaurant keeps running smoothly — orders flow, your kitchen stays updated, and staff can still clock in and out, all without a single internet connection.
+                Internet outages happen at the worst times. With Veno App's Offline Hub, your restaurant keeps running smoothly — orders keep flowing and your kitchen stays updated, all without a single internet connection.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
@@ -112,9 +112,8 @@ export default function OfflineHubPage() {
 
                 {/* 3 live indicators */}
                 {[
-                  { label: 'Orders & Payments', y: 264 },
-                  { label: 'Kitchen & Bar Displays', y: 296 },
-                  { label: 'Staff Clock In / Out', y: 328 },
+                  { label: 'Orders & Payments', y: 272 },
+                  { label: 'Kitchen & Bar Displays', y: 310 },
                 ].map(({ label, y }) => (
                   <g key={label}>
                     <rect x="40" y={y - 12} width="300" height="26" rx="8" fill="#f8fafc" />
@@ -180,8 +179,8 @@ export default function OfflineHubPage() {
                   </svg>
                 ),
                 color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400',
-                title: 'Staff are stranded',
-                description: 'Your team can\'t clock in, access rotas, or check their tasks — everything stops until the internet is back.',
+                title: 'Staff are in the dark',
+                description: 'Your team loses access to orders, tasks, and the kitchen display — everything stops until the internet is back.',
               },
             ].map((item) => (
               <div key={item.title} className="bg-white dark:bg-slate-800 rounded-2xl p-6 border-2 border-slate-100 dark:border-slate-700">
@@ -216,7 +215,7 @@ export default function OfflineHubPage() {
                   {
                     step: '1',
                     title: 'Set up once, forget about it',
-                    description: 'Install the Offline Hub app on any Windows, Mac, or Raspberry Pi device in your venue. It runs quietly in the background — no technical knowledge needed.',
+                    description: 'Install the Offline Hub app on a Windows PC in your venue. It runs quietly in the background — no technical knowledge needed.',
                   },
                   {
                     step: '2',
@@ -226,7 +225,7 @@ export default function OfflineHubPage() {
                   {
                     step: '3',
                     title: 'Back online? Everything syncs',
-                    description: 'The moment your internet returns, all orders, clock-in records, and data sync automatically to the cloud. Nothing is lost, nothing needs manual updating.',
+                    description: 'The moment your internet returns, all orders and data sync automatically to the cloud. Nothing is lost, nothing needs manual updating.',
                   },
                 ].map((item) => (
                   <div key={item.step} className="flex gap-4">
@@ -244,7 +243,7 @@ export default function OfflineHubPage() {
 
             {/* Diagram illustration */}
             <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-xl border border-slate-100 dark:border-slate-700">
-              <svg viewBox="0 0 360 300" className="w-full h-auto">
+              <svg viewBox="0 0 420 300" className="w-full h-auto">
                 <defs>
                   <linearGradient id="hub-g" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#14b8a6" />
@@ -255,40 +254,64 @@ export default function OfflineHubPage() {
                   </filter>
                 </defs>
 
-                {/* Central hub */}
-                <circle cx="180" cy="150" r="40" fill="url(#hub-g)" filter="url(#hub-shadow)" />
-                <text x="180" y="145" fontSize="10" fill="white" textAnchor="middle" fontWeight="bold">Offline</text>
-                <text x="180" y="159" fontSize="10" fill="white" textAnchor="middle" fontWeight="bold">Hub</text>
-
-                {/* Connecting lines */}
-                <line x1="143" y1="128" x2="80" y2="72" stroke="#14b8a6" strokeWidth="1.5" strokeDasharray="4 3" opacity="0.5" />
-                <line x1="180" y1="110" x2="180" y2="44" stroke="#14b8a6" strokeWidth="1.5" strokeDasharray="4 3" opacity="0.5" />
-                <line x1="217" y1="128" x2="280" y2="72" stroke="#14b8a6" strokeWidth="1.5" strokeDasharray="4 3" opacity="0.5" />
-                <line x1="143" y1="172" x2="80" y2="228" stroke="#14b8a6" strokeWidth="1.5" strokeDasharray="4 3" opacity="0.5" />
-                <line x1="217" y1="172" x2="280" y2="228" stroke="#14b8a6" strokeWidth="1.5" strokeDasharray="4 3" opacity="0.5" />
-
-                {/* Device nodes */}
+                {/* ── LEFT SIDE: device nodes ── */}
                 {[
-                  { x: 42, y: 42, label: 'Till', icon: '🖥️' },
-                  { x: 154, y: 14, label: 'QR Menu', icon: '📱' },
-                  { x: 266, y: 42, label: 'Kitchen', icon: '👨‍🍳' },
-                  { x: 42, y: 228, label: 'Staff App', icon: '👥' },
-                  { x: 266, y: 228, label: 'Manager', icon: '📊' },
-                ].map(({ x, y, label, icon }) => (
+                  { cx: 42, cy: 70,  label: 'Orders',  icon: '🛒' },
+                  { cx: 42, cy: 150, label: 'Kitchen', icon: '👨‍🍳' },
+                  { cx: 42, cy: 230, label: 'Bar',     icon: '🍺' },
+                ].map(({ cx, cy, label, icon }) => (
                   <g key={label}>
-                    <circle cx={x + 28} cy={y + 28} r="28" fill="#f0fdf4" stroke="#14b8a6" strokeWidth="1.5" filter="url(#hub-shadow)" />
-                    <text x={x + 28} y={y + 24} fontSize="16" textAnchor="middle">{icon}</text>
-                    <text x={x + 28} y={y + 38} fontSize="8" fill="#0f766e" textAnchor="middle" fontWeight="bold">{label}</text>
+                    {/* line to hub */}
+                    <line x1={cx + 24} y1={cy} x2="148" y2="150" stroke="#14b8a6" strokeWidth="1.5" strokeDasharray="4 3" opacity="0.5" />
+                    <circle cx={cx} cy={cy} r="24" fill="#f0fdf4" stroke="#14b8a6" strokeWidth="1.5" filter="url(#hub-shadow)" />
+                    <text x={cx} y={cy - 4} fontSize="14" textAnchor="middle">{icon}</text>
+                    <text x={cx} y={cy + 12} fontSize="7.5" fill="#0f766e" textAnchor="middle" fontWeight="bold">{label}</text>
                   </g>
                 ))}
 
-                {/* "No internet" badge top right */}
-                <rect x="250" y="140" width="96" height="22" rx="11" fill="#fee2e2" />
-                <text x="298" y="155" fontSize="8.5" fill="#dc2626" textAnchor="middle" fontWeight="bold">No Internet ✕</text>
+                {/* "Still working" badge under the left nodes */}
+                <rect x="4" y="264" width="76" height="20" rx="10" fill="#dcfce7" />
+                <text x="42" y="278" fontSize="7.5" fill="#16a34a" textAnchor="middle" fontWeight="bold">Still Working ✓</text>
 
-                {/* Still works badge */}
-                <rect x="14" y="140" width="96" height="22" rx="11" fill="#dcfce7" />
-                <text x="62" y="155" fontSize="8.5" fill="#16a34a" textAnchor="middle" fontWeight="bold">Still Working ✓</text>
+                {/* ── CENTRE: Offline Hub ── */}
+                <circle cx="188" cy="150" r="38" fill="url(#hub-g)" filter="url(#hub-shadow)" />
+                <text x="188" y="145" fontSize="9.5" fill="white" textAnchor="middle" fontWeight="bold">Offline</text>
+                <text x="188" y="159" fontSize="9.5" fill="white" textAnchor="middle" fontWeight="bold">Hub</text>
+
+                {/* ── BROKEN CABLE between Hub and Cloud ── */}
+                {/* left segment of cable */}
+                <line x1="226" y1="150" x2="258" y2="150" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" />
+                {/* plug end left */}
+                <rect x="254" y="144" width="8" height="12" rx="2" fill="#94a3b8" />
+                {/* gap */}
+                {/* plug end right */}
+                <rect x="270" y="144" width="8" height="12" rx="2" fill="#cbd5e1" opacity="0.7" />
+                {/* right segment */}
+                <line x1="278" y1="150" x2="308" y2="150" stroke="#cbd5e1" strokeWidth="2.5" strokeLinecap="round" opacity="0.6" />
+                {/* spark in the gap */}
+                <polyline points="263,143 265,150 262,150 264,157" fill="none" stroke="#f97316" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+
+                {/* "No Internet" badge above the break */}
+                <rect x="240" y="112" width="96" height="26" rx="13" fill="#fee2e2" />
+                <text x="288" y="124" fontSize="8" fill="#dc2626" textAnchor="middle" fontWeight="bold">No Internet ✕</text>
+                <text x="288" y="133" fontSize="7" fill="#ef4444" textAnchor="middle">Connection lost</text>
+                {/* downward arrow to gap */}
+                <line x1="288" y1="138" x2="266" y2="143" stroke="#ef4444" strokeWidth="1" strokeDasharray="2 2" opacity="0.6" />
+
+                {/* ── RIGHT SIDE: Cloud Database (unreachable) ── */}
+                {/* Cloud shape */}
+                <g opacity="0.35">
+                  <ellipse cx="360" cy="145" rx="42" ry="28" fill="#e2e8f0" />
+                  <ellipse cx="338" cy="152" rx="20" ry="16" fill="#e2e8f0" />
+                  <ellipse cx="376" cy="154" rx="18" ry="14" fill="#e2e8f0" />
+                  {/* database cylinder lines */}
+                  <ellipse cx="360" cy="160" rx="18" ry="5" fill="#cbd5e1" />
+                  <rect x="342" y="160" width="36" height="18" fill="#cbd5e1" />
+                  <ellipse cx="360" cy="178" rx="18" ry="5" fill="#94a3b8" />
+                  <ellipse cx="360" cy="160" rx="18" ry="5" fill="#cbd5e1" />
+                </g>
+                <text x="360" y="202" fontSize="7.5" fill="#94a3b8" textAnchor="middle">Cloud Database</text>
+                <text x="360" y="212" fontSize="7" fill="#cbd5e1" textAnchor="middle">(unreachable)</text>
               </svg>
             </div>
           </div>
@@ -307,14 +330,12 @@ export default function OfflineHubPage() {
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4 mb-6">
             {[
-              { icon: '🛒', title: 'Taking Orders', description: 'Staff can still take table, counter, and takeaway orders without any interruption.' },
+              { icon: '🛒', title: 'Taking Orders', description: 'Staff can still take and process orders through Veno App without any interruption.' },
               { icon: '👨‍🍳', title: 'Kitchen Display', description: 'Kitchen and bar screens stay live — chefs see every order as it comes in.' },
-              { icon: '🕐', title: 'Staff Clock In/Out', description: 'Your team can still clock in and out for their shifts as normal.' },
-              { icon: '📋', title: 'Menu Browsing', description: 'Customers can still browse your digital menu from their phones.' },
-              { icon: '💳', title: 'Order Tracking', description: 'Orders are tracked and managed locally, no data is lost.' },
-              { icon: '🔄', title: 'Automatic Sync', description: 'The moment internet returns, everything syncs instantly — nothing to do manually.' },
+              { icon: '💳', title: 'Order Tracking', description: 'Orders are tracked and managed locally across the whole venue. No data is lost.' },
+              { icon: '🔄', title: 'Automatic Sync', description: 'The moment internet returns, everything syncs instantly to the cloud — nothing to do manually.' },
             ].map((item) => (
               <div key={item.title} className="bg-white dark:bg-slate-800 rounded-2xl p-5 border-2 border-slate-100 dark:border-slate-700 flex gap-4 items-start">
                 <div className="text-2xl flex-shrink-0">{item.icon}</div>
@@ -324,6 +345,14 @@ export default function OfflineHubPage() {
                 </div>
               </div>
             ))}
+          </div>
+          <div className="flex items-start gap-3 bg-teal-50 dark:bg-teal-900/20 border border-teal-100 dark:border-teal-800/40 rounded-xl px-5 py-4 max-w-2xl mx-auto">
+            <svg className="w-5 h-5 text-teal-600 dark:text-teal-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-sm text-teal-800 dark:text-teal-300 leading-relaxed">
+              All of this works because your devices communicate directly with each other over your venue's <strong>local area network (LAN)</strong> — no internet required. The Offline Hub acts as the bridge that keeps them all in sync.
+            </p>
           </div>
         </div>
       </section>
@@ -336,14 +365,14 @@ export default function OfflineHubPage() {
               Easy Setup
             </div>
             <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 dark:text-white mb-4">
-              Works on any device you already have
+              Simple to set up on Windows
             </h2>
             <p className="text-lg text-slate-600 dark:text-slate-400">
-              No specialist hardware required. Install the Offline Hub app on any device in your venue.
+              No specialist hardware required. Install the Offline Hub app on any Windows PC in your venue and you're ready to go.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
             {[
               {
                 icon: (
@@ -351,21 +380,10 @@ export default function OfflineHubPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                 ),
-                title: 'Windows or Mac',
-                description: 'Any laptop or desktop computer already in your office or back-of-house. Just install the app and leave it running.',
-                tag: 'Most common',
+                title: 'Windows PC',
+                description: 'Any Windows laptop or desktop already in your office or back-of-house. Just install the app and leave it running quietly in the background.',
+                tag: 'Currently supported',
                 tagColor: 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400',
-              },
-              {
-                icon: (
-                  <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18" />
-                  </svg>
-                ),
-                title: 'Raspberry Pi',
-                description: 'A tiny, low-cost mini computer that can be tucked away and left running 24/7 using almost no electricity.',
-                tag: 'Most efficient',
-                tagColor: 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400',
               },
               {
                 icon: (
@@ -402,7 +420,7 @@ export default function OfflineHubPage() {
               Never lose a sale to a bad internet connection
             </h2>
             <p className="text-teal-100 text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
-              Join hundreds of restaurants that keep serving no matter what. Set up the Offline Hub once and never worry about downtime again.
+              Set up the Offline Hub once and your restaurant keeps serving no matter what — internet or not.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link

@@ -152,11 +152,11 @@ const features = [
     title: 'Offline Hub',
     subtitle: 'Keep Serving, Even Without Internet',
     description:
-      'Internet goes down? No problem. Veno App keeps working. Orders still flow, staff can still clock in, and your kitchen stays in sync — all without a single internet connection. When you\'re back online, everything syncs automatically.',
+      'Internet goes down? No problem. Veno App keeps working. Orders still flow and your kitchen stays in sync — all without a single internet connection. When you\'re back online, everything syncs automatically.',
     benefits: [
       'Orders flow even without internet',
-      'Staff clock-in and out works offline',
       'Kitchen & bar displays stay live',
+      'No data lost during an outage',
       'Auto-syncs the moment you reconnect',
     ],
     color: 'from-teal-500 to-emerald-600',
