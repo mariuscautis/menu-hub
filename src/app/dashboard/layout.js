@@ -1156,6 +1156,24 @@ export default function DashboardLayout({ children }) {
     <LanguageProvider>
       <div className={`min-h-screen bg-slate-50 dark:bg-slate-950 flex relative${isImpersonating ? ' pt-10' : ''}${!isOnline ? ' ring-2 ring-inset ring-amber-400 shadow-[inset_0_0_40px_rgba(251,191,36,0.08)]' : backOnline ? ' ring-2 ring-inset ring-green-400 shadow-[inset_0_0_40px_rgba(74,222,128,0.08)]' : ''} transition-shadow duration-500`}>
 
+      {/* Connectivity banner — fixed so it's always visible even in full-width mode */}
+      {!isOnline && (
+        <div className="fixed top-0 left-0 right-0 z-[9990] bg-amber-400 text-amber-900 flex items-center justify-center px-6 py-1.5 text-xs font-semibold shadow-md pointer-events-none">
+          <svg className="w-3.5 h-3.5 mr-1.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3" />
+          </svg>
+          No internet connection — offline mode active
+        </div>
+      )}
+      {!isOnline ? null : backOnline && (
+        <div className="fixed top-0 left-0 right-0 z-[9990] bg-green-500 text-white flex items-center justify-center px-6 py-1.5 text-xs font-semibold shadow-md pointer-events-none">
+          <svg className="w-3.5 h-3.5 mr-1.5 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
+          Back online
+        </div>
+      )}
+
       {/* Impersonation banner */}
       {isImpersonating && (
         <div className="fixed top-0 left-0 right-0 z-[9999] bg-amber-400 text-amber-900 flex items-center justify-between px-6 py-2 text-sm font-semibold shadow-md">

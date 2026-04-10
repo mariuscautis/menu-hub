@@ -36,7 +36,7 @@ export default function OfflinePageGuard({ children }) {
   if (isOnline) return children
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center">
+    <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center">
       <div className="w-16 h-16 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center mb-5">
         <svg className="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
