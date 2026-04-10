@@ -305,7 +305,7 @@ export default function CustomersPage() {
         )}
 
         {/* Filters */}
-        <div className="mb-4 flex gap-3 flex-wrap">
+        <div className="mb-4 flex gap-3 flex-wrap sm:flex-nowrap">
           <input
             type="text"
             value={search}
@@ -316,7 +316,7 @@ export default function CustomersPage() {
           <select
             value={filterRestriction}
             onChange={e => setFilterRestriction(e.target.value)}
-            className="px-3 py-2.5 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#6262bd]"
+            className="w-full sm:w-auto px-3 py-2.5 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#6262bd]"
           >
             <option value="all">{t('allCustomers')}</option>
             <option value="blocked">{t('blocked')}</option>

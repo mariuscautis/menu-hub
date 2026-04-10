@@ -225,7 +225,7 @@ export default function MyRotaPage() {
 
   return (
     <OfflinePageGuard>
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-6 md:p-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-4 md:p-8">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">{t('pageTitle') || 'My Rota'}<InfoTooltip text={tg('my_rota_desc')} /></h1>
@@ -270,14 +270,14 @@ export default function MyRotaPage() {
       </div>
 
       {/* Main tab nav */}
-      <div className="flex items-center gap-1 mb-6 bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-700 rounded-xl p-1 w-fit">
+      <div className="flex items-center gap-1 mb-6 bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-700 rounded-xl p-1 w-full sm:w-fit">
         {[
           { key: 'shifts',  label: '📅 Upcoming Shifts' },
           { key: 'leave',   label: '🌴 My Leave' },
           { key: 'history', label: '📋 Work History' }
         ].map(tab => (
           <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-            className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors ${activeTab === tab.key ? 'bg-[#6262bd] text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400'}`}>
+            className={`flex-1 sm:flex-none px-3 sm:px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors ${activeTab === tab.key ? 'bg-[#6262bd] text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400'}`}>
             {tab.label}
           </button>
         ))}
@@ -286,19 +286,21 @@ export default function MyRotaPage() {
       {/* ─── SHIFTS TAB ─── */}
       {activeTab === 'shifts' && (
         <div>
-          <div className="flex flex-wrap items-center gap-3 mb-5">
-            <button onClick={() => { setRequestType('time_off'); setShowRequestModal(true); }}
-              className="px-5 py-2.5 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252a5] transition-colors font-medium text-sm">
-              🌴 {t('requestTimeOff') || 'Request Time Off'}
-            </button>
-            <button onClick={() => { setRequestType('swap'); setShowRequestModal(true); }}
-              className="px-5 py-2.5 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl hover:border-[#6262bd] transition-colors font-medium text-sm">
-              🔄 {t('requestShiftSwap') || 'Request Shift Swap'}
-            </button>
-            <div className="ml-auto flex gap-2">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 mb-5">
+            <div className="flex gap-3">
+              <button onClick={() => { setRequestType('time_off'); setShowRequestModal(true); }}
+                className="flex-1 sm:flex-none px-4 py-2.5 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252a5] transition-colors font-medium text-sm">
+                🌴 {t('requestTimeOff') || 'Request Time Off'}
+              </button>
+              <button onClick={() => { setRequestType('swap'); setShowRequestModal(true); }}
+                className="flex-1 sm:flex-none px-4 py-2.5 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl hover:border-[#6262bd] transition-colors font-medium text-sm">
+                🔄 {t('requestShiftSwap') || 'Request Shift Swap'}
+              </button>
+            </div>
+            <div className="flex gap-2 sm:ml-auto">
               {[['week', t('next7Days') || 'Next 7 Days'], ['month', t('next30Days') || 'Next 30 Days']].map(([key, label]) => (
                 <button key={key} onClick={() => setSelectedPeriod(key)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${selectedPeriod === key ? 'bg-[#6262bd] text-white' : 'bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-[#6262bd]'}`}>
+                  className={`flex-1 sm:flex-none px-4 py-2 rounded-lg text-sm font-medium transition-colors ${selectedPeriod === key ? 'bg-[#6262bd] text-white' : 'bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-[#6262bd]'}`}>
                   {label}
                 </button>
               ))}
@@ -430,14 +432,14 @@ export default function MyRotaPage() {
               <div className="space-y-2">
                 {pendingLeave.map(r => (
                   <div key={r.id} className="bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-200 dark:border-amber-800 rounded-xl px-5 py-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                       <div>
                         <p className="font-semibold text-slate-800 dark:text-slate-200">
                           {new Date(r.date_from).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} – {new Date(r.date_to).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </p>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{r.days_requested} working days · {r.leave_type?.replace(/_/g, ' ')}</p>
                       </div>
-                      <span className="text-xs font-semibold px-3 py-1.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-full">⏳ Awaiting approval</span>
+                      <span className="self-start sm:self-auto text-xs font-semibold px-3 py-1.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-full whitespace-nowrap">⏳ Awaiting approval</span>
                     </div>
                     {r.reason && <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 italic">"{r.reason}"</p>}
                   </div>

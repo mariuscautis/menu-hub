@@ -161,7 +161,8 @@ export default function OfflineHubSettings() {
               ))}
             </div>
 
-            {/* Bridge Code */}
+            {/* Bridge Code — managers only */}
+            {isOwnerOrAdmin && (
             <div className="border-t border-slate-100 dark:border-slate-800 pt-5 mb-5">
               <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">Your restaurant code</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
@@ -189,8 +190,10 @@ export default function OfflineHubSettings() {
                 Unique to your venue — keep it private.
               </p>
             </div>
+            )}
 
-            {/* Download & Setup — tabbed */}
+            {/* Download & Setup — managers only */}
+            {isOwnerOrAdmin && (
             <div className="border-t border-slate-100 dark:border-slate-800 pt-5">
               <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-4">Download &amp; setup instructions</h3>
 
@@ -286,6 +289,7 @@ export default function OfflineHubSettings() {
 
               {/* Raspberry Pi tab hidden for now */}
             </div>
+            )}
           </div>
 
           {/* Connected devices */}

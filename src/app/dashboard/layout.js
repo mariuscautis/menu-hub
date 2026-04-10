@@ -1572,21 +1572,28 @@ export default function DashboardLayout({ children }) {
                       className="relative group focus:outline-none"
                       title="Tap to enter full-screen mode"
                     >
+                      {/* Expand arrows + rounded square around the avatar to hint fullscreen */}
+                      <span className="absolute -inset-3 pointer-events-none">
+                        <svg className="w-full h-full text-[#6262bd]/40" viewBox="0 0 80 80" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          {/* rounded square border */}
+                          <rect x="6" y="6" width="68" height="68" rx="10" ry="10" />
+                          {/* top-right arrow */}
+                          <line x1="50" y1="30" x2="66" y2="14" />
+                          <polyline points="56,14 66,14 66,24" />
+                          {/* bottom-left arrow */}
+                          <line x1="30" y1="50" x2="14" y2="66" />
+                          <polyline points="24,66 14,66 14,56" />
+                        </svg>
+                      </span>
                       {staffAvatar ? (
-                        <img src={staffAvatar} alt={staffName} className="w-14 h-14 rounded-full object-cover border-2 border-[#6262bd]/20" />
+                        <img src={staffAvatar} alt={staffName} className="w-14 h-14 rounded-full object-cover border-2 border-[#6262bd]/20 relative z-10" />
                       ) : (
-                        <div className="w-14 h-14 rounded-full bg-[#6262bd]/10 dark:bg-[#6262bd]/20 flex items-center justify-center">
+                        <div className="w-14 h-14 rounded-full bg-[#6262bd]/10 dark:bg-[#6262bd]/20 flex items-center justify-center relative z-10">
                           <svg className="w-7 h-7 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                           </svg>
                         </div>
                       )}
-                      {/* Expand hint icon — always visible but subtle */}
-                      <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-[#6262bd] rounded-full flex items-center justify-center shadow">
-                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
-                        </svg>
-                      </span>
                     </button>
                     <span className="mt-2 text-sm font-semibold text-slate-700 dark:text-slate-200 truncate max-w-full text-center">
                       {staffName || restaurant?.name || 'Veno App'}
@@ -1610,22 +1617,44 @@ export default function DashboardLayout({ children }) {
                 )}
               </div>
             ) : (
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800 relative">
+              <div className="flex flex-col items-center gap-2">
                 {(userType === 'staff' || userType === 'staff-admin') ? (
-                  <button onClick={toggleFullWidth} className="relative w-full h-full focus:outline-none" title="Tap to enter full-screen mode">
-                    {staffAvatar ? (
-                      <img src={staffAvatar} alt={staffName} className="w-full h-full object-cover rounded-full" />
-                    ) : (
-                      <svg className="w-5 h-5 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                  <>
+                    <button onClick={toggleFullWidth} className="relative focus:outline-none" title="Tap to enter full-screen mode">
+                      {/* Avatar with expand arrows visible around it */}
+                      <div className="relative w-8 h-8">
+                        <span className="absolute -inset-1.5 pointer-events-none">
+                          <svg className="w-full h-full text-[#6262bd]/40" viewBox="0 0 44 44" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="3" width="38" height="38" rx="7" ry="7" />
+                            {/* top-right arrow */}
+                            <line x1="26" y1="18" x2="36" y2="8" />
+                            <polyline points="30,8 36,8 36,14" />
+                            {/* bottom-left arrow */}
+                            <line x1="18" y1="26" x2="8" y2="36" />
+                            <polyline points="14,36 8,36 8,30" />
+                          </svg>
+                        </span>
+                        {staffAvatar ? (
+                          <img src={staffAvatar} alt={staffName} className="w-6 h-6 object-cover rounded-full absolute inset-0 m-auto z-10" />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-[#6262bd]/10 dark:bg-[#6262bd]/20 flex items-center justify-center relative z-10">
+                            <svg className="w-4 h-4 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => setSidebarOpen(true)}
+                      title="Expand sidebar"
+                      className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
                       </svg>
-                    )}
-                    <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-[#6262bd] rounded-full flex items-center justify-center shadow">
-                      <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
-                      </svg>
-                    </span>
-                  </button>
+                    </button>
+                  </>
                 ) : restaurant?.logo_url ? (
                   <img src={restaurant.logo_url} alt={restaurant.name} className="max-w-full max-h-full object-contain" />
                 ) : (
@@ -1713,20 +1742,6 @@ export default function DashboardLayout({ children }) {
             )}
           </ul>
 
-          {/* Expand button at bottom of nav when collapsed */}
-          {!sidebarOpen && (
-            <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-center">
-              <button
-                onClick={() => setSidebarOpen(true)}
-                title="Expand sidebar"
-                className="p-3 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 transition-colors"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
-                </svg>
-              </button>
-            </div>
-          )}
         </nav>
 
         <div className="border-t border-slate-100 dark:border-slate-800 mt-auto flex-shrink-0">
@@ -1825,7 +1840,7 @@ export default function DashboardLayout({ children }) {
       {/* Main content */}
       <main className={`
         flex-1
-        ${fullWidthMode ? 'ml-0' : sidebarOpen ? 'ml-72' : 'ml-16'}
+        ${fullWidthMode ? 'ml-0' : sidebarOpen ? 'ml-16 sm:ml-72' : 'ml-16'}
         ${fullWidthMode ? 'p-4' : 'p-4 md:p-8'}
         ${debug ? 'mt-10' : ''}
         transition-all duration-300

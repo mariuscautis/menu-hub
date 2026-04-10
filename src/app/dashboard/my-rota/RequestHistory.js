@@ -109,7 +109,7 @@ export default function RequestHistory({ staff, restaurant }) {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl border-2 border-slate-200 p-6">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-200 dark:border-slate-700 p-4 md:p-6">
         <div className="flex items-center justify-center py-12">
           <div className="text-slate-500">{t('loadingRequests') || 'Loading request history...'}</div>
         </div>
@@ -118,20 +118,20 @@ export default function RequestHistory({ staff, restaurant }) {
   }
 
   return (
-    <div className="bg-white rounded-2xl border-2 border-slate-200 p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-slate-800">{t('title') || 'My Request History'}</h2>
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-200 dark:border-slate-700 p-4 md:p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">{t('title') || 'My Request History'}</h2>
 
         {/* Filter tabs */}
-        <div className="flex gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
           {['all', 'pending', 'approved', 'rejected'].map((filterOption) => (
             <button
               key={filterOption}
               onClick={() => setFilter(filterOption)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                 filter === filterOption
                   ? 'bg-[#6262bd] text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >
               {t(filterOption) || filterOption.charAt(0).toUpperCase() + filterOption.slice(1)}
@@ -156,29 +156,24 @@ export default function RequestHistory({ staff, restaurant }) {
               key={request.id}
               className="border-2 border-slate-200 rounded-xl p-4 hover:border-[#6262bd] transition-colors"
             >
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  {getLeaveTypeBadge(request.leave_type)}
-                  {getStatusBadge(request.status)}
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-slate-600">{t('submitted') || 'Submitted'}</p>
-                  <p className="text-sm font-medium text-slate-800">
-                    {formatDate(request.created_at)}
-                  </p>
-                </div>
+              <div className="flex flex-wrap items-start gap-2 mb-3">
+                {getLeaveTypeBadge(request.leave_type)}
+                {getStatusBadge(request.status)}
+                <span className="ml-auto text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                  {t('submitted') || 'Submitted'} {formatDate(request.created_at)}
+                </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 mb-3">
+              <div className="flex flex-wrap gap-x-6 gap-y-2 mb-3">
                 <div>
-                  <p className="text-xs text-slate-600 mb-1">{t('dates') || 'Dates'}</p>
-                  <p className="text-sm font-semibold text-slate-800">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-0.5">{t('dates') || 'Dates'}</p>
+                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
                     {formatDateRange(request.date_from, request.date_to)}
                   </p>
                 </div>
                 {request.days_requested && (
                   <div>
-                    <p className="text-xs text-slate-600 mb-1">{t('duration') || 'Duration'}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-0.5">{t('duration') || 'Duration'}</p>
                     <p className="text-sm font-semibold text-[#6262bd]">
                       {request.days_requested} {request.days_requested === 1 ? (t('workingDay') || 'working day') : (t('workingDays') || 'working days')}
                     </p>
