@@ -39,7 +39,7 @@ const PRESETS = [
 
 import { useModuleGuard } from '@/hooks/useModuleGuard'
 import PageTabs from '@/components/PageTabs'
-import { reportsNavTabs } from '@/components/PageTabsConfig'
+import { reportsTabs } from '@/components/PageTabsConfig'
 import OfflinePageGuard from '@/components/OfflinePageGuard'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import InfoTooltip from '@/components/InfoTooltip'
@@ -467,7 +467,7 @@ export default function SalesBalanceReport() {
   return (
     <OfflinePageGuard>
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-4 md:p-8">
-      <PageTabs tabs={reportsNavTabs} />
+      <PageTabs tabs={reportsTabs} />
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-1 flex items-center gap-2">

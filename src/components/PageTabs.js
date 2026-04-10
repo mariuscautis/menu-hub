@@ -1,61 +1,88 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { useState, useRef, useEffect } from 'react'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 
 /**
  * PageTabs – two modes:
- *  - "tiles"  – when any tab has an `icon`, renders prominent card tiles (grid)
- *  - "pills"  – plain segmented pill bar (original style, no icons)
- *
- * Tabs should use `labelKey` (looked up in the 'pageTabs' namespace) or a
- * fallback `label` string for backwards compatibility.
+ *  - "dropdown" – when any tab has an `icon`, renders a compact dropdown nav
+ *  - "pills"    – plain segmented pill bar (no icons)
  */
 export default function PageTabs({ tabs }) {
   const pathname = usePathname()
+  const router = useRouter()
   const t = useTranslations('pageTabs')
   const hasTiles = tabs.some(tab => tab.icon)
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
 
   const getLabel = (tab) => tab.labelKey ? t(tab.labelKey) : tab.label
+  const activeTab = tabs.find(tab => pathname === tab.href) || tabs[0]
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
 
   if (hasTiles) {
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 mb-8">
-        {tabs.map(tab => {
-          const active = pathname === tab.href
-          return (
-            <Link
-              key={tab.href}
-              href={tab.href}
-              className={`group flex flex-col gap-2 p-4 rounded-2xl border-2 transition-all ${
-                active
-                  ? 'bg-[#6262bd] border-[#6262bd] text-white shadow-lg shadow-[#6262bd]/20'
-                  : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 hover:border-[#6262bd] dark:hover:border-[#6262bd] hover:shadow-md'
-              }`}
-            >
-              <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${
-                active ? 'bg-white/20' : 'bg-slate-100 dark:bg-slate-800'
-              }`}>
-                <span className={active ? 'text-white' : 'text-[#6262bd]'}>
-                  {tab.icon}
-                </span>
-              </div>
-              <span className={`text-sm font-semibold leading-tight ${
-                active ? 'text-white' : 'text-slate-800 dark:text-slate-200 group-hover:text-[#6262bd] transition-colors'
-              }`}>
-                {getLabel(tab)}
-              </span>
-              {tab.description && (
-                <span className={`text-xs leading-tight ${
-                  active ? 'text-white/75' : 'text-slate-500 dark:text-slate-400'
-                }`}>
-                  {tab.description}
-                </span>
-              )}
-            </Link>
-          )
-        })}
+      <div ref={ref} className="relative mb-6">
+        {/* Trigger button */}
+        <button
+          onClick={() => setOpen(o => !o)}
+          className="flex items-center gap-3 w-full sm:w-auto bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 hover:border-[#6262bd] dark:hover:border-[#6262bd] rounded-xl px-4 py-2.5 transition-colors"
+        >
+          {activeTab?.icon && (
+            <span className="text-[#6262bd] flex-shrink-0">{activeTab.icon}</span>
+          )}
+          <span className="flex-1 text-left text-sm font-semibold text-slate-800 dark:text-slate-200">
+            {getLabel(activeTab)}
+          </span>
+          <svg
+            className={`w-4 h-4 text-slate-400 flex-shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
+            fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        {/* Dropdown panel */}
+        {open && (
+          <div className="absolute top-full left-0 mt-1.5 z-50 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl overflow-hidden w-64">
+            {tabs.map(tab => {
+              const active = pathname === tab.href
+              return (
+                <Link
+                  key={tab.href}
+                  href={tab.href}
+                  onClick={() => setOpen(false)}
+                  className={`flex items-center gap-3 px-4 py-2.5 transition-colors ${
+                    active
+                      ? 'bg-[#6262bd]/10 dark:bg-[#6262bd]/20 text-[#6262bd]'
+                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  {tab.icon && (
+                    <span className={`flex-shrink-0 ${active ? 'text-[#6262bd]' : 'text-slate-400'}`}>
+                      {tab.icon}
+                    </span>
+                  )}
+                  <span className="text-sm font-medium">{getLabel(tab)}</span>
+                  {active && (
+                    <svg className="w-4 h-4 ml-auto flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                  )}
+                </Link>
+              )
+            })}
+          </div>
+        )}
       </div>
     )
   }
