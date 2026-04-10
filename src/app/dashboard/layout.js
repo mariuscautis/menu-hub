@@ -723,13 +723,9 @@ export default function DashboardLayout({ children }) {
     }
 
     if (priorityPage && pathname !== priorityPage) {
-      setFullWidthMode(true)
-      setSidebarOpen(false) // Close sidebar for full-width view
       sessionStorage.setItem('staff_redirect_done', 'true')
       router.push(priorityPage)
     } else if (priorityPage) {
-      setFullWidthMode(true)
-      setSidebarOpen(false) // Close sidebar for full-width view
       sessionStorage.setItem('staff_redirect_done', 'true')
     }
 
@@ -1540,18 +1536,9 @@ export default function DashboardLayout({ children }) {
         />
       )}
 
-      {/* Full-width mode floating buttons */}
+      {/* Full-width mode — minimise button only */}
       {fullWidthMode && (
-        <div className="fixed bottom-4 right-4 z-50 flex gap-2">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="p-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-lg shadow border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-700 transition-colors"
-            title="Open menu"
-          >
-            <svg className="w-4 h-4 text-slate-500 dark:text-slate-400" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-            </svg>
-          </button>
+        <div className="fixed bottom-4 right-4 z-50">
           <button
             onClick={toggleFullWidth}
             className="p-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-lg shadow border border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-700 transition-colors"
@@ -1578,15 +1565,27 @@ export default function DashboardLayout({ children }) {
               <div className="flex items-center space-x-2 flex-1 min-w-0">
                 {(userType === 'staff' || userType === 'staff-admin') ? (
                   <div className="flex flex-col items-center w-full">
-                    {staffAvatar ? (
-                      <img src={staffAvatar} alt={staffName} className="w-14 h-14 rounded-full object-cover border-2 border-[#6262bd]/20" />
-                    ) : (
-                      <div className="w-14 h-14 rounded-full bg-[#6262bd]/10 dark:bg-[#6262bd]/20 flex items-center justify-center">
-                        <svg className="w-7 h-7 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    <button
+                      onClick={toggleFullWidth}
+                      className="relative group focus:outline-none"
+                      title="Tap to enter full-screen mode"
+                    >
+                      {staffAvatar ? (
+                        <img src={staffAvatar} alt={staffName} className="w-14 h-14 rounded-full object-cover border-2 border-[#6262bd]/20" />
+                      ) : (
+                        <div className="w-14 h-14 rounded-full bg-[#6262bd]/10 dark:bg-[#6262bd]/20 flex items-center justify-center">
+                          <svg className="w-7 h-7 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                          </svg>
+                        </div>
+                      )}
+                      {/* Expand hint icon — always visible but subtle */}
+                      <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-[#6262bd] rounded-full flex items-center justify-center shadow">
+                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
                         </svg>
-                      </div>
-                    )}
+                      </span>
+                    </button>
                     <span className="mt-2 text-sm font-semibold text-slate-700 dark:text-slate-200 truncate max-w-full text-center">
                       {staffName || restaurant?.name || 'Veno App'}
                     </span>
