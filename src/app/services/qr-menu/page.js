@@ -2,9 +2,17 @@
 
 import Link from 'next/link'
 import ServicePageLayout from '@/components/ServicePageLayout'
+import { useSeoSettings } from '@/lib/useSeoSettings'
 
 export default function QRMenuPage() {
+  const seo = useSeoSettings('services_qr_menu', {
+    title: 'QR Code Menus That Customers Love — Veno App',
+    description: 'Create stunning digital QR menus your customers can access instantly on any smartphone. No app download needed. Always up to date.',
+  })
   return (
+    <>
+    {seo.title && <title>{seo.title}</title>}
+    {seo.description && <meta name="description" content={seo.description} />}
     <ServicePageLayout>
       {/* Hero Section */}
       <section className="relative overflow-hidden py-16 lg:py-24">
@@ -446,5 +454,6 @@ export default function QRMenuPage() {
         </div>
       </section>
     </ServicePageLayout>
+    </>
   )
 }

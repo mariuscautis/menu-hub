@@ -1,9 +1,18 @@
 'use client';
 
 import ServicePageLayout from '@/components/ServicePageLayout';
+import { useSeoSettings } from '@/lib/useSeoSettings'
+
 
 export default function InventoryPage() {
+  const seo = useSeoSettings('services_inventory', {
+    title: 'Inventory Management — Veno App',
+    description: 'Track stock levels in real-time, get automatic low-stock alerts, and never run out of ingredients during service again.',
+  })
   return (
+    <>
+    {seo.title && <title>{seo.title}</title>}
+    {seo.description && <meta name="description" content={seo.description} />}
     <ServicePageLayout
       title="Inventory Management"
       description="Track stock levels in real-time, get automatic low-stock alerts, and never run out of ingredients during service again."
@@ -667,5 +676,6 @@ export default function InventoryPage() {
         </div>
       </section>
     </ServicePageLayout>
+    </>
   );
 }

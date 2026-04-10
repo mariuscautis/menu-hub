@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import PlatformLogo from '@/components/PlatformLogo'
 import SiteFooter from '@/components/SiteFooter'
+import { useSeoSettings } from '@/lib/useSeoSettings'
 
 // Service categories for mega menu
 const services = {
@@ -955,11 +956,18 @@ const FeatureIcons = {
 }
 
 export default function HomePage() {
+  const seo = useSeoSettings('home', {
+    title: 'Veno App — Restaurant Management Platform',
+    description: 'Run your restaurant smarter with Veno App. Digital menus, table ordering, staff management, reservations, and real-time analytics — all in one platform.',
+  })
   const [megaMenuOpen, setMegaMenuOpen] = useState(false)
   const [activeCategory, setActiveCategory] = useState('features')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
+    <>
+    {seo.title && <title>{seo.title}</title>}
+    {seo.description && <meta name="description" content={seo.description} />}
     <div className="min-h-screen bg-white dark:bg-slate-900">
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-b border-slate-100 dark:border-slate-800">
@@ -1913,5 +1921,6 @@ export default function HomePage() {
       {/* Footer */}
       <SiteFooter />
     </div>
+    </>
   )
 }

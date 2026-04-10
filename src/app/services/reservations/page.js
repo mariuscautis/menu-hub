@@ -2,9 +2,17 @@
 
 import Link from 'next/link'
 import ServicePageLayout from '@/components/ServicePageLayout'
+import { useSeoSettings } from '@/lib/useSeoSettings'
 
 export default function ReservationsPage() {
+  const seo = useSeoSettings('services_reservations', {
+    title: 'Smart Reservations. Zero Missed Bookings. — Veno App',
+    description: 'Manage table bookings effortlessly with Veno App\'s smart reservation system. Reduce no-shows, optimise capacity, and delight every guest.',
+  })
   return (
+    <>
+    {seo.title && <title>{seo.title}</title>}
+    {seo.description && <meta name="description" content={seo.description} />}
     <ServicePageLayout>
 
       {/* Hero */}
@@ -836,5 +844,6 @@ export default function ReservationsPage() {
       </section>
 
     </ServicePageLayout>
+    </>
   )
 }

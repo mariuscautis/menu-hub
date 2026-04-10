@@ -4,10 +4,15 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import ServicePageLayout from '@/components/ServicePageLayout'
+import { useSeoSettings } from '@/lib/useSeoSettings'
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
 
 export default function ContactPage() {
+  const seo = useSeoSettings('contact', {
+    title: 'Contact Us — Veno App',
+    description: 'Get in touch with the Veno App team. We\'d love to hear from you — whether it\'s a question, feedback, or a partnership enquiry.',
+  })
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -125,6 +130,9 @@ export default function ContactPage() {
   const inputClass = "w-full px-4 py-3.5 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 placeholder:text-slate-400 transition-colors text-sm"
 
   return (
+    <>
+    {seo.title && <title>{seo.title}</title>}
+    {seo.description && <meta name="description" content={seo.description} />}
     <ServicePageLayout>
 
       {/* Hero */}
@@ -405,5 +413,6 @@ export default function ContactPage() {
       </section>
 
     </ServicePageLayout>
+    </>
   )
 }

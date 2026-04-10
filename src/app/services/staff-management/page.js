@@ -2,9 +2,17 @@
 
 import Link from 'next/link'
 import ServicePageLayout from '@/components/ServicePageLayout'
+import { useSeoSettings } from '@/lib/useSeoSettings'
 
 export default function StaffManagementPage() {
+  const seo = useSeoSettings('services_staff_management', {
+    title: 'Staff Management Made Simple — Veno App',
+    description: 'Schedule shifts, track work history, manage time-off requests, and keep your team organised — all from one easy-to-use dashboard.',
+  })
   return (
+    <>
+    {seo.title && <title>{seo.title}</title>}
+    {seo.description && <meta name="description" content={seo.description} />}
     <ServicePageLayout>
       {/* Hero Section */}
       <section className="relative overflow-hidden py-16 lg:py-24">
@@ -447,5 +455,6 @@ export default function StaffManagementPage() {
         </div>
       </section>
     </ServicePageLayout>
+    </>
   )
 }

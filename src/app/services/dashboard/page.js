@@ -2,9 +2,17 @@
 
 import Link from 'next/link'
 import ServicePageLayout from '@/components/ServicePageLayout'
+import { useSeoSettings } from '@/lib/useSeoSettings'
 
 export default function DashboardPage() {
+  const seo = useSeoSettings('services_dashboard', {
+    title: 'Command Central for Your Team — Veno App',
+    description: 'The Veno App management dashboard gives owners and managers full visibility over orders, staff, reports, and settings — all in one place.',
+  })
   return (
+    <>
+    {seo.title && <title>{seo.title}</title>}
+    {seo.description && <meta name="description" content={seo.description} />}
     <ServicePageLayout>
       {/* Hero Section */}
       <section className="relative overflow-hidden py-16 lg:py-24">
@@ -361,5 +369,6 @@ export default function DashboardPage() {
         </div>
       </section>
     </ServicePageLayout>
+    </>
   )
 }

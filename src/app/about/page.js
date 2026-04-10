@@ -2,9 +2,17 @@
 
 import Link from 'next/link'
 import ServicePageLayout from '@/components/ServicePageLayout'
+import { useSeoSettings } from '@/lib/useSeoSettings'
 
 export default function AboutPage() {
+  const seo = useSeoSettings('about', {
+    title: 'About Us — Veno App',
+    description: 'Learn about the team behind Veno App and our mission to simplify restaurant management for independent venues everywhere.',
+  })
   return (
+    <>
+    {seo.title && <title>{seo.title}</title>}
+    {seo.description && <meta name="description" content={seo.description} />}
     <ServicePageLayout>
 
       {/* Hero */}
@@ -395,5 +403,6 @@ export default function AboutPage() {
       </section>
 
     </ServicePageLayout>
+    </>
   )
 }

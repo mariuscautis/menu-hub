@@ -2,9 +2,17 @@
 
 import Link from 'next/link'
 import ServicePageLayout from '@/components/ServicePageLayout'
+import { useSeoSettings } from '@/lib/useSeoSettings'
 
 export default function BrandedAppPage() {
+  const seo = useSeoSettings('services_branded_app', {
+    title: 'Your Restaurant, Your App — Veno App',
+    description: 'Launch a fully branded PWA for your restaurant in minutes. Your logo, your colours, your experience — no app store needed.',
+  })
   return (
+    <>
+    {seo.title && <title>{seo.title}</title>}
+    {seo.description && <meta name="description" content={seo.description} />}
     <ServicePageLayout>
       {/* Hero Section */}
       <section className="relative overflow-hidden py-16 lg:py-24">
@@ -488,5 +496,6 @@ export default function BrandedAppPage() {
         </div>
       </section>
     </ServicePageLayout>
+    </>
   )
 }

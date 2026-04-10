@@ -2,9 +2,17 @@
 
 import Link from 'next/link'
 import ServicePageLayout from '@/components/ServicePageLayout'
+import { useSeoSettings } from '@/lib/useSeoSettings'
 
 export default function AnalyticsPage() {
+  const seo = useSeoSettings('services_analytics', {
+    title: 'Data-Driven Decisions for Your Restaurant — Veno App',
+    description: 'Unlock powerful sales reports, tax breakdowns, stock movement tracking, and real-time analytics to help your restaurant thrive.',
+  })
   return (
+    <>
+    {seo.title && <title>{seo.title}</title>}
+    {seo.description && <meta name="description" content={seo.description} />}
     <ServicePageLayout>
       {/* Hero Section */}
       <section className="relative overflow-hidden py-16 lg:py-24">
@@ -379,5 +387,6 @@ export default function AnalyticsPage() {
         </div>
       </section>
     </ServicePageLayout>
+    </>
   )
 }

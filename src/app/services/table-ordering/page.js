@@ -2,9 +2,17 @@
 
 import Link from 'next/link'
 import ServicePageLayout from '@/components/ServicePageLayout'
+import { useSeoSettings } from '@/lib/useSeoSettings'
 
 export default function TableOrderingPage() {
+  const seo = useSeoSettings('services_table_ordering', {
+    title: 'Let Customers Order Directly From Their Table — Veno App',
+    description: 'Boost revenue and speed up service with Veno App\'s table ordering. Customers scan a QR code, browse the menu, and place orders without waiting for staff.',
+  })
   return (
+    <>
+    {seo.title && <title>{seo.title}</title>}
+    {seo.description && <meta name="description" content={seo.description} />}
     <ServicePageLayout>
       {/* Hero Section */}
       <section className="relative overflow-hidden py-16 lg:py-24">
@@ -374,5 +382,6 @@ export default function TableOrderingPage() {
         </div>
       </section>
     </ServicePageLayout>
+    </>
   )
 }

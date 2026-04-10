@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import ServicePageLayout from '@/components/ServicePageLayout'
+import { useSeoSettings } from '@/lib/useSeoSettings'
 
 const PLANS = [
   {
@@ -103,6 +104,10 @@ function CheckIcon({ className = 'w-4 h-4' }) {
 }
 
 export default function PricingPage() {
+  const seo = useSeoSettings('pricing', {
+    title: 'Pricing — Veno App',
+    description: 'Simple, transparent pricing for restaurants of every size. Choose the Veno App modules that fit your venue and scale as you grow.',
+  })
   const [selected, setSelected] = useState([])
 
   const toggle = (id) => setSelected(prev =>
@@ -118,6 +123,9 @@ export default function PricingPage() {
   const total = subtotal * (1 - discount)
 
   return (
+    <>
+    {seo.title && <title>{seo.title}</title>}
+    {seo.description && <meta name="description" content={seo.description} />}
     <ServicePageLayout>
 
       {/* Hero */}
@@ -413,5 +421,6 @@ export default function PricingPage() {
       </section>
 
     </ServicePageLayout>
+    </>
   )
 }

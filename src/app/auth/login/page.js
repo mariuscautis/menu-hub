@@ -5,8 +5,13 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import PlatformLogo from '@/components/PlatformLogo'
+import { useSeoSettings } from '@/lib/useSeoSettings'
 
 export default function Login() {
+  const seo = useSeoSettings('login', {
+    title: 'Log In — Veno App',
+    description: 'Sign in to your Veno App restaurant dashboard to manage orders, menus, staff, and reports.',
+  })
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
@@ -139,6 +144,9 @@ export default function Login() {
   }
 
   return (
+    <>
+    {seo.title && <title>{seo.title}</title>}
+    {seo.description && <meta name="description" content={seo.description} />}
     <div className="min-h-screen bg-slate-950 flex">
       {/* Left panel — decorative */}
       <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-between p-12 overflow-hidden">
@@ -304,5 +312,6 @@ export default function Login() {
         </div>
       </div>
     </div>
+    </>
   )
 }
