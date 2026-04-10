@@ -513,32 +513,6 @@ export default function Tables() {
         console.warn('Failed to read table order caches:', err)
       }
 
-      // Step 1b: also scan Supabase query cache (sbcache_*) for tables not covered above.
-      // Covers orders that came in via the customer-facing page (no table_orders_* key written).
-      try {
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i)
-          if (!key || !key.startsWith('sbcache_')) continue
-          if (!key.includes('/orders') && !key.includes('table_id')) continue
-          const entry = JSON.parse(localStorage.getItem(key) || 'null')
-          if (!entry?.body) continue
-          const rows = JSON.parse(entry.body)
-          if (!Array.isArray(rows)) continue
-          rows.filter(o => o.table_id && !o.paid && ['pending', 'preparing', 'ready'].includes(o.status))
-            .forEach(order => {
-              const tid = order.table_id
-              if (orderInfo[tid]) return // already accounted for by table_orders_* key
-              let total = 0
-              order.order_items?.forEach(item => {
-                total += (item.quantity || 0) * (item.price_at_time || 0)
-              })
-              orderInfo[tid] = { count: 1, total, readyDepartments: [] }
-            })
-        }
-      } catch (err) {
-        console.warn('Failed to scan sbcache for order info:', err)
-      }
-
       // Step 2: layer IDB pending orders and updates on top
       try {
         const [offlineOrdersByTable, offlineUpdatesByTable] = await Promise.all([
@@ -1023,32 +997,6 @@ export default function Tables() {
         }
       } catch (e) {
         console.error('Failed to load cached orders:', e)
-      }
-
-      // Fallback: scan Supabase query cache (sbcache_*) for this table's orders.
-      // This covers the case where the order came in from the customer-facing page
-      // and was never opened in the dashboard (so table_orders_* was never written).
-      if (!existingOrder) {
-        try {
-          for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i)
-            if (!key || !key.startsWith('sbcache_')) continue
-            if (!key.includes('/orders') && !key.includes('table_id')) continue
-            const entry = JSON.parse(localStorage.getItem(key) || 'null')
-            if (!entry?.body) continue
-            const rows = JSON.parse(entry.body)
-            if (!Array.isArray(rows)) continue
-            const unpaid = rows.filter(o =>
-              o.table_id === table.id && !o.paid && ['pending', 'preparing', 'ready'].includes(o.status)
-            )
-            if (unpaid.length > 0) {
-              existingOrder = unpaid[unpaid.length - 1]
-              break
-            }
-          }
-        } catch (e) {
-          console.warn('Failed to scan sbcache for table orders:', e)
-        }
       }
 
       if (!existingOrder && pendingOfflineOrders.length > 0) {

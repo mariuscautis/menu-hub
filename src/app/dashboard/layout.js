@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
@@ -46,28 +46,48 @@ export default function DashboardLayout({ children }) {
   const [staffAvatar, setStaffAvatar] = useState(null)
   const [staffName, setStaffName] = useState('')
 
-  // Connectivity border indicator
+  // Connectivity indicator — uses an active network probe in addition to
+  // navigator.onLine events because some devices (Android tablets) report
+  // onLine = true even when there is no real internet connectivity.
   const [isOnline, setIsOnline] = useState(true)
   const [backOnline, setBackOnline] = useState(false)
+  const connectivityProbeRef = useRef(null)
 
-  useEffect(() => {
-    setIsOnline(navigator.onLine)
-    const handleOnline = () => {
-      setIsOnline(true)
-      setBackOnline(true)
-      setTimeout(() => setBackOnline(false), 5000)
-    }
-    const handleOffline = () => {
+  const probeConnectivity = useCallback(async () => {
+    try {
+      const res = await fetch('/api/manifest', {
+        method: 'HEAD',
+        cache: 'no-store',
+        signal: AbortSignal.timeout(3000),
+      })
+      const online = res.ok
+      setIsOnline(prev => {
+        if (!prev && online) {
+          setBackOnline(true)
+          setTimeout(() => setBackOnline(false), 5000)
+        }
+        return online
+      })
+    } catch {
       setIsOnline(false)
       setBackOnline(false)
     }
+  }, [])
+
+  useEffect(() => {
+    probeConnectivity()
+    const handleOnline = () => probeConnectivity()
+    const handleOffline = () => { setIsOnline(false); setBackOnline(false) }
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
+    // Probe every 15 seconds to catch devices that don't fire offline events
+    connectivityProbeRef.current = setInterval(probeConnectivity, 15000)
     return () => {
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
+      clearInterval(connectivityProbeRef.current)
     }
-  }, [])
+  }, [probeConnectivity])
 
   // Responsive state - works on all devices
   const [sidebarOpen, setSidebarOpen] = useState(true) // Start with sidebar open on desktop

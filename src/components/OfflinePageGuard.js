@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 
 /**
@@ -9,27 +9,53 @@ import Link from 'next/link'
  * a blank/broken page — keeping staff oriented within the normal layout.
  * When online, renders children normally.
  *
- * Usage:
- *   export default function MyPage() {
- *     return (
- *       <OfflinePageGuard>
- *         <ActualPageContent />
- *       </OfflinePageGuard>
- *     )
- *   }
+ * Uses both navigator.onLine events AND an active network probe because
+ * some devices (notably Android tablets) report navigator.onLine = true
+ * even when there is no actual internet connectivity.
  */
 export default function OfflinePageGuard({ children }) {
   const [isOnline, setIsOnline] = useState(true)
+  const probeTimerRef = useRef(null)
+
+  // Active network probe — fetches a tiny resource to confirm real connectivity.
+  // Uses /api/manifest (already cached by SW) with cache: 'no-store' to bypass
+  // all caches and hit the network directly.
+  const probeNetwork = async () => {
+    try {
+      const res = await fetch('/api/manifest', {
+        method: 'HEAD',
+        cache: 'no-store',
+        signal: AbortSignal.timeout(3000),
+      })
+      setIsOnline(res.ok)
+    } catch {
+      setIsOnline(false)
+    }
+  }
 
   useEffect(() => {
-    setIsOnline(navigator.onLine)
-    const handleOnline = () => setIsOnline(true)
-    const handleOffline = () => setIsOnline(false)
+    // Initial probe on mount
+    probeNetwork()
+
+    const handleOnline = () => {
+      // navigator.onLine fired online — probe to confirm
+      probeNetwork()
+    }
+    const handleOffline = () => {
+      setIsOnline(false)
+    }
+
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
+
+    // Probe every 10 seconds while mounted so the guard reacts
+    // even on devices that don't fire the offline event reliably
+    probeTimerRef.current = setInterval(probeNetwork, 10000)
+
     return () => {
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
+      clearInterval(probeTimerRef.current)
     }
   }, [])
 
