@@ -19,6 +19,12 @@ const services = {
         href: '/services/branded-app',
       },
       {
+        name: 'Offline Hub',
+        description: 'Keep serving without internet',
+        icon: '📡',
+        href: '/services/offline-hub',
+      },
+      {
         name: 'Digital QR Menu',
         description: 'Contactless menus via smartphone',
         icon: '📱',
@@ -140,6 +146,21 @@ const features = [
     ],
     color: 'from-indigo-500 to-violet-600',
     href: '/services/branded-app',
+  },
+  {
+    id: 'offline-hub',
+    title: 'Offline Hub',
+    subtitle: 'Keep Serving, Even Without Internet',
+    description:
+      'Internet goes down? No problem. Veno App keeps working. Orders still flow, staff can still clock in, and your kitchen stays in sync — all without a single internet connection. When you\'re back online, everything syncs automatically.',
+    benefits: [
+      'Orders flow even without internet',
+      'Staff clock-in and out works offline',
+      'Kitchen & bar displays stay live',
+      'Auto-syncs the moment you reconnect',
+    ],
+    color: 'from-teal-500 to-emerald-600',
+    href: '/services/offline-hub',
   },
   {
     id: 'digital-menu',
@@ -908,10 +929,81 @@ const FeatureIllustrations = {
       <text x="315" y="272" fontSize="12" fill="#ef4444" textAnchor="middle" fontWeight="bold">1</text>
     </svg>
   ),
+  'offline-hub': () => (
+    <svg viewBox="0 0 400 300" className="w-full h-full">
+      <defs>
+        <filter id="shadow-oh" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="4" stdDeviation="8" floodOpacity="0.12" />
+        </filter>
+        <linearGradient id="oh-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#14b8a6" />
+          <stop offset="100%" stopColor="#10b981" />
+        </linearGradient>
+      </defs>
+
+      {/* Background card */}
+      <rect x="12" y="12" width="376" height="276" rx="16" fill="#f0fdf4" />
+
+      {/* Wifi-off cloud at the top */}
+      <circle cx="200" cy="62" r="32" fill="#dcfce7" />
+      {/* Crossed-out wifi arcs */}
+      <path d="M182 70 Q200 52 218 70" fill="none" stroke="#14b8a6" strokeWidth="3" strokeLinecap="round" opacity="0.4"/>
+      <path d="M174 78 Q200 48 226 78" fill="none" stroke="#14b8a6" strokeWidth="3" strokeLinecap="round" opacity="0.2"/>
+      <circle cx="200" cy="78" r="3.5" fill="#14b8a6" />
+      {/* red diagonal slash */}
+      <line x1="183" y1="52" x2="217" y2="86" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" />
+
+      {/* "No internet" label */}
+      <rect x="156" y="100" width="88" height="20" rx="10" fill="#fecaca" />
+      <text x="200" y="114" fontSize="9" fill="#dc2626" textAnchor="middle" fontWeight="bold">No Internet</text>
+
+      {/* Still working cards - 3 columns */}
+      {/* Card 1: Orders */}
+      <rect x="30" y="134" width="100" height="72" rx="10" fill="white" filter="url(#shadow-oh)" />
+      <rect x="30" y="134" width="100" height="6" rx="10" fill="url(#oh-grad)" />
+      <text x="80" y="160" fontSize="9" fill="#64748b" textAnchor="middle" fontWeight="semibold">ORDERS</text>
+      <rect x="42" y="166" width="56" height="7" rx="3" fill="#dcfce7" />
+      <text x="70" y="173" fontSize="7.5" fill="#16a34a" textAnchor="middle" fontWeight="bold">✓ Live</text>
+      <rect x="42" y="178" width="40" height="5" rx="2" fill="#e2e8f0" />
+      <rect x="42" y="186" width="52" height="5" rx="2" fill="#e2e8f0" />
+
+      {/* Card 2: Staff */}
+      <rect x="150" y="134" width="100" height="72" rx="10" fill="white" filter="url(#shadow-oh)" />
+      <rect x="150" y="134" width="100" height="6" rx="10" fill="url(#oh-grad)" />
+      <text x="200" y="160" fontSize="9" fill="#64748b" textAnchor="middle" fontWeight="semibold">STAFF</text>
+      <rect x="162" y="166" width="56" height="7" rx="3" fill="#dcfce7" />
+      <text x="190" y="173" fontSize="7.5" fill="#16a34a" textAnchor="middle" fontWeight="bold">✓ Live</text>
+      <rect x="162" y="178" width="40" height="5" rx="2" fill="#e2e8f0" />
+      <rect x="162" y="186" width="52" height="5" rx="2" fill="#e2e8f0" />
+
+      {/* Card 3: Kitchen */}
+      <rect x="270" y="134" width="100" height="72" rx="10" fill="white" filter="url(#shadow-oh)" />
+      <rect x="270" y="134" width="100" height="6" rx="10" fill="url(#oh-grad)" />
+      <text x="320" y="160" fontSize="9" fill="#64748b" textAnchor="middle" fontWeight="semibold">KITCHEN</text>
+      <rect x="282" y="166" width="56" height="7" rx="3" fill="#dcfce7" />
+      <text x="310" y="173" fontSize="7.5" fill="#16a34a" textAnchor="middle" fontWeight="bold">✓ Live</text>
+      <rect x="282" y="178" width="40" height="5" rx="2" fill="#e2e8f0" />
+      <rect x="282" y="186" width="52" height="5" rx="2" fill="#e2e8f0" />
+
+      {/* Auto-sync banner at bottom */}
+      <rect x="60" y="222" width="280" height="36" rx="10" fill="url(#oh-grad)" filter="url(#shadow-oh)" />
+      {/* sync icon */}
+      <path d="M82 238 a8 8 0 1 1 6 10" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+      <polyline points="86,234 82,238 87,242" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <text x="200" y="238" fontSize="9" fill="white" textAnchor="middle" fontWeight="bold">Back online? Syncing automatically…</text>
+      <rect x="100" y="244" width="140" height="4" rx="2" fill="white" opacity="0.3" />
+      <rect x="100" y="244" width="90" height="4" rx="2" fill="white" opacity="0.7" />
+    </svg>
+  ),
 }
 
 // Icons for feature cards
 const FeatureIcons = {
+  'offline-hub': (
+    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
+    </svg>
+  ),
   'digital-menu': (
     <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
@@ -951,6 +1043,11 @@ const FeatureIcons = {
     <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11l4-4m0 0l-4-4m4 4H3" />
+    </svg>
+  ),
+  'offline-hub': (
+    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
     </svg>
   ),
 }

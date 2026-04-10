@@ -17,6 +17,7 @@ const PAGES = [
   {
     group: 'Services',
     items: [
+      { key: 'services_offline_hub', label: 'Offline Hub', path: '/services/offline-hub' },
       { key: 'services_qr_menu', label: 'QR Menu', path: '/services/qr-menu' },
       { key: 'services_reservations', label: 'Reservations', path: '/services/reservations' },
       { key: 'services_table_ordering', label: 'Table Ordering', path: '/services/table-ordering' },
@@ -43,6 +44,7 @@ const DEFAULTS = {
   about:                     { title: 'About Us — Veno App', description: 'Learn about the team behind Veno App and our mission to simplify restaurant management for independent venues everywhere.' },
   contact:                   { title: 'Contact Us — Veno App', description: "Get in touch with the Veno App team. We'd love to hear from you — whether it's a question, feedback, or a partnership enquiry." },
   login:                     { title: 'Log In — Veno App', description: 'Sign in to your Veno App restaurant dashboard to manage orders, menus, staff, and reports.' },
+  services_offline_hub:      { title: 'Keep Serving Even Without Internet — Veno App Offline Hub', description: 'Veno App keeps working even when your internet goes down. Orders, kitchen displays, and staff management all stay live — then sync automatically when you reconnect.' },
   services_qr_menu:          { title: 'QR Code Menus That Customers Love — Veno App', description: 'Create stunning digital QR menus your customers can access instantly on any smartphone. No app download needed. Always up to date.' },
   services_reservations:     { title: 'Smart Reservations. Zero Missed Bookings. — Veno App', description: "Manage table bookings effortlessly with Veno App's smart reservation system. Reduce no-shows, optimise capacity, and delight every guest." },
   services_table_ordering:   { title: 'Let Customers Order Directly From Their Table — Veno App', description: "Boost revenue and speed up service with Veno App's table ordering. Customers scan a QR code, browse the menu, and place orders without waiting for staff." },
