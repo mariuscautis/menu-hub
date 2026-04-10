@@ -126,6 +126,16 @@ export default function PricingPage() {
     <>
     {seo.title && <title>{seo.title}</title>}
     {seo.description && <meta name="description" content={seo.description} />}
+    {/* Open Graph */}
+    {seo.title && <meta property="og:title" content={seo.title} />}
+    {seo.description && <meta property="og:description" content={seo.description} />}
+    <meta property="og:type" content="website" />
+    {seo.ogImage && <meta property="og:image" content={seo.ogImage} />}
+    {/* Twitter / X */}
+    <meta name="twitter:card" content={seo.ogImage ? "summary_large_image" : "summary"} />
+    {seo.title && <meta name="twitter:title" content={seo.title} />}
+    {seo.description && <meta name="twitter:description" content={seo.description} />}
+    {seo.ogImage && <meta name="twitter:image" content={seo.ogImage} />}
     <ServicePageLayout>
 
       {/* Hero */}

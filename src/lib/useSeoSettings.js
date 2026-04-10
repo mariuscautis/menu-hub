@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase'
 let cache = null
 
 export function useSeoSettings(pageKey, defaults) {
-  const [seo, setSeo] = useState(defaults)
+  const [seo, setSeo] = useState({ ...defaults, ogImage: null })
 
   useEffect(() => {
     const load = async () => {
@@ -23,6 +23,7 @@ export function useSeoSettings(pageKey, defaults) {
         setSeo({
           title: overrides.title || defaults.title,
           description: overrides.description || defaults.description,
+          ogImage: overrides.ogImage || null,
         })
       }
     }
