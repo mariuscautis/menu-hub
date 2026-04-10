@@ -3,5 +3,16 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
 
+# Service worker and PWA manifests must never be cached at the edge
+# so users always get the latest version on next visit
 /sw.js
+  Cache-Control: public, max-age=0, must-revalidate
+
+/workbox-*.js
+  Cache-Control: public, max-age=0, must-revalidate
+
+/fallback-*.js
+  Cache-Control: public, max-age=0, must-revalidate
+
+/manifest.json
   Cache-Control: public, max-age=0, must-revalidate
