@@ -330,7 +330,7 @@ export default function OfflineHubPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             {[
               { icon: '🛒', title: 'Taking Orders', description: 'Staff can still take and process orders through Veno App without any interruption.' },
               { icon: '👨‍🍳', title: 'Kitchen Display', description: 'Kitchen and bar screens stay live — chefs see every order as it comes in.' },
