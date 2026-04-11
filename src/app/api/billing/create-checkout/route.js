@@ -80,6 +80,14 @@ export async function POST(request) {
           }
         }
 
+        // Update metadata FIRST so that the webhooks triggered by item
+        // add/remove below already carry the correct plans string.
+        const newPlansString = plans.sort().join(',')
+        await stripePost(`subscriptions/${restaurant.subscription_id}`, {
+          'metadata[plans]': newPlansString,
+          'metadata[restaurant_id]': restaurantId,
+        })
+
         // Add new items (prorated — charged immediately for the remainder of the cycle)
         for (const plan of toAdd) {
           await stripePost('subscription_items', {
@@ -104,13 +112,6 @@ export async function POST(request) {
             })
           }
         }
-
-        // Update subscription metadata
-        const newPlansString = plans.sort().join(',')
-        await stripePost(`subscriptions/${restaurant.subscription_id}`, {
-          'metadata[plans]': newPlansString,
-          'metadata[restaurant_id]': restaurantId,
-        })
 
         // Update Supabase immediately (webhook will also confirm)
         const newModules = {
