@@ -109,7 +109,7 @@ export default function Onboarding() {
         venue_type_other: formData.venueType === 'other' ? formData.venueTypeOther : null,
         status: 'pending',
         trial_ends_at: trialEndsAt,
-        enabled_modules: { ordering: true, analytics: true, reservations: true, rota: true },
+        enabled_modules: { ordering: true, analytics: true, reservations: true, rota: true, reports: true },
       })
 
       if (dbError) throw dbError

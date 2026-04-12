@@ -44,6 +44,7 @@ export const reportsNavTabs = [
   { href: '/dashboard/reports/tax', labelKey: 'tax' },
   { href: '/dashboard/reports/sales-balance', labelKey: 'salesBalance' },
   { href: '/dashboard/reports/stock-movement', labelKey: 'stockMovement' },
+  { href: '/dashboard/reports/fiscal-records', labelKey: 'fiscalRecords' },
 ]
 
 export const reportsTabs = [
@@ -86,6 +87,11 @@ export const reportsTabs = [
     href: '/dashboard/reports/stock-movement',
     labelKey: 'stockMovement',
     icon: icon('M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'),
+  },
+  {
+    href: '/dashboard/reports/fiscal-records',
+    labelKey: 'fiscalRecords',
+    icon: icon('M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'),
   },
 ]
 

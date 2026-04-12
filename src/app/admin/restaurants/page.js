@@ -66,7 +66,7 @@ const MODULE_CONFIG = [
   },
 ]
 
-const DEFAULT_MODULES = { ordering: true, reservations: true, rota: true, analytics: true }
+const DEFAULT_MODULES = { ordering: true, reservations: true, rota: true, analytics: true, reports: true }
 const PLAN_LABELS = { orders: 'Orders', bookings: 'Bookings', team: 'Team' }
 const SUB_STATUS_TILE = {
   trialing: 'bg-blue-100 text-blue-700',
