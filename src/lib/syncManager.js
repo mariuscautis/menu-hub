@@ -296,6 +296,24 @@ export async function syncPendingPayments() {
           throw new Error(data.error || 'Failed to process payment')
         }
 
+        // ── Fiscal event recording (fire-and-forget) ──────────────────────
+        // Payment is now recorded in Supabase. Notify the fiscal pipeline.
+        // Errors are logged but must NOT prevent the payment from being marked
+        // as synced — fiscal transmission failures need a retry queue.
+        // TODO: implement fiscal retry queue before enabling fiscally-strict markets.
+        if (orderIdsToProcess.length > 0 && payment.restaurant_id) {
+          fetch('/api/fiscal/record', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              orderIds: orderIdsToProcess,
+              restaurantId: payment.restaurant_id,
+              paymentMethod: payment.payment_method === 'card' ? 'card' : 'cash',
+              occurredAt: payment.created_at || new Date().toISOString(),
+            }),
+          }).catch(err => console.error('[fiscal] Failed to record fiscal event during sync:', err))
+        }
+
         // If the table was cleaned offline, restore its 'available' status
         // (process_table_payment sets it to 'needs_cleaning', but staff already cleaned it)
         if (payment.table_id && wasTableCleanedOffline(payment.table_id)) {

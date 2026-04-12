@@ -1898,6 +1898,20 @@ export default function Tables() {
               p_payment_method: 'card',
               p_order_ids: orderIds
             })
+            // ── Fiscal event recording (fire-and-forget) ──────────────────
+            // TODO: implement fiscal retry queue before enabling fiscally-strict markets.
+            if (orderIds.length > 0) {
+              fetch('/api/fiscal/record', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  orderIds,
+                  restaurantId: restaurant.id,
+                  paymentMethod: 'card',
+                  occurredAt: new Date().toISOString(),
+                }),
+              }).catch(err => console.error('[fiscal] Failed to record fiscal event:', err))
+            }
             await fetchTableOrderInfo(restaurant.id)
             resetTerminalState()
             setShowPaymentModal(false)
@@ -2056,6 +2070,23 @@ export default function Tables() {
 
       if (data && !data.success) {
         throw new Error(data.error || 'Failed to process payment')
+      }
+
+      // ── Fiscal event recording ─────────────────────────────────────────
+      // Fire-and-forget: fiscal errors must not block the waiter.
+      // A retry queue should handle failures before enabling DE, IT, FR, BR, ES.
+      // TODO: implement fiscal retry queue before enabling fiscally-strict markets.
+      if (orderIds.length > 0) {
+        fetch('/api/fiscal/record', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orderIds,
+            restaurantId: restaurant.id,
+            paymentMethod,
+            occurredAt: new Date().toISOString(),
+          }),
+        }).catch(err => console.error('[fiscal] Failed to record fiscal event:', err))
       }
 
       // Save external terminal reference if provided

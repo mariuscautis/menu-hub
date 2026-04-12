@@ -1,6 +1,7 @@
 export const runtime = 'edge'
 
 import { createClient } from '@supabase/supabase-js'
+import { processFiscalEvent, FiscalRejectionError } from '@/lib/fiscal/pipeline'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -56,15 +57,39 @@ export async function POST(request) {
       )
     }
 
+    const now = new Date().toISOString()
+
+    // ── Fiscal pre-authorisation ──────────────────────────────────────────
+    // Call processFiscalEvent BEFORE marking the order paid so that countries
+    // requiring pre-authorisation (e.g. Brazil SEFAZ) can block if rejected.
+    // For GB/IE/NL/AU this returns immediately with no side effects.
+    try {
+      await processFiscalEvent(orderId, order.restaurant_id, 'cash', now)
+    } catch (fiscalErr) {
+      if (fiscalErr instanceof FiscalRejectionError) {
+        // Fiscal authority rejected the payment — must block order completion.
+        console.error('[fiscal] Payment rejected by fiscal authority:', fiscalErr.message)
+        return Response.json(
+          { error: 'Payment rejected by fiscal authority', details: fiscalErr.reason },
+          { status: 422 }
+        )
+      }
+      // Any other fiscal error (network timeout, signing failure etc.) is
+      // logged but does NOT block the waiter. A retry queue should handle
+      // these before going live in fiscally-strict markets.
+      // TODO: implement fiscal retry queue before enabling DE, IT, FR, BR, ES venues.
+      console.error('[fiscal] Non-blocking fiscal error — order completion proceeding:', fiscalErr)
+    }
+
     // Update order status using admin client (bypasses RLS)
     const { error: updateError } = await supabaseAdmin
       .from('orders')
       .update({
-        picked_up_at: new Date().toISOString(),
+        picked_up_at: now,
         status: 'completed',
         paid: true,
         payment_method: 'cash',
-        payment_taken_at: new Date().toISOString()
+        payment_taken_at: now
       })
       .eq('id', orderId)
 
