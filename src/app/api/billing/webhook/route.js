@@ -295,6 +295,16 @@ export async function POST(request) {
         const sub = event.data.object
         const restaurantId = sub.metadata?.restaurant_id
         if (!restaurantId) break
+        // If the webhook payload shows canceled/incomplete_expired, verify with
+        // Stripe live before trusting it — item add/remove events can transiently
+        // show these statuses mid-operation.
+        if (sub.status === 'canceled' || sub.status === 'incomplete_expired') {
+          const liveSub = await fetchSubscription(sub.id)
+          if (liveSub.status === 'active' || liveSub.status === 'trialing') {
+            console.log(`Ignoring ${event.type} with status ${sub.status} for ${sub.id} — live status is ${liveSub.status}`)
+            break
+          }
+        }
         await updateSubscription(supabaseAdmin, restaurantId, sub)
         const { data: r } = await supabaseAdmin.from('restaurants').select('name, email, email_language').eq('id', restaurantId).single()
         const action = event.type === 'customer.subscription.created' ? 'created' : 'updated'
@@ -314,6 +324,28 @@ export async function POST(request) {
         const sub = event.data.object
         const restaurantId = sub.metadata?.restaurant_id
         if (!restaurantId) break
+
+        // Verify with Stripe live API before marking as canceled.
+        // Stripe fires this event when items are removed mid-cycle, but the
+        // subscription may have already been replaced by a new one.
+        const liveSub = await fetchSubscription(sub.id)
+        if (liveSub.status === 'active' || liveSub.status === 'trialing') {
+          console.log(`Ignoring customer.subscription.deleted for ${sub.id} — live status is ${liveSub.status}`)
+          break
+        }
+
+        // Also check if the restaurant has a newer active subscription_id.
+        // If so, this deleted event is stale and should be ignored.
+        const { data: existing } = await supabaseAdmin
+          .from('restaurants')
+          .select('subscription_id, subscription_status')
+          .eq('id', restaurantId)
+          .single()
+        if (existing?.subscription_id && existing.subscription_id !== sub.id) {
+          console.log(`Ignoring customer.subscription.deleted for ${sub.id} — restaurant now has subscription ${existing.subscription_id}`)
+          break
+        }
+
         const periodEnd = sub.current_period_end
           ? new Date(sub.current_period_end * 1000).toISOString()
           : sub.items?.data?.[0]?.current_period_end
