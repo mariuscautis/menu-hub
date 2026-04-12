@@ -305,18 +305,30 @@ export async function POST(request) {
             break
           }
         }
+        const { data: r } = await supabaseAdmin.from('restaurants').select('name, email, email_language, subscription_plans').eq('id', restaurantId).single()
+        // Skip entirely if restaurant not found — stale/test subscription with bad metadata
+        if (!r) {
+          console.log(`Ignoring ${event.type} for ${sub.id} — no restaurant found for id ${restaurantId}`)
+          break
+        }
         await updateSubscription(supabaseAdmin, restaurantId, sub)
-        const { data: r } = await supabaseAdmin.from('restaurants').select('name, email, email_language').eq('id', restaurantId).single()
         const action = event.type === 'customer.subscription.created' ? 'created' : 'updated'
         const periodEnd = sub.current_period_end
           ? new Date(sub.current_period_end * 1000).toISOString()
           : sub.items?.data?.[0]?.current_period_end
             ? new Date(sub.items.data[0].current_period_end * 1000).toISOString()
             : null
-        await Promise.all([
-          notifyAdminSubscription(action, r?.name, r?.email, sub.metadata?.plans, sub.status),
-          notifyClientSubscription(action, r, sub.metadata?.plans, periodEnd),
-        ])
+        // Only send "updated" email if plans actually changed — suppresses intermediate
+        // item add/remove webhooks that fire with the same plans as before.
+        const incomingPlans = (sub.metadata?.plans || '').split(',').filter(Boolean).sort().join(',')
+        const existingPlans = (r.subscription_plans || '').split(',').filter(Boolean).sort().join(',')
+        const plansChanged = action === 'created' || incomingPlans !== existingPlans
+        if (plansChanged) {
+          await Promise.all([
+            notifyAdminSubscription(action, r.name, r.email, sub.metadata?.plans, sub.status),
+            notifyClientSubscription(action, r, sub.metadata?.plans, periodEnd),
+          ])
+        }
         break
       }
 
