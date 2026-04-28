@@ -540,7 +540,7 @@ export default function DashboardLayout({ children }) {
     if (hasPermission('overview')) {
       items.push({
         href: '/dashboard', labelKey: 'overview', label: 'Overview',
-        icon: (<svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M4 13h6c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1zm0 8h6c.55 0 1-.45 1-1v-4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1zm10 0h6c.55 0 1-.45 1-1v-8c0-.55-.45-1-1-1h-6c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1zM13 4v4c0 .55.45 1 1 1h6c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1h-6c-.55 0-1 .45-1 1z"/></svg>)
+        icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>)
       })
     }
 
@@ -548,7 +548,7 @@ export default function DashboardLayout({ children }) {
       items.push({
         href: '/dashboard/orders', labelKey: 'orders', label: 'Orders',
         badge: pendingOrdersCount > 0 ? pendingOrdersCount : null,
-        icon: (<svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l4.59-4.58L18 11l-6 6z"/></svg>)
+        icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="m9 12 2 2 4-4"/></svg>)
       })
     }
 
@@ -557,21 +557,21 @@ export default function DashboardLayout({ children }) {
         href: '/dashboard/tables',
         labelKey: userType === 'owner' || userType === 'staff-admin' ? 'tablesQr' : 'tables',
         label: userType === 'owner' || userType === 'staff-admin' ? 'Tables & QR' : 'Tables',
-        icon: (<svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm6 0H5v4h4V5zm-6 8a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4zm6 0H5v4h4v-4zm2-8a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2h-4a2 2 0 01-2-2V5zm6 0h-4v4h4V5zm-6 8a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2h-4a2 2 0 01-2-2v-4zm6 0h-4v4h4v-4z"/></svg>)
+        icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="6" height="6" rx="0.5"/><rect x="15" y="3" width="6" height="6" rx="0.5"/><rect x="3" y="15" width="6" height="6" rx="0.5"/><path d="M15 15h2m4 0h-2m-2 0v2m0 4v-2m0 0h-2m2 0h2"/></svg>)
       })
     }
 
     if (hasModule('ordering') && (userType === 'owner' || userType === 'staff-admin')) {
       items.push({
         href: '/dashboard/floor-plan', labelKey: 'floorPlan', label: 'Floor Plan', mobileHidden: true,
-        icon: (<svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 2H9c-1.1 0-2 .9-2 2v5.5h2V4h10v16h-5v2h5c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM2 10v11c0 1.1.9 2 2 2h9c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2zm11 11H4v-2h9v2zm0-3.5H4v-2h9v2zM13 14H4v-2h9v2zm0-3.5H4V9h9v1.5z"/></svg>)
+        icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M3 9h7V3"/><path d="M3 3h18v18H3z"/><path d="M10 3v6h11"/><path d="M10 9v12"/></svg>)
       })
     }
 
     if (hasModule('ordering') && hasPermission('floor_plan') && userType !== 'owner' && userType !== 'staff-admin') {
       items.push({
         href: '/dashboard/tables-floor-plan', labelKey: 'floorPlan', label: 'Floor Plan', mobileHidden: true,
-        icon: (<svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 2H9c-1.1 0-2 .9-2 2v5.5h2V4h10v16h-5v2h5c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM2 10v11c0 1.1.9 2 2 2h9c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2zm11 11H4v-2h9v2zm0-3.5H4v-2h9v2zM13 14H4v-2h9v2zm0-3.5H4V9h9v1.5z"/></svg>)
+        icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M3 9h7V3"/><path d="M3 3h18v18H3z"/><path d="M10 3v6h11"/><path d="M10 9v12"/></svg>)
       })
     }
 
@@ -579,62 +579,62 @@ export default function DashboardLayout({ children }) {
       items.push({
         href: '/dashboard/reservations', labelKey: 'reservations', label: 'Reservations',
         badge: pendingReservationsCount > 0 ? pendingReservationsCount : null,
-        icon: (<svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/></svg>)
+        icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="1"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></svg>)
       })
       items.push({
         href: '/dashboard/customers', labelKey: 'customers', label: 'Customers',
-        icon: (<svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H8a2 2 0 0 0-2 2v2H4a1 1 0 0 0 0 2h2v2H4a1 1 0 0 0 0 2h2v2H4a1 1 0 0 0 0 2h2v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm-6 3a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm5 13H9v-.75C9 15.58 11.24 14 14 14s5 1.58 5 3.25V18z"/></svg>)
+        icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>)
       })
     }
 
     if (hasModule('ordering') && (userType === 'owner' || userType === 'staff-admin' || hasPermission('menu'))) {
       items.push({
         href: '/dashboard/menu', labelKey: 'menu', label: 'Menu',
-        icon: (<svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>)
+        icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h12"/></svg>)
       })
     }
 
     if (hasModule('ordering') && (userType === 'owner' || userType === 'staff-admin' || hasPermission('stock'))) {
       items.push({
         href: '/dashboard/stock', labelKey: 'stock', label: 'Stock',
-        icon: (<svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z"/></svg>)
+        icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>)
       })
     }
 
     if (hasModule('ordering') && hasPermission('report_loss')) {
       items.push({
         href: '/dashboard/report-loss', labelKey: 'reportLoss', label: 'Report Loss',
-        icon: (<svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>)
+        icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>)
       })
     }
 
     if (hasModule('rota') && (userType === 'owner' || userType === 'staff-admin' || hasPermission('staff_rota'))) {
       items.push({
         href: '/dashboard/staff', labelKey: 'staffRota', label: 'Staff & Rota',
-        icon: (<svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>)
+        icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>)
       })
     }
 
     if (hasModule('rota') && (userType === 'staff' || userType === 'staff-admin') && hasPermission('my_rota')) {
       items.push({
         href: '/dashboard/my-rota', labelKey: 'myRota', label: 'My Rota',
-        icon: (<svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"/></svg>)
+        icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="1"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/></svg>)
       })
     }
 
     if (userType === 'owner' || userType === 'staff-admin') {
       if (hasModule('analytics')) items.push({
         href: '/dashboard/analytics', labelKey: 'analytics', label: 'Analytics',
-        icon: (<svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>)
+        icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>)
       })
       if (hasModule('reports')) items.push({
         href: '/dashboard/reports', labelKey: 'reports', label: 'Reports',
-        icon: (<svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>)
+        icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>)
       })
     } else if (hasModule('reports') && (hasPermission('reports') || hasPermission('z_report'))) {
       items.push({
         href: '/dashboard/reports', labelKey: 'reports', label: 'Reports',
-        icon: (<svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>)
+        icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>)
       })
     }
 
@@ -647,7 +647,7 @@ export default function DashboardLayout({ children }) {
         href: '/dashboard/support', labelKey: 'support', label: 'Support',
         badge: unreadSupportCount > 0 ? unreadSupportCount : null,
         badgeColor: 'bg-[#6262bd]',
-        icon: (<svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>)
+        icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="12" y1="7" x2="12" y2="13"/></svg>)
       })
     }
 
@@ -661,7 +661,7 @@ export default function DashboardLayout({ children }) {
     if (userType === 'owner') {
       items.push({
         href: '/dashboard/settings', labelKey: 'settings', label: 'Settings',
-        icon: (<svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>)
+        icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>)
       })
     }
 
@@ -1036,7 +1036,7 @@ export default function DashboardLayout({ children }) {
                         </div>
                       )}
                     </button>
-                    <span className="mt-2 text-sm font-semibold text-zinc-200 truncate max-w-full text-center">
+                    <span className="mt-2 text-sm font-semibold text-zinc-900 dark:text-zinc-200 truncate max-w-full text-center">
                       {staffName || restaurant?.name || 'Veno App'}
                     </span>
                   </div>
@@ -1045,7 +1045,7 @@ export default function DashboardLayout({ children }) {
                     <div className="w-10 h-10 flex items-center justify-center overflow-hidden bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex-shrink-0">
                       <img src={restaurant.logo_url} alt={restaurant.name} className="max-w-full max-h-full object-contain" />
                     </div>
-                    <span className="text-base font-bold text-zinc-200 truncate">{restaurant?.name || 'Veno App'}</span>
+                    <span className="text-base font-bold text-zinc-900 dark:text-zinc-200 truncate">{restaurant?.name || 'Veno App'}</span>
                   </>
                 ) : (
                   <PlatformLogo size="md" darkMode={true} />
@@ -1107,17 +1107,17 @@ export default function DashboardLayout({ children }) {
                     href={item.href}
                     title={!sidebarOpen ? item.label : undefined}
                     className={`relative flex items-center font-medium transition-colors ${
-                      sidebarOpen ? 'justify-between px-3 py-2.5' : 'justify-center p-3'
+                      sidebarOpen ? 'justify-between py-2.5 pr-3 pl-[10px]' : 'justify-center p-3'
                     } ${
                       isActive
-                        ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white'
-                        : 'text-zinc-500 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-200'
+                        ? 'border-l-2 border-[#6262bd] bg-[rgba(98,98,189,0.08)] dark:bg-[rgba(98,98,189,0.12)] text-zinc-900 dark:text-white'
+                        : 'border-l-2 border-transparent text-zinc-500 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-200'
                     }`}
                   >
                     {sidebarOpen ? (
                       <>
                         <div className="flex items-center space-x-3">
-                          <span className={isActive ? 'text-white' : 'text-zinc-500'}>{item.icon}</span>
+                          <span className={isActive ? 'text-[#6262bd]' : 'text-zinc-400 dark:text-zinc-500'}>{item.icon}</span>
                           <span className="text-sm">{item.labelKey ? <NavLabel labelKey={item.labelKey} /> : item.label}</span>
                         </div>
                         {item.badge && (
@@ -1130,7 +1130,7 @@ export default function DashboardLayout({ children }) {
                       </>
                     ) : (
                       <div className="relative">
-                        <span className={isActive ? 'text-white' : 'text-zinc-500'}>{item.icon}</span>
+                        <span className={isActive ? 'text-[#6262bd]' : 'text-zinc-400 dark:text-zinc-500'}>{item.icon}</span>
                         {item.badge && (
                           <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
                             {item.badge}
@@ -1176,7 +1176,7 @@ export default function DashboardLayout({ children }) {
 
               <div className="flex items-center gap-2 px-4 pt-3 pb-2">
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-zinc-300 truncate leading-tight">{restaurant?.name}</p>
+                  <p className="text-sm font-medium text-zinc-900 dark:text-zinc-200 truncate leading-tight">{restaurant?.name}</p>
                   <div className="flex items-center gap-1 mt-0.5 flex-wrap">
                     {userLabel && (
                       <span className={`inline-block px-1.5 py-0 text-xs font-medium ${userLabel.class}`}>
