@@ -294,7 +294,7 @@ export default function DataMigration() {
                 {t('step1Desc')} {importType === 'menu' ? t('step1DescMenu') : t('step1DescStock')}
               </p>
 
-              <div className="bg-zinc-50 dark:bg-zinc-900 rounded-sm p-4 mb-4 overflow-x-auto">
+              <div className="bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-4 mb-4 overflow-x-auto">
                 <code className="text-xs text-zinc-600 dark:text-zinc-400 whitespace-pre">
                   {importType === 'menu'
                     ? 'name, price, category, department, description, available'
@@ -401,7 +401,7 @@ export default function DataMigration() {
             </div>
 
             {/* Duplicate handling */}
-            <div className="mb-6 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-sm">
+            <div className="mb-6 p-4 bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm">
               <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-3">{t('duplicateHandling')}</p>
               <div className="flex gap-4">
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -568,7 +568,7 @@ export default function DataMigration() {
                 </div>
 
                 {results.skippedNames?.length > 0 && (
-                  <div className="mb-4 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-sm">
+                  <div className="mb-4 p-4 bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm">
                     <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">{t('skippedAlreadyExist')}</p>
                     <p className="text-sm text-zinc-500 dark:text-zinc-400">{results.skippedNames.join(', ')}</p>
                   </div>

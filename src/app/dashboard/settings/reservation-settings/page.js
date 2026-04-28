@@ -225,7 +225,7 @@ export default function ReservationSettingsPage() {
       </div>
 
       {/* Industry category (read-only) */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 mb-6">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-6">
         <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-1">{t('industryCategory')}</h2>
         <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-3">
           {t('industryCategoryDesc')}
@@ -235,7 +235,7 @@ export default function ReservationSettingsPage() {
             {categoryLabels[restaurant.industry_category] || restaurant.industry_category}
           </span>
         ) : (
-          <span className="inline-flex items-center px-4 py-2 rounded-sm bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 text-sm">
+          <span className="inline-flex items-center px-4 py-2 rounded-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 text-sm">
             {t('notAssigned')}
           </span>
         )}
@@ -252,7 +252,7 @@ export default function ReservationSettingsPage() {
       )}
 
       {/* Booking slot mode */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 mb-6">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-6">
         <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-1">{t('bookingSlotMode')}</h2>
         <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-5">
           {t('bookingSlotModeDesc')}
@@ -265,7 +265,7 @@ export default function ReservationSettingsPage() {
             className={`p-4 rounded-sm border-2 text-left transition-all ${
               slotMode === 'fixed'
                 ? 'border-[#6262bd] bg-[#6262bd]/10'
-                : 'border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 hover:border-zinc-300 dark:border-zinc-600'
+                : 'border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:border-zinc-600'
             }`}
           >
             <div className={`font-semibold mb-1 ${slotMode === 'fixed' ? 'text-[#6262bd]' : 'text-zinc-700 dark:text-zinc-300 dark:text-zinc-300'}`}>{t('fixedSlots')}</div>
@@ -276,7 +276,7 @@ export default function ReservationSettingsPage() {
             className={`p-4 rounded-sm border-2 text-left transition-all ${
               slotMode === 'customer_choice'
                 ? 'border-[#6262bd] bg-[#6262bd]/10'
-                : 'border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 hover:border-zinc-300 dark:border-zinc-600'
+                : 'border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:border-zinc-600'
             }`}
           >
             <div className={`font-semibold mb-1 ${slotMode === 'customer_choice' ? 'text-[#6262bd]' : 'text-zinc-700 dark:text-zinc-300 dark:text-zinc-300'}`}>{t('customerChooses')}</div>
@@ -296,7 +296,7 @@ export default function ReservationSettingsPage() {
                   className={`py-3 px-4 rounded-sm border-2 font-medium text-sm transition-all ${
                     slotInterval === opt.value
                       ? 'border-[#6262bd] bg-[#6262bd]/10 text-[#6262bd]'
-                      : 'border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 hover:border-zinc-300 dark:border-zinc-600'
+                      : 'border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:border-zinc-600'
                   }`}
                 >
                   {t(opt.labelKey)}
@@ -319,7 +319,7 @@ export default function ReservationSettingsPage() {
                   className={`py-2.5 px-3 rounded-sm border-2 font-medium text-sm transition-all ${
                     allowedDurations.includes(opt.value)
                       ? 'border-[#6262bd] bg-[#6262bd]/10 text-[#6262bd]'
-                      : 'border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 hover:border-zinc-300 dark:border-zinc-600'
+                      : 'border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:border-zinc-600'
                   }`}
                 >
                   {t(opt.labelKey)}
@@ -334,7 +334,7 @@ export default function ReservationSettingsPage() {
       </div>
 
       {/* Padding between bookings */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 mb-6">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-6">
         <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-1">{t('bufferTime')}</h2>
         <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-5">
           {t('bufferTimeDesc')}
@@ -347,7 +347,7 @@ export default function ReservationSettingsPage() {
               className={`py-3 px-2 rounded-sm border-2 font-medium text-sm transition-all ${
                 slotPadding === opt.value
                   ? 'border-[#6262bd] bg-[#6262bd]/10 text-[#6262bd]'
-                  : 'border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 hover:border-zinc-300 dark:border-zinc-600'
+                  : 'border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:border-zinc-600'
               }`}
             >
               {t(opt.labelKey)}
@@ -362,7 +362,7 @@ export default function ReservationSettingsPage() {
       </div>
 
       {/* Advance booking window */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 mb-6">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-6">
         <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-1">{t('advanceBookingWindow')}</h2>
         <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-5">
           {t('advanceBookingWindowDesc')}
@@ -374,14 +374,14 @@ export default function ReservationSettingsPage() {
             max={365}
             value={advanceBookingDays}
             onChange={(e) => setAdvanceBookingDays(Number(e.target.value))}
-            className="w-28 px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 text-center text-lg font-semibold"
+            className="w-28 px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 text-center text-lg font-semibold"
           />
           <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 font-medium">{t('days')}</span>
         </div>
       </div>
 
       {/* Party size toggle */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 mb-6">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-6">
         <div className="flex items-start justify-between gap-6">
           <div>
             <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-1">{t('partySize')}</h2>
@@ -402,7 +402,7 @@ export default function ReservationSettingsPage() {
       </div>
 
       {/* Single booking area */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 mb-6">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-6">
         <div className="flex items-start justify-between gap-6">
           <div>
             <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-1">{t('singleBookingArea')}</h2>
@@ -423,7 +423,7 @@ export default function ReservationSettingsPage() {
       </div>
 
       {/* "See menu" button on confirmation page */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 mb-6">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-6">
         <div className="flex items-start justify-between gap-6">
           <div>
             <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-1">{t('seeMenuButton')}</h2>
@@ -459,14 +459,14 @@ export default function ReservationSettingsPage() {
       </div>
 
       {/* Operating hours */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 mb-6">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-6">
         <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-1">{t('operatingHours')}</h2>
         <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-5">
           {t('operatingHoursDesc')}
         </p>
 
         {/* Minimum advance notice */}
-        <div className="mb-6 p-4 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 rounded-sm border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700">
+        <div className="mb-6 p-4 bg-zinc-50 dark:bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700">
           <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-1">{t('minAdvanceNotice')}</h3>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-4">
             {t('minAdvanceNoticeDesc')}
@@ -479,7 +479,7 @@ export default function ReservationSettingsPage() {
                 className={`px-4 py-2 rounded-sm border-2 text-sm font-semibold transition-all ${
                   minAdvanceNoticeDays === n
                     ? 'border-[#6262bd] bg-[#6262bd]/10 text-[#6262bd]'
-                    : 'border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 hover:border-zinc-300 dark:border-zinc-600'
+                    : 'border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:border-zinc-600'
                 }`}
               >
                 {n === 0 ? t('sameDay') : n === 1 ? t('oneDay') : t('nDays', { n })}
@@ -492,7 +492,7 @@ export default function ReservationSettingsPage() {
                 max={30}
                 value={minAdvanceNoticeDays}
                 onChange={e => setMinAdvanceNoticeDays(Math.max(0, Number(e.target.value)))}
-                className="w-20 px-3 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 dark:bg-zinc-700 dark:text-zinc-200 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 text-center text-sm font-semibold"
+                className="w-20 px-3 py-2 border border-zinc-200 dark:border-zinc-700 dark:bg-zinc-700 dark:text-zinc-200 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 text-center text-sm font-semibold"
               />
               <span className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('days')}</span>
             </div>
@@ -509,7 +509,7 @@ export default function ReservationSettingsPage() {
           )}
         </div>
 
-        <div className="rounded-sm border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 overflow-hidden">
+        <div className="rounded-sm border border-zinc-200 dark:border-zinc-700 overflow-hidden">
           {DAYS.map((day, dayIdx) => {
             const hours = operatingHours[day] || DEFAULT_HOURS[day]
             return (
@@ -518,7 +518,7 @@ export default function ReservationSettingsPage() {
                 className={`px-4 py-3 ${
                   dayIdx % 2 === 0
                     ? 'bg-white dark:bg-zinc-900'
-                    : 'bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800/50'
+                    : 'bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900/50'
                 }`}
               >
                 {/* Day name + toggle on one line */}
@@ -544,9 +544,9 @@ export default function ReservationSettingsPage() {
                       <div key={idx}>
                         {idx > 0 && (
                           <div className="flex items-center gap-2 mb-2">
-                            <div className="flex-1 border-t border-dashed border-zinc-200 dark:border-zinc-700 dark:border-zinc-700" />
+                            <div className="flex-1 border-t border-dashed border-zinc-200 dark:border-zinc-700" />
                             <span className="text-xs text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 font-medium">{t('shift', { n: idx + 1 })}</span>
-                            <div className="flex-1 border-t border-dashed border-zinc-200 dark:border-zinc-700 dark:border-zinc-700" />
+                            <div className="flex-1 border-t border-dashed border-zinc-200 dark:border-zinc-700" />
                           </div>
                         )}
                         <div className="flex flex-col xs:flex-row items-start xs:items-center gap-1.5">
@@ -594,7 +594,7 @@ export default function ReservationSettingsPage() {
       </div>
 
       {/* Global booking fee */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 mb-6">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-6">
         <div className="flex items-start justify-between gap-6">
           <div>
             <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-1">{t('reservationFee')}</h2>
@@ -636,7 +636,7 @@ export default function ReservationSettingsPage() {
                 value={globalFeeAmount}
                 onChange={e => setGlobalFeeAmount(e.target.value)}
                 placeholder="0.00"
-                className="pl-14 pr-4 py-2.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 w-40 text-sm"
+                className="pl-14 pr-4 py-2.5 border border-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 w-40 text-sm"
               />
             </div>
             <span className="text-xs text-zinc-400 dark:text-zinc-500">{t('perBooking')}</span>

@@ -973,7 +973,7 @@ export default function StockManagement() {
           }}
         >
           <div
-            className="bg-white dark:bg-zinc-900 rounded-sm p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 mb-6">
@@ -1157,7 +1157,7 @@ export default function StockManagement() {
           onClick={() => setShowStockModal(false)}
         >
           <div
-            className="bg-white dark:bg-zinc-900 rounded-sm p-8 w-full max-w-md"
+            className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 mb-4">{t('addStock')}</h2>

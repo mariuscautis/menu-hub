@@ -474,7 +474,7 @@ export default function DiscountsSettings() {
         </div>
 
         {/* Examples */}
-        <div className="mt-6 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 rounded-sm p-4">
+        <div className="mt-6 bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 rounded-sm p-4">
           <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
             {t('examples.title') || 'Example Discount Templates'}
           </h3>
@@ -729,7 +729,7 @@ function DiscountForm({ state, setState, menuItems, currencySymbol, onSave, onCa
                     className={`px-3 py-1.5 rounded-sm text-sm font-medium transition-colors ${
                       state.promo_days.includes(value)
                         ? 'bg-orange-500 text-white'
-                        : 'bg-white dark:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 hover:border-orange-300'
+                        : 'bg-white dark:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 hover:border-orange-300'
                     }`}
                   >
                     {label}

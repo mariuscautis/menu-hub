@@ -486,7 +486,7 @@ export default function StockMovementReport() {
       </div>
 
       {/* Date Range Selector */}
-      <div className="mb-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-5">
+      <div className="mb-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-5">
         <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-3 uppercase tracking-wide">
           {t('timeFrame')}
         </h2>
@@ -498,7 +498,7 @@ export default function StockMovementReport() {
               className={`px-3 py-1.5 rounded-sm text-sm font-medium transition-colors ${
                 activePreset === p.key
                   ? 'bg-[#6262bd] text-white'
-                  : 'bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700'
+                  : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700'
               }`}
             >
               {t(p.labelKey)}
@@ -509,7 +509,7 @@ export default function StockMovementReport() {
             className={`px-3 py-1.5 rounded-sm text-sm font-medium transition-colors ${
               activePreset === 'Custom'
                 ? 'bg-[#6262bd] text-white'
-                : 'bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700'
+                : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700'
             }`}
           >
             {t('presetCustom')}
@@ -522,7 +522,7 @@ export default function StockMovementReport() {
               type="date"
               value={startDate}
               onChange={e => { setStartDate(e.target.value); setActivePreset('Custom'); }}
-              className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 text-sm focus:outline-none focus:border-[#6262bd]"
+              className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 text-sm focus:outline-none focus:border-[#6262bd]"
             />
           </div>
           <div>
@@ -532,7 +532,7 @@ export default function StockMovementReport() {
               value={endDate}
               max={new Date().toISOString().split('T')[0]}
               onChange={e => { setEndDate(e.target.value); setActivePreset('Custom'); }}
-              className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 text-sm focus:outline-none focus:border-[#6262bd]"
+              className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 text-sm focus:outline-none focus:border-[#6262bd]"
             />
           </div>
           <button
@@ -555,22 +555,22 @@ export default function StockMovementReport() {
         <>
           {/* Summary Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4 text-center">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4 text-center">
               <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-1">{t('totalStockItems')}</p>
               <p className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{reportData.summary.totalProducts}</p>
               <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">{t('activeProducts')}</p>
             </div>
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4 text-center">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4 text-center">
               <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-1">{t('purchasedPeriod')}</p>
               <p className="text-xl font-bold text-blue-600">{formatCurrency(reportData.summary.totalPurchasedCost)}</p>
               <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">{t('totalPurchaseCost')}</p>
             </div>
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4 text-center">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4 text-center">
               <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-1">{t('usedInRecipes')}</p>
               <p className="text-xl font-bold text-amber-600">{formatCurrency(reportData.summary.totalRecipeUsedValue)}</p>
               <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">{t('ingredientCostOfSales')}</p>
             </div>
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4 text-center">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4 text-center">
               <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-1">{t('currentStockValue')}</p>
               <p className="text-xl font-bold text-emerald-600">{formatCurrency(reportData.summary.totalCurrentValue)}</p>
               <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">{t('atCurrentUnitCost')}</p>
@@ -580,7 +580,7 @@ export default function StockMovementReport() {
           {/* Filter + Sort bar */}
           <div className="mb-4 flex flex-wrap gap-3 items-center justify-between">
             {/* Category toggle */}
-            <div className="flex items-center gap-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-1">
+            <div className="flex items-center gap-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-1">
               {[
                 { value: 'all', labelKey: 'allStock' },
                 { value: 'kitchen', labelKey: 'kitchenFood' },
@@ -607,7 +607,7 @@ export default function StockMovementReport() {
                 <select
                   value={sortBy}
                   onChange={e => setSortBy(e.target.value)}
-                  className="text-sm px-3 py-1.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 focus:outline-none focus:border-[#6262bd]"
+                  className="text-sm px-3 py-1.5 border border-zinc-200 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 focus:outline-none focus:border-[#6262bd]"
                 >
                   <option value="name">{t('sortName')}</option>
                   <option value="used-desc">{t('sortMostUsed')}</option>
@@ -618,7 +618,7 @@ export default function StockMovementReport() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleExportCSV}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 rounded-sm hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 rounded-sm hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -640,13 +640,13 @@ export default function StockMovementReport() {
 
           {/* Stock Table */}
           {filteredItems.length === 0 ? (
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-10 text-center">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-10 text-center">
               <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('noStockItems')}</p>
             </div>
           ) : (
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm overflow-hidden">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm overflow-hidden">
               {/* Table header */}
-              <div className="hidden lg:grid grid-cols-10 gap-2 px-5 py-3 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800/50 text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 uppercase tracking-wide">
+              <div className="hidden lg:grid grid-cols-10 gap-2 px-5 py-3 bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900/50 text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 uppercase tracking-wide">
                 <div className="col-span-2">{t('product')}</div>
                 <div className="text-right">{t('costUnit')}</div>
                 <div className="text-right">{t('opening')}</div>
@@ -746,7 +746,7 @@ export default function StockMovementReport() {
 
                       {/* Expanded details */}
                       {isExpanded && hasDetails && (
-                        <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800/40 border-t border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 px-10 py-4 space-y-4">
+                        <div className="bg-zinc-50 dark:bg-zinc-900/40 border-t border-zinc-200 dark:border-zinc-800 px-10 py-4 space-y-4">
                           {/* Used in recipes */}
                           {Object.keys(item.usedIn).length > 0 && (
                             <div>
@@ -760,7 +760,7 @@ export default function StockMovementReport() {
                                     <span className="font-medium">{formatQty(qty / item.multiplier, item.inputUnit)}</span>
                                   </div>
                                 ))}
-                                <div className="flex justify-between text-xs font-semibold text-amber-700 dark:text-amber-400 pt-1 border-t border-zinc-200 dark:border-zinc-700 dark:border-zinc-700">
+                                <div className="flex justify-between text-xs font-semibold text-amber-700 dark:text-amber-400 pt-1 border-t border-zinc-200 dark:border-zinc-700">
                                   <span>{t('totalRecipeUsage')}</span>
                                   <span>{formatQty(item.recipeUsedQty / item.multiplier, item.inputUnit)} ({formatCurrency(item.recipeUsedValue)})</span>
                                 </div>
@@ -809,7 +809,7 @@ export default function StockMovementReport() {
               </div>
 
               {/* Table footer */}
-              <div className="hidden lg:grid grid-cols-10 gap-2 px-5 py-4 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800/50 border-t-2 border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-sm font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
+              <div className="hidden lg:grid grid-cols-10 gap-2 px-5 py-4 bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900/50 border-t-2 border-zinc-200 dark:border-zinc-700 text-sm font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                 <div className="col-span-2">{filteredItems.length} {t('products')}</div>
                 <div></div>
                 <div></div>

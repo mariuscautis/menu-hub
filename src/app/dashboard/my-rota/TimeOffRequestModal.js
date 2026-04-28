@@ -180,7 +180,7 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, o
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div
-        className="bg-white dark:bg-zinc-900 rounded-sm p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-6">

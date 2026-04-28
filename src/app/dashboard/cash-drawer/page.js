@@ -397,7 +397,7 @@ export default function CashDrawerPage() {
 
             {/* Session Info */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 rounded-sm p-4">
+              <div className="bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-4">
                 <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-1">
                   {t('openedBy') || 'Opened By'}
                 </p>
@@ -405,7 +405,7 @@ export default function CashDrawerPage() {
                   {currentSession.opened_by_name}
                 </p>
               </div>
-              <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 rounded-sm p-4">
+              <div className="bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-4">
                 <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-1">
                   {t('openedAt') || 'Opened At'}
                 </p>
@@ -413,7 +413,7 @@ export default function CashDrawerPage() {
                   {formatDateTime(currentSession.opened_at)}
                 </p>
               </div>
-              <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 rounded-sm p-4">
+              <div className="bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-4">
                 <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-1">
                   {t('openingAmount') || 'Opening Amount'}
                 </p>
@@ -432,12 +432,12 @@ export default function CashDrawerPage() {
             </div>
 
             {/* Cash Breakdown */}
-            <div className="border-t border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 pt-6">
+            <div className="border-t border-zinc-200 dark:border-zinc-800 pt-6">
               <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4">
                 {t('cashBreakdown') || 'Cash Breakdown'}
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="flex justify-between items-center p-3 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 rounded-sm">
+                <div className="flex justify-between items-center p-3 bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm">
                   <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{t('openingFloat') || 'Opening Float'}</span>
                   <span className="font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                     {formatCurrency(currentSession.opening_amount)}
@@ -466,8 +466,8 @@ export default function CashDrawerPage() {
           </div>
         ) : (
           // No Active Session - Open Drawer Prompt
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-8 text-center">
-            <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-8 text-center">
+            <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8 text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
@@ -489,7 +489,7 @@ export default function CashDrawerPage() {
       </div>
 
       {/* Session History */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
         <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-6">
           {t('sessionHistory') || 'Session History'}
         </h2>
@@ -504,7 +504,7 @@ export default function CashDrawerPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-800">
+                <tr className="border-b border-zinc-200 dark:border-zinc-800">
                   <th className="text-left py-3 px-4 text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">
                     {t('date') || 'Date'}
                   </th>
@@ -538,7 +538,7 @@ export default function CashDrawerPage() {
                       : 'text-zinc-600 dark:text-zinc-400 dark:text-zinc-400';
 
                   return (
-                    <tr key={session.id} className="border-b border-zinc-100 dark:border-zinc-800/50 dark:border-zinc-800 hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800/50">
+                    <tr key={session.id} className="border-b border-zinc-100 dark:border-zinc-800/50 dark:border-zinc-800 hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-100/50 dark:bg-zinc-800/50">
                       <td className="py-3 px-4 text-sm text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                         {formatDate(session.opened_at)}
                       </td>
@@ -572,7 +572,7 @@ export default function CashDrawerPage() {
       {/* Open Drawer Modal */}
       {showOpenModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-zinc-900 rounded-sm p-6 max-w-md w-full">
+          <div className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-6 max-w-md w-full">
             <h3 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4">
               {t('openDrawer') || 'Open Cash Drawer'}
             </h3>
@@ -593,7 +593,7 @@ export default function CashDrawerPage() {
                   min="0"
                   value={openingAmount}
                   onChange={(e) => setOpeningAmount(e.target.value)}
-                  className="w-full pl-8 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 focus:outline-none focus:border-[#6262bd]"
+                  className="w-full pl-8 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 focus:outline-none focus:border-[#6262bd]"
                   placeholder="0.00"
                   autoFocus
                 />
@@ -609,7 +609,7 @@ export default function CashDrawerPage() {
                   setShowOpenModal(false);
                   setOpeningAmount('');
                 }}
-                className="flex-1 px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors"
+                className="flex-1 px-4 py-3 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors"
               >
                 {t('cancel') || 'Cancel'}
               </button>
@@ -628,13 +628,13 @@ export default function CashDrawerPage() {
       {/* Close Drawer Modal */}
       {showCloseModal && currentSession && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-zinc-900 rounded-sm p-6 max-w-md w-full">
+          <div className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-6 max-w-md w-full">
             <h3 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4">
               {t('closeDrawer') || 'Close Cash Drawer'}
             </h3>
 
             {/* Expected Amount Display */}
-            <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 rounded-sm p-4 mb-6">
+            <div className="bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-4 mb-6">
               <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-1">
                 {t('expectedAmount') || 'Expected Amount'}
               </p>
@@ -661,7 +661,7 @@ export default function CashDrawerPage() {
                   min="0"
                   value={closingAmount}
                   onChange={(e) => setClosingAmount(e.target.value)}
-                  className="w-full pl-8 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 focus:outline-none focus:border-[#6262bd]"
+                  className="w-full pl-8 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 focus:outline-none focus:border-[#6262bd]"
                   placeholder="0.00"
                   autoFocus
                 />
@@ -674,7 +674,7 @@ export default function CashDrawerPage() {
                     ? 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400'
                     : parseFloat(closingAmount) - sessionStats.expectedAmount < 0
                       ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                      : 'bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 dark:text-zinc-400'
+                      : 'bg-zinc-50 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 dark:text-zinc-400'
                 }`}>
                   <span className="font-medium">{t('variance') || 'Variance'}: </span>
                   <span className="font-bold">
@@ -699,7 +699,7 @@ export default function CashDrawerPage() {
               <textarea
                 value={closeNotes}
                 onChange={(e) => setCloseNotes(e.target.value)}
-                className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 focus:outline-none focus:border-[#6262bd] resize-none"
+                className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 focus:outline-none focus:border-[#6262bd] resize-none"
                 rows={2}
                 placeholder={t('notesPlaceholder') || 'Add any notes about variance...'}
               />
@@ -712,7 +712,7 @@ export default function CashDrawerPage() {
                   setClosingAmount('');
                   setCloseNotes('');
                 }}
-                className="flex-1 px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors"
+                className="flex-1 px-4 py-3 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors"
               >
                 {t('cancel') || 'Cancel'}
               </button>

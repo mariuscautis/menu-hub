@@ -109,7 +109,7 @@ export default function RequestHistory({ staff, restaurant }) {
 
   if (loading) {
     return (
-      <div className="bg-white dark:bg-zinc-900 rounded-sm border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 p-4 md:p-6">
+      <div className="bg-white dark:bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 p-4 md:p-6">
         <div className="flex items-center justify-center py-12">
           <div className="text-zinc-500 dark:text-zinc-400">{t('loadingRequests') || 'Loading request history...'}</div>
         </div>
@@ -118,7 +118,7 @@ export default function RequestHistory({ staff, restaurant }) {
   }
 
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-sm border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 p-4 md:p-6">
+    <div className="bg-white dark:bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 p-4 md:p-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{t('title') || 'My Request History'}</h2>
 
@@ -131,7 +131,7 @@ export default function RequestHistory({ staff, restaurant }) {
               className={`px-3 py-2 rounded-sm text-sm font-medium transition-colors ${
                 filter === filterOption
                   ? 'bg-[#6262bd] text-white'
-                  : 'bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700'
+                  : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700'
               }`}
             >
               {t(filterOption) || filterOption.charAt(0).toUpperCase() + filterOption.slice(1)}

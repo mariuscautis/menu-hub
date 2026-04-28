@@ -661,7 +661,7 @@ export default function FloorPlanPage() {
                     value={floorForm.name}
                     onChange={(e) => setFloorForm({ ...floorForm, name: e.target.value })}
                     placeholder="e.g., Ground Floor, First Floor, Terrace"
-                    className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 focus:outline-none focus:border-primary"
+                    className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 focus:outline-none focus:border-primary"
                   />
                 </div>
 
@@ -673,7 +673,7 @@ export default function FloorPlanPage() {
                     type="number"
                     value={floorForm.level}
                     onChange={(e) => setFloorForm({ ...floorForm, level: parseInt(e.target.value) || 0 })}
-                    className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 focus:outline-none focus:border-primary"
+                    className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 focus:outline-none focus:border-primary"
                   />
                   <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-1">
                     Lower numbers appear first in the list
@@ -691,7 +691,7 @@ export default function FloorPlanPage() {
                       onChange={(e) => setFloorForm({ ...floorForm, width: parseInt(e.target.value) || 1200 })}
                       min="400"
                       max="3000"
-                      className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 focus:outline-none focus:border-primary"
+                      className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 focus:outline-none focus:border-primary"
                     />
                   </div>
 
@@ -705,7 +705,7 @@ export default function FloorPlanPage() {
                       onChange={(e) => setFloorForm({ ...floorForm, height: parseInt(e.target.value) || 800 })}
                       min="400"
                       max="3000"
-                      className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 focus:outline-none focus:border-primary"
+                      className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 focus:outline-none focus:border-primary"
                     />
                   </div>
                 </div>
@@ -719,14 +719,14 @@ export default function FloorPlanPage() {
                       type="color"
                       value={floorForm.background_color}
                       onChange={(e) => setFloorForm({ ...floorForm, background_color: e.target.value })}
-                      className="w-20 h-10 rounded-sm cursor-pointer border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700"
+                      className="w-20 h-10 rounded-sm cursor-pointer border border-zinc-200 dark:border-zinc-700"
                     />
                     <input
                       type="text"
                       value={floorForm.background_color}
                       onChange={(e) => setFloorForm({ ...floorForm, background_color: e.target.value })}
                       placeholder="#ffffff"
-                      className="flex-1 px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 focus:outline-none focus:border-primary"
+                      className="flex-1 px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 focus:outline-none focus:border-primary"
                     />
                   </div>
                 </div>
@@ -768,7 +768,7 @@ export default function FloorPlanPage() {
     <OfflinePageGuard>
     <div className="h-screen flex flex-col bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-950">
       {/* Header */}
-      <div className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 p-4">
+      <div className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 p-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">Floor Plan Designer</h1>
@@ -782,7 +782,7 @@ export default function FloorPlanPage() {
                 setCurrentFloor(floor)
                 loadFloorData(floor.id, restaurant.id)
               }}
-              className="px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300"
+              className="px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300"
             >
               {floors.map(floor => (
                 <option key={floor.id} value={floor.id}>{floor.name}</option>
@@ -790,7 +790,7 @@ export default function FloorPlanPage() {
             </select>
             <button
               onClick={() => openEditFloorModal(currentFloor)}
-              className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm font-medium transition-colors"
+              className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm font-medium transition-colors"
             >
               Edit Floor
             </button>
@@ -806,7 +806,7 @@ export default function FloorPlanPage() {
 
       <div className="flex flex-1 overflow-hidden">
         {/* Toolbar */}
-        <div className="w-64 bg-white dark:bg-zinc-900 border-r-2 border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 p-4 overflow-y-auto">
+        <div className="w-64 bg-white dark:bg-zinc-900 border-r-2 border-zinc-200 dark:border-zinc-800 p-4 overflow-y-auto">
           <h3 className="font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-3">Add to Floor</h3>
 
           <div className="space-y-2">
@@ -825,56 +825,56 @@ export default function FloorPlanPage() {
           <div className="space-y-2">
             <button
               onClick={() => addDecorativeElement('wall')}
-              className="w-full px-3 py-2 bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm text-sm"
+              className="w-full px-3 py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm text-sm"
             >
               ▮ Wall
             </button>
             <button
               onClick={() => addDecorativeElement('door')}
-              className="w-full px-3 py-2 bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm text-sm"
+              className="w-full px-3 py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm text-sm"
             >
               ⌂ Door
             </button>
             <button
               onClick={() => addDecorativeElement('plant')}
-              className="w-full px-3 py-2 bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm text-sm"
+              className="w-full px-3 py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm text-sm"
             >
               ☘ Plant
             </button>
             <button
               onClick={() => addDecorativeElement('counter')}
-              className="w-full px-3 py-2 bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm text-sm"
+              className="w-full px-3 py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm text-sm"
             >
               ▬ Counter
             </button>
             <button
               onClick={() => addDecorativeElement('bar')}
-              className="w-full px-3 py-2 bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm text-sm"
+              className="w-full px-3 py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm text-sm"
             >
               🍷 Bar
             </button>
             <button
               onClick={() => addDecorativeElement('entrance')}
-              className="w-full px-3 py-2 bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm text-sm"
+              className="w-full px-3 py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm text-sm"
             >
               ⬇ Entrance
             </button>
             <button
               onClick={() => addDecorativeElement('stairs')}
-              className="w-full px-3 py-2 bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm text-sm"
+              className="w-full px-3 py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm text-sm"
             >
               ⚏ Stairs
             </button>
             <button
               onClick={() => addDecorativeElement('restroom')}
-              className="w-full px-3 py-2 bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm text-sm"
+              className="w-full px-3 py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm text-sm"
             >
               ♿ Restroom
             </button>
           </div>
 
           {selectedItem && (
-            <div className="mt-6 pt-6 border-t border-zinc-200 dark:border-zinc-700 dark:border-zinc-700">
+            <div className="mt-6 pt-6 border-t border-zinc-200 dark:border-zinc-700">
               <h3 className="font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-3">
                 {selectedItem.type === 'table' ? `Table ${selectedItem.table_number}` : 'Element Properties'}
               </h3>
@@ -932,7 +932,7 @@ export default function FloorPlanPage() {
                       value={selectedItem.label || ''}
                       onChange={(e) => updateElementProperty('label', e.target.value)}
                       placeholder="e.g., Main Entrance"
-                      className="w-full px-2 py-1 text-sm border border-zinc-300 dark:border-zinc-600 dark:border-zinc-600 rounded bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300"
+                      className="w-full px-2 py-1 text-sm border border-zinc-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300"
                     />
                   </div>
 
@@ -987,7 +987,7 @@ export default function FloorPlanPage() {
                     <select
                       value={selectedItem.shape || 'rectangle'}
                       onChange={(e) => updateTableProperty('shape', e.target.value)}
-                      className="w-full px-2 py-1 text-sm border border-zinc-300 dark:border-zinc-600 dark:border-zinc-600 rounded bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300"
+                      className="w-full px-2 py-1 text-sm border border-zinc-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300"
                     >
                       <option value="rectangle">Rectangle</option>
                       <option value="square">Square</option>
@@ -1107,7 +1107,7 @@ export default function FloorPlanPage() {
                   value={floorForm.name}
                   onChange={(e) => setFloorForm({ ...floorForm, name: e.target.value })}
                   placeholder="e.g., Ground Floor, First Floor, Terrace"
-                  className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 focus:outline-none focus:border-primary"
+                  className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 focus:outline-none focus:border-primary"
                 />
               </div>
 
@@ -1119,7 +1119,7 @@ export default function FloorPlanPage() {
                   type="number"
                   value={floorForm.level}
                   onChange={(e) => setFloorForm({ ...floorForm, level: parseInt(e.target.value) || 0 })}
-                  className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 focus:outline-none focus:border-primary"
+                  className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 focus:outline-none focus:border-primary"
                 />
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-1">
                   Lower numbers appear first in the list
@@ -1137,7 +1137,7 @@ export default function FloorPlanPage() {
                     onChange={(e) => setFloorForm({ ...floorForm, width: parseInt(e.target.value) || 1200 })}
                     min="400"
                     max="3000"
-                    className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 focus:outline-none focus:border-primary"
+                    className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 focus:outline-none focus:border-primary"
                   />
                 </div>
 
@@ -1151,7 +1151,7 @@ export default function FloorPlanPage() {
                     onChange={(e) => setFloorForm({ ...floorForm, height: parseInt(e.target.value) || 800 })}
                     min="400"
                     max="3000"
-                    className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 focus:outline-none focus:border-primary"
+                    className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 focus:outline-none focus:border-primary"
                   />
                 </div>
               </div>
@@ -1165,14 +1165,14 @@ export default function FloorPlanPage() {
                     type="color"
                     value={floorForm.background_color}
                     onChange={(e) => setFloorForm({ ...floorForm, background_color: e.target.value })}
-                    className="w-20 h-10 rounded-sm cursor-pointer border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700"
+                    className="w-20 h-10 rounded-sm cursor-pointer border border-zinc-200 dark:border-zinc-700"
                   />
                   <input
                     type="text"
                     value={floorForm.background_color}
                     onChange={(e) => setFloorForm({ ...floorForm, background_color: e.target.value })}
                     placeholder="#ffffff"
-                    className="flex-1 px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 focus:outline-none focus:border-primary"
+                    className="flex-1 px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 focus:outline-none focus:border-primary"
                   />
                 </div>
               </div>

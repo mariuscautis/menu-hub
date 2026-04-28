@@ -766,7 +766,7 @@ export default function Reservations() {
         <button
           onClick={() => { setTimeScope('upcoming'); setDateFilter('all'); setSpecificDate('') }}
           className={`flex-1 min-w-0 px-4 sm:px-6 py-3 rounded-sm font-medium transition-colors text-sm sm:text-base ${
-            timeScope === 'upcoming' ? 'bg-[#6262bd] text-white' : 'bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 hover:border-zinc-300 dark:border-zinc-600'
+            timeScope === 'upcoming' ? 'bg-[#6262bd] text-white' : 'bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:border-zinc-600'
           }`}
         >
           {t('upcomingReservations')}
@@ -774,7 +774,7 @@ export default function Reservations() {
         <button
           onClick={() => { setTimeScope('past'); setDateFilter('all'); setSpecificDate('') }}
           className={`flex-1 min-w-0 px-4 sm:px-6 py-3 rounded-sm font-medium transition-colors text-sm sm:text-base ${
-            timeScope === 'past' ? 'bg-[#6262bd] text-white' : 'bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 hover:border-zinc-300 dark:border-zinc-600'
+            timeScope === 'past' ? 'bg-[#6262bd] text-white' : 'bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:border-zinc-600'
           }`}
         >
           {t('pastReservations')}
@@ -850,7 +850,7 @@ export default function Reservations() {
 
         {/* Custom date range */}
         {dateFilter === 'custom' && (
-          <div className="grid md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700 dark:border-zinc-700">
+          <div className="grid md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
             <div>
               <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">{t('startDate')}</label>
               <input type="date" value={customDateRange.start} onChange={(e) => setCustomDateRange({ ...customDateRange, start: e.target.value })} className="w-full px-4 py-2.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-200 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300" />
@@ -863,7 +863,7 @@ export default function Reservations() {
         )}
 
         {/* Stats row */}
-        <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700 dark:border-zinc-700">
+        <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
           <div className="bg-amber-50 dark:bg-amber-900/30 border-2 border-amber-200 dark:border-amber-800 px-4 py-2 rounded-sm">
             <div className="text-xl font-bold text-amber-700 dark:text-amber-400">{reservations.filter(r => r.status === 'pending').length}</div>
             <div className="text-xs text-amber-600 dark:text-amber-500">{t('pending')}</div>
@@ -886,7 +886,7 @@ export default function Reservations() {
               <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"/>
             </svg>
           </div>
-          <p className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 font-medium mb-1">{t('noReservationsFound')}</p>
+          <p className="text-zinc-600 dark:text-zinc-400 font-medium mb-1">{t('noReservationsFound')}</p>
           <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 text-sm">{t('adjustFilters')}</p>
         </div>
       ) : (
@@ -1216,7 +1216,7 @@ export default function Reservations() {
                       className={`py-2.5 px-3 rounded-sm text-sm font-medium border-2 transition-colors ${
                         restrictionMode === 'blocked' || (restriction && restriction !== 'none' && restriction.type === 'blocked' && !restrictionMode)
                           ? 'bg-red-600 border-red-600 text-white'
-                          : 'border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 hover:border-red-300 hover:text-red-600'
+                          : 'border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 hover:border-red-300 hover:text-red-600'
                       }`}
                     >
                       🚫 Block
@@ -1231,7 +1231,7 @@ export default function Reservations() {
                       className={`py-2.5 px-3 rounded-sm text-sm font-medium border-2 transition-colors ${
                         restrictionMode === 'fee_required' || (restriction && restriction !== 'none' && restriction.type === 'fee_required' && !restrictionMode)
                           ? 'bg-amber-500 border-amber-500 text-white'
-                          : 'border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 hover:border-amber-300 hover:text-amber-600'
+                          : 'border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 hover:border-amber-300 hover:text-amber-600'
                       }`}
                     >
                       💳 Deposit
@@ -1343,7 +1343,7 @@ export default function Reservations() {
                 <button
                   type="button"
                   onClick={() => { setShowConfirmModal(false); setSelectedReservation(null); setSelectedTable('') }}
-                  className="w-full border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-700 text-sm"
+                  className="w-full border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-700 text-sm"
                 >
                   {t('cancel')}
                 </button>
@@ -1396,7 +1396,7 @@ export default function Reservations() {
                 <button
                   type="button"
                   onClick={() => { setShowDenyModal(false); setDenyReason('') }}
-                  className="w-full border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-700 text-sm"
+                  className="w-full border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-700 text-sm"
                 >
                   {t('cancel')}
                 </button>

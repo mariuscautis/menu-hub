@@ -125,7 +125,7 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white dark:bg-zinc-900 rounded-sm w-full max-w-3xl max-h-[92vh] flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
+      <div className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm w-full max-w-3xl max-h-[92vh] flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 flex-shrink-0">
@@ -160,13 +160,13 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
           {viewMode === 'list' && (
             loading ? (
               <div className="flex flex-col items-center justify-center py-16">
-                <div className="w-8 h-8 border-2 border-zinc-200 dark:border-zinc-800 border-t-[#6262bd] rounded-full animate-spin mb-4"></div>
+                <div className="w-8 h-8 border-2 border-zinc-200 dark:border-zinc-200 dark:border-zinc-800 border-t-[#6262bd] rounded-full animate-spin mb-4"></div>
                 <p className="text-zinc-500 dark:text-zinc-400">{t('loadingTemplates')}</p>
               </div>
             ) : templates.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-zinc-400 dark:text-zinc-500">
                 <div className="text-5xl mb-4">📋</div>
-                <p className="font-medium text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 mb-4">{t('noTemplatesYet')}</p>
+                <p className="font-medium text-zinc-600 dark:text-zinc-400 mb-4">{t('noTemplatesYet')}</p>
                 <button onClick={() => setViewMode('create')} className="px-5 py-2.5 bg-[#6262bd] text-white rounded-sm hover:bg-[#5252a5] transition-colors font-medium">
                   {t('createFirstTemplate')}
                 </button>
@@ -206,7 +206,7 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
                       <div className="px-5 pb-4">
                         <div className="grid grid-cols-7 gap-1">
                           {DAYS.map(day => (
-                            <div key={day} className={`rounded-sm p-1.5 text-center ${grouped[day].length > 0 ? 'bg-[#6262bd]/10' : 'bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800'}`}>
+                            <div key={day} className={`rounded-sm p-1.5 text-center ${grouped[day].length > 0 ? 'bg-[#6262bd]/10' : 'bg-zinc-50 dark:bg-zinc-900'}`}>
                               <p className={`text-xs font-semibold ${grouped[day].length > 0 ? 'text-[#6262bd]' : 'text-zinc-400 dark:text-zinc-500 dark:text-zinc-600 dark:text-zinc-400'}`}>{DAY_ABBR[day]}</p>
                               {grouped[day].length > 0 && (
                                 <p className="text-xs text-[#6262bd] font-bold">{grouped[day].length}</p>
@@ -243,12 +243,12 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
                   value={templateName}
                   onChange={e => setTemplateName(e.target.value)}
                   placeholder={t('templateNamePlaceholder')}
-                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 transition-colors"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 transition-colors"
                 />
               </div>
 
               {/* Add shift form */}
-              <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800/50 rounded-sm p-4 border-2 border-dashed border-zinc-200 dark:border-zinc-700 dark:border-zinc-700">
+              <div className="bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900/50 rounded-sm p-4 border-2 border-dashed border-zinc-200 dark:border-zinc-700">
                 <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-3">➕ {t('addShiftsToTemplate')}</h3>
                 <div className="grid grid-cols-2 gap-3 mb-3">
                   <div>
@@ -315,7 +315,7 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
           {viewMode === 'apply' && selectedTemplate && (
             <div className="space-y-5">
               <div className="flex items-center gap-3 p-4 bg-[#6262bd]/5 border-2 border-[#6262bd]/20 rounded-sm">
-                <div className="w-10 h-10 rounded-sm bg-[#6262bd] flex-shrink-0 flex items-center justify-center text-white font-bold">
+                <div className="w-10 h-10 rounded-sm bg-[#6262bd] flex-shrink-0 flex items-center justify-center text-zinc-900 dark:text-white font-bold">
                   {selectedTemplate.shifts?.length || 0}
                 </div>
                 <div>
@@ -328,13 +328,13 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
                 <div>
                   <label className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-1.5">{t('startDateLabel')}</label>
                   <input type="date" value={applyStartDate} onChange={e => setApplyStartDate(e.target.value)}
-                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 transition-colors" />
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 transition-colors" />
                   <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">{t('startDateHelper')}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-1.5">{t('numberOfWeeks')}</label>
                   <input type="number" value={applyWeeks} onChange={e => setApplyWeeks(parseInt(e.target.value) || 1)} min="1" max="12"
-                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 transition-colors" />
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 transition-colors" />
                   <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">{t('numberOfWeeksHelper')}</p>
                 </div>
               </div>
@@ -352,7 +352,7 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
         <div className="px-6 py-4 border-t border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 flex gap-3 flex-shrink-0">
           {viewMode === 'list' && (
             <>
-              <button onClick={onClose} className="flex-1 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors">{t('cancel')}</button>
+              <button onClick={onClose} className="flex-1 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors">{t('cancel')}</button>
               <button onClick={() => setViewMode('create')} className="flex-1 bg-[#6262bd] text-white py-3 rounded-sm font-semibold hover:bg-[#5252a5] transition-colors">
                 ➕ {t('tabCreateNew')}
               </button>
@@ -360,7 +360,7 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
           )}
           {viewMode === 'create' && (
             <>
-              <button onClick={() => setViewMode('list')} className="flex-1 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors">{t('cancel')}</button>
+              <button onClick={() => setViewMode('list')} className="flex-1 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors">{t('cancel')}</button>
               <button onClick={handleSaveTemplate} disabled={saving} className="flex-1 bg-[#6262bd] text-white py-3 rounded-sm font-semibold hover:bg-[#5252a5] transition-colors disabled:opacity-50">
                 {saving ? '...' : t('saveTemplate')}
               </button>
@@ -368,7 +368,7 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
           )}
           {viewMode === 'apply' && (
             <>
-              <button onClick={() => setViewMode('list')} className="flex-1 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors">{t('cancel')}</button>
+              <button onClick={() => setViewMode('list')} className="flex-1 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors">{t('cancel')}</button>
               <button onClick={handleApplyTemplate} className="flex-1 bg-[#6262bd] text-white py-3 rounded-sm font-semibold hover:bg-[#5252a5] transition-colors">
                 ▶ {t('applyTemplate')}
               </button>

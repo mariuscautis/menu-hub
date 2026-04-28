@@ -216,7 +216,7 @@ export default function ReportLoss() {
           className={`group flex flex-col items-center text-center gap-3 rounded-sm border-2 p-5 transition-all ${
             lossType === 'menu'
               ? 'bg-[#6262bd] border-[#6262bd] text-white shadow-lg shadow-[#6262bd]/20'
-              : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 hover:border-[#6262bd] dark:hover:border-[#6262bd] hover:shadow-md'
+              : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:border-[#6262bd] dark:hover:border-[#6262bd] hover:shadow-md'
           }`}
         >
           <div className={`p-3 rounded-sm transition-transform group-hover:scale-110 ${lossType === 'menu' ? 'bg-white/20' : 'bg-amber-50 dark:bg-amber-900/30'}`}>
@@ -235,7 +235,7 @@ export default function ReportLoss() {
           className={`group flex flex-col items-center text-center gap-3 rounded-sm border-2 p-5 transition-all ${
             lossType === 'stock'
               ? 'bg-[#6262bd] border-[#6262bd] text-white shadow-lg shadow-[#6262bd]/20'
-              : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 hover:border-[#6262bd] dark:hover:border-[#6262bd] hover:shadow-md'
+              : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:border-[#6262bd] dark:hover:border-[#6262bd] hover:shadow-md'
           }`}
         >
           <div className={`p-3 rounded-sm transition-transform group-hover:scale-110 ${lossType === 'stock' ? 'bg-white/20' : 'bg-red-50 dark:bg-red-900/30'}`}>
@@ -250,7 +250,7 @@ export default function ReportLoss() {
         </button>
       </div>
 
-      {lossType && <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6">
+      {lossType && <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
 
         {/* ── MENU ITEM LOSS ── */}
         {lossType === 'menu' && (
@@ -274,11 +274,11 @@ export default function ReportLoss() {
                   onChange={(e) => { setMenuItemSearch(e.target.value); setShowMenuDropdown(true); if (menuForm.menu_item_id) setMenuForm({ ...menuForm, menu_item_id: '' }) }}
                   onFocus={() => setMenuItemSearch('')}
                   placeholder={t('menuItemPlaceholder')}
-                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800"
                   required
                 />
                 {showMenuDropdown && (
-                  <div className="absolute z-10 w-full mt-1 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm shadow-lg max-h-60 overflow-y-auto">
+                  <div className="absolute z-10 w-full mt-1 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-sm shadow-lg max-h-60 overflow-y-auto">
                     {(() => {
                       const filtered = menuItems.filter(i => !menuItemSearch || i.name.toLowerCase().includes(menuItemSearch.toLowerCase()))
                       return filtered.length > 0 ? filtered.map(item => {
@@ -304,11 +304,11 @@ export default function ReportLoss() {
               </label>
               <div className="flex items-center gap-3">
                 <button type="button" onClick={() => setMenuForm({ ...menuForm, quantity: Math.max(1, menuForm.quantity - 1) })}
-                  className="w-12 h-12 flex items-center justify-center border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm hover:border-[#6262bd] hover:bg-[#6262bd] hover:text-white transition-all text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 font-bold text-xl">−</button>
+                  className="w-12 h-12 flex items-center justify-center border border-zinc-200 dark:border-zinc-700 rounded-sm hover:border-[#6262bd] hover:bg-[#6262bd] hover:text-white transition-all text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 font-bold text-xl">−</button>
                 <input type="number" value={menuForm.quantity} onChange={e => setMenuForm({ ...menuForm, quantity: parseInt(e.target.value) || 1 })} min="1"
-                  className="w-24 px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 text-center font-semibold" />
+                  className="w-24 px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 text-center font-semibold" />
                 <button type="button" onClick={() => setMenuForm({ ...menuForm, quantity: menuForm.quantity + 1 })}
-                  className="w-12 h-12 flex items-center justify-center border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm hover:border-[#6262bd] hover:bg-[#6262bd] hover:text-white transition-all text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 font-bold text-xl">+</button>
+                  className="w-12 h-12 flex items-center justify-center border border-zinc-200 dark:border-zinc-700 rounded-sm hover:border-[#6262bd] hover:bg-[#6262bd] hover:text-white transition-all text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 font-bold text-xl">+</button>
               </div>
               <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-1">{t('quantityHelp')}</p>
             </div>
@@ -318,7 +318,7 @@ export default function ReportLoss() {
                 {t('reasonLabel')} {t('reasonRequired')}
               </label>
               <select value={menuForm.reason} onChange={e => setMenuForm({ ...menuForm, reason: e.target.value })} required
-                className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800">
+                className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800">
                 <option value="">{t('reasonPlaceholder')}</option>
                 {reasons.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
               </select>
@@ -327,7 +327,7 @@ export default function ReportLoss() {
             <div>
               <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">{t('notesLabel')}</label>
               <textarea value={menuForm.notes} onChange={e => setMenuForm({ ...menuForm, notes: e.target.value })} rows={3}
-                className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 resize-none"
+                className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 resize-none"
                 placeholder={t('notesPlaceholder')} />
             </div>
 
@@ -355,11 +355,11 @@ export default function ReportLoss() {
                   onChange={e => { setStockSearch(e.target.value); setShowStockDropdown(true); if (stockForm.stock_product_id) setStockForm({ ...stockForm, stock_product_id: '' }) }}
                   onFocus={() => setStockSearch('')}
                   placeholder={t('stockItemPlaceholder')}
-                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800"
                   required
                 />
                 {showStockDropdown && (
-                  <div className="absolute z-10 w-full mt-1 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm shadow-lg max-h-60 overflow-y-auto">
+                  <div className="absolute z-10 w-full mt-1 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-sm shadow-lg max-h-60 overflow-y-auto">
                     {(() => {
                       const filtered = stockProducts.filter(p => !stockSearch || p.name.toLowerCase().includes(stockSearch.toLowerCase()) || (p.brand || '').toLowerCase().includes(stockSearch.toLowerCase()))
                       return filtered.length > 0 ? filtered.map(p => (
@@ -393,7 +393,7 @@ export default function ReportLoss() {
                   step="0.01"
                   required
                   placeholder="0"
-                  className="w-full px-4 py-3 pr-20 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800"
+                  className="w-full px-4 py-3 pr-20 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800"
                 />
                 {selectedStock && (
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 font-medium text-sm">
@@ -408,7 +408,7 @@ export default function ReportLoss() {
                 {t('reasonLabel')} {t('reasonRequired')}
               </label>
               <select value={stockForm.reason} onChange={e => setStockForm({ ...stockForm, reason: e.target.value })} required
-                className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800">
+                className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800">
                 <option value="">{t('reasonPlaceholder')}</option>
                 {reasons.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
               </select>
@@ -417,7 +417,7 @@ export default function ReportLoss() {
             <div>
               <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">{t('notesLabel')}</label>
               <textarea value={stockForm.notes} onChange={e => setStockForm({ ...stockForm, notes: e.target.value })} rows={3}
-                className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 resize-none"
+                className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 resize-none"
                 placeholder={t('notesPlaceholder')} />
             </div>
 

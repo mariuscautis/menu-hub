@@ -248,7 +248,7 @@ export default function Security() {
               {t('staffLoginUrl') || 'Staff Login URL'}
             </label>
             <div className="flex flex-col sm:flex-row gap-2">
-              <div className="flex-1 p-3 bg-zinc-50 dark:bg-zinc-900 rounded-sm border border-zinc-200 dark:border-zinc-700 overflow-hidden">
+              <div className="flex-1 p-3 bg-zinc-50 dark:bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 overflow-hidden">
                 <code className="text-[#6262bd] text-sm break-all">
                   {getStaffLoginUrl()}
                 </code>
@@ -329,7 +329,7 @@ export default function Security() {
 
         {/* QR Codes */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-          <div className="flex flex-col items-center p-4 bg-zinc-50 dark:bg-zinc-900 rounded-sm border border-zinc-200 dark:border-zinc-700">
+          <div className="flex flex-col items-center p-4 bg-zinc-50 dark:bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700">
             <p className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-3 uppercase tracking-wide">{t('installApp') || 'Install App'}</p>
             <div className="bg-white dark:bg-zinc-900 p-2 rounded-sm shadow-sm mb-3">
               <canvas ref={installCanvasRef} />
@@ -347,7 +347,7 @@ export default function Security() {
             </div>
           </div>
 
-          <div className="flex flex-col items-center p-4 bg-zinc-50 dark:bg-zinc-900 rounded-sm border border-zinc-200 dark:border-zinc-700">
+          <div className="flex flex-col items-center p-4 bg-zinc-50 dark:bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700">
             <p className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-3 uppercase tracking-wide">{t('loginPage') || 'Login Page'}</p>
             <div className="bg-white dark:bg-zinc-900 p-2 rounded-sm shadow-sm mb-3">
               <canvas ref={loginCanvasRef} />
@@ -367,7 +367,7 @@ export default function Security() {
         </div>
 
         {/* How it works */}
-        <div className="bg-zinc-50 dark:bg-zinc-900 rounded-sm p-4 border border-zinc-200 dark:border-zinc-700">
+        <div className="bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-4 border border-zinc-200 dark:border-zinc-700">
           <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-2">{t('howStaffLoginWorks') || 'How it works'}</p>
           <ol className="text-sm text-zinc-600 dark:text-zinc-400 space-y-1 list-decimal list-inside">
             <li>{t('loginSteps.step1') || 'Staff scan the Install App QR code to download the app'}</li>
@@ -412,7 +412,7 @@ export default function Security() {
               },
             ] : []),
           ].map(({ label, url, onCopy, copied, badge }) => (
-            <div key={label} className="flex flex-wrap items-center gap-2 p-3 bg-zinc-50 dark:bg-zinc-900 rounded-sm border border-zinc-200 dark:border-zinc-700">
+            <div key={label} className="flex flex-wrap items-center gap-2 p-3 bg-zinc-50 dark:bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700">
               <span className={`text-xs font-semibold px-2.5 py-1 rounded-sm shrink-0 ${badge}`}>{label}</span>
               <code className="flex-1 text-xs text-zinc-600 dark:text-zinc-400 truncate">{url || '...'}</code>
               <button

@@ -292,7 +292,7 @@ export default function ProductTaxSettings() {
         )}
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-6 p-1 bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 rounded-sm">
+        <div className="flex gap-1 mb-6 p-1 bg-zinc-100 dark:bg-zinc-800 rounded-sm">
           {tabs.map(tab => (
             <button
               key={tab.id}
@@ -309,7 +309,7 @@ export default function ProductTaxSettings() {
                 <span className={`ml-1 px-1.5 py-0.5 text-xs rounded-full font-medium ${
                   activeTab === tab.id
                     ? 'bg-[#6262bd]/10 text-[#6262bd]'
-                    : 'bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300'
+                    : 'bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400'
                 }`}>
                   {tab.badge}
                 </span>
@@ -365,7 +365,7 @@ export default function ProductTaxSettings() {
                           placeholder="Rate"
                         />
                         <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 font-medium">%</span>
-                        <label className="flex items-center gap-1 text-xs text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 whitespace-nowrap">
+                        <label className="flex items-center gap-1 text-xs text-zinc-600 dark:text-zinc-400 whitespace-nowrap">
                           <input
                             type="checkbox"
                             defaultChecked={cat.is_default}
@@ -438,7 +438,7 @@ export default function ProductTaxSettings() {
                   type="text"
                   value={newMenuTaxCategory.name}
                   onChange={(e) => setNewMenuTaxCategory({ ...newMenuTaxCategory, name: e.target.value })}
-                  className="flex-1 min-w-[160px] px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 dark:text-zinc-500"
+                  className="flex-1 min-w-[160px] px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 dark:text-zinc-500"
                   placeholder={t('menuTaxCategoryPlaceholder') || 'e.g., Alcohol, Soft Drinks, Food'}
                 />
                 <input
@@ -446,11 +446,11 @@ export default function ProductTaxSettings() {
                   value={newMenuTaxCategory.rate}
                   onChange={(e) => setNewMenuTaxCategory({ ...newMenuTaxCategory, rate: e.target.value })}
                   step="0.01" min="0" max="100"
-                  className="w-28 px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 dark:text-zinc-500"
+                  className="w-28 px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 dark:text-zinc-500"
                   placeholder="21.00"
                 />
                 <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 font-medium">%</span>
-                <label className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 whitespace-nowrap">
+                <label className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400 whitespace-nowrap">
                   <input
                     type="checkbox"
                     checked={newMenuTaxCategory.is_default}
@@ -575,7 +575,7 @@ export default function ProductTaxSettings() {
                   type="text"
                   value={newCategory.name}
                   onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-                  className="flex-1 min-w-[160px] px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 dark:text-zinc-500"
+                  className="flex-1 min-w-[160px] px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 dark:text-zinc-500"
                   placeholder={t('categoryNamePlaceholder') || 'e.g., Base Products, Alcohol, Sugary Products'}
                 />
                 <input
@@ -583,7 +583,7 @@ export default function ProductTaxSettings() {
                   value={newCategory.rate}
                   onChange={(e) => setNewCategory({ ...newCategory, rate: e.target.value })}
                   step="0.01" min="0" max="100"
-                  className="w-28 px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 dark:text-zinc-500"
+                  className="w-28 px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 dark:text-zinc-500"
                   placeholder="10.00"
                 />
                 <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 font-medium">%</span>
@@ -599,7 +599,7 @@ export default function ProductTaxSettings() {
 
             {/* Example hint */}
             <div className="mt-5 p-3 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-700/50 rounded-sm border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600">
-              <p className="text-xs font-medium text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 mb-1">{t('exampleCategories') || 'Example categories'}:</p>
+              <p className="text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1">{t('exampleCategories') || 'Example categories'}:</p>
               <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">
                 {t('exampleBase') || 'Base Products'} 10% · {t('exampleSugary') || 'Sugary Products'} 17% · {t('exampleAlcohol') || 'Alcohol'} 21% · {t('exampleLuxury') || 'Luxury Items'} 25%
               </p>

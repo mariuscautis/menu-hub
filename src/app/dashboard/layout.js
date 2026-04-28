@@ -704,8 +704,8 @@ export default function DashboardLayout({ children }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-6">
-        <div className="w-8 h-8 border-2 border-zinc-800 border-t-[#6262bd] rounded-full animate-spin mb-4" />
+      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex flex-col items-center justify-center p-6">
+        <div className="w-8 h-8 border-2 border-zinc-200 dark:border-zinc-800 border-t-[#6262bd] rounded-full animate-spin mb-4" />
         <p className="text-zinc-600 text-sm font-mono tracking-widest uppercase">Loading</p>
         {debug && (
           <pre className="mt-6 bg-zinc-900 border border-zinc-800 p-4 rounded text-xs text-zinc-500 max-w-2xl overflow-auto whitespace-pre-wrap">
@@ -730,7 +730,7 @@ export default function DashboardLayout({ children }) {
         <div className={`fixed inset-0 z-[9989] pointer-events-none border-4 transition-colors duration-500 ${!isOnline ? 'border-amber-400' : 'border-emerald-400'}`} />
       )}
 
-      <div className={`min-h-screen bg-zinc-950 flex relative${isImpersonating ? ' pt-10' : ''} transition-shadow duration-500`}>
+      <div className={`min-h-screen bg-zinc-50 dark:bg-zinc-950 flex relative${isImpersonating ? ' pt-10' : ''} transition-shadow duration-500`}>
 
       {/* Offline banner */}
       {!isOnline && (
@@ -858,7 +858,7 @@ export default function DashboardLayout({ children }) {
                 <div className="w-14 h-14 bg-zinc-800 flex items-center justify-center mx-auto mb-5">
                   <svg className="w-7 h-7 text-zinc-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
                 </div>
-                <h2 className="text-xl font-bold text-white mb-2">Your account is currently restricted</h2>
+                <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">Your account is currently restricted</h2>
                 <p className="text-zinc-500 text-sm leading-relaxed mb-6">This account has been deactivated. You can request to recover it — our team will review and get back to you.</p>
                 {alreadyRequested ? (
                   <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 mb-4">
@@ -886,7 +886,7 @@ export default function DashboardLayout({ children }) {
                 <div className="w-14 h-14 bg-red-500/10 flex items-center justify-center mx-auto mb-5">
                   <svg className="w-7 h-7 text-red-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
                 </div>
-                <h2 className="text-xl font-bold text-white mb-2">{s.suspended}</h2>
+                <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">{s.suspended}</h2>
                 <p className="text-zinc-500 text-sm leading-relaxed mb-2">{msg || s.suspendedDefault}</p>
                 <p className="text-zinc-600 text-xs mb-7">{s.suspendedSub}</p>
                 <a href="mailto:support@venoapp.com?subject=Menu Hub - Account suspended" className="block w-full py-3 px-6 bg-[#6262bd] hover:bg-[#5151a8] text-white rounded-none font-semibold text-sm transition-colors">
@@ -905,7 +905,7 @@ export default function DashboardLayout({ children }) {
                 <div className="w-14 h-14 bg-[#6262bd]/10 flex items-center justify-center mx-auto mb-5">
                   <svg className="w-7 h-7 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
                 </div>
-                <h2 className="text-xl font-bold text-white mb-2">Welcome back!</h2>
+                <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">Welcome back!</h2>
                 <p className="text-zinc-500 text-sm leading-relaxed mb-7">Your account has been reinstated. To get started, choose a plan and subscribe below.</p>
                 <a href="/dashboard/settings/billing" className="block w-full py-3 px-6 bg-[#6262bd] hover:bg-[#5151a8] text-white rounded-none font-semibold text-sm transition-colors">
                   {s.viewPlans}
@@ -923,7 +923,7 @@ export default function DashboardLayout({ children }) {
                 <div className="w-14 h-14 bg-amber-500/10 flex items-center justify-center mx-auto mb-5">
                   <svg className="w-7 h-7 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
                 </div>
-                <h2 className="text-xl font-bold text-white mb-2">{s.trialEnded}</h2>
+                <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">{s.trialEnded}</h2>
                 <p className="text-zinc-500 text-sm leading-relaxed mb-7">{s.trialEndedBody}</p>
                 <a href="/dashboard/settings/billing" className="block w-full py-3 px-6 bg-[#6262bd] hover:bg-[#5151a8] text-white rounded-none font-semibold text-sm transition-colors mb-3">
                   {s.viewPlans}
@@ -945,7 +945,7 @@ export default function DashboardLayout({ children }) {
                   <div className="w-14 h-14 bg-red-500/10 flex items-center justify-center mx-auto mb-5">
                     <svg className="w-7 h-7 text-red-400" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
                   </div>
-                  <h2 className="text-xl font-bold text-white mb-2">{s.accessPaused}</h2>
+                  <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">{s.accessPaused}</h2>
                   <p className="text-zinc-500 text-sm leading-relaxed mb-7">{s.accessPausedBody}</p>
                   <a href="/dashboard/settings/billing" className="block w-full py-3 px-6 bg-[#6262bd] hover:bg-[#5151a8] text-white rounded-none font-semibold text-sm transition-colors mb-3">
                     {s.updatePayment}
@@ -1003,14 +1003,14 @@ export default function DashboardLayout({ children }) {
       {/* ── Sidebar ───────────────────────────────────────────────────────── */}
       <aside className={`
         fixed inset-y-0 left-0 z-50 flex flex-col h-screen
-        bg-zinc-950 border-r border-zinc-800
+        bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800
         transition-all duration-300 ease-in-out overflow-hidden
         ${fullWidthMode ? '-translate-x-full' : 'translate-x-0'}
         ${sidebarOpen ? 'w-72' : 'w-16'}
       `}>
 
         {/* Sidebar header */}
-        <div className={`border-b border-zinc-800 flex-shrink-0 ${sidebarOpen ? 'p-5' : 'py-4 px-2'}`}>
+        <div className={`border-b border-zinc-200 dark:border-zinc-800 flex-shrink-0 ${sidebarOpen ? 'p-5' : 'py-4 px-2'}`}>
           <div className={`flex items-center ${sidebarOpen ? 'justify-between' : 'justify-center'}`}>
             {sidebarOpen ? (
               <div className="flex items-center space-x-2 flex-1 min-w-0">
@@ -1027,7 +1027,7 @@ export default function DashboardLayout({ children }) {
                       {staffAvatar ? (
                         <img src={staffAvatar} alt={staffName} className="w-14 h-14 rounded-full object-cover border border-zinc-700 relative z-10" />
                       ) : userType === 'owner' && restaurant?.logo_url ? (
-                        <div className="w-10 h-10 flex items-center justify-center overflow-hidden bg-zinc-900 border border-zinc-800 relative z-10">
+                        <div className="w-10 h-10 flex items-center justify-center overflow-hidden bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 relative z-10">
                           <img src={restaurant.logo_url} alt={restaurant.name} className="max-w-full max-h-full object-contain" />
                         </div>
                       ) : (
@@ -1042,7 +1042,7 @@ export default function DashboardLayout({ children }) {
                   </div>
                 ) : restaurant?.logo_url ? (
                   <>
-                    <div className="w-10 h-10 flex items-center justify-center overflow-hidden bg-zinc-900 border border-zinc-800 flex-shrink-0">
+                    <div className="w-10 h-10 flex items-center justify-center overflow-hidden bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex-shrink-0">
                       <img src={restaurant.logo_url} alt={restaurant.name} className="max-w-full max-h-full object-contain" />
                     </div>
                     <span className="text-base font-bold text-zinc-200 truncate">{restaurant?.name || 'Veno App'}</span>
@@ -1110,8 +1110,8 @@ export default function DashboardLayout({ children }) {
                       sidebarOpen ? 'justify-between px-3 py-2.5' : 'justify-center p-3'
                     } ${
                       isActive
-                        ? 'bg-zinc-800 text-white'
-                        : 'text-zinc-500 hover:bg-zinc-900 hover:text-zinc-200'
+                        ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white'
+                        : 'text-zinc-500 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-200'
                     }`}
                   >
                     {sidebarOpen ? (
@@ -1144,11 +1144,11 @@ export default function DashboardLayout({ children }) {
             })}
 
             {isPlatformAdmin && (
-              <li className={`${sidebarOpen ? 'pt-3 mt-3' : 'pt-2 mt-2'} border-t border-zinc-800`}>
+              <li className={`${sidebarOpen ? 'pt-3 mt-3' : 'pt-2 mt-2'} border-t border-zinc-200 dark:border-zinc-800`}>
                 <Link
                   href="/admin"
                   title={!sidebarOpen ? 'Platform Admin' : undefined}
-                  className={`flex items-center font-medium text-amber-500 hover:bg-zinc-900 transition-colors ${
+                  className={`flex items-center font-medium text-amber-500 hover:bg-amber-50 dark:hover:bg-zinc-900 transition-colors ${
                     sidebarOpen ? 'space-x-3 px-3 py-2.5' : 'justify-center p-3'
                   }`}
                 >
@@ -1163,12 +1163,12 @@ export default function DashboardLayout({ children }) {
         </nav>
 
         {/* Sidebar footer */}
-        <div className="border-t border-zinc-800 mt-auto flex-shrink-0">
+        <div className="border-t border-zinc-200 dark:border-zinc-800 mt-auto flex-shrink-0">
           {sidebarOpen ? (
             <>
               {(userType === 'staff' || userType === 'staff-admin') && restaurant && (
                 <div className="px-3 pt-3">
-                  <div className="p-2.5 bg-zinc-900 border border-zinc-800">
+                  <div className="p-2.5 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
                     <HubConnectionStatus restaurantId={restaurant.id} />
                   </div>
                 </div>
@@ -1253,7 +1253,7 @@ export default function DashboardLayout({ children }) {
         ${fullWidthMode ? 'ml-0' : sidebarOpen ? 'ml-16 sm:ml-72' : 'ml-16'}
         ${fullWidthMode ? 'p-4' : 'p-4 md:p-6'}
         ${debug ? 'mt-10' : ''}
-        transition-all duration-300 bg-zinc-950
+        transition-all duration-300 bg-zinc-50 dark:bg-zinc-950
       `}>
         <div className={`${fullWidthMode ? 'h-[calc(100vh-4rem)] overflow-auto' : ''}`}>
           <RestaurantProvider value={restaurantContextValue}>

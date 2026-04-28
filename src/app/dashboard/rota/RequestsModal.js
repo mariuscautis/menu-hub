@@ -137,7 +137,7 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white dark:bg-zinc-900 rounded-sm w-full max-w-3xl max-h-[92vh] flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
+      <div className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm w-full max-w-3xl max-h-[92vh] flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 flex-shrink-0">
@@ -174,13 +174,13 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
         <div className="overflow-y-auto flex-1 px-6 py-4">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16">
-              <div className="w-8 h-8 border-2 border-zinc-200 dark:border-zinc-800 border-t-[#6262bd] rounded-full animate-spin mb-4"></div>
+              <div className="w-8 h-8 border-2 border-zinc-200 dark:border-zinc-200 dark:border-zinc-800 border-t-[#6262bd] rounded-full animate-spin mb-4"></div>
               <p className="text-zinc-500 dark:text-zinc-400">{t('loadingRequests')}</p>
             </div>
           ) : requests.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-zinc-400 dark:text-zinc-500">
               <div className="text-5xl mb-4">📭</div>
-              <p className="font-medium text-zinc-600 dark:text-zinc-400 dark:text-zinc-300">{t('noRequestsFound')}</p>
+              <p className="font-medium text-zinc-600 dark:text-zinc-400">{t('noRequestsFound')}</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -232,7 +232,7 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
                         )}
                         <button
                           onClick={e => { e.stopPropagation(); handleEdit(request); }}
-                          className="px-3 py-1.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 rounded-sm hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 transition-colors text-xs font-semibold"
+                          className="px-3 py-1.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-sm hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 transition-colors text-xs font-semibold"
                         >✎ {t('edit')}</button>
                         <span className={`text-zinc-400 dark:text-zinc-500 text-sm transition-transform ${isExpanded ? 'rotate-180' : ''}`}>▾</span>
                       </div>
@@ -240,7 +240,7 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
 
                     {/* Expanded details */}
                     {isExpanded && (
-                      <div className="px-5 pb-4 pt-1 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800/50 border-t border-zinc-200 dark:border-zinc-800 dark:border-zinc-700">
+                      <div className="px-5 pb-4 pt-1 bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900/50 border-t border-zinc-200 dark:border-zinc-800 dark:border-zinc-700">
                         {request.request_type === 'time_off' && (
                           <div className="grid grid-cols-2 gap-3">
                             <div>
@@ -292,7 +292,7 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
       {/* Rejection inline modal */}
       {selectedRequest && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4" onClick={() => { setSelectedRequest(null); setRejectionReason(''); }}>
-          <div className="bg-white dark:bg-zinc-900 rounded-sm p-6 max-w-md w-full shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-6 max-w-md w-full shadow-2xl" onClick={e => e.stopPropagation()}>
             <h3 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-1">{t('rejectRequestTitle')}</h3>
             <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-4">
               Rejecting request from <strong>{selectedRequest.staff?.name}</strong>
@@ -303,10 +303,10 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
               rows="3"
               autoFocus
               placeholder={t('rejectionReasonPlaceholder')}
-              className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] resize-none text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 mb-4"
+              className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] resize-none text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 mb-4"
             />
             <div className="flex gap-3">
-              <button onClick={() => { setSelectedRequest(null); setRejectionReason(''); }} className="flex-1 px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors">
+              <button onClick={() => { setSelectedRequest(null); setRejectionReason(''); }} className="flex-1 px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm text-zinc-600 dark:text-zinc-400 font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors">
                 {tCommon('cancel')}
               </button>
               <button onClick={() => handleReject(selectedRequest)} className="flex-1 px-4 py-3 bg-red-600 text-white rounded-sm font-semibold hover:bg-red-700 transition-colors">
@@ -320,13 +320,13 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
       {/* Edit modal */}
       {editingRequest && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4" onClick={() => setEditingRequest(null)}>
-          <div className="bg-white dark:bg-zinc-900 rounded-sm w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-700">
               <h3 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{t('editRequestTitle')}</h3>
               <button onClick={() => setEditingRequest(null)} className="w-8 h-8 flex items-center justify-center rounded-sm text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-xl font-bold">×</button>
             </div>
             <div className="px-6 py-5 space-y-4">
-              <div className="p-3 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 rounded-sm">
+              <div className="p-3 bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm">
                 <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">{editingRequest.staff?.name} <span className="font-normal text-zinc-500 dark:text-zinc-400">({editingRequest.staff?.role})</span></p>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -334,7 +334,7 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
                   <div key={name}>
                     <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mb-1.5">{label}</label>
                     <input type="date" name={name} value={editForm[name]} onChange={e => setEditForm(p => ({ ...p, [name]: e.target.value }))}
-                      className="w-full px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800" />
+                      className="w-full px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800" />
                   </div>
                 ))}
               </div>
@@ -342,7 +342,7 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
                 <div>
                   <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mb-1.5">{t('leaveTypeLabel')}</label>
                   <select name="leave_type" value={editForm.leave_type} onChange={e => setEditForm(p => ({ ...p, leave_type: e.target.value }))}
-                    className="w-full px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800">
+                    className="w-full px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800">
                     <option value="">{t('selectType')}</option>
                     <option value="annual_holiday">Annual Holiday</option>
                     <option value="sick_self_cert">Sick (Self-cert)</option>
@@ -355,7 +355,7 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
                 <div>
                   <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mb-1.5">{t('statusLabel')}</label>
                   <select name="status" value={editForm.status} onChange={e => setEditForm(p => ({ ...p, status: e.target.value }))}
-                    className="w-full px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800">
+                    className="w-full px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800">
                     <option value="pending">Pending</option>
                     <option value="approved">Approved</option>
                     <option value="rejected">Rejected</option>
@@ -366,18 +366,18 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
               <div>
                 <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mb-1.5">{t('reasonLabel')}</label>
                 <textarea name="reason" value={editForm.reason} onChange={e => setEditForm(p => ({ ...p, reason: e.target.value }))} rows="2" placeholder={t('reasonPlaceholder')}
-                  className="w-full px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] resize-none text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 placeholder:text-zinc-400 dark:text-zinc-500" />
+                  className="w-full px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] resize-none text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 placeholder:text-zinc-400 dark:text-zinc-500" />
               </div>
               {editForm.status === 'rejected' && (
                 <div>
                   <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mb-1.5">{t('rejectionReasonLabel')}</label>
                   <textarea name="rejection_reason" value={editForm.rejection_reason} onChange={e => setEditForm(p => ({ ...p, rejection_reason: e.target.value }))} rows="2" placeholder={t('rejectionReasonEditPlaceholder')}
-                    className="w-full px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] resize-none text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 placeholder:text-zinc-400 dark:text-zinc-500" />
+                    className="w-full px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] resize-none text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 placeholder:text-zinc-400 dark:text-zinc-500" />
                 </div>
               )}
             </div>
             <div className="px-6 py-4 border-t border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 flex gap-3">
-              <button onClick={() => setEditingRequest(null)} className="flex-1 px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors">{tCommon('cancel')}</button>
+              <button onClick={() => setEditingRequest(null)} className="flex-1 px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm text-zinc-600 dark:text-zinc-400 font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors">{tCommon('cancel')}</button>
               <button onClick={handleSaveEdit} className="flex-1 px-4 py-3 bg-[#6262bd] text-white rounded-sm font-semibold hover:bg-[#5252a5] transition-colors">{t('saveChanges')}</button>
             </div>
           </div>

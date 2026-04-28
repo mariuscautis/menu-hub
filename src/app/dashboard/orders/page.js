@@ -1302,7 +1302,7 @@ export default function Orders() {
           }}
         >
           <div
-            className="bg-white dark:bg-zinc-900 rounded-sm p-8 w-full max-w-md"
+            className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 mb-4">{t('cancelOrderTitle')}</h2>
@@ -1378,7 +1378,7 @@ export default function Orders() {
           }}
         >
           <div
-            className="bg-white dark:bg-zinc-900 rounded-sm p-8 w-full max-w-md"
+            className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="text-center mb-6">
@@ -1402,7 +1402,7 @@ export default function Orders() {
                 <div className="mb-6">
                   {/* Customer Info */}
                   {order.customer_name && (
-                    <div className="bg-zinc-50 dark:bg-zinc-900 rounded-sm p-4 mb-4">
+                    <div className="bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-4 mb-4">
                       <p className="text-sm text-zinc-500 dark:text-zinc-400">{t('customerName') || 'Customer'}</p>
                       <p className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">{order.customer_name}</p>
                     </div>
@@ -1533,13 +1533,13 @@ export default function Orders() {
               <div className="flex gap-2 mt-2">
                 <button
                   onClick={() => setRefundAmount(((refundOrder.total || 0) - (refundOrder.refund_total || 0)).toFixed(2))}
-                  className="text-xs px-3 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 rounded-sm hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600"
+                  className="text-xs px-3 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-sm hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600"
                 >
                   {t('fullRefund') || 'Full Refund'}
                 </button>
                 <button
                   onClick={() => setRefundAmount((((refundOrder.total || 0) - (refundOrder.refund_total || 0)) / 2).toFixed(2))}
-                  className="text-xs px-3 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 rounded-sm hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600"
+                  className="text-xs px-3 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-sm hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600"
                 >
                   {t('halfRefund') || '50%'}
                 </button>
@@ -1603,7 +1603,7 @@ export default function Orders() {
                   setRefundOrder(null)
                 }}
                 disabled={processingRefund}
-                className="flex-1 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-700 disabled:opacity-50"
+                className="flex-1 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-700 disabled:opacity-50"
               >
                 {tc('cancel') || 'Cancel'}
               </button>
@@ -1669,7 +1669,7 @@ export default function Orders() {
             <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-700/50 rounded-sm p-4 mb-4">
               <div className="flex justify-between items-center mb-2">
                 <span className="font-medium text-zinc-800 dark:text-zinc-200">{voidItem.name}</span>
-                <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-300">
+                <span className="text-zinc-600 dark:text-zinc-400">
                   {formatCurrency(voidItem.price_at_time)} each
                 </span>
               </div>
@@ -1691,7 +1691,7 @@ export default function Orders() {
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setVoidQuantity(Math.max(1, voidQuantity - 1))}
-                  className="w-10 h-10 rounded-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 flex items-center justify-center font-bold text-lg"
+                  className="w-10 h-10 rounded-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 flex items-center justify-center font-bold text-lg"
                 >
                   -
                 </button>
@@ -1705,7 +1705,7 @@ export default function Orders() {
                 />
                 <button
                   onClick={() => setVoidQuantity(Math.min(voidItem.quantity, voidQuantity + 1))}
-                  className="w-10 h-10 rounded-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 flex items-center justify-center font-bold text-lg"
+                  className="w-10 h-10 rounded-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 flex items-center justify-center font-bold text-lg"
                 >
                   +
                 </button>
@@ -1740,19 +1740,19 @@ export default function Orders() {
               <div className="flex flex-wrap gap-2 mt-2">
                 <button
                   onClick={() => setVoidReason(t('voidReasonChanged') || 'Customer changed mind')}
-                  className="text-xs px-3 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 rounded-sm hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600"
+                  className="text-xs px-3 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-sm hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600"
                 >
                   {t('voidReasonChanged') || 'Customer changed mind'}
                 </button>
                 <button
                   onClick={() => setVoidReason(t('voidReasonWrong') || 'Wrong item ordered')}
-                  className="text-xs px-3 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 rounded-sm hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600"
+                  className="text-xs px-3 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-sm hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600"
                 >
                   {t('voidReasonWrong') || 'Wrong item'}
                 </button>
                 <button
                   onClick={() => setVoidReason(t('voidReasonStock') || 'Out of stock')}
-                  className="text-xs px-3 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 rounded-sm hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600"
+                  className="text-xs px-3 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-sm hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600"
                 >
                   {t('voidReasonStock') || 'Out of stock'}
                 </button>
@@ -1768,7 +1768,7 @@ export default function Orders() {
                   setVoidOrder(null)
                 }}
                 disabled={processingVoid}
-                className="flex-1 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-700 disabled:opacity-50"
+                className="flex-1 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-700 disabled:opacity-50"
               >
                 {tc('cancel') || 'Cancel'}
               </button>

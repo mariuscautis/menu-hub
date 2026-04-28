@@ -15,7 +15,7 @@ const STATUS_CONFIG = {
   pending:   { label: 'Pending',   bg: 'bg-amber-100 dark:bg-amber-900/30',  text: 'text-amber-700 dark:text-amber-400',  dot: 'bg-amber-500',  border: 'border-amber-200 dark:border-amber-800' },
   approved:  { label: 'Approved',  bg: 'bg-green-100 dark:bg-green-900/30',  text: 'text-green-700 dark:text-green-400',  dot: 'bg-green-500',  border: 'border-green-200 dark:border-green-800' },
   rejected:  { label: 'Rejected',  bg: 'bg-red-100 dark:bg-red-900/30',      text: 'text-red-700 dark:text-red-400',      dot: 'bg-red-500',    border: 'border-red-200 dark:border-red-800' },
-  cancelled: { label: 'Cancelled', bg: 'bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800',     text: 'text-zinc-500 dark:text-zinc-400 dark:text-zinc-400',  dot: 'bg-slate-400',  border: 'border-zinc-200 dark:border-zinc-700 dark:border-zinc-700' }
+  cancelled: { label: 'Cancelled', bg: 'bg-zinc-100 dark:bg-zinc-800',     text: 'text-zinc-500 dark:text-zinc-400 dark:text-zinc-400',  dot: 'bg-slate-400',  border: 'border-zinc-200 dark:border-zinc-700' }
 }
 
 const LEAVE_LABELS = {
@@ -248,7 +248,7 @@ export default function TimeOffRequestsPage() {
             <div>
               <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mb-1">{t('staffMember')}</label>
               <select value={selectedStaff} onChange={e => setSelectedStaff(e.target.value)}
-                className="w-full px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-sm text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 transition-colors">
+                className="w-full px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-sm text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 transition-colors">
                 <option value="all">{t('allStaff')}</option>
                 {staffMembers.map(s => <option key={s.id} value={s.id}>{s.name} ({s.role})</option>)}
               </select>
@@ -256,7 +256,7 @@ export default function TimeOffRequestsPage() {
             <div>
               <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mb-1">Leave Type</label>
               <select value={selectedLeaveType} onChange={e => setSelectedLeaveType(e.target.value)}
-                className="w-full px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-sm text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 transition-colors">
+                className="w-full px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-sm text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 transition-colors">
                 <option value="all">All types</option>
                 {Object.entries(LEAVE_LABELS).map(([k, v]) => <option key={k} value={k}>{v.emoji} {v.label}</option>)}
               </select>
@@ -264,12 +264,12 @@ export default function TimeOffRequestsPage() {
             <div>
               <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mb-1">{t('fromDate')}</label>
               <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
-                className="w-full px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-sm text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 transition-colors" />
+                className="w-full px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-sm text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 transition-colors" />
             </div>
             <div>
               <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mb-1">{t('toDate')}</label>
               <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
-                className="w-full px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-sm text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 transition-colors" />
+                className="w-full px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-sm text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 transition-colors" />
             </div>
           </div>
         </div>
@@ -293,7 +293,7 @@ export default function TimeOffRequestsPage() {
           <div className="flex items-center gap-2 flex-shrink-0">
             <label className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 whitespace-nowrap">Sort by:</label>
             <select value={sortBy} onChange={e => setSortBy(e.target.value)}
-              className="flex-1 sm:flex-none px-3 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm text-sm text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-900 focus:outline-none focus:border-[#6262bd] transition-colors">
+              className="flex-1 sm:flex-none px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm text-sm text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-900 focus:outline-none focus:border-[#6262bd] transition-colors">
               <option value="date_desc">Latest first</option>
               <option value="date_asc">Earliest first</option>
               <option value="submitted">Recently submitted</option>
@@ -306,13 +306,13 @@ export default function TimeOffRequestsPage() {
         {/* Requests */}
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 rounded-sm">
-            <div className="w-8 h-8 border-2 border-zinc-200 dark:border-zinc-800 border-t-[#6262bd] rounded-full animate-spin mb-4"></div>
+            <div className="w-8 h-8 border-2 border-zinc-200 dark:border-zinc-200 dark:border-zinc-800 border-t-[#6262bd] rounded-full animate-spin mb-4"></div>
             <p className="text-zinc-500 dark:text-zinc-400">{t('loadingRequests')}</p>
           </div>
         ) : displayRequests.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 rounded-sm text-zinc-400 dark:text-zinc-500">
             <div className="text-5xl mb-4">🌴</div>
-            <p className="font-medium text-zinc-600 dark:text-zinc-400 dark:text-zinc-300">{t('noRequestsFound')}</p>
+            <p className="font-medium text-zinc-600 dark:text-zinc-400">{t('noRequestsFound')}</p>
             {hasActiveFilters && <button onClick={clearFilters} className="mt-3 text-sm text-[#6262bd] font-medium hover:underline">Clear filters</button>}
           </div>
         ) : (
@@ -326,7 +326,7 @@ export default function TimeOffRequestsPage() {
                 <div key={request.id} className={`bg-white dark:bg-zinc-900 border-2 rounded-sm overflow-hidden transition-all ${sc.border}`}>
                   {/* Card row */}
                   <div
-                    className="flex items-start gap-3 px-4 py-4 cursor-pointer hover:bg-zinc-50 dark:bg-zinc-900/50 dark:hover:bg-zinc-800/50 transition-colors"
+                    className="flex items-start gap-3 px-4 py-4 cursor-pointer hover:bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900/50 dark:hover:bg-zinc-100/50 dark:bg-zinc-800/50 transition-colors"
                     onClick={() => setExpandedId(isExpanded ? null : request.id)}
                   >
                     {/* Avatar */}
@@ -389,7 +389,7 @@ export default function TimeOffRequestsPage() {
 
                   {/* Expanded details */}
                   {isExpanded && (
-                    <div className="px-4 pb-5 pt-3 border-t border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/50 dark:bg-zinc-800/30">
+                    <div className="px-4 pb-5 pt-3 border-t border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900/50 dark:bg-zinc-800/30">
 
                       {editingId === request.id ? (
                         /* ── Edit form ── */
@@ -427,7 +427,7 @@ export default function TimeOffRequestsPage() {
                           <p className="text-xs text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 mb-3">Saving will notify the staff member by email that their request has been amended.</p>
                           <div className="flex gap-2">
                             <button onClick={() => setEditingId(null)}
-                              className="flex-1 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 py-2 rounded-sm text-sm font-medium hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 transition-colors">
+                              className="flex-1 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 py-2 rounded-sm text-sm font-medium hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 transition-colors">
                               Cancel
                             </button>
                             <button onClick={() => submitEdit(request)} disabled={editSaving}
@@ -509,7 +509,7 @@ export default function TimeOffRequestsPage() {
       {/* Reject Modal */}
       {showRejectModal && selectedRequest && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={() => setShowRejectModal(false)}>
-          <div className="bg-white dark:bg-zinc-900 rounded-sm w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="px-6 py-5 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-700">
               <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{t('rejectModalTitle')}</h2>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-1">
@@ -527,12 +527,12 @@ export default function TimeOffRequestsPage() {
                 onChange={e => setRejectionReason(e.target.value)}
                 rows={4}
                 autoFocus
-                className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] resize-none text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 placeholder:text-zinc-400 dark:text-zinc-500 transition-colors"
+                className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] resize-none text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 placeholder:text-zinc-400 dark:text-zinc-500 transition-colors"
                 placeholder={t('reasonPlaceholder')}
               />
               <div className="flex gap-3 mt-4">
                 <button onClick={() => setShowRejectModal(false)}
-                  className="flex-1 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors">
+                  className="flex-1 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors">
                   {t('cancel')}
                 </button>
                 <button onClick={submitRejection}

@@ -81,7 +81,7 @@ export default function CurrentlyWorkingModal({ restaurant, onClose }) {
   };
 
   const getStatus = (att) => {
-    if (att.clock_out) return { label: t('statusCompleted'), color: 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300', dot: 'bg-slate-400' };
+    if (att.clock_out) return { label: t('statusCompleted'), color: 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400', dot: 'bg-slate-400' };
     if (att.break_start && !att.break_end) return { label: t('statusOnBreak'), color: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400', dot: 'bg-amber-500' };
     return { label: t('statusWorking'), color: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400', dot: 'bg-green-500' };
   };
@@ -121,13 +121,13 @@ export default function CurrentlyWorkingModal({ restaurant, onClose }) {
         <div className="overflow-y-auto flex-1 px-6 py-4">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16">
-              <div className="w-8 h-8 border-2 border-zinc-200 dark:border-zinc-800 border-t-[#6262bd] rounded-full animate-spin mb-4"></div>
+              <div className="w-8 h-8 border-2 border-zinc-200 dark:border-zinc-200 dark:border-zinc-800 border-t-[#6262bd] rounded-full animate-spin mb-4"></div>
               <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('loading')}</p>
             </div>
           ) : activeStaff.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-zinc-400 dark:text-zinc-500">
               <div className="text-5xl mb-4">👥</div>
-              <p className="font-medium text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 text-lg">{t('noRecordsTitle')}</p>
+              <p className="font-medium text-zinc-600 dark:text-zinc-400 text-lg">{t('noRecordsTitle')}</p>
               <p className="text-sm mt-2 text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('noRecordsSubtitle')}</p>
             </div>
           ) : (
@@ -147,7 +147,7 @@ export default function CurrentlyWorkingModal({ restaurant, onClose }) {
                     }`}
                   >
                     {/* Avatar */}
-                    <div className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-sm ${isActive ? 'bg-green-500 text-white' : 'bg-zinc-200 dark:bg-zinc-700 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300'}`}>
+                    <div className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-sm ${isActive ? 'bg-green-500 text-white' : 'bg-zinc-200 dark:bg-zinc-700 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400'}`}>
                       {att.staff?.name?.charAt(0).toUpperCase() || '?'}
                     </div>
 

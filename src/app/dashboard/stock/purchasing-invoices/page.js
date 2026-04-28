@@ -499,7 +499,7 @@ export default function PurchasingInvoices() {
           onClick={() => setShowInvoiceModal(false)}
         >
           <div
-            className="bg-white dark:bg-zinc-900 rounded-sm p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 mb-6">
@@ -655,7 +655,7 @@ export default function PurchasingInvoices() {
           onClick={() => setShowDetailModal(false)}
         >
           <div
-            className="bg-white dark:bg-zinc-900 rounded-sm p-8 w-full max-w-3xl max-h-[90vh] overflow-y-auto"
+            className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 w-full max-w-3xl max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-start mb-6">
@@ -674,7 +674,7 @@ export default function PurchasingInvoices() {
             </div>
 
             {/* Invoice Info */}
-            <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-sm">
+            <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm">
               <div>
                 <p className="text-sm text-zinc-500 dark:text-zinc-400">{t('supplier')}</p>
                 <p className="font-medium text-zinc-800 dark:text-zinc-200">{viewingInvoice.supplier_name || '-'}</p>
@@ -730,7 +730,7 @@ export default function PurchasingInvoices() {
             <div>
               <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-3">{t('linkedItems')}</h3>
               {linkedItems.length === 0 ? (
-                <div className="text-center py-8 bg-zinc-50 dark:bg-zinc-900 rounded-sm">
+                <div className="text-center py-8 bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm">
                   <p className="text-zinc-500 dark:text-zinc-400">{t('noLinkedItems')}</p>
                 </div>
               ) : (

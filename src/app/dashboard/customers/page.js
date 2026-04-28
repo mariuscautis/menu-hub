@@ -532,7 +532,7 @@ export default function CustomersPage() {
                   className={`py-2.5 px-3 rounded-sm text-sm font-medium border-2 transition-colors ${
                     restrictionMode === 'blocked' || (selected.restriction?.type === 'blocked' && !restrictionMode)
                       ? 'bg-red-600 border-red-600 text-white'
-                      : 'border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 hover:border-red-300 hover:text-red-600'
+                      : 'border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 hover:border-red-300 hover:text-red-600'
                   }`}
                 >
                   {t('blockBtn')}
@@ -547,7 +547,7 @@ export default function CustomersPage() {
                   className={`py-2.5 px-3 rounded-sm text-sm font-medium border-2 transition-colors ${
                     restrictionMode === 'fee_required' || (selected.restriction?.type === 'fee_required' && !restrictionMode)
                       ? 'bg-amber-500 border-amber-500 text-white'
-                      : 'border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 hover:border-amber-300 hover:text-amber-600'
+                      : 'border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 hover:border-amber-300 hover:text-amber-600'
                   }`}
                 >
                   {t('depositBtn')}

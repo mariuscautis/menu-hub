@@ -77,7 +77,7 @@ export default function StaffHub() {
             <Link
               key={section.href}
               href={section.href}
-              className="group flex flex-col items-center text-center gap-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 hover:border-[#6262bd] dark:hover:border-[#6262bd] hover:shadow-lg transition-all"
+              className="group flex flex-col items-center text-center gap-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 hover:border-[#6262bd] dark:hover:border-[#6262bd] hover:shadow-lg transition-all"
             >
               <div className={`${section.bg} p-4 rounded-sm ${section.color} group-hover:scale-110 transition-transform`}>
                 {section.icon}

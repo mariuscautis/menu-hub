@@ -85,12 +85,12 @@ function SlotPill({ label, value }) {
 
 function ExpandedRow({ event, formatCurrency }) {
   return (
-    <div className="px-4 py-4 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800/50 border-t border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 space-y-4">
+    <div className="px-4 py-4 bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900/50 border-t border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 space-y-4">
 
       {/* Line items */}
       <div>
         <h4 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 uppercase tracking-wide mb-2">Line Items</h4>
-        <div className="rounded-sm border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 overflow-hidden">
+        <div className="rounded-sm border border-zinc-200 dark:border-zinc-700 overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-zinc-100 dark:bg-zinc-800 text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">
               <tr>
@@ -120,7 +120,7 @@ function ExpandedRow({ event, formatCurrency }) {
       {(event.tax_lines || []).length > 0 && (
         <div>
           <h4 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 uppercase tracking-wide mb-2">Tax Lines</h4>
-          <div className="rounded-sm border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 overflow-hidden">
+          <div className="rounded-sm border border-zinc-200 dark:border-zinc-700 overflow-hidden">
             <table className="w-full text-sm">
               <thead className="bg-zinc-100 dark:bg-zinc-800 text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">
                 <tr>
@@ -149,19 +149,19 @@ function ExpandedRow({ event, formatCurrency }) {
       <div>
         <h4 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 uppercase tracking-wide mb-2">Tamper Evidence</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs font-mono">
-          <div className="bg-white dark:bg-zinc-900 rounded-sm border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 p-3 space-y-1">
+          <div className="bg-white dark:bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 p-3 space-y-1">
             <div className="text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 mb-1">Content Hash (SHA-256)</div>
             <div className="text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 break-all">{event.content_hash || '—'}</div>
           </div>
-          <div className="bg-white dark:bg-zinc-900 rounded-sm border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 p-3 space-y-1">
+          <div className="bg-white dark:bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 p-3 space-y-1">
             <div className="text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 mb-1">Chain Hash (SHA-256)</div>
             <div className="text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 break-all">{event.chain_hash || '—'}</div>
           </div>
-          <div className="bg-white dark:bg-zinc-900 rounded-sm border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 p-3">
+          <div className="bg-white dark:bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 p-3">
             <div className="text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 mb-1">Previous Event ID</div>
             <div className="text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">{event.previous_event_id || 'GENESIS (first record)'}</div>
           </div>
-          <div className="bg-white dark:bg-zinc-900 rounded-sm border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 p-3">
+          <div className="bg-white dark:bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 p-3">
             <div className="text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 mb-1">Legal Basis / Retention</div>
             <div className="text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">{event.legal_basis || '—'}</div>
             {event.delete_after && (
@@ -180,25 +180,25 @@ function ExpandedRow({ event, formatCurrency }) {
           <h4 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 uppercase tracking-wide mb-2">Fiscal Lifecycle Data</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             {event.pre_authorisation && (
-              <div className="bg-white dark:bg-zinc-900 rounded-sm border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 p-3">
+              <div className="bg-white dark:bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 p-3">
                 <div className="text-xs text-zinc-400 dark:text-zinc-500 mb-1">Pre-Authorisation</div>
                 <pre className="text-xs text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 overflow-auto max-h-32">{JSON.stringify(event.pre_authorisation, null, 2)}</pre>
               </div>
             )}
             {event.signing && (
-              <div className="bg-white dark:bg-zinc-900 rounded-sm border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 p-3">
+              <div className="bg-white dark:bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 p-3">
                 <div className="text-xs text-zinc-400 dark:text-zinc-500 mb-1">Signing (TSS / Certificate)</div>
                 <pre className="text-xs text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 overflow-auto max-h-32">{JSON.stringify(event.signing, null, 2)}</pre>
               </div>
             )}
             {event.transmission && (
-              <div className="bg-white dark:bg-zinc-900 rounded-sm border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 p-3">
+              <div className="bg-white dark:bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 p-3">
                 <div className="text-xs text-zinc-400 dark:text-zinc-500 mb-1">Transmission</div>
                 <pre className="text-xs text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 overflow-auto max-h-32">{JSON.stringify(event.transmission, null, 2)}</pre>
               </div>
             )}
             {event.receipt_payload && (
-              <div className="bg-white dark:bg-zinc-900 rounded-sm border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 p-3">
+              <div className="bg-white dark:bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 p-3">
                 <div className="text-xs text-zinc-400 dark:text-zinc-500 mb-1">Receipt Payload</div>
                 <pre className="text-xs text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 overflow-auto max-h-32">{JSON.stringify(event.receipt_payload, null, 2)}</pre>
               </div>
@@ -374,7 +374,7 @@ export default function FiscalRecordsPage() {
           </div>
 
           {/* Filters */}
-          <div className="bg-white dark:bg-zinc-900 rounded-sm border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 p-4">
+          <div className="bg-white dark:bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 p-4">
             <div className="flex flex-wrap gap-3 items-end">
               <div className="flex flex-col gap-1">
                 <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">From</label>
@@ -427,7 +427,7 @@ export default function FiscalRecordsPage() {
               { label: 'Cash', value: fmt(summary.cashCents, formatCurrency), icon: 'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z', color: 'text-amber-600 bg-amber-50 dark:bg-amber-900/30' },
               { label: 'Card', value: fmt(summary.cardCents, formatCurrency), icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z', color: 'text-blue-600 bg-blue-50 dark:bg-blue-900/30' },
             ].map(card => (
-              <div key={card.label} className="bg-white dark:bg-zinc-900 rounded-sm border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 p-4 flex items-center gap-3">
+              <div key={card.label} className="bg-white dark:bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 p-4 flex items-center gap-3">
                 <div className={`p-2.5 rounded-sm ${card.color}`}>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={card.icon} />
@@ -466,7 +466,7 @@ export default function FiscalRecordsPage() {
           </div>
 
           {/* Records table */}
-          <div className="bg-white dark:bg-zinc-900 rounded-sm border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 overflow-hidden">
+          <div className="bg-white dark:bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 overflow-hidden">
             {loading ? (
               <div className="p-12 text-center text-zinc-400 dark:text-zinc-500 dark:text-zinc-500">
                 <div className="w-8 h-8 border-2 border-[#6262bd] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
@@ -502,7 +502,7 @@ export default function FiscalRecordsPage() {
                         <tr
                           key={event.id}
                           onClick={() => setExpandedId(isOpen ? null : event.id)}
-                          className="hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800/50 cursor-pointer transition-colors"
+                          className="hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-100/50 dark:bg-zinc-800/50 cursor-pointer transition-colors"
                         >
                           <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 whitespace-nowrap">
                             {fmtDatetime(event.occurred_at)}

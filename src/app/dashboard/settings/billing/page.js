@@ -443,7 +443,7 @@ export default function BillingPage() {
 
               <ul className="space-y-1.5 flex-1">
                 {plan.features.map(f => (
-                  <li key={f} className="flex items-start gap-2 text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-300">
+                  <li key={f} className="flex items-start gap-2 text-sm text-zinc-600 dark:text-zinc-400">
                     <svg className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
                     </svg>
@@ -505,7 +505,7 @@ export default function BillingPage() {
                         {t('smsUsageMonth', { month: smsUsage.month })}
                       </p>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-300">{t('smsSent', { count: smsUsage.sms_count })}</span>
+                        <span className="text-zinc-600 dark:text-zinc-400">{t('smsSent', { count: smsUsage.sms_count })}</span>
                         <span className="font-semibold text-zinc-800 dark:text-zinc-200 dark:text-white">
                           {t('smsEstimated', { amount: (smsUsage.total_pence / 100).toFixed(2) })}
                         </span>

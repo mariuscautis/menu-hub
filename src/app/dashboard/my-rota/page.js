@@ -293,14 +293,14 @@ export default function MyRotaPage() {
                 🌴 {t('requestTimeOff') || 'Request Time Off'}
               </button>
               <button onClick={() => { setRequestType('swap'); setShowRequestModal(true); }}
-                className="flex-1 sm:flex-none px-4 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm hover:border-[#6262bd] transition-colors font-medium text-sm">
+                className="flex-1 sm:flex-none px-4 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm hover:border-[#6262bd] transition-colors font-medium text-sm">
                 🔄 {t('requestShiftSwap') || 'Request Shift Swap'}
               </button>
             </div>
             <div className="flex gap-2 sm:ml-auto">
               {[['week', t('next7Days') || 'Next 7 Days'], ['month', t('next30Days') || 'Next 30 Days']].map(([key, label]) => (
                 <button key={key} onClick={() => setSelectedPeriod(key)}
-                  className={`flex-1 sm:flex-none px-4 py-2 rounded-sm text-sm font-medium transition-colors ${selectedPeriod === key ? 'bg-[#6262bd] text-white' : 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 hover:border-[#6262bd]'}`}>
+                  className={`flex-1 sm:flex-none px-4 py-2 rounded-sm text-sm font-medium transition-colors ${selectedPeriod === key ? 'bg-[#6262bd] text-white' : 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 hover:border-[#6262bd]'}`}>
                   {label}
                 </button>
               ))}
@@ -309,20 +309,20 @@ export default function MyRotaPage() {
 
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16">
-              <div className="w-8 h-8 border-2 border-zinc-200 dark:border-zinc-800 border-t-[#6262bd] rounded-full animate-spin mb-4"></div>
+              <div className="w-8 h-8 border-2 border-zinc-200 dark:border-zinc-200 dark:border-zinc-800 border-t-[#6262bd] rounded-full animate-spin mb-4"></div>
               <p className="text-zinc-500 dark:text-zinc-400">{t('loadingShifts') || 'Loading your shifts...'}</p>
             </div>
           ) : shifts.length === 0 ? (
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 rounded-sm p-12 text-center">
               <div className="text-5xl mb-4">📅</div>
-              <p className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 font-medium">{t('noShifts') || 'No shifts scheduled for the selected period'}</p>
+              <p className="text-zinc-600 dark:text-zinc-400 font-medium">{t('noShifts') || 'No shifts scheduled for the selected period'}</p>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-2">{t('checkBackLater') || 'Check back later or contact your manager'}</p>
             </div>
           ) : (
             <div className="space-y-5">
               {Object.keys(groupedShifts).sort().map(date => (
                 <div key={date} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 rounded-sm overflow-hidden">
-                  <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 px-6 py-3 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-700">
+                  <div className="bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 px-6 py-3 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-700">
                     <h3 className="font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{formatDate(date)}</h3>
                   </div>
                   <div className="divide-y-2 divide-zinc-200 dark:divide-zinc-800 dark:divide-slate-700">
@@ -339,7 +339,7 @@ export default function MyRotaPage() {
                               <span>⏱ {calculateShiftDuration(shift.shift_start, shift.shift_end, shift.break_duration)}</span>
                               {shift.break_duration > 0 && <span>☕ {shift.break_duration}min break</span>}
                             </div>
-                            {shift.notes && <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 p-3 rounded-sm">📝 {shift.notes}</p>}
+                            {shift.notes && <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 p-3 rounded-sm">📝 {shift.notes}</p>}
                           </div>
                           <div className="ml-4">
                             {shift.status === 'published' && <span className="px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-sm text-sm font-medium">✓ {t('confirmed') || 'Confirmed'}</span>}
@@ -409,7 +409,7 @@ export default function MyRotaPage() {
           ) : (
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 rounded-sm p-8 text-center text-zinc-400 dark:text-zinc-500">
               <div className="text-4xl mb-3">📋</div>
-              <p className="font-medium text-zinc-600 dark:text-zinc-400 dark:text-zinc-300">No leave entitlement set up yet</p>
+              <p className="font-medium text-zinc-600 dark:text-zinc-400">No leave entitlement set up yet</p>
               <p className="text-sm mt-1">Contact your manager to set up your holiday entitlement</p>
             </div>
           )}
@@ -504,7 +504,7 @@ export default function MyRotaPage() {
       {/* Shift Swap placeholder */}
       {showRequestModal && requestType === 'swap' && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-zinc-900 rounded-sm p-8 max-w-md w-full">
+          <div className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 max-w-md w-full">
             <h3 className="text-xl font-bold mb-4 text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{t('requestShiftSwap') || 'Request Shift Swap'}</h3>
             <p className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mb-6">{t('shiftSwapComingSoon') || 'Shift swap functionality coming soon'}</p>
             <button onClick={() => setShowRequestModal(false)} className="w-full px-6 py-3 bg-[#6262bd] text-white rounded-sm hover:bg-[#5252a5] transition-colors font-medium">

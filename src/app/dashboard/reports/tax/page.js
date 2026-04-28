@@ -235,7 +235,7 @@ export default function TaxReportPage() {
       </div>
 
       {/* Date Range & Actions */}
-      <div className="mb-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6">
+      <div className="mb-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
         <h2 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4">
           {t('dateRange') || 'Date Range'}
         </h2>
@@ -248,7 +248,7 @@ export default function TaxReportPage() {
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 focus:outline-none focus:border-[#6262bd]"
+              className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 focus:outline-none focus:border-[#6262bd]"
             />
           </div>
           <div className="flex-1">
@@ -260,7 +260,7 @@ export default function TaxReportPage() {
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
               max={new Date().toISOString().split('T')[0]}
-              className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 focus:outline-none focus:border-[#6262bd]"
+              className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 focus:outline-none focus:border-[#6262bd]"
             />
           </div>
           <button
@@ -277,14 +277,14 @@ export default function TaxReportPage() {
       {reportData.orderCount > 0 && (
         <div className="space-y-6">
           {/* Summary Card */}
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
             <div className="flex justify-between items-start mb-6">
               <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                 {t('taxBreakdown') || 'Tax Breakdown by Rate'}
               </h2>
               <button
                 onClick={handleExportCSV}
-                className="px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors flex items-center gap-2"
+                className="px-4 py-2 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors flex items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -297,7 +297,7 @@ export default function TaxReportPage() {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-800">
+                    <tr className="border-b border-zinc-200 dark:border-zinc-800">
                       <th className="text-left py-3 px-4 text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">
                         {t('taxRate') || 'Tax Rate'}
                       </th>
@@ -327,7 +327,7 @@ export default function TaxReportPage() {
                     ))}
                   </tbody>
                   <tfoot>
-                    <tr className="border-t-2 border-zinc-200 dark:border-zinc-700 dark:border-zinc-700">
+                    <tr className="border-t-2 border-zinc-200 dark:border-zinc-700">
                       <td className="py-4 px-4 font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                         {t('totalTaxCollected') || 'Total Tax Collected'}
                       </td>
@@ -354,13 +354,13 @@ export default function TaxReportPage() {
 
           {/* Summary Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4 text-center">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4 text-center">
               <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('totalSales') || 'Total Sales'}</p>
               <p className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                 {formatCurrency(reportData.totalSales)}
               </p>
             </div>
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4 text-center">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4 text-center">
               <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('orders') || 'Orders'}</p>
               <p className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                 {reportData.orderCount}
@@ -395,8 +395,8 @@ export default function TaxReportPage() {
 
       {/* Empty State */}
       {reportData.orderCount === 0 && !loading && (
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-8 text-center">
-          <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-8 text-center">
+          <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
             </svg>

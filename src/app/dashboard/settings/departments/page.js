@@ -282,7 +282,7 @@ export default function DepartmentsSettingsPage() {
         ))}
       </div>
       {/* Add New Department */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 mb-6">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-6">
         <h3 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-3">{t('addNewDepartment')}</h3>
         <div className="flex flex-col sm:flex-row gap-3">
           <input
@@ -295,7 +295,7 @@ export default function DepartmentsSettingsPage() {
               }
             }}
             placeholder={t('departmentNamePlaceholder')}
-            className="flex-1 px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 dark:text-zinc-500 dark:placeholder:text-zinc-500"
+            className="flex-1 px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 dark:text-zinc-500 dark:placeholder:text-zinc-500"
           />
           <button
             onClick={handleAddDepartment}

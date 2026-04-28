@@ -159,12 +159,12 @@ export default function NotificationBell() {
 
           {/* Modal — centered on all screen sizes */}
           <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 pointer-events-none">
-          <div className="w-full max-w-md flex flex-col bg-white dark:bg-zinc-900 rounded-sm border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 shadow-2xl max-h-[80vh] pointer-events-auto">
+          <div className="w-full max-w-md flex flex-col bg-white dark:bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 shadow-2xl max-h-[80vh] pointer-events-auto">
 
             {/* Header */}
             <div className="px-5 py-4 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-2">
-                <h3 className="font-bold text-base text-zinc-800 dark:text-zinc-200 dark:text-zinc-100">Notifications</h3>
+                <h3 className="font-bold text-base text-zinc-800 dark:text-zinc-200">Notifications</h3>
                 {unreadCount > 0 && (
                   <span className="text-xs font-bold bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 px-2 py-0.5 rounded-full">
                     {unreadCount} new
@@ -200,7 +200,7 @@ export default function NotificationBell() {
               ) : notifications.length === 0 ? (
                 <div className="p-10 text-center">
                   <div className="text-4xl mb-3">🔔</div>
-                  <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400 dark:text-zinc-300">No notifications yet</p>
+                  <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">No notifications yet</p>
                 </div>
               ) : (
                 <div className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -218,7 +218,7 @@ export default function NotificationBell() {
                       <div className="flex-1 min-w-0">
                         <p className={`text-sm leading-snug break-words ${
                           !notification.read
-                            ? 'font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-100'
+                            ? 'font-semibold text-zinc-800 dark:text-zinc-200'
                             : 'text-zinc-700 dark:text-zinc-300 dark:text-zinc-300'
                         }`}>
                           {notification.title}

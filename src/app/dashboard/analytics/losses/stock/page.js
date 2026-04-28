@@ -79,24 +79,24 @@ export default function StockItemLosses() {
       </div>
 
       {/* Date Filters */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 mb-6">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-6">
         <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-4">{t('filters')}</h2>
         <div className="grid grid-cols-2 gap-4 max-w-sm">
           <div>
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">{t('startDate')}</label>
             <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
-              className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300" />
+              className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300" />
           </div>
           <div>
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">{t('endDate')}</label>
             <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
-              className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300" />
+              className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300" />
           </div>
         </div>
       </div>
 
       {lossesData ? (
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
           <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-4">{t('stockLossRecords')}</h2>
           {lossesData.data?.length === 0 ? (
             <div className="text-center py-12 text-zinc-400 dark:text-zinc-500">{t('noStockLossRecords')}</div>
@@ -105,18 +105,18 @@ export default function StockItemLosses() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-700">
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-600 dark:text-zinc-400 dark:text-zinc-300">{t('date')}</th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-600 dark:text-zinc-400 dark:text-zinc-300">{t('item')}</th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-600 dark:text-zinc-400 dark:text-zinc-300">{t('qtyLost')}</th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-600 dark:text-zinc-400 dark:text-zinc-300">{t('unitCost')}</th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-600 dark:text-zinc-400 dark:text-zinc-300">{t('totalCost')}</th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-600 dark:text-zinc-400 dark:text-zinc-300">{t('reason')}</th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-600 dark:text-zinc-400 dark:text-zinc-300">{t('staff')}</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-600 dark:text-zinc-400">{t('date')}</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-600 dark:text-zinc-400">{t('item')}</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-600 dark:text-zinc-400">{t('qtyLost')}</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-600 dark:text-zinc-400">{t('unitCost')}</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-600 dark:text-zinc-400">{t('totalCost')}</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-600 dark:text-zinc-400">{t('reason')}</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-600 dark:text-zinc-400">{t('staff')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {lossesData.data.map((loss, i) => (
-                    <tr key={i} className="border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800">
+                    <tr key={i} className="border-b border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800">
                       <td className="py-3 px-4 text-sm text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">
                         {new Date(loss.created_at).toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' })}
                       </td>
@@ -136,7 +136,7 @@ export default function StockItemLosses() {
           )}
         </div>
       ) : (
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-12 text-center">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-12 text-center">
           <div className="text-zinc-400 dark:text-zinc-500 mb-3">
             <svg className="w-12 h-12 mx-auto mb-4 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />

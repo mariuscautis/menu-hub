@@ -149,7 +149,7 @@ export default function InactivityRing({ progress, timeRemaining, setting, onSet
               className="pointer-events-auto w-full max-w-sm bg-white dark:bg-zinc-900 rounded-sm shadow-2xl border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 overflow-hidden"
             >
               {/* Header */}
-              <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-800">
+              <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-zinc-200 dark:border-zinc-800">
                 <div>
                   <h2 className="text-base font-bold text-zinc-800 dark:text-white">Auto sign-out timer</h2>
                   <p className="text-xs text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 mt-0.5">
@@ -181,9 +181,9 @@ export default function InactivityRing({ progress, timeRemaining, setting, onSet
                       className={`w-full flex items-center justify-between px-4 py-3.5 rounded-sm text-sm font-medium transition-colors ${
                         isSelected
                           ? isOff
-                            ? 'bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300'
+                            ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
                             : 'bg-[#6262bd]/10 dark:bg-[#6262bd]/20 text-[#6262bd]'
-                          : 'text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800'
+                          : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800'
                       }`}
                     >
                       <span className="text-base">{opt.label}</span>

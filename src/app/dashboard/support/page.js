@@ -215,13 +215,13 @@ export default function SupportPage() {
           </button>
 
           {/* Ticket header */}
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 mb-4">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-4">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h1 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 mb-1">{selectedTicket.subject}</h1>
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${status.cls}`}>{statusLabel}</span>
-                  <span className="text-xs text-zinc-400 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 px-2 py-0.5 rounded-full">{t(CATEGORY_KEYS[selectedTicket.category] || 'categoryOther')}</span>
+                  <span className="text-xs text-zinc-400 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full">{t(CATEGORY_KEYS[selectedTicket.category] || 'categoryOther')}</span>
                   <span className="text-xs text-zinc-400 dark:text-zinc-500">{formatDate(selectedTicket.created_at)}</span>
                 </div>
               </div>
@@ -241,7 +241,7 @@ export default function SupportPage() {
                   <div className={`max-w-[80%] rounded-sm px-4 py-3 ${
                     isVenue
                       ? 'bg-[#6262bd] text-white rounded-br-sm'
-                      : 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 text-zinc-800 dark:text-zinc-200 rounded-bl-sm'
+                      : 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-200 rounded-bl-sm'
                   }`}>
                     <div className={`text-xs mb-1 ${isVenue ? 'text-white/70' : 'text-zinc-400 dark:text-zinc-500'}`}>
                       {isVenue ? t('you') : t('supportTeam')} · {formatDate(msg.created_at)}
@@ -256,14 +256,14 @@ export default function SupportPage() {
 
           {/* Reply form — only if not closed/resolved */}
           {selectedTicket.status !== 'closed' && selectedTicket.status !== 'resolved' ? (
-            <form onSubmit={handleReply} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+            <form onSubmit={handleReply} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4">
               {error && <p className="text-red-600 text-sm mb-3">{error}</p>}
               <textarea
                 value={replyBody}
                 onChange={e => setReplyBody(e.target.value)}
                 placeholder={t('replyPlaceholder')}
                 rows={3}
-                className="w-full px-3 py-2 text-sm border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 dark:text-zinc-500 resize-none mb-3"
+                className="w-full px-3 py-2 text-sm border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 dark:text-zinc-500 resize-none mb-3"
               />
               <div className="flex justify-end">
                 <button
@@ -319,7 +319,7 @@ export default function SupportPage() {
                   <select
                     value={newTicket.category}
                     onChange={e => setNewTicket(p => ({ ...p, category: e.target.value }))}
-                    className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
+                    className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
                   >
                     <option value="bug">{t('categoryBug')}</option>
                     <option value="billing">{t('categoryBilling')}</option>
@@ -335,7 +335,7 @@ export default function SupportPage() {
                     onChange={e => setNewTicket(p => ({ ...p, subject: e.target.value }))}
                     placeholder={t('subjectPlaceholder')}
                     required
-                    className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 dark:text-zinc-500"
+                    className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 dark:text-zinc-500"
                   />
                 </div>
               </div>
@@ -347,7 +347,7 @@ export default function SupportPage() {
                   placeholder={t('messagePlaceholder')}
                   rows={4}
                   required
-                  className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 dark:text-zinc-500 resize-none"
+                  className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 dark:text-zinc-500 resize-none"
                 />
               </div>
               <div className="flex gap-3 justify-end">
@@ -362,7 +362,7 @@ export default function SupportPage() {
 
         {/* Tickets list */}
         {tickets.length === 0 ? (
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-12 text-center">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-12 text-center">
             <div className="w-16 h-16 bg-[#6262bd]/10 rounded-sm flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8 text-[#6262bd]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -382,7 +382,7 @@ export default function SupportPage() {
                 <button
                   key={ticket.id}
                   onClick={() => openTicket(ticket)}
-                  className="w-full text-left bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 hover:border-[#6262bd] dark:hover:border-[#6262bd] rounded-sm p-5 transition-all group"
+                  className="w-full text-left bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-[#6262bd] dark:hover:border-[#6262bd] rounded-sm p-5 transition-all group"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">

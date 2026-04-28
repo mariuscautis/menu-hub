@@ -290,11 +290,11 @@ export default function StaffAnalyticsPage() {
 
                   {/* Metrics Grid */}
                   <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="bg-zinc-50 dark:bg-zinc-900 rounded-sm p-4">
+                    <div className="bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-4">
                       <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium mb-1">{t('ordersProcessed')}</p>
                       <p className="text-lg font-bold text-zinc-700 dark:text-zinc-300">{staff.total_orders}</p>
                     </div>
-                    <div className="bg-zinc-50 dark:bg-zinc-900 rounded-sm p-4">
+                    <div className="bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-4">
                       <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium mb-1">{t('avgOrderValue')}</p>
                       <p className="text-lg font-bold text-zinc-700 dark:text-zinc-300">
                         {formatCurrency(staff.avg_order_value)}
@@ -337,7 +337,7 @@ export default function StaffAnalyticsPage() {
                         {t('itemsWithPercent').replace('{count}', staff.kitchen_items_sold).replace('{percent}', staff.kitchen_ratio.toFixed(0))}
                       </p>
                     </div>
-                    <div className="bg-zinc-50 dark:bg-zinc-900 rounded-sm p-4 col-span-2">
+                    <div className="bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-4 col-span-2">
                       <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium mb-1">{t('performance')}</p>
                       <p className="text-sm text-zinc-700 dark:text-zinc-300">
                         {staff.performance === 'high'

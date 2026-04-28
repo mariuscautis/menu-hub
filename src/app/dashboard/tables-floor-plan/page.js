@@ -2733,7 +2733,7 @@ export default function StaffFloorPlanPage() {
 
           {/* Floor picker — always visible, pill style */}
           {floors.length > 0 && (
-            <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 rounded-sm p-1 overflow-x-auto shrink-0 max-w-xs">
+            <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 rounded-sm p-1 overflow-x-auto shrink-0 max-w-xs">
               {floors.map(floor => (
                 <button
                   key={floor.id}
@@ -2755,7 +2755,7 @@ export default function StaffFloorPlanPage() {
           )}
 
           {/* Zoom controls */}
-          <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 rounded-sm p-1 shrink-0">
+          <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 rounded-sm p-1 shrink-0">
             <button
               onClick={() => adjustZoom(-0.1)}
               className="w-8 h-8 flex items-center justify-center rounded-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:text-zinc-300 hover:bg-white dark:bg-zinc-900 dark:hover:bg-zinc-700 transition-all font-bold text-lg"
@@ -2783,7 +2783,7 @@ export default function StaffFloorPlanPage() {
         style={{ padding: `${Math.max(16, 32 * zoom)}px` }}
       >
         {/* Floating legend */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-full px-4 py-2 shadow-md text-xs text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 pointer-events-none">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm border border-zinc-200 dark:border-zinc-700 rounded-full px-4 py-2 shadow-md text-xs text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 pointer-events-none">
           <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-green-400 inline-block"></span>Available</span>
           <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-amber-400 inline-block"></span>Has orders</span>
           <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-red-400 inline-block"></span>Needs cleaning</span>
@@ -2801,7 +2801,7 @@ export default function StaffFloorPlanPage() {
             marginRight: canvasWidth * (zoom - 1),
             marginBottom: canvasHeight * (zoom - 1),
           }}
-          className="shadow-2xl rounded-sm border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700"
+          className="shadow-2xl rounded-sm border border-zinc-200 dark:border-zinc-700"
         >
           {/* Decorative Elements */}
           {elements.map((element) => (
@@ -2851,7 +2851,7 @@ export default function StaffFloorPlanPage() {
             </div>
 
             {/* Table Info */}
-            <div className="space-y-3 mb-6 p-4 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-900 rounded-sm">
+            <div className="space-y-3 mb-6 p-4 bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm">
               
               <div className="flex justify-between text-sm">
                 <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{t('tableDetailsModal.activeOrders') || 'Active Orders:'}</span>
@@ -2930,7 +2930,7 @@ export default function StaffFloorPlanPage() {
                     .map(order => (
                       <div
                         key={order.id}
-                        className="p-4 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-900 rounded-sm hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-800 transition-colors"
+                        className="p-4 bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-800 transition-colors"
                       >
                         <div className="flex justify-between items-start mb-2">
                           <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
@@ -3057,13 +3057,13 @@ export default function StaffFloorPlanPage() {
             </div>
 
             {selectedTableReservations.length === 0 ? (
-              <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-900 rounded-sm p-8 text-center">
+              <div className="bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 text-center">
                 <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">No confirmed reservations for today</p>
               </div>
             ) : (
               <div className="space-y-4">
                 {selectedTableReservations.map((reservation) => (
-                  <div key={reservation.id} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm p-5">
+                  <div key={reservation.id} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-sm p-5">
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
@@ -3106,7 +3106,7 @@ export default function StaffFloorPlanPage() {
                             </div>
                           )}
                           {reservation.special_requests && (
-                            <div className="mt-2 p-2 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 rounded text-xs">
+                            <div className="mt-2 p-2 bg-zinc-50 dark:bg-zinc-900 rounded text-xs">
                               <strong>Special requests:</strong> {reservation.special_requests}
                             </div>
                           )}
@@ -3115,7 +3115,7 @@ export default function StaffFloorPlanPage() {
                     </div>
 
                     {/* Action buttons */}
-                    <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700 dark:border-zinc-700">
+                    <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
                       {reservation.status === 'pending' ? (
                         <div className="flex gap-2">
                           <button
@@ -3269,7 +3269,7 @@ export default function StaffFloorPlanPage() {
                     setShowCreateReservationModal(false)
                     setSelectedTable(null)
                   }}
-                  className="flex-1 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-700"
+                  className="flex-1 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-700"
                 >
                   {t('createReservationModal.cancel') || 'Cancel'}
                 </button>
@@ -3386,7 +3386,7 @@ export default function StaffFloorPlanPage() {
             </div>
 
             {unpaidOrders.length === 0 ? (
-              <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-900 rounded-sm p-8 text-center mb-6">
+              <div className="bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 text-center mb-6">
                 <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('paymentModal.noUnpaidOrders') || 'No unpaid orders for this table'}</p>
               </div>
             ) : (
@@ -3394,9 +3394,9 @@ export default function StaffFloorPlanPage() {
                 {/* Order Summary */}
                 <div className="mb-6">
                   <h3 className="font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-3">{t('paymentModal.ordersSummary') || 'Orders Summary'}</h3>
-                  <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-900 rounded-sm p-4 space-y-3 max-h-64 overflow-y-auto">
+                  <div className="bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-4 space-y-3 max-h-64 overflow-y-auto">
                     {unpaidOrders.map((order, index) => (
-                      <div key={order.id} className="border-b border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 pb-3 last:border-0 last:pb-0">
+                      <div key={order.id} className="border-b border-zinc-200 dark:border-zinc-700 pb-3 last:border-0 last:pb-0">
                         <div className="flex justify-between items-start mb-2">
                           <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{(t('paymentModal.orderNumber') || 'Order #{number}').replace('{number}', index + 1)}</span>
                           <span className="text-sm font-semibold text-primary">{formatCurrency(order.total)}</span>
@@ -3433,7 +3433,7 @@ export default function StaffFloorPlanPage() {
                     <select
                       value={selectedDiscount?.id || 'none'}
                       onChange={(e) => handleDiscountChange(e.target.value)}
-                      className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-primary text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800"
+                      className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-primary text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800"
                     >
                       <option value="none">{t('paymentModal.noDiscount') || 'No discount'}</option>
                       {availableDiscounts.map((discount) => (
@@ -3498,7 +3498,7 @@ export default function StaffFloorPlanPage() {
                   {/* Split Bill Option */}
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-zinc-300 dark:border-zinc-600 dark:border-zinc-600"></div>
+                      <div className="w-full border-t border-zinc-300 dark:border-zinc-600"></div>
                     </div>
                     <div className="relative flex justify-center text-xs">
                       <span className="px-2 bg-white dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('paymentModal.or') || 'or'}</span>
@@ -3945,7 +3945,7 @@ export default function StaffFloorPlanPage() {
                   setUnpaidOrders([])
                   setCompletedOrderIds([])
                 }}
-                className="w-full border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-700"
+                className="w-full border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-700"
               >
                 No Thanks
               </button>
@@ -4046,7 +4046,7 @@ export default function StaffFloorPlanPage() {
                 </div>
 
                 {menuItems.length === 0 ? (
-                  <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-900 rounded-sm p-8 text-center">
+                  <div className="bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 text-center">
                     <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('orderModal.noMenuItems') || 'No menu items available'}</p>
                     <p className="text-sm text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 mt-2">{t('orderModal.addItemsFirst') || 'Add items in the Menu tab first'}</p>
                   </div>
@@ -4062,7 +4062,7 @@ export default function StaffFloorPlanPage() {
                       )
                       if (filteredItems.length === 0) {
                         return (
-                          <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-900 rounded-sm p-6 text-center">
+                          <div className="bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-6 text-center">
                             <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('orderModal.noProductsFound') || 'No products found'}</p>
                           </div>
                         )
@@ -4076,7 +4076,7 @@ export default function StaffFloorPlanPage() {
                               disabled={!item.available}
                               className={`flex flex-col p-3 rounded-sm transition-all text-left ${
                                 item.available
-                                  ? 'bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-900 hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 hover:shadow-md'
+                                  ? 'bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 hover:shadow-md'
                                   : 'bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-900 opacity-60 cursor-not-allowed'
                               }`}
                             >
@@ -4161,7 +4161,7 @@ export default function StaffFloorPlanPage() {
                             disabled={!item.available}
                             className={`flex flex-col p-3 rounded-sm transition-all text-left ${
                               item.available
-                                ? 'bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-900 hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 hover:shadow-md'
+                                ? 'bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 hover:shadow-md'
                                 : 'bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-900 opacity-60 cursor-not-allowed'
                             }`}
                             >
@@ -4219,7 +4219,7 @@ export default function StaffFloorPlanPage() {
                               disabled={!item.available}
                               className={`flex flex-col p-3 rounded-sm transition-all text-left ${
                                 item.available
-                                  ? 'bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-900 hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 hover:shadow-md'
+                                  ? 'bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 hover:shadow-md'
                                   : 'bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-900 opacity-60 cursor-not-allowed'
                               }`}
                             >
@@ -4259,12 +4259,12 @@ export default function StaffFloorPlanPage() {
               <div>
                 <h3 className="font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-4">{t('orderModal.orderSummary') || 'Order Summary'}</h3>
                 {orderItems.length === 0 ? (
-                  <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-900 rounded-sm p-6 text-center">
+                  <div className="bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-6 text-center">
                     <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('orderModal.noItemsAdded') || 'No items added yet'}</p>
                   </div>
                 ) : (
                   <>
-                    <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-900 rounded-sm p-4 mb-4 max-h-64 overflow-y-auto">
+                    <div className="bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-4 mb-4 max-h-64 overflow-y-auto">
                       {orderItems.map((item) => {
                         const newQuantity = item.isExisting ? item.quantity - item.existingQuantity : item.quantity
                         const hasNewItems = newQuantity > 0
@@ -4426,7 +4426,7 @@ export default function StaffFloorPlanPage() {
                   setSelectedReservationToCancel(null)
                   setCancelReason('')
                 }}
-                className="flex-1 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-700"
+                className="flex-1 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-700"
               >
                 Keep Reservation
               </button>

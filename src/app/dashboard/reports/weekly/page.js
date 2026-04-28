@@ -429,10 +429,10 @@ export default function WeeklyReportPage() {
       </div>
 
       {/* Week Navigation */}
-      <div className="mb-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4 flex items-center justify-between">
+      <div className="mb-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4 flex items-center justify-between">
         <button
           onClick={goToPreviousWeek}
-          className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 rounded-sm text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 transition-colors flex items-center gap-2"
+          className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 rounded-sm text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 transition-colors flex items-center gap-2"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -459,8 +459,8 @@ export default function WeeklyReportPage() {
           disabled={isCurrentWeek()}
           className={`px-4 py-2 rounded-sm flex items-center gap-2 transition-colors ${
             isCurrentWeek()
-              ? 'bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800/50 text-zinc-400 dark:text-zinc-500 cursor-not-allowed'
-              : 'bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300'
+              ? 'bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900/50 text-zinc-400 dark:text-zinc-500 cursor-not-allowed'
+              : 'bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300'
           }`}
         >
           Next
@@ -475,14 +475,14 @@ export default function WeeklyReportPage() {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6262bd] mx-auto mb-4"></div>
         </div>
       ) : reportData.totalOrders === 0 ? (
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-8 text-center">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-8 text-center">
           <p className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{t('noData') || 'No data available for this week'}</p>
         </div>
       ) : (
         <div className="space-y-6">
           {/* Key Metrics Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4">
               <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('totalRevenue') || 'Total Revenue'}</p>
               <p className="text-2xl font-bold text-[#6262bd]">{formatCurrency(reportData.totalRevenue)}</p>
               {reportData.percentageChange !== 0 && (
@@ -492,7 +492,7 @@ export default function WeeklyReportPage() {
               )}
             </div>
 
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4">
               <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('totalOrders') || 'Total Orders'}</p>
               <p className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{reportData.totalOrders}</p>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
@@ -500,7 +500,7 @@ export default function WeeklyReportPage() {
               </p>
             </div>
 
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4">
               <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('busiestDay') || 'Busiest Day'}</p>
               <p className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                 {reportData.busiestDay?.dayName || '-'}
@@ -510,7 +510,7 @@ export default function WeeklyReportPage() {
               </p>
             </div>
 
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4">
               <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('laborPercent') || 'Labor %'}</p>
               <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
                 {reportData.laborPercent.toFixed(1)}%
@@ -523,7 +523,7 @@ export default function WeeklyReportPage() {
 
           {/* Secondary Metrics Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4">
               <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('taxCollected') || 'Tax Collected'}</p>
               <p className="text-xl font-bold text-purple-600 dark:text-purple-400">
                 {formatCurrency(reportData.totalTaxCollected)}
@@ -533,7 +533,7 @@ export default function WeeklyReportPage() {
               </p>
             </div>
 
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4">
               <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('materialCosts') || 'Material Costs'}</p>
               <p className="text-xl font-bold text-red-600 dark:text-red-400">
                 {formatCurrency(reportData.totalMaterialCosts)}
@@ -543,7 +543,7 @@ export default function WeeklyReportPage() {
               </p>
             </div>
 
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4">
               <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('discountsGiven') || 'Discounts Given'}</p>
               <p className="text-xl font-bold text-orange-600 dark:text-orange-400">
                 {formatCurrency(reportData.totalDiscounts)}
@@ -555,7 +555,7 @@ export default function WeeklyReportPage() {
               )}
             </div>
 
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4">
               <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('refunds') || 'Refunds'}</p>
               <p className="text-xl font-bold text-red-600 dark:text-red-400">
                 {formatCurrency(reportData.totalRefunds)}
@@ -564,14 +564,14 @@ export default function WeeklyReportPage() {
           </div>
 
           {/* Daily Breakdown Table */}
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
             <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4">
               {t('dailyBreakdown') || 'Daily Breakdown'}
             </h2>
             <div className="overflow-x-auto -mx-2">
               <table className="w-full min-w-[480px]">
                 <thead>
-                  <tr className="border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-800">
+                  <tr className="border-b border-zinc-200 dark:border-zinc-800">
                     <th className="text-left py-3 px-4 text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">{t('day') || 'Day'}</th>
                     <th className="text-right py-3 px-4 text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">{t('revenue') || 'Revenue'}</th>
                     <th className="text-right py-3 px-4 text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">{t('orders') || 'Orders'}</th>
@@ -618,7 +618,7 @@ export default function WeeklyReportPage() {
                   ))}
                 </tbody>
                 <tfoot>
-                  <tr className="border-t-2 border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 font-bold">
+                  <tr className="border-t-2 border-zinc-200 dark:border-zinc-700 font-bold">
                     <td className="py-3 px-4 text-sm text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{t('total') || 'Total'}</td>
                     <td className="py-3 px-4 text-sm text-[#6262bd] text-right">
                       {formatCurrency(reportData.totalRevenue)}
@@ -640,12 +640,12 @@ export default function WeeklyReportPage() {
 
           {/* Week Comparison */}
           {reportData.previousWeekRevenue > 0 && (
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
               <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4">
                 Week-over-Week Comparison
               </h2>
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 rounded-sm p-4">
+                <div className="bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-4">
                   <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-1">Last Week</p>
                   <p className="text-xl font-bold text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">
                     {formatCurrency(reportData.previousWeekRevenue)}
@@ -663,7 +663,7 @@ export default function WeeklyReportPage() {
                   ? 'bg-green-50 dark:bg-green-900/30'
                   : reportData.percentageChange < 0
                     ? 'bg-red-50 dark:bg-red-900/30'
-                    : 'bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800'
+                    : 'bg-zinc-50 dark:bg-zinc-900'
               }`}>
                 <p className={`text-center font-bold ${
                   reportData.percentageChange > 0

@@ -49,7 +49,7 @@ export default function LanguageSelector({ className = '', collapsed = false }) 
       <select
         value={locale}
         onChange={(e) => changeLanguage(e.target.value)}
-        className="w-full pl-9 pr-8 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 dark:text-zinc-200 bg-white dark:bg-zinc-800 cursor-pointer appearance-none text-sm"
+        className="w-full pl-9 pr-8 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 cursor-pointer appearance-none text-sm"
       >
         {languages.map((lang) => (
           <option key={lang.code} value={lang.code}>

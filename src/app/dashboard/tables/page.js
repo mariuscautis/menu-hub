@@ -3302,7 +3302,7 @@ export default function Tables() {
           onClick={() => setShowModal(false)}
         >
           <div
-            className="bg-white dark:bg-zinc-900 rounded-sm p-8 w-full max-w-sm"
+            className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 w-full max-w-sm"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 mb-6">{t('addNewTable')}</h2>
@@ -3358,7 +3358,7 @@ export default function Tables() {
           }}
         >
           <div
-            className="bg-white dark:bg-zinc-900 rounded-sm p-6 w-full max-w-6xl my-4 max-h-[90vh] flex flex-col animate-zoom-in relative"
+            className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-6 w-full max-w-6xl my-4 max-h-[90vh] flex flex-col animate-zoom-in relative"
             onClick={(e) => e.stopPropagation()}
           >
             {orderModalLoading && (
@@ -3441,7 +3441,7 @@ export default function Tables() {
                 </div>
 
                 {menuItems.length === 0 ? (
-                  <div className="bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 text-center">
+                  <div className="bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 text-center">
                     <p className="text-zinc-500 dark:text-zinc-400">{t('orderModal.noMenuItems')}</p>
                     <p className="text-sm text-zinc-400 dark:text-zinc-500 mt-2">{t('orderModal.addItemsFirst')}</p>
                   </div>
@@ -3457,7 +3457,7 @@ export default function Tables() {
                       )
                       if (filteredItems.length === 0) {
                         return (
-                          <div className="bg-zinc-50 dark:bg-zinc-900 rounded-sm p-6 text-center">
+                          <div className="bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-6 text-center">
                             <p className="text-zinc-500 dark:text-zinc-400">{t('orderModal.noProductsFound') || 'No products found'}</p>
                           </div>
                         )
@@ -3522,7 +3522,7 @@ export default function Tables() {
                                 </svg>
                               </div>
                               <span className="font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-100 text-center">{category.name}</span>
-                              <span className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-300 mt-1">{categoryItems.length} {categoryItems.length === 1 ? (t('orderModal.item') || 'item') : (t('orderModal.items') || 'items')}</span>
+                              <span className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">{categoryItems.length} {categoryItems.length === 1 ? (t('orderModal.item') || 'item') : (t('orderModal.items') || 'items')}</span>
                             </button>
                           )
                         })}
@@ -3541,7 +3541,7 @@ export default function Tables() {
                                 </svg>
                               </div>
                               <span className="font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-100 text-center">{t('orderModal.uncategorized') || 'Other'}</span>
-                              <span className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-300 mt-1">{uncategorizedItems.length} {uncategorizedItems.length === 1 ? (t('orderModal.item') || 'item') : (t('orderModal.items') || 'items')}</span>
+                              <span className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">{uncategorizedItems.length} {uncategorizedItems.length === 1 ? (t('orderModal.item') || 'item') : (t('orderModal.items') || 'items')}</span>
                             </button>
                           )
                         })()}
@@ -3654,7 +3654,7 @@ export default function Tables() {
               <div>
                 <h3 className="font-semibold text-zinc-700 dark:text-zinc-300 mb-4">{t('orderModal.orderSummary')}</h3>
                 {orderItems.length === 0 ? (
-                  <div className="bg-zinc-50 dark:bg-zinc-900 rounded-sm p-6 text-center">
+                  <div className="bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-6 text-center">
                     <p className="text-zinc-500 dark:text-zinc-400">{t('orderModal.noItemsAdded')}</p>
                   </div>
                 ) : (
@@ -3672,7 +3672,7 @@ export default function Tables() {
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1">
                                 <p className="font-medium text-zinc-800 dark:text-zinc-200 text-sm">{item.quantity}x {item.name}</p>
-                                <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-300">{formatCurrency(item.price_at_time || 0)} {t('orderModal.each') || 'each'}</p>
+                                <p className="text-xs text-zinc-500 dark:text-zinc-400">{formatCurrency(item.price_at_time || 0)} {t('orderModal.each') || 'each'}</p>
 
                                 {/* Show breakdown if item has both existing and new quantities */}
                                 {item.isExisting && hasNewItems && (
@@ -4148,7 +4148,7 @@ export default function Tables() {
       {/* Split Bill Modal */}
       {showSplitBillModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-zinc-900 rounded-sm p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200">
                 {t('splitBillModal.title').replace('{tableNumber}', selectedTable?.table_number)}
@@ -4171,7 +4171,7 @@ export default function Tables() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Left Side: Available Items */}
               <div>
-                <div className="bg-zinc-50 dark:bg-zinc-900 rounded-sm p-4 mb-4">
+                <div className="bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-4 mb-4">
                   <h3 className="font-bold text-zinc-800 dark:text-zinc-200 mb-2">{t('splitBillModal.availableItems')}</h3>
                   <p className="text-sm text-zinc-600 dark:text-zinc-400">{t('splitBillModal.clickToAssign')}</p>
                 </div>
@@ -4316,7 +4316,7 @@ export default function Tables() {
                         <>
                           <div className="space-y-2 mb-3">
                             {bill.items.map((item) => (
-                              <div key={item.id} className="flex justify-between items-center text-sm bg-zinc-50 dark:bg-zinc-900 rounded-sm p-2">
+                              <div key={item.id} className="flex justify-between items-center text-sm bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-2">
                                 <div className="flex-1">
                                   <div className="font-medium text-zinc-800 dark:text-zinc-200">{item.name}</div>
                                   <div className="text-xs text-zinc-600 dark:text-zinc-400">
@@ -4463,7 +4463,7 @@ export default function Tables() {
       {/* Order Details Modal */}
       {showOrderDetailsModal && selectedTable && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-zinc-900 rounded-sm p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+          <div className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200">
                 Table {selectedTable.table_number} - Order Details
@@ -4483,7 +4483,7 @@ export default function Tables() {
             </div>
 
             {tableOrderDetails.length === 0 ? (
-              <div className="bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 text-center">
+              <div className="bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 text-center">
                 <p className="text-zinc-500 dark:text-zinc-400">No orders for this table</p>
               </div>
             ) : (
@@ -4491,7 +4491,7 @@ export default function Tables() {
                 {/* All Orders */}
                 <div className="space-y-4 mb-6">
                   {tableOrderDetails.map((order, index) => (
-                    <div key={order.id} className="bg-zinc-50 dark:bg-zinc-900 rounded-sm p-4">
+                    <div key={order.id} className="bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-4">
                       <div className="flex justify-between items-start mb-3">
                         <div>
                           <h3 className="font-semibold text-zinc-700 dark:text-zinc-300">Order #{index + 1}</h3>
@@ -4551,7 +4551,7 @@ export default function Tables() {
           }}
         >
           <div
-            className="bg-white dark:bg-zinc-900 rounded-sm p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto"
+            className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-6">
@@ -4573,7 +4573,7 @@ export default function Tables() {
             </div>
 
             {selectedTableReservations.length === 0 ? (
-              <div className="bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 text-center">
+              <div className="bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 text-center">
                 <p className="text-zinc-500 dark:text-zinc-400">No confirmed reservations for today</p>
               </div>
             ) : (
@@ -4708,7 +4708,7 @@ export default function Tables() {
           }}
         >
           <div
-            className="bg-white dark:bg-zinc-900 rounded-sm p-8 w-full max-w-md"
+            className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 mb-6">
@@ -4847,7 +4847,7 @@ export default function Tables() {
           }}
         >
           <div
-            className="bg-white dark:bg-zinc-900 rounded-sm p-8 w-full max-w-md"
+            className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-6">
@@ -5047,7 +5047,7 @@ export default function Tables() {
           }}
         >
           <div
-            className="bg-white dark:bg-zinc-900 rounded-sm p-8 w-full max-w-md"
+            className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="text-center mb-6">
@@ -5097,7 +5097,7 @@ export default function Tables() {
           onClick={() => { setShowTransferModal(false); setTransferSourceTable(null) }}
         >
           <div
-            className="bg-white dark:bg-zinc-900 rounded-sm p-6 w-full max-w-lg max-h-[80vh] flex flex-col"
+            className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-6 w-full max-w-lg max-h-[80vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-2">

@@ -395,7 +395,7 @@ export default function LaborAnalyticsPage() {
               <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 mb-6">{t('departmentBreakdown')}</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {analytics.departmentBreakdown.map(dept => (
-                  <div key={dept.department} className="p-4 bg-zinc-50 dark:bg-zinc-900 rounded-sm">
+                  <div key={dept.department} className="p-4 bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm">
                     <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2 capitalize">
                       {dept.department}
                     </p>
@@ -413,7 +413,7 @@ export default function LaborAnalyticsPage() {
 
           {/* Daily Breakdown */}
           {analytics.dailyBreakdown.length > 0 && (
-            <div className="mb-8 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6">
+            <div className="mb-8 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
               <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-6">{t('dailyBreakdown')}</h2>
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -440,7 +440,7 @@ export default function LaborAnalyticsPage() {
                     ))}
                   </tbody>
                   <tfoot>
-                    <tr className="border-t-2 border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 font-bold">
+                    <tr className="border-t-2 border-zinc-200 dark:border-zinc-700 font-bold">
                       <td className="py-3 px-4 text-sm text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{t('total')}</td>
                       <td className="py-3 px-4 text-sm text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 text-right">
                         {analytics.dailyBreakdown.reduce((sum, day) => sum + day.shifts, 0)}
@@ -466,7 +466,7 @@ export default function LaborAnalyticsPage() {
                 {analytics.staffPerformance.map((staff, index) => (
                   <div
                     key={staff.staff.id}
-                    className="flex flex-wrap items-center justify-between gap-3 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-sm hover:bg-zinc-100 dark:bg-zinc-800 transition-colors"
+                    className="flex flex-wrap items-center justify-between gap-3 p-4 bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm hover:bg-zinc-100 dark:bg-zinc-800 transition-colors"
                   >
                     <div className="flex items-center gap-4">
                       <div className="w-8 h-8 bg-[#6262bd] text-white rounded-full flex items-center justify-center font-bold">

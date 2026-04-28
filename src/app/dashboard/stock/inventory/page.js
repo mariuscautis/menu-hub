@@ -720,7 +720,7 @@ export default function InventoryManagement() {
           onClick={() => setShowProductModal(false)}
         >
           <div
-            className="bg-white dark:bg-zinc-900 rounded-sm p-8 w-full max-w-lg"
+            className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 w-full max-w-lg"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 mb-6">
@@ -827,7 +827,7 @@ export default function InventoryManagement() {
           onClick={() => setShowStockModal(false)}
         >
           <div
-            className="bg-white dark:bg-zinc-900 rounded-sm p-8 w-full max-w-md"
+            className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 mb-6">{t('addStock')}</h2>

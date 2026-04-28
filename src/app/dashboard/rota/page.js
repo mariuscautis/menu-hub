@@ -376,7 +376,7 @@ export default function RotaPage() {
               className={`px-5 py-2.5 rounded-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                 hasUnnotifiedChanges
                   ? 'bg-amber-500 hover:bg-amber-600 text-white animate-pulse'
-                  : 'bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 hover:border-[#6262bd]'
+                  : 'bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 hover:border-[#6262bd]'
               }`}
             >
               {notifying ? '⏳ Sending...' : <><span className="hidden sm:inline">📧 Send Rota Notifications</span><span className="sm:hidden">📧 Notify</span></>}
@@ -389,13 +389,13 @@ export default function RotaPage() {
           </div>
           <button
             onClick={() => setShowTemplatesModal(true)}
-            className="px-3 sm:px-5 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm hover:border-[#6262bd] transition-colors font-medium text-sm sm:text-base"
+            className="px-3 sm:px-5 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm hover:border-[#6262bd] transition-colors font-medium text-sm sm:text-base"
           >
             📋 {t('templates')}
           </button>
           <button
             onClick={() => setShowRequestsModal(true)}
-            className="relative px-3 sm:px-5 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm hover:border-[#6262bd] transition-colors font-medium text-sm sm:text-base"
+            className="relative px-3 sm:px-5 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm hover:border-[#6262bd] transition-colors font-medium text-sm sm:text-base"
           >
             📨 {t('requests')}
             {pendingRequestsCount > 0 && (
@@ -427,7 +427,7 @@ export default function RotaPage() {
         <select
           value={filters.department}
           onChange={(e) => setFilters({ ...filters, department: e.target.value })}
-          className="px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
+          className="px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
         >
           <option value="">{t('allDepartments')}</option>
           {departments.map(dept => (
@@ -438,7 +438,7 @@ export default function RotaPage() {
         <select
           value={filters.status}
           onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-          className="px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
+          className="px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
         >
           <option value="">{t('allStatuses')}</option>
           <option value="draft">{t('status.draft')}</option>
@@ -450,7 +450,7 @@ export default function RotaPage() {
         <select
           value={filters.staff_id}
           onChange={(e) => setFilters({ ...filters, staff_id: e.target.value })}
-          className="px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
+          className="px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
         >
           <option value="">{t('allStaff')}</option>
           {staff.map(s => (
@@ -469,7 +469,7 @@ export default function RotaPage() {
       </div>
 
       {/* Calendar */}
-      <div className="bg-white dark:bg-zinc-900 rounded-sm p-6 shadow-sm mb-8" style={{ height: 700 }}>
+      <div className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-6 shadow-sm mb-8" style={{ height: 700 }}>
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">

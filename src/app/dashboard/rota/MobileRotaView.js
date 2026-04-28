@@ -99,12 +99,12 @@ export default function MobileRotaView({ shifts, onSelectShift }) {
   return (
     <div className="space-y-4">
       {sortedDates.length === 0 ? (
-        <div className="text-center py-12 bg-white dark:bg-zinc-900 rounded-sm border border-zinc-200 dark:border-zinc-800">
+        <div className="text-center py-12 bg-white dark:bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
           <p className="text-zinc-600 dark:text-zinc-400">No shifts scheduled for this period</p>
         </div>
       ) : (
         sortedDates.map(date => (
-          <div key={date} className="bg-white dark:bg-zinc-900 rounded-sm border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+          <div key={date} className="bg-white dark:bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 overflow-hidden">
             {/* Date Header */}
             <div className="bg-[#6262bd] text-white px-4 py-3">
               <h3 className="font-bold text-lg">{formatDate(date)}</h3>
@@ -164,7 +164,7 @@ export default function MobileRotaView({ shifts, onSelectShift }) {
                     </div>
 
                     {shift.notes && (
-                      <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-2 bg-white dark:bg-zinc-900/50 p-2 rounded">
+                      <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-2 bg-white dark:bg-zinc-50 dark:bg-zinc-900/50 p-2 rounded">
                         {shift.notes}
                       </p>
                     )}

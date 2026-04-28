@@ -403,7 +403,7 @@ export default function ClockInOut({ staff, restaurant }) {
 
       {/* Today's Shift Info */}
       {todayShift ? (
-        <div className="mb-6 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-sm border border-zinc-200 dark:border-zinc-700">
+        <div className="mb-6 p-4 bg-zinc-50 dark:bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700">
           <div className="flex items-start justify-between mb-2">
             <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{t('todaysShift') || "Today's Shift"}</p>
             {todayShift.status === 'draft' && (

@@ -124,7 +124,7 @@ export default function OfflineHubSettings() {
           )}
 
           {/* Main Bridge card */}
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4 sm:p-6">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4 sm:p-6">
             <div className="flex items-start justify-between gap-4 mb-6">
               <div>
                 <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300">VenoApp Bridge</h2>
@@ -163,13 +163,13 @@ export default function OfflineHubSettings() {
 
             {/* Bridge Code — managers only */}
             {isOwnerOrAdmin && (
-            <div className="border-t border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 pt-5 mb-5">
+            <div className="border-t border-zinc-200 dark:border-zinc-800 pt-5 mb-5">
               <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-1">Your restaurant code</h3>
               <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-3">
                 Enter this code in VenoApp Bridge during setup. It links the Bridge to your restaurant account.
               </p>
               <div className="flex items-center gap-3">
-                <div className="flex-1 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm px-4 py-3">
+                <div className="flex-1 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-sm px-4 py-3">
                   {bridgeCode
                     ? <span className="font-mono text-2xl font-bold tracking-widest text-[#6262bd]">{bridgeCode}</span>
                     : <span className="text-zinc-400 dark:text-zinc-500 text-sm">Loading...</span>
@@ -194,11 +194,11 @@ export default function OfflineHubSettings() {
 
             {/* Download & Setup — managers only */}
             {isOwnerOrAdmin && (
-            <div className="border-t border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 pt-5">
+            <div className="border-t border-zinc-200 dark:border-zinc-800 pt-5">
               <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-4">Download &amp; setup instructions</h3>
 
               {/* Tab bar */}
-              <div className="flex gap-2 p-1 bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 rounded-sm mb-5 w-full sm:w-fit overflow-x-auto">
+              <div className="flex gap-2 p-1 bg-zinc-100 dark:bg-zinc-800 rounded-sm mb-5 w-full sm:w-fit overflow-x-auto">
                 {tabBtn('windows', 'Windows')}
                 {tabBtn('linux', 'Linux')}
               </div>
@@ -234,8 +234,8 @@ export default function OfflineHubSettings() {
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
                     Download for Windows (.exe)
                   </a>
-                  <div className="p-4 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800/50 rounded-sm">
-                    <p className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 mb-3">Setup steps:</p>
+                  <div className="p-4 bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900/50 rounded-sm">
+                    <p className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-3">Setup steps:</p>
                     <ol className="space-y-2">
                       {[
                         'Download the .exe file and double-click it. If SmartScreen appears, click "More info" then "Run anyway" — no installation needed.',
@@ -257,7 +257,7 @@ export default function OfflineHubSettings() {
               {/* Linux */}
               {activeTab === 'linux' && (
                 <div className="space-y-4">
-                  <div className="p-4 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm text-xs text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">
+                  <div className="p-4 bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 rounded-sm text-xs text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">
                     Suitable for any Ubuntu, Debian, or Fedora PC or laptop. Also works on a mini PC running Linux.
                   </div>
                   <a
@@ -267,8 +267,8 @@ export default function OfflineHubSettings() {
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
                     Download for Linux (.AppImage)
                   </a>
-                  <div className="p-4 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800/50 rounded-sm">
-                    <p className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 mb-3">Setup steps:</p>
+                  <div className="p-4 bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900/50 rounded-sm">
+                    <p className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-3">Setup steps:</p>
                     <ol className="space-y-2">
                       {[
                         'Open a terminal and run: chmod +x venoapp-bridge.AppImage',
@@ -294,7 +294,7 @@ export default function OfflineHubSettings() {
 
           {/* Connected devices */}
           {isConnected && (
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4 sm:p-6">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4 sm:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300">Connected devices</h2>
                 <span className="text-xs text-zinc-400 dark:text-zinc-500 dark:text-zinc-500">Updates every 4 s</span>
@@ -304,7 +304,7 @@ export default function OfflineHubSettings() {
               ) : (
                 <div className="space-y-3">
                   {connectedDevices.map((device) => (
-                    <div key={device.id} className="flex items-start gap-4 p-3 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800/50 rounded-sm">
+                    <div key={device.id} className="flex items-start gap-4 p-3 bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900/50 rounded-sm">
                       <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center flex-shrink-0">
                         <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -323,7 +323,7 @@ export default function OfflineHubSettings() {
           )}
 
           {/* Per-device offline mode */}
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4 sm:p-6">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4 sm:p-6">
             <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-1">Per-device offline mode</h2>
             <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-4">
               Even without VenoApp Bridge, every device handles internet outages independently.

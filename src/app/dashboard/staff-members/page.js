@@ -366,8 +366,8 @@ export default function StaffMembers() {
 
       {/* Staff List */}
       {staff.length === 0 ? (
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-12 text-center">
-          <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-12 text-center">
+          <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-zinc-400 dark:text-zinc-500" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
             </svg>
@@ -380,7 +380,7 @@ export default function StaffMembers() {
       ) : (
         <div className="flex flex-col gap-3">
           {staff.map((member) => (
-            <div key={member.id} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+            <div key={member.id} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4">
               {/* Name + email + hub badge */}
               <div className="flex items-start gap-3 mb-4">
                 <StaffAvatar avatarUrl={member.avatar_url} name={member.name} size="sm" />
@@ -413,7 +413,7 @@ export default function StaffMembers() {
                   <p className="text-xs text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 font-medium mb-0.5">{t('pinCode')}</p>
                   <div className="flex items-center gap-1.5">
                     <span className="font-mono text-sm font-bold text-[#6262bd] dark:text-[#8b8bdb]">{member.pin_code || '---'}</span>
-                    <button onClick={() => openPinModal(member)} className="px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 rounded text-xs font-medium hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600">
+                    <button onClick={() => openPinModal(member)} className="px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded text-xs font-medium hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600">
                       {t('change')}
                     </button>
                   </div>
@@ -421,7 +421,7 @@ export default function StaffMembers() {
               </div>
 
               {/* Divider */}
-              <div className="border-t border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 mb-3" />
+              <div className="border-t border-zinc-200 dark:border-zinc-800 mb-3" />
 
               {/* Actions */}
               <div className="flex flex-wrap gap-2">
@@ -446,7 +446,7 @@ export default function StaffMembers() {
       {/* Add / Edit Staff Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={() => { setShowModal(false); setIsEditing(false); setSelectedStaff(null); setError(null); setFormData({ email: '', name: '', role: 'staff', pin_code: '', department: departments[0] || 'kitchen', annual_holiday_days: 28.0, holiday_year_start: new Date().toISOString().split('T')[0], is_hub: false }) }}>
-          <div className="bg-white dark:bg-zinc-900 rounded-sm w-full max-w-lg max-h-[92vh] flex flex-col shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm w-full max-w-lg max-h-[92vh] flex flex-col shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 flex-shrink-0">
               <div className="flex items-center gap-3">
                 {isEditing && selectedStaff ? (
@@ -492,10 +492,10 @@ export default function StaffMembers() {
                 <div className="space-y-5">
                   <div>
                     <label className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-1.5">{t('nameLabel')} <span className="text-red-500">*</span></label>
-                    <input type="text" name="name" value={formData.name} onChange={handleChange} required className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 placeholder:text-zinc-400 dark:text-zinc-500 dark:placeholder:text-zinc-500 transition-colors" placeholder={formData.is_hub ? 'Hub Device Name' : t('namePlaceholder')}/>
+                    <input type="text" name="name" value={formData.name} onChange={handleChange} required className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 placeholder:text-zinc-400 dark:text-zinc-500 dark:placeholder:text-zinc-500 transition-colors" placeholder={formData.is_hub ? 'Hub Device Name' : t('namePlaceholder')}/>
                   </div>
 
-                  <label className="flex items-start gap-3 p-4 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm cursor-pointer hover:border-[#6262bd] transition-colors">
+                  <label className="flex items-start gap-3 p-4 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-sm cursor-pointer hover:border-[#6262bd] transition-colors">
                     <input type="checkbox" id="is_hub" checked={formData.is_hub} onChange={(e) => setFormData({ ...formData, is_hub: e.target.checked })} className="mt-0.5 w-5 h-5 text-[#6262bd] border-zinc-300 dark:border-zinc-600 rounded focus:ring-[#6262bd]"/>
                     <div>
                       <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">🍽️ Designate as Local Hub</p>
@@ -515,20 +515,20 @@ export default function StaffMembers() {
                         <label className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-1.5">{t('emailLabel')} <span className="text-red-500">*</span></label>
                         <div className="relative">
                           <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 dark:text-zinc-500" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-                          <input type="email" name="email" value={formData.email} onChange={handleChange} required className="w-full pl-10 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 placeholder:text-zinc-400 dark:text-zinc-500 dark:placeholder:text-zinc-500 transition-colors" placeholder={t('emailPlaceholder')}/>
+                          <input type="email" name="email" value={formData.email} onChange={handleChange} required className="w-full pl-10 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 placeholder:text-zinc-400 dark:text-zinc-500 dark:placeholder:text-zinc-500 transition-colors" placeholder={t('emailPlaceholder')}/>
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-1.5">{t('roleLabel')}</label>
-                          <select name="role" value={formData.role} onChange={handleChange} className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 transition-colors">
+                          <select name="role" value={formData.role} onChange={handleChange} className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 transition-colors">
                             <option value="staff">{t('roleStaff')}</option>
                             <option value="admin">{t('roleAdmin')}</option>
                           </select>
                         </div>
                         <div>
                           <label className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-1.5">{t('departmentLabel')}</label>
-                          <select name="department" value={formData.department} onChange={handleChange} className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 transition-colors">
+                          <select name="department" value={formData.department} onChange={handleChange} className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 transition-colors">
                             {departments.map(dept => <option key={dept} value={dept}>{dept.charAt(0).toUpperCase() + dept.slice(1)}</option>)}
                           </select>
                         </div>
@@ -539,8 +539,8 @@ export default function StaffMembers() {
                   <div>
                     <label className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-1.5">{t('pinCodeLabel')} {!isEditing && <span className="text-red-500">*</span>}</label>
                     <div className="flex gap-2">
-                      <input type="text" name="pin_code" value={formData.pin_code} onChange={(e) => setFormData({ ...formData, pin_code: e.target.value.replace(/\D/g, '').slice(0, 3) })} required={!isEditing} maxLength={3} pattern="[0-9]{3}" inputMode="numeric" className="flex-1 px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 font-mono text-2xl text-center tracking-widest placeholder:text-slate-300 dark:placeholder:text-zinc-600 dark:text-zinc-400 transition-colors" placeholder="•••"/>
-                      <button type="button" onClick={generatePinCode} className="px-4 py-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 font-medium text-sm whitespace-nowrap transition-colors">{t('generate')}</button>
+                      <input type="text" name="pin_code" value={formData.pin_code} onChange={(e) => setFormData({ ...formData, pin_code: e.target.value.replace(/\D/g, '').slice(0, 3) })} required={!isEditing} maxLength={3} pattern="[0-9]{3}" inputMode="numeric" className="flex-1 px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 font-mono text-2xl text-center tracking-widest placeholder:text-slate-300 dark:placeholder:text-zinc-600 dark:text-zinc-400 transition-colors" placeholder="•••"/>
+                      <button type="button" onClick={generatePinCode} className="px-4 py-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 font-medium text-sm whitespace-nowrap transition-colors">{t('generate')}</button>
                     </div>
                     <p className="text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 text-xs mt-1.5">{isEditing ? t('pinHintEdit') : t('pinHintAdd')}</p>
                   </div>
@@ -556,12 +556,12 @@ export default function StaffMembers() {
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mb-1.5">{t('annualHolidayDays')}</label>
-                          <input type="number" name="annual_holiday_days" value={formData.annual_holiday_days} onChange={handleChange} step="0.5" min="0" max="365" className="w-full px-4 py-2.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 transition-colors"/>
+                          <input type="number" name="annual_holiday_days" value={formData.annual_holiday_days} onChange={handleChange} step="0.5" min="0" max="365" className="w-full px-4 py-2.5 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 transition-colors"/>
                           <p className="text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 text-xs mt-1">{t('annualHolidayDaysHint')}</p>
                         </div>
                         <div>
                           <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mb-1.5">{t('holidayYearStartDate')}</label>
-                          <input type="date" name="holiday_year_start" value={formData.holiday_year_start} onChange={handleChange} className="w-full px-4 py-2.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 transition-colors"/>
+                          <input type="date" name="holiday_year_start" value={formData.holiday_year_start} onChange={handleChange} className="w-full px-4 py-2.5 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 transition-colors"/>
                           <p className="text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 text-xs mt-1">{t('holidayYearStartDateHint')}</p>
                         </div>
                       </div>
@@ -572,7 +572,7 @@ export default function StaffMembers() {
             </div>
 
             <div className="px-6 py-4 border-t border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 flex gap-3 flex-shrink-0">
-              <button type="button" onClick={() => { setShowModal(false); setIsEditing(false); setError(null) }} className="flex-1 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors">{t('cancel')}</button>
+              <button type="button" onClick={() => { setShowModal(false); setIsEditing(false); setError(null) }} className="flex-1 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors">{t('cancel')}</button>
               <button type="submit" form="staff-form" className="flex-1 bg-[#6262bd] text-white py-3 rounded-sm font-semibold hover:bg-[#5252a3] transition-colors shadow-sm">{isEditing ? t('updateStaff') : t('addStaffButton')}</button>
             </div>
           </div>
@@ -582,7 +582,7 @@ export default function StaffMembers() {
       {/* Change PIN Modal */}
       {showPasswordModal && selectedStaff && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={() => { setShowPasswordModal(false); setPasswordData({ newPassword: '' }); setSelectedStaff(null) }}>
-          <div className="bg-white dark:bg-zinc-900 rounded-sm w-full max-w-sm shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm w-full max-w-sm shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-700">
               <div>
                 <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{t('changePinTitle').replace('{name}', selectedStaff.name || selectedStaff.email)}</h2>
@@ -594,14 +594,14 @@ export default function StaffMembers() {
               <label className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-3">{t('newPinCode')}</label>
               <div className="flex gap-2 justify-center mb-4">
                 {[0, 1, 2].map((i) => (
-                  <div key={i} className={`w-16 h-16 flex items-center justify-center border-2 rounded-sm text-3xl font-mono font-bold transition-colors ${passwordData.newPassword.length === i ? 'border-[#6262bd] bg-[#6262bd]/5 text-[#6262bd]' : passwordData.newPassword[i] ? 'border-zinc-300 dark:border-zinc-600 dark:border-zinc-600 text-zinc-800 dark:text-zinc-200 dark:text-zinc-200' : 'border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-slate-300'}`}>
+                  <div key={i} className={`w-16 h-16 flex items-center justify-center border-2 rounded-sm text-3xl font-mono font-bold transition-colors ${passwordData.newPassword.length === i ? 'border-[#6262bd] bg-[#6262bd]/5 text-[#6262bd]' : passwordData.newPassword[i] ? 'border-zinc-300 dark:border-zinc-600 text-zinc-800 dark:text-zinc-200 dark:text-zinc-200' : 'border-zinc-200 dark:border-zinc-700 text-slate-300'}`}>
                     {passwordData.newPassword[i] || '·'}
                   </div>
                 ))}
               </div>
-              <input type="text" value={passwordData.newPassword} onChange={(e) => setPasswordData({ newPassword: e.target.value.replace(/\D/g, '').slice(0, 3) })} maxLength={3} pattern="[0-9]{3}" inputMode="numeric" className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 font-mono text-xl text-center tracking-widest placeholder:text-slate-300 transition-colors" placeholder="Enter 3-digit PIN" autoFocus/>
+              <input type="text" value={passwordData.newPassword} onChange={(e) => setPasswordData({ newPassword: e.target.value.replace(/\D/g, '').slice(0, 3) })} maxLength={3} pattern="[0-9]{3}" inputMode="numeric" className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 font-mono text-xl text-center tracking-widest placeholder:text-slate-300 transition-colors" placeholder="Enter 3-digit PIN" autoFocus/>
               <div className="flex gap-3 mt-5">
-                <button type="button" onClick={() => { setShowPasswordModal(false); setSelectedStaff(null); setPasswordData({ newPassword: '' }) }} className="flex-1 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors">{t('cancel')}</button>
+                <button type="button" onClick={() => { setShowPasswordModal(false); setSelectedStaff(null); setPasswordData({ newPassword: '' }) }} className="flex-1 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors">{t('cancel')}</button>
                 <button type="submit" disabled={passwordData.newPassword.length !== 3} className="flex-1 bg-[#6262bd] text-white py-3 rounded-sm font-semibold hover:bg-[#5252a3] disabled:opacity-40 disabled:cursor-not-allowed transition-colors">{t('updatePin')}</button>
               </div>
             </form>

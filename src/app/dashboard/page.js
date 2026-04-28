@@ -115,7 +115,7 @@ export default function Dashboard() {
       {/* Page header */}
       <div className="mb-8">
         <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-600 mb-1">Overview</p>
-        <h1 className="text-2xl font-bold tracking-tight text-white">Welcome back.</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">Welcome back.</h1>
         {restaurant?.name && (
           <p className="text-sm text-zinc-500 mt-0.5">{restaurant.name}</p>
         )}
@@ -134,13 +134,13 @@ export default function Dashboard() {
       {orderingEnabled ? (
         <>
           {/* Stats grid */}
-          <div className={`grid gap-px bg-zinc-800 mb-8 ${canSeeAdminStats ? 'grid-cols-2 lg:grid-cols-4' : 'grid-cols-1 sm:grid-cols-2'}`}>
+          <div className={`grid gap-px bg-zinc-200 dark:bg-zinc-800 mb-8 ${canSeeAdminStats ? 'grid-cols-2 lg:grid-cols-4' : 'grid-cols-1 sm:grid-cols-2'}`}>
             {statCards
               .filter(stat => !stat.adminOnly || canSeeAdminStats)
               .map((stat) => (
-                <div key={stat.label} className="bg-zinc-950 px-6 py-6">
+                <div key={stat.label} className="bg-white dark:bg-zinc-950 px-6 py-6">
                   <div className="flex items-center justify-between mb-4">
-                    <p className="text-xs font-mono uppercase tracking-[0.15em] text-zinc-600">{stat.label}</p>
+                    <p className="text-xs font-mono uppercase tracking-[0.15em] text-zinc-600 dark:text-zinc-400">{stat.label}</p>
                     <span style={{ color: stat.accent }}>{stat.icon}</span>
                   </div>
                   <p className="text-4xl font-bold tracking-tight" style={{ color: stat.accent }}>{stat.value}</p>
@@ -151,17 +151,17 @@ export default function Dashboard() {
           {/* Quick actions */}
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-600 mb-3">Quick actions</p>
-            <div className="grid gap-px bg-zinc-800">
+            <div className="grid gap-px bg-zinc-200 dark:bg-zinc-800">
               {quickActions
                 .filter(a => a.always || (a.adminOnly && canSeeAdminStats))
                 .map((action) => (
                   <Link
                     key={action.href}
                     href={action.href}
-                    className="bg-zinc-950 flex items-center justify-between px-6 py-4 hover:bg-zinc-900 transition-colors group"
+                    className="bg-white dark:bg-zinc-950 flex items-center justify-between px-6 py-4 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors group"
                   >
-                    <span className="text-sm font-medium text-zinc-400 group-hover:text-white transition-colors">{action.label}</span>
-                    <svg className="w-4 h-4 text-zinc-700 group-hover:text-zinc-400 transition-colors" fill="currentColor" viewBox="0 0 24 24">
+                    <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors">{action.label}</span>
+                    <svg className="w-4 h-4 text-zinc-300 dark:text-zinc-700 group-hover:text-zinc-400 transition-colors" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6-6-6z"/>
                     </svg>
                   </Link>
@@ -170,13 +170,13 @@ export default function Dashboard() {
           </div>
         </>
       ) : (
-        <div className="border border-zinc-800 bg-zinc-900 p-10 flex flex-col items-center text-center">
-          <div className="w-14 h-14 bg-zinc-800 flex items-center justify-center mb-4">
-            <svg className="w-7 h-7 text-zinc-600" fill="currentColor" viewBox="0 0 24 24">
+        <div className="border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 p-10 flex flex-col items-center text-center">
+          <div className="w-14 h-14 bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
+            <svg className="w-7 h-7 text-zinc-400 dark:text-zinc-600" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm0 10c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
             </svg>
           </div>
-          <h2 className="text-base font-bold text-zinc-200 mb-2">Your account is active</h2>
+          <h2 className="text-base font-bold text-zinc-800 dark:text-zinc-200 mb-2">Your account is active</h2>
           <p className="text-zinc-500 text-sm max-w-sm leading-relaxed">
             Your current plan does not include the Ordering & Menu module. Contact your administrator to enable ordering, tables, menu management, and more.
           </p>

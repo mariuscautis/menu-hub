@@ -300,7 +300,7 @@ export default function XReportPage() {
           </h1>
         </div>
 
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-8 text-center">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-8 text-center">
           <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -380,30 +380,30 @@ export default function XReportPage() {
       <div className="space-y-6">
         {/* Quick Stats Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4">
             <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{tZ('netSales') || 'Net Sales'}</p>
             <p className="text-2xl font-bold text-[#6262bd]">{formatCurrency(reportData.netSales)}</p>
           </div>
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4">
             <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{tZ('totalOrders') || 'Total Orders'}</p>
             <p className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{reportData.totalOrders}</p>
           </div>
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4">
             <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{tZ('discounts') || 'Discounts'}</p>
             <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{formatCurrency(reportData.discountTotal)}</p>
           </div>
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4">
             <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{tZ('totalTips') || 'Total Tips'}</p>
             <p className="text-2xl font-bold text-green-600 dark:text-green-400">{formatCurrency(reportData.totalTips)}</p>
           </div>
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4">
             <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">Expected in Drawer</p>
             <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{formatCurrency(expectedDrawer)}</p>
           </div>
         </div>
 
         {/* Payment Breakdown */}
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
           <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4">
             {tZ('paymentBreakdown') || 'Payment Breakdown'}
           </h2>
@@ -424,24 +424,24 @@ export default function XReportPage() {
         </div>
 
         {/* Cash Drawer Status */}
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
           <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4">
             {tZ('cashDrawer') || 'Cash Drawer'}
           </h2>
           <div className="space-y-3">
-            <div className="flex justify-between py-2 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-800">
+            <div className="flex justify-between py-2 border-b border-zinc-200 dark:border-zinc-800">
               <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{tZ('openingAmount') || 'Opening Amount'}</span>
               <span className="font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                 {formatCurrency(currentSession.opening_amount)}
               </span>
             </div>
-            <div className="flex justify-between py-2 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-800">
+            <div className="flex justify-between py-2 border-b border-zinc-200 dark:border-zinc-800">
               <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{tZ('cashSalesAndTips') || 'Cash Sales + Tips'}</span>
               <span className="font-semibold text-green-600 dark:text-green-400">
                 +{formatCurrency(reportData.cashSalesAndTips)}
               </span>
             </div>
-            <div className="flex justify-between py-2 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-800">
+            <div className="flex justify-between py-2 border-b border-zinc-200 dark:border-zinc-800">
               <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{tZ('cashRefunds') || 'Cash Refunds'}</span>
               <span className="font-semibold text-red-600 dark:text-red-400">
                 -{formatCurrency(reportData.cashRefundsTotal)}
@@ -458,7 +458,7 @@ export default function XReportPage() {
 
         {/* Voids & Refunds */}
         {(reportData.voidsCount > 0 || reportData.refundsCount > 0) && (
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
             <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4">
               {tZ('voidsAndRefunds') || 'Voids & Refunds'}
             </h2>
@@ -483,13 +483,13 @@ export default function XReportPage() {
 
         {/* Staff Summary */}
         {reportData.staffSummary.length > 0 && (
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
             <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4">
               {tZ('staffSummary') || 'Staff Summary'}
             </h2>
             <div className="space-y-2">
               {reportData.staffSummary.map((staff, index) => (
-                <div key={index} className="flex justify-between items-center p-3 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 rounded-sm">
+                <div key={index} className="flex justify-between items-center p-3 bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm">
                   <span className="font-medium text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{staff.name}</span>
                   <div className="text-right">
                     <span className="font-bold text-[#6262bd]">{formatCurrency(staff.totalProcessed)}</span>

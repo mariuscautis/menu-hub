@@ -286,7 +286,7 @@ export default function TaxInvoicing() {
             </div>
 
             {/* Additional Options */}
-            <div className="space-y-3 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-sm">
+            <div className="space-y-3 p-4 bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"

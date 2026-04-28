@@ -200,7 +200,7 @@ export default function PaymentsSettingsPage() {
           </div>
 
           {/* How it works */}
-          <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 rounded-sm p-6">
+          <div className="bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 rounded-sm p-6">
             <h3 className="font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-4">{t('howItWorksTitle')}</h3>
             <ol className="space-y-3 text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">
               {['step1', 'step2', 'step3', 'step4'].map((step, i) => (

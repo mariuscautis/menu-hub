@@ -207,7 +207,7 @@ export default function WorkHistory({ staff, restaurant }) {
               key={key}
               onClick={() => { if (key === 'custom') { setShowCustom(!showCustom); } else { setPeriod(key); setShowCustom(false); } }}
               className={`px-3 py-2 rounded-sm text-sm font-medium transition-colors ${
-                period === key ? 'bg-[#6262bd] text-white' : 'bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700'
+                period === key ? 'bg-[#6262bd] text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700'
               }`}
             >
               {label}
@@ -217,7 +217,7 @@ export default function WorkHistory({ staff, restaurant }) {
 
         {/* Custom Date Range Picker */}
         {showCustom && (
-          <div className="p-4 bg-zinc-50 dark:bg-zinc-900 rounded-sm border border-zinc-200 dark:border-zinc-700">
+          <div className="p-4 bg-zinc-50 dark:bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
               <div>
                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
@@ -260,7 +260,7 @@ export default function WorkHistory({ staff, restaurant }) {
           <p className="text-zinc-600 dark:text-zinc-400">{t('loading') || 'Loading work history...'}</p>
         </div>
       ) : attendance.length === 0 ? (
-        <div className="text-center py-12 bg-zinc-50 dark:bg-zinc-900 rounded-sm">
+        <div className="text-center py-12 bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm">
           <div className="text-4xl mb-3">📊</div>
           <p className="text-zinc-600 dark:text-zinc-400 font-medium">{t('noHistory') || 'No work history for this period'}</p>
           <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">{t('completedShiftsNote') || 'Completed shifts will appear here'}</p>
@@ -269,7 +269,7 @@ export default function WorkHistory({ staff, restaurant }) {
         <div className="space-y-4">
           {Object.keys(groupedAttendance).sort((a, b) => b.localeCompare(a)).map(date => (
             <div key={date} className="border border-zinc-200 dark:border-zinc-800 rounded-sm overflow-hidden">
-              <div className="bg-zinc-50 dark:bg-zinc-900 px-4 py-3 border-b border-zinc-200 dark:border-zinc-800">
+              <div className="bg-zinc-50 dark:bg-zinc-50 dark:bg-zinc-900 px-4 py-3 border-b border-zinc-200 dark:border-zinc-800">
                 <div className="flex justify-between items-center">
                   <h3 className="font-bold text-zinc-800 dark:text-zinc-200">{formatDate(date)}</h3>
                   <span className="text-sm font-medium text-[#6262bd]">

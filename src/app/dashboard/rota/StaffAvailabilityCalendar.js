@@ -130,7 +130,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
 
   if (loading) {
     return (
-      <div className="bg-white dark:bg-zinc-900 rounded-sm p-6 shadow-sm">
+      <div className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-6 shadow-sm">
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <div className="w-7 h-7 border-2 border-zinc-200 dark:border-zinc-800 border-t-[#6262bd] rounded-full animate-spin mx-auto mb-3"></div>
@@ -142,9 +142,9 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
   }
 
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-sm shadow-sm overflow-hidden">
+    <div className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 px-6 py-4">
+      <div className="bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700 px-6 py-4">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{t('title')}</h2>
@@ -200,7 +200,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
             </button>
 
             {/* Date Range Label */}
-            <div className="ml-4 px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm">
+            <div className="ml-4 px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-sm">
               <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                 {getDateRangeLabel()}
               </span>
@@ -217,7 +217,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
               placeholder={t('searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 dark:text-zinc-500 dark:placeholder:text-zinc-500"
+              className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 dark:text-zinc-500 dark:placeholder:text-zinc-500"
             />
           </div>
 
@@ -226,7 +226,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
             <select
               value={departmentFilter}
               onChange={(e) => setDepartmentFilter(e.target.value)}
-              className="px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-sm text-zinc-700 dark:text-zinc-300"
+              className="px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-sm text-zinc-700 dark:text-zinc-300"
             >
               <option value="">{t('allDepartments')}</option>
               {departments.map(dept => (
@@ -242,7 +242,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className="px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-sm text-zinc-700 dark:text-zinc-300"
+              className="px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-sm text-zinc-700 dark:text-zinc-300"
             >
               <option value="">{t('allRoles')}</option>
               {roles.map(role => (
@@ -272,8 +272,8 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
       {/* Calendar Grid */}
       <div>
         {/* Date Headers */}
-        <div className="flex border-b border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 sticky top-0 z-10">
-          <div className="w-48 flex-shrink-0 px-4 py-3 font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 border-r-2 border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800">
+        <div className="flex border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 sticky top-0 z-10">
+          <div className="w-48 flex-shrink-0 px-4 py-3 font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 border-r-2 border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900">
             {t('staffMember')}
           </div>
           <div className="flex flex-1">
@@ -284,7 +284,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
                 return (
                   <div
                     key={idx}
-                    className={`flex-1 min-w-[80px] px-1 py-3 text-center border-r border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 ${
+                    className={`flex-1 min-w-[80px] px-1 py-3 text-center border-r border-zinc-200 dark:border-zinc-700 ${
                       isToday ? 'bg-blue-50 dark:bg-blue-900/30' : isWeekend ? 'bg-zinc-100 dark:bg-zinc-800' : ''
                     }`}
                   >
@@ -310,7 +310,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
             {filteredStaff.map((staffMember) => (
               <div key={staffMember.id} className="flex hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors">
                 {/* Staff Name */}
-                <div className="w-48 flex-shrink-0 px-4 py-4 border-r-2 border-zinc-200 dark:border-zinc-700 dark:border-zinc-700">
+                <div className="w-48 flex-shrink-0 px-4 py-4 border-r-2 border-zinc-200 dark:border-zinc-700">
                   <div className="font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{staffMember.name}</div>
                   <div className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{staffMember.role}</div>
                   {staffMember.department && (
@@ -368,8 +368,8 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
                       return (
                         <div
                           key={idx}
-                          className={`flex-1 min-w-[80px] px-1 py-4 border-r border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 ${
-                            isToday ? 'bg-blue-50/30 dark:bg-blue-900/20' : isWeekend ? 'bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800' : ''
+                          className={`flex-1 min-w-[80px] px-1 py-4 border-r border-zinc-200 dark:border-zinc-700 ${
+                            isToday ? 'bg-blue-50/30 dark:bg-blue-900/20' : isWeekend ? 'bg-zinc-50 dark:bg-zinc-900' : ''
                           }`}
                         >
                           <div className="h-full bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-sm"></div>
@@ -393,7 +393,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
 
       {/* Summary */}
       {staff && staff.length > 0 && (
-        <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 border-t-2 border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 px-6 py-4">
+        <div className="bg-zinc-50 dark:bg-zinc-900 border-t-2 border-zinc-200 dark:border-zinc-700 px-6 py-4">
           <div className="flex items-center justify-between text-sm">
             <div className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">
               {t('showingStaff')
