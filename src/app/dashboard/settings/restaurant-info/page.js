@@ -143,14 +143,14 @@ export default function RestaurantInfo() {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="text-slate-500">{t('loading')}</div>
+        <div className="text-zinc-500 dark:text-zinc-400">{t('loading')}</div>
       </div>
     )
   }
   if (!restaurant) {
     return (
       <div className="p-8">
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-600">
+        <div className="bg-red-50 border border-red-200 rounded-sm p-4 text-red-600">
           {t('accessError')}
         </div>
       </div>
@@ -161,11 +161,11 @@ export default function RestaurantInfo() {
     <div>
       <PageTabs tabs={settingsTabs} />
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">{t('pageTitle')}<InfoTooltip text={tg('restaurant_info_desc')} /></h1>
-        <p className="text-slate-500">{t('pageSubtitle')}</p>
+        <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">{t('pageTitle')}<InfoTooltip text={tg('restaurant_info_desc')} /></h1>
+        <p className="text-zinc-500 dark:text-zinc-400">{t('pageSubtitle')}</p>
       </div>
       {message && (
-        <div className={`mb-6 p-4 rounded-xl border ${
+        <div className={`mb-6 p-4 rounded-sm border ${
           message.type === 'success'
             ? 'bg-green-50 border-green-200 text-green-600'
             : 'bg-red-50 border-red-200 text-red-600'
@@ -174,30 +174,30 @@ export default function RestaurantInfo() {
         </div>
       )}
       {/* Restaurant Information Section */}
-      <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-6">
         <div className="mb-6">
-          <h2 className="text-lg font-bold text-slate-700 mb-2">{t('sectionTitle')}</h2>
-          <p className="text-sm text-slate-500">
+          <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-2">{t('sectionTitle')}</h2>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
             {t('sectionDescription')}
           </p>
         </div>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
               {t('restaurantNameLabel')}
             </label>
             <input
               type="text"
               value={restaurant.name}
               disabled
-              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl bg-slate-50 text-slate-500 cursor-not-allowed"
+              className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm bg-zinc-50 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 cursor-not-allowed"
             />
-            <p className="text-xs text-slate-500 mt-2">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
               {t('nameCannotChange')}
             </p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
               {t('restaurantPhoneLabel')}
             </label>
             <input
@@ -205,14 +205,14 @@ export default function RestaurantInfo() {
               value={restaurantPhone}
               onChange={(e) => setRestaurantPhone(e.target.value)}
               placeholder={t('phonePlaceholder')}
-              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+              className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
             />
-            <p className="text-xs text-slate-500 mt-2">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
               {t('phoneHelpText')}
             </p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
               {t('addressLabel')}
             </label>
             <textarea
@@ -220,9 +220,9 @@ export default function RestaurantInfo() {
               onChange={(e) => setRestaurantAddress(e.target.value)}
               placeholder={t('addressPlaceholder')}
               rows={3}
-              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 resize-none"
+              className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 resize-none"
             />
-            <p className="text-xs text-slate-500 mt-2">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
               {t('addressHelpText')}
             </p>
           </div>
@@ -231,7 +231,7 @@ export default function RestaurantInfo() {
             <button
               onClick={handleSaveRestaurantInfo}
               disabled={savingPhone}
-              className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="w-full bg-[#6262bd] text-white py-3 rounded-sm font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               {savingPhone ? t('saving') : t('saveButton')}
             </button>
@@ -239,22 +239,22 @@ export default function RestaurantInfo() {
         </div>
       </div>
       {/* Email Language Section */}
-      <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-6">
         <div className="mb-6">
-          <h2 className="text-lg font-bold text-slate-700 mb-2">{t('emailLanguageSectionTitle') || 'Email Language'}</h2>
-          <p className="text-sm text-slate-500">
+          <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-2">{t('emailLanguageSectionTitle') || 'Email Language'}</h2>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
             {t('emailLanguageSectionDescription') || 'Choose the language for all emails sent to your customers (booking confirmations, order notifications, etc.)'}
           </p>
         </div>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
               {t('emailLanguageLabel') || 'Email Language'}
             </label>
             <select
               value={emailLanguage}
               onChange={(e) => setEmailLanguage(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 bg-white"
+              className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-900"
             >
               <option value="en">🇬🇧 English</option>
               <option value="ro">🇷🇴 Română (Romanian)</option>
@@ -262,7 +262,7 @@ export default function RestaurantInfo() {
               <option value="fr">🇫🇷 Français (French)</option>
               <option value="it">🇮🇹 Italiano (Italian)</option>
             </select>
-            <p className="text-xs text-slate-500 mt-2">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
               {t('emailLanguageHelpText') || 'This is the language that will be used for all customer emails including booking confirmations, takeaway orders, and notifications.'}
             </p>
           </div>
@@ -271,7 +271,7 @@ export default function RestaurantInfo() {
             <button
               onClick={handleSaveEmailLanguage}
               disabled={savingEmailLanguage}
-              className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="w-full bg-[#6262bd] text-white py-3 rounded-sm font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               {savingEmailLanguage ? (t('saving') || 'Saving...') : (t('saveEmailLanguage') || 'Save Email Language')}
             </button>
@@ -279,10 +279,10 @@ export default function RestaurantInfo() {
         </div>
       </div>
       {/* Restaurant Logo Section */}
-      <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-6">
         <div className="mb-6">
-          <h2 className="text-lg font-bold text-slate-700 mb-2">{t('logoSectionTitle')}</h2>
-          <p className="text-sm text-slate-500">
+          <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-2">{t('logoSectionTitle')}</h2>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
             {t('logoSectionDescription')}
           </p>
         </div>
@@ -290,7 +290,7 @@ export default function RestaurantInfo() {
           {/* Logo Preview */}
           {logoPreview && (
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <div className="w-32 h-32 bg-slate-100 rounded-xl border-2 border-slate-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+              <div className="w-32 h-32 bg-zinc-100 dark:bg-zinc-800 rounded-sm border border-zinc-200 dark:border-zinc-700 flex items-center justify-center overflow-hidden flex-shrink-0">
                 <img
                   src={logoPreview}
                   alt="Restaurant Logo"
@@ -298,11 +298,11 @@ export default function RestaurantInfo() {
                 />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-slate-700 mb-2">{t('currentLogo')}</p>
+                <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">{t('currentLogo')}</p>
                 <button
                   onClick={handleRemoveLogo}
                   disabled={uploadingLogo}
-                  className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl font-medium transition-colors disabled:opacity-50"
+                  className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-sm font-medium transition-colors disabled:opacity-50"
                 >
                   {t('removeLogo')}
                 </button>
@@ -311,7 +311,7 @@ export default function RestaurantInfo() {
           )}
           {/* Logo Upload */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
               {logoPreview ? t('changeLogo') : t('uploadLogo')}
             </label>
             <input
@@ -319,9 +319,9 @@ export default function RestaurantInfo() {
               accept="image/*"
               onChange={handleLogoChange}
               disabled={uploadingLogo}
-              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#6262bd] file:text-white hover:file:bg-[#5252a3] file:cursor-pointer disabled:opacity-50"
+              className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 file:mr-4 file:py-2 file:px-4 file:rounded-sm file:border-0 file:text-sm file:font-medium file:bg-[#6262bd] file:text-white hover:file:bg-[#5252a3] file:cursor-pointer disabled:opacity-50"
             />
-            <p className="text-xs text-slate-500 mt-2">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
               {t('logoHelpText')}
             </p>
           </div>
@@ -331,7 +331,7 @@ export default function RestaurantInfo() {
               <button
                 onClick={handleLogoUpload}
                 disabled={uploadingLogo}
-                className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="w-full bg-[#6262bd] text-white py-3 rounded-sm font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 {uploadingLogo ? t('uploading') : t('uploadLogoButton')}
               </button>

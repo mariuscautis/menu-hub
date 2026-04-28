@@ -135,7 +135,7 @@ export default function NotificationBell() {
       {/* Bell button */}
       <button
         onClick={() => setShowDropdown(!showDropdown)}
-        className="relative p-2 text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
+        className="relative p-2 text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 hover:text-zinc-800 dark:text-zinc-200 dark:hover:text-zinc-200 transition-colors"
         aria-label="Notifications"
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -159,12 +159,12 @@ export default function NotificationBell() {
 
           {/* Modal — centered on all screen sizes */}
           <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 pointer-events-none">
-          <div className="w-full max-w-md flex flex-col bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl max-h-[80vh] pointer-events-auto">
+          <div className="w-full max-w-md flex flex-col bg-white dark:bg-zinc-900 rounded-sm border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 shadow-2xl max-h-[80vh] pointer-events-auto">
 
             {/* Header */}
-            <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between flex-shrink-0">
+            <div className="px-5 py-4 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-2">
-                <h3 className="font-bold text-base text-slate-800 dark:text-slate-100">Notifications</h3>
+                <h3 className="font-bold text-base text-zinc-800 dark:text-zinc-200 dark:text-zinc-100">Notifications</h3>
                 {unreadCount > 0 && (
                   <span className="text-xs font-bold bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 px-2 py-0.5 rounded-full">
                     {unreadCount} new
@@ -174,13 +174,13 @@ export default function NotificationBell() {
               <div className="flex items-center gap-2">
                 {unreadCount > 0 && (
                   <button onClick={markAllAsRead}
-                    className="text-xs text-[#6262bd] hover:text-[#4f4fa3] font-semibold px-2 py-1 rounded-lg hover:bg-[#6262bd]/10 transition-colors">
+                    className="text-xs text-[#6262bd] hover:text-[#4f4fa3] font-semibold px-2 py-1 rounded-sm hover:bg-[#6262bd]/10 transition-colors">
                     Mark all read
                   </button>
                 )}
                 <button
                   onClick={() => setShowDropdown(false)}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                  className="w-8 h-8 flex items-center justify-center rounded-sm text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 transition-colors"
                   aria-label="Close notifications"
                 >
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -195,12 +195,12 @@ export default function NotificationBell() {
               {loading ? (
                 <div className="p-8 text-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6262bd] mx-auto mb-2" />
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Loading...</p>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">Loading...</p>
                 </div>
               ) : notifications.length === 0 ? (
                 <div className="p-10 text-center">
                   <div className="text-4xl mb-3">🔔</div>
-                  <p className="text-sm font-medium text-slate-600 dark:text-slate-300">No notifications yet</p>
+                  <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400 dark:text-zinc-300">No notifications yet</p>
                 </div>
               ) : (
                 <div className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -211,24 +211,24 @@ export default function NotificationBell() {
                       className={`px-5 py-4 flex gap-3 cursor-pointer transition-colors active:scale-[0.99] ${
                         !notification.read
                           ? 'bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100/70 dark:hover:bg-blue-900/40'
-                          : 'hover:bg-slate-50 dark:hover:bg-slate-800'
+                          : 'hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800'
                       }`}
                     >
                       <div className="text-xl flex-shrink-0 mt-0.5">{getNotificationIcon(notification.type)}</div>
                       <div className="flex-1 min-w-0">
                         <p className={`text-sm leading-snug break-words ${
                           !notification.read
-                            ? 'font-semibold text-slate-800 dark:text-slate-100'
-                            : 'text-slate-700 dark:text-slate-300'
+                            ? 'font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-100'
+                            : 'text-zinc-700 dark:text-zinc-300 dark:text-zinc-300'
                         }`}>
                           {notification.title}
                         </p>
                         {notification.message && (
-                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-snug break-words">
+                          <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-0.5 leading-snug break-words">
                             {notification.message}
                           </p>
                         )}
-                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                        <p className="text-xs text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 mt-1">
                           {formatTime(notification.created_at)}
                         </p>
                       </div>

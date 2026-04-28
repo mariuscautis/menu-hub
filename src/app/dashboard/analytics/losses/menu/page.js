@@ -82,10 +82,10 @@ export default function MenuItemLosses() {
       quality_failure: 'bg-pink-100 text-pink-700',
       customer_complaint: 'bg-indigo-100 text-indigo-700'
     }
-    return colors[reason] || 'bg-slate-100 text-slate-700'
+    return colors[reason] || 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300'
   }
 
-  if (loading) return <div className="text-slate-500">{t('loading')}</div>
+  if (loading) return <div className="text-zinc-500 dark:text-zinc-400">{t('loading')}</div>
   if (!restaurant) return <div className="text-red-600">{t('noRestaurant')}</div>
 
   return (
@@ -95,7 +95,7 @@ export default function MenuItemLosses() {
       <div className="mb-6 flex items-center gap-3">
         <Link
           href="/dashboard/analytics/losses"
-          className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-[#6262bd] transition-colors"
+          className="flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400 hover:text-[#6262bd] transition-colors"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -103,41 +103,41 @@ export default function MenuItemLosses() {
           Loss Reports
         </Link>
         <span className="text-slate-300">/</span>
-        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Menu Item Losses</span>
+        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">Menu Item Losses</span>
       </div>
 
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">Menu Item Losses<InfoTooltip text={tg('analytics_losses_menu_desc')} /></h1>
-        <p className="text-slate-500 dark:text-slate-400">{t('subtitle')}</p>
+        <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 flex items-center gap-2">Menu Item Losses<InfoTooltip text={tg('analytics_losses_menu_desc')} /></h1>
+        <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('subtitle')}</p>
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
-        <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-4">{t('filters')}</h2>
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 mb-6">
+        <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-4">{t('filters')}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('startDate')}</label>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">{t('startDate')}</label>
             <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
-              className="w-full px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200" />
+              className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('endDate')}</label>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">{t('endDate')}</label>
             <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
-              className="w-full px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200" />
+              className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('department')}</label>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">{t('department')}</label>
             <select value={departmentFilter} onChange={(e) => setDepartmentFilter(e.target.value)}
-              className="w-full px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200">
+              className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
               <option value="all">{t('allDepartments')}</option>
               <option value="bar">{t('bar')}</option>
               <option value="kitchen">{t('kitchen')}</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('reason')}</label>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">{t('reason')}</label>
             <select value={reasonFilter} onChange={(e) => setReasonFilter(e.target.value)}
-              className="w-full px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200">
+              className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
               <option value="all">{t('allReasons')}</option>
               <option value="expired">{t('reasonExpired')}</option>
               <option value="spoiled">{t('reasonSpoiled')}</option>
@@ -150,9 +150,9 @@ export default function MenuItemLosses() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('staffMember')}</label>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">{t('staffMember')}</label>
             <select value={staffFilter} onChange={(e) => setStaffFilter(e.target.value)}
-              className="w-full px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200">
+              className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
               <option value="all">{t('allStaff')}</option>
               {lossesData && [...new Set(lossesData.data.map(l => JSON.stringify({ name: l.staff_name, email: l.staff_email })))]
                 .map(str => JSON.parse(str))
@@ -165,26 +165,26 @@ export default function MenuItemLosses() {
       {lossesData && (
         <>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-xl p-4">
-              <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">{t('totalLossRecords')}</p>
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+              <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 text-sm font-medium mb-1">{t('totalLossRecords')}</p>
               <p className="text-2xl font-bold text-[#6262bd]">{lossesData.summary.total_loss_records}</p>
             </div>
-            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-xl p-4">
-              <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">{t('totalItemsLost')}</p>
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+              <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 text-sm font-medium mb-1">{t('totalItemsLost')}</p>
               <p className="text-2xl font-bold text-red-600">{lossesData.summary.total_items_lost}</p>
             </div>
-            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-xl p-4">
-              <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">{t('barLosses')}</p>
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+              <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 text-sm font-medium mb-1">{t('barLosses')}</p>
               <p className="text-2xl font-bold text-orange-600">{lossesData.summary.by_department?.bar?.items || 0}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-1">
                 {t('cost')}: {formatCurrency(lossesData.summary.by_department?.bar?.restaurant_cost || 0)} •
                 {t('revenue')}: {formatCurrency(lossesData.summary.by_department?.bar?.selling_cost || 0)}
               </p>
             </div>
-            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-xl p-4">
-              <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">{t('kitchenLosses')}</p>
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+              <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 text-sm font-medium mb-1">{t('kitchenLosses')}</p>
               <p className="text-2xl font-bold text-green-600">{lossesData.summary.by_department?.kitchen?.items || 0}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-1">
                 {t('cost')}: {formatCurrency(lossesData.summary.by_department?.kitchen?.restaurant_cost || 0)} •
                 {t('revenue')}: {formatCurrency(lossesData.summary.by_department?.kitchen?.selling_cost || 0)}
               </p>
@@ -192,16 +192,16 @@ export default function MenuItemLosses() {
           </div>
 
           {lossesData.summary.top_loss_items.length > 0 && (
-            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
-              <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-4">{t('topLossItems')}</h2>
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 mb-6">
+              <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-4">{t('topLossItems')}</h2>
               <div className="space-y-2">
                 {lossesData.summary.top_loss_items.map((item, index) => (
-                  <div key={index} className="flex flex-wrap items-start justify-between gap-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
+                  <div key={index} className="flex flex-wrap items-start justify-between gap-3 p-3 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 rounded-sm">
                     <div className="flex items-center gap-3 min-w-0">
-                      <span className="text-lg font-bold text-slate-400">#{index + 1}</span>
+                      <span className="text-lg font-bold text-zinc-400 dark:text-zinc-500">#{index + 1}</span>
                       <div>
-                        <p className="font-semibold text-slate-800 dark:text-slate-200">{item.name}</p>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                        <p className="font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{item.name}</p>
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">
                           {item.count} {t('lossRecords').replace('{plural}', item.count > 1 ? 's' : '')} • {item.items} {t('items')}
                         </p>
                       </div>
@@ -211,8 +211,8 @@ export default function MenuItemLosses() {
                     </div>
                     <div className="text-right">
                       <p className="text-xl font-bold text-red-600">{formatCurrency(item.selling_cost || 0)}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">{t('lostRevenue')}</p>
-                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{t('cost')}: {formatCurrency(item.restaurant_cost || 0)}</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('lostRevenue')}</p>
+                      <p className="text-xs text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 mt-1">{t('cost')}: {formatCurrency(item.restaurant_cost || 0)}</p>
                     </div>
                   </div>
                 ))}
@@ -220,33 +220,33 @@ export default function MenuItemLosses() {
             </div>
           )}
 
-          <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6">
-            <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-4">{t('lossRecordsTable')}</h2>
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6">
+            <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-4">{t('lossRecordsTable')}</h2>
             {lossesData.data.length === 0 ? (
-              <div className="text-center py-12 text-slate-400"><p>{t('noRecordsFound')}</p></div>
+              <div className="text-center py-12 text-zinc-400 dark:text-zinc-500"><p>{t('noRecordsFound')}</p></div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b-2 border-slate-100 dark:border-slate-700">
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('dateTime')}</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('item')}</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('qty')}</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('restaurantCost')}</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('sellingCost')}</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('reason')}</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('dept')}</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('staff')}</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600 dark:text-slate-300">{t('notes')}</th>
+                    <tr className="border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-700">
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-600 dark:text-zinc-400 dark:text-zinc-300">{t('dateTime')}</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-600 dark:text-zinc-400 dark:text-zinc-300">{t('item')}</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-600 dark:text-zinc-400 dark:text-zinc-300">{t('qty')}</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-600 dark:text-zinc-400 dark:text-zinc-300">{t('restaurantCost')}</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-600 dark:text-zinc-400 dark:text-zinc-300">{t('sellingCost')}</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-600 dark:text-zinc-400 dark:text-zinc-300">{t('reason')}</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-600 dark:text-zinc-400 dark:text-zinc-300">{t('dept')}</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-600 dark:text-zinc-400 dark:text-zinc-300">{t('staff')}</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-600 dark:text-zinc-400 dark:text-zinc-300">{t('notes')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {lossesData.data.map((loss) => (
-                      <tr key={loss.id} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800">
-                        <td className="py-3 px-4 text-sm text-slate-700 dark:text-slate-300">
+                      <tr key={loss.id} className="border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800">
+                        <td className="py-3 px-4 text-sm text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">
                           {new Date(loss.created_at).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                         </td>
-                        <td className="py-3 px-4"><p className="font-medium text-slate-800 dark:text-slate-200">{loss.menu_item_name}</p></td>
+                        <td className="py-3 px-4"><p className="font-medium text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{loss.menu_item_name}</p></td>
                         <td className="py-3 px-4"><span className="font-semibold text-red-600">{loss.quantity}</span></td>
                         <td className="py-3 px-4"><span className="font-semibold text-amber-700 dark:text-amber-500">{formatCurrency(loss.restaurant_cost || 0)}</span></td>
                         <td className="py-3 px-4"><span className="font-semibold text-red-700 dark:text-red-500">{formatCurrency(loss.selling_cost || 0)}</span></td>
@@ -258,11 +258,11 @@ export default function MenuItemLosses() {
                             {loss.department === 'bar' ? '🍸' : '🍳'}
                           </span>
                         </td>
-                        <td className="py-3 px-4"><span className="text-slate-700 dark:text-slate-300">{loss.staff_name}</span></td>
+                        <td className="py-3 px-4"><span className="text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">{loss.staff_name}</span></td>
                         <td className="py-3 px-4 text-center">
                           {loss.notes ? (
                             <button onClick={() => { setSelectedNote({ item: loss.menu_item_name, note: loss.notes, date: loss.created_at }); setShowNotesModal(true) }}
-                              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 transition-colors">
+                              className="inline-flex items-center justify-center w-8 h-8 rounded-sm bg-blue-50 hover:bg-blue-100 text-blue-600 transition-colors">
                               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
                               </svg>
@@ -279,8 +279,8 @@ export default function MenuItemLosses() {
                     ))}
                   </tbody>
                   <tfoot>
-                    <tr className="border-t-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
-                      <td className="py-4 px-4 text-sm font-bold text-slate-700 dark:text-slate-200" colSpan="2">{t('total')}</td>
+                    <tr className="border-t-2 border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800">
+                      <td className="py-4 px-4 text-sm font-bold text-zinc-700 dark:text-zinc-300" colSpan="2">{t('total')}</td>
                       <td className="py-4 px-4"><span className="font-bold text-red-600">{lossesData.summary.total_items_lost}</span></td>
                       <td className="py-4 px-4"><span className="font-bold text-amber-700 dark:text-amber-500 text-lg">{formatCurrency(lossesData.summary.total_restaurant_cost || 0)}</span></td>
                       <td className="py-4 px-4"><span className="font-bold text-red-700 dark:text-red-500 text-lg">{formatCurrency(lossesData.summary.total_selling_cost || 0)}</span></td>
@@ -296,24 +296,24 @@ export default function MenuItemLosses() {
 
       {showNotesModal && selectedNote && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => { setShowNotesModal(false); setSelectedNote(null) }}>
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 max-w-lg w-full shadow-xl" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white dark:bg-zinc-800 rounded-sm p-6 max-w-lg w-full shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200">{t('lossNote')}</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{selectedNote.item}</p>
-                <p className="text-xs text-slate-400 dark:text-slate-500">
+                <h3 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{t('lossNote')}</h3>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-1">{selectedNote.item}</p>
+                <p className="text-xs text-zinc-400 dark:text-zinc-500 dark:text-zinc-500">
                   {new Date(selectedNote.date).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
-              <button onClick={() => { setShowNotesModal(false); setSelectedNote(null) }} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+              <button onClick={() => { setShowNotesModal(false); setSelectedNote(null) }} className="text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300 transition-colors">
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
               </button>
             </div>
-            <div className="bg-slate-50 dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-700 rounded-xl p-4">
-              <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{selectedNote.note}</p>
+            <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 rounded-sm p-4">
+              <p className="text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 whitespace-pre-wrap">{selectedNote.note}</p>
             </div>
             <button onClick={() => { setShowNotesModal(false); setSelectedNote(null) }}
-              className="mt-4 w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252ad] transition-colors">
+              className="mt-4 w-full bg-[#6262bd] text-white py-3 rounded-sm font-semibold hover:bg-[#5252ad] transition-colors">
               {t('close')}
             </button>
           </div>

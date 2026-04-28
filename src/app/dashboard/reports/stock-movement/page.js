@@ -464,7 +464,7 @@ export default function StockMovementReport() {
 
   if (initialLoad) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-8 flex items-center justify-center">
+      <div className="min-h-screen p-8 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6262bd]"></div>
       </div>
     );
@@ -472,22 +472,22 @@ export default function StockMovementReport() {
 
   return (
     <OfflinePageGuard>
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-4 md:p-8">
+    <div className="min-h-screen p-4 md:p-8">
       <PageTabs tabs={reportsTabs} />
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-1 flex items-center gap-2">
+        <h1 className="text-2xl md:text-3xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-1 flex items-center gap-2">
           {t('title')}
           <InfoTooltip text={tg('reports_stock_movement_desc')} />
         </h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm">
+        <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 text-sm">
           {t('subtitle')}
         </p>
       </div>
 
       {/* Date Range Selector */}
-      <div className="mb-6 bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-5">
-        <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 uppercase tracking-wide">
+      <div className="mb-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-5">
+        <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-3 uppercase tracking-wide">
           {t('timeFrame')}
         </h2>
         <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 mb-4">
@@ -495,10 +495,10 @@ export default function StockMovementReport() {
             <button
               key={p.key}
               onClick={() => applyPreset(p)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-sm text-sm font-medium transition-colors ${
                 activePreset === p.key
                   ? 'bg-[#6262bd] text-white'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  : 'bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700'
               }`}
             >
               {t(p.labelKey)}
@@ -506,10 +506,10 @@ export default function StockMovementReport() {
           ))}
           <button
             onClick={() => setActivePreset('Custom')}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-sm text-sm font-medium transition-colors ${
               activePreset === 'Custom'
                 ? 'bg-[#6262bd] text-white'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                : 'bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700'
             }`}
           >
             {t('presetCustom')}
@@ -517,28 +517,28 @@ export default function StockMovementReport() {
         </div>
         <div className="grid grid-cols-2 sm:flex sm:flex-row gap-3 sm:items-end">
           <div>
-            <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{t('from')}</label>
+            <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-1">{t('from')}</label>
             <input
               type="date"
               value={startDate}
               onChange={e => { setStartDate(e.target.value); setActivePreset('Custom'); }}
-              className="w-full px-3 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-sm focus:outline-none focus:border-[#6262bd]"
+              className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 text-sm focus:outline-none focus:border-[#6262bd]"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{t('to')}</label>
+            <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-1">{t('to')}</label>
             <input
               type="date"
               value={endDate}
               max={new Date().toISOString().split('T')[0]}
               onChange={e => { setEndDate(e.target.value); setActivePreset('Custom'); }}
-              className="w-full px-3 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-sm focus:outline-none focus:border-[#6262bd]"
+              className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 text-sm focus:outline-none focus:border-[#6262bd]"
             />
           </div>
           <button
             onClick={fetchReport}
             disabled={loading}
-            className="col-span-2 sm:col-span-1 w-full sm:w-auto px-5 py-2 bg-[#6262bd] hover:bg-[#5252ad] text-white font-medium rounded-xl transition-colors disabled:opacity-50 text-sm whitespace-nowrap"
+            className="col-span-2 sm:col-span-1 w-full sm:w-auto px-5 py-2 bg-[#6262bd] hover:bg-[#5252ad] text-white font-medium rounded-sm transition-colors disabled:opacity-50 text-sm whitespace-nowrap"
           >
             {loading ? t('loading') : t('generateReport')}
           </button>
@@ -547,7 +547,7 @@ export default function StockMovementReport() {
 
       {loading && (
         <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#6262bd]"></div>
+          <div className="w-8 h-8 border-2 border-zinc-200 dark:border-zinc-800 border-t-[#6262bd] rounded-full animate-spin"></div>
         </div>
       )}
 
@@ -555,32 +555,32 @@ export default function StockMovementReport() {
         <>
           {/* Summary Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4 text-center">
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">{t('totalStockItems')}</p>
-              <p className="text-xl font-bold text-slate-800 dark:text-slate-200">{reportData.summary.totalProducts}</p>
-              <p className="text-xs text-slate-400 mt-0.5">{t('activeProducts')}</p>
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4 text-center">
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-1">{t('totalStockItems')}</p>
+              <p className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{reportData.summary.totalProducts}</p>
+              <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">{t('activeProducts')}</p>
             </div>
-            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4 text-center">
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">{t('purchasedPeriod')}</p>
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4 text-center">
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-1">{t('purchasedPeriod')}</p>
               <p className="text-xl font-bold text-blue-600">{formatCurrency(reportData.summary.totalPurchasedCost)}</p>
-              <p className="text-xs text-slate-400 mt-0.5">{t('totalPurchaseCost')}</p>
+              <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">{t('totalPurchaseCost')}</p>
             </div>
-            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4 text-center">
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">{t('usedInRecipes')}</p>
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4 text-center">
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-1">{t('usedInRecipes')}</p>
               <p className="text-xl font-bold text-amber-600">{formatCurrency(reportData.summary.totalRecipeUsedValue)}</p>
-              <p className="text-xs text-slate-400 mt-0.5">{t('ingredientCostOfSales')}</p>
+              <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">{t('ingredientCostOfSales')}</p>
             </div>
-            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4 text-center">
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">{t('currentStockValue')}</p>
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4 text-center">
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-1">{t('currentStockValue')}</p>
               <p className="text-xl font-bold text-emerald-600">{formatCurrency(reportData.summary.totalCurrentValue)}</p>
-              <p className="text-xs text-slate-400 mt-0.5">{t('atCurrentUnitCost')}</p>
+              <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">{t('atCurrentUnitCost')}</p>
             </div>
           </div>
 
           {/* Filter + Sort bar */}
           <div className="mb-4 flex flex-wrap gap-3 items-center justify-between">
             {/* Category toggle */}
-            <div className="flex items-center gap-1 bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-xl p-1">
+            <div className="flex items-center gap-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-1">
               {[
                 { value: 'all', labelKey: 'allStock' },
                 { value: 'kitchen', labelKey: 'kitchenFood' },
@@ -589,10 +589,10 @@ export default function StockMovementReport() {
                 <button
                   key={opt.value}
                   onClick={() => setStockTypeFilter(opt.value)}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                  className={`px-3 py-1.5 rounded-sm text-sm font-medium transition-colors ${
                     stockTypeFilter === opt.value
                       ? 'bg-[#6262bd] text-white'
-                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                      : 'text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-800'
                   }`}
                 >
                   {t(opt.labelKey)}
@@ -603,11 +603,11 @@ export default function StockMovementReport() {
             <div className="flex items-center gap-3">
               {/* Sort */}
               <div className="flex items-center gap-2">
-                <label className="text-xs text-slate-500 dark:text-slate-400">{t('sortBy')}</label>
+                <label className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('sortBy')}</label>
                 <select
                   value={sortBy}
                   onChange={e => setSortBy(e.target.value)}
-                  className="text-sm px-3 py-1.5 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:border-[#6262bd]"
+                  className="text-sm px-3 py-1.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 focus:outline-none focus:border-[#6262bd]"
                 >
                   <option value="name">{t('sortName')}</option>
                   <option value="used-desc">{t('sortMostUsed')}</option>
@@ -618,7 +618,7 @@ export default function StockMovementReport() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleExportCSV}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 rounded-sm hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -627,7 +627,7 @@ export default function StockMovementReport() {
                 </button>
                 <button
                   onClick={handleExportPDF}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm border-2 border-[#6262bd]/40 text-[#6262bd] rounded-xl hover:bg-[#6262bd]/10 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm border-2 border-[#6262bd]/40 text-[#6262bd] rounded-sm hover:bg-[#6262bd]/10 transition-colors"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -640,13 +640,13 @@ export default function StockMovementReport() {
 
           {/* Stock Table */}
           {filteredItems.length === 0 ? (
-            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-10 text-center">
-              <p className="text-slate-500 dark:text-slate-400">{t('noStockItems')}</p>
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-10 text-center">
+              <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('noStockItems')}</p>
             </div>
           ) : (
-            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm overflow-hidden">
               {/* Table header */}
-              <div className="hidden lg:grid grid-cols-10 gap-2 px-5 py-3 bg-slate-50 dark:bg-slate-800/50 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+              <div className="hidden lg:grid grid-cols-10 gap-2 px-5 py-3 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800/50 text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 uppercase tracking-wide">
                 <div className="col-span-2">{t('product')}</div>
                 <div className="text-right">{t('costUnit')}</div>
                 <div className="text-right">{t('opening')}</div>
@@ -658,7 +658,7 @@ export default function StockMovementReport() {
                 <div className="text-right">{t('details')}</div>
               </div>
 
-              <div className="divide-y divide-slate-100 dark:divide-slate-800">
+              <div className="divide-y divide-zinc-200 dark:divide-zinc-800 dark:divide-slate-800">
                 {filteredItems.map(item => {
                   const isExpanded = expandedItems[item.id];
                   const hasDetails = Object.keys(item.usedIn).length > 0 || item.lossEntries.length > 0 || item.purchaseEntries.length > 0;
@@ -669,19 +669,19 @@ export default function StockMovementReport() {
                     <div key={item.id}>
                       {/* Main row */}
                       <div
-                        className={`px-5 py-3.5 lg:grid lg:grid-cols-10 lg:gap-2 flex flex-col gap-2 ${hasDetails ? 'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/40' : ''} transition-colors`}
+                        className={`px-5 py-3.5 lg:grid lg:grid-cols-10 lg:gap-2 flex flex-col gap-2 ${hasDetails ? 'cursor-pointer hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800/40' : ''} transition-colors`}
                         onClick={() => hasDetails && toggleExpand(item.id)}
                       >
                         {/* Name + category */}
                         <div className="col-span-2 flex items-start gap-2">
                           {hasDetails && (
-                            <svg className={`w-3.5 h-3.5 text-slate-400 mt-0.5 transition-transform flex-shrink-0 ${isExpanded ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className={`w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500 mt-0.5 transition-transform flex-shrink-0 ${isExpanded ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                             </svg>
                           )}
                           {!hasDetails && <span className="w-3.5 flex-shrink-0" />}
                           <div>
-                            <p className="font-medium text-slate-800 dark:text-slate-200 text-sm">{item.name}</p>
+                            <p className="font-medium text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 text-sm">{item.name}</p>
                             <span className={`text-xs px-1.5 py-0.5 rounded-md font-medium ${item.category === 'kitchen' ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'}`}>
                               {item.category}
                             </span>
@@ -689,38 +689,38 @@ export default function StockMovementReport() {
                         </div>
 
                         {/* Cost per unit */}
-                        <div className="lg:text-right text-xs text-slate-500 dark:text-slate-400 lg:block flex justify-between items-center">
-                          <span className="lg:hidden text-slate-400">{t('costUnit')}</span>
+                        <div className="lg:text-right text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 lg:block flex justify-between items-center">
+                          <span className="lg:hidden text-zinc-400 dark:text-zinc-500">{t('costUnit')}</span>
                           <span>{item.currentQty > 0 ? `${formatCostPerUnit(item.costPerUnit * item.multiplier)}/${item.inputUnit}` : '—'}</span>
                         </div>
 
                         {/* Opening qty */}
-                        <div className="lg:text-right text-sm text-slate-600 dark:text-slate-400 lg:block flex justify-between">
-                          <span className="lg:hidden text-xs text-slate-400">{t('opening')}</span>
+                        <div className="lg:text-right text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 lg:block flex justify-between">
+                          <span className="lg:hidden text-xs text-zinc-400 dark:text-zinc-500">{t('opening')}</span>
                           <span>{formatQty(item.openingQty / item.multiplier, item.inputUnit)}</span>
                         </div>
 
                         {/* Purchased — show in input units (e.g. kg, pieces) */}
                         <div className="lg:text-right text-sm text-blue-600 lg:block flex justify-between">
-                          <span className="lg:hidden text-xs text-slate-400">{t('purchased')}</span>
+                          <span className="lg:hidden text-xs text-zinc-400 dark:text-zinc-500">{t('purchased')}</span>
                           <span>{item.purchasedInputQty > 0 ? `+${formatQty(item.purchasedInputQty, item.inputUnit)}` : '—'}</span>
                         </div>
 
                         {/* Used in recipe */}
                         <div className="lg:text-right text-sm text-amber-600 lg:block flex justify-between">
-                          <span className="lg:hidden text-xs text-slate-400">{t('usedRecipe')}</span>
+                          <span className="lg:hidden text-xs text-zinc-400 dark:text-zinc-500">{t('usedRecipe')}</span>
                           <span>{item.recipeUsedQty > 0 ? `−${formatQty(item.recipeUsedQty / item.multiplier, item.inputUnit)}` : '—'}</span>
                         </div>
 
                         {/* Lost / adjusted */}
                         <div className="lg:text-right text-sm text-red-500 lg:block flex justify-between">
-                          <span className="lg:hidden text-xs text-slate-400">{t('lostAdj')}</span>
+                          <span className="lg:hidden text-xs text-zinc-400 dark:text-zinc-500">{t('lostAdj')}</span>
                           <span>{item.lostQty > 0 ? `−${formatQty(item.lostInputQty, item.inputUnit)}` : '—'}</span>
                         </div>
 
                         {/* Closing / current */}
-                        <div className={`lg:text-right text-sm font-semibold lg:block flex justify-between ${isEmpty ? 'text-red-500' : isLow ? 'text-amber-500' : 'text-slate-700 dark:text-slate-300'}`}>
-                          <span className="lg:hidden text-xs text-slate-400">{t('closing')}</span>
+                        <div className={`lg:text-right text-sm font-semibold lg:block flex justify-between ${isEmpty ? 'text-red-500' : isLow ? 'text-amber-500' : 'text-zinc-700 dark:text-zinc-300 dark:text-zinc-300'}`}>
+                          <span className="lg:hidden text-xs text-zinc-400 dark:text-zinc-500">{t('closing')}</span>
                           <span className="flex items-center lg:justify-end gap-1">
                             {formatQty(item.currentQty / item.multiplier, item.inputUnit)}
                             {isEmpty && <span className="text-xs bg-red-100 dark:bg-red-900/30 text-red-600 px-1 rounded">out</span>}
@@ -729,8 +729,8 @@ export default function StockMovementReport() {
                         </div>
 
                         {/* Stock value */}
-                        <div className="lg:text-right text-sm text-slate-600 dark:text-slate-400 lg:block flex justify-between">
-                          <span className="lg:hidden text-xs text-slate-400">{t('stockValue')}</span>
+                        <div className="lg:text-right text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 lg:block flex justify-between">
+                          <span className="lg:hidden text-xs text-zinc-400 dark:text-zinc-500">{t('stockValue')}</span>
                           <span>{item.currentQty > 0 ? formatCurrency(item.totalCurrentValue) : '—'}</span>
                         </div>
 
@@ -746,7 +746,7 @@ export default function StockMovementReport() {
 
                       {/* Expanded details */}
                       {isExpanded && hasDetails && (
-                        <div className="bg-slate-50 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-800 px-10 py-4 space-y-4">
+                        <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800/40 border-t border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 px-10 py-4 space-y-4">
                           {/* Used in recipes */}
                           {Object.keys(item.usedIn).length > 0 && (
                             <div>
@@ -755,12 +755,12 @@ export default function StockMovementReport() {
                               </p>
                               <div className="space-y-1">
                                 {Object.entries(item.usedIn).sort((a, b) => b[1] - a[1]).map(([dish, qty]) => (
-                                  <div key={dish} className="flex justify-between text-xs text-slate-600 dark:text-slate-400">
+                                  <div key={dish} className="flex justify-between text-xs text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">
                                     <span>{dish}</span>
                                     <span className="font-medium">{formatQty(qty / item.multiplier, item.inputUnit)}</span>
                                   </div>
                                 ))}
-                                <div className="flex justify-between text-xs font-semibold text-amber-700 dark:text-amber-400 pt-1 border-t border-slate-200 dark:border-slate-700">
+                                <div className="flex justify-between text-xs font-semibold text-amber-700 dark:text-amber-400 pt-1 border-t border-zinc-200 dark:border-zinc-700 dark:border-zinc-700">
                                   <span>{t('totalRecipeUsage')}</span>
                                   <span>{formatQty(item.recipeUsedQty / item.multiplier, item.inputUnit)} ({formatCurrency(item.recipeUsedValue)})</span>
                                 </div>
@@ -776,7 +776,7 @@ export default function StockMovementReport() {
                               </p>
                               <div className="space-y-1">
                                 {item.purchaseEntries.map((entry, i) => (
-                                  <div key={i} className="flex justify-between text-xs text-slate-600 dark:text-slate-400">
+                                  <div key={i} className="flex justify-between text-xs text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">
                                     <span>{formatDate(entry.created_at)}</span>
                                     <span className="font-medium text-blue-600">+{formatQty(parseFloat(entry.quantity), entry.unit_used || item.inputUnit)} ({formatCurrency(parseFloat(entry.purchase_price || 0))})</span>
                                   </div>
@@ -793,7 +793,7 @@ export default function StockMovementReport() {
                               </p>
                               <div className="space-y-1">
                                 {item.lossEntries.map((entry, i) => (
-                                  <div key={i} className="flex justify-between text-xs text-slate-600 dark:text-slate-400">
+                                  <div key={i} className="flex justify-between text-xs text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">
                                     <span>{formatDate(entry.created_at)}</span>
                                     <span className="font-medium text-red-500">{formatQty(Math.abs(parseFloat(entry.quantity)), entry.unit_used || item.inputUnit)}</span>
                                   </div>
@@ -809,7 +809,7 @@ export default function StockMovementReport() {
               </div>
 
               {/* Table footer */}
-              <div className="hidden lg:grid grid-cols-10 gap-2 px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border-t-2 border-slate-200 dark:border-slate-700 text-sm font-bold text-slate-800 dark:text-slate-200">
+              <div className="hidden lg:grid grid-cols-10 gap-2 px-5 py-4 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800/50 border-t-2 border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-sm font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                 <div className="col-span-2">{filteredItems.length} {t('products')}</div>
                 <div></div>
                 <div></div>
@@ -824,7 +824,7 @@ export default function StockMovementReport() {
           )}
 
           {/* Info note */}
-          <div className="mt-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+          <div className="mt-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-sm p-4">
             <p className="text-xs text-blue-600 dark:text-blue-400 flex gap-2">
               <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />

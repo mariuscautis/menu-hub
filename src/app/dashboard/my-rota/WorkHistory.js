@@ -184,11 +184,11 @@ export default function WorkHistory({ staff, restaurant }) {
   const groupedAttendance = groupByDate();
 
   return (
-    <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-700 rounded-2xl p-4 md:p-6">
+    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 rounded-sm p-4 md:p-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">{t('title') || 'Work History'}</h2>
+        <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{t('title') || 'Work History'}</h2>
         <div className="text-right">
-          <p className="text-xs text-slate-500 dark:text-slate-400">{t('totalHoursWorked') || 'Total Hours'}</p>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('totalHoursWorked') || 'Total Hours'}</p>
           <p className="text-xl font-bold text-[#6262bd]">{formatHours(getTotalHours())}</p>
         </div>
       </div>
@@ -206,8 +206,8 @@ export default function WorkHistory({ staff, restaurant }) {
             <button
               key={key}
               onClick={() => { if (key === 'custom') { setShowCustom(!showCustom); } else { setPeriod(key); setShowCustom(false); } }}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                period === key ? 'bg-[#6262bd] text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+              className={`px-3 py-2 rounded-sm text-sm font-medium transition-colors ${
+                period === key ? 'bg-[#6262bd] text-white' : 'bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700'
               }`}
             >
               {label}
@@ -217,35 +217,35 @@ export default function WorkHistory({ staff, restaurant }) {
 
         {/* Custom Date Range Picker */}
         {showCustom && (
-          <div className="p-4 bg-slate-50 rounded-xl border-2 border-slate-200">
+          <div className="p-4 bg-zinc-50 dark:bg-zinc-900 rounded-sm border border-zinc-200 dark:border-zinc-700">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   {t('fromDate') || 'From Date'}
                 </label>
                 <input
                   type="date"
                   value={customDateFrom}
                   onChange={(e) => setCustomDateFrom(e.target.value)}
-                  className="w-full px-4 py-2 border-2 border-slate-200 rounded-lg focus:outline-none focus:border-[#6262bd]"
+                  className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd]"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   {t('toDate') || 'To Date'}
                 </label>
                 <input
                   type="date"
                   value={customDateTo}
                   onChange={(e) => setCustomDateTo(e.target.value)}
-                  className="w-full px-4 py-2 border-2 border-slate-200 rounded-lg focus:outline-none focus:border-[#6262bd]"
+                  className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd]"
                 />
               </div>
             </div>
             <button
               onClick={handleCustomDateApply}
               disabled={!customDateFrom || !customDateTo}
-              className="px-6 py-2 bg-[#6262bd] text-white rounded-lg hover:bg-[#5252a5] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-2 bg-[#6262bd] text-white rounded-sm hover:bg-[#5252a5] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {t('apply') || 'Apply'}
             </button>
@@ -256,22 +256,22 @@ export default function WorkHistory({ staff, restaurant }) {
       {/* Work History List */}
       {loading ? (
         <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6262bd] mx-auto mb-4"></div>
-          <p className="text-slate-600">{t('loading') || 'Loading work history...'}</p>
+          <div className="w-7 h-7 border-2 border-zinc-200 dark:border-zinc-800 border-t-[#6262bd] rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-zinc-600 dark:text-zinc-400">{t('loading') || 'Loading work history...'}</p>
         </div>
       ) : attendance.length === 0 ? (
-        <div className="text-center py-12 bg-slate-50 rounded-xl">
+        <div className="text-center py-12 bg-zinc-50 dark:bg-zinc-900 rounded-sm">
           <div className="text-4xl mb-3">📊</div>
-          <p className="text-slate-600 font-medium">{t('noHistory') || 'No work history for this period'}</p>
-          <p className="text-sm text-slate-500 mt-1">{t('completedShiftsNote') || 'Completed shifts will appear here'}</p>
+          <p className="text-zinc-600 dark:text-zinc-400 font-medium">{t('noHistory') || 'No work history for this period'}</p>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">{t('completedShiftsNote') || 'Completed shifts will appear here'}</p>
         </div>
       ) : (
         <div className="space-y-4">
           {Object.keys(groupedAttendance).sort((a, b) => b.localeCompare(a)).map(date => (
-            <div key={date} className="border-2 border-slate-100 rounded-xl overflow-hidden">
-              <div className="bg-slate-50 px-4 py-3 border-b-2 border-slate-100">
+            <div key={date} className="border border-zinc-200 dark:border-zinc-800 rounded-sm overflow-hidden">
+              <div className="bg-zinc-50 dark:bg-zinc-900 px-4 py-3 border-b border-zinc-200 dark:border-zinc-800">
                 <div className="flex justify-between items-center">
-                  <h3 className="font-bold text-slate-800">{formatDate(date)}</h3>
+                  <h3 className="font-bold text-zinc-800 dark:text-zinc-200">{formatDate(date)}</h3>
                   <span className="text-sm font-medium text-[#6262bd]">
                     {formatHours(
                       groupedAttendance[date].reduce((sum, att) =>
@@ -281,7 +281,7 @@ export default function WorkHistory({ staff, restaurant }) {
                   </span>
                 </div>
               </div>
-              <div className="divide-y-2 divide-slate-100">
+              <div className="divide-y-2 divide-zinc-200 dark:divide-zinc-800">
                 {groupedAttendance[date].map(att => {
                   const hoursWorked = calculateHoursWorked(att.clock_in, att.clock_out, att.break_start, att.break_end);
                   const breakDuration = att.break_start && att.break_end
@@ -291,7 +291,7 @@ export default function WorkHistory({ staff, restaurant }) {
                   return (
                     <div key={att.id} className="p-4">
                       <div className="flex justify-between items-start gap-2 mb-1">
-                        <span className="font-bold text-slate-800 dark:text-slate-200">
+                        <span className="font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                           {formatTime(att.clock_in)} – {formatTime(att.clock_out)}
                         </span>
                         <span className="text-base font-bold text-[#6262bd] shrink-0">
@@ -300,7 +300,7 @@ export default function WorkHistory({ staff, restaurant }) {
                       </div>
                       <div className="flex flex-wrap items-center gap-1.5 mb-1">
                         {att.shift?.role_required && (
-                          <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-full text-xs font-medium">
+                          <span className="px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-full text-xs font-medium">
                             {att.shift.role_required}
                           </span>
                         )}
@@ -315,14 +315,14 @@ export default function WorkHistory({ staff, restaurant }) {
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+                      <div className="flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">
                         <span>⏱ {t('worked') || 'Worked'}: {formatHours(hoursWorked)}</span>
                         {breakDuration > 0 && (
                           <span>☕ {t('break') || 'Break'}: {Math.round(breakDuration)}m</span>
                         )}
                       </div>
                       {att.notes && (
-                        <p className="text-xs text-slate-500 mt-2 bg-slate-50 p-2 rounded">
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2 bg-zinc-50 dark:bg-zinc-900 p-2 rounded">
                           {att.notes}
                         </p>
                       )}
@@ -338,15 +338,15 @@ export default function WorkHistory({ staff, restaurant }) {
       {/* Summary Stats */}
       {attendance.length > 0 && (
         <div className="mt-6 grid grid-cols-3 gap-3">
-          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-100 dark:border-blue-800 rounded-xl text-center">
+          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-100 dark:border-blue-800 rounded-sm text-center">
             <p className="text-xs text-blue-700 dark:text-blue-400 mb-1">{t('totalShifts') || 'Total Shifts'}</p>
             <p className="text-xl font-bold text-blue-800 dark:text-blue-300">{attendance.length}</p>
           </div>
-          <div className="p-3 bg-green-50 dark:bg-green-900/20 border-2 border-green-100 dark:border-green-800 rounded-xl text-center">
+          <div className="p-3 bg-green-50 dark:bg-green-900/20 border-2 border-green-100 dark:border-green-800 rounded-sm text-center">
             <p className="text-xs text-green-700 dark:text-green-400 mb-1">{t('totalHours') || 'Total Hours'}</p>
             <p className="text-xl font-bold text-green-800 dark:text-green-300">{formatHours(getTotalHours())}</p>
           </div>
-          <div className="p-3 bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-100 dark:border-purple-800 rounded-xl text-center">
+          <div className="p-3 bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-100 dark:border-purple-800 rounded-sm text-center">
             <p className="text-xs text-purple-700 dark:text-purple-400 mb-1">{t('averagePerShift') || 'Avg / Shift'}</p>
             <p className="text-xl font-bold text-purple-800 dark:text-purple-300">
               {formatHours(getTotalHours() / attendance.length)}

@@ -110,14 +110,14 @@ export default function ReportsPage() {
   const tg = useTranslations('guide');
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-4 md:p-8">
+    <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-5xl mx-auto">
         <div className="mb-10 text-center">
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-2 flex items-center justify-center gap-2">
+          <h1 className="text-2xl md:text-3xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-2 flex items-center justify-center gap-2">
             {t('title')}
             <InfoTooltip text={tg('reports_desc')} />
           </h1>
-          <p className="text-slate-500 dark:text-slate-400">
+          <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">
             {t('subtitle')}
           </p>
         </div>
@@ -127,16 +127,16 @@ export default function ReportsPage() {
             <Link
               key={report.href}
               href={report.href}
-              className="group flex flex-col items-center text-center gap-3 bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 hover:border-[#6262bd] dark:hover:border-[#6262bd] hover:shadow-lg transition-all"
+              className="group flex flex-col items-center text-center gap-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 hover:border-[#6262bd] dark:hover:border-[#6262bd] hover:shadow-lg transition-all"
             >
-              <div className={`${report.bg} p-4 rounded-2xl ${report.color} group-hover:scale-110 transition-transform`}>
+              <div className={`${report.bg} p-4 rounded-sm ${report.color} group-hover:scale-110 transition-transform`}>
                 {report.icon}
               </div>
               <div>
-                <h3 className="font-semibold text-slate-800 dark:text-slate-200 group-hover:text-[#6262bd] transition-colors mb-1">
+                <h3 className="font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 group-hover:text-[#6262bd] transition-colors mb-1">
                   {t(report.titleKey)}
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 leading-snug">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 leading-snug">
                   {t(report.descKey)}
                 </p>
               </div>

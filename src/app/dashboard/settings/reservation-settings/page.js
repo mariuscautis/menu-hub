@@ -211,7 +211,7 @@ export default function ReservationSettingsPage() {
     setSaving(false)
   }
 
-  if (loading) return <div className="text-slate-500">{t('loading')}</div>
+  if (loading) return <div className="text-zinc-500 dark:text-zinc-400">{t('loading')}</div>
   if (!restaurant) return <div className="text-red-600">{t('noRestaurant')}</div>
 
   return (
@@ -220,29 +220,29 @@ export default function ReservationSettingsPage() {
       <PageTabs tabs={settingsTabs} />
 
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">{t('title')}<InfoTooltip text={tg('reservation_settings_desc')} /></h1>
-        <p className="text-slate-500 dark:text-slate-400">{t('subtitle')}</p>
+        <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 flex items-center gap-2">{t('title')}<InfoTooltip text={tg('reservation_settings_desc')} /></h1>
+        <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('subtitle')}</p>
       </div>
 
       {/* Industry category (read-only) */}
-      <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
-        <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">{t('industryCategory')}</h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 mb-6">
+        <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-1">{t('industryCategory')}</h2>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-3">
           {t('industryCategoryDesc')}
         </p>
         {restaurant.industry_category ? (
-          <span className="inline-flex items-center px-4 py-2 rounded-xl bg-[#6262bd]/10 text-[#6262bd] font-semibold text-sm">
+          <span className="inline-flex items-center px-4 py-2 rounded-sm bg-[#6262bd]/10 text-[#6262bd] font-semibold text-sm">
             {categoryLabels[restaurant.industry_category] || restaurant.industry_category}
           </span>
         ) : (
-          <span className="inline-flex items-center px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-sm">
+          <span className="inline-flex items-center px-4 py-2 rounded-sm bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 text-sm">
             {t('notAssigned')}
           </span>
         )}
       </div>
 
       {message && (
-        <div className={`mb-6 p-4 rounded-xl border ${
+        <div className={`mb-6 p-4 rounded-sm border ${
           message.type === 'success'
             ? 'bg-green-50 border-green-200 text-green-700'
             : 'bg-red-50 border-red-200 text-red-700'
@@ -252,9 +252,9 @@ export default function ReservationSettingsPage() {
       )}
 
       {/* Booking slot mode */}
-      <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
-        <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">{t('bookingSlotMode')}</h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mb-5">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 mb-6">
+        <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-1">{t('bookingSlotMode')}</h2>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-5">
           {t('bookingSlotModeDesc')}
         </p>
 
@@ -262,41 +262,41 @@ export default function ReservationSettingsPage() {
         <div className="grid sm:grid-cols-2 gap-3 mb-6">
           <button
             onClick={() => setSlotMode('fixed')}
-            className={`p-4 rounded-xl border-2 text-left transition-all ${
+            className={`p-4 rounded-sm border-2 text-left transition-all ${
               slotMode === 'fixed'
                 ? 'border-[#6262bd] bg-[#6262bd]/10'
-                : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'
+                : 'border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 hover:border-zinc-300 dark:border-zinc-600'
             }`}
           >
-            <div className={`font-semibold mb-1 ${slotMode === 'fixed' ? 'text-[#6262bd]' : 'text-slate-700 dark:text-slate-300'}`}>{t('fixedSlots')}</div>
-            <div className="text-xs text-slate-500 dark:text-slate-400">{t('fixedSlotsDesc')}</div>
+            <div className={`font-semibold mb-1 ${slotMode === 'fixed' ? 'text-[#6262bd]' : 'text-zinc-700 dark:text-zinc-300 dark:text-zinc-300'}`}>{t('fixedSlots')}</div>
+            <div className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('fixedSlotsDesc')}</div>
           </button>
           <button
             onClick={() => setSlotMode('customer_choice')}
-            className={`p-4 rounded-xl border-2 text-left transition-all ${
+            className={`p-4 rounded-sm border-2 text-left transition-all ${
               slotMode === 'customer_choice'
                 ? 'border-[#6262bd] bg-[#6262bd]/10'
-                : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'
+                : 'border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 hover:border-zinc-300 dark:border-zinc-600'
             }`}
           >
-            <div className={`font-semibold mb-1 ${slotMode === 'customer_choice' ? 'text-[#6262bd]' : 'text-slate-700 dark:text-slate-300'}`}>{t('customerChooses')}</div>
-            <div className="text-xs text-slate-500 dark:text-slate-400">{t('customerChoosesDesc')}</div>
+            <div className={`font-semibold mb-1 ${slotMode === 'customer_choice' ? 'text-[#6262bd]' : 'text-zinc-700 dark:text-zinc-300 dark:text-zinc-300'}`}>{t('customerChooses')}</div>
+            <div className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('customerChoosesDesc')}</div>
           </button>
         </div>
 
         {/* Fixed: slot interval */}
         {slotMode === 'fixed' && (
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">{t('slotInterval')}</label>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-3">{t('slotInterval')}</label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
               {FIXED_SLOT_OPTIONS.map(opt => (
                 <button
                   key={opt.value}
                   onClick={() => setSlotInterval(opt.value)}
-                  className={`py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all ${
+                  className={`py-3 px-4 rounded-sm border-2 font-medium text-sm transition-all ${
                     slotInterval === opt.value
                       ? 'border-[#6262bd] bg-[#6262bd]/10 text-[#6262bd]'
-                      : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300'
+                      : 'border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 hover:border-zinc-300 dark:border-zinc-600'
                   }`}
                 >
                   {t(opt.labelKey)}
@@ -309,17 +309,17 @@ export default function ReservationSettingsPage() {
         {/* Customer choice: allowed durations */}
         {slotMode === 'customer_choice' && (
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{t('durationOptions')}</label>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">{t('durationOptionsDesc')}</p>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-1">{t('durationOptions')}</label>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-3">{t('durationOptionsDesc')}</p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {DURATION_OPTIONS.map(opt => (
                 <button
                   key={opt.value}
                   onClick={() => toggleDuration(opt.value)}
-                  className={`py-2.5 px-3 rounded-xl border-2 font-medium text-sm transition-all ${
+                  className={`py-2.5 px-3 rounded-sm border-2 font-medium text-sm transition-all ${
                     allowedDurations.includes(opt.value)
                       ? 'border-[#6262bd] bg-[#6262bd]/10 text-[#6262bd]'
-                      : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300'
+                      : 'border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 hover:border-zinc-300 dark:border-zinc-600'
                   }`}
                 >
                   {t(opt.labelKey)}
@@ -334,9 +334,9 @@ export default function ReservationSettingsPage() {
       </div>
 
       {/* Padding between bookings */}
-      <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
-        <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">{t('bufferTime')}</h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mb-5">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 mb-6">
+        <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-1">{t('bufferTime')}</h2>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-5">
           {t('bufferTimeDesc')}
         </p>
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
@@ -344,10 +344,10 @@ export default function ReservationSettingsPage() {
             <button
               key={opt.value}
               onClick={() => setSlotPadding(opt.value)}
-              className={`py-3 px-2 rounded-xl border-2 font-medium text-sm transition-all ${
+              className={`py-3 px-2 rounded-sm border-2 font-medium text-sm transition-all ${
                 slotPadding === opt.value
                   ? 'border-[#6262bd] bg-[#6262bd]/10 text-[#6262bd]'
-                  : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300'
+                  : 'border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 hover:border-zinc-300 dark:border-zinc-600'
               }`}
             >
               {t(opt.labelKey)}
@@ -355,16 +355,16 @@ export default function ReservationSettingsPage() {
           ))}
         </div>
         {slotPadding > 0 && (
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-3">
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-3">
             {t('bufferNote', { minutes: slotPadding, plural: slotPadding > 1 ? 's' : '' })}
           </p>
         )}
       </div>
 
       {/* Advance booking window */}
-      <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
-        <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">{t('advanceBookingWindow')}</h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mb-5">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 mb-6">
+        <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-1">{t('advanceBookingWindow')}</h2>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-5">
           {t('advanceBookingWindowDesc')}
         </p>
         <div className="flex items-center gap-4 max-w-xs">
@@ -374,77 +374,77 @@ export default function ReservationSettingsPage() {
             max={365}
             value={advanceBookingDays}
             onChange={(e) => setAdvanceBookingDays(Number(e.target.value))}
-            className="w-28 px-4 py-3 border-2 border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 text-center text-lg font-semibold"
+            className="w-28 px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 text-center text-lg font-semibold"
           />
-          <span className="text-slate-600 dark:text-slate-400 font-medium">{t('days')}</span>
+          <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 font-medium">{t('days')}</span>
         </div>
       </div>
 
       {/* Party size toggle */}
-      <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 mb-6">
         <div className="flex items-start justify-between gap-6">
           <div>
-            <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">{t('partySize')}</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
+            <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-1">{t('partySize')}</h2>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">
               {t('partySizeDesc')}
             </p>
           </div>
           <button
             onClick={() => setShowPartySize(v => !v)}
-            className={`relative flex-shrink-0 w-12 h-6 rounded-full transition-colors ${showPartySize ? 'bg-[#6262bd]' : 'bg-slate-300 dark:bg-slate-600'}`}
+            className={`relative flex-shrink-0 w-12 h-6 rounded-full transition-colors ${showPartySize ? 'bg-[#6262bd]' : 'bg-slate-300 dark:bg-zinc-600'}`}
           >
             <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${showPartySize ? 'translate-x-6' : 'translate-x-0'}`} />
           </button>
         </div>
-        <div className={`mt-3 text-sm font-medium ${showPartySize ? 'text-green-600 dark:text-green-400' : 'text-slate-500 dark:text-slate-400'}`}>
+        <div className={`mt-3 text-sm font-medium ${showPartySize ? 'text-green-600 dark:text-green-400' : 'text-zinc-500 dark:text-zinc-400 dark:text-zinc-400'}`}>
           {showPartySize ? t('partySizeOn') : t('partySizeOff')}
         </div>
       </div>
 
       {/* Single booking area */}
-      <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 mb-6">
         <div className="flex items-start justify-between gap-6">
           <div>
-            <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">{t('singleBookingArea')}</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
+            <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-1">{t('singleBookingArea')}</h2>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">
               {t('singleBookingAreaDesc')}
             </p>
           </div>
           <button
             onClick={() => setSingleBookingArea(v => !v)}
-            className={`relative flex-shrink-0 w-12 h-6 rounded-full transition-colors ${singleBookingArea ? 'bg-[#6262bd]' : 'bg-slate-300 dark:bg-slate-600'}`}
+            className={`relative flex-shrink-0 w-12 h-6 rounded-full transition-colors ${singleBookingArea ? 'bg-[#6262bd]' : 'bg-slate-300 dark:bg-zinc-600'}`}
           >
             <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${singleBookingArea ? 'translate-x-6' : 'translate-x-0'}`} />
           </button>
         </div>
-        <div className={`mt-3 text-sm font-medium ${singleBookingArea ? 'text-[#6262bd]' : 'text-slate-500 dark:text-slate-400'}`}>
+        <div className={`mt-3 text-sm font-medium ${singleBookingArea ? 'text-[#6262bd]' : 'text-zinc-500 dark:text-zinc-400 dark:text-zinc-400'}`}>
           {singleBookingArea ? t('singleAreaOn') : t('singleAreaOff')}
         </div>
       </div>
 
       {/* "See menu" button on confirmation page */}
-      <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 mb-6">
         <div className="flex items-start justify-between gap-6">
           <div>
-            <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">{t('seeMenuButton')}</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
+            <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-1">{t('seeMenuButton')}</h2>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">
               {t('seeMenuButtonDesc')}
             </p>
           </div>
           <button
             onClick={() => setShowMenuButton(v => !v)}
-            className={`relative flex-shrink-0 w-12 h-6 rounded-full transition-colors ${showMenuButton ? 'bg-[#6262bd]' : 'bg-slate-300 dark:bg-slate-600'}`}
+            className={`relative flex-shrink-0 w-12 h-6 rounded-full transition-colors ${showMenuButton ? 'bg-[#6262bd]' : 'bg-slate-300 dark:bg-zinc-600'}`}
           >
             <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${showMenuButton ? 'translate-x-6' : 'translate-x-0'}`} />
           </button>
         </div>
-        <div className={`mt-3 text-sm font-medium ${showMenuButton ? 'text-[#6262bd]' : 'text-slate-500 dark:text-slate-400'}`}>
+        <div className={`mt-3 text-sm font-medium ${showMenuButton ? 'text-[#6262bd]' : 'text-zinc-500 dark:text-zinc-400 dark:text-zinc-400'}`}>
           {showMenuButton ? t('menuButtonOn') : t('menuButtonOff')}
         </div>
         {showMenuButton && (
           <div className="mt-4">
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-              {t('buttonLabel')} <span className="text-slate-400 font-normal">{t('buttonLabelOptional')}</span>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-1.5">
+              {t('buttonLabel')} <span className="text-zinc-400 dark:text-zinc-500 font-normal">{t('buttonLabelOptional')}</span>
             </label>
             <input
               type="text"
@@ -452,23 +452,23 @@ export default function ReservationSettingsPage() {
               onChange={e => setMenuButtonText(e.target.value)}
               placeholder={t('viewMenuPlaceholder')}
               maxLength={60}
-              className="w-full max-w-xs px-4 py-2.5 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 text-sm"
+              className="w-full max-w-xs px-4 py-2.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-200 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 text-sm"
             />
           </div>
         )}
       </div>
 
       {/* Operating hours */}
-      <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
-        <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">{t('operatingHours')}</h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mb-5">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 mb-6">
+        <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-1">{t('operatingHours')}</h2>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-5">
           {t('operatingHoursDesc')}
         </p>
 
         {/* Minimum advance notice */}
-        <div className="mb-6 p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">{t('minAdvanceNotice')}</h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+        <div className="mb-6 p-4 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 rounded-sm border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700">
+          <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-1">{t('minAdvanceNotice')}</h3>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-4">
             {t('minAdvanceNoticeDesc')}
           </p>
           <div className="flex items-center gap-3 flex-wrap">
@@ -476,10 +476,10 @@ export default function ReservationSettingsPage() {
               <button
                 key={n}
                 onClick={() => setMinAdvanceNoticeDays(n)}
-                className={`px-4 py-2 rounded-xl border-2 text-sm font-semibold transition-all ${
+                className={`px-4 py-2 rounded-sm border-2 text-sm font-semibold transition-all ${
                   minAdvanceNoticeDays === n
                     ? 'border-[#6262bd] bg-[#6262bd]/10 text-[#6262bd]'
-                    : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300'
+                    : 'border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 hover:border-zinc-300 dark:border-zinc-600'
                 }`}
               >
                 {n === 0 ? t('sameDay') : n === 1 ? t('oneDay') : t('nDays', { n })}
@@ -492,9 +492,9 @@ export default function ReservationSettingsPage() {
                 max={30}
                 value={minAdvanceNoticeDays}
                 onChange={e => setMinAdvanceNoticeDays(Math.max(0, Number(e.target.value)))}
-                className="w-20 px-3 py-2 border-2 border-slate-200 dark:border-slate-700 dark:bg-slate-700 dark:text-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 text-center text-sm font-semibold"
+                className="w-20 px-3 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 dark:bg-zinc-700 dark:text-zinc-200 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 text-center text-sm font-semibold"
               />
-              <span className="text-sm text-slate-500 dark:text-slate-400">{t('days')}</span>
+              <span className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('days')}</span>
             </div>
           </div>
           {minAdvanceNoticeDays > 0 && (
@@ -509,7 +509,7 @@ export default function ReservationSettingsPage() {
           )}
         </div>
 
-        <div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div className="rounded-sm border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 overflow-hidden">
           {DAYS.map((day, dayIdx) => {
             const hours = operatingHours[day] || DEFAULT_HOURS[day]
             return (
@@ -517,23 +517,23 @@ export default function ReservationSettingsPage() {
                 key={day}
                 className={`px-4 py-3 ${
                   dayIdx % 2 === 0
-                    ? 'bg-white dark:bg-slate-900'
-                    : 'bg-slate-50 dark:bg-slate-800/50'
+                    ? 'bg-white dark:bg-zinc-900'
+                    : 'bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800/50'
                 }`}
               >
                 {/* Day name + toggle on one line */}
                 <div className="flex items-center gap-3 mb-2">
-                  <span className={`text-sm font-semibold capitalize w-20 flex-shrink-0 ${hours.closed ? 'text-slate-400 dark:text-slate-500' : 'text-slate-700 dark:text-slate-300'}`}>
+                  <span className={`text-sm font-semibold capitalize w-20 flex-shrink-0 ${hours.closed ? 'text-zinc-400 dark:text-zinc-500 dark:text-zinc-500' : 'text-zinc-700 dark:text-zinc-300 dark:text-zinc-300'}`}>
                     {t(day)}
                   </span>
                   <button
                     onClick={() => toggleDayClosed(day)}
-                    className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 ${hours.closed ? 'bg-slate-300 dark:bg-slate-600' : 'bg-[#6262bd]'}`}
+                    className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 ${hours.closed ? 'bg-slate-300 dark:bg-zinc-600' : 'bg-[#6262bd]'}`}
                   >
                     <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${hours.closed ? 'translate-x-0' : 'translate-x-5'}`} />
                   </button>
                   {hours.closed && (
-                    <span className="text-sm text-slate-400 dark:text-slate-500">{t('closed')}</span>
+                    <span className="text-sm text-zinc-400 dark:text-zinc-500 dark:text-zinc-500">{t('closed')}</span>
                   )}
                 </div>
 
@@ -544,9 +544,9 @@ export default function ReservationSettingsPage() {
                       <div key={idx}>
                         {idx > 0 && (
                           <div className="flex items-center gap-2 mb-2">
-                            <div className="flex-1 border-t border-dashed border-slate-200 dark:border-slate-700" />
-                            <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">{t('shift', { n: idx + 1 })}</span>
-                            <div className="flex-1 border-t border-dashed border-slate-200 dark:border-slate-700" />
+                            <div className="flex-1 border-t border-dashed border-zinc-200 dark:border-zinc-700 dark:border-zinc-700" />
+                            <span className="text-xs text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 font-medium">{t('shift', { n: idx + 1 })}</span>
+                            <div className="flex-1 border-t border-dashed border-zinc-200 dark:border-zinc-700 dark:border-zinc-700" />
                           </div>
                         )}
                         <div className="flex flex-col xs:flex-row items-start xs:items-center gap-1.5">
@@ -555,14 +555,14 @@ export default function ReservationSettingsPage() {
                               type="time"
                               value={shift.open}
                               onChange={e => updateShift(day, idx, 'open', e.target.value)}
-                              className="px-2 py-1.5 border border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 rounded-lg focus:outline-none focus:border-[#6262bd] text-slate-700 text-sm flex-1 min-w-0"
+                              className="px-2 py-1.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-200 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 text-sm flex-1 min-w-0"
                             />
-                            <span className="text-slate-400 dark:text-slate-500 text-xs">–</span>
+                            <span className="text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 text-xs">–</span>
                             <input
                               type="time"
                               value={shift.close}
                               onChange={e => updateShift(day, idx, 'close', e.target.value)}
-                              className="px-2 py-1.5 border border-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 rounded-lg focus:outline-none focus:border-[#6262bd] text-slate-700 text-sm flex-1 min-w-0"
+                              className="px-2 py-1.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-200 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 text-sm flex-1 min-w-0"
                             />
                           </div>
                           {hours.shifts.length > 1 && (
@@ -594,18 +594,18 @@ export default function ReservationSettingsPage() {
       </div>
 
       {/* Global booking fee */}
-      <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 mb-6">
         <div className="flex items-start justify-between gap-6">
           <div>
-            <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">{t('reservationFee')}</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
+            <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-1">{t('reservationFee')}</h2>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">
               {t('reservationFeeDesc')}
             </p>
           </div>
           <button
             onClick={() => setGlobalFeeEnabled(v => !v)}
             disabled={!restaurant.sms_billing_enabled || !restaurant.stripe_connect_onboarded}
-            className={`relative flex-shrink-0 w-12 h-6 rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${globalFeeEnabled ? 'bg-[#6262bd]' : 'bg-slate-300 dark:bg-slate-600'}`}
+            className={`relative flex-shrink-0 w-12 h-6 rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${globalFeeEnabled ? 'bg-[#6262bd]' : 'bg-slate-300 dark:bg-zinc-600'}`}
           >
             <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${globalFeeEnabled ? 'translate-x-6' : 'translate-x-0'}`} />
           </button>
@@ -624,9 +624,9 @@ export default function ReservationSettingsPage() {
 
         {globalFeeEnabled && restaurant.sms_billing_enabled && restaurant.stripe_connect_onboarded && (
           <div className="mt-5 flex items-center gap-3">
-            <label className="text-sm font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">{t('feeAmount')}</label>
+            <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 whitespace-nowrap">{t('feeAmount')}</label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-medium">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 text-sm font-medium">
                 {restaurant.invoice_settings?.currency || 'GBP'}
               </span>
               <input
@@ -636,15 +636,15 @@ export default function ReservationSettingsPage() {
                 value={globalFeeAmount}
                 onChange={e => setGlobalFeeAmount(e.target.value)}
                 placeholder="0.00"
-                className="pl-14 pr-4 py-2.5 border-2 border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 w-40 text-sm"
+                className="pl-14 pr-4 py-2.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 w-40 text-sm"
               />
             </div>
-            <span className="text-xs text-slate-400">{t('perBooking')}</span>
+            <span className="text-xs text-zinc-400 dark:text-zinc-500">{t('perBooking')}</span>
           </div>
         )}
 
         {globalFeeEnabled && restaurant.sms_billing_enabled && restaurant.stripe_connect_onboarded && (
-          <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+          <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">
             {t('feeNote')}
           </p>
         )}
@@ -653,7 +653,7 @@ export default function ReservationSettingsPage() {
       <button
         onClick={handleSave}
         disabled={saving}
-        className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+        className="w-full bg-[#6262bd] text-white py-3 rounded-sm font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
       >
         {saving ? t('saving') : t('saveButton')}
       </button>

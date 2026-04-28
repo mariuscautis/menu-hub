@@ -112,7 +112,7 @@ export default function MyAvailabilityPage() {
 
   if (!staff) {
     return (
-      <div className="min-h-screen bg-gray-50 p-8">
+      <div className="min-h-screen p-8">
         <p>Loading...</p>
       </div>
     );
@@ -120,17 +120,17 @@ export default function MyAvailabilityPage() {
 
   return (
     <OfflinePageGuard>
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen p-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2 flex items-center gap-2">My Availability<InfoTooltip text={tg('my_availability_desc')} /></h1>
-        <p className="text-slate-600">Set your weekly availability preferences</p>
+        <h1 className="text-3xl font-bold text-zinc-800 dark:text-zinc-200 mb-2 flex items-center gap-2">My Availability<InfoTooltip text={tg('my_availability_desc')} /></h1>
+        <p className="text-zinc-600 dark:text-zinc-400">Set your weekly availability preferences</p>
       </div>
 
       {/* Message */}
       {message && (
         <div
-          className={`mb-6 p-4 rounded-xl ${
+          className={`mb-6 p-4 rounded-sm ${
             message.type === 'success'
               ? 'bg-green-50 border-2 border-green-200 text-green-700'
               : 'bg-red-50 border-2 border-red-200 text-red-700'
@@ -141,7 +141,7 @@ export default function MyAvailabilityPage() {
       )}
 
       {/* Info Box */}
-      <div className="mb-6 bg-blue-50 border-2 border-blue-200 rounded-2xl p-6">
+      <div className="mb-6 bg-blue-50 border-2 border-blue-200 rounded-sm p-6">
         <p className="text-sm text-blue-800">
           💡 <strong>Tip:</strong> Setting your availability helps managers schedule shifts that work for you.
           This doesn't guarantee you'll only get shifts during these times, but it shows your preferences.
@@ -149,7 +149,7 @@ export default function MyAvailabilityPage() {
       </div>
 
       {/* Availability Grid */}
-      <div className="bg-white border-2 border-slate-100 rounded-2xl p-8">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-8">
         <div className="space-y-4">
           {DAYS.map(day => {
             const dayKey = day.toLowerCase();
@@ -162,7 +162,7 @@ export default function MyAvailabilityPage() {
             return (
               <div
                 key={day}
-                className="flex items-center gap-6 p-4 border-2 border-slate-100 rounded-xl hover:border-slate-200 transition-colors"
+                className="flex items-center gap-6 p-4 border border-zinc-200 dark:border-zinc-800 rounded-sm hover:border-zinc-200 dark:border-zinc-700 transition-colors"
               >
                 <div className="w-32">
                   <label className="flex items-center gap-3 cursor-pointer">
@@ -174,37 +174,37 @@ export default function MyAvailabilityPage() {
                       }
                       className="w-5 h-5 text-[#6262bd] rounded focus:ring-[#6262bd]"
                     />
-                    <span className="font-medium text-slate-800">{day}</span>
+                    <span className="font-medium text-zinc-800 dark:text-zinc-200">{day}</span>
                   </label>
                 </div>
 
                 {dayAvailability.available ? (
                   <div className="flex items-center gap-4 flex-1">
                     <div>
-                      <label className="block text-xs text-slate-600 mb-1">From</label>
+                      <label className="block text-xs text-zinc-600 dark:text-zinc-400 mb-1">From</label>
                       <input
                         type="time"
                         value={dayAvailability.from}
                         onChange={(e) =>
                           handleAvailabilityChange(dayKey, 'from', e.target.value)
                         }
-                        className="px-3 py-2 border-2 border-slate-200 rounded-lg focus:outline-none focus:border-[#6262bd]"
+                        className="px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd]"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-slate-600 mb-1">To</label>
+                      <label className="block text-xs text-zinc-600 dark:text-zinc-400 mb-1">To</label>
                       <input
                         type="time"
                         value={dayAvailability.to}
                         onChange={(e) =>
                           handleAvailabilityChange(dayKey, 'to', e.target.value)
                         }
-                        className="px-3 py-2 border-2 border-slate-200 rounded-lg focus:outline-none focus:border-[#6262bd]"
+                        className="px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd]"
                       />
                     </div>
                   </div>
                 ) : (
-                  <div className="flex-1 text-sm text-slate-400">
+                  <div className="flex-1 text-sm text-zinc-400 dark:text-zinc-500">
                     Not available
                   </div>
                 )}
@@ -218,7 +218,7 @@ export default function MyAvailabilityPage() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-8 py-3 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252a5] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-8 py-3 bg-[#6262bd] text-white rounded-sm hover:bg-[#5252a5] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? 'Saving...' : 'Save Availability'}
           </button>
@@ -226,9 +226,9 @@ export default function MyAvailabilityPage() {
       </div>
 
       {/* Additional Info */}
-      <div className="mt-6 bg-white border-2 border-slate-100 rounded-2xl p-6">
-        <h3 className="font-bold text-slate-800 mb-3">Important Notes:</h3>
-        <ul className="space-y-2 text-sm text-slate-600">
+      <div className="mt-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
+        <h3 className="font-bold text-zinc-800 dark:text-zinc-200 mb-3">Important Notes:</h3>
+        <ul className="space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
           <li className="flex items-start gap-2">
             <span className="text-[#6262bd]">•</span>
             <span>Changes to your availability don't affect existing scheduled shifts</span>

@@ -125,7 +125,7 @@ export default function StaffLeaveSettings() {
     return (
       <div className="p-4 sm:p-8">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center text-slate-500">Loading...</div>
+          <div className="text-center text-zinc-500 dark:text-zinc-400">Loading...</div>
         </div>
       </div>
     );
@@ -147,8 +147,8 @@ export default function StaffLeaveSettings() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-slate-800">Staff Leave Management</h1>
-          <p className="text-sm text-slate-500 mt-2">
+          <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200">Staff Leave Management</h1>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-2">
             Manage holiday entitlements and leave balances for your staff
           </p>
         </div>
@@ -156,7 +156,7 @@ export default function StaffLeaveSettings() {
         {/* Message Alert */}
         {message && (
           <div
-            className={`mb-6 p-4 rounded-xl border-2 ${
+            className={`mb-6 p-4 rounded-sm border-2 ${
               message.type === 'success'
                 ? 'bg-green-50 border-green-200 text-green-700'
                 : 'bg-red-50 border-red-200 text-red-700'
@@ -167,7 +167,7 @@ export default function StaffLeaveSettings() {
         )}
 
         {/* Info Box */}
-        <div className="mb-6 bg-blue-50 border-2 border-blue-100 rounded-xl p-4">
+        <div className="mb-6 bg-blue-50 border-2 border-blue-100 rounded-sm p-4">
           <div className="flex items-start gap-3">
             <svg className="w-5 h-5 text-blue-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
@@ -186,34 +186,34 @@ export default function StaffLeaveSettings() {
 
         {/* Staff List */}
         {staff.length === 0 ? (
-          <div className="text-center py-12 bg-white border-2 border-slate-100 rounded-2xl">
-            <p className="text-slate-500">No active staff members found</p>
+          <div className="text-center py-12 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm">
+            <p className="text-zinc-500 dark:text-zinc-400">No active staff members found</p>
           </div>
         ) : (
-          <div className="bg-white border-2 border-slate-100 rounded-2xl overflow-hidden">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-slate-50 border-b-2 border-slate-100">
+                <thead className="bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800">
                   <tr>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Staff Member</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">Annual Entitlement</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">Used</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">Pending</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">Available</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">Sick Days</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">Holiday Year</th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">Actions</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-zinc-700 dark:text-zinc-300">Staff Member</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-zinc-700 dark:text-zinc-300">Annual Entitlement</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-zinc-700 dark:text-zinc-300">Used</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-zinc-700 dark:text-zinc-300">Pending</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-zinc-700 dark:text-zinc-300">Available</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-zinc-700 dark:text-zinc-300">Sick Days</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-zinc-700 dark:text-zinc-300">Holiday Year</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-zinc-700 dark:text-zinc-300">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
                   {staff.map((staffMember) => (
-                    <tr key={staffMember.staff_id} className="hover:bg-slate-50">
+                    <tr key={staffMember.staff_id} className="hover:bg-zinc-50 dark:bg-zinc-900">
                       <td className="px-6 py-4">
-                        <div className="font-medium text-slate-800">{staffMember.staff_name}</div>
-                        <div className="text-xs text-slate-500">{staffMember.role}</div>
+                        <div className="font-medium text-zinc-800 dark:text-zinc-200">{staffMember.staff_name}</div>
+                        <div className="text-xs text-zinc-500 dark:text-zinc-400">{staffMember.role}</div>
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <span className="text-sm font-medium text-slate-700">
+                        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                           {staffMember.annual_holiday_days || '—'} days
                         </span>
                       </td>
@@ -238,7 +238,7 @@ export default function StaffLeaveSettings() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <span className="text-xs text-slate-600">
+                        <span className="text-xs text-zinc-600 dark:text-zinc-400">
                           {staffMember.holiday_year_start
                             ? new Date(staffMember.holiday_year_start).toLocaleDateString('en-GB', {
                                 day: '2-digit',
@@ -252,14 +252,14 @@ export default function StaffLeaveSettings() {
                         <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={() => setEditingStaff(staffMember)}
-                            className="px-3 py-1.5 text-sm bg-[#6262bd] text-white rounded-lg hover:bg-[#5252a3]"
+                            className="px-3 py-1.5 text-sm bg-[#6262bd] text-white rounded-sm hover:bg-[#5252a3]"
                           >
                             Edit
                           </button>
                           <button
                             onClick={() => handleResetLeaveYear(staffMember)}
                             disabled={saving}
-                            className="px-3 py-1.5 text-sm bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 disabled:opacity-50"
+                            className="px-3 py-1.5 text-sm bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-sm hover:bg-zinc-300 dark:hover:bg-zinc-600 disabled:opacity-50"
                           >
                             Reset Year
                           </button>
@@ -276,9 +276,9 @@ export default function StaffLeaveSettings() {
         {/* Edit Modal */}
         {editingStaff && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl p-8 max-w-md w-full">
+            <div className="bg-white dark:bg-zinc-900 rounded-sm p-8 max-w-md w-full">
               <h3 className="text-xl font-bold mb-4">Edit Leave Entitlement</h3>
-              <p className="text-sm text-slate-600 mb-6">
+              <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-6">
                 {editingStaff.staff_name} ({editingStaff.role})
               </p>
 
@@ -294,7 +294,7 @@ export default function StaffLeaveSettings() {
                 className="space-y-4"
               >
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                     Annual Holiday Entitlement (days)
                   </label>
                   <input
@@ -305,13 +305,13 @@ export default function StaffLeaveSettings() {
                     min="0"
                     max="365"
                     required
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd]"
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd]"
                   />
-                  <p className="text-xs text-slate-500 mt-1">UK statutory minimum is 28 days (including bank holidays)</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">UK statutory minimum is 28 days (including bank holidays)</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                     Holiday Year Start Date
                   </label>
                   <input
@@ -319,13 +319,13 @@ export default function StaffLeaveSettings() {
                     name="holiday_year_start"
                     defaultValue={editingStaff.holiday_year_start || new Date().toISOString().split('T')[0]}
                     required
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd]"
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd]"
                   />
-                  <p className="text-xs text-slate-500 mt-1">Usually the staff member's hire date anniversary</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Usually the staff member's hire date anniversary</p>
                 </div>
 
-                <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
-                  <p className="text-xs text-slate-600">
+                <div className="bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-sm p-3">
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400">
                     <strong>Note:</strong> Changes to entitlement will not affect already used or pending days.
                     Current balances will be recalculated based on the new entitlement.
                   </p>
@@ -335,14 +335,14 @@ export default function StaffLeaveSettings() {
                   <button
                     type="button"
                     onClick={() => setEditingStaff(null)}
-                    className="flex-1 px-4 py-2 border-2 border-slate-200 rounded-lg text-slate-700"
+                    className="flex-1 px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm text-zinc-700 dark:text-zinc-300"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={saving}
-                    className="flex-1 px-4 py-2 bg-[#6262bd] text-white rounded-lg hover:bg-[#5252a3] disabled:opacity-50"
+                    className="flex-1 px-4 py-2 bg-[#6262bd] text-white rounded-sm hover:bg-[#5252a3] disabled:opacity-50"
                   >
                     {saving ? 'Saving...' : 'Save Changes'}
                   </button>

@@ -131,7 +131,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
     draft: { label: t('statusDraft'), color: 'text-amber-600 bg-amber-50 border-amber-200' },
     published: { label: t('statusPublished'), color: 'text-blue-600 bg-blue-50 border-blue-200' },
     completed: { label: t('statusCompleted'), color: 'text-green-600 bg-green-50 border-green-200' },
-    cancelled: { label: t('statusCancelled'), color: 'text-slate-500 bg-slate-50 border-slate-200' }
+    cancelled: { label: t('statusCancelled'), color: 'text-zinc-500 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700' }
   };
 
   const handleSubmit = async (e) => {
@@ -194,12 +194,12 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl">
+      <div className="bg-white dark:bg-zinc-800 rounded-sm w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b-2 border-slate-100 dark:border-slate-700 flex-shrink-0">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 flex-shrink-0">
           <div>
-            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">
+            <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
               {shift?.id ? t('titleEdit') : t('titleCreate')}
             </h2>
             {shiftDuration && (
@@ -214,13 +214,13 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
                 {statusConfig[formData.status]?.label || formData.status}
               </span>
             )}
-            <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-2xl font-bold transition-colors">×</button>
+            <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-sm text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-2xl font-bold transition-colors">×</button>
           </div>
         </div>
 
         {/* Conflict Error */}
         {conflictError && (
-          <div className="mx-6 mt-4 p-3 bg-red-50 border-2 border-red-200 rounded-xl text-red-700 text-sm flex items-start gap-2 flex-shrink-0">
+          <div className="mx-6 mt-4 p-3 bg-red-50 border-2 border-red-200 rounded-sm text-red-700 text-sm flex items-start gap-2 flex-shrink-0">
             <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
             <span><strong>{t('conflictLabel')}</strong> {conflictError}</span>
           </div>
@@ -234,18 +234,18 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
               {/* Date + Role row */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{t('date')} *</label>
+                  <label className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-1.5">{t('date')} *</label>
                   <input
                     type="date"
                     name="date"
                     value={formData.date}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 transition-colors"
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{t('roleRequired')} *</label>
+                  <label className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-1.5">{t('roleRequired')} *</label>
                   <input
                     type="text"
                     name="role_required"
@@ -253,14 +253,14 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
                     onChange={handleChange}
                     placeholder={t('roleRequiredPlaceholder')}
                     required
-                    className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors"
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 dark:text-zinc-500 dark:placeholder:text-zinc-500 transition-colors"
                   />
                 </div>
               </div>
 
               {/* Time row with visual separator */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{t('startTime')} / {t('endTime')} *</label>
+                <label className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-1.5">{t('startTime')} / {t('endTime')} *</label>
                 <div className="flex items-center gap-3">
                   <input
                     type="time"
@@ -268,20 +268,20 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
                     value={formData.shift_start}
                     onChange={handleChange}
                     required
-                    className="flex-1 px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 transition-colors"
+                    className="flex-1 px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 transition-colors"
                   />
-                  <span className="text-slate-400 font-bold text-lg">→</span>
+                  <span className="text-zinc-400 dark:text-zinc-500 font-bold text-lg">→</span>
                   <input
                     type="time"
                     name="shift_end"
                     value={formData.shift_end}
                     onChange={handleChange}
                     required
-                    className="flex-1 px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 transition-colors"
+                    className="flex-1 px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 transition-colors"
                   />
                   <div className="flex-shrink-0 w-28">
-                    <div className="flex items-center gap-2 px-3 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl">
-                      <span className="text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">☕ Break</span>
+                    <div className="flex items-center gap-2 px-3 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm">
+                      <span className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 whitespace-nowrap">☕ Break</span>
                       <input
                         type="number"
                         name="break_duration"
@@ -289,14 +289,14 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
                         onChange={handleChange}
                         min="0"
                         max="180"
-                        className="w-12 bg-transparent focus:outline-none text-slate-700 dark:text-slate-200 text-sm font-mono"
+                        className="w-12 bg-transparent focus:outline-none text-zinc-700 dark:text-zinc-300 text-sm font-mono"
                       />
-                      <span className="text-xs text-slate-400">m</span>
+                      <span className="text-xs text-zinc-400 dark:text-zinc-500">m</span>
                     </div>
                   </div>
                 </div>
                 {shiftDuration && (
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5">
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-1.5">
                     Net working time after break: <strong className="text-[#6262bd]">{shiftDuration}</strong>
                   </p>
                 )}
@@ -305,12 +305,12 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
               {/* Department + Status */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{t('department')}</label>
+                  <label className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-1.5">{t('department')}</label>
                   <select
                     name="department"
                     value={formData.department}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 transition-colors"
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 transition-colors"
                   >
                     <option value="">{t('selectDepartment')}</option>
                     {departments && departments.length > 0 ? (
@@ -327,12 +327,12 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{t('status')}</label>
+                  <label className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-1.5">{t('status')}</label>
                   <select
                     name="status"
                     value={formData.status}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 transition-colors"
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 transition-colors"
                   >
                     <option value="draft">{t('statusDraft')}</option>
                     <option value="published">{t('statusPublished')}</option>
@@ -345,12 +345,12 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
               {/* Staff Assignment */}
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">{t('assignStaff')}</label>
+                  <label className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">{t('assignStaff')}</label>
                   {unavailableStaff.length > 0 && (
                     <button
                       type="button"
                       onClick={() => setShowUnavailable(!showUnavailable)}
-                      className="text-xs text-amber-600 hover:text-amber-700 font-medium bg-amber-50 border border-amber-200 px-2 py-1 rounded-lg transition-colors"
+                      className="text-xs text-amber-600 hover:text-amber-700 font-medium bg-amber-50 border border-amber-200 px-2 py-1 rounded-sm transition-colors"
                     >
                       {showUnavailable ? '▲' : '▼'} {unavailableStaff.length} on leave
                     </button>
@@ -359,12 +359,12 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
 
                 {/* Current assignee pill */}
                 {assignedStaff && (
-                  <div className="flex items-center gap-2 mb-2 px-3 py-2 bg-[#6262bd]/5 border border-[#6262bd]/20 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2 px-3 py-2 bg-[#6262bd]/5 border border-[#6262bd]/20 rounded-sm">
                     <div className="w-6 h-6 rounded-full bg-[#6262bd] flex items-center justify-center text-white text-xs font-bold">
                       {assignedStaff.name?.charAt(0).toUpperCase()}
                     </div>
                     <span className="text-sm text-[#6262bd] font-medium">{assignedStaff.name}</span>
-                    <button type="button" onClick={() => setFormData(p => ({ ...p, staff_id: '' }))} className="ml-auto text-slate-400 hover:text-red-500 text-xs">✕ Remove</button>
+                    <button type="button" onClick={() => setFormData(p => ({ ...p, staff_id: '' }))} className="ml-auto text-zinc-400 dark:text-zinc-500 hover:text-red-500 text-xs">✕ Remove</button>
                   </div>
                 )}
 
@@ -372,7 +372,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
                   name="staff_id"
                   value={formData.staff_id}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 transition-colors"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 transition-colors"
                 >
                   <option value="">{t('leaveUnfilled')}</option>
                   {availableStaff.length > 0 && (
@@ -391,7 +391,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
                   )}
                 </select>
 
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-1.5">
                   {loadingAvailable ? t('checkingAvailability') :
                     availableStaff.length === 0 && unavailableStaff.length > 0 ? t('allStaffUnavailable') :
                     unavailableStaff.length > 0 ? t('staffAvailabilitySummary').replace('{available}', availableStaff.length).replace('{unavailable}', unavailableStaff.length) :
@@ -401,14 +401,14 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
 
               {/* Notes */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{t('notes')}</label>
+                <label className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-1.5">{t('notes')}</label>
                 <textarea
                   name="notes"
                   value={formData.notes}
                   onChange={handleChange}
                   rows="2"
                   placeholder={t('notesPlaceholder')}
-                  className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] resize-none bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] resize-none bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 dark:text-zinc-500 dark:placeholder:text-zinc-500 transition-colors"
                 />
               </div>
             </div>
@@ -416,13 +416,13 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t-2 border-slate-100 dark:border-slate-700 flex items-center justify-between flex-shrink-0">
+        <div className="px-6 py-4 border-t border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 flex items-center justify-between flex-shrink-0">
           <div>
             {shift?.id && (
               <button
                 type="button"
                 onClick={handleDeleteClick}
-                className="px-4 py-2.5 text-red-600 border-2 border-red-200 hover:bg-red-50 rounded-xl transition-colors font-medium text-sm"
+                className="px-4 py-2.5 text-red-600 border-2 border-red-200 hover:bg-red-50 rounded-sm transition-colors font-medium text-sm"
               >
                 🗑 {t('deleteShift')}
               </button>
@@ -432,7 +432,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl hover:border-[#6262bd] transition-colors font-medium"
+              className="px-5 py-2.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm hover:border-[#6262bd] transition-colors font-medium"
             >
               {t('cancel')}
             </button>
@@ -440,7 +440,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
               type="submit"
               form="shift-form"
               disabled={saving}
-              className="px-5 py-2.5 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252a5] transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed min-w-[130px]"
+              className="px-5 py-2.5 bg-[#6262bd] text-white rounded-sm hover:bg-[#5252a5] transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed min-w-[130px]"
             >
               {saving ? t('saving') : shift?.id ? t('updateShift') : t('createShift')}
             </button>

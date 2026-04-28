@@ -28,7 +28,7 @@ export default function LanguageSelector({ className = '', collapsed = false }) 
             </option>
           ))}
         </select>
-        <div className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 transition-colors pointer-events-none">
+        <div className="p-2 rounded-sm text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-800 hover:text-zinc-700 dark:text-zinc-300 dark:hover:text-zinc-200 transition-colors pointer-events-none">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
               d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -41,7 +41,7 @@ export default function LanguageSelector({ className = '', collapsed = false }) 
   return (
     <div className={`relative ${className}`}>
       <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-        <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-4 h-4 text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
             d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
@@ -49,7 +49,7 @@ export default function LanguageSelector({ className = '', collapsed = false }) 
       <select
         value={locale}
         onChange={(e) => changeLanguage(e.target.value)}
-        className="w-full pl-9 pr-8 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 cursor-pointer appearance-none text-sm"
+        className="w-full pl-9 pr-8 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 dark:text-zinc-200 bg-white dark:bg-zinc-800 cursor-pointer appearance-none text-sm"
       >
         {languages.map((lang) => (
           <option key={lang.code} value={lang.code}>
@@ -58,7 +58,7 @@ export default function LanguageSelector({ className = '', collapsed = false }) 
         ))}
       </select>
       <svg
-        className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none"
+        className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 dark:text-zinc-400 pointer-events-none"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"

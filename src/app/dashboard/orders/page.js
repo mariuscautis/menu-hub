@@ -813,9 +813,9 @@ export default function Orders() {
       case 'pending': return 'bg-amber-100 text-amber-700'
       case 'preparing': return 'bg-blue-100 text-blue-700'
       case 'ready': return 'bg-green-100 text-green-700'
-      case 'completed': return 'bg-slate-100 text-slate-600'
+      case 'completed': return 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
       case 'cancelled': return 'bg-red-100 text-red-700'
-      default: return 'bg-slate-100 text-slate-600'
+      default: return 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
     }
   }
 
@@ -885,7 +885,7 @@ export default function Orders() {
 
   // Elapsed-time urgency colour for active orders
   const getUrgencyClasses = (createdAt, isActive) => {
-    if (!isActive || !createdAt) return { header: 'bg-slate-100', border: 'border-slate-100' }
+    if (!isActive || !createdAt) return { header: 'bg-zinc-100 dark:bg-zinc-800', border: 'border-zinc-200 dark:border-zinc-800' }
     const mins = Math.floor((Date.now() - new Date(createdAt).getTime()) / 60000)
     if (mins < 5)  return { header: 'bg-green-500',  border: 'border-green-400'  }
     if (mins < 10) return { header: 'bg-amber-400',  border: 'border-amber-400'  }
@@ -894,7 +894,7 @@ export default function Orders() {
   }
 
   if (loading) {
-    return <div className="text-slate-500">{t('loadingOrders')}</div>
+    return <div className="text-zinc-500 dark:text-zinc-400">{t('loadingOrders')}</div>
   }
 
   return (
@@ -903,11 +903,11 @@ export default function Orders() {
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">
               {t('title')}
               <InfoTooltip text={tg('orders_desc')} position="right" />
             </h1>
-            <p className="text-slate-500 text-sm">{t('subtitle')}</p>
+            <p className="text-zinc-500 dark:text-zinc-400 text-sm">{t('subtitle')}</p>
           </div>
           <div className="flex items-center gap-2">
             {soundSettings?.enabled && (
@@ -922,7 +922,7 @@ export default function Orders() {
             <button
               onClick={toggleLayout}
               title={layoutMode === 'grid' ? 'Switch to list view' : 'Switch to grid view'}
-              className="p-2 rounded-xl bg-white border-2 border-slate-200 text-slate-500 hover:border-[#6262bd] hover:text-[#6262bd] transition-colors"
+              className="p-2 rounded-sm bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-[#6262bd] hover:text-[#6262bd] transition-colors"
             >
               {layoutMode === 'grid' ? (
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -947,25 +947,25 @@ export default function Orders() {
           return (
             <div className="flex flex-wrap gap-2 mb-4">
               {pendingCount > 0 && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-xl">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-sm">
                   <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse inline-block"></span>
                   <span className="text-sm font-semibold text-amber-700">{pendingCount} {t('status.pending').toLowerCase()}</span>
                 </div>
               )}
               {preparingCount > 0 && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-xl">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-sm">
                   <span className="w-2 h-2 rounded-full bg-blue-500 inline-block"></span>
                   <span className="text-sm font-semibold text-blue-700">{preparingCount} {t('status.preparing').toLowerCase()}</span>
                 </div>
               )}
               {readyCount > 0 && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-200 rounded-xl">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-200 rounded-sm">
                   <span className="w-2 h-2 rounded-full bg-green-500 inline-block"></span>
                   <span className="text-sm font-semibold text-green-700">{readyCount} {t('status.ready').toLowerCase()}</span>
                 </div>
               )}
               {pickupCount > 0 && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-50 border border-cyan-200 rounded-xl">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-50 border border-cyan-200 rounded-sm">
                   <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse inline-block"></span>
                   <span className="text-sm font-semibold text-cyan-700">{pickupCount} awaiting pickup</span>
                 </div>
@@ -977,17 +977,17 @@ export default function Orders() {
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-4 mb-6">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide flex items-center gap-1">
+            <span className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wide flex items-center gap-1">
               Status
               <InfoTooltip text={tg('orders_status_filter_desc')} position="bottom" />
             </span>
-            <div className="flex bg-slate-100 rounded-xl p-1 gap-0.5">
+            <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-sm p-1 gap-0.5">
               {['active', 'completed', 'all'].map((f) => (
                 <button
                   key={f}
                   onClick={() => setFilter(f)}
-                  className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                    filter === f ? 'bg-white text-[#6262bd] shadow-sm font-semibold' : 'text-slate-500 hover:text-slate-700'
+                  className={`px-3.5 py-1.5 rounded-sm text-sm font-medium transition-colors ${
+                    filter === f ? 'bg-white text-[#6262bd] shadow-sm font-semibold' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:text-zinc-300'
                   }`}
                 >
                   {t(f)}
@@ -995,13 +995,13 @@ export default function Orders() {
               ))}
             </div>
           </div>
-          <div className="w-px h-6 bg-slate-200 hidden sm:block"></div>
+          <div className="w-px h-6 bg-zinc-200 dark:bg-zinc-700 hidden sm:block"></div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide flex items-center gap-1">
+            <span className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wide flex items-center gap-1">
               Type
               <InfoTooltip text={tg('orders_type_filter_desc')} position="bottom" />
             </span>
-            <div className="flex bg-slate-100 rounded-xl p-1 gap-0.5">
+            <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-sm p-1 gap-0.5">
               {[
                 { value: 'all',      label: t('allOrders') || 'All' },
                 { value: 'dine_in',  label: `🍽️ ${t('dineIn') || 'Dine-in'}` },
@@ -1010,8 +1010,8 @@ export default function Orders() {
                 <button
                   key={value}
                   onClick={() => setOrderTypeFilter(value)}
-                  className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                    orderTypeFilter === value ? 'bg-white text-[#6262bd] shadow-sm font-semibold' : 'text-slate-500 hover:text-slate-700'
+                  className={`px-3.5 py-1.5 rounded-sm text-sm font-medium transition-colors ${
+                    orderTypeFilter === value ? 'bg-white text-[#6262bd] shadow-sm font-semibold' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:text-zinc-300'
                   }`}
                 >
                   {label}
@@ -1023,13 +1023,13 @@ export default function Orders() {
 
         {/* Orders */}
         {filteredOrders.length === 0 ? (
-          <div className="bg-white border-2 border-slate-100 rounded-2xl p-12 text-center">
-            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-12 text-center">
+            <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-zinc-400 dark:text-zinc-500" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l4.59-4.58L18 11l-6 6z"/>
               </svg>
             </div>
-            <p className="text-slate-500">
+            <p className="text-zinc-500 dark:text-zinc-400">
               {filter === 'active' ? t('noActiveOrders') : t('noOrders').replace('{filter}', t(filter))}
             </p>
           </div>
@@ -1051,34 +1051,34 @@ export default function Orders() {
               return (
                 <div
                   key={order.id}
-                  className={`bg-white border-2 rounded-2xl overflow-hidden flex flex-col transition-opacity ${
-                    isPaid ? 'opacity-60 border-slate-100' :
+                  className={`bg-white border-2 rounded-sm overflow-hidden flex flex-col transition-opacity ${
+                    isPaid ? 'opacity-60 border-zinc-200 dark:border-zinc-800' :
                     order._isOffline ? 'border-orange-300' :
                     order.order_type === 'takeaway' ? 'border-cyan-200' :
-                    'border-slate-100'
+                    'border-zinc-200 dark:border-zinc-800'
                   }`}
                 >
                   {/* Urgency header band */}
                   <div className={`px-4 py-2.5 flex items-center justify-between gap-2 ${
-                    isPaid ? 'bg-slate-100' : urgency.header
+                    isPaid ? 'bg-zinc-100 dark:bg-zinc-800' : urgency.header
                   }`}>
                     <div className="flex items-center gap-2 min-w-0">
                       {order.order_type === 'takeaway' ? (
                         <span className="font-black text-white text-base leading-none">🥡 {t('takeaway') || 'Takeaway'}</span>
                       ) : (
-                        <span className={`font-black text-base leading-none ${isPaid ? 'text-slate-600' : 'text-white'}`}>
+                        <span className={`font-black text-base leading-none ${isPaid ? 'text-zinc-600 dark:text-zinc-400' : 'text-white'}`}>
                           {t('table')} {order.tables?.table_number || 'N/A'}
                         </span>
                       )}
                       {order.order_type === 'takeaway' && order.pickup_code && (
-                        <span className={`font-black text-sm tracking-widest ${isPaid ? 'text-slate-500' : 'text-white/90'}`}>
+                        <span className={`font-black text-sm tracking-widest ${isPaid ? 'text-zinc-500 dark:text-zinc-400' : 'text-white/90'}`}>
                           #{order.pickup_code}
                         </span>
                       )}
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
                       {isActive && (
-                        <span className={`text-xs font-bold ${isPaid ? 'text-slate-500' : 'text-white/90'}`}>
+                        <span className={`text-xs font-bold ${isPaid ? 'text-zinc-500 dark:text-zinc-400' : 'text-white/90'}`}>
                           {elapsedMins < 1 ? 'Just now' : `${elapsedMins}m`}
                         </span>
                       )}
@@ -1091,18 +1091,18 @@ export default function Orders() {
                         <span className="px-2 py-0.5 bg-orange-100 text-orange-700 rounded-full text-xs font-semibold animate-pulse">Sync</span>
                       )}
                       {order.order_type === 'takeaway' && order.ready_for_pickup && !order.picked_up_at && (
-                        <span className="px-2 py-0.5 bg-white/20 text-white rounded-full text-xs font-bold animate-pulse">Ready</span>
+                        <span className="px-2 py-0.5 bg-white dark:bg-zinc-900/20 text-white rounded-full text-xs font-bold animate-pulse">Ready</span>
                       )}
                     </div>
                   </div>
 
                   {/* Meta row */}
-                  <div className="px-4 pt-2 pb-1 flex items-center gap-2 text-xs text-slate-400">
+                  <div className="px-4 pt-2 pb-1 flex items-center gap-2 text-xs text-zinc-400 dark:text-zinc-500">
                     <span className="font-mono">{order.id.slice(0, 8)}</span>
                     <span>·</span>
                     <span>{formatTime(order.created_at)}</span>
                     {order.customer_name && (
-                      <><span>·</span><span className="font-medium text-slate-500 truncate">{order.customer_name}</span></>
+                      <><span>·</span><span className="font-medium text-zinc-500 dark:text-zinc-400 truncate">{order.customer_name}</span></>
                     )}
                     <span className={`ml-auto px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                       {t(`status.${order.status}`)}
@@ -1118,7 +1118,7 @@ export default function Orders() {
                         return (
                           <div key={index} className={`flex items-start justify-between gap-2 py-0.5 ${isVoided ? 'opacity-40' : ''}`}>
                             <div className="flex items-center gap-1.5 min-w-0">
-                              <span className={`text-sm text-slate-700 ${isVoided ? 'line-through' : ''} truncate`}>
+                              <span className={`text-sm text-zinc-700 dark:text-zinc-300 ${isVoided ? 'line-through' : ''} truncate`}>
                                 <span className="font-semibold">{item.quantity}×</span> {item.name}
                               </span>
                               {isVoided && <span className="px-1.5 py-0.5 text-xs rounded-full font-medium bg-red-100 text-red-700 shrink-0">VOID</span>}
@@ -1129,7 +1129,7 @@ export default function Orders() {
                               )}
                             </div>
                             <div className="flex items-center gap-1 shrink-0">
-                              <span className={`text-xs text-slate-400 ${isVoided ? 'line-through' : ''}`}>
+                              <span className={`text-xs text-zinc-400 dark:text-zinc-500 ${isVoided ? 'line-through' : ''}`}>
                                 {formatCurrency(item.price_at_time * item.quantity)}
                               </span>
                               {!order.paid && !isVoided && (userType === 'owner' || userType === 'staff-admin') && (
@@ -1153,7 +1153,7 @@ export default function Orders() {
                     {filteredItems.some(i => i.special_instructions) && (
                       <div className="mt-1.5 space-y-1">
                         {filteredItems.filter(i => i.special_instructions).map((item, idx) => (
-                          <div key={idx} className="px-2.5 py-1 bg-amber-50 border border-amber-200 rounded-lg">
+                          <div key={idx} className="px-2.5 py-1 bg-amber-50 border border-amber-200 rounded-sm">
                             <p className="text-xs text-amber-700">📝 <span className="font-medium">{item.name}:</span> {item.special_instructions}</p>
                           </div>
                         ))}
@@ -1161,19 +1161,19 @@ export default function Orders() {
                     )}
 
                     {order.notes && (
-                      <div className="mt-1.5 px-2.5 py-1.5 bg-amber-50 border border-amber-200 rounded-lg">
+                      <div className="mt-1.5 px-2.5 py-1.5 bg-amber-50 border border-amber-200 rounded-sm">
                         <p className="text-xs text-amber-700"><strong>{t('note')}:</strong> {order.notes}</p>
                       </div>
                     )}
                   </div>
 
                   {/* Total + expand toggle */}
-                  <div className="px-4 pt-2 pb-2 flex items-center justify-between border-t border-slate-100 mt-2">
-                    <span className="font-bold text-slate-800">{formatCurrency(order.total)}</span>
+                  <div className="px-4 pt-2 pb-2 flex items-center justify-between border-t border-zinc-200 dark:border-zinc-800 mt-2">
+                    <span className="font-bold text-zinc-800 dark:text-zinc-200">{formatCurrency(order.total)}</span>
                     {(order.paid || (userType !== 'kitchen' && restaurant?.invoice_settings?.enabled)) && (
                       <button
                         onClick={() => toggleExpanded(order.id)}
-                        className="flex items-center gap-1 text-xs text-slate-400 hover:text-[#6262bd] transition-colors"
+                        className="flex items-center gap-1 text-xs text-zinc-400 dark:text-zinc-500 hover:text-[#6262bd] transition-colors"
                       >
                         {isExpanded ? 'Hide details' : 'Details'}
                         <svg className={`w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="currentColor" viewBox="0 0 24 24">
@@ -1185,8 +1185,8 @@ export default function Orders() {
 
                   {/* Expanded: payment info + invoice/refund */}
                   {isExpanded && order.paid && (
-                    <div className="px-4 pb-3 space-y-2 border-t border-slate-100 pt-2">
-                      <div className="p-3 bg-green-50 border border-green-200 rounded-xl text-xs text-green-700 space-y-0.5">
+                    <div className="px-4 pb-3 space-y-2 border-t border-zinc-200 dark:border-zinc-800 pt-2">
+                      <div className="p-3 bg-green-50 border border-green-200 rounded-sm text-xs text-green-700 space-y-0.5">
                         <p className="font-semibold flex items-center gap-1">
                           <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
                           {t('paid')}
@@ -1198,7 +1198,7 @@ export default function Orders() {
                       {restaurant?.invoice_settings?.enabled && staffDepartment !== 'kitchen' && (
                         <button
                           onClick={() => openInvoiceModal(order.id)}
-                          className="w-full bg-[#6262bd] text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-[#5252a3] flex items-center justify-center gap-2"
+                          className="w-full bg-[#6262bd] text-white px-4 py-2 rounded-sm text-sm font-medium hover:bg-[#5252a3] flex items-center justify-center gap-2"
                         >
                           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
                           {t('generateInvoice')}
@@ -1207,7 +1207,7 @@ export default function Orders() {
                       {(userType === 'owner' || userType === 'staff-admin') && staffDepartment !== 'kitchen' && (
                         <button
                           onClick={() => { setRefundOrder(order); setRefundAmount(''); setRefundReason(''); setRefundMethod(order.payment_method || 'cash'); setShowRefundModal(true) }}
-                          className="w-full bg-orange-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-orange-600 flex items-center justify-center gap-2"
+                          className="w-full bg-orange-500 text-white px-4 py-2 rounded-sm text-sm font-medium hover:bg-orange-600 flex items-center justify-center gap-2"
                         >
                           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.5 6.9c1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-.53.12-1.03.3-1.48.54l1.47 1.47c.41-.17.91-.27 1.51-.27zM5.33 4.06L4.06 5.33 7.5 8.77c0 2.08 1.56 3.22 3.91 3.91l3.51 3.51c-.34.49-1.05.91-2.42.91-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c.96-.18 1.83-.55 2.46-1.12l2.22 2.22 1.27-1.27L5.33 4.06z"/></svg>
                           {t('refund') || 'Issue Refund'}
@@ -1236,14 +1236,14 @@ export default function Orders() {
                           if (order.status === 'pending' || (order.status === 'preparing' && !deptData.hasStartedPreparing)) {
                             buttons.push(
                               <button key={`start-${dept}`} onClick={() => startPreparingDepartment(order.id, dept)}
-                                className="flex-1 bg-[#6262bd] text-white px-3 py-2 rounded-xl text-sm font-medium hover:bg-[#5252a3] flex items-center justify-center gap-1.5">
+                                className="flex-1 bg-[#6262bd] text-white px-3 py-2 rounded-sm text-sm font-medium hover:bg-[#5252a3] flex items-center justify-center gap-1.5">
                                 <span>{deptIcon}</span><span>{t('startPreparing').replace('{department}', t(dept))}</span>
                               </button>
                             )
                           } else if ((order.status === 'preparing' || order.status === 'ready') && deptData.hasStartedPreparing && !deptData.hasMarkedReady) {
                             buttons.push(
                               <button key={`ready-${dept}`} onClick={() => markDepartmentReady(order.id, dept)}
-                                className={`flex-1 ${dept === 'bar' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'} text-white px-3 py-2 rounded-xl text-sm font-medium flex items-center justify-center gap-1.5`}>
+                                className={`flex-1 ${dept === 'bar' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'} text-white px-3 py-2 rounded-sm text-sm font-medium flex items-center justify-center gap-1.5`}>
                                 <span>{deptIcon}</span><span>{t('markReady').replace('{department}', t(dept))}</span>
                               </button>
                             )
@@ -1256,7 +1256,7 @@ export default function Orders() {
                       <div className="flex flex-wrap gap-2">
                         {order.order_type === 'takeaway' && order.status === 'ready' && !order.ready_for_pickup && (
                           <button onClick={() => markReadyForPickup(order.id)} disabled={markingReady === order.id}
-                            className="flex-1 bg-cyan-600 text-white px-3 py-2 rounded-xl text-sm font-medium hover:bg-cyan-700 disabled:opacity-50 flex items-center justify-center gap-1.5">
+                            className="flex-1 bg-cyan-600 text-white px-3 py-2 rounded-sm text-sm font-medium hover:bg-cyan-700 disabled:opacity-50 flex items-center justify-center gap-1.5">
                             {markingReady === order.id ? (
                               <><svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>{t('sendingNotification') || 'Sending...'}</>
                             ) : (
@@ -1266,20 +1266,20 @@ export default function Orders() {
                         )}
                         {order.order_type === 'takeaway' && order.ready_for_pickup && !order.picked_up_at && (
                           <button onClick={() => openPickupModal(order.id)}
-                            className="flex-1 bg-green-600 text-white px-3 py-2 rounded-xl text-sm font-medium hover:bg-green-700 flex items-center justify-center gap-1.5">
+                            className="flex-1 bg-green-600 text-white px-3 py-2 rounded-sm text-sm font-medium hover:bg-green-700 flex items-center justify-center gap-1.5">
                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
                             {t('markPickedUp') || 'Mark Picked Up'}
                           </button>
                         )}
                         {order.status === 'ready' && order.order_type !== 'takeaway' && (
                           <button onClick={() => updateOrderStatus(order.id, 'completed')}
-                            className="flex-1 bg-slate-600 text-white px-3 py-2 rounded-xl text-sm font-medium hover:bg-slate-700 flex items-center justify-center gap-1.5">
+                            className="flex-1 bg-zinc-600 text-white px-3 py-2 rounded-sm text-sm font-medium hover:bg-zinc-700 flex items-center justify-center gap-1.5">
                             {t('completeOrder')}
                           </button>
                         )}
                         {userType === 'owner' && ['pending','preparing'].includes(order.status) && (
                           <button onClick={() => confirmCancelOrder(order)}
-                            className="px-3 py-2 rounded-xl text-sm font-medium border-2 border-red-200 text-red-600 hover:bg-red-50">
+                            className="px-3 py-2 rounded-sm text-sm font-medium border-2 border-red-200 text-red-600 hover:bg-red-50">
                             {t('cancel')}
                           </button>
                         )}
@@ -1302,11 +1302,11 @@ export default function Orders() {
           }}
         >
           <div
-            className="bg-white rounded-2xl p-8 w-full max-w-md"
+            className="bg-white dark:bg-zinc-900 rounded-sm p-8 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold text-slate-800 mb-4">{t('cancelOrderTitle')}</h2>
-            <p className="text-slate-600 mb-6">
+            <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 mb-4">{t('cancelOrderTitle')}</h2>
+            <p className="text-zinc-600 dark:text-zinc-400 mb-6">
               {t('cancelOrderMessage').replace('{tableNumber}', orderToCancel.tables?.table_number)}
             </p>
             <div className="flex gap-3">
@@ -1315,13 +1315,13 @@ export default function Orders() {
                   setShowCancelModal(false)
                   setOrderToCancel(null)
                 }}
-                className="flex-1 border-2 border-slate-200 text-slate-600 py-3 rounded-xl font-medium hover:bg-slate-50"
+                className="flex-1 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900"
               >
                 {t('noKeepOrder')}
               </button>
               <button
                 onClick={cancelOrder}
-                className="flex-1 bg-red-600 text-white py-3 rounded-xl font-medium hover:bg-red-700"
+                className="flex-1 bg-red-600 text-white py-3 rounded-sm font-medium hover:bg-red-700"
               >
                 {t('yesCancelOrder')}
               </button>
@@ -1340,7 +1340,7 @@ export default function Orders() {
                 : notification.type === 'error'
                 ? 'bg-red-500'
                 : 'bg-blue-500'
-            } text-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 min-w-[300px]`}
+            } text-white px-6 py-4 rounded-sm shadow-lg flex items-center gap-3 min-w-[300px]`}
           >
             {notification.type === 'success' ? (
               <svg className="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
@@ -1378,7 +1378,7 @@ export default function Orders() {
           }}
         >
           <div
-            className="bg-white rounded-2xl p-8 w-full max-w-md"
+            className="bg-white dark:bg-zinc-900 rounded-sm p-8 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="text-center mb-6">
@@ -1387,10 +1387,10 @@ export default function Orders() {
                   <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
                 </svg>
               </div>
-              <h2 className="text-xl font-bold text-slate-800 mb-2">
+              <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 mb-2">
                 {t('confirmPickup') || 'Confirm Pickup'}
               </h2>
-              <p className="text-slate-600">
+              <p className="text-zinc-600 dark:text-zinc-400">
                 {t('verifyCodeVerbally') || 'Ask the customer for their pickup code and verify it matches below.'}
               </p>
             </div>
@@ -1402,20 +1402,20 @@ export default function Orders() {
                 <div className="mb-6">
                   {/* Customer Info */}
                   {order.customer_name && (
-                    <div className="bg-slate-50 rounded-xl p-4 mb-4">
-                      <p className="text-sm text-slate-500">{t('customerName') || 'Customer'}</p>
-                      <p className="text-lg font-semibold text-slate-800">{order.customer_name}</p>
+                    <div className="bg-zinc-50 dark:bg-zinc-900 rounded-sm p-4 mb-4">
+                      <p className="text-sm text-zinc-500 dark:text-zinc-400">{t('customerName') || 'Customer'}</p>
+                      <p className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">{order.customer_name}</p>
                     </div>
                   )}
 
                   {/* Pickup Code - Large Display */}
-                  <div className="bg-cyan-50 border-2 border-cyan-200 rounded-xl p-6 text-center">
+                  <div className="bg-cyan-50 border-2 border-cyan-200 rounded-sm p-6 text-center">
                     <p className="text-sm text-cyan-600 font-medium mb-2">{t('pickupCode') || 'Pickup Code'}</p>
                     <p className="text-4xl font-bold text-cyan-700 tracking-widest">{order.pickup_code}</p>
                   </div>
 
                   {/* Order Total */}
-                  <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                  <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-sm">
                     <div className="flex justify-between items-center">
                       <span className="text-amber-700 font-medium">{t('totalToPay') || 'Total to collect (Cash)'}</span>
                       <span className="text-xl font-bold text-amber-800">{formatCurrency(order.total)}</span>
@@ -1431,13 +1431,13 @@ export default function Orders() {
                   setShowPickupModal(false)
                   setPickupOrderId(null)
                 }}
-                className="flex-1 border-2 border-slate-200 text-slate-600 py-3 rounded-xl font-medium hover:bg-slate-50"
+                className="flex-1 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900"
               >
                 {tc('close') || 'Cancel'}
               </button>
               <button
                 onClick={confirmPickup}
-                className="flex-1 bg-green-600 text-white py-3 rounded-xl font-medium hover:bg-green-700 flex items-center justify-center gap-2"
+                className="flex-1 bg-green-600 text-white py-3 rounded-sm font-medium hover:bg-green-700 flex items-center justify-center gap-2"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
@@ -1472,31 +1472,31 @@ export default function Orders() {
           }}
         >
           <div
-            className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md"
+            className="bg-white dark:bg-zinc-800 rounded-sm p-6 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-sm flex items-center justify-center">
                 <svg className="w-6 h-6 text-orange-600 dark:text-orange-400" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12.5 6.9c1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-.53.12-1.03.3-1.48.54l1.47 1.47c.41-.17.91-.27 1.51-.27zM5.33 4.06L4.06 5.33 7.5 8.77c0 2.08 1.56 3.22 3.91 3.91l3.51 3.51c-.34.49-1.05.91-2.42.91-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c.96-.18 1.83-.55 2.46-1.12l2.22 2.22 1.27-1.27L5.33 4.06z"/>
                 </svg>
               </div>
               <div>
-                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+                <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200">
                   {t('refundTitle') || 'Issue Refund'}
                 </h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">
                   {t('refundOrderNumber') || 'Order'} #{refundOrder.id?.slice(-8).toUpperCase()}
                 </p>
               </div>
             </div>
 
             {/* Order Info */}
-            <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 mb-4">
+            <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-700/50 rounded-sm p-4 mb-4">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-slate-600 dark:text-slate-400">{t('orderTotal') || 'Order Total'}</span>
-                <span className="font-bold text-slate-800 dark:text-slate-100">{formatCurrency(refundOrder.total || 0)}</span>
+                <span className="text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{t('orderTotal') || 'Order Total'}</span>
+                <span className="font-bold text-zinc-800 dark:text-zinc-200">{formatCurrency(refundOrder.total || 0)}</span>
               </div>
               {(refundOrder.refund_total || 0) > 0 && (
                 <div className="flex justify-between items-center mb-2">
@@ -1504,8 +1504,8 @@ export default function Orders() {
                   <span className="font-bold text-orange-600 dark:text-orange-400">-{formatCurrency(refundOrder.refund_total || 0)}</span>
                 </div>
               )}
-              <div className="flex justify-between items-center pt-2 border-t border-slate-200 dark:border-slate-600">
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('maxRefundable') || 'Max Refundable'}</span>
+              <div className="flex justify-between items-center pt-2 border-t border-zinc-200 dark:border-zinc-700 dark:border-zinc-600">
+                <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">{t('maxRefundable') || 'Max Refundable'}</span>
                 <span className="font-bold text-green-600 dark:text-green-400">
                   {formatCurrency((refundOrder.total || 0) - (refundOrder.refund_total || 0))}
                 </span>
@@ -1514,11 +1514,11 @@ export default function Orders() {
 
             {/* Refund Amount */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
                 {t('refundAmount') || 'Refund Amount'} *
               </label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-medium">{currencySymbol}</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400 font-medium">{currencySymbol}</span>
                 <input
                   type="number"
                   value={refundAmount}
@@ -1526,20 +1526,20 @@ export default function Orders() {
                   step="0.01"
                   min="0.01"
                   max={(refundOrder.total || 0) - (refundOrder.refund_total || 0)}
-                  className="w-full pl-8 pr-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
+                  className="w-full pl-8 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
                   placeholder="0.00"
                 />
               </div>
               <div className="flex gap-2 mt-2">
                 <button
                   onClick={() => setRefundAmount(((refundOrder.total || 0) - (refundOrder.refund_total || 0)).toFixed(2))}
-                  className="text-xs px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600"
+                  className="text-xs px-3 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 rounded-sm hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600"
                 >
                   {t('fullRefund') || 'Full Refund'}
                 </button>
                 <button
                   onClick={() => setRefundAmount((((refundOrder.total || 0) - (refundOrder.refund_total || 0)) / 2).toFixed(2))}
-                  className="text-xs px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600"
+                  className="text-xs px-3 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 rounded-sm hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600"
                 >
                   {t('halfRefund') || '50%'}
                 </button>
@@ -1548,16 +1548,16 @@ export default function Orders() {
 
             {/* Refund Method */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
                 {t('refundMethod') || 'Refund Method'} *
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => setRefundMethod('cash')}
-                  className={`py-3 px-4 rounded-xl font-medium border-2 flex items-center justify-center gap-2 transition-colors ${
+                  className={`py-3 px-4 rounded-sm font-medium border-2 flex items-center justify-center gap-2 transition-colors ${
                     refundMethod === 'cash'
                       ? 'border-green-500 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                      : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
+                      : 'border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-700'
                   }`}
                 >
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -1567,10 +1567,10 @@ export default function Orders() {
                 </button>
                 <button
                   onClick={() => setRefundMethod('card')}
-                  className={`py-3 px-4 rounded-xl font-medium border-2 flex items-center justify-center gap-2 transition-colors ${
+                  className={`py-3 px-4 rounded-sm font-medium border-2 flex items-center justify-center gap-2 transition-colors ${
                     refundMethod === 'card'
                       ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                      : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
+                      : 'border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-700'
                   }`}
                 >
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -1583,14 +1583,14 @@ export default function Orders() {
 
             {/* Refund Reason */}
             <div className="mb-6">
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
                 {t('refundReason') || 'Reason for Refund'} *
               </label>
               <textarea
                 value={refundReason}
                 onChange={(e) => setRefundReason(e.target.value)}
                 rows={3}
-                className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 resize-none"
+                className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 resize-none"
                 placeholder={t('refundReasonPlaceholder') || 'e.g., Customer complaint, wrong order, quality issue...'}
               />
             </div>
@@ -1603,14 +1603,14 @@ export default function Orders() {
                   setRefundOrder(null)
                 }}
                 disabled={processingRefund}
-                className="flex-1 border-2 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 py-3 rounded-xl font-medium hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50"
+                className="flex-1 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-700 disabled:opacity-50"
               >
                 {tc('cancel') || 'Cancel'}
               </button>
               <button
                 onClick={processRefund}
                 disabled={processingRefund || !refundAmount || !refundReason.trim()}
-                className="flex-1 bg-orange-500 text-white py-3 rounded-xl font-medium hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 bg-orange-500 text-white py-3 rounded-sm font-medium hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {processingRefund ? (
                   <>
@@ -1645,39 +1645,39 @@ export default function Orders() {
           }}
         >
           <div
-            className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md"
+            className="bg-white dark:bg-zinc-800 rounded-sm p-6 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-sm flex items-center justify-center">
                 <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
                 </svg>
               </div>
               <div>
-                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+                <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200">
                   {t('voidTitle') || 'Void Item'}
                 </h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">
                   {t('voidSubtitle') || 'Remove item from order before payment'}
                 </p>
               </div>
             </div>
 
             {/* Item Info */}
-            <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 mb-4">
+            <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-700/50 rounded-sm p-4 mb-4">
               <div className="flex justify-between items-center mb-2">
-                <span className="font-medium text-slate-800 dark:text-slate-100">{voidItem.name}</span>
-                <span className="text-slate-600 dark:text-slate-300">
+                <span className="font-medium text-zinc-800 dark:text-zinc-200">{voidItem.name}</span>
+                <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-300">
                   {formatCurrency(voidItem.price_at_time)} each
                 </span>
               </div>
               <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-500 dark:text-slate-400">
+                <span className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">
                   {t('voidCurrentQuantity') || 'Current quantity'}: {voidItem.quantity}
                 </span>
-                <span className="font-medium text-slate-700 dark:text-slate-200">
+                <span className="font-medium text-zinc-700 dark:text-zinc-300">
                   {t('voidTotalValue') || 'Total'}: {formatCurrency(voidItem.price_at_time * voidItem.quantity)}
                 </span>
               </div>
@@ -1685,13 +1685,13 @@ export default function Orders() {
 
             {/* Void Quantity */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
                 {t('voidQuantity') || 'Quantity to Void'}
               </label>
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setVoidQuantity(Math.max(1, voidQuantity - 1))}
-                  className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 flex items-center justify-center font-bold text-lg"
+                  className="w-10 h-10 rounded-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 flex items-center justify-center font-bold text-lg"
                 >
                   -
                 </button>
@@ -1701,24 +1701,24 @@ export default function Orders() {
                   onChange={(e) => setVoidQuantity(Math.min(voidItem.quantity, Math.max(1, parseInt(e.target.value) || 1)))}
                   min="1"
                   max={voidItem.quantity}
-                  className="w-20 text-center px-4 py-2 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-lg"
+                  className="w-20 text-center px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-lg"
                 />
                 <button
                   onClick={() => setVoidQuantity(Math.min(voidItem.quantity, voidQuantity + 1))}
-                  className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 flex items-center justify-center font-bold text-lg"
+                  className="w-10 h-10 rounded-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 flex items-center justify-center font-bold text-lg"
                 >
                   +
                 </button>
                 {voidItem.quantity > 1 && (
                   <button
                     onClick={() => setVoidQuantity(voidItem.quantity)}
-                    className="text-xs px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50"
+                    className="text-xs px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-sm hover:bg-red-200 dark:hover:bg-red-900/50"
                   >
                     {t('voidAll') || 'Void All'}
                   </button>
                 )}
               </div>
-              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+              <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">
                 {t('voidValueLabel') || 'Value to void'}: <span className="font-bold text-red-600 dark:text-red-400">
                   {formatCurrency(voidItem.price_at_time * voidQuantity)}
                 </span>
@@ -1727,32 +1727,32 @@ export default function Orders() {
 
             {/* Void Reason */}
             <div className="mb-6">
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
                 {t('voidReason') || 'Reason for Void'} *
               </label>
               <textarea
                 value={voidReason}
                 onChange={(e) => setVoidReason(e.target.value)}
                 rows={3}
-                className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 resize-none"
+                className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 resize-none"
                 placeholder={t('voidReasonPlaceholder') || 'e.g., Customer changed mind, wrong item ordered, out of stock...'}
               />
               <div className="flex flex-wrap gap-2 mt-2">
                 <button
                   onClick={() => setVoidReason(t('voidReasonChanged') || 'Customer changed mind')}
-                  className="text-xs px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600"
+                  className="text-xs px-3 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 rounded-sm hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600"
                 >
                   {t('voidReasonChanged') || 'Customer changed mind'}
                 </button>
                 <button
                   onClick={() => setVoidReason(t('voidReasonWrong') || 'Wrong item ordered')}
-                  className="text-xs px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600"
+                  className="text-xs px-3 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 rounded-sm hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600"
                 >
                   {t('voidReasonWrong') || 'Wrong item'}
                 </button>
                 <button
                   onClick={() => setVoidReason(t('voidReasonStock') || 'Out of stock')}
-                  className="text-xs px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600"
+                  className="text-xs px-3 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 rounded-sm hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600"
                 >
                   {t('voidReasonStock') || 'Out of stock'}
                 </button>
@@ -1768,14 +1768,14 @@ export default function Orders() {
                   setVoidOrder(null)
                 }}
                 disabled={processingVoid}
-                className="flex-1 border-2 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 py-3 rounded-xl font-medium hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50"
+                className="flex-1 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-700 disabled:opacity-50"
               >
                 {tc('cancel') || 'Cancel'}
               </button>
               <button
                 onClick={processVoid}
                 disabled={processingVoid || !voidReason.trim()}
-                className="flex-1 bg-red-500 text-white py-3 rounded-xl font-medium hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 bg-red-500 text-white py-3 rounded-sm font-medium hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {processingVoid ? (
                   <>

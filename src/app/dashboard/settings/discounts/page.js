@@ -276,7 +276,7 @@ export default function DiscountsSettings() {
     return (
       <div className="p-4 sm:p-8">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center text-slate-500 dark:text-slate-400">
+          <div className="text-center text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">
             {tc('loading') || 'Loading...'}
           </div>
         </div>
@@ -302,18 +302,18 @@ export default function DiscountsSettings() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">
             {t('title') || 'Discount Templates'}
             <InfoTooltip text={tg('discounts_desc')} />
           </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-2">
             {t('description') || 'Create discount templates that can be applied to orders at payment time.'}
           </p>
         </div>
 
         {/* Message Alert */}
         {message && (
-          <div className={`mb-6 p-4 rounded-xl border-2 ${
+          <div className={`mb-6 p-4 rounded-sm border-2 ${
             message.type === 'success'
               ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300'
               : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300'
@@ -323,7 +323,7 @@ export default function DiscountsSettings() {
         )}
 
         {/* Info Box */}
-        <div className="mb-6 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-100 dark:border-blue-800 rounded-xl p-4">
+        <div className="mb-6 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-100 dark:border-blue-800 rounded-sm p-4">
           <div className="flex items-start gap-3">
             <svg className="w-5 h-5 text-blue-500 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
@@ -340,8 +340,8 @@ export default function DiscountsSettings() {
         </div>
 
         {/* Existing Discounts */}
-        <div className="bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl p-6 mb-6">
-          <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-4">
+        <div className="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 rounded-sm p-6 mb-6">
+          <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-4">
             {t('existingDiscounts') || 'Existing Discounts'}
           </h2>
 
@@ -352,7 +352,7 @@ export default function DiscountsSettings() {
                 return (
                   <div
                     key={discount.id}
-                    className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-200 dark:border-slate-600"
+                    className="p-4 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-700/50 rounded-sm border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600"
                   >
                     {editingId === discount.id ? (
                       <DiscountForm
@@ -376,14 +376,14 @@ export default function DiscountsSettings() {
                       <div className="flex flex-wrap items-start gap-3">
                         <div className="flex-1 min-w-0" style={{minWidth: '0', flexBasis: '200px'}}>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <p className="font-medium text-slate-800 dark:text-slate-100">{discount.name}</p>
+                            <p className="font-medium text-zinc-800 dark:text-zinc-200">{discount.name}</p>
                             {discount.is_promotion && (
                               <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${
                                 promoStatus === 'active'
                                   ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300'
                                   : promoStatus === 'upcoming'
                                   ? 'bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300'
-                                  : 'bg-slate-100 dark:bg-slate-600 text-slate-500 dark:text-slate-400'
+                                  : 'bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-600 text-zinc-500 dark:text-zinc-400 dark:text-zinc-400'
                               }`}>
                                 <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
@@ -393,10 +393,10 @@ export default function DiscountsSettings() {
                             )}
                           </div>
                           {discount.description && (
-                            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{discount.description}</p>
+                            <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-0.5">{discount.description}</p>
                           )}
                           {discount.is_promotion && (
-                            <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+                            <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">
                               {discount.product_id && (() => {
                                 const item = menuItems.find(m => m.id === discount.product_id)
                                 return item ? (
@@ -425,13 +425,13 @@ export default function DiscountsSettings() {
                           </span>
                           <button
                             onClick={() => startEditing(discount)}
-                            className="px-3 py-1.5 text-sm bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-500"
+                            className="px-3 py-1.5 text-sm bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-sm hover:bg-zinc-300 dark:hover:bg-zinc-600 dark:bg-zinc-900"
                           >
                             {tc('edit') || 'Edit'}
                           </button>
                           <button
                             onClick={() => handleDeleteDiscount(discount.id, discount.name)}
-                            className="px-3 py-1.5 text-sm bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50"
+                            className="px-3 py-1.5 text-sm bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-sm hover:bg-red-200 dark:hover:bg-red-900/50"
                           >
                             {tc('delete') || 'Delete'}
                           </button>
@@ -443,15 +443,15 @@ export default function DiscountsSettings() {
               })}
             </div>
           ) : (
-            <div className="text-center py-8 text-slate-500 dark:text-slate-400">
+            <div className="text-center py-8 text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">
               {t('noDiscounts') || 'No discount templates yet. Create one below to get started.'}
             </div>
           )}
         </div>
 
         {/* Add New Discount */}
-        <div className="bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl p-6">
-          <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-4">
+        <div className="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 rounded-sm p-6">
+          <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-4">
             {t('addNew') || 'Add New Discount'}
           </h2>
           <DiscountForm
@@ -474,11 +474,11 @@ export default function DiscountsSettings() {
         </div>
 
         {/* Examples */}
-        <div className="mt-6 bg-slate-50 dark:bg-slate-800/50 border-2 border-slate-100 dark:border-slate-700 rounded-xl p-4">
-          <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+        <div className="mt-6 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 rounded-sm p-4">
+          <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
             {t('examples.title') || 'Example Discount Templates'}
           </h3>
-          <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-1">
+          <ul className="text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 space-y-1">
             <li>• <strong>{t('examples.staff') || 'Staff Discount'}:</strong> 15% {t('examples.staffDesc') || 'for employee meals'}</li>
             <li>• <strong>{t('examples.loyalty') || 'Loyalty 10%'}:</strong> 10% {t('examples.loyaltyDesc') || 'for repeat customers'}</li>
             <li>• <strong>{t('examples.happyHour') || 'Happy Hour'}:</strong> 20% {t('examples.happyHourDesc') || 'for drinks during 4-6pm'}</li>
@@ -523,25 +523,25 @@ function DiscountForm({ state, setState, menuItems, currencySymbol, onSave, onCa
       {/* Name + Type */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+          <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
             {t('form.name') || 'Discount Name'}
           </label>
           <input
             type="text"
             value={state.name}
             onChange={(e) => set('name', e.target.value)}
-            className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
+            className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 dark:text-zinc-500"
             placeholder={t('form.namePlaceholder') || 'e.g., Staff Discount, Loyalty 10%, Happy Hour'}
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+          <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
             {t('form.type') || 'Type'}
           </label>
           <select
             value={state.type}
             onChange={(e) => set('type', e.target.value)}
-            className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
+            className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
           >
             <option value="percentage">{t('form.percentage') || 'Percentage (%)'}</option>
             <option value="fixed">{t('form.fixed') || 'Fixed Amount'}</option>
@@ -552,7 +552,7 @@ function DiscountForm({ state, setState, menuItems, currencySymbol, onSave, onCa
       {/* Value + Description */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+          <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
             {t('form.value') || 'Value'}
           </label>
           <div className="relative">
@@ -563,40 +563,40 @@ function DiscountForm({ state, setState, menuItems, currencySymbol, onSave, onCa
               step="0.01"
               min="0"
               max={state.type === 'percentage' ? 100 : undefined}
-              className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
+              className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 dark:text-zinc-500"
               placeholder={state.type === 'percentage' ? '10' : '5.00'}
             />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 font-medium">
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 font-medium">
               {state.type === 'percentage' ? '%' : currencySymbol}
             </span>
           </div>
         </div>
         <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            {t('form.description') || 'Description'} <span className="text-slate-400">({tc('optional') || 'optional'})</span>
+          <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
+            {t('form.description') || 'Description'} <span className="text-zinc-400 dark:text-zinc-500">({tc('optional') || 'optional'})</span>
           </label>
           <input
             type="text"
             value={state.description}
             onChange={(e) => set('description', e.target.value)}
-            className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
+            className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 dark:text-zinc-500"
             placeholder={t('form.descriptionPlaceholder') || 'e.g., For loyalty program members'}
           />
         </div>
       </div>
 
       {/* Promotion Toggle */}
-      <div className={`rounded-xl border-2 transition-colors ${
+      <div className={`rounded-sm border-2 transition-colors ${
         state.is_promotion
           ? 'border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/10'
-          : 'border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/30'
+          : 'border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-700/30'
       } p-4`}>
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-medium text-slate-800 dark:text-slate-100 text-sm">
+            <p className="font-medium text-zinc-800 dark:text-zinc-200 text-sm">
               {t('form.isPromotion') || 'Timed Promotion'}
             </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-0.5">
               {t('form.isPromotionDesc') || 'Tie this discount to a specific product and activate it only within a date range or on certain days'}
             </p>
           </div>
@@ -604,7 +604,7 @@ function DiscountForm({ state, setState, menuItems, currencySymbol, onSave, onCa
             type="button"
             onClick={() => set('is_promotion', !state.is_promotion)}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              state.is_promotion ? 'bg-orange-500' : 'bg-slate-300 dark:bg-slate-600'
+              state.is_promotion ? 'bg-orange-500' : 'bg-slate-300 dark:bg-zinc-600'
             }`}
           >
             <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
@@ -617,7 +617,7 @@ function DiscountForm({ state, setState, menuItems, currencySymbol, onSave, onCa
           <div className="mt-4 space-y-4">
             {/* Product selector with search */}
             <div className="relative" ref={dropdownRef}>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
                 {t('form.product') || 'Apply to Product'}
               </label>
               {/* Trigger button */}
@@ -627,22 +627,22 @@ function DiscountForm({ state, setState, menuItems, currencySymbol, onSave, onCa
                   setProductDropdownOpen(o => !o)
                   setProductSearch('')
                 }}
-                className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-orange-400 bg-white dark:bg-slate-800 text-left flex items-center justify-between"
+                className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm focus:outline-none focus:border-orange-400 bg-white dark:bg-zinc-800 text-left flex items-center justify-between"
               >
-                <span className={selectedItemName ? 'text-slate-700 dark:text-slate-200' : 'text-slate-400'}>
+                <span className={selectedItemName ? 'text-zinc-700 dark:text-zinc-300' : 'text-zinc-400 dark:text-zinc-500'}>
                   {selectedItemName || (t('form.selectProduct') || '— Select a product —')}
                 </span>
-                <svg className={`w-4 h-4 text-slate-400 transition-transform ${productDropdownOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className={`w-4 h-4 text-zinc-400 dark:text-zinc-500 transition-transform ${productDropdownOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
 
               {productDropdownOpen && (
-                <div className="absolute z-20 mt-1 w-full bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-600 rounded-xl shadow-lg overflow-hidden">
+                <div className="absolute z-20 mt-1 w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm shadow-lg overflow-hidden">
                   {/* Search input */}
-                  <div className="p-2 border-b border-slate-100 dark:border-slate-700">
+                  <div className="p-2 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-700">
                     <div className="relative">
-                      <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 dark:text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
                       <input
@@ -651,7 +651,7 @@ function DiscountForm({ state, setState, menuItems, currencySymbol, onSave, onCa
                         value={productSearch}
                         onChange={(e) => setProductSearch(e.target.value)}
                         placeholder="Search products..."
-                        className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:border-orange-400 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
+                        className="w-full pl-9 pr-3 py-2 text-sm border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm focus:outline-none focus:border-orange-400 bg-white dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 dark:text-zinc-500"
                       />
                     </div>
                   </div>
@@ -661,7 +661,7 @@ function DiscountForm({ state, setState, menuItems, currencySymbol, onSave, onCa
                       <button
                         type="button"
                         onClick={() => { set('product_id', ''); setProductDropdownOpen(false) }}
-                        className="w-full text-left px-4 py-2.5 text-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700"
+                        className="w-full text-left px-4 py-2.5 text-sm text-zinc-400 dark:text-zinc-500 hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-700"
                       >
                         {t('form.selectProduct') || '— Select a product —'}
                       </button>
@@ -674,14 +674,14 @@ function DiscountForm({ state, setState, menuItems, currencySymbol, onSave, onCa
                           className={`w-full text-left px-4 py-2.5 text-sm hover:bg-orange-50 dark:hover:bg-orange-900/20 ${
                             state.product_id === item.id
                               ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 font-medium'
-                              : 'text-slate-700 dark:text-slate-200'
+                              : 'text-zinc-700 dark:text-zinc-300'
                           }`}
                         >
                           {item.name}
                         </button>
                       </li>
                     )) : (
-                      <li className="px-4 py-3 text-sm text-slate-400 text-center">No products found</li>
+                      <li className="px-4 py-3 text-sm text-zinc-400 dark:text-zinc-500 text-center">No products found</li>
                     )}
                   </ul>
                 </div>
@@ -691,18 +691,18 @@ function DiscountForm({ state, setState, menuItems, currencySymbol, onSave, onCa
             {/* Date range */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
                   {t('form.startDate') || 'Start Date'}
                 </label>
                 <input
                   type="date"
                   value={state.promo_start_date}
                   onChange={(e) => set('promo_start_date', e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-orange-400 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm focus:outline-none focus:border-orange-400 bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
                   {t('form.endDate') || 'End Date'}
                 </label>
                 <input
@@ -710,15 +710,15 @@ function DiscountForm({ state, setState, menuItems, currencySymbol, onSave, onCa
                   value={state.promo_end_date}
                   onChange={(e) => set('promo_end_date', e.target.value)}
                   min={state.promo_start_date || undefined}
-                  className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-orange-400 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm focus:outline-none focus:border-orange-400 bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
                 />
               </div>
             </div>
 
             {/* Days of week */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                {t('form.promoDays') || 'Active Days'} <span className="text-slate-400 font-normal">({t('form.promoDaysHint') || 'leave empty for every day'})</span>
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
+                {t('form.promoDays') || 'Active Days'} <span className="text-zinc-400 dark:text-zinc-500 font-normal">({t('form.promoDaysHint') || 'leave empty for every day'})</span>
               </label>
               <div className="flex gap-2 flex-wrap">
                 {DAYS_OF_WEEK.map(({ label, value }) => (
@@ -726,10 +726,10 @@ function DiscountForm({ state, setState, menuItems, currencySymbol, onSave, onCa
                     key={value}
                     type="button"
                     onClick={() => toggleDay(value)}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    className={`px-3 py-1.5 rounded-sm text-sm font-medium transition-colors ${
                       state.promo_days.includes(value)
                         ? 'bg-orange-500 text-white'
-                        : 'bg-white dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-orange-300'
+                        : 'bg-white dark:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 hover:border-orange-300'
                     }`}
                   >
                     {label}
@@ -746,7 +746,7 @@ function DiscountForm({ state, setState, menuItems, currencySymbol, onSave, onCa
         {onCancel && (
           <button
             onClick={onCancel}
-            className="px-4 py-2.5 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-xl hover:bg-slate-300 dark:hover:bg-slate-500"
+            className="px-4 py-2.5 bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-sm hover:bg-zinc-300 dark:hover:bg-zinc-600 dark:bg-zinc-900"
           >
             {tc('cancel') || 'Cancel'}
           </button>
@@ -754,7 +754,7 @@ function DiscountForm({ state, setState, menuItems, currencySymbol, onSave, onCa
         <button
           onClick={onSave}
           disabled={saving || !state.name || !state.value}
-          className="px-6 py-2.5 bg-[#6262bd] text-white rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          className="px-6 py-2.5 bg-[#6262bd] text-white rounded-sm font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
         >
           {!isNew ? null : (
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">

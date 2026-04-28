@@ -102,7 +102,7 @@ export default function OtherOptionsSettings() {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="text-slate-500">{tc('loading') || 'Loading...'}</div>
+        <div className="text-zinc-500 dark:text-zinc-400">{tc('loading') || 'Loading...'}</div>
       </div>
     )
   }
@@ -110,7 +110,7 @@ export default function OtherOptionsSettings() {
   if (!restaurant) {
     return (
       <div className="p-8">
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-600">
+        <div className="bg-red-50 border border-red-200 rounded-sm p-4 text-red-600">
           {t('accessDenied') || 'Only restaurant owners can access settings.'}
         </div>
       </div>
@@ -122,12 +122,12 @@ export default function OtherOptionsSettings() {
     <div>
       <PageTabs tabs={settingsTabs} />
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">{t('title') || 'Other Options'}<InfoTooltip text={tg('other_options_desc')} /></h1>
-        <p className="text-slate-500">{t('subtitle') || 'Configure additional restaurant features and notifications'}</p>
+        <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">{t('title') || 'Other Options'}<InfoTooltip text={tg('other_options_desc')} /></h1>
+        <p className="text-zinc-500 dark:text-zinc-400">{t('subtitle') || 'Configure additional restaurant features and notifications'}</p>
       </div>
 
       {message && (
-        <div className={`mb-6 p-4 rounded-xl border ${
+        <div className={`mb-6 p-4 rounded-sm border ${
           message.type === 'success'
             ? 'bg-green-50 border-green-200 text-green-600'
             : 'bg-red-50 border-red-200 text-red-600'
@@ -137,17 +137,17 @@ export default function OtherOptionsSettings() {
       )}
 
       {/* Order Sound Notifications Section */}
-      <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-6">
         <div className="mb-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h2 className="text-lg font-bold text-slate-700 mb-2 flex items-center gap-2">
+              <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-2 flex items-center gap-2">
                 <svg className="w-6 h-6 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
                 </svg>
                 {t('orderSoundNotifications') || 'Order Sound Notifications'}
               </h2>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400">
                 {t('orderSoundNotificationsDesc') || 'Play distinct sounds when new orders arrive for kitchen, bar, or takeaway.'}
               </p>
             </div>
@@ -158,8 +158,8 @@ export default function OtherOptionsSettings() {
                 onChange={(e) => setSoundEnabled(e.target.checked)}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#6262bd]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#6262bd]"></div>
-              <span className="ml-3 text-sm font-medium text-slate-700">
+              <div className="w-11 h-6 bg-zinc-200 dark:bg-zinc-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#6262bd]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 dark:border-zinc-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#6262bd]"></div>
+              <span className="ml-3 text-sm font-medium text-zinc-700 dark:text-zinc-300">
                 {soundEnabled ? (t('enabled') || 'Enabled') : (t('disabled') || 'Disabled')}
               </span>
             </label>
@@ -167,14 +167,14 @@ export default function OtherOptionsSettings() {
         </div>
 
         {soundEnabled && (
-          <div className="space-y-6 border-t border-slate-100 pt-6">
+          <div className="space-y-6 border-t border-zinc-200 dark:border-zinc-800 pt-6">
             {/* Volume Control */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-3">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-3">
                 {t('volume') || 'Volume'}
               </label>
               <div className="flex items-center gap-4">
-                <svg className="w-5 h-5 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-zinc-400 dark:text-zinc-500" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M3 9v6h4l5 5V4L7 9H3z"/>
                 </svg>
                 <input
@@ -184,17 +184,17 @@ export default function OtherOptionsSettings() {
                   step="0.1"
                   value={volume}
                   onChange={(e) => setVolume(parseFloat(e.target.value))}
-                  className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#6262bd]"
+                  className="flex-1 h-2 bg-zinc-200 dark:bg-zinc-700 rounded-sm appearance-none cursor-pointer accent-[#6262bd]"
                 />
-                <svg className="w-6 h-6 text-slate-600" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 text-zinc-600 dark:text-zinc-400" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
                 </svg>
-                <span className="text-sm text-slate-500 w-12 text-right">{Math.round(volume * 100)}%</span>
+                <span className="text-sm text-zinc-500 dark:text-zinc-400 w-12 text-right">{Math.round(volume * 100)}%</span>
               </div>
             </div>
 
             {/* Kitchen Sound */}
-            <div className="p-4 bg-green-50 rounded-xl border border-green-100">
+            <div className="p-4 bg-green-50 rounded-sm border border-green-100">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">🍳</span>
@@ -206,7 +206,7 @@ export default function OtherOptionsSettings() {
                 <button
                   onClick={() => handleTestSound(kitchenSound)}
                   disabled={kitchenSound === 'silent'}
-                  className="px-3 py-1.5 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg text-sm font-medium flex items-center gap-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1.5 bg-green-100 hover:bg-green-200 text-green-700 rounded-sm text-sm font-medium flex items-center gap-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z"/>
@@ -217,7 +217,7 @@ export default function OtherOptionsSettings() {
               <select
                 value={kitchenSound}
                 onChange={(e) => setKitchenSound(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-green-200 rounded-xl focus:outline-none focus:border-green-400 text-slate-700 bg-white"
+                className="w-full px-4 py-3 border-2 border-green-200 rounded-sm focus:outline-none focus:border-green-400 text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-900"
               >
                 {soundOptions.map(option => (
                   <option key={option.value} value={option.value}>{option.label}</option>
@@ -226,7 +226,7 @@ export default function OtherOptionsSettings() {
             </div>
 
             {/* Bar Sound */}
-            <div className="p-4 bg-orange-50 rounded-xl border border-orange-100">
+            <div className="p-4 bg-orange-50 rounded-sm border border-orange-100">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">🍸</span>
@@ -238,7 +238,7 @@ export default function OtherOptionsSettings() {
                 <button
                   onClick={() => handleTestSound(barSound)}
                   disabled={barSound === 'silent'}
-                  className="px-3 py-1.5 bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-lg text-sm font-medium flex items-center gap-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1.5 bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-sm text-sm font-medium flex items-center gap-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z"/>
@@ -249,7 +249,7 @@ export default function OtherOptionsSettings() {
               <select
                 value={barSound}
                 onChange={(e) => setBarSound(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-orange-200 rounded-xl focus:outline-none focus:border-orange-400 text-slate-700 bg-white"
+                className="w-full px-4 py-3 border-2 border-orange-200 rounded-sm focus:outline-none focus:border-orange-400 text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-900"
               >
                 {soundOptions.map(option => (
                   <option key={option.value} value={option.value}>{option.label}</option>
@@ -258,7 +258,7 @@ export default function OtherOptionsSettings() {
             </div>
 
             {/* Takeaway Sound */}
-            <div className="p-4 bg-cyan-50 rounded-xl border border-cyan-100">
+            <div className="p-4 bg-cyan-50 rounded-sm border border-cyan-100">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">🥡</span>
@@ -270,7 +270,7 @@ export default function OtherOptionsSettings() {
                 <button
                   onClick={() => handleTestSound(takeawaySound)}
                   disabled={takeawaySound === 'silent'}
-                  className="px-3 py-1.5 bg-cyan-100 hover:bg-cyan-200 text-cyan-700 rounded-lg text-sm font-medium flex items-center gap-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1.5 bg-cyan-100 hover:bg-cyan-200 text-cyan-700 rounded-sm text-sm font-medium flex items-center gap-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z"/>
@@ -281,7 +281,7 @@ export default function OtherOptionsSettings() {
               <select
                 value={takeawaySound}
                 onChange={(e) => setTakeawaySound(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-cyan-200 rounded-xl focus:outline-none focus:border-cyan-400 text-slate-700 bg-white"
+                className="w-full px-4 py-3 border-2 border-cyan-200 rounded-sm focus:outline-none focus:border-cyan-400 text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-900"
               >
                 {soundOptions.map(option => (
                   <option key={option.value} value={option.value}>{option.label}</option>
@@ -290,7 +290,7 @@ export default function OtherOptionsSettings() {
             </div>
 
             {/* Reservation Sound */}
-            <div className="p-4 bg-purple-50 rounded-xl border border-purple-100">
+            <div className="p-4 bg-purple-50 rounded-sm border border-purple-100">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">📅</span>
@@ -302,7 +302,7 @@ export default function OtherOptionsSettings() {
                 <button
                   onClick={() => handleTestSound(reservationSound)}
                   disabled={reservationSound === 'silent'}
-                  className="px-3 py-1.5 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg text-sm font-medium flex items-center gap-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1.5 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-sm text-sm font-medium flex items-center gap-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z"/>
@@ -313,7 +313,7 @@ export default function OtherOptionsSettings() {
               <select
                 value={reservationSound}
                 onChange={(e) => setReservationSound(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:outline-none focus:border-purple-400 text-slate-700 bg-white"
+                className="w-full px-4 py-3 border-2 border-purple-200 rounded-sm focus:outline-none focus:border-purple-400 text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-900"
               >
                 {soundOptions.map(option => (
                   <option key={option.value} value={option.value}>{option.label}</option>
@@ -322,7 +322,7 @@ export default function OtherOptionsSettings() {
             </div>
 
             {/* Info Box */}
-            <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
+            <div className="p-4 bg-blue-50 border border-blue-100 rounded-sm">
               <div className="flex gap-3">
                 <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
@@ -346,7 +346,7 @@ export default function OtherOptionsSettings() {
               <button
                 onClick={handleSaveSoundSettings}
                 disabled={saving}
-                className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="w-full bg-[#6262bd] text-white py-3 rounded-sm font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 {saving ? (tc('saving') || 'Saving...') : (t('saveSoundSettings') || 'Save Sound Settings')}
               </button>
@@ -355,8 +355,8 @@ export default function OtherOptionsSettings() {
         )}
 
         {!soundEnabled && (
-          <div className="border-t border-slate-100 pt-6">
-            <div className="text-center py-6 text-slate-400">
+          <div className="border-t border-zinc-200 dark:border-zinc-800 pt-6">
+            <div className="text-center py-6 text-zinc-400 dark:text-zinc-500">
               <svg className="w-12 h-12 mx-auto mb-3 opacity-50" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
               </svg>
@@ -368,7 +368,7 @@ export default function OtherOptionsSettings() {
               <button
                 onClick={handleSaveSoundSettings}
                 disabled={saving}
-                className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="w-full bg-[#6262bd] text-white py-3 rounded-sm font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 {saving ? (tc('saving') || 'Saving...') : (t('saveSoundSettings') || 'Save Sound Settings')}
               </button>

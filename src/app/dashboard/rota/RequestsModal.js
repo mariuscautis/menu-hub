@@ -9,16 +9,16 @@ const STATUS_CONFIG = {
   pending:  { label: 'Pending',  bg: 'bg-amber-100 dark:bg-amber-900/30',  text: 'text-amber-700 dark:text-amber-400',  dot: 'bg-amber-500' },
   approved: { label: 'Approved', bg: 'bg-green-100 dark:bg-green-900/30',  text: 'text-green-700 dark:text-green-400',  dot: 'bg-green-500' },
   rejected: { label: 'Rejected', bg: 'bg-red-100 dark:bg-red-900/30',     text: 'text-red-700 dark:text-red-400',     dot: 'bg-red-500'   },
-  cancelled:{ label: 'Cancelled',bg: 'bg-slate-100 dark:bg-slate-700',    text: 'text-slate-600 dark:text-slate-400', dot: 'bg-slate-400' }
+  cancelled:{ label: 'Cancelled',bg: 'bg-zinc-100 dark:bg-zinc-800',    text: 'text-zinc-600 dark:text-zinc-400 dark:text-zinc-400', dot: 'bg-slate-400' }
 };
 
 const LEAVE_CONFIG = {
   annual_holiday:   { emoji: '🏖️', label: 'Annual Holiday',      bg: 'bg-blue-100 text-blue-800'   },
   sick_self_cert:   { emoji: '🤒', label: 'Sick (Self-cert)',    bg: 'bg-orange-100 text-orange-800' },
   sick_medical_cert:{ emoji: '🏥', label: 'Sick (Medical)',      bg: 'bg-red-100 text-red-800'     },
-  unpaid:           { emoji: '💰', label: 'Unpaid Leave',        bg: 'bg-slate-100 text-slate-800' },
+  unpaid:           { emoji: '💰', label: 'Unpaid Leave',        bg: 'bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200' },
   compassionate:    { emoji: '🕊️', label: 'Compassionate',      bg: 'bg-purple-100 text-purple-800'},
-  other:            { emoji: '📋', label: 'Other',               bg: 'bg-slate-100 text-slate-800' }
+  other:            { emoji: '📋', label: 'Other',               bg: 'bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200' }
 };
 
 export default function RequestsModal({ onClose, onRequestUpdated }) {
@@ -137,15 +137,15 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-3xl max-h-[92vh] flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
+      <div className="bg-white dark:bg-zinc-900 rounded-sm w-full max-w-3xl max-h-[92vh] flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b-2 border-slate-100 dark:border-slate-700 flex-shrink-0">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 flex-shrink-0">
           <div>
-            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">{t('title')}</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Shift swaps and cover requests</p>
+            <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{t('title')}</h2>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-0.5">Shift swaps and cover requests</p>
           </div>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 text-xl font-bold transition-colors">×</button>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-sm text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-xl font-bold transition-colors">×</button>
         </div>
 
         {/* Filter tabs */}
@@ -154,10 +154,10 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
             <button
               key={tab.key}
               onClick={() => setFilter(tab.key)}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-1.5 ${
+              className={`px-4 py-2 rounded-sm text-sm font-semibold transition-colors flex items-center gap-1.5 ${
                 filter === tab.key
                   ? 'bg-[#6262bd] text-white'
-                  : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400'
+                  : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-800 dark:text-zinc-400'
               }`}
             >
               {tab.label}
@@ -174,13 +174,13 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
         <div className="overflow-y-auto flex-1 px-6 py-4">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#6262bd] mb-4"></div>
-              <p className="text-slate-500">{t('loadingRequests')}</p>
+              <div className="w-8 h-8 border-2 border-zinc-200 dark:border-zinc-800 border-t-[#6262bd] rounded-full animate-spin mb-4"></div>
+              <p className="text-zinc-500 dark:text-zinc-400">{t('loadingRequests')}</p>
             </div>
           ) : requests.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-slate-400">
+            <div className="flex flex-col items-center justify-center py-16 text-zinc-400 dark:text-zinc-500">
               <div className="text-5xl mb-4">📭</div>
-              <p className="font-medium text-slate-600 dark:text-slate-300">{t('noRequestsFound')}</p>
+              <p className="font-medium text-zinc-600 dark:text-zinc-400 dark:text-zinc-300">{t('noRequestsFound')}</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -190,7 +190,7 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
                 const isExpanded = expandedId === request.id;
 
                 return (
-                  <div key={request.id} className="border-2 border-slate-100 dark:border-slate-700 rounded-xl overflow-hidden hover:border-slate-200 dark:hover:border-slate-600 transition-colors">
+                  <div key={request.id} className="border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 rounded-sm overflow-hidden hover:border-zinc-200 dark:border-zinc-700 dark:hover:border-zinc-600 transition-colors">
                     {/* Card header */}
                     <div
                       className="flex items-center justify-between px-5 py-4 cursor-pointer"
@@ -202,7 +202,7 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-semibold text-slate-800 dark:text-slate-200">{request.staff?.name}</span>
+                            <span className="font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{request.staff?.name}</span>
                             <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 ${sc.bg} ${sc.text}`}>
                               <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`}></span>
                               {sc.label}
@@ -211,7 +211,7 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
                               <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${lc.bg}`}>{lc.emoji} {lc.label}</span>
                             )}
                           </div>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                          <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-0.5">
                             {request.staff?.role} · {t('submitted')} {formatDate(request.created_at)}
                             {request.days_requested && <span className="ml-1 text-[#6262bd] font-medium">· {request.days_requested}d</span>}
                           </p>
@@ -222,50 +222,50 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
                           <>
                             <button
                               onClick={e => { e.stopPropagation(); handleApprove(request); }}
-                              className="px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-xs font-semibold"
+                              className="px-3 py-1.5 bg-green-600 text-white rounded-sm hover:bg-green-700 transition-colors text-xs font-semibold"
                             >✓ {t('approve')}</button>
                             <button
                               onClick={e => { e.stopPropagation(); setSelectedRequest(request); }}
-                              className="px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-xs font-semibold"
+                              className="px-3 py-1.5 bg-red-600 text-white rounded-sm hover:bg-red-700 transition-colors text-xs font-semibold"
                             >✕ {t('reject')}</button>
                           </>
                         )}
                         <button
                           onClick={e => { e.stopPropagation(); handleEdit(request); }}
-                          className="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors text-xs font-semibold"
+                          className="px-3 py-1.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 rounded-sm hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 transition-colors text-xs font-semibold"
                         >✎ {t('edit')}</button>
-                        <span className={`text-slate-400 text-sm transition-transform ${isExpanded ? 'rotate-180' : ''}`}>▾</span>
+                        <span className={`text-zinc-400 dark:text-zinc-500 text-sm transition-transform ${isExpanded ? 'rotate-180' : ''}`}>▾</span>
                       </div>
                     </div>
 
                     {/* Expanded details */}
                     {isExpanded && (
-                      <div className="px-5 pb-4 pt-1 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-700">
+                      <div className="px-5 pb-4 pt-1 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800/50 border-t border-zinc-200 dark:border-zinc-800 dark:border-zinc-700">
                         {request.request_type === 'time_off' && (
                           <div className="grid grid-cols-2 gap-3">
                             <div>
-                              <p className="text-xs text-slate-500 mb-0.5">{t('from')}</p>
-                              <p className="text-sm font-medium text-slate-700 dark:text-slate-300">{formatDate(request.date_from)}</p>
+                              <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-0.5">{t('from')}</p>
+                              <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">{formatDate(request.date_from)}</p>
                             </div>
                             <div>
-                              <p className="text-xs text-slate-500 mb-0.5">{t('to')}</p>
-                              <p className="text-sm font-medium text-slate-700 dark:text-slate-300">{formatDate(request.date_to)}</p>
+                              <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-0.5">{t('to')}</p>
+                              <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">{formatDate(request.date_to)}</p>
                             </div>
                           </div>
                         )}
                         {request.request_type === 'swap' && request.shift && (
-                          <p className="text-sm text-slate-600 dark:text-slate-400">
+                          <p className="text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">
                             <strong>{t('wantsToSwap')}:</strong> {formatDate(request.shift.date)} {request.shift.shift_start}–{request.shift.shift_end}
                             {request.swap_with_staff && <span> → with <strong>{request.swap_with_staff.name}</strong></span>}
                           </p>
                         )}
                         {request.request_type === 'cover' && request.shift && (
-                          <p className="text-sm text-slate-600 dark:text-slate-400">
+                          <p className="text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">
                             <strong>{t('needsCoverFor')}:</strong> {formatDate(request.shift.date)} {request.shift.shift_start}–{request.shift.shift_end}
                           </p>
                         )}
                         {request.reason && (
-                          <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
+                          <p className="text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mt-2">
                             <strong>{t('reason')}:</strong> {request.reason}
                           </p>
                         )}
@@ -292,9 +292,9 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
       {/* Rejection inline modal */}
       {selectedRequest && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4" onClick={() => { setSelectedRequest(null); setRejectionReason(''); }}>
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-md w-full shadow-2xl" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-1">{t('rejectRequestTitle')}</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+          <div className="bg-white dark:bg-zinc-900 rounded-sm p-6 max-w-md w-full shadow-2xl" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-1">{t('rejectRequestTitle')}</h3>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-4">
               Rejecting request from <strong>{selectedRequest.staff?.name}</strong>
             </p>
             <textarea
@@ -303,13 +303,13 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
               rows="3"
               autoFocus
               placeholder={t('rejectionReasonPlaceholder')}
-              className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] resize-none text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 mb-4"
+              className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] resize-none text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 mb-4"
             />
             <div className="flex gap-3">
-              <button onClick={() => { setSelectedRequest(null); setRejectionReason(''); }} className="flex-1 px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+              <button onClick={() => { setSelectedRequest(null); setRejectionReason(''); }} className="flex-1 px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors">
                 {tCommon('cancel')}
               </button>
-              <button onClick={() => handleReject(selectedRequest)} className="flex-1 px-4 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition-colors">
+              <button onClick={() => handleReject(selectedRequest)} className="flex-1 px-4 py-3 bg-red-600 text-white rounded-sm font-semibold hover:bg-red-700 transition-colors">
                 {t('rejectRequestButton')}
               </button>
             </div>
@@ -320,29 +320,29 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
       {/* Edit modal */}
       {editingRequest && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4" onClick={() => setEditingRequest(null)}>
-          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-6 py-5 border-b-2 border-slate-100 dark:border-slate-700">
-              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">{t('editRequestTitle')}</h3>
-              <button onClick={() => setEditingRequest(null)} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 text-xl font-bold">×</button>
+          <div className="bg-white dark:bg-zinc-900 rounded-sm w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-700">
+              <h3 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{t('editRequestTitle')}</h3>
+              <button onClick={() => setEditingRequest(null)} className="w-8 h-8 flex items-center justify-center rounded-sm text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-xl font-bold">×</button>
             </div>
             <div className="px-6 py-5 space-y-4">
-              <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">{editingRequest.staff?.name} <span className="font-normal text-slate-500">({editingRequest.staff?.role})</span></p>
+              <div className="p-3 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 rounded-sm">
+                <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">{editingRequest.staff?.name} <span className="font-normal text-zinc-500 dark:text-zinc-400">({editingRequest.staff?.role})</span></p>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 {[['date_from', t('startDate')], ['date_to', t('endDate')]].map(([name, label]) => (
                   <div key={name}>
-                    <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">{label}</label>
+                    <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mb-1.5">{label}</label>
                     <input type="date" name={name} value={editForm[name]} onChange={e => setEditForm(p => ({ ...p, [name]: e.target.value }))}
-                      className="w-full px-3 py-2.5 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800" />
+                      className="w-full px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800" />
                   </div>
                 ))}
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">{t('leaveTypeLabel')}</label>
+                  <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mb-1.5">{t('leaveTypeLabel')}</label>
                   <select name="leave_type" value={editForm.leave_type} onChange={e => setEditForm(p => ({ ...p, leave_type: e.target.value }))}
-                    className="w-full px-3 py-2.5 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800">
+                    className="w-full px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800">
                     <option value="">{t('selectType')}</option>
                     <option value="annual_holiday">Annual Holiday</option>
                     <option value="sick_self_cert">Sick (Self-cert)</option>
@@ -353,9 +353,9 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">{t('statusLabel')}</label>
+                  <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mb-1.5">{t('statusLabel')}</label>
                   <select name="status" value={editForm.status} onChange={e => setEditForm(p => ({ ...p, status: e.target.value }))}
-                    className="w-full px-3 py-2.5 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800">
+                    className="w-full px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800">
                     <option value="pending">Pending</option>
                     <option value="approved">Approved</option>
                     <option value="rejected">Rejected</option>
@@ -364,21 +364,21 @@ export default function RequestsModal({ onClose, onRequestUpdated }) {
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">{t('reasonLabel')}</label>
+                <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mb-1.5">{t('reasonLabel')}</label>
                 <textarea name="reason" value={editForm.reason} onChange={e => setEditForm(p => ({ ...p, reason: e.target.value }))} rows="2" placeholder={t('reasonPlaceholder')}
-                  className="w-full px-3 py-2.5 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] resize-none text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 placeholder:text-slate-400" />
+                  className="w-full px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] resize-none text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 placeholder:text-zinc-400 dark:text-zinc-500" />
               </div>
               {editForm.status === 'rejected' && (
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">{t('rejectionReasonLabel')}</label>
+                  <label className="block text-xs font-semibold text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mb-1.5">{t('rejectionReasonLabel')}</label>
                   <textarea name="rejection_reason" value={editForm.rejection_reason} onChange={e => setEditForm(p => ({ ...p, rejection_reason: e.target.value }))} rows="2" placeholder={t('rejectionReasonEditPlaceholder')}
-                    className="w-full px-3 py-2.5 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] resize-none text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 placeholder:text-slate-400" />
+                    className="w-full px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] resize-none text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 placeholder:text-zinc-400 dark:text-zinc-500" />
                 </div>
               )}
             </div>
-            <div className="px-6 py-4 border-t-2 border-slate-100 dark:border-slate-700 flex gap-3">
-              <button onClick={() => setEditingRequest(null)} className="flex-1 px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{tCommon('cancel')}</button>
-              <button onClick={handleSaveEdit} className="flex-1 px-4 py-3 bg-[#6262bd] text-white rounded-xl font-semibold hover:bg-[#5252a5] transition-colors">{t('saveChanges')}</button>
+            <div className="px-6 py-4 border-t border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 flex gap-3">
+              <button onClick={() => setEditingRequest(null)} className="flex-1 px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors">{tCommon('cancel')}</button>
+              <button onClick={handleSaveEdit} className="flex-1 px-4 py-3 bg-[#6262bd] text-white rounded-sm font-semibold hover:bg-[#5252a5] transition-colors">{t('saveChanges')}</button>
             </div>
           </div>
         </div>

@@ -326,7 +326,7 @@ export default function PurchasingInvoices() {
   })
 
   if (loading) {
-    return <div className="text-slate-500">{t('loading')}</div>
+    return <div className="text-zinc-500 dark:text-zinc-400">{t('loading')}</div>
   }
 
   return (
@@ -335,15 +335,15 @@ export default function PurchasingInvoices() {
       <PageTabs tabs={stockNavTabs} />
       <div className="flex flex-wrap justify-between items-start gap-3 mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">
             {t('title')}
             <InfoTooltip text={tg('stock_invoices_desc')} />
           </h1>
-          <p className="text-slate-500">{t('subtitle')}</p>
+          <p className="text-zinc-500 dark:text-zinc-400">{t('subtitle')}</p>
         </div>
         <button
           onClick={() => openInvoiceModal()}
-          className="bg-[#6262bd] text-white px-5 py-2.5 rounded-xl font-medium hover:bg-[#5252a3] flex items-center gap-2 flex-shrink-0"
+          className="bg-[#6262bd] text-white px-5 py-2.5 rounded-sm font-medium hover:bg-[#5252a3] flex items-center gap-2 flex-shrink-0"
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
@@ -356,7 +356,7 @@ export default function PurchasingInvoices() {
       <div className="mb-6 flex flex-wrap gap-4 items-end">
         {/* Search Bar */}
         <div className="relative flex-1 min-w-[250px] max-w-md">
-          <svg className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
@@ -364,7 +364,7 @@ export default function PurchasingInvoices() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t('searchPlaceholder')}
-            className="w-full pl-12 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+            className="w-full pl-12 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
           />
         </div>
 
@@ -373,7 +373,7 @@ export default function PurchasingInvoices() {
           <select
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
-            className="px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 bg-white"
+            className="px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-900"
           >
             <option value="all">{t('allDates')}</option>
             <option value="today">{t('today')}</option>
@@ -389,15 +389,15 @@ export default function PurchasingInvoices() {
                 type="date"
                 value={customStartDate}
                 onChange={(e) => setCustomStartDate(e.target.value)}
-                className="px-3 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                className="px-3 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                 placeholder={t('startDate')}
               />
-              <span className="text-slate-400">-</span>
+              <span className="text-zinc-400 dark:text-zinc-500">-</span>
               <input
                 type="date"
                 value={customEndDate}
                 onChange={(e) => setCustomEndDate(e.target.value)}
-                className="px-3 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                className="px-3 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                 placeholder={t('endDate')}
               />
             </div>
@@ -407,13 +407,13 @@ export default function PurchasingInvoices() {
 
       {/* Invoices List */}
       {filteredInvoices.length === 0 ? (
-        <div className="bg-white border-2 border-slate-100 rounded-2xl p-12 text-center">
-          <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-12 text-center">
+          <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-zinc-400 dark:text-zinc-500" fill="currentColor" viewBox="0 0 24 24">
               <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
             </svg>
           </div>
-          <p className="text-slate-500 mb-4">{t('noInvoicesYet')}</p>
+          <p className="text-zinc-500 dark:text-zinc-400 mb-4">{t('noInvoicesYet')}</p>
           <button
             onClick={() => openInvoiceModal()}
             className="text-[#6262bd] font-medium hover:underline"
@@ -426,15 +426,15 @@ export default function PurchasingInvoices() {
           {filteredInvoices.map((invoice) => (
             <div
               key={invoice.id}
-              className="bg-white border-2 border-slate-100 rounded-2xl p-4 sm:p-6 flex flex-wrap justify-between items-start gap-3"
+              className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4 sm:p-6 flex flex-wrap justify-between items-start gap-3"
             >
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2 mb-2">
-                  <h3 className="text-lg font-semibold text-slate-800">
+                  <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">
                     {invoice.reference_number}
                   </h3>
                   {invoice.supplier_name && (
-                    <span className="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-full font-medium">
+                    <span className="px-2 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 text-xs rounded-full font-medium">
                       {invoice.supplier_name}
                     </span>
                   )}
@@ -444,7 +444,7 @@ export default function PurchasingInvoices() {
                     </span>
                   )}
                 </div>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-600">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-zinc-600 dark:text-zinc-400">
                   <span>
                     {t('invoiceDate')}: <strong>{new Date(invoice.invoice_date).toLocaleDateString()}</strong>
                   </span>
@@ -466,13 +466,13 @@ export default function PurchasingInvoices() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => viewInvoiceDetails(invoice)}
-                  className="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl font-medium hover:bg-blue-100"
+                  className="px-4 py-2 bg-blue-50 text-blue-600 rounded-sm font-medium hover:bg-blue-100"
                 >
                   {t('viewDetails')}
                 </button>
                 <button
                   onClick={() => openInvoiceModal(invoice)}
-                  className="p-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  className="p-2 rounded-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:bg-zinc-700"
                 >
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
@@ -480,7 +480,7 @@ export default function PurchasingInvoices() {
                 </button>
                 <button
                   onClick={() => deleteInvoice(invoice.id)}
-                  className="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100"
+                  className="p-2 rounded-sm bg-red-50 text-red-500 hover:bg-red-100"
                 >
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
@@ -499,17 +499,17 @@ export default function PurchasingInvoices() {
           onClick={() => setShowInvoiceModal(false)}
         >
           <div
-            className="bg-white rounded-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            className="bg-white dark:bg-zinc-900 rounded-sm p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold text-slate-800 mb-6">
+            <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 mb-6">
               {editingInvoice ? t('editInvoice') : t('createInvoice')}
             </h2>
 
             <form onSubmit={handleInvoiceSubmit} className="space-y-5">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                     {t('referenceNumber')} *
                   </label>
                   <input
@@ -517,13 +517,13 @@ export default function PurchasingInvoices() {
                     value={invoiceForm.reference_number}
                     onChange={(e) => setInvoiceForm({ ...invoiceForm, reference_number: e.target.value })}
                     required
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                     placeholder={t('referenceNumberPlaceholder')}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                     {t('invoiceDate')} *
                   </label>
                   <input
@@ -531,38 +531,38 @@ export default function PurchasingInvoices() {
                     value={invoiceForm.invoice_date}
                     onChange={(e) => setInvoiceForm({ ...invoiceForm, invoice_date: e.target.value })}
                     required
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                     {t('supplierName')}
                   </label>
                   <input
                     type="text"
                     value={invoiceForm.supplier_name}
                     onChange={(e) => setInvoiceForm({ ...invoiceForm, supplier_name: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                     placeholder={t('supplierNamePlaceholder')}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                     {t('totalAmount')}
                   </label>
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-medium">{currencySymbol}</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400 font-medium">{currencySymbol}</span>
                     <input
                       type="number"
                       step="0.01"
                       min="0"
                       value={invoiceForm.total_amount}
                       onChange={(e) => setInvoiceForm({ ...invoiceForm, total_amount: e.target.value })}
-                      className="w-full pl-8 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                      className="w-full pl-8 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                       placeholder="0.00"
                     />
                   </div>
@@ -571,10 +571,10 @@ export default function PurchasingInvoices() {
 
               {/* Image Upload */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   {t('invoiceImages')}
                 </label>
-                <div className="border-2 border-dashed border-slate-200 rounded-xl p-4">
+                <div className="border-2 border-dashed border-zinc-200 dark:border-zinc-700 rounded-sm p-4">
                   {imagePreviews.length > 0 && (
                     <div className="grid grid-cols-4 gap-3 mb-4">
                       {imagePreviews.map((preview, index) => (
@@ -582,7 +582,7 @@ export default function PurchasingInvoices() {
                           <img
                             src={preview}
                             alt={`Preview ${index + 1}`}
-                            className="w-full h-24 object-cover rounded-lg"
+                            className="w-full h-24 object-cover rounded-sm"
                           />
                           <button
                             type="button"
@@ -598,10 +598,10 @@ export default function PurchasingInvoices() {
                     </div>
                   )}
                   <label className="flex flex-col items-center cursor-pointer">
-                    <svg className="w-8 h-8 text-slate-400 mb-2" fill="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-8 h-8 text-zinc-400 dark:text-zinc-500 mb-2" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M19 7v2.99s-1.99.01-2 0V7h-3s.01-1.99 0-2h3V2h2v3h3v2h-3zm-3 4V8h-3V5H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-8h-3zM5 19l3-4 2 3 3-4 4 5H5z"/>
                     </svg>
-                    <span className="text-sm text-slate-500">{t('uploadImages')}</span>
+                    <span className="text-sm text-zinc-500 dark:text-zinc-400">{t('uploadImages')}</span>
                     <input
                       type="file"
                       accept="image/*"
@@ -610,19 +610,19 @@ export default function PurchasingInvoices() {
                       className="hidden"
                     />
                   </label>
-                  <p className="text-xs text-slate-400 text-center mt-2">{t('imagesHelp')}</p>
+                  <p className="text-xs text-zinc-400 dark:text-zinc-500 text-center mt-2">{t('imagesHelp')}</p>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   {t('notes')}
                 </label>
                 <textarea
                   value={invoiceForm.notes}
                   onChange={(e) => setInvoiceForm({ ...invoiceForm, notes: e.target.value })}
                   rows={3}
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 resize-none"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 resize-none"
                   placeholder={t('notesPlaceholder')}
                 />
               </div>
@@ -631,14 +631,14 @@ export default function PurchasingInvoices() {
                 <button
                   type="button"
                   onClick={() => setShowInvoiceModal(false)}
-                  className="flex-1 border-2 border-slate-200 text-slate-600 py-3 rounded-xl font-medium hover:bg-slate-50"
+                  className="flex-1 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900"
                 >
                   {t('cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={uploading}
-                  className="flex-1 bg-[#6262bd] text-white py-3 rounded-xl font-medium hover:bg-[#5252a3] disabled:opacity-50"
+                  className="flex-1 bg-[#6262bd] text-white py-3 rounded-sm font-medium hover:bg-[#5252a3] disabled:opacity-50"
                 >
                   {uploading ? 'Uploading...' : (editingInvoice ? t('saveInvoice') : t('createInvoice'))}
                 </button>
@@ -655,48 +655,48 @@ export default function PurchasingInvoices() {
           onClick={() => setShowDetailModal(false)}
         >
           <div
-            className="bg-white rounded-2xl p-8 w-full max-w-3xl max-h-[90vh] overflow-y-auto"
+            className="bg-white dark:bg-zinc-900 rounded-sm p-8 w-full max-w-3xl max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-start mb-6">
               <div>
-                <h2 className="text-xl font-bold text-slate-800">{t('invoiceDetails')}</h2>
-                <p className="text-slate-500">{viewingInvoice.reference_number}</p>
+                <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200">{t('invoiceDetails')}</h2>
+                <p className="text-zinc-500 dark:text-zinc-400">{viewingInvoice.reference_number}</p>
               </div>
               <button
                 onClick={() => setShowDetailModal(false)}
-                className="p-2 hover:bg-slate-100 rounded-lg"
+                className="p-2 hover:bg-zinc-100 dark:bg-zinc-800 rounded-sm"
               >
-                <svg className="w-5 h-5 text-slate-500" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-zinc-500 dark:text-zinc-400" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
                 </svg>
               </button>
             </div>
 
             {/* Invoice Info */}
-            <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-slate-50 rounded-xl">
+            <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-sm">
               <div>
-                <p className="text-sm text-slate-500">{t('supplier')}</p>
-                <p className="font-medium text-slate-800">{viewingInvoice.supplier_name || '-'}</p>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400">{t('supplier')}</p>
+                <p className="font-medium text-zinc-800 dark:text-zinc-200">{viewingInvoice.supplier_name || '-'}</p>
               </div>
               <div>
-                <p className="text-sm text-slate-500">{t('invoiceDate')}</p>
-                <p className="font-medium text-slate-800">{new Date(viewingInvoice.invoice_date).toLocaleDateString()}</p>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400">{t('invoiceDate')}</p>
+                <p className="font-medium text-zinc-800 dark:text-zinc-200">{new Date(viewingInvoice.invoice_date).toLocaleDateString()}</p>
               </div>
               <div>
-                <p className="text-sm text-slate-500">{t('amount')}</p>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400">{t('amount')}</p>
                 <p className="font-medium text-green-600">
                   {viewingInvoice.total_amount ? formatCurrency(parseFloat(viewingInvoice.total_amount)) : '-'}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-slate-500">{t('createdBy')}</p>
-                <p className="font-medium text-slate-800">{viewingInvoice.created_by_email}</p>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400">{t('createdBy')}</p>
+                <p className="font-medium text-zinc-800 dark:text-zinc-200">{viewingInvoice.created_by_email}</p>
               </div>
               {viewingInvoice.notes && (
                 <div className="col-span-2">
-                  <p className="text-sm text-slate-500">{t('notes')}</p>
-                  <p className="font-medium text-slate-800">{viewingInvoice.notes}</p>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">{t('notes')}</p>
+                  <p className="font-medium text-zinc-800 dark:text-zinc-200">{viewingInvoice.notes}</p>
                 </div>
               )}
             </div>
@@ -704,7 +704,7 @@ export default function PurchasingInvoices() {
             {/* Images */}
             {viewingInvoice.image_urls?.length > 0 && (
               <div className="mb-6">
-                <h3 className="text-sm font-medium text-slate-700 mb-3">{t('images')}</h3>
+                <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-3">{t('images')}</h3>
                 <div className="grid grid-cols-3 gap-3">
                   {viewingInvoice.image_urls.map((url, index) => (
                     <a
@@ -717,37 +717,37 @@ export default function PurchasingInvoices() {
                       <img
                         src={url}
                         alt={`Invoice image ${index + 1}`}
-                        className="w-full h-32 object-cover rounded-lg hover:opacity-80 transition-opacity cursor-pointer"
+                        className="w-full h-32 object-cover rounded-sm hover:opacity-80 transition-opacity cursor-pointer"
                       />
                     </a>
                   ))}
                 </div>
-                <p className="text-xs text-slate-400 mt-2">{t('clickToEnlarge')}</p>
+                <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-2">{t('clickToEnlarge')}</p>
               </div>
             )}
 
             {/* Linked Items */}
             <div>
-              <h3 className="text-sm font-medium text-slate-700 mb-3">{t('linkedItems')}</h3>
+              <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-3">{t('linkedItems')}</h3>
               {linkedItems.length === 0 ? (
-                <div className="text-center py-8 bg-slate-50 rounded-xl">
-                  <p className="text-slate-500">{t('noLinkedItems')}</p>
+                <div className="text-center py-8 bg-zinc-50 dark:bg-zinc-900 rounded-sm">
+                  <p className="text-zinc-500 dark:text-zinc-400">{t('noLinkedItems')}</p>
                 </div>
               ) : (
-                <div className="border-2 border-slate-100 rounded-xl overflow-hidden">
+                <div className="border border-zinc-200 dark:border-zinc-800 rounded-sm overflow-hidden">
                   <table className="w-full">
-                    <thead className="bg-slate-50">
+                    <thead className="bg-zinc-50 dark:bg-zinc-900">
                       <tr>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-slate-700">{t('type')}</th>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-slate-700">{t('item')}</th>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-slate-700">{t('quantity')}</th>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-slate-700">{t('price')}</th>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-slate-700">{t('date')}</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-zinc-700 dark:text-zinc-300">{t('type')}</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-zinc-700 dark:text-zinc-300">{t('item')}</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-zinc-700 dark:text-zinc-300">{t('quantity')}</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-zinc-700 dark:text-zinc-300">{t('price')}</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-zinc-700 dark:text-zinc-300">{t('date')}</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
                       {linkedItems.map((item) => (
-                        <tr key={`${item.type}-${item.id}`} className="hover:bg-slate-50">
+                        <tr key={`${item.type}-${item.id}`} className="hover:bg-zinc-50 dark:bg-zinc-900">
                           <td className="px-4 py-3">
                             <span className={`px-2 py-1 text-xs rounded-full font-medium ${
                               item.type === 'food'
@@ -758,18 +758,18 @@ export default function PurchasingInvoices() {
                             </span>
                           </td>
                           <td className="px-4 py-3">
-                            <div className="font-medium text-slate-800">{item.productName}</div>
+                            <div className="font-medium text-zinc-800 dark:text-zinc-200">{item.productName}</div>
                             {item.productBrand && (
-                              <div className="text-xs text-slate-500">{item.productBrand}</div>
+                              <div className="text-xs text-zinc-500 dark:text-zinc-400">{item.productBrand}</div>
                             )}
                           </td>
-                          <td className="px-4 py-3 text-slate-700">
+                          <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">
                             {item.quantity} {item.unit_used || 'units'}
                           </td>
-                          <td className="px-4 py-3 text-slate-700">
+                          <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">
                             {item.purchase_price ? formatCurrency(parseFloat(item.purchase_price)) : '-'}
                           </td>
-                          <td className="px-4 py-3 text-slate-500 text-sm">
+                          <td className="px-4 py-3 text-zinc-500 dark:text-zinc-400 text-sm">
                             {new Date(item.created_at).toLocaleDateString()}
                           </td>
                         </tr>

@@ -176,20 +176,20 @@ export default function ReportLoss() {
 
   const selectedStock = stockProducts.find(p => p.id === stockForm.stock_product_id)
 
-  if (loading) return <div className="text-slate-500">{t('loading')}</div>
+  if (loading) return <div className="text-zinc-500 dark:text-zinc-400">{t('loading')}</div>
   if (!restaurant) return <div className="text-red-600">{t('noRestaurant')}</div>
 
   return (
     <OfflinePageGuard>
     <div className="max-w-lg mx-auto">
       <div className="mb-8 text-center">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200 flex items-center justify-center gap-2">
+        <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 flex items-center justify-center gap-2">
           {t('title')}
           <InfoTooltip text={tg('report_loss_desc')} />
         </h1>
-        <p className="text-slate-500 dark:text-slate-400">{t('subtitle')}</p>
+        <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('subtitle')}</p>
         {staffDepartment && (
-          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+          <p className="text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mt-1">
             {t('department')}: <span className={`font-semibold ${
               staffDepartment === 'bar' ? 'text-orange-600' :
               staffDepartment === 'kitchen' ? 'text-green-600' : 'text-[#6262bd]'
@@ -202,7 +202,7 @@ export default function ReportLoss() {
       </div>
 
       {message && (
-        <div className={`mb-6 p-4 rounded-xl border-2 ${
+        <div className={`mb-6 p-4 rounded-sm border-2 ${
           message.type === 'success' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-700'
         }`}>
           {message.text}
@@ -213,50 +213,50 @@ export default function ReportLoss() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
         <button
           onClick={() => { setLossType('menu'); setMessage(null) }}
-          className={`group flex flex-col items-center text-center gap-3 rounded-2xl border-2 p-5 transition-all ${
+          className={`group flex flex-col items-center text-center gap-3 rounded-sm border-2 p-5 transition-all ${
             lossType === 'menu'
               ? 'bg-[#6262bd] border-[#6262bd] text-white shadow-lg shadow-[#6262bd]/20'
-              : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 hover:border-[#6262bd] dark:hover:border-[#6262bd] hover:shadow-md'
+              : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 hover:border-[#6262bd] dark:hover:border-[#6262bd] hover:shadow-md'
           }`}
         >
-          <div className={`p-3 rounded-xl transition-transform group-hover:scale-110 ${lossType === 'menu' ? 'bg-white/20' : 'bg-amber-50 dark:bg-amber-900/30'}`}>
+          <div className={`p-3 rounded-sm transition-transform group-hover:scale-110 ${lossType === 'menu' ? 'bg-white/20' : 'bg-amber-50 dark:bg-amber-900/30'}`}>
             <svg className={`w-7 h-7 ${lossType === 'menu' ? 'text-white' : 'text-amber-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
             </svg>
           </div>
           <div>
-            <p className={`font-semibold text-sm ${lossType === 'menu' ? 'text-white' : 'text-slate-800 dark:text-slate-200'}`}>{t('menuItemLossTitle')}</p>
-            <p className={`text-xs mt-0.5 ${lossType === 'menu' ? 'text-white/75' : 'text-slate-500 dark:text-slate-400'}`}>{t('menuItemLossDesc')}</p>
+            <p className={`font-semibold text-sm ${lossType === 'menu' ? 'text-white' : 'text-zinc-800 dark:text-zinc-200 dark:text-zinc-200'}`}>{t('menuItemLossTitle')}</p>
+            <p className={`text-xs mt-0.5 ${lossType === 'menu' ? 'text-white/75' : 'text-zinc-500 dark:text-zinc-400 dark:text-zinc-400'}`}>{t('menuItemLossDesc')}</p>
           </div>
         </button>
 
         <button
           onClick={() => { setLossType('stock'); setMessage(null) }}
-          className={`group flex flex-col items-center text-center gap-3 rounded-2xl border-2 p-5 transition-all ${
+          className={`group flex flex-col items-center text-center gap-3 rounded-sm border-2 p-5 transition-all ${
             lossType === 'stock'
               ? 'bg-[#6262bd] border-[#6262bd] text-white shadow-lg shadow-[#6262bd]/20'
-              : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 hover:border-[#6262bd] dark:hover:border-[#6262bd] hover:shadow-md'
+              : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 hover:border-[#6262bd] dark:hover:border-[#6262bd] hover:shadow-md'
           }`}
         >
-          <div className={`p-3 rounded-xl transition-transform group-hover:scale-110 ${lossType === 'stock' ? 'bg-white/20' : 'bg-red-50 dark:bg-red-900/30'}`}>
+          <div className={`p-3 rounded-sm transition-transform group-hover:scale-110 ${lossType === 'stock' ? 'bg-white/20' : 'bg-red-50 dark:bg-red-900/30'}`}>
             <svg className={`w-7 h-7 ${lossType === 'stock' ? 'text-white' : 'text-red-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
             </svg>
           </div>
           <div>
-            <p className={`font-semibold text-sm ${lossType === 'stock' ? 'text-white' : 'text-slate-800 dark:text-slate-200'}`}>{t('stockItemLossTitle')}</p>
-            <p className={`text-xs mt-0.5 ${lossType === 'stock' ? 'text-white/75' : 'text-slate-500 dark:text-slate-400'}`}>{t('stockItemLossDesc')}</p>
+            <p className={`font-semibold text-sm ${lossType === 'stock' ? 'text-white' : 'text-zinc-800 dark:text-zinc-200 dark:text-zinc-200'}`}>{t('stockItemLossTitle')}</p>
+            <p className={`text-xs mt-0.5 ${lossType === 'stock' ? 'text-white/75' : 'text-zinc-500 dark:text-zinc-400 dark:text-zinc-400'}`}>{t('stockItemLossDesc')}</p>
           </div>
         </button>
       </div>
 
-      {lossType && <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6">
+      {lossType && <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6">
 
         {/* ── MENU ITEM LOSS ── */}
         {lossType === 'menu' && (
           <form onSubmit={handleMenuSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
                 {t('menuItemLabel')} {t('menuItemRequired')}
               </label>
               <div className="relative menu-dropdown-container">
@@ -274,11 +274,11 @@ export default function ReportLoss() {
                   onChange={(e) => { setMenuItemSearch(e.target.value); setShowMenuDropdown(true); if (menuForm.menu_item_id) setMenuForm({ ...menuForm, menu_item_id: '' }) }}
                   onFocus={() => setMenuItemSearch('')}
                   placeholder={t('menuItemPlaceholder')}
-                  className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800"
                   required
                 />
                 {showMenuDropdown && (
-                  <div className="absolute z-10 w-full mt-1 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                  <div className="absolute z-10 w-full mt-1 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm shadow-lg max-h-60 overflow-y-auto">
                     {(() => {
                       const filtered = menuItems.filter(i => !menuItemSearch || i.name.toLowerCase().includes(menuItemSearch.toLowerCase()))
                       return filtered.length > 0 ? filtered.map(item => {
@@ -290,49 +290,49 @@ export default function ReportLoss() {
                             {!hasRecipe && <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded">{t('noRecipeBadge')}</span>}
                           </div>
                         )
-                      }) : <div className="px-4 py-2 text-slate-400 text-sm">{t('noItemsFound')}</div>
+                      }) : <div className="px-4 py-2 text-zinc-400 dark:text-zinc-500 text-sm">{t('noItemsFound')}</div>
                     })()}
                   </div>
                 )}
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t('helpTextRecipe')}</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-1">{t('helpTextRecipe')}</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
                 {t('quantityLabel')} {t('quantityRequired')}
               </label>
               <div className="flex items-center gap-3">
                 <button type="button" onClick={() => setMenuForm({ ...menuForm, quantity: Math.max(1, menuForm.quantity - 1) })}
-                  className="w-12 h-12 flex items-center justify-center border-2 border-slate-200 dark:border-slate-700 rounded-xl hover:border-[#6262bd] hover:bg-[#6262bd] hover:text-white transition-all text-slate-700 dark:text-slate-300 font-bold text-xl">−</button>
+                  className="w-12 h-12 flex items-center justify-center border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm hover:border-[#6262bd] hover:bg-[#6262bd] hover:text-white transition-all text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 font-bold text-xl">−</button>
                 <input type="number" value={menuForm.quantity} onChange={e => setMenuForm({ ...menuForm, quantity: parseInt(e.target.value) || 1 })} min="1"
-                  className="w-24 px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 text-center font-semibold" />
+                  className="w-24 px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 text-center font-semibold" />
                 <button type="button" onClick={() => setMenuForm({ ...menuForm, quantity: menuForm.quantity + 1 })}
-                  className="w-12 h-12 flex items-center justify-center border-2 border-slate-200 dark:border-slate-700 rounded-xl hover:border-[#6262bd] hover:bg-[#6262bd] hover:text-white transition-all text-slate-700 dark:text-slate-300 font-bold text-xl">+</button>
+                  className="w-12 h-12 flex items-center justify-center border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm hover:border-[#6262bd] hover:bg-[#6262bd] hover:text-white transition-all text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 font-bold text-xl">+</button>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t('quantityHelp')}</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-1">{t('quantityHelp')}</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
                 {t('reasonLabel')} {t('reasonRequired')}
               </label>
               <select value={menuForm.reason} onChange={e => setMenuForm({ ...menuForm, reason: e.target.value })} required
-                className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800">
+                className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800">
                 <option value="">{t('reasonPlaceholder')}</option>
                 {reasons.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
               </select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('notesLabel')}</label>
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">{t('notesLabel')}</label>
               <textarea value={menuForm.notes} onChange={e => setMenuForm({ ...menuForm, notes: e.target.value })} rows={3}
-                className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 resize-none"
+                className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 resize-none"
                 placeholder={t('notesPlaceholder')} />
             </div>
 
             <button type="submit" disabled={submitting}
-              className="w-full bg-red-600 text-white py-3 rounded-xl font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+              className="w-full bg-red-600 text-white py-3 rounded-sm font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
               {submitting ? t('submitting') : t('submitButton')}
             </button>
           </form>
@@ -342,7 +342,7 @@ export default function ReportLoss() {
         {lossType === 'stock' && (
           <form onSubmit={handleStockSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
                 {t('stockItemLabel')} {t('menuItemRequired')}
               </label>
               <div className="relative stock-dropdown-container">
@@ -355,11 +355,11 @@ export default function ReportLoss() {
                   onChange={e => { setStockSearch(e.target.value); setShowStockDropdown(true); if (stockForm.stock_product_id) setStockForm({ ...stockForm, stock_product_id: '' }) }}
                   onFocus={() => setStockSearch('')}
                   placeholder={t('stockItemPlaceholder')}
-                  className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800"
                   required
                 />
                 {showStockDropdown && (
-                  <div className="absolute z-10 w-full mt-1 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                  <div className="absolute z-10 w-full mt-1 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm shadow-lg max-h-60 overflow-y-auto">
                     {(() => {
                       const filtered = stockProducts.filter(p => !stockSearch || p.name.toLowerCase().includes(stockSearch.toLowerCase()) || (p.brand || '').toLowerCase().includes(stockSearch.toLowerCase()))
                       return filtered.length > 0 ? filtered.map(p => (
@@ -368,20 +368,20 @@ export default function ReportLoss() {
                           <span>{p.name}{p.brand ? <span className="opacity-60"> — {p.brand}</span> : ''}</span>
                           <span className="text-xs opacity-70 ml-2">{p.category} · {p.input_unit_type}</span>
                         </div>
-                      )) : <div className="px-4 py-2 text-slate-400 text-sm">{t('noStockItemsFound')}</div>
+                      )) : <div className="px-4 py-2 text-zinc-400 dark:text-zinc-500 text-sm">{t('noStockItemsFound')}</div>
                     })()}
                   </div>
                 )}
               </div>
               {selectedStock && (
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-1">
                   {t('currentStock')}: <strong>{(selectedStock.current_stock / (selectedStock.units_to_base_multiplier || 1)).toFixed(2)} {selectedStock.input_unit_type}</strong>
                 </p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
                 {t('quantityToRemove')} {t('menuItemRequired')}
               </label>
               <div className="relative">
@@ -393,10 +393,10 @@ export default function ReportLoss() {
                   step="0.01"
                   required
                   placeholder="0"
-                  className="w-full px-4 py-3 pr-20 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800"
+                  className="w-full px-4 py-3 pr-20 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800"
                 />
                 {selectedStock && (
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 font-medium text-sm">
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 font-medium text-sm">
                     {selectedStock.input_unit_type}
                   </span>
                 )}
@@ -404,32 +404,32 @@ export default function ReportLoss() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
                 {t('reasonLabel')} {t('reasonRequired')}
               </label>
               <select value={stockForm.reason} onChange={e => setStockForm({ ...stockForm, reason: e.target.value })} required
-                className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800">
+                className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800">
                 <option value="">{t('reasonPlaceholder')}</option>
                 {reasons.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
               </select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{t('notesLabel')}</label>
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">{t('notesLabel')}</label>
               <textarea value={stockForm.notes} onChange={e => setStockForm({ ...stockForm, notes: e.target.value })} rows={3}
-                className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 resize-none"
+                className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 resize-none"
                 placeholder={t('notesPlaceholder')} />
             </div>
 
             <button type="submit" disabled={submitting}
-              className="w-full bg-red-600 text-white py-3 rounded-xl font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+              className="w-full bg-red-600 text-white py-3 rounded-sm font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
               {submitting ? t('submitting') : t('submitStockButton')}
             </button>
           </form>
         )}
 
         {/* Info Box */}
-        <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-100 dark:border-blue-800 rounded-2xl p-6">
+        <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-100 dark:border-blue-800 rounded-sm p-6">
           <div className="flex gap-3">
             <svg className="w-6 h-6 text-blue-600 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>

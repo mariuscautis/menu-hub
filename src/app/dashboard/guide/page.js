@@ -67,10 +67,10 @@ const FLOWS = [
 
 function FlowCard({ flow, t }) {
   return (
-    <div className={`bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-700 rounded-2xl p-6`}>
+    <div className={`bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 rounded-sm p-6`}>
       {/* Card header */}
       <div className="flex items-center gap-3 mb-6">
-        <div className={`${flow.bg} ${flow.color} p-2.5 rounded-xl`}>
+        <div className={`${flow.bg} ${flow.color} p-2.5 rounded-sm`}>
           {flow.icon}
         </div>
         <h2 className={`text-lg font-bold ${flow.color}`}>{t(flow.titleKey)}</h2>
@@ -86,7 +86,7 @@ function FlowCard({ flow, t }) {
                 {idx + 1}
               </div>
               {/* Step text */}
-              <p className="text-sm text-slate-700 dark:text-slate-300 pt-1 leading-snug">{t(stepKey)}</p>
+              <p className="text-sm text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 pt-1 leading-snug">{t(stepKey)}</p>
             </div>
             {/* Arrow connector between steps */}
             {idx < flow.steps.length - 1 && (
@@ -103,14 +103,14 @@ export default function GuidePage() {
   const t = useTranslations('guidePage')
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-4 md:p-8">
+    <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-5xl mx-auto">
         {/* Page header */}
         <div className="mb-10 text-center">
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-2">
+          <h1 className="text-2xl md:text-3xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-2">
             {t('title')}
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
+          <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 max-w-xl mx-auto">
             {t('subtitle')}
           </p>
         </div>

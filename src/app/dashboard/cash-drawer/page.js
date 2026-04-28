@@ -344,7 +344,7 @@ export default function CashDrawerPage() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-8">
+      <div className="min-h-screen p-8">
         <div className="flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6262bd]"></div>
         </div>
@@ -355,22 +355,22 @@ export default function CashDrawerPage() {
   // No restaurant found
   if (!restaurant) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-8">
-        <p className="text-slate-600 dark:text-slate-400">{t('noRestaurant') || 'No restaurant found'}</p>
+      <div className="min-h-screen p-8">
+        <p className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{t('noRestaurant') || 'No restaurant found'}</p>
       </div>
     );
   }
 
   return (
     <OfflinePageGuard>
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-4 md:p-8">
+    <div className="min-h-screen p-4 md:p-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-2 flex items-center gap-2">
+        <h1 className="text-2xl md:text-3xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-2 flex items-center gap-2">
           {t('title') || 'Cash Drawer'}
           <InfoTooltip text={tg('cash_drawer_desc')} />
         </h1>
-        <p className="text-slate-600 dark:text-slate-400">
+        <p className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">
           {t('subtitle') || 'Manage cash drawer sessions and track variance'}
         </p>
       </div>
@@ -379,17 +379,17 @@ export default function CashDrawerPage() {
       <div className="mb-8">
         {currentSession ? (
           // Active Session View
-          <div className="bg-white dark:bg-slate-900 border-2 border-green-200 dark:border-green-800 rounded-2xl p-6">
+          <div className="bg-white dark:bg-zinc-900 border-2 border-green-200 dark:border-green-800 rounded-sm p-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">
+                <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                   {t('drawerOpen') || 'Drawer Open'}
                 </h2>
               </div>
               <button
                 onClick={() => setShowCloseModal(true)}
-                className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white font-medium rounded-xl transition-colors"
+                className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white font-medium rounded-sm transition-colors"
               >
                 {t('closeDrawer') || 'Close Drawer'}
               </button>
@@ -397,31 +397,31 @@ export default function CashDrawerPage() {
 
             {/* Session Info */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4">
-                <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+              <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 rounded-sm p-4">
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-1">
                   {t('openedBy') || 'Opened By'}
                 </p>
-                <p className="font-semibold text-slate-800 dark:text-slate-200">
+                <p className="font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                   {currentSession.opened_by_name}
                 </p>
               </div>
-              <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4">
-                <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+              <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 rounded-sm p-4">
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-1">
                   {t('openedAt') || 'Opened At'}
                 </p>
-                <p className="font-semibold text-slate-800 dark:text-slate-200">
+                <p className="font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                   {formatDateTime(currentSession.opened_at)}
                 </p>
               </div>
-              <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4">
-                <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+              <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 rounded-sm p-4">
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-1">
                   {t('openingAmount') || 'Opening Amount'}
                 </p>
-                <p className="font-semibold text-slate-800 dark:text-slate-200">
+                <p className="font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                   {formatCurrency(currentSession.opening_amount)}
                 </p>
               </div>
-              <div className="bg-green-50 dark:bg-green-900/30 rounded-xl p-4">
+              <div className="bg-green-50 dark:bg-green-900/30 rounded-sm p-4">
                 <p className="text-sm text-green-600 dark:text-green-400 mb-1">
                   {t('expectedAmount') || 'Expected Amount'}
                 </p>
@@ -432,30 +432,30 @@ export default function CashDrawerPage() {
             </div>
 
             {/* Cash Breakdown */}
-            <div className="border-t border-slate-100 dark:border-slate-800 pt-6">
-              <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-4">
+            <div className="border-t border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 pt-6">
+              <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4">
                 {t('cashBreakdown') || 'Cash Breakdown'}
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                  <span className="text-slate-600 dark:text-slate-400">{t('openingFloat') || 'Opening Float'}</span>
-                  <span className="font-semibold text-slate-800 dark:text-slate-200">
+                <div className="flex justify-between items-center p-3 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 rounded-sm">
+                  <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{t('openingFloat') || 'Opening Float'}</span>
+                  <span className="font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                     {formatCurrency(currentSession.opening_amount)}
                   </span>
                 </div>
-                <div className="flex justify-between items-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div className="flex justify-between items-center p-3 bg-green-50 dark:bg-green-900/20 rounded-sm">
                   <span className="text-green-600 dark:text-green-400">{t('cashSales') || 'Cash Sales'}</span>
                   <span className="font-semibold text-green-600 dark:text-green-400">
                     +{formatCurrency(sessionStats.cashSales)}
                   </span>
                 </div>
-                <div className="flex justify-between items-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <div className="flex justify-between items-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-sm">
                   <span className="text-blue-600 dark:text-blue-400">{t('cashTips') || 'Cash Tips'}</span>
                   <span className="font-semibold text-blue-600 dark:text-blue-400">
                     +{formatCurrency(sessionStats.cashTips)}
                   </span>
                 </div>
-                <div className="flex justify-between items-center p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <div className="flex justify-between items-center p-3 bg-red-50 dark:bg-red-900/20 rounded-sm">
                   <span className="text-red-600 dark:text-red-400">{t('cashRefunds') || 'Cash Refunds'}</span>
                   <span className="font-semibold text-red-600 dark:text-red-400">
                     -{formatCurrency(sessionStats.cashRefunds)}
@@ -466,21 +466,21 @@ export default function CashDrawerPage() {
           </div>
         ) : (
           // No Active Session - Open Drawer Prompt
-          <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-8 text-center">
-            <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-8 text-center">
+            <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
             </div>
-            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-2">
+            <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-2">
               {t('noActiveSession') || 'No Active Session'}
             </h2>
-            <p className="text-slate-600 dark:text-slate-400 mb-6">
+            <p className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mb-6">
               {t('noActiveSessionDesc') || 'Start a new cash drawer session to begin tracking cash transactions.'}
             </p>
             <button
               onClick={() => setShowOpenModal(true)}
-              className="px-8 py-4 bg-[#6262bd] hover:bg-[#5252ad] text-white font-semibold rounded-xl transition-colors"
+              className="px-8 py-4 bg-[#6262bd] hover:bg-[#5252ad] text-white font-semibold rounded-sm transition-colors"
             >
               {t('openDrawer') || 'Open Cash Drawer'}
             </button>
@@ -489,14 +489,14 @@ export default function CashDrawerPage() {
       </div>
 
       {/* Session History */}
-      <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6">
-        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-6">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6">
+        <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-6">
           {t('sessionHistory') || 'Session History'}
         </h2>
 
         {sessionHistory.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-slate-500 dark:text-slate-400">
+            <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">
               {t('noHistory') || 'No previous sessions found'}
             </p>
           </div>
@@ -504,26 +504,26 @@ export default function CashDrawerPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b-2 border-slate-100 dark:border-slate-800">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-700 dark:text-slate-300">
+                <tr className="border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-800">
+                  <th className="text-left py-3 px-4 text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">
                     {t('date') || 'Date'}
                   </th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-700 dark:text-slate-300">
+                  <th className="text-left py-3 px-4 text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">
                     {t('openedBy') || 'Opened By'}
                   </th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-slate-700 dark:text-slate-300">
+                  <th className="text-right py-3 px-4 text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">
                     {t('opening') || 'Opening'}
                   </th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-slate-700 dark:text-slate-300">
+                  <th className="text-right py-3 px-4 text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">
                     {t('expected') || 'Expected'}
                   </th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-slate-700 dark:text-slate-300">
+                  <th className="text-right py-3 px-4 text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">
                     {t('actual') || 'Actual'}
                   </th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-slate-700 dark:text-slate-300">
+                  <th className="text-right py-3 px-4 text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">
                     {t('variance') || 'Variance'}
                   </th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-700 dark:text-slate-300">
+                  <th className="text-left py-3 px-4 text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">
                     {t('duration') || 'Duration'}
                   </th>
                 </tr>
@@ -535,29 +535,29 @@ export default function CashDrawerPage() {
                     ? 'text-green-600 dark:text-green-400'
                     : variance < 0
                       ? 'text-red-600 dark:text-red-400'
-                      : 'text-slate-600 dark:text-slate-400';
+                      : 'text-zinc-600 dark:text-zinc-400 dark:text-zinc-400';
 
                   return (
-                    <tr key={session.id} className="border-b border-slate-50 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                      <td className="py-3 px-4 text-sm text-slate-800 dark:text-slate-200">
+                    <tr key={session.id} className="border-b border-zinc-100 dark:border-zinc-800/50 dark:border-zinc-800 hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800/50">
+                      <td className="py-3 px-4 text-sm text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                         {formatDate(session.opened_at)}
                       </td>
-                      <td className="py-3 px-4 text-sm text-slate-600 dark:text-slate-400">
+                      <td className="py-3 px-4 text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">
                         {session.opened_by_name}
                       </td>
-                      <td className="py-3 px-4 text-sm text-slate-800 dark:text-slate-200 text-right">
+                      <td className="py-3 px-4 text-sm text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 text-right">
                         {formatCurrency(session.opening_amount)}
                       </td>
-                      <td className="py-3 px-4 text-sm text-slate-800 dark:text-slate-200 text-right">
+                      <td className="py-3 px-4 text-sm text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 text-right">
                         {formatCurrency(session.expected_amount)}
                       </td>
-                      <td className="py-3 px-4 text-sm text-slate-800 dark:text-slate-200 text-right">
+                      <td className="py-3 px-4 text-sm text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 text-right">
                         {formatCurrency(session.closing_amount)}
                       </td>
                       <td className={`py-3 px-4 text-sm font-semibold text-right ${varianceClass}`}>
                         {variance > 0 ? '+' : ''}{formatCurrency(variance)}
                       </td>
-                      <td className="py-3 px-4 text-sm text-slate-600 dark:text-slate-400">
+                      <td className="py-3 px-4 text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">
                         {formatDuration(session.opened_at, session.closed_at)}
                       </td>
                     </tr>
@@ -572,33 +572,33 @@ export default function CashDrawerPage() {
       {/* Open Drawer Modal */}
       {showOpenModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-md w-full">
-            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-4">
+          <div className="bg-white dark:bg-zinc-900 rounded-sm p-6 max-w-md w-full">
+            <h3 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4">
               {t('openDrawer') || 'Open Cash Drawer'}
             </h3>
 
-            <p className="text-slate-600 dark:text-slate-400 mb-6">
+            <p className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mb-6">
               {t('openDrawerDesc') || 'Enter the opening float amount to start a new cash drawer session.'}
             </p>
 
             <div className="mb-6">
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
                 {t('openingAmount') || 'Opening Amount'} *
               </label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">{currencySymbol}</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400">{currencySymbol}</span>
                 <input
                   type="number"
                   step="0.01"
                   min="0"
                   value={openingAmount}
                   onChange={(e) => setOpeningAmount(e.target.value)}
-                  className="w-full pl-8 pr-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-[#6262bd]"
+                  className="w-full pl-8 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 focus:outline-none focus:border-[#6262bd]"
                   placeholder="0.00"
                   autoFocus
                 />
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-2">
                 {t('openingAmountHint') || 'Count the cash in the drawer and enter the total'}
               </p>
             </div>
@@ -609,14 +609,14 @@ export default function CashDrawerPage() {
                   setShowOpenModal(false);
                   setOpeningAmount('');
                 }}
-                className="flex-1 px-4 py-3 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                className="flex-1 px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors"
               >
                 {t('cancel') || 'Cancel'}
               </button>
               <button
                 onClick={handleOpenDrawer}
                 disabled={isSubmitting || !openingAmount}
-                className="flex-1 px-4 py-3 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252ad] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-3 bg-[#6262bd] text-white rounded-sm hover:bg-[#5252ad] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (t('opening') || 'Opening...') : (t('openDrawerBtn') || 'Open Drawer')}
               </button>
@@ -628,20 +628,20 @@ export default function CashDrawerPage() {
       {/* Close Drawer Modal */}
       {showCloseModal && currentSession && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-md w-full">
-            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-4">
+          <div className="bg-white dark:bg-zinc-900 rounded-sm p-6 max-w-md w-full">
+            <h3 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4">
               {t('closeDrawer') || 'Close Cash Drawer'}
             </h3>
 
             {/* Expected Amount Display */}
-            <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 mb-6">
-              <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+            <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 rounded-sm p-4 mb-6">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-1">
                 {t('expectedAmount') || 'Expected Amount'}
               </p>
               <p className="text-2xl font-bold text-[#6262bd]">
                 {formatCurrency(sessionStats.expectedAmount)}
               </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-2">
                 {t('expectedBreakdown') || 'Opening'}: {formatCurrency(currentSession.opening_amount)} +
                 {t('sales') || 'Sales'}: {formatCurrency(sessionStats.cashSales)} +
                 {t('tips') || 'Tips'}: {formatCurrency(sessionStats.cashTips)} -
@@ -650,18 +650,18 @@ export default function CashDrawerPage() {
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
                 {t('countedAmount') || 'Counted Amount'} *
               </label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">{currencySymbol}</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400">{currencySymbol}</span>
                 <input
                   type="number"
                   step="0.01"
                   min="0"
                   value={closingAmount}
                   onChange={(e) => setClosingAmount(e.target.value)}
-                  className="w-full pl-8 pr-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-[#6262bd]"
+                  className="w-full pl-8 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 focus:outline-none focus:border-[#6262bd]"
                   placeholder="0.00"
                   autoFocus
                 />
@@ -669,12 +669,12 @@ export default function CashDrawerPage() {
 
               {/* Live variance display */}
               {closingAmount && (
-                <div className={`mt-3 p-3 rounded-lg ${
+                <div className={`mt-3 p-3 rounded-sm ${
                   parseFloat(closingAmount) - sessionStats.expectedAmount > 0
                     ? 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400'
                     : parseFloat(closingAmount) - sessionStats.expectedAmount < 0
                       ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                      : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                      : 'bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 dark:text-zinc-400'
                 }`}>
                   <span className="font-medium">{t('variance') || 'Variance'}: </span>
                   <span className="font-bold">
@@ -693,13 +693,13 @@ export default function CashDrawerPage() {
             </div>
 
             <div className="mb-6">
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
                 {t('notes') || 'Notes'} ({t('optional') || 'optional'})
               </label>
               <textarea
                 value={closeNotes}
                 onChange={(e) => setCloseNotes(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-[#6262bd] resize-none"
+                className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 focus:outline-none focus:border-[#6262bd] resize-none"
                 rows={2}
                 placeholder={t('notesPlaceholder') || 'Add any notes about variance...'}
               />
@@ -712,14 +712,14 @@ export default function CashDrawerPage() {
                   setClosingAmount('');
                   setCloseNotes('');
                 }}
-                className="flex-1 px-4 py-3 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                className="flex-1 px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors"
               >
                 {t('cancel') || 'Cancel'}
               </button>
               <button
                 onClick={handleCloseDrawer}
                 disabled={isSubmitting || !closingAmount}
-                className="flex-1 px-4 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-3 bg-red-500 text-white rounded-sm hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (t('closing') || 'Closing...') : (t('closeDrawerBtn') || 'Close Drawer')}
               </button>

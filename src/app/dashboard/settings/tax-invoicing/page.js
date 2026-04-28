@@ -91,7 +91,7 @@ export default function TaxInvoicing() {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-4 sm:p-8">
-        <div className="text-slate-500">{t('loading')}</div>
+        <div className="text-zinc-500 dark:text-zinc-400">{t('loading')}</div>
       </div>
     )
   }
@@ -99,7 +99,7 @@ export default function TaxInvoicing() {
   if (!restaurant) {
     return (
       <div className="p-4 sm:p-8">
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-600">
+        <div className="bg-red-50 border border-red-200 rounded-sm p-4 text-red-600">
           {t('accessError')}
         </div>
       </div>
@@ -111,12 +111,12 @@ export default function TaxInvoicing() {
     <div>
       <PageTabs tabs={settingsTabs} />
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">{t('pageTitle')}<InfoTooltip text={tg('tax_invoicing_desc')} /></h1>
-        <p className="text-slate-500">{t('pageSubtitle')}</p>
+        <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">{t('pageTitle')}<InfoTooltip text={tg('tax_invoicing_desc')} /></h1>
+        <p className="text-zinc-500 dark:text-zinc-400">{t('pageSubtitle')}</p>
       </div>
 
       {message && (
-        <div className={`mb-6 p-4 rounded-xl border ${
+        <div className={`mb-6 p-4 rounded-sm border ${
           message.type === 'success'
             ? 'bg-green-50 border-green-200 text-green-600'
             : 'bg-red-50 border-red-200 text-red-600'
@@ -126,12 +126,12 @@ export default function TaxInvoicing() {
       )}
 
       {/* Invoice Settings Section */}
-      <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-6">
         <div className="mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold text-slate-700 mb-2">{t('sectionTitle')}</h2>
-              <p className="text-sm text-slate-500">
+              <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-2">{t('sectionTitle')}</h2>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400">
                 {t('sectionDescription')}
               </p>
             </div>
@@ -142,8 +142,8 @@ export default function TaxInvoicing() {
                 onChange={(e) => setInvoiceSettings({ ...invoiceSettings, enabled: e.target.checked })}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#6262bd]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#6262bd]"></div>
-              <span className="ml-3 text-sm font-medium text-slate-700">
+              <div className="w-11 h-6 bg-zinc-200 dark:bg-zinc-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#6262bd]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 dark:border-zinc-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#6262bd]"></div>
+              <span className="ml-3 text-sm font-medium text-zinc-700 dark:text-zinc-300">
                 {invoiceSettings.enabled ? t('enabled') : t('disabled')}
               </span>
             </label>
@@ -151,7 +151,7 @@ export default function TaxInvoicing() {
         </div>
 
         {invoiceSettings.enabled && (
-          <div className="space-y-6 border-t border-slate-100 pt-6">
+          <div className="space-y-6 border-t border-zinc-200 dark:border-zinc-800 pt-6">
             {/* Template Selector */}
             <TemplateSelector
               selectedTemplate={invoiceSettings.template}
@@ -161,7 +161,7 @@ export default function TaxInvoicing() {
             {/* Business Tax Information */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   {t('vatNumber')}
                 </label>
                 <input
@@ -169,11 +169,11 @@ export default function TaxInvoicing() {
                   value={invoiceSettings.vat_number}
                   onChange={(e) => setInvoiceSettings({ ...invoiceSettings, vat_number: e.target.value })}
                   placeholder={t('vatNumberPlaceholder')}
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   {t('taxId')}
                 </label>
                 <input
@@ -181,11 +181,11 @@ export default function TaxInvoicing() {
                   value={invoiceSettings.tax_id}
                   onChange={(e) => setInvoiceSettings({ ...invoiceSettings, tax_id: e.target.value })}
                   placeholder={t('taxIdPlaceholder')}
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   {t('companyRegistration')}
                 </label>
                 <input
@@ -193,7 +193,7 @@ export default function TaxInvoicing() {
                   value={invoiceSettings.company_registration}
                   onChange={(e) => setInvoiceSettings({ ...invoiceSettings, company_registration: e.target.value })}
                   placeholder={t('companyRegistrationPlaceholder')}
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                 />
               </div>
             </div>
@@ -201,7 +201,7 @@ export default function TaxInvoicing() {
             {/* Invoice Number Format */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   {t('invoicePrefix')}
                 </label>
                 <input
@@ -209,11 +209,11 @@ export default function TaxInvoicing() {
                   value={invoiceSettings.invoice_prefix}
                   onChange={(e) => setInvoiceSettings({ ...invoiceSettings, invoice_prefix: e.target.value })}
                   placeholder={t('invoicePrefixPlaceholder')}
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   {t('invoiceFormat')}
                 </label>
                 <input
@@ -221,9 +221,9 @@ export default function TaxInvoicing() {
                   value={invoiceSettings.invoice_format}
                   onChange={(e) => setInvoiceSettings({ ...invoiceSettings, invoice_format: e.target.value })}
                   placeholder={t('invoiceFormatPlaceholder')}
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                 />
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                   {t('invoiceFormatHelp')}
                 </p>
               </div>
@@ -232,13 +232,13 @@ export default function TaxInvoicing() {
             {/* Currency and Locale */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   {t('currency')}
                 </label>
                 <select
                   value={invoiceSettings.currency}
                   onChange={(e) => setInvoiceSettings({ ...invoiceSettings, currency: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                 >
                   <option value="EUR">EUR (€)</option>
                   <option value="USD">USD ($)</option>
@@ -250,13 +250,13 @@ export default function TaxInvoicing() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   {t('locale')}
                 </label>
                 <select
                   value={invoiceSettings.locale}
                   onChange={(e) => setInvoiceSettings({ ...invoiceSettings, locale: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                 >
                   <option value="en-GB">English (DD/MM/YYYY)</option>
                   <option value="en-US">English US (MM/DD/YYYY)</option>
@@ -270,7 +270,7 @@ export default function TaxInvoicing() {
 
             {/* Footer Text */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                 {t('footerText')}
               </label>
               <textarea
@@ -278,25 +278,25 @@ export default function TaxInvoicing() {
                 onChange={(e) => setInvoiceSettings({ ...invoiceSettings, footer_text: e.target.value })}
                 placeholder={t('footerTextPlaceholder')}
                 rows={3}
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
               />
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                 {t('footerTextHelp')}
               </p>
             </div>
 
             {/* Additional Options */}
-            <div className="space-y-3 p-4 bg-slate-50 rounded-xl">
+            <div className="space-y-3 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-sm">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={invoiceSettings.reset_yearly}
                   onChange={(e) => setInvoiceSettings({ ...invoiceSettings, reset_yearly: e.target.checked })}
-                  className="w-5 h-5 rounded border-slate-300 text-[#6262bd] focus:ring-[#6262bd]"
+                  className="w-5 h-5 rounded border-zinc-300 dark:border-zinc-600 text-[#6262bd] focus:ring-[#6262bd]"
                 />
                 <div>
-                  <div className="text-sm font-medium text-slate-700">{t('resetYearlyTitle')}</div>
-                  <div className="text-xs text-slate-500">{t('resetYearlyDescription')}</div>
+                  <div className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{t('resetYearlyTitle')}</div>
+                  <div className="text-xs text-zinc-500 dark:text-zinc-400">{t('resetYearlyDescription')}</div>
                 </div>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
@@ -304,11 +304,11 @@ export default function TaxInvoicing() {
                   type="checkbox"
                   checked={invoiceSettings.require_sequential}
                   onChange={(e) => setInvoiceSettings({ ...invoiceSettings, require_sequential: e.target.checked })}
-                  className="w-5 h-5 rounded border-slate-300 text-[#6262bd] focus:ring-[#6262bd]"
+                  className="w-5 h-5 rounded border-zinc-300 dark:border-zinc-600 text-[#6262bd] focus:ring-[#6262bd]"
                 />
                 <div>
-                  <div className="text-sm font-medium text-slate-700">{t('requireSequentialTitle')}</div>
-                  <div className="text-xs text-slate-500">{t('requireSequentialDescription')}</div>
+                  <div className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{t('requireSequentialTitle')}</div>
+                  <div className="text-xs text-zinc-500 dark:text-zinc-400">{t('requireSequentialDescription')}</div>
                 </div>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
@@ -316,11 +316,11 @@ export default function TaxInvoicing() {
                   type="checkbox"
                   checked={invoiceSettings.require_customer_vat}
                   onChange={(e) => setInvoiceSettings({ ...invoiceSettings, require_customer_vat: e.target.checked })}
-                  className="w-5 h-5 rounded border-slate-300 text-[#6262bd] focus:ring-[#6262bd]"
+                  className="w-5 h-5 rounded border-zinc-300 dark:border-zinc-600 text-[#6262bd] focus:ring-[#6262bd]"
                 />
                 <div>
-                  <div className="text-sm font-medium text-slate-700">{t('requireCustomerVatTitle')}</div>
-                  <div className="text-xs text-slate-500">{t('requireCustomerVatDescription')}</div>
+                  <div className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{t('requireCustomerVatTitle')}</div>
+                  <div className="text-xs text-zinc-500 dark:text-zinc-400">{t('requireCustomerVatDescription')}</div>
                 </div>
               </label>
             </div>
@@ -330,7 +330,7 @@ export default function TaxInvoicing() {
               <button
                 onClick={handleSaveInvoiceSettings}
                 disabled={savingInvoiceSettings}
-                className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="w-full bg-[#6262bd] text-white py-3 rounded-sm font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 {savingInvoiceSettings ? t('saving') : t('saveButton')}
               </button>

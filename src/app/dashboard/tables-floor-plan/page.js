@@ -39,8 +39,8 @@ function FloorPlanTable({ table, orderInfo, reservations, waiterCalls, onClick, 
   const shapeClass = table.shape === 'circle'
     ? 'rounded-full'
     : table.shape === 'square'
-    ? 'rounded-lg'
-    : 'rounded-xl'
+    ? 'rounded-sm'
+    : 'rounded-sm'
 
   const statusColor = needsCleaning
     ? 'bg-red-100 dark:bg-red-900/30 border-red-400 dark:border-red-500'
@@ -175,12 +175,12 @@ function FloorPlanTable({ table, orderInfo, reservations, waiterCalls, onClick, 
         <div className={`font-bold ${
           needsCleaning
             ? 'text-red-800 dark:text-red-200'
-            : 'text-slate-800 dark:text-slate-200'
+            : 'text-zinc-800 dark:text-zinc-200 dark:text-zinc-200'
         }`}>T{table.table_number}</div>
         <div className={`text-xs ${
           needsCleaning
             ? 'text-red-600 dark:text-red-300'
-            : 'text-slate-600 dark:text-slate-400'
+            : 'text-zinc-600 dark:text-zinc-400 dark:text-zinc-400'
         }`}>{table.capacity} seats</div>
         {hasOpenOrders && !needsCleaning && (
           <div className="text-xs font-medium text-amber-700 dark:text-amber-300 mt-1">
@@ -229,7 +229,7 @@ function FloorPlanElement({ element }) {
   return (
     <div
       style={style}
-      className="rounded-lg border-2 border-slate-400 dark:border-slate-500 flex items-center justify-center text-3xl select-none text-slate-700 dark:text-slate-200"
+      className="rounded-sm border-2 border-zinc-400 dark:border-zinc-100 dark:border-zinc-800/500 flex items-center justify-center text-3xl select-none text-zinc-700 dark:text-zinc-300"
     >
       <span>{getElementIcon()}</span>
       {element.label && (
@@ -2704,7 +2704,7 @@ export default function StaffFloorPlanPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-slate-600 dark:text-slate-400">Loading floor plan...</div>
+        <div className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">Loading floor plan...</div>
       </div>
     )
   }
@@ -2713,8 +2713,8 @@ export default function StaffFloorPlanPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <p className="text-slate-600 dark:text-slate-400 mb-4">No floor plan available yet</p>
-          <p className="text-sm text-slate-500 dark:text-slate-500">Ask your manager to set up the floor plan</p>
+          <p className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mb-4">No floor plan available yet</p>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-500">Ask your manager to set up the floor plan</p>
         </div>
       </div>
     )
@@ -2722,18 +2722,18 @@ export default function StaffFloorPlanPage() {
 
   return (
     <OfflinePageGuard>
-    <div className="flex flex-col h-screen bg-slate-100 dark:bg-slate-950">
+    <div className="flex flex-col h-screen bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-950">
       {/* Header */}
-      <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shrink-0">
+      <div className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700 dark:border-zinc-800 shrink-0">
         <div className="flex items-center justify-between px-4 py-3 gap-4">
           <div className="min-w-0">
-            <h1 className="text-xl font-bold text-slate-800 dark:text-slate-200 leading-tight">Floor Plan</h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{restaurant?.name}</p>
+            <h1 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 leading-tight">Floor Plan</h1>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 truncate">{restaurant?.name}</p>
           </div>
 
           {/* Floor picker — always visible, pill style */}
           {floors.length > 0 && (
-            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-xl p-1 overflow-x-auto shrink-0 max-w-xs">
+            <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 rounded-sm p-1 overflow-x-auto shrink-0 max-w-xs">
               {floors.map(floor => (
                 <button
                   key={floor.id}
@@ -2742,10 +2742,10 @@ export default function StaffFloorPlanPage() {
                     loadFloorData(floor.id, restaurant.id)
                     setSelectedTable(null)
                   }}
-                  className={`px-4 py-1.5 text-sm font-medium rounded-lg whitespace-nowrap transition-all ${
+                  className={`px-4 py-1.5 text-sm font-medium rounded-sm whitespace-nowrap transition-all ${
                     currentFloor?.id === floor.id
-                      ? 'bg-white dark:bg-slate-700 text-[#6262bd] shadow-sm'
-                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                      ? 'bg-white dark:bg-zinc-700 text-[#6262bd] shadow-sm'
+                      : 'text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 hover:text-zinc-700 dark:text-zinc-300 dark:hover:text-zinc-200'
                   }`}
                 >
                   {floor.name}
@@ -2755,20 +2755,20 @@ export default function StaffFloorPlanPage() {
           )}
 
           {/* Zoom controls */}
-          <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-xl p-1 shrink-0">
+          <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 rounded-sm p-1 shrink-0">
             <button
               onClick={() => adjustZoom(-0.1)}
-              className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-700 hover:bg-white dark:hover:bg-slate-700 transition-all font-bold text-lg"
+              className="w-8 h-8 flex items-center justify-center rounded-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:text-zinc-300 hover:bg-white dark:bg-zinc-900 dark:hover:bg-zinc-700 transition-all font-bold text-lg"
               title="Zoom out"
             >−</button>
             <button
               onClick={fitToScreen}
-              className="px-2 h-8 text-xs font-semibold text-slate-500 hover:text-slate-700 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-all min-w-[44px]"
+              className="px-2 h-8 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:text-zinc-300 hover:bg-white dark:bg-zinc-900 dark:hover:bg-zinc-700 rounded-sm transition-all min-w-[44px]"
               title="Fit to screen"
             >{Math.round(zoom * 100)}%</button>
             <button
               onClick={() => adjustZoom(0.1)}
-              className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-700 hover:bg-white dark:hover:bg-slate-700 transition-all font-bold text-lg"
+              className="w-8 h-8 flex items-center justify-center rounded-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:text-zinc-300 hover:bg-white dark:bg-zinc-900 dark:hover:bg-zinc-700 transition-all font-bold text-lg"
               title="Zoom in"
             >+</button>
           </div>
@@ -2783,7 +2783,7 @@ export default function StaffFloorPlanPage() {
         style={{ padding: `${Math.max(16, 32 * zoom)}px` }}
       >
         {/* Floating legend */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border border-slate-200 dark:border-slate-700 rounded-full px-4 py-2 shadow-md text-xs text-slate-600 dark:text-slate-400 pointer-events-none">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-full px-4 py-2 shadow-md text-xs text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 pointer-events-none">
           <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-green-400 inline-block"></span>Available</span>
           <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-amber-400 inline-block"></span>Has orders</span>
           <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-red-400 inline-block"></span>Needs cleaning</span>
@@ -2801,7 +2801,7 @@ export default function StaffFloorPlanPage() {
             marginRight: canvasWidth * (zoom - 1),
             marginBottom: canvasHeight * (zoom - 1),
           }}
-          className="shadow-2xl rounded-2xl border-2 border-slate-200 dark:border-slate-700"
+          className="shadow-2xl rounded-sm border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700"
         >
           {/* Decorative Elements */}
           {elements.map((element) => (
@@ -2832,35 +2832,35 @@ export default function StaffFloorPlanPage() {
           onClick={() => setSelectedTable(null)}
         >
           <div
-            className="bg-white dark:bg-slate-800 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl animate-zoom-in"
+            className="bg-white dark:bg-zinc-800 rounded-sm p-6 max-w-md w-full mx-4 shadow-2xl animate-zoom-in"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">
+              <h2 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                 {t('tableDetailsModal.title')?.replace('{tableNumber}', selectedTable.table_number) || `Table ${selectedTable.table_number}`}
               </h2>
               <button
                 onClick={() => setSelectedTable(null)}
-                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 transition-colors"
               >
-                <svg className="w-5 h-5 text-slate-600 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-zinc-600 dark:text-zinc-400 dark:text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
 
             {/* Table Info */}
-            <div className="space-y-3 mb-6 p-4 bg-slate-50 dark:bg-slate-900 rounded-xl">
+            <div className="space-y-3 mb-6 p-4 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-900 rounded-sm">
               
               <div className="flex justify-between text-sm">
-                <span className="text-slate-600 dark:text-slate-400">{t('tableDetailsModal.activeOrders') || 'Active Orders:'}</span>
-                <span className="font-semibold text-slate-800 dark:text-slate-200">
+                <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{t('tableDetailsModal.activeOrders') || 'Active Orders:'}</span>
+                <span className="font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                   {tableOrderInfo[selectedTable.id]?.count || 0}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-slate-600 dark:text-slate-400">{t('tableDetailsModal.status') || 'Status:'}</span>
+                <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{t('tableDetailsModal.status') || 'Status:'}</span>
                 <span className={`font-semibold ${
                   tableOrderInfo[selectedTable.id]?.count > 0
                     ? 'text-amber-600 dark:text-amber-400'
@@ -2875,21 +2875,21 @@ export default function StaffFloorPlanPage() {
             <div className="space-y-3 mb-6">
               <button
                 onClick={handleNewOrder}
-                className="w-full px-4 py-3 bg-primary hover:bg-primary-hover text-white rounded-xl font-medium transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full px-4 py-3 bg-primary hover:bg-primary-hover text-white rounded-sm font-medium transition-all hover:scale-[1.02] active:scale-[0.98]"
               >
                 {tableOrderInfo[selectedTable.id]?.count > 0 ? (t('updateOrder') || 'Update Order') : (t('placeOrder') || 'Place Order')}
               </button>
 
               <button
                 onClick={handlePayBill}
-                className="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-sm font-medium transition-all hover:scale-[1.02] active:scale-[0.98]"
               >
                 {t('payBill') || 'Pay Bill'}
               </button>
 
               <button
                 onClick={handleCreateReservation}
-                className="w-full px-4 py-3 border-2 border-primary text-primary hover:bg-primary/5 dark:hover:bg-primary/10 rounded-xl font-medium transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                className="w-full px-4 py-3 border-2 border-primary text-primary hover:bg-primary/5 dark:hover:bg-primary/10 rounded-sm font-medium transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM12 13h5v5h-5z"/>
@@ -2901,13 +2901,13 @@ export default function StaffFloorPlanPage() {
                 <>
                   <button
                     onClick={handleViewOrders}
-                    className="w-full px-4 py-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-xl font-medium transition-all hover:scale-[1.02] active:scale-[0.98]"
+                    className="w-full px-4 py-3 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm font-medium transition-all hover:scale-[1.02] active:scale-[0.98]"
                   >
                     {t('tableDetailsModal.viewAllOrders')?.replace('{count}', tableOrderInfo[selectedTable.id]?.count) || `View All Orders (${tableOrderInfo[selectedTable.id]?.count})`}
                   </button>
                   <button
                     onClick={() => setShowTransferModal(true)}
-                    className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 rounded-xl font-medium transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 rounded-sm font-medium transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
                   >
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/>
@@ -2921,7 +2921,7 @@ export default function StaffFloorPlanPage() {
             {/* Active Orders List */}
             {tableOrderInfo[selectedTable.id]?.count > 0 && (
               <div>
-                <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-3 text-sm uppercase tracking-wide">
+                <h3 className="font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-3 text-sm uppercase tracking-wide">
                   {t('tableDetailsModal.activeOrdersTitle') || 'Active Orders'}
                 </h3>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
@@ -2930,10 +2930,10 @@ export default function StaffFloorPlanPage() {
                     .map(order => (
                       <div
                         key={order.id}
-                        className="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        className="p-4 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-900 rounded-sm hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-800 transition-colors"
                       >
                         <div className="flex justify-between items-start mb-2">
-                          <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                          <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                             {t('tableDetailsModal.orderNumber')?.replace('{id}', order.id.slice(0, 8)) || `Order #${order.id.slice(0, 8)}`}
                           </span>
                           <span className={`text-xs px-2 py-1 rounded-full font-medium ${
@@ -2944,7 +2944,7 @@ export default function StaffFloorPlanPage() {
                             {order.status}
                           </span>
                         </div>
-                        <div className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                        <div className="text-sm font-bold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">
                           {formatCurrency(order.total)}
                         </div>
                       </div>
@@ -2963,23 +2963,23 @@ export default function StaffFloorPlanPage() {
           onClick={() => setShowTransferModal(false)}
         >
           <div
-            className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-lg max-h-[80vh] flex flex-col animate-zoom-in"
+            className="bg-white dark:bg-zinc-800 rounded-sm p-6 w-full max-w-lg max-h-[80vh] flex flex-col animate-zoom-in"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">
+              <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                 {t('transferModal.title') || 'Transfer Order'} — Table {selectedTable.table_number}
               </h2>
               <button
                 onClick={() => setShowTransferModal(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 transition-colors"
               >
-                <svg className="w-5 h-5 text-slate-600 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-zinc-600 dark:text-zinc-400 dark:text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-4">
               {t('transferModal.subtitle') || 'Select the table to move this order to. If the destination already has an open order, items will be merged.'}
             </p>
             <div className="overflow-y-auto flex-1 space-y-2">
@@ -2993,27 +2993,27 @@ export default function StaffFloorPlanPage() {
                       key={destTable.id}
                       onClick={() => handleTransfer(destTable)}
                       disabled={transferring}
-                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 text-left transition-colors ${
+                      className={`w-full flex items-center justify-between px-4 py-3 rounded-sm border-2 text-left transition-colors ${
                         transferring
-                          ? 'opacity-50 cursor-not-allowed border-slate-100 bg-slate-50 dark:border-slate-700 dark:bg-slate-900'
+                          ? 'opacity-50 cursor-not-allowed border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 dark:border-zinc-700 dark:bg-zinc-900'
                           : destHasOrders
                           ? 'border-amber-200 bg-amber-50 hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-900/20 dark:hover:bg-amber-900/40'
-                          : 'border-slate-200 bg-white hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600'
+                          : 'border-zinc-200 dark:border-zinc-700 bg-white hover:bg-zinc-50 dark:bg-zinc-900 dark:border-zinc-600 dark:bg-zinc-700 dark:hover:bg-zinc-600'
                       }`}
                     >
                       <div>
-                        <span className="font-semibold text-slate-800 dark:text-slate-200">Table {destTable.table_number}</span>
+                        <span className="font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">Table {destTable.table_number}</span>
                         {destHasOrders ? (
                           <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
                             {t('transferModal.hasExistingOrder') || 'Has existing order'} — {formatCurrency(destInfo.total)}
                           </p>
                         ) : (
-                          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                          <p className="text-xs text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 mt-0.5">
                             {t('transferModal.emptyTable') || 'Empty — order will be moved here'}
                           </p>
                         )}
                       </div>
-                      <svg className="w-5 h-5 text-slate-400 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 text-zinc-400 dark:text-zinc-500 shrink-0" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
                       </svg>
                     </button>
@@ -3035,11 +3035,11 @@ export default function StaffFloorPlanPage() {
           }}
         >
           <div
-            className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-2xl animate-zoom-in max-h-[90vh] overflow-y-auto"
+            className="bg-white dark:bg-zinc-800 rounded-sm p-8 w-full max-w-2xl animate-zoom-in max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">
+              <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                 Reservations - Table {selectedTable.table_number}
               </h2>
               <button
@@ -3048,7 +3048,7 @@ export default function StaffFloorPlanPage() {
                   setSelectedTable(null)
                   setSelectedTableReservations([])
                 }}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                className="text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300"
               >
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -3057,17 +3057,17 @@ export default function StaffFloorPlanPage() {
             </div>
 
             {selectedTableReservations.length === 0 ? (
-              <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-8 text-center">
-                <p className="text-slate-500 dark:text-slate-400">No confirmed reservations for today</p>
+              <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-900 rounded-sm p-8 text-center">
+                <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">No confirmed reservations for today</p>
               </div>
             ) : (
               <div className="space-y-4">
                 {selectedTableReservations.map((reservation) => (
-                  <div key={reservation.id} className="bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-xl p-5">
+                  <div key={reservation.id} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm p-5">
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-bold text-slate-800 dark:text-slate-200">{reservation.customer_name}</h3>
+                          <h3 className="font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{reservation.customer_name}</h3>
                           <span className={`px-2 py-0.5 rounded-md text-xs font-semibold ${
                             reservation.status === 'confirmed'
                               ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200'
@@ -3076,7 +3076,7 @@ export default function StaffFloorPlanPage() {
                             {reservation.status === 'confirmed' ? 'Confirmed' : 'Pending'}
                           </span>
                         </div>
-                        <div className="text-sm text-slate-600 dark:text-slate-400 space-y-1">
+                        <div className="text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 space-y-1">
                           <div className="flex items-center gap-2">
                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                               <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
@@ -3106,7 +3106,7 @@ export default function StaffFloorPlanPage() {
                             </div>
                           )}
                           {reservation.special_requests && (
-                            <div className="mt-2 p-2 bg-slate-50 dark:bg-slate-800 rounded text-xs">
+                            <div className="mt-2 p-2 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 rounded text-xs">
                               <strong>Special requests:</strong> {reservation.special_requests}
                             </div>
                           )}
@@ -3115,18 +3115,18 @@ export default function StaffFloorPlanPage() {
                     </div>
 
                     {/* Action buttons */}
-                    <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                    <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700 dark:border-zinc-700">
                       {reservation.status === 'pending' ? (
                         <div className="flex gap-2">
                           <button
                             onClick={() => confirmReservation(reservation)}
-                            className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+                            className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-sm font-medium transition-colors"
                           >
                             Confirm Reservation
                           </button>
                           <button
                             onClick={() => openCancelReservationModal(reservation)}
-                            className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors"
+                            className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-sm font-medium transition-colors"
                           >
                             Deny
                           </button>
@@ -3134,7 +3134,7 @@ export default function StaffFloorPlanPage() {
                       ) : (
                         <button
                           onClick={() => openCancelReservationModal(reservation)}
-                          className="w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors"
+                          className="w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-sm font-medium transition-colors"
                         >
                           Cancel Reservation
                         </button>
@@ -3158,17 +3158,17 @@ export default function StaffFloorPlanPage() {
           }}
         >
           <div
-            className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md animate-zoom-in"
+            className="bg-white dark:bg-zinc-800 rounded-sm p-8 w-full max-w-md animate-zoom-in"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-6">
+            <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-6">
               {(t('createReservationModal.title') || 'Create Reservation - Table {tableNumber}').replace('{tableNumber}', selectedTable.table_number)}
             </h2>
 
             <form onSubmit={submitReservation} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
                     {t('createReservationModal.date') || 'Date'}
                   </label>
                   <input
@@ -3176,17 +3176,17 @@ export default function StaffFloorPlanPage() {
                     required
                     value={reservationForm.date}
                     onChange={(e) => handleDateChange(e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 dark:bg-slate-700"
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 dark:bg-zinc-700"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
                     {t('createReservationModal.time') || 'Time'}
                   </label>
                   <button
                     type="button"
                     onClick={() => setShowTimeSlotModal(true)}
-                    className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 dark:bg-slate-700 text-left hover:border-[#6262bd] transition-colors"
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 dark:bg-zinc-700 text-left hover:border-[#6262bd] transition-colors"
                   >
                     {reservationForm.time || (t('createReservationModal.selectTime') || 'Select time...')}
                   </button>
@@ -3194,7 +3194,7 @@ export default function StaffFloorPlanPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
                   {t('createReservationModal.partySize') || 'Party Size'}
                 </label>
                 <input
@@ -3204,12 +3204,12 @@ export default function StaffFloorPlanPage() {
                   max="50"
                   value={reservationForm.partySize}
                   onChange={(e) => setReservationForm({ ...reservationForm, partySize: parseInt(e.target.value) })}
-                  className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 dark:bg-slate-700"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 dark:bg-zinc-700"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
                   {t('createReservationModal.customerName') || 'Customer Name'}
                 </label>
                 <input
@@ -3217,13 +3217,13 @@ export default function StaffFloorPlanPage() {
                   required
                   value={reservationForm.customerName}
                   onChange={(e) => setReservationForm({ ...reservationForm, customerName: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 dark:bg-slate-700"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 dark:bg-zinc-700"
                   placeholder="John Doe"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
                   {t('createReservationModal.email') || 'Email'}
                 </label>
                 <input
@@ -3231,32 +3231,32 @@ export default function StaffFloorPlanPage() {
                   required
                   value={reservationForm.customerEmail}
                   onChange={(e) => setReservationForm({ ...reservationForm, customerEmail: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 dark:bg-slate-700"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 dark:bg-zinc-700"
                   placeholder="john@example.com"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
                   {t('createReservationModal.phone') || 'Phone (Optional)'}
                 </label>
                 <input
                   type="tel"
                   value={reservationForm.customerPhone}
                   onChange={(e) => setReservationForm({ ...reservationForm, customerPhone: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 dark:bg-slate-700"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 dark:bg-zinc-700"
                   placeholder="+44 123 456 7890"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
                   {t('createReservationModal.specialRequests') || 'Special Requests (Optional)'}
                 </label>
                 <textarea
                   value={reservationForm.specialRequests}
                   onChange={(e) => setReservationForm({ ...reservationForm, specialRequests: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 dark:bg-slate-700 resize-none"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 dark:bg-zinc-700 resize-none"
                   rows="3"
                   placeholder={t('createReservationModal.specialRequestsPlaceholder') || 'Any dietary restrictions or special requests...'}
                 />
@@ -3269,13 +3269,13 @@ export default function StaffFloorPlanPage() {
                     setShowCreateReservationModal(false)
                     setSelectedTable(null)
                   }}
-                  className="flex-1 border-2 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 py-3 rounded-xl font-medium hover:bg-slate-50 dark:hover:bg-slate-700"
+                  className="flex-1 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-700"
                 >
                   {t('createReservationModal.cancel') || 'Cancel'}
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-[#6262bd] text-white py-3 rounded-xl font-medium hover:bg-[#5252a3]"
+                  className="flex-1 bg-[#6262bd] text-white py-3 rounded-sm font-medium hover:bg-[#5252a3]"
                 >
                   {t('createReservationModal.createReservation') || 'Create Reservation'}
                 </button>
@@ -3292,16 +3292,16 @@ export default function StaffFloorPlanPage() {
           onClick={() => setShowTimeSlotModal(false)}
         >
           <div
-            className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto"
+            className="bg-white dark:bg-zinc-800 rounded-sm p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">
+              <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                 {t('timeSlotModal.title') || 'Select Time Slot'}
               </h2>
               <button
                 onClick={() => setShowTimeSlotModal(false)}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                className="text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300"
               >
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -3315,7 +3315,7 @@ export default function StaffFloorPlanPage() {
               </div>
             ) : (
               <>
-                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mb-4">
                   {(t('timeSlotModal.tableInfo') || 'Table {tableNumber} - {date}').replace('{tableNumber}', selectedTable?.table_number).replace('{date}', new Date(reservationForm.date).toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }))}
                 </p>
 
@@ -3326,12 +3326,12 @@ export default function StaffFloorPlanPage() {
                       type="button"
                       onClick={() => !slot.isBooked && handleTimeSelect(slot.time)}
                       disabled={slot.isBooked}
-                      className={`py-3 px-4 rounded-xl font-medium transition-all ${
+                      className={`py-3 px-4 rounded-sm font-medium transition-all ${
                         slot.isBooked
                           ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 border-2 border-red-200 dark:border-red-800 cursor-not-allowed line-through'
                           : reservationForm.time === slot.time
                           ? 'bg-[#6262bd] text-white border-2 border-[#6262bd]'
-                          : 'border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:border-[#6262bd] hover:bg-[#6262bd]/10 dark:hover:bg-[#6262bd]/20'
+                          : 'border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:border-[#6262bd] hover:bg-[#6262bd]/10 dark:hover:bg-[#6262bd]/20'
                       }`}
                     >
                       {slot.time}
@@ -3339,7 +3339,7 @@ export default function StaffFloorPlanPage() {
                   ))}
                 </div>
 
-                <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
+                <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-sm">
                   <div className="flex items-start gap-3">
                     <svg className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
@@ -3363,9 +3363,9 @@ export default function StaffFloorPlanPage() {
       {/* Payment Modal */}
       {showPaymentModal && selectedTable && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md animate-zoom-in">
+          <div className="bg-white dark:bg-zinc-800 rounded-sm p-8 w-full max-w-md animate-zoom-in">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">
+              <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                 {(t('paymentModal.title') || 'Pay Bill - Table {tableNumber}').replace('{tableNumber}', selectedTable.table_number)}
               </h2>
               <button
@@ -3377,7 +3377,7 @@ export default function StaffFloorPlanPage() {
                   setDiscountAmount(0)
                   setAvailableDiscounts([])
                 }}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                className="text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300"
               >
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -3386,29 +3386,29 @@ export default function StaffFloorPlanPage() {
             </div>
 
             {unpaidOrders.length === 0 ? (
-              <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-8 text-center mb-6">
-                <p className="text-slate-500 dark:text-slate-400">{t('paymentModal.noUnpaidOrders') || 'No unpaid orders for this table'}</p>
+              <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-900 rounded-sm p-8 text-center mb-6">
+                <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('paymentModal.noUnpaidOrders') || 'No unpaid orders for this table'}</p>
               </div>
             ) : (
               <>
                 {/* Order Summary */}
                 <div className="mb-6">
-                  <h3 className="font-semibold text-slate-700 dark:text-slate-300 mb-3">{t('paymentModal.ordersSummary') || 'Orders Summary'}</h3>
-                  <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-4 space-y-3 max-h-64 overflow-y-auto">
+                  <h3 className="font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-3">{t('paymentModal.ordersSummary') || 'Orders Summary'}</h3>
+                  <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-900 rounded-sm p-4 space-y-3 max-h-64 overflow-y-auto">
                     {unpaidOrders.map((order, index) => (
-                      <div key={order.id} className="border-b border-slate-200 dark:border-slate-700 pb-3 last:border-0 last:pb-0">
+                      <div key={order.id} className="border-b border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 pb-3 last:border-0 last:pb-0">
                         <div className="flex justify-between items-start mb-2">
-                          <span className="text-sm font-medium text-slate-600 dark:text-slate-400">{(t('paymentModal.orderNumber') || 'Order #{number}').replace('{number}', index + 1)}</span>
+                          <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{(t('paymentModal.orderNumber') || 'Order #{number}').replace('{number}', index + 1)}</span>
                           <span className="text-sm font-semibold text-primary">{formatCurrency(order.total)}</span>
                         </div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400 space-y-1">
+                        <div className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 space-y-1">
                           {order.order_items?.map((item, idx) => (
                             <div key={idx}>
                               {item.quantity}x {item.name}
                             </div>
                           ))}
                         </div>
-                        <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                        <div className="text-xs text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 mt-1">
                           {t('paymentModal.status') || 'Status:'} <span className="capitalize">{order.status}</span>
                         </div>
                       </div>
@@ -3419,11 +3419,11 @@ export default function StaffFloorPlanPage() {
                 {/* Discount Selector - Show to all staff if discounts are available */}
                 {availableDiscounts.length > 0 && (
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
                       {t('paymentModal.applyDiscount') || 'Apply Discount'}
                     </label>
                     {selectedDiscount?.is_promotion && (
-                      <div className="mb-2 flex items-center gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-lg text-xs text-orange-700 font-medium">
+                      <div className="mb-2 flex items-center gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-sm text-xs text-orange-700 font-medium">
                         <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
                         </svg>
@@ -3433,7 +3433,7 @@ export default function StaffFloorPlanPage() {
                     <select
                       value={selectedDiscount?.id || 'none'}
                       onChange={(e) => handleDiscountChange(e.target.value)}
-                      className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-primary text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800"
+                      className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-primary text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800"
                     >
                       <option value="none">{t('paymentModal.noDiscount') || 'No discount'}</option>
                       {availableDiscounts.map((discount) => (
@@ -3446,11 +3446,11 @@ export default function StaffFloorPlanPage() {
                 )}
 
                 {/* Total with Discount Breakdown */}
-                <div className="bg-primary/10 rounded-xl p-4 mb-6">
+                <div className="bg-primary/10 rounded-sm p-4 mb-6">
                   {/* Subtotal */}
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm text-slate-600 dark:text-slate-400">{t('paymentModal.subtotal') || 'Subtotal'}</span>
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{formatCurrency(calculateTableTotal())}</span>
+                    <span className="text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{t('paymentModal.subtotal') || 'Subtotal'}</span>
+                    <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">{formatCurrency(calculateTableTotal())}</span>
                   </div>
 
                   {/* Discount (if applied) */}
@@ -3469,7 +3469,7 @@ export default function StaffFloorPlanPage() {
 
                   {/* Final Total */}
                   <div className="flex justify-between items-center pt-2 border-t border-primary/20">
-                    <span className="font-semibold text-slate-700 dark:text-slate-300">{t('paymentModal.totalToPay') || 'Total to Pay'}</span>
+                    <span className="font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">{t('paymentModal.totalToPay') || 'Total to Pay'}</span>
                     <span className="text-2xl font-bold text-primary">{formatCurrency(calculateFinalTotal())}</span>
                   </div>
                 </div>
@@ -3478,7 +3478,7 @@ export default function StaffFloorPlanPage() {
                 <div className="space-y-3">
                   <button
                     onClick={() => processPayment('cash')}
-                    className="w-full bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 flex items-center justify-center gap-2"
+                    className="w-full bg-green-600 text-white py-3 rounded-sm font-semibold hover:bg-green-700 flex items-center justify-center gap-2"
                   >
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
@@ -3487,7 +3487,7 @@ export default function StaffFloorPlanPage() {
                   </button>
                   <button
                     onClick={() => processPayment('card')}
-                    className="w-full bg-primary text-white py-3 rounded-xl font-semibold hover:bg-primary-hover flex items-center justify-center gap-2"
+                    className="w-full bg-primary text-white py-3 rounded-sm font-semibold hover:bg-primary-hover flex items-center justify-center gap-2"
                   >
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
@@ -3498,10 +3498,10 @@ export default function StaffFloorPlanPage() {
                   {/* Split Bill Option */}
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-slate-300 dark:border-slate-600"></div>
+                      <div className="w-full border-t border-zinc-300 dark:border-zinc-600 dark:border-zinc-600"></div>
                     </div>
                     <div className="relative flex justify-center text-xs">
-                      <span className="px-2 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400">{t('paymentModal.or') || 'or'}</span>
+                      <span className="px-2 bg-white dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('paymentModal.or') || 'or'}</span>
                     </div>
                   </div>
 
@@ -3562,7 +3562,7 @@ export default function StaffFloorPlanPage() {
                         }
                       }
                     }}
-                    className="w-full bg-slate-600 text-white py-3 rounded-xl font-semibold hover:bg-slate-700 flex items-center justify-center gap-2 border-2 border-slate-400"
+                    className="w-full bg-zinc-600 text-white py-3 rounded-sm font-semibold hover:bg-zinc-700 flex items-center justify-center gap-2 border-2 border-zinc-400"
                   >
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
@@ -3579,9 +3579,9 @@ export default function StaffFloorPlanPage() {
       {/* Split Bill Modal */}
       {showSplitBillModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto animate-zoom-in">
+          <div className="bg-white dark:bg-zinc-800 rounded-sm p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto animate-zoom-in">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">
+              <h2 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                 Split Bill - Table {selectedTable?.table_number}
               </h2>
               <button
@@ -3592,7 +3592,7 @@ export default function StaffFloorPlanPage() {
                   setAvailableItems([])
                   setSplitBillTableId(null)
                 }}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-200"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -3603,25 +3603,25 @@ export default function StaffFloorPlanPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Left Side: Available Items */}
               <div>
-                <div className="bg-slate-50 dark:bg-slate-700 rounded-xl p-4 mb-4">
-                  <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-2">Available Items</h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Click on items to assign them to a bill</p>
+                <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-700 rounded-sm p-4 mb-4">
+                  <h3 className="font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-2">Available Items</h3>
+                  <p className="text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">Click on items to assign them to a bill</p>
                 </div>
 
                 <div className="space-y-2">
                   {availableItems.filter(item => item.quantity > 0).map((item) => (
                     <div
                       key={item.id}
-                      className="bg-white dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl p-4 transition-all"
+                      className="bg-white dark:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm p-4 transition-all"
                     >
                       <div className="flex justify-between items-start mb-3">
                         <div className="flex-1">
-                          <h4 className="font-semibold text-slate-800 dark:text-slate-200">{item.name}</h4>
-                          <p className="text-sm text-slate-600 dark:text-slate-400">
+                          <h4 className="font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{item.name}</h4>
+                          <p className="text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">
                             {item.quantity} available × {formatCurrency(item.price)}
                           </p>
                         </div>
-                        <span className="font-bold text-slate-800 dark:text-slate-200">
+                        <span className="font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                           {formatCurrency(item.quantity * item.price)}
                         </span>
                       </div>
@@ -3667,7 +3667,7 @@ export default function StaffFloorPlanPage() {
                                 )
                               }}
                               disabled={item.quantity <= 0}
-                              className="flex-1 px-3 py-2 bg-primary text-white text-sm rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                              className="flex-1 px-3 py-2 bg-primary text-white text-sm rounded-sm hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
                               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
@@ -3681,7 +3681,7 @@ export default function StaffFloorPlanPage() {
                   ))}
 
                   {availableItems.filter(item => item.quantity > 0).length === 0 && (
-                    <div className="text-center py-8 text-slate-500 dark:text-slate-400">
+                    <div className="text-center py-8 text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">
                       All items have been assigned to bills
                     </div>
                   )}
@@ -3693,16 +3693,16 @@ export default function StaffFloorPlanPage() {
                 {/* Top Section - Paid Bills (Simple List) */}
                 {splitBills.filter(b => b.paid).length > 0 && (
                   <div className="mb-6">
-                    <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-3">Paid Bills</h3>
+                    <h3 className="font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-3">Paid Bills</h3>
                     <div className="space-y-2">
                       {splitBills.filter(b => b.paid).map((bill) => (
-                        <div key={bill.id} className="flex justify-between items-center bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
+                        <div key={bill.id} className="flex justify-between items-center bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-sm p-3">
                           <div className="flex items-center gap-3">
                             <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 24 24">
                               <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
                             </svg>
-                            <span className="font-semibold text-slate-800 dark:text-slate-200">{bill.name}</span>
-                            <span className="text-slate-600 dark:text-slate-400">{formatCurrency(bill.total)}</span>
+                            <span className="font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{bill.name}</span>
+                            <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{formatCurrency(bill.total)}</span>
                           </div>
                           <button
                             onClick={() => {
@@ -3717,7 +3717,7 @@ export default function StaffFloorPlanPage() {
                               setInvoiceOrderId(null) // Clear regular order ID
                               setShowInvoiceModal(true)
                             }}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium flex items-center gap-2"
+                            className="px-4 py-2 bg-blue-600 text-white rounded-sm hover:bg-blue-700 text-sm font-medium flex items-center gap-2"
                           >
                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                               <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
@@ -3736,10 +3736,10 @@ export default function StaffFloorPlanPage() {
                   {splitBills.filter(b => !b.paid).map((bill) => (
                     <div
                       key={bill.id}
-                      className="bg-white dark:bg-slate-700 border-2 border-primary/30 rounded-xl p-4"
+                      className="bg-white dark:bg-zinc-700 border-2 border-primary/30 rounded-sm p-4"
                     >
                       <div className="flex justify-between items-center mb-3">
-                        <h4 className="font-bold text-lg text-slate-800 dark:text-slate-200">{bill.name}</h4>
+                        <h4 className="font-bold text-lg text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{bill.name}</h4>
                         {splitBills.filter(b => !b.paid).length > 1 && (
                           <button
                             onClick={() => {
@@ -3766,16 +3766,16 @@ export default function StaffFloorPlanPage() {
                             {bill.items.map((item) => (
                               <div
                                 key={item.id}
-                                className="flex justify-between items-center text-sm bg-slate-50 dark:bg-slate-600 rounded-lg p-2"
+                                className="flex justify-between items-center text-sm bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-600 rounded-sm p-2"
                               >
                                 <div className="flex-1">
-                                  <div className="font-medium text-slate-800 dark:text-slate-200">{item.name}</div>
-                                  <div className="text-xs text-slate-600 dark:text-slate-400">
+                                  <div className="font-medium text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{item.name}</div>
+                                  <div className="text-xs text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">
                                     {item.quantity} × {formatCurrency(item.price)}
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <span className="font-semibold text-slate-800 dark:text-slate-200">
+                                  <span className="font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                                     {formatCurrency(item.total)}
                                   </span>
                                   <button
@@ -3816,9 +3816,9 @@ export default function StaffFloorPlanPage() {
                             ))}
                           </div>
 
-                          <div className="border-t-2 border-slate-200 dark:border-slate-600 pt-3">
+                          <div className="border-t-2 border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 pt-3">
                             <div className="flex justify-between items-center mb-3">
-                              <span className="font-bold text-slate-700 dark:text-slate-300">Total</span>
+                              <span className="font-bold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">Total</span>
                               <span className="text-xl font-bold text-primary">{formatCurrency(bill.total)}</span>
                             </div>
 
@@ -3826,7 +3826,7 @@ export default function StaffFloorPlanPage() {
                             <div className="space-y-2">
                               <button
                                 onClick={() => processSplitBillPayment(bill, 'cash')}
-                                className="w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 flex items-center justify-center gap-2 text-sm"
+                                className="w-full bg-green-600 text-white py-2 rounded-sm font-semibold hover:bg-green-700 flex items-center justify-center gap-2 text-sm"
                               >
                                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
@@ -3835,7 +3835,7 @@ export default function StaffFloorPlanPage() {
                               </button>
                               <button
                                 onClick={() => processSplitBillPayment(bill, 'card')}
-                                className="w-full bg-primary text-white py-2 rounded-lg font-semibold hover:bg-primary-hover flex items-center justify-center gap-2 text-sm"
+                                className="w-full bg-primary text-white py-2 rounded-sm font-semibold hover:bg-primary-hover flex items-center justify-center gap-2 text-sm"
                               >
                                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                   <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
@@ -3846,7 +3846,7 @@ export default function StaffFloorPlanPage() {
                           </div>
                         </>
                       ) : (
-                        <div className="text-center py-6 text-slate-400 dark:text-slate-500 text-sm">
+                        <div className="text-center py-6 text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 text-sm">
                           No items assigned to this bill yet
                         </div>
                       )}
@@ -3865,7 +3865,7 @@ export default function StaffFloorPlanPage() {
                           total: 0
                         }])
                       }}
-                      className="w-full px-4 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors flex items-center justify-center gap-2 font-medium"
+                      className="w-full px-4 py-3 bg-green-600 text-white rounded-sm hover:bg-green-700 transition-colors flex items-center justify-center gap-2 font-medium"
                     >
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
@@ -3876,19 +3876,19 @@ export default function StaffFloorPlanPage() {
                 </div>
 
                 {/* Summary */}
-                <div className="mt-4 bg-primary/10 rounded-xl p-4">
+                <div className="mt-4 bg-primary/10 rounded-sm p-4">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="font-semibold text-slate-700 dark:text-slate-300">Original Total</span>
-                    <span className="font-bold text-slate-800 dark:text-slate-200">{formatCurrency(calculateTableTotal())}</span>
+                    <span className="font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">Original Total</span>
+                    <span className="font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{formatCurrency(calculateTableTotal())}</span>
                   </div>
                   <div className="flex justify-between items-center mb-2">
-                    <span className="font-semibold text-slate-700 dark:text-slate-300">Assigned to Bills</span>
+                    <span className="font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">Assigned to Bills</span>
                     <span className="font-bold text-primary">
                       {formatCurrency(splitBills.reduce((sum, b) => sum + b.total, 0))}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="font-semibold text-slate-700 dark:text-slate-300">Remaining</span>
+                    <span className="font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">Remaining</span>
                     <span className="font-bold text-orange-600">
                       {formatCurrency(calculateTableTotal() - splitBills.reduce((sum, b) => sum + b.total, 0))}
                     </span>
@@ -3912,7 +3912,7 @@ export default function StaffFloorPlanPage() {
           }}
         >
           <div
-            className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md animate-zoom-in"
+            className="bg-white dark:bg-zinc-800 rounded-sm p-8 w-full max-w-md animate-zoom-in"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="text-center mb-6">
@@ -3921,8 +3921,8 @@ export default function StaffFloorPlanPage() {
                   <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-2">Payment Successful!</h2>
-              <p className="text-slate-600 dark:text-slate-400">Would you like to generate an invoice for this order?</p>
+              <h2 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-2">Payment Successful!</h2>
+              <p className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">Would you like to generate an invoice for this order?</p>
             </div>
 
             <div className="space-y-3">
@@ -3931,7 +3931,7 @@ export default function StaffFloorPlanPage() {
                   const orderId = completedOrderIds[0]
                   openInvoiceModal(orderId)
                 }}
-                className="w-full bg-primary text-white py-3 rounded-xl font-semibold hover:bg-primary-hover transition-all flex items-center justify-center gap-2"
+                className="w-full bg-primary text-white py-3 rounded-sm font-semibold hover:bg-primary-hover transition-all flex items-center justify-center gap-2"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
@@ -3945,7 +3945,7 @@ export default function StaffFloorPlanPage() {
                   setUnpaidOrders([])
                   setCompletedOrderIds([])
                 }}
-                className="w-full border-2 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 py-3 rounded-xl font-medium hover:bg-slate-50 dark:hover:bg-slate-700"
+                className="w-full border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-700"
               >
                 No Thanks
               </button>
@@ -3969,16 +3969,16 @@ export default function StaffFloorPlanPage() {
           }}
         >
           <div
-            className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-6xl my-4 max-h-[90vh] flex flex-col animate-zoom-in"
+            className="bg-white dark:bg-zinc-800 rounded-sm p-6 w-full max-w-6xl my-4 max-h-[90vh] flex flex-col animate-zoom-in"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-6">
               <div>
-                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">
+                <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                   {currentOrder ? t('orderModal.titleUpdate') : t('orderModal.titlePlace')} - {t('orderModal.tableTitle')?.replace('{tableNumber}', selectedTable.table_number) || `Table ${selectedTable.table_number}`}
                 </h2>
                 {currentOrder && (
-                  <p className="text-sm text-slate-500 dark:text-slate-400">{t('orderModal.orderNumber')?.replace('{id}', (currentOrder.id || currentOrder.client_id || 'new').slice(0, 8)) || `Order #${(currentOrder.id || currentOrder.client_id || 'new').slice(0, 8)}`}</p>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('orderModal.orderNumber')?.replace('{id}', (currentOrder.id || currentOrder.client_id || 'new').slice(0, 8)) || `Order #${(currentOrder.id || currentOrder.client_id || 'new').slice(0, 8)}`}</p>
                 )}
               </div>
               <button
@@ -3991,7 +3991,7 @@ export default function StaffFloorPlanPage() {
                   setSelectedCategory(null)
                   setProductSearch('')
                 }}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                className="text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300"
               >
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -4001,7 +4001,7 @@ export default function StaffFloorPlanPage() {
 
             {/* Info banner for staff editing existing orders */}
             {currentOrder && userType === 'staff' && (
-              <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-xl">
+              <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-sm">
                 <div className="flex items-start gap-3">
                   <svg className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
@@ -4022,7 +4022,7 @@ export default function StaffFloorPlanPage() {
                 {/* Search Bar - Always visible */}
                 <div className="mb-4">
                   <div className="relative">
-                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                     <input
@@ -4030,12 +4030,12 @@ export default function StaffFloorPlanPage() {
                       placeholder={t('orderModal.searchProducts') || 'Search products...'}
                       value={productSearch}
                       onChange={(e) => setProductSearch(e.target.value)}
-                      className="w-full pl-10 pr-10 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6262bd]/50 focus:border-[#6262bd] text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 bg-white dark:bg-slate-700 transition-colors"
+                      className="w-full pl-10 pr-10 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm focus:outline-none focus:ring-2 focus:ring-[#6262bd]/50 focus:border-[#6262bd] text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 placeholder-zinc-400 dark:placeholder-slate-500 bg-white dark:bg-zinc-700 transition-colors"
                     />
                     {productSearch && (
                       <button
                         onClick={() => setProductSearch('')}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300"
                       >
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -4046,14 +4046,14 @@ export default function StaffFloorPlanPage() {
                 </div>
 
                 {menuItems.length === 0 ? (
-                  <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-8 text-center">
-                    <p className="text-slate-500 dark:text-slate-400">{t('orderModal.noMenuItems') || 'No menu items available'}</p>
-                    <p className="text-sm text-slate-400 dark:text-slate-500 mt-2">{t('orderModal.addItemsFirst') || 'Add items in the Menu tab first'}</p>
+                  <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-900 rounded-sm p-8 text-center">
+                    <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('orderModal.noMenuItems') || 'No menu items available'}</p>
+                    <p className="text-sm text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 mt-2">{t('orderModal.addItemsFirst') || 'Add items in the Menu tab first'}</p>
                   </div>
                 ) : productSearch ? (
                   /* Search Results View */
                   <div className="flex-1 overflow-y-auto pr-2">
-                    <h3 className="font-semibold text-slate-700 dark:text-slate-300 mb-3">{t('orderModal.searchResults') || 'Search Results'}</h3>
+                    <h3 className="font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-3">{t('orderModal.searchResults') || 'Search Results'}</h3>
                     {(() => {
                       const searchLower = productSearch.toLowerCase()
                       const filteredItems = menuItems.filter(item =>
@@ -4062,8 +4062,8 @@ export default function StaffFloorPlanPage() {
                       )
                       if (filteredItems.length === 0) {
                         return (
-                          <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-6 text-center">
-                            <p className="text-slate-500 dark:text-slate-400">{t('orderModal.noProductsFound') || 'No products found'}</p>
+                          <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-900 rounded-sm p-6 text-center">
+                            <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('orderModal.noProductsFound') || 'No products found'}</p>
                           </div>
                         )
                       }
@@ -4074,26 +4074,26 @@ export default function StaffFloorPlanPage() {
                               key={item.id}
                               onClick={() => addItemToOrder(item)}
                               disabled={!item.available}
-                              className={`flex flex-col p-3 rounded-xl transition-all text-left ${
+                              className={`flex flex-col p-3 rounded-sm transition-all text-left ${
                                 item.available
-                                  ? 'bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-700 hover:shadow-md'
-                                  : 'bg-slate-100 dark:bg-slate-900 opacity-60 cursor-not-allowed'
+                                  ? 'bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-900 hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 hover:shadow-md'
+                                  : 'bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-900 opacity-60 cursor-not-allowed'
                               }`}
                             >
                               {item.image_url ? (
                                 <img
                                   src={item.image_url}
                                   alt={item.name}
-                                  className="w-full h-24 rounded-lg object-cover mb-2"
+                                  className="w-full h-24 rounded-sm object-cover mb-2"
                                 />
                               ) : (
-                                <div className="w-full h-24 rounded-lg bg-slate-200 dark:bg-slate-700 mb-2 flex items-center justify-center">
-                                  <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="w-full h-24 rounded-sm bg-zinc-200 dark:bg-zinc-700 dark:bg-zinc-700 mb-2 flex items-center justify-center">
+                                  <svg className="w-8 h-8 text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                   </svg>
                                 </div>
                               )}
-                              <p className="font-medium text-slate-800 dark:text-slate-200 text-sm line-clamp-2">{item.name}</p>
+                              <p className="font-medium text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 text-sm line-clamp-2">{item.name}</p>
                               <div className="mt-auto pt-2 flex items-center justify-between">
                                 <span className="font-semibold text-[#6262bd]">{formatCurrency(item.price)}</span>
                                 {!item.available && (
@@ -4109,7 +4109,7 @@ export default function StaffFloorPlanPage() {
                 ) : !selectedCategory ? (
                   /* Categories Grid View */
                   <div className="flex-1 overflow-y-auto pr-2">
-                    <h3 className="font-semibold text-slate-700 dark:text-slate-300 mb-3">{t('orderModal.selectCategory') || 'Select a Category'}</h3>
+                    <h3 className="font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-3">{t('orderModal.selectCategory') || 'Select a Category'}</h3>
                     {categories.length > 0 ? (
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         {categories.map(category => {
@@ -4119,15 +4119,15 @@ export default function StaffFloorPlanPage() {
                             <button
                               key={category.id}
                               onClick={() => setSelectedCategory(category)}
-                              className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800 hover:from-[#6262bd]/10 hover:to-[#6262bd]/5 dark:hover:from-[#6262bd]/20 dark:hover:to-[#6262bd]/10 rounded-xl transition-all hover:shadow-md border border-slate-200 dark:border-slate-600 hover:border-[#6262bd]/30"
+                              className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-zinc-700 dark:to-slate-800 hover:from-[#6262bd]/10 hover:to-[#6262bd]/5 dark:hover:from-[#6262bd]/20 dark:hover:to-[#6262bd]/10 rounded-sm transition-all hover:shadow-md border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 hover:border-[#6262bd]/30"
                             >
                               <div className="w-12 h-12 rounded-full bg-[#6262bd]/10 flex items-center justify-center mb-3">
                                 <svg className="w-6 h-6 text-[#6262bd]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                 </svg>
                               </div>
-                              <span className="font-semibold text-slate-700 dark:text-slate-200 text-center">{category.name}</span>
-                              <span className="text-xs text-slate-500 dark:text-slate-400 mt-1">{categoryItems.length} {categoryItems.length === 1 ? (t('orderModal.item') || 'item') : (t('orderModal.items') || 'items')}</span>
+                              <span className="font-semibold text-zinc-700 dark:text-zinc-300 text-center">{category.name}</span>
+                              <span className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-1">{categoryItems.length} {categoryItems.length === 1 ? (t('orderModal.item') || 'item') : (t('orderModal.items') || 'items')}</span>
                             </button>
                           )
                         })}
@@ -4138,15 +4138,15 @@ export default function StaffFloorPlanPage() {
                           return (
                             <button
                               onClick={() => setSelectedCategory({ id: 'uncategorized', name: t('orderModal.uncategorized') || 'Other' })}
-                              className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800 hover:from-[#6262bd]/10 hover:to-[#6262bd]/5 dark:hover:from-[#6262bd]/20 dark:hover:to-[#6262bd]/10 rounded-xl transition-all hover:shadow-md border border-slate-200 dark:border-slate-600 hover:border-[#6262bd]/30"
+                              className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-zinc-700 dark:to-slate-800 hover:from-[#6262bd]/10 hover:to-[#6262bd]/5 dark:hover:from-[#6262bd]/20 dark:hover:to-[#6262bd]/10 rounded-sm transition-all hover:shadow-md border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 hover:border-[#6262bd]/30"
                             >
-                              <div className="w-12 h-12 rounded-full bg-slate-200 dark:bg-slate-600 flex items-center justify-center mb-3">
-                                <svg className="w-6 h-6 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <div className="w-12 h-12 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center mb-3">
+                                <svg className="w-6 h-6 text-zinc-500 dark:text-zinc-400 dark:text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                                 </svg>
                               </div>
-                              <span className="font-semibold text-slate-700 dark:text-slate-200 text-center">{t('orderModal.uncategorized') || 'Other'}</span>
-                              <span className="text-xs text-slate-500 dark:text-slate-400 mt-1">{uncategorizedItems.length} {uncategorizedItems.length === 1 ? (t('orderModal.item') || 'item') : (t('orderModal.items') || 'items')}</span>
+                              <span className="font-semibold text-zinc-700 dark:text-zinc-300 text-center">{t('orderModal.uncategorized') || 'Other'}</span>
+                              <span className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-1">{uncategorizedItems.length} {uncategorizedItems.length === 1 ? (t('orderModal.item') || 'item') : (t('orderModal.items') || 'items')}</span>
                             </button>
                           )
                         })()}
@@ -4159,26 +4159,26 @@ export default function StaffFloorPlanPage() {
                             key={item.id}
                             onClick={() => addItemToOrder(item)}
                             disabled={!item.available}
-                            className={`flex flex-col p-3 rounded-xl transition-all text-left ${
+                            className={`flex flex-col p-3 rounded-sm transition-all text-left ${
                               item.available
-                                ? 'bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-700 hover:shadow-md'
-                                : 'bg-slate-100 dark:bg-slate-900 opacity-60 cursor-not-allowed'
+                                ? 'bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-900 hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 hover:shadow-md'
+                                : 'bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-900 opacity-60 cursor-not-allowed'
                             }`}
                             >
                               {item.image_url ? (
                                 <img
                                   src={item.image_url}
                                   alt={item.name}
-                                  className="w-full h-24 rounded-lg object-cover mb-2"
+                                  className="w-full h-24 rounded-sm object-cover mb-2"
                                 />
                               ) : (
-                                <div className="w-full h-24 rounded-lg bg-slate-200 dark:bg-slate-700 mb-2 flex items-center justify-center">
-                                  <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="w-full h-24 rounded-sm bg-zinc-200 dark:bg-zinc-700 dark:bg-zinc-700 mb-2 flex items-center justify-center">
+                                  <svg className="w-8 h-8 text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                   </svg>
                                 </div>
                               )}
-                              <p className="font-medium text-slate-800 dark:text-slate-200 text-sm line-clamp-2">{item.name}</p>
+                              <p className="font-medium text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 text-sm line-clamp-2">{item.name}</p>
                               <div className="mt-auto pt-2 flex items-center justify-between">
                                 <span className="font-semibold text-[#6262bd]">{formatCurrency(item.price)}</span>
                                 {!item.available && (
@@ -4203,7 +4203,7 @@ export default function StaffFloorPlanPage() {
                         </svg>
                         {t('orderModal.back') || 'Back'}
                       </button>
-                      <h3 className="font-semibold text-slate-700 dark:text-slate-300">{selectedCategory.name}</h3>
+                      <h3 className="font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">{selectedCategory.name}</h3>
                     </div>
                     {(() => {
                       const categoryItems = selectedCategory.id === 'uncategorized'
@@ -4217,28 +4217,28 @@ export default function StaffFloorPlanPage() {
                               key={item.id}
                               onClick={() => addItemToOrder(item)}
                               disabled={!item.available}
-                              className={`flex flex-col p-3 rounded-xl transition-all text-left ${
+                              className={`flex flex-col p-3 rounded-sm transition-all text-left ${
                                 item.available
-                                  ? 'bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-700 hover:shadow-md'
-                                  : 'bg-slate-100 dark:bg-slate-900 opacity-60 cursor-not-allowed'
+                                  ? 'bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-900 hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 hover:shadow-md'
+                                  : 'bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-900 opacity-60 cursor-not-allowed'
                               }`}
                             >
                               {item.image_url ? (
                                 <img
                                   src={item.image_url}
                                   alt={item.name}
-                                  className="w-full h-24 rounded-lg object-cover mb-2"
+                                  className="w-full h-24 rounded-sm object-cover mb-2"
                                 />
                               ) : (
-                                <div className="w-full h-24 rounded-lg bg-slate-200 dark:bg-slate-700 mb-2 flex items-center justify-center">
-                                  <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="w-full h-24 rounded-sm bg-zinc-200 dark:bg-zinc-700 dark:bg-zinc-700 mb-2 flex items-center justify-center">
+                                  <svg className="w-8 h-8 text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                   </svg>
                                 </div>
                               )}
-                              <p className="font-medium text-slate-800 dark:text-slate-200 text-sm line-clamp-2">{item.name}</p>
+                              <p className="font-medium text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 text-sm line-clamp-2">{item.name}</p>
                               {item.description && (
-                                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1">{item.description}</p>
+                                <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 line-clamp-2 mt-1">{item.description}</p>
                               )}
                               <div className="mt-auto pt-2 flex items-center justify-between">
                                 <span className="font-semibold text-[#6262bd]">{formatCurrency(item.price)}</span>
@@ -4257,14 +4257,14 @@ export default function StaffFloorPlanPage() {
 
               {/* Order Summary */}
               <div>
-                <h3 className="font-semibold text-slate-700 dark:text-slate-300 mb-4">{t('orderModal.orderSummary') || 'Order Summary'}</h3>
+                <h3 className="font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-4">{t('orderModal.orderSummary') || 'Order Summary'}</h3>
                 {orderItems.length === 0 ? (
-                  <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-6 text-center">
-                    <p className="text-slate-500 dark:text-slate-400">{t('orderModal.noItemsAdded') || 'No items added yet'}</p>
+                  <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-900 rounded-sm p-6 text-center">
+                    <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('orderModal.noItemsAdded') || 'No items added yet'}</p>
                   </div>
                 ) : (
                   <>
-                    <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-4 mb-4 max-h-64 overflow-y-auto">
+                    <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-900 rounded-sm p-4 mb-4 max-h-64 overflow-y-auto">
                       {orderItems.map((item) => {
                         const newQuantity = item.isExisting ? item.quantity - item.existingQuantity : item.quantity
                         const hasNewItems = newQuantity > 0
@@ -4273,11 +4273,11 @@ export default function StaffFloorPlanPage() {
                         const instructionsLabel = menuItem?.special_instructions_label || 'Special instructions'
 
                         return (
-                          <div key={item.menu_item_id} className={`mb-3 last:mb-0 rounded-lg p-2 ${item.isExisting ? 'bg-blue-50/50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700' : ''}`}>
+                          <div key={item.menu_item_id} className={`mb-3 last:mb-0 rounded-sm p-2 ${item.isExisting ? 'bg-blue-50/50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700' : ''}`}>
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1">
-                                <p className="font-medium text-slate-800 dark:text-slate-200 text-sm">{item.quantity}x {item.name}</p>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">{formatCurrency(item.price_at_time)} {t('orderModal.each') || 'each'}</p>
+                                <p className="font-medium text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 text-sm">{item.quantity}x {item.name}</p>
+                                <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{formatCurrency(item.price_at_time)} {t('orderModal.each') || 'each'}</p>
 
                                 {item.isExisting && hasNewItems && (
                                   <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
@@ -4305,14 +4305,14 @@ export default function StaffFloorPlanPage() {
                                   <>
                                     <button
                                       onClick={() => updateItemQuantity(item.menu_item_id, item.quantity - 1)}
-                                      className="w-6 h-6 rounded bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 flex items-center justify-center transition-colors"
+                                      className="w-6 h-6 rounded bg-zinc-200 dark:bg-zinc-700 dark:bg-zinc-700 hover:bg-zinc-300 dark:hover:bg-zinc-600 dark:hover:bg-zinc-600 flex items-center justify-center transition-colors"
                                     >
                                       -
                                     </button>
-                                    <span className="w-8 text-center font-medium text-slate-800 dark:text-slate-200">{item.quantity}</span>
+                                    <span className="w-8 text-center font-medium text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{item.quantity}</span>
                                     <button
                                       onClick={() => updateItemQuantity(item.menu_item_id, item.quantity + 1)}
-                                      className="w-6 h-6 rounded bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 flex items-center justify-center transition-colors"
+                                      className="w-6 h-6 rounded bg-zinc-200 dark:bg-zinc-700 dark:bg-zinc-700 hover:bg-zinc-300 dark:hover:bg-zinc-600 dark:hover:bg-zinc-600 flex items-center justify-center transition-colors"
                                     >
                                       +
                                     </button>
@@ -4322,14 +4322,14 @@ export default function StaffFloorPlanPage() {
                                     <button
                                       onClick={() => updateItemQuantity(item.menu_item_id, item.quantity - 1)}
                                       disabled={currentOrder?.paid === true && item.isExisting && item.quantity <= item.existingQuantity}
-                                      className="w-6 h-6 rounded bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+                                      className="w-6 h-6 rounded bg-zinc-200 dark:bg-zinc-700 dark:bg-zinc-700 hover:bg-zinc-300 dark:hover:bg-zinc-600 dark:hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
                                     >
                                       -
                                     </button>
-                                    <span className="w-8 text-center font-medium text-slate-800 dark:text-slate-200">{item.quantity}</span>
+                                    <span className="w-8 text-center font-medium text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{item.quantity}</span>
                                     <button
                                       onClick={() => updateItemQuantity(item.menu_item_id, item.quantity + 1)}
-                                      className="w-6 h-6 rounded bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 flex items-center justify-center transition-colors"
+                                      className="w-6 h-6 rounded bg-zinc-200 dark:bg-zinc-700 dark:bg-zinc-700 hover:bg-zinc-300 dark:hover:bg-zinc-600 dark:hover:bg-zinc-600 flex items-center justify-center transition-colors"
                                     >
                                       +
                                     </button>
@@ -4342,16 +4342,16 @@ export default function StaffFloorPlanPage() {
                       })}
                     </div>
 
-                    <div className="bg-primary/10 rounded-xl p-4 mb-4">
+                    <div className="bg-primary/10 rounded-sm p-4 mb-4">
                       <div className="flex justify-between items-center">
-                        <span className="font-semibold text-slate-700 dark:text-slate-300">{t('orderModal.total') || 'Total'}</span>
+                        <span className="font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">{t('orderModal.total') || 'Total'}</span>
                         <span className="text-xl font-bold text-primary">{formatCurrency(calculateTotal())}</span>
                       </div>
                     </div>
 
                     <button
                       onClick={submitOrder}
-                      className="w-full bg-primary text-white py-3 rounded-xl font-semibold hover:bg-primary-hover"
+                      className="w-full bg-primary text-white py-3 rounded-sm font-semibold hover:bg-primary-hover"
                     >
                       {currentOrder ? (t('orderModal.updateOrder') || 'Update Order') : (t('orderModal.placeOrder') || 'Place Order')}
                     </button>
@@ -4389,31 +4389,31 @@ export default function StaffFloorPlanPage() {
           }}
         >
           <div
-            className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md animate-zoom-in"
+            className="bg-white dark:bg-zinc-800 rounded-sm p-8 w-full max-w-md animate-zoom-in"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-4">
+            <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4">
               Cancel Reservation
             </h2>
 
             <div className="mb-6">
-              <p className="text-slate-600 dark:text-slate-400 mb-2">
+              <p className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mb-2">
                 Cancelling reservation for <strong>{selectedReservationToCancel.customer_name}</strong>
               </p>
-              <p className="text-sm text-slate-500 dark:text-slate-500">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-500">
                 {selectedReservationToCancel.reservation_time} - {selectedReservationToCancel.party_size} {selectedReservationToCancel.party_size === 1 ? 'guest' : 'guests'}
               </p>
             </div>
 
             <div className="mb-6">
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
                 Reason for Cancellation *
               </label>
               <textarea
                 value={cancelReason}
                 onChange={(e) => setCancelReason(e.target.value)}
                 placeholder="Please provide a reason for cancelling this reservation..."
-                className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-xl focus:outline-none focus:border-red-500 resize-none"
+                className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100 rounded-sm focus:outline-none focus:border-red-500 resize-none"
                 rows="4"
                 autoFocus
               />
@@ -4426,13 +4426,13 @@ export default function StaffFloorPlanPage() {
                   setSelectedReservationToCancel(null)
                   setCancelReason('')
                 }}
-                className="flex-1 border-2 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 py-3 rounded-xl font-medium hover:bg-slate-50 dark:hover:bg-slate-700"
+                className="flex-1 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-700"
               >
                 Keep Reservation
               </button>
               <button
                 onClick={cancelReservation}
-                className="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl font-medium"
+                className="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 rounded-sm font-medium"
               >
                 Cancel Reservation
               </button>
@@ -4444,7 +4444,7 @@ export default function StaffFloorPlanPage() {
       {/* Notification Toast */}
       {notification && (
         <div className="fixed top-4 right-4 z-[100] animate-fade-in">
-          <div className={`px-6 py-4 rounded-xl shadow-lg ${
+          <div className={`px-6 py-4 rounded-sm shadow-lg ${
             notification.type === 'success'
               ? 'bg-green-600 text-white'
               : notification.type === 'error'

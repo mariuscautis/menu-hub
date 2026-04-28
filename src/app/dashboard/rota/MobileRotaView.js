@@ -99,12 +99,12 @@ export default function MobileRotaView({ shifts, onSelectShift }) {
   return (
     <div className="space-y-4">
       {sortedDates.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-2xl border-2 border-slate-100">
-          <p className="text-slate-600">No shifts scheduled for this period</p>
+        <div className="text-center py-12 bg-white dark:bg-zinc-900 rounded-sm border border-zinc-200 dark:border-zinc-800">
+          <p className="text-zinc-600 dark:text-zinc-400">No shifts scheduled for this period</p>
         </div>
       ) : (
         sortedDates.map(date => (
-          <div key={date} className="bg-white rounded-2xl border-2 border-slate-100 overflow-hidden">
+          <div key={date} className="bg-white dark:bg-zinc-900 rounded-sm border border-zinc-200 dark:border-zinc-800 overflow-hidden">
             {/* Date Header */}
             <div className="bg-[#6262bd] text-white px-4 py-3">
               <h3 className="font-bold text-lg">{formatDate(date)}</h3>
@@ -112,7 +112,7 @@ export default function MobileRotaView({ shifts, onSelectShift }) {
             </div>
 
             {/* Shifts */}
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
               {groupedShifts[date].map(shift => {
                 const shiftStyle = getShiftStyle(shift);
                 const staffColor = shift.staff_id ? getStaffColor(shift.staff_id) : null;
@@ -127,12 +127,12 @@ export default function MobileRotaView({ shifts, onSelectShift }) {
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="font-bold text-lg text-slate-800">
+                          <span className="font-bold text-lg text-zinc-800 dark:text-zinc-200">
                             {formatTime(shift.shift_start)} - {formatTime(shift.shift_end)}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <p className="text-slate-700 font-medium">
+                          <p className="text-zinc-700 dark:text-zinc-300 font-medium">
                             {shift.staff?.name || shift.role_required}
                           </p>
                           {staffColor && shift.staff_id && (
@@ -147,16 +147,16 @@ export default function MobileRotaView({ shifts, onSelectShift }) {
                           )}
                         </div>
                         {!shift.staff_id && (
-                          <p className="text-sm text-slate-500 mt-1">{shift.role_required} needed</p>
+                          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">{shift.role_required} needed</p>
                         )}
                       </div>
 
                       <div className="flex flex-col items-end gap-2">
-                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-white border border-slate-200 text-slate-700">
+                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300">
                           {getStatusLabel(shift)}
                         </span>
                         {shift.department && (
-                          <span className="px-2 py-1 bg-white border border-slate-200 text-slate-700 rounded text-xs">
+                          <span className="px-2 py-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 rounded text-xs">
                             {shift.department}
                           </span>
                         )}
@@ -164,13 +164,13 @@ export default function MobileRotaView({ shifts, onSelectShift }) {
                     </div>
 
                     {shift.notes && (
-                      <p className="text-sm text-slate-600 mt-2 bg-white/50 p-2 rounded">
+                      <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-2 bg-white dark:bg-zinc-900/50 p-2 rounded">
                         {shift.notes}
                       </p>
                     )}
 
                     {shift.break_duration > 0 && (
-                      <p className="text-xs text-slate-500 mt-2">
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
                         Break: {shift.break_duration} min
                       </p>
                     )}

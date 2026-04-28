@@ -164,39 +164,39 @@ export default function DepartmentsSettingsPage() {
   };
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-8">
+      <div className="min-h-screen p-8">
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6262bd] mx-auto"></div>
-          <p className="text-slate-500 mt-4">{t('loading')}</p>
+          <p className="text-zinc-500 dark:text-zinc-400 mt-4">{t('loading')}</p>
         </div>
       </div>
     );
   }
   if (!restaurant) {
     return (
-      <div className="min-h-screen bg-gray-50 p-8">
+      <div className="min-h-screen p-8">
         <div className="text-center py-12">
-          <p className="text-slate-600">No restaurant found</p>
+          <p className="text-zinc-600 dark:text-zinc-400">No restaurant found</p>
         </div>
       </div>
     );
   }
   return (
     <OfflinePageGuard>
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-8">
+    <div className="min-h-screen p-4 sm:p-8">
       <PageTabs tabs={staffTabs} />
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2 flex items-center gap-2">
+        <h1 className="text-3xl font-bold text-zinc-800 dark:text-zinc-200 mb-2 flex items-center gap-2">
           {t('title')}
           <InfoTooltip text={tg('departments_desc')} />
         </h1>
-        <p className="text-slate-600">{t('subtitle')}</p>
+        <p className="text-zinc-600 dark:text-zinc-400">{t('subtitle')}</p>
       </div>
       {/* Message */}
       {message && (
         <div
-          className={`mb-6 p-4 rounded-xl ${
+          className={`mb-6 p-4 rounded-sm ${
             message.type === 'success'
               ? 'bg-green-50 border-2 border-green-200 text-green-700'
               : 'bg-red-50 border-2 border-red-200 text-red-700'
@@ -208,32 +208,32 @@ export default function DepartmentsSettingsPage() {
       {/* Departments List */}
       <div className="space-y-6 mb-6">
         {departments.map((dept, index) => (
-          <div key={dept.id || `new-${index}`} className="bg-white border-2 border-slate-100 rounded-2xl p-6">
+          <div key={dept.id || `new-${index}`} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
             {/* Department Header */}
-            <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-4 border-b-2 border-slate-100">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-4 border-b border-zinc-200 dark:border-zinc-800">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-4 h-4 bg-[#6262bd] rounded-full flex-shrink-0"></div>
-                <h3 className="text-xl font-bold text-slate-800 capitalize truncate">{dept.name}</h3>
-                <span className="text-sm text-slate-500 whitespace-nowrap">
+                <h3 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 capitalize truncate">{dept.name}</h3>
+                <span className="text-sm text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
                   ({dept.permissions.length} permission{dept.permissions.length !== 1 ? 's' : ''})
                 </span>
               </div>
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => handleSelectAll(dept.name)}
-                  className="px-3 py-1 text-sm text-[#6262bd] hover:bg-[#6262bd]/10 rounded-lg transition-colors"
+                  className="px-3 py-1 text-sm text-[#6262bd] hover:bg-[#6262bd]/10 rounded-sm transition-colors"
                 >
                   {t('selectAll')}
                 </button>
                 <button
                   onClick={() => handleDeselectAll(dept.name)}
-                  className="px-3 py-1 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                  className="px-3 py-1 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:bg-zinc-800 rounded-sm transition-colors"
                 >
                   {t('deselectAll')}
                 </button>
                 <button
                   onClick={() => handleRemoveDepartment(dept.name)}
-                  className="px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  className="px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded-sm transition-colors"
                   disabled={departments.length <= 1}
                   title={departments.length <= 1 ? 'Cannot remove last department' : t('remove')}
                 >
@@ -248,23 +248,23 @@ export default function DepartmentsSettingsPage() {
                 return (
                   <label
                     key={permission.id}
-                    className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${permission.child ? 'ml-6' : ''} ${
+                    className={`flex items-start gap-3 p-4 rounded-sm border-2 cursor-pointer transition-all ${permission.child ? 'ml-6' : ''} ${
                       isChecked
                         ? 'bg-[#6262bd]/10 border-[#6262bd]'
                         : permission.parent
-                          ? 'bg-slate-100 border-slate-300 hover:border-slate-400'
-                          : 'bg-slate-50 border-slate-200 hover:border-slate-300'
+                          ? 'bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-600 hover:border-zinc-400'
+                          : 'bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:border-zinc-600'
                     }`}
                   >
                     <input
                       type="checkbox"
                       checked={isChecked}
                       onChange={() => handleTogglePermission(dept.name, permission.id)}
-                      className="mt-1 w-5 h-5 text-[#6262bd] border-2 border-slate-300 rounded focus:ring-[#6262bd] focus:ring-2"
+                      className="mt-1 w-5 h-5 text-[#6262bd] border border-zinc-300 dark:border-zinc-600 rounded focus:ring-[#6262bd] focus:ring-2"
                     />
                     <div className="flex-1">
-                      <div className={`font-medium text-slate-800 ${permission.parent ? 'text-sm uppercase tracking-wide text-slate-500' : ''}`}>{permission.label}</div>
-                      <div className="text-xs text-slate-600 mt-0.5">{permission.description}</div>
+                      <div className={`font-medium text-zinc-800 dark:text-zinc-200 ${permission.parent ? 'text-sm uppercase tracking-wide text-zinc-500 dark:text-zinc-400' : ''}`}>{permission.label}</div>
+                      <div className="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5">{permission.description}</div>
                     </div>
                   </label>
                 );
@@ -272,7 +272,7 @@ export default function DepartmentsSettingsPage() {
             </div>
             {/* Warning if no permissions */}
             {dept.permissions.length === 0 && (
-              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-xl">
+              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-sm">
                 <p className="text-sm text-yellow-800">
                   <strong>Warning:</strong> This department has no permissions. Staff in this department will only be able to log in and see a blank dashboard.
                 </p>
@@ -282,8 +282,8 @@ export default function DepartmentsSettingsPage() {
         ))}
       </div>
       {/* Add New Department */}
-      <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 mb-6">
-        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-3">{t('addNewDepartment')}</h3>
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 mb-6">
+        <h3 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-3">{t('addNewDepartment')}</h3>
         <div className="flex flex-col sm:flex-row gap-3">
           <input
             type="text"
@@ -295,11 +295,11 @@ export default function DepartmentsSettingsPage() {
               }
             }}
             placeholder={t('departmentNamePlaceholder')}
-            className="flex-1 px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+            className="flex-1 px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 dark:text-zinc-500 dark:placeholder:text-zinc-500"
           />
           <button
             onClick={handleAddDepartment}
-            className="px-6 py-3 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252a5] transition-colors font-medium whitespace-nowrap"
+            className="px-6 py-3 bg-[#6262bd] text-white rounded-sm hover:bg-[#5252a5] transition-colors font-medium whitespace-nowrap"
           >
             {t('addDepartment')}
           </button>
@@ -307,17 +307,17 @@ export default function DepartmentsSettingsPage() {
       </div>
       {/* Info Boxes */}
       <div className="space-y-4 mb-6">
-        <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+        <div className="p-4 bg-blue-50 border border-blue-200 rounded-sm">
           <p className="text-sm text-blue-800">
             <strong>{t('infoBox1Title')}:</strong> {t('infoBox1Text')}
           </p>
         </div>
-        <div className="p-4 bg-purple-50 border border-purple-200 rounded-xl">
+        <div className="p-4 bg-purple-50 border border-purple-200 rounded-sm">
           <p className="text-sm text-purple-800">
             <strong>{t('infoBox2Title')}:</strong> {t('infoBox2Text')}
           </p>
         </div>
-        <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+        <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-sm">
           <p className="text-sm text-yellow-800">
             <strong>{t('infoBox3Title')}:</strong> {t('infoBox3Text')}
           </p>
@@ -328,7 +328,7 @@ export default function DepartmentsSettingsPage() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-8 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-8 py-3 bg-green-600 text-white rounded-sm hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {saving ? t('saving') : t('saveAllChanges')}
         </button>

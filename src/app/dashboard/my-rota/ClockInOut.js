@@ -375,9 +375,9 @@ export default function ClockInOut({ staff, restaurant }) {
 
   if (loading) {
     return (
-      <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
         <div className="text-center py-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6262bd] mx-auto"></div>
+          <div className="w-7 h-7 border-2 border-zinc-200 dark:border-zinc-800 border-t-[#6262bd] rounded-full animate-spin mx-auto"></div>
         </div>
       </div>
     );
@@ -386,12 +386,12 @@ export default function ClockInOut({ staff, restaurant }) {
   const onBreak = currentAttendance?.break_start && !currentAttendance?.break_end;
 
   return (
-    <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-      <h2 className="text-xl font-bold text-slate-800 mb-6">{t('title') || 'Clock In/Out'}</h2>
+    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
+      <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 mb-6">{t('title') || 'Clock In/Out'}</h2>
 
       {message && (
         <div
-          className={`mb-4 p-4 rounded-xl ${
+          className={`mb-4 p-4 rounded-sm ${
             message.type === 'success'
               ? 'bg-green-50 border-2 border-green-200 text-green-700'
               : 'bg-red-50 border-2 border-red-200 text-red-700'
@@ -403,9 +403,9 @@ export default function ClockInOut({ staff, restaurant }) {
 
       {/* Today's Shift Info */}
       {todayShift ? (
-        <div className="mb-6 p-4 bg-slate-50 rounded-xl border-2 border-slate-200">
+        <div className="mb-6 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-sm border border-zinc-200 dark:border-zinc-700">
           <div className="flex items-start justify-between mb-2">
-            <p className="text-sm font-medium text-slate-700">{t('todaysShift') || "Today's Shift"}</p>
+            <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{t('todaysShift') || "Today's Shift"}</p>
             {todayShift.status === 'draft' && (
               <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
                 {t('draft') || 'Draft'}
@@ -417,11 +417,11 @@ export default function ClockInOut({ staff, restaurant }) {
               </span>
             )}
           </div>
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-zinc-600 dark:text-zinc-400">
             {todayShift.role_required} • {formatTime(todayShift.shift_start)} - {formatTime(todayShift.shift_end)}
           </p>
           {todayShift.department && (
-            <p className="text-sm text-slate-600 mt-1">
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
               {t('department') || 'Department'}: {todayShift.department.charAt(0).toUpperCase() + todayShift.department.slice(1)}
             </p>
           )}
@@ -432,7 +432,7 @@ export default function ClockInOut({ staff, restaurant }) {
           )}
         </div>
       ) : (
-        <div className="mb-6 p-4 bg-yellow-50 border-2 border-yellow-200 rounded-xl">
+        <div className="mb-6 p-4 bg-yellow-50 border-2 border-yellow-200 rounded-sm">
           <p className="text-sm text-yellow-800">{t('noShiftToday') || 'You do not have a scheduled shift today'}</p>
         </div>
       )}
@@ -440,7 +440,7 @@ export default function ClockInOut({ staff, restaurant }) {
       {/* Clock Status */}
       {currentAttendance ? (
         <div className="space-y-4">
-          <div className="p-4 bg-green-50 border-2 border-green-200 rounded-xl">
+          <div className="p-4 bg-green-50 border-2 border-green-200 rounded-sm">
             <div className="flex items-center justify-between mb-3">
               <div>
                 <p className="text-sm font-medium text-green-800">{t('clockedIn') || 'Clocked In'}</p>
@@ -475,7 +475,7 @@ export default function ClockInOut({ staff, restaurant }) {
               <button
                 onClick={handleEndBreak}
                 disabled={actionLoading}
-                className="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-3 bg-green-600 text-white rounded-sm hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {actionLoading ? (t('processing') || 'Processing...') : (t('endBreak') || 'End Break')}
               </button>
@@ -483,7 +483,7 @@ export default function ClockInOut({ staff, restaurant }) {
               <button
                 onClick={handleStartBreak}
                 disabled={actionLoading}
-                className="px-6 py-3 bg-yellow-600 text-white rounded-xl hover:bg-yellow-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-3 bg-yellow-600 text-white rounded-sm hover:bg-yellow-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {actionLoading ? (t('processing') || 'Processing...') : (t('startBreak') || 'Start Break')}
               </button>
@@ -492,7 +492,7 @@ export default function ClockInOut({ staff, restaurant }) {
             <button
               onClick={handleClockOut}
               disabled={actionLoading}
-              className="px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-3 bg-red-600 text-white rounded-sm hover:bg-red-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {actionLoading ? (t('processing') || 'Processing...') : (t('clockOut') || 'Clock Out')}
             </button>
@@ -502,14 +502,14 @@ export default function ClockInOut({ staff, restaurant }) {
         <button
           onClick={handleClockIn}
           disabled={actionLoading || !todayShift}
-          className="w-full px-6 py-4 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252a5] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed text-lg"
+          className="w-full px-6 py-4 bg-[#6262bd] text-white rounded-sm hover:bg-[#5252a5] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed text-lg"
         >
           {actionLoading ? (t('processing') || 'Processing...') : (t('clockIn') || 'Clock In')}
         </button>
       )}
 
       {/* Info */}
-      <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+      <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-sm">
         <p className="text-xs text-blue-800">
           {t('note') || 'Note: Clock in when you start your shift and clock out when you finish. Use the break buttons to track your break time.'}
         </p>

@@ -543,7 +543,7 @@ export default function StockManagement() {
   }
 
   if (loading) {
-    return <div className="text-slate-500">{t('loading')}</div>
+    return <div className="text-zinc-500 dark:text-zinc-400">{t('loading')}</div>
   }
 
   return (
@@ -552,16 +552,16 @@ export default function StockManagement() {
       <PageTabs tabs={stockNavTabs} />
       <div className="flex flex-wrap justify-between items-start gap-3 mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">
             {t('title')}
             <InfoTooltip text={tg('stock_products_desc')} />
           </h1>
-          <p className="text-slate-500">{t('subtitle')}</p>
+          <p className="text-zinc-500 dark:text-zinc-400">{t('subtitle')}</p>
         </div>
         <div className="flex flex-wrap gap-3">
           <button
             onClick={() => openStockModal()}
-            className="bg-green-600 text-white px-5 py-2.5 rounded-xl font-medium hover:bg-green-700 dark:bg-green-600 dark:text-white dark:hover:bg-green-700 flex items-center gap-2"
+            className="bg-green-600 text-white px-5 py-2.5 rounded-sm font-medium hover:bg-green-700 dark:bg-green-600 dark:text-white dark:hover:bg-green-700 flex items-center gap-2"
           >
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
@@ -570,7 +570,7 @@ export default function StockManagement() {
           </button>
           <button
             onClick={() => openProductModal()}
-            className="bg-[#6262bd] text-white px-5 py-2.5 rounded-xl font-medium hover:bg-[#5252a3] flex items-center gap-2"
+            className="bg-[#6262bd] text-white px-5 py-2.5 rounded-sm font-medium hover:bg-[#5252a3] flex items-center gap-2"
           >
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
@@ -581,13 +581,13 @@ export default function StockManagement() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6 border-b-2 border-slate-100">
+      <div className="flex gap-2 mb-6 border-b border-zinc-200 dark:border-zinc-800">
         <button
           onClick={() => setActiveTab('products')}
           className={`px-6 py-3 font-medium transition-colors ${
             activeTab === 'products'
               ? 'text-[#6262bd] border-b-2 border-[#6262bd] -mb-0.5'
-              : 'text-slate-500 hover:text-slate-700'
+              : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:text-zinc-300'
           }`}
         >
           {t('products')} ({products.length})
@@ -597,7 +597,7 @@ export default function StockManagement() {
           className={`px-6 py-3 font-medium transition-colors ${
             activeTab === 'history'
               ? 'text-[#6262bd] border-b-2 border-[#6262bd] -mb-0.5'
-              : 'text-slate-500 hover:text-slate-700'
+              : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:text-zinc-300'
           }`}
         >
           {t('history')} ({entries.length})
@@ -611,46 +611,46 @@ export default function StockManagement() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
             <button
               onClick={() => setFilterStockType('all')}
-              className={`bg-white border-2 rounded-xl p-4 text-left transition-all ${
+              className={`bg-white border-2 rounded-sm p-4 text-left transition-all ${
                 filterStockType === 'all'
                   ? 'border-[#6262bd] ring-2 ring-[#6262bd]/20'
-                  : 'border-slate-100 hover:border-slate-200'
+                  : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-200 dark:border-zinc-700'
               }`}
             >
-              <p className="text-slate-500 text-sm font-medium mb-1">{t('totalProducts')}</p>
+              <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium mb-1">{t('totalProducts')}</p>
               <p className="text-2xl font-bold text-[#6262bd]">{stats.totalProducts}</p>
             </button>
             <button
               onClick={() => setFilterStockType('low')}
-              className={`bg-white border-2 rounded-xl p-4 text-left transition-all ${
+              className={`bg-white border-2 rounded-sm p-4 text-left transition-all ${
                 filterStockType === 'low'
                   ? 'border-amber-500 ring-2 ring-amber-500/20'
-                  : 'border-slate-100 hover:border-slate-200'
+                  : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-200 dark:border-zinc-700'
               }`}
             >
-              <p className="text-slate-500 text-sm font-medium mb-1">{t('lowStockItems')}</p>
+              <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium mb-1">{t('lowStockItems')}</p>
               <p className="text-2xl font-bold text-amber-600">{stats.lowStock}</p>
             </button>
             <button
               onClick={() => setFilterStockType('kitchen')}
-              className={`bg-white border-2 rounded-xl p-4 text-left transition-all ${
+              className={`bg-white border-2 rounded-sm p-4 text-left transition-all ${
                 filterStockType === 'kitchen'
                   ? 'border-green-500 ring-2 ring-green-500/20'
-                  : 'border-slate-100 hover:border-slate-200'
+                  : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-200 dark:border-zinc-700'
               }`}
             >
-              <p className="text-slate-500 text-sm font-medium mb-1">{t('kitchenItems')}</p>
+              <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium mb-1">{t('kitchenItems')}</p>
               <p className="text-2xl font-bold text-green-600">{stats.kitchenItems}</p>
             </button>
             <button
               onClick={() => setFilterStockType('bar')}
-              className={`bg-white border-2 rounded-xl p-4 text-left transition-all ${
+              className={`bg-white border-2 rounded-sm p-4 text-left transition-all ${
                 filterStockType === 'bar'
                   ? 'border-orange-500 ring-2 ring-orange-500/20'
-                  : 'border-slate-100 hover:border-slate-200'
+                  : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-200 dark:border-zinc-700'
               }`}
             >
-              <p className="text-slate-500 text-sm font-medium mb-1">{t('barItems')}</p>
+              <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium mb-1">{t('barItems')}</p>
               <p className="text-2xl font-bold text-orange-600">{stats.barItems}</p>
             </button>
           </div>
@@ -658,7 +658,7 @@ export default function StockManagement() {
           {/* Search and Sort Bar */}
           <div className="mb-6 flex flex-wrap gap-3">
             <div className="flex-1 relative">
-              <svg className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
               <input
@@ -666,12 +666,12 @@ export default function StockManagement() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('searchPlaceholder')}
-                className="w-full pl-12 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                className="w-full pl-12 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400"
                 >
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -682,7 +682,7 @@ export default function StockManagement() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 bg-white"
+              className="px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-900"
             >
               <option value="name">{t('sortAZ')}</option>
               <option value="stock-low">{t('sortLowStock')}</option>
@@ -694,17 +694,17 @@ export default function StockManagement() {
           <div className="mb-6 flex flex-wrap gap-2">
             <button
               onClick={() => setFilterCategory('all')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-4 py-2 rounded-sm font-medium transition-colors ${
                 filterCategory === 'all'
                   ? 'bg-[#6262bd] text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:bg-zinc-700'
               }`}
             >
               {t('all')}
             </button>
             <button
               onClick={() => setFilterCategory('kitchen')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-4 py-2 rounded-sm font-medium transition-colors ${
                 filterCategory === 'kitchen'
                   ? 'bg-green-600 text-white'
                   : 'bg-green-100 text-green-700 hover:bg-green-200'
@@ -714,7 +714,7 @@ export default function StockManagement() {
             </button>
             <button
               onClick={() => setFilterCategory('bar')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-4 py-2 rounded-sm font-medium transition-colors ${
                 filterCategory === 'bar'
                   ? 'bg-orange-600 text-white'
                   : 'bg-orange-100 text-orange-700 hover:bg-orange-200'
@@ -726,7 +726,7 @@ export default function StockManagement() {
 
           {/* Results Count */}
           {(searchQuery || filterCategory !== 'all' || filterStockType !== 'all') && products.length > 0 && (
-            <div className="mb-4 text-sm text-slate-600" dangerouslySetInnerHTML={{
+            <div className="mb-4 text-sm text-zinc-600 dark:text-zinc-400" dangerouslySetInnerHTML={{
               __html: t('showingProducts')
                 .replace('{filtered}', filteredProducts.length)
                 .replace('{total}', products.length)
@@ -735,9 +735,9 @@ export default function StockManagement() {
 
           {/* Products List */}
           {filteredProducts.length === 0 ? (
-            <div className="bg-white border-2 border-slate-100 rounded-2xl p-12 text-center">
-              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-12 text-center">
+              <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-zinc-400 dark:text-zinc-500" fill="currentColor" viewBox="0 0 24 24">
                   {searchQuery || filterCategory !== 'all' || filterStockType !== 'all' ? (
                     <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
                   ) : (
@@ -747,8 +747,8 @@ export default function StockManagement() {
               </div>
               {searchQuery || filterCategory !== 'all' || filterStockType !== 'all' ? (
                 <>
-                  <p className="text-slate-500 mb-2">{t('noProductsFound')}</p>
-                  <p className="text-sm text-slate-400 mb-4">
+                  <p className="text-zinc-500 dark:text-zinc-400 mb-2">{t('noProductsFound')}</p>
+                  <p className="text-sm text-zinc-400 dark:text-zinc-500 mb-4">
                     {t('tryAdjusting')}
                   </p>
                   <button
@@ -764,7 +764,7 @@ export default function StockManagement() {
                 </>
               ) : (
                 <>
-                  <p className="text-slate-500 mb-4">{t('noProductsYet')}</p>
+                  <p className="text-zinc-500 dark:text-zinc-400 mb-4">{t('noProductsYet')}</p>
                   <button
                     onClick={() => openProductModal()}
                     className="text-[#6262bd] font-medium hover:underline"
@@ -783,9 +783,9 @@ export default function StockManagement() {
                   checked={selectedIds.size === filteredProducts.length && filteredProducts.length > 0}
                   ref={el => { if (el) el.indeterminate = selectedIds.size > 0 && selectedIds.size < filteredProducts.length }}
                   onChange={toggleSelectAll}
-                  className="w-4 h-4 rounded border-slate-300 accent-[#6262bd] cursor-pointer"
+                  className="w-4 h-4 rounded border-zinc-300 dark:border-zinc-600 accent-[#6262bd] cursor-pointer"
                 />
-                <span className="text-sm text-slate-500">
+                <span className="text-sm text-zinc-500 dark:text-zinc-400">
                   {selectedIds.size > 0 ? `${selectedIds.size} selected` : `Select all (${filteredProducts.length})`}
                 </span>
               </div>
@@ -793,21 +793,21 @@ export default function StockManagement() {
               {filteredProducts.map((product) => (
                 <div
                   key={product.id}
-                  className={`bg-white border-2 rounded-2xl p-4 sm:p-6 flex gap-3 ${
+                  className={`bg-white border-2 rounded-sm p-4 sm:p-6 flex gap-3 ${
                     selectedIds.has(product.id) ? 'border-[#6262bd] bg-[#6262bd]/5' :
-                    product.current_stock <= 0 ? 'border-red-300 bg-red-50' : 'border-slate-100'
+                    product.current_stock <= 0 ? 'border-red-300 bg-red-50' : 'border-zinc-200 dark:border-zinc-800'
                   }`}
                 >
                   <input
                     type="checkbox"
                     checked={selectedIds.has(product.id)}
                     onChange={() => toggleSelect(product.id)}
-                    className="w-4 h-4 mt-1 rounded border-slate-300 accent-[#6262bd] cursor-pointer flex-shrink-0"
+                    className="w-4 h-4 mt-1 rounded border-zinc-300 dark:border-zinc-600 accent-[#6262bd] cursor-pointer flex-shrink-0"
                   />
                   <div className="flex-1 flex flex-col gap-3 min-w-0">
                     {/* Name + badges */}
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="text-base font-semibold text-slate-800">
+                      <h3 className="text-base font-semibold text-zinc-800 dark:text-zinc-200">
                         {product.name}
                       </h3>
                       {product.current_stock <= 0 && (
@@ -824,7 +824,7 @@ export default function StockManagement() {
                         </button>
                       )}
                       {product.brand && (
-                        <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs rounded-full font-medium">
+                        <span className="px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 text-xs rounded-full font-medium">
                           {product.brand}
                         </span>
                       )}
@@ -837,7 +837,7 @@ export default function StockManagement() {
                       </span>
                     </div>
                     {/* Metadata */}
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-600">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-zinc-600 dark:text-zinc-400">
                       <span>
                         {t('currentStock')}: <strong className={product.current_stock <= 0 ? 'text-red-500' : 'text-[#6262bd]'}>{formatStock(product.current_stock, product.base_unit)}</strong>
                       </span>
@@ -857,13 +857,13 @@ export default function StockManagement() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <button
                         onClick={() => openStockModal(product)}
-                        className="flex-1 sm:flex-none px-4 py-2 bg-green-50 text-green-600 rounded-xl font-medium hover:bg-green-100 text-sm"
+                        className="flex-1 sm:flex-none px-4 py-2 bg-green-50 text-green-600 rounded-sm font-medium hover:bg-green-100 text-sm"
                       >
                         {t('addStockButton')}
                       </button>
                       <button
                         onClick={() => openProductModal(product)}
-                        className="p-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        className="p-2 rounded-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:bg-zinc-700"
                       >
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
@@ -871,7 +871,7 @@ export default function StockManagement() {
                       </button>
                       <button
                         onClick={() => deleteProduct(product.id)}
-                        className="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100"
+                        className="p-2 rounded-sm bg-red-50 text-red-500 hover:bg-red-100"
                       >
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
@@ -886,11 +886,11 @@ export default function StockManagement() {
 
           {/* Bulk action bar */}
           {selectedIds.size > 0 && (
-            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl">
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-slate-900 text-white px-6 py-3 rounded-sm shadow-2xl">
               <span className="text-sm font-medium">{selectedIds.size} selected</span>
               <button
                 onClick={deleteSelected}
-                className="flex items-center gap-2 px-4 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-medium transition-colors"
+                className="flex items-center gap-2 px-4 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-sm text-sm font-medium transition-colors"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
@@ -899,7 +899,7 @@ export default function StockManagement() {
               </button>
               <button
                 onClick={() => setSelectedIds(new Set())}
-                className="text-sm text-slate-400 hover:text-white transition-colors"
+                className="text-sm text-zinc-400 dark:text-zinc-500 hover:text-white transition-colors"
               >
                 Cancel
               </button>
@@ -912,45 +912,45 @@ export default function StockManagement() {
       {activeTab === 'history' && (
         <div>
           {entries.length === 0 ? (
-            <div className="bg-white border-2 border-slate-100 rounded-2xl p-12 text-center">
-              <p className="text-slate-500">{t('noStockEntries')}</p>
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-12 text-center">
+              <p className="text-zinc-500 dark:text-zinc-400">{t('noStockEntries')}</p>
             </div>
           ) : (
-            <div className="bg-white border-2 border-slate-100 rounded-2xl overflow-hidden">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-slate-50 border-b-2 border-slate-100">
+                  <thead className="bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800">
                     <tr>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">{t('date')}</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">{t('product')}</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">{t('quantity')}</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">{t('addedBy')}</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">{t('notes')}</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-zinc-700 dark:text-zinc-300">{t('date')}</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-zinc-700 dark:text-zinc-300">{t('product')}</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-zinc-700 dark:text-zinc-300">{t('quantity')}</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-zinc-700 dark:text-zinc-300">{t('addedBy')}</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-zinc-700 dark:text-zinc-300">{t('notes')}</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
                     {entries.map((entry) => (
-                      <tr key={entry.id} className="hover:bg-slate-50">
-                        <td className="px-6 py-4 text-sm text-slate-600">
+                      <tr key={entry.id} className="hover:bg-zinc-50 dark:bg-zinc-900">
+                        <td className="px-6 py-4 text-sm text-zinc-600 dark:text-zinc-400">
                           {new Date(entry.created_at).toLocaleString()}
                         </td>
                         <td className="px-6 py-4">
-                          <div className="font-medium text-slate-800">
+                          <div className="font-medium text-zinc-800 dark:text-zinc-200">
                             {entry.stock_products?.name}
                           </div>
                           {entry.stock_products?.brand && (
-                            <div className="text-xs text-slate-500">
+                            <div className="text-xs text-zinc-500 dark:text-zinc-400">
                               {entry.stock_products.brand}
                             </div>
                           )}
                         </td>
-                        <td className="px-6 py-4 text-sm font-medium text-slate-800">
+                        <td className="px-6 py-4 text-sm font-medium text-zinc-800 dark:text-zinc-200">
                           {entry.quantity} {entry.unit_used}
                         </td>
-                        <td className="px-6 py-4 text-sm text-slate-600">
+                        <td className="px-6 py-4 text-sm text-zinc-600 dark:text-zinc-400">
                           {entry.added_by_email}
                         </td>
-                        <td className="px-6 py-4 text-sm text-slate-500">
+                        <td className="px-6 py-4 text-sm text-zinc-500 dark:text-zinc-400">
                           {entry.notes || '-'}
                         </td>
                       </tr>
@@ -973,17 +973,17 @@ export default function StockManagement() {
           }}
         >
           <div
-            className="bg-white rounded-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            className="bg-white dark:bg-zinc-900 rounded-sm p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold text-slate-800 mb-6">
+            <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 mb-6">
               {editingProduct ? t('editProduct') : t('newProduct')}
             </h2>
 
             <form onSubmit={handleProductSubmit} className="space-y-5">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                     {t('productName')} *
                   </label>
                   <input
@@ -992,13 +992,13 @@ export default function StockManagement() {
                     value={productForm.name}
                     onChange={handleProductFormChange}
                     required
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                     placeholder={t('productNamePlaceholder')}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                     {t('brand')}
                   </label>
                   <input
@@ -1006,14 +1006,14 @@ export default function StockManagement() {
                     name="brand"
                     value={productForm.brand}
                     onChange={handleProductFormChange}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                     placeholder={t('brandPlaceholder')}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   {t('category')} *
                 </label>
                 <select
@@ -1021,7 +1021,7 @@ export default function StockManagement() {
                   value={productForm.category}
                   onChange={handleProductFormChange}
                   required
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                 >
                   <option value="kitchen">🍳 {t('kitchen')}</option>
                   <option value="bar">🍸 {t('bar')}</option>
@@ -1030,7 +1030,7 @@ export default function StockManagement() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                     {t('baseStorageUnit')} *
                   </label>
                   <select
@@ -1038,18 +1038,18 @@ export default function StockManagement() {
                     value={productForm.base_unit}
                     onChange={handleProductFormChange}
                     required
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                   >
                     <option value="grams">{t('gramsForSolids')}</option>
                     <option value="ml">{t('mlForLiquids')}</option>
                   </select>
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                     {t('baseUnitHelp')}
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                     {t('inputUnitType')} *
                   </label>
                   <select
@@ -1057,7 +1057,7 @@ export default function StockManagement() {
                     value={productForm.input_unit_type}
                     onChange={handleProductFormChange}
                     required
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                   >
                     <optgroup label={t('weight')}>
                       <option value="kg">{t('kilograms')}</option>
@@ -1073,14 +1073,14 @@ export default function StockManagement() {
                       <option value="units">{t('units')}</option>
                     </optgroup>
                   </select>
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                     {t('inputUnitHelp')}
                   </p>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   {t('conversionFactor')} *
                 </label>
                 <input
@@ -1091,9 +1091,9 @@ export default function StockManagement() {
                   required
                   step="0.01"
                   min="0.01"
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                 />
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                   {t('conversionHelp').replace('{inputUnit}', productForm.input_unit_type).replace('{multiplier}', productForm.units_to_base_multiplier).replace('{baseUnit}', productForm.base_unit)}
                   {['bottles', 'cans', 'units'].includes(productForm.input_unit_type) && (
                     <span className="block mt-1">
@@ -1104,14 +1104,14 @@ export default function StockManagement() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   {t('productTaxCategory')}
                 </label>
                 <select
                   name="tax_category_id"
                   value={productForm.tax_category_id}
                   onChange={handleProductFormChange}
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                 >
                   <option value="">{t('noTaxCategory')}</option>
                   {taxCategories.map((cat) => (
@@ -1120,7 +1120,7 @@ export default function StockManagement() {
                     </option>
                   ))}
                 </select>
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                   {t('taxCategoryHelp')}
                   {taxCategories.length === 0 && (
                     <span className="block mt-1 text-amber-600">
@@ -1134,13 +1134,13 @@ export default function StockManagement() {
                 <button
                   type="button"
                   onClick={() => setShowProductModal(false)}
-                  className="flex-1 border-2 border-slate-200 text-slate-600 py-3 rounded-xl font-medium hover:bg-slate-50"
+                  className="flex-1 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900"
                 >
                   {t('cancel')}
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-[#6262bd] text-white py-3 rounded-xl font-medium hover:bg-[#5252a3]"
+                  className="flex-1 bg-[#6262bd] text-white py-3 rounded-sm font-medium hover:bg-[#5252a3]"
                 >
                   {editingProduct ? t('saveChanges') : t('createProduct')}
                 </button>
@@ -1157,24 +1157,24 @@ export default function StockManagement() {
           onClick={() => setShowStockModal(false)}
         >
           <div
-            className="bg-white rounded-2xl p-8 w-full max-w-md"
+            className="bg-white dark:bg-zinc-900 rounded-sm p-8 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold text-slate-800 mb-4">{t('addStock')}</h2>
+            <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 mb-4">{t('addStock')}</h2>
 
             {/* Tab toggle */}
-            <div className="flex gap-1 bg-slate-100 rounded-xl p-1 mb-6">
+            <div className="flex gap-1 bg-zinc-100 dark:bg-zinc-800 rounded-sm p-1 mb-6">
               <button
                 type="button"
                 onClick={() => setStockModalTab('add')}
-                className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${stockModalTab === 'add' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`flex-1 py-2 rounded-sm text-sm font-medium transition-all ${stockModalTab === 'add' ? 'bg-white text-zinc-800 dark:text-zinc-200 shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:text-zinc-300'}`}
               >
                 {t('addStock')}
               </button>
               <button
                 type="button"
                 onClick={() => setStockModalTab('adjust')}
-                className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${stockModalTab === 'adjust' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`flex-1 py-2 rounded-sm text-sm font-medium transition-all ${stockModalTab === 'adjust' ? 'bg-white text-zinc-800 dark:text-zinc-200 shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:text-zinc-300'}`}
               >
                 {t('adjustStockValue')}
               </button>
@@ -1182,7 +1182,7 @@ export default function StockManagement() {
 
             <form onSubmit={stockModalTab === 'add' ? handleStockSubmit : handleAdjustValue} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   {t('selectProduct')} *
                 </label>
                 <div className="relative stock-dropdown-container">
@@ -1214,13 +1214,13 @@ export default function StockManagement() {
                       setStockProductSearch('')
                     }}
                     placeholder={t('searchOrSelectProduct')}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                     required
                   />
 
                   {/* Dropdown List */}
                   {showStockDropdown && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border-2 border-slate-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                    <div className="absolute z-10 w-full mt-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-sm shadow-lg max-h-60 overflow-y-auto">
                       {(() => {
                         const filteredProducts = products.filter(product => {
                           if (!stockProductSearch) return true
@@ -1246,7 +1246,7 @@ export default function StockManagement() {
                             </div>
                           ))
                         ) : (
-                          <div className="px-4 py-2 text-slate-400 text-sm">
+                          <div className="px-4 py-2 text-zinc-400 dark:text-zinc-500 text-sm">
                             {t('noProductsFound')}
                           </div>
                         )
@@ -1260,7 +1260,7 @@ export default function StockManagement() {
                 <>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                      <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                         {t('quantity')} *
                       </label>
                       <div className="relative">
@@ -1271,21 +1271,21 @@ export default function StockManagement() {
                           required
                           step="0.01"
                           min="0.01"
-                          className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                          className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                           placeholder="0"
                         />
-                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 font-medium">
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400 font-medium">
                           {products.find(p => p.id === stockForm.product_id)?.input_unit_type}
                         </span>
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                      <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                         {t('purchasePrice')} *
                       </label>
                       <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-medium">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400 font-medium">
                           {currencySymbol}
                         </span>
                         <input
@@ -1295,7 +1295,7 @@ export default function StockManagement() {
                           required
                           step="0.01"
                           min="0.01"
-                          className="w-full pl-8 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                          className="w-full pl-8 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                           placeholder="0.00"
                         />
                       </div>
@@ -1303,11 +1303,11 @@ export default function StockManagement() {
                   </div>
 
                   {stockForm.quantity && stockForm.purchase_price && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                      <p className="text-sm text-slate-700 mb-1">
+                    <div className="bg-blue-50 border border-blue-200 rounded-sm p-4">
+                      <p className="text-sm text-zinc-700 dark:text-zinc-300 mb-1">
                         <strong>{t('totalStock')}:</strong> {(parseFloat(stockForm.quantity) * products.find(p => p.id === stockForm.product_id)?.units_to_base_multiplier).toFixed(2)} {products.find(p => p.id === stockForm.product_id)?.base_unit}
                       </p>
-                      <p className="text-sm text-slate-700">
+                      <p className="text-sm text-zinc-700 dark:text-zinc-300">
                         <strong>{t('costPerUnit').replace('{unit}', products.find(p => p.id === stockForm.product_id)?.base_unit)}:</strong> {(() => { const v = parseFloat(stockForm.purchase_price) / (parseFloat(stockForm.quantity) * products.find(p => p.id === stockForm.product_id)?.units_to_base_multiplier); return `${currencySymbol}${v < 0.1 ? v.toFixed(4) : v.toFixed(2)}`; })()}
                       </p>
                     </div>
@@ -1315,7 +1315,7 @@ export default function StockManagement() {
 
                   {/* Invoice Selection (Optional) */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                       {t('linkToInvoice')} ({t('optional')})
                     </label>
                     <div className="relative invoice-dropdown-container">
@@ -1345,13 +1345,13 @@ export default function StockManagement() {
                           setInvoiceSearch('')
                         }}
                         placeholder={t('searchOrSelectInvoice')}
-                        className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                        className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                       />
                       {stockForm.purchasing_invoice_id && !showInvoiceDropdown && (
                         <button
                           type="button"
                           onClick={() => setStockForm({ ...stockForm, purchasing_invoice_id: '' })}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400"
                         >
                           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -1360,14 +1360,14 @@ export default function StockManagement() {
                       )}
 
                       {showInvoiceDropdown && (
-                        <div className="absolute z-10 w-full mt-1 bg-white border-2 border-slate-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                        <div className="absolute z-10 w-full mt-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-sm shadow-lg max-h-60 overflow-y-auto">
                           <div
                             onClick={() => {
                               setStockForm({ ...stockForm, purchasing_invoice_id: '' })
                               setShowInvoiceDropdown(false)
                               setInvoiceSearch('')
                             }}
-                            className="px-4 py-2 hover:bg-slate-100 cursor-pointer text-slate-500 border-b border-slate-100"
+                            className="px-4 py-2 hover:bg-zinc-100 dark:bg-zinc-800 cursor-pointer text-zinc-500 dark:text-zinc-400 border-b border-zinc-200 dark:border-zinc-800"
                           >
                             {t('noInvoice')}
                           </div>
@@ -1400,7 +1400,7 @@ export default function StockManagement() {
                                 </div>
                               ))
                             ) : (
-                              <div className="px-4 py-2 text-slate-400 text-sm">
+                              <div className="px-4 py-2 text-zinc-400 dark:text-zinc-500 text-sm">
                                 No invoices found
                               </div>
                             )
@@ -1411,14 +1411,14 @@ export default function StockManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                       {t('notesOptional')}
                     </label>
                     <textarea
                       value={stockForm.notes}
                       onChange={(e) => setStockForm({ ...stockForm, notes: e.target.value })}
                       rows={3}
-                      className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 resize-none"
+                      className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 resize-none"
                       placeholder={t('notesPlaceholder')}
                     />
                   </div>
@@ -1427,13 +1427,13 @@ export default function StockManagement() {
 
               {stockForm.product_id && stockModalTab === 'adjust' && (
                 <>
-                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-800">
+                  <div className="bg-amber-50 border border-amber-200 rounded-sm p-3 text-sm text-amber-800">
                     {t('adjustStockValueNote')}
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                      <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                         {t('currentStockQty')} *
                       </label>
                       <div className="relative">
@@ -1448,10 +1448,10 @@ export default function StockManagement() {
                               required
                               step="0.01"
                               min="0"
-                              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                              className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                               placeholder={currentInInputUnit}
                             />
-                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 font-medium text-xs">
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400 font-medium text-xs">
                               {p?.input_unit_type}
                             </span>
                           </>
@@ -1460,11 +1460,11 @@ export default function StockManagement() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                      <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                         {t('currentStockValue')} *
                       </label>
                       <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-medium">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400 font-medium">
                           {currencySymbol}
                         </span>
                         <input
@@ -1474,7 +1474,7 @@ export default function StockManagement() {
                           required
                           step="0.01"
                           min="0"
-                          className="w-full pl-8 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                          className="w-full pl-8 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                           placeholder="0.00"
                         />
                       </div>
@@ -1482,8 +1482,8 @@ export default function StockManagement() {
                   </div>
 
                   {adjustForm.current_stock && adjustForm.current_stock_value && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                      <p className="text-sm text-slate-700">
+                    <div className="bg-blue-50 border border-blue-200 rounded-sm p-4">
+                      <p className="text-sm text-zinc-700 dark:text-zinc-300">
                         {(() => {
                           const p = products.find(pr => pr.id === stockForm.product_id)
                           const qty = parseFloat(adjustForm.current_stock)
@@ -1504,14 +1504,14 @@ export default function StockManagement() {
                 <button
                   type="button"
                   onClick={() => setShowStockModal(false)}
-                  className="flex-1 border-2 border-slate-200 text-slate-600 py-3 rounded-xl font-medium hover:bg-slate-50"
+                  className="flex-1 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900"
                 >
                   {t('cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={!stockForm.product_id}
-                  className={`flex-1 text-white py-3 rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${stockModalTab === 'add' ? 'bg-green-600 hover:bg-green-700' : 'bg-[#6262bd] hover:bg-[#5252a3]'}`}
+                  className={`flex-1 text-white py-3 rounded-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${stockModalTab === 'add' ? 'bg-green-600 hover:bg-green-700' : 'bg-[#6262bd] hover:bg-[#5252a3]'}`}
                 >
                   {stockModalTab === 'add' ? t('addStock') : t('saveAdjustment')}
                 </button>

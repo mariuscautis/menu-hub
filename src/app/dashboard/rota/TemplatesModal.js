@@ -125,22 +125,22 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-3xl max-h-[92vh] flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
+      <div className="bg-white dark:bg-zinc-900 rounded-sm w-full max-w-3xl max-h-[92vh] flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b-2 border-slate-100 dark:border-slate-700 flex-shrink-0">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 flex-shrink-0">
           <div>
-            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">{t('title')}</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Reusable weekly shift patterns</p>
+            <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{t('title')}</h2>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-0.5">Reusable weekly shift patterns</p>
           </div>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 text-xl font-bold transition-colors">×</button>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-sm text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-xl font-bold transition-colors">×</button>
         </div>
 
         {/* Tabs */}
         <div className="px-6 pt-4 flex gap-1 flex-shrink-0">
           {TABS.map(tab => (
             <button key={tab.key} onClick={() => setViewMode(tab.key)}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${viewMode === tab.key ? 'bg-[#6262bd] text-white' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400'}`}>
+              className={`px-4 py-2 rounded-sm text-sm font-semibold transition-colors ${viewMode === tab.key ? 'bg-[#6262bd] text-white' : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-800 dark:text-zinc-400'}`}>
               {tab.label}
             </button>
           ))}
@@ -148,7 +148,7 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
 
         {/* Message banner */}
         {message && (
-          <div className={`mx-6 mt-4 p-3 rounded-xl text-sm font-medium flex-shrink-0 ${message.type === 'success' ? 'bg-green-50 border border-green-200 text-green-700' : 'bg-red-50 border border-red-200 text-red-700'}`}>
+          <div className={`mx-6 mt-4 p-3 rounded-sm text-sm font-medium flex-shrink-0 ${message.type === 'success' ? 'bg-green-50 border border-green-200 text-green-700' : 'bg-red-50 border border-red-200 text-red-700'}`}>
             {message.type === 'success' ? '✅' : '⚠️'} {message.text}
           </div>
         )}
@@ -160,14 +160,14 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
           {viewMode === 'list' && (
             loading ? (
               <div className="flex flex-col items-center justify-center py-16">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#6262bd] mb-4"></div>
-                <p className="text-slate-500">{t('loadingTemplates')}</p>
+                <div className="w-8 h-8 border-2 border-zinc-200 dark:border-zinc-800 border-t-[#6262bd] rounded-full animate-spin mb-4"></div>
+                <p className="text-zinc-500 dark:text-zinc-400">{t('loadingTemplates')}</p>
               </div>
             ) : templates.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-slate-400">
+              <div className="flex flex-col items-center justify-center py-16 text-zinc-400 dark:text-zinc-500">
                 <div className="text-5xl mb-4">📋</div>
-                <p className="font-medium text-slate-600 dark:text-slate-300 mb-4">{t('noTemplatesYet')}</p>
-                <button onClick={() => setViewMode('create')} className="px-5 py-2.5 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252a5] transition-colors font-medium">
+                <p className="font-medium text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 mb-4">{t('noTemplatesYet')}</p>
+                <button onClick={() => setViewMode('create')} className="px-5 py-2.5 bg-[#6262bd] text-white rounded-sm hover:bg-[#5252a5] transition-colors font-medium">
                   {t('createFirstTemplate')}
                 </button>
               </div>
@@ -177,15 +177,15 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
                   const grouped = groupByDay(template.shifts || []);
                   const activeDays = DAYS.filter(d => grouped[d].length > 0);
                   return (
-                    <div key={template.id} className={`border-2 rounded-xl overflow-hidden transition-colors ${selectedTemplate?.id === template.id ? 'border-[#6262bd]' : 'border-slate-100 dark:border-slate-700 hover:border-slate-200 dark:hover:border-slate-600'}`}>
+                    <div key={template.id} className={`border-2 rounded-sm overflow-hidden transition-colors ${selectedTemplate?.id === template.id ? 'border-[#6262bd]' : 'border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 hover:border-zinc-200 dark:border-zinc-700 dark:hover:border-zinc-600'}`}>
                       <div className="flex items-center justify-between px-5 py-4">
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-9 h-9 rounded-xl bg-[#6262bd]/10 flex-shrink-0 flex items-center justify-center">
+                          <div className="w-9 h-9 rounded-sm bg-[#6262bd]/10 flex-shrink-0 flex items-center justify-center">
                             <span className="text-sm font-bold text-[#6262bd]">{template.shifts?.length || 0}</span>
                           </div>
                           <div>
-                            <p className="font-semibold text-slate-800 dark:text-slate-200">{template.name}</p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                            <p className="font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{template.name}</p>
+                            <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">
                               {template.shifts?.length || 0} shifts/week · {activeDays.length} days
                             </p>
                           </div>
@@ -193,11 +193,11 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
                         <div className="flex gap-2 flex-shrink-0 ml-3">
                           <button
                             onClick={() => { setSelectedTemplate(template); setViewMode('apply'); }}
-                            className="px-3 py-1.5 bg-[#6262bd] text-white rounded-lg hover:bg-[#5252a5] transition-colors text-xs font-semibold"
+                            className="px-3 py-1.5 bg-[#6262bd] text-white rounded-sm hover:bg-[#5252a5] transition-colors text-xs font-semibold"
                           >▶ {t('apply')}</button>
                           <button
                             onClick={() => handleDeleteTemplate(template.id)}
-                            className="px-3 py-1.5 text-red-600 border border-red-200 hover:bg-red-50 rounded-lg transition-colors text-xs font-semibold"
+                            className="px-3 py-1.5 text-red-600 border border-red-200 hover:bg-red-50 rounded-sm transition-colors text-xs font-semibold"
                           >🗑</button>
                         </div>
                       </div>
@@ -206,8 +206,8 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
                       <div className="px-5 pb-4">
                         <div className="grid grid-cols-7 gap-1">
                           {DAYS.map(day => (
-                            <div key={day} className={`rounded-lg p-1.5 text-center ${grouped[day].length > 0 ? 'bg-[#6262bd]/10' : 'bg-slate-50 dark:bg-slate-800'}`}>
-                              <p className={`text-xs font-semibold ${grouped[day].length > 0 ? 'text-[#6262bd]' : 'text-slate-400 dark:text-slate-600'}`}>{DAY_ABBR[day]}</p>
+                            <div key={day} className={`rounded-sm p-1.5 text-center ${grouped[day].length > 0 ? 'bg-[#6262bd]/10' : 'bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800'}`}>
+                              <p className={`text-xs font-semibold ${grouped[day].length > 0 ? 'text-[#6262bd]' : 'text-zinc-400 dark:text-zinc-500 dark:text-zinc-600 dark:text-zinc-400'}`}>{DAY_ABBR[day]}</p>
                               {grouped[day].length > 0 && (
                                 <p className="text-xs text-[#6262bd] font-bold">{grouped[day].length}</p>
                               )}
@@ -218,7 +218,7 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
                           <div className="mt-2 space-y-0.5">
                             {activeDays.map(day =>
                               grouped[day].map((s, i) => (
-                                <p key={`${day}-${i}`} className="text-xs text-slate-600 dark:text-slate-400">
+                                <p key={`${day}-${i}`} className="text-xs text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">
                                   <span className="font-medium">{DAY_ABBR[day]}:</span> {s.shift_start}–{s.shift_end} · {s.role_required}{s.department ? ` (${s.department})` : ''}
                                 </p>
                               ))
@@ -237,51 +237,51 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
           {viewMode === 'create' && (
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{t('templateNameRequired')}</label>
+                <label className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-1.5">{t('templateNameRequired')}</label>
                 <input
                   type="text"
                   value={templateName}
                   onChange={e => setTemplateName(e.target.value)}
                   placeholder={t('templateNamePlaceholder')}
-                  className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 transition-colors"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 transition-colors"
                 />
               </div>
 
               {/* Add shift form */}
-              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border-2 border-dashed border-slate-200 dark:border-slate-700">
-                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">➕ {t('addShiftsToTemplate')}</h3>
+              <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800/50 rounded-sm p-4 border-2 border-dashed border-zinc-200 dark:border-zinc-700 dark:border-zinc-700">
+                <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-3">➕ {t('addShiftsToTemplate')}</h3>
                 <div className="grid grid-cols-2 gap-3 mb-3">
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">{t('dayOfWeek')}</label>
+                    <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mb-1">{t('dayOfWeek')}</label>
                     <select value={newShift.day_of_week} onChange={e => setNewShift({ ...newShift, day_of_week: e.target.value })}
-                      className="w-full px-3 py-2.5 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 text-sm transition-colors">
+                      className="w-full px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-700 text-sm transition-colors">
                       {DAYS.map(d => <option key={d} value={d}>{getDayLabel(d)}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">{t('roleRequired')}</label>
+                    <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mb-1">{t('roleRequired')}</label>
                     <input type="text" value={newShift.role_required} onChange={e => setNewShift({ ...newShift, role_required: e.target.value })} placeholder={t('roleRequiredPlaceholder')}
-                      className="w-full px-3 py-2.5 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 text-sm placeholder:text-slate-400 transition-colors" />
+                      className="w-full px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-700 text-sm placeholder:text-zinc-400 dark:text-zinc-500 transition-colors" />
                   </div>
                   <div className="col-span-2 grid grid-cols-3 gap-3">
                     <div>
-                      <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">{t('startTime')}</label>
+                      <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mb-1">{t('startTime')}</label>
                       <input type="time" value={newShift.shift_start} onChange={e => setNewShift({ ...newShift, shift_start: e.target.value })}
-                        className="w-full px-3 py-2.5 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 text-sm transition-colors" />
+                        className="w-full px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-700 text-sm transition-colors" />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">{t('endTime')}</label>
+                      <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mb-1">{t('endTime')}</label>
                       <input type="time" value={newShift.shift_end} onChange={e => setNewShift({ ...newShift, shift_end: e.target.value })}
-                        className="w-full px-3 py-2.5 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 text-sm transition-colors" />
+                        className="w-full px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-700 text-sm transition-colors" />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Break (min)</label>
+                      <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mb-1">Break (min)</label>
                       <input type="number" value={newShift.break_duration} onChange={e => setNewShift({ ...newShift, break_duration: parseInt(e.target.value) })} min="0" max="180"
-                        className="w-full px-3 py-2.5 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 text-sm transition-colors" />
+                        className="w-full px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-700 text-sm transition-colors" />
                     </div>
                   </div>
                 </div>
-                <button onClick={handleAddShift} className="w-full py-2.5 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252a5] transition-colors font-semibold text-sm">
+                <button onClick={handleAddShift} className="w-full py-2.5 bg-[#6262bd] text-white rounded-sm hover:bg-[#5252a5] transition-colors font-semibold text-sm">
                   ➕ {t('addShiftToTemplate')}
                 </button>
               </div>
@@ -289,18 +289,18 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
               {/* Shifts list */}
               {templateShifts.length > 0 && (
                 <div>
-                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">{t('shiftsInTemplate')} ({templateShifts.length})</p>
+                  <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">{t('shiftsInTemplate')} ({templateShifts.length})</p>
                   <div className="space-y-1.5">
                     {templateShifts.map((s, i) => (
-                      <div key={i} className="flex items-center justify-between px-4 py-3 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-xl">
+                      <div key={i} className="flex items-center justify-between px-4 py-3 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 rounded-sm">
                         <div className="flex items-center gap-3">
-                          <span className="text-xs font-bold text-[#6262bd] bg-[#6262bd]/10 px-2 py-1 rounded-lg">{DAY_ABBR[s.day_of_week]}</span>
-                          <span className="text-sm text-slate-700 dark:text-slate-300">
+                          <span className="text-xs font-bold text-[#6262bd] bg-[#6262bd]/10 px-2 py-1 rounded-sm">{DAY_ABBR[s.day_of_week]}</span>
+                          <span className="text-sm text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">
                             {s.shift_start}–{s.shift_end} · {s.role_required}{s.department ? ` · ${s.department}` : ''}
                           </span>
                         </div>
                         <button onClick={() => setTemplateShifts(templateShifts.filter((_, j) => j !== i))}
-                          className="text-red-500 hover:text-red-600 text-sm font-bold px-2 py-1 rounded-lg hover:bg-red-50 transition-colors">
+                          className="text-red-500 hover:text-red-600 text-sm font-bold px-2 py-1 rounded-sm hover:bg-red-50 transition-colors">
                           ✕
                         </button>
                       </div>
@@ -314,32 +314,32 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
           {/* ─── APPLY ─── */}
           {viewMode === 'apply' && selectedTemplate && (
             <div className="space-y-5">
-              <div className="flex items-center gap-3 p-4 bg-[#6262bd]/5 border-2 border-[#6262bd]/20 rounded-xl">
-                <div className="w-10 h-10 rounded-xl bg-[#6262bd] flex-shrink-0 flex items-center justify-center text-white font-bold">
+              <div className="flex items-center gap-3 p-4 bg-[#6262bd]/5 border-2 border-[#6262bd]/20 rounded-sm">
+                <div className="w-10 h-10 rounded-sm bg-[#6262bd] flex-shrink-0 flex items-center justify-center text-white font-bold">
                   {selectedTemplate.shifts?.length || 0}
                 </div>
                 <div>
-                  <p className="font-semibold text-slate-800 dark:text-slate-200">{selectedTemplate.name}</p>
-                  <p className="text-xs text-slate-500">{selectedTemplate.shifts?.length || 0} shifts per week</p>
+                  <p className="font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{selectedTemplate.name}</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">{selectedTemplate.shifts?.length || 0} shifts per week</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{t('startDateLabel')}</label>
+                  <label className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-1.5">{t('startDateLabel')}</label>
                   <input type="date" value={applyStartDate} onChange={e => setApplyStartDate(e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 transition-colors" />
-                  <p className="text-xs text-slate-500 mt-1">{t('startDateHelper')}</p>
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 transition-colors" />
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">{t('startDateHelper')}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{t('numberOfWeeks')}</label>
+                  <label className="block text-sm font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-1.5">{t('numberOfWeeks')}</label>
                   <input type="number" value={applyWeeks} onChange={e => setApplyWeeks(parseInt(e.target.value) || 1)} min="1" max="12"
-                    className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 transition-colors" />
-                  <p className="text-xs text-slate-500 mt-1">{t('numberOfWeeksHelper')}</p>
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 transition-colors" />
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">{t('numberOfWeeksHelper')}</p>
                 </div>
               </div>
 
-              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-xl">
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-sm">
                 <p className="text-sm text-blue-800 dark:text-blue-300">
                   <strong>{t('noteLabel')}</strong> {t('noteText').replace('{count}', (selectedTemplate.shifts?.length || 0) * applyWeeks)} draft shifts will be created.
                 </p>
@@ -349,27 +349,27 @@ export default function TemplatesModal({ restaurant, staff, onClose, onApplyTemp
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t-2 border-slate-100 dark:border-slate-700 flex gap-3 flex-shrink-0">
+        <div className="px-6 py-4 border-t border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 flex gap-3 flex-shrink-0">
           {viewMode === 'list' && (
             <>
-              <button onClick={onClose} className="flex-1 border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 py-3 rounded-xl font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{t('cancel')}</button>
-              <button onClick={() => setViewMode('create')} className="flex-1 bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a5] transition-colors">
+              <button onClick={onClose} className="flex-1 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors">{t('cancel')}</button>
+              <button onClick={() => setViewMode('create')} className="flex-1 bg-[#6262bd] text-white py-3 rounded-sm font-semibold hover:bg-[#5252a5] transition-colors">
                 ➕ {t('tabCreateNew')}
               </button>
             </>
           )}
           {viewMode === 'create' && (
             <>
-              <button onClick={() => setViewMode('list')} className="flex-1 border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 py-3 rounded-xl font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{t('cancel')}</button>
-              <button onClick={handleSaveTemplate} disabled={saving} className="flex-1 bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a5] transition-colors disabled:opacity-50">
+              <button onClick={() => setViewMode('list')} className="flex-1 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors">{t('cancel')}</button>
+              <button onClick={handleSaveTemplate} disabled={saving} className="flex-1 bg-[#6262bd] text-white py-3 rounded-sm font-semibold hover:bg-[#5252a5] transition-colors disabled:opacity-50">
                 {saving ? '...' : t('saveTemplate')}
               </button>
             </>
           )}
           {viewMode === 'apply' && (
             <>
-              <button onClick={() => setViewMode('list')} className="flex-1 border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 py-3 rounded-xl font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">{t('cancel')}</button>
-              <button onClick={handleApplyTemplate} className="flex-1 bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a5] transition-colors">
+              <button onClick={() => setViewMode('list')} className="flex-1 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors">{t('cancel')}</button>
+              <button onClick={handleApplyTemplate} className="flex-1 bg-[#6262bd] text-white py-3 rounded-sm font-semibold hover:bg-[#5252a5] transition-colors">
                 ▶ {t('applyTemplate')}
               </button>
             </>

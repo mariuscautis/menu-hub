@@ -272,7 +272,7 @@ export default function XReportPage() {
   // Loading state
   if (loading && !restaurant) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-8">
+      <div className="min-h-screen p-8">
         <div className="flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6262bd]"></div>
         </div>
@@ -283,8 +283,8 @@ export default function XReportPage() {
   // No restaurant
   if (!restaurant) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-8">
-        <p className="text-slate-600 dark:text-slate-400">No restaurant found</p>
+      <div className="min-h-screen p-8">
+        <p className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">No restaurant found</p>
       </div>
     );
   }
@@ -292,29 +292,29 @@ export default function XReportPage() {
   // No active session
   if (!currentSession) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-4 md:p-8">
+      <div className="min-h-screen p-4 md:p-8">
         <div className="mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-2 flex items-center gap-2">
+          <h1 className="text-2xl md:text-3xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-2 flex items-center gap-2">
             {t('title') || 'X-Report'}
             <InfoTooltip text={tg('xreport_desc')} />
           </h1>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-8 text-center">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-8 text-center">
           <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
-          <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-2">
+          <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-2">
             {t('noActiveSession') || 'No active cash drawer session'}
           </h2>
-          <p className="text-slate-600 dark:text-slate-400 mb-6">
+          <p className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mb-6">
             {t('openDrawerFirst') || 'Open a cash drawer to start tracking shift data'}
           </p>
           <Link
             href="/dashboard/cash-drawer"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-[#6262bd] hover:bg-[#5252ad] text-white font-medium rounded-xl transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-[#6262bd] hover:bg-[#5252ad] text-white font-medium rounded-sm transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -333,22 +333,22 @@ export default function XReportPage() {
 
   return (
     <OfflinePageGuard>
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-4 md:p-8">
+    <div className="min-h-screen p-4 md:p-8">
       <PageTabs tabs={reportsTabs} />
       {/* Header */}
       <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200">
+          <h1 className="text-2xl md:text-3xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
             {t('title') || 'X-Report'}
           </h1>
-          <p className="text-slate-600 dark:text-slate-400">
+          <p className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">
             {t('subtitle')?.replace('{time}', formatTime(lastRefresh)) || `Current shift report as of ${formatTime(lastRefresh)}`}
           </p>
         </div>
 
         <button
           onClick={handleRefresh}
-          className="px-6 py-2 bg-[#6262bd] hover:bg-[#5252ad] text-white font-medium rounded-xl transition-colors flex items-center gap-2"
+          className="px-6 py-2 bg-[#6262bd] hover:bg-[#5252ad] text-white font-medium rounded-sm transition-colors flex items-center gap-2"
         >
           <svg className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -358,7 +358,7 @@ export default function XReportPage() {
       </div>
 
       {/* Shift Status Banner */}
-      <div className="mb-6 bg-green-50 dark:bg-green-900/30 border-2 border-green-200 dark:border-green-800 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+      <div className="mb-6 bg-green-50 dark:bg-green-900/30 border-2 border-green-200 dark:border-green-800 rounded-sm p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div className="flex items-center gap-3">
           <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
           <div>
@@ -380,43 +380,43 @@ export default function XReportPage() {
       <div className="space-y-6">
         {/* Quick Stats Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-          <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
-            <p className="text-sm text-slate-500 dark:text-slate-400">{tZ('netSales') || 'Net Sales'}</p>
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{tZ('netSales') || 'Net Sales'}</p>
             <p className="text-2xl font-bold text-[#6262bd]">{formatCurrency(reportData.netSales)}</p>
           </div>
-          <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
-            <p className="text-sm text-slate-500 dark:text-slate-400">{tZ('totalOrders') || 'Total Orders'}</p>
-            <p className="text-2xl font-bold text-slate-800 dark:text-slate-200">{reportData.totalOrders}</p>
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{tZ('totalOrders') || 'Total Orders'}</p>
+            <p className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{reportData.totalOrders}</p>
           </div>
-          <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
-            <p className="text-sm text-slate-500 dark:text-slate-400">{tZ('discounts') || 'Discounts'}</p>
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{tZ('discounts') || 'Discounts'}</p>
             <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{formatCurrency(reportData.discountTotal)}</p>
           </div>
-          <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
-            <p className="text-sm text-slate-500 dark:text-slate-400">{tZ('totalTips') || 'Total Tips'}</p>
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{tZ('totalTips') || 'Total Tips'}</p>
             <p className="text-2xl font-bold text-green-600 dark:text-green-400">{formatCurrency(reportData.totalTips)}</p>
           </div>
-          <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
-            <p className="text-sm text-slate-500 dark:text-slate-400">Expected in Drawer</p>
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">Expected in Drawer</p>
             <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{formatCurrency(expectedDrawer)}</p>
           </div>
         </div>
 
         {/* Payment Breakdown */}
-        <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6">
-          <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6">
+          <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4">
             {tZ('paymentBreakdown') || 'Payment Breakdown'}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-green-50 dark:bg-green-900/30 rounded-xl p-4 text-center">
+            <div className="bg-green-50 dark:bg-green-900/30 rounded-sm p-4 text-center">
               <p className="text-sm text-green-600 dark:text-green-400">{tZ('cash') || 'Cash'}</p>
               <p className="text-xl font-bold text-green-600 dark:text-green-400">{formatCurrency(reportData.cashTotal)}</p>
             </div>
-            <div className="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-4 text-center">
+            <div className="bg-blue-50 dark:bg-blue-900/30 rounded-sm p-4 text-center">
               <p className="text-sm text-blue-600 dark:text-blue-400">{tZ('card') || 'Card'}</p>
               <p className="text-xl font-bold text-blue-600 dark:text-blue-400">{formatCurrency(reportData.cardTotal)}</p>
             </div>
-            <div className="bg-purple-50 dark:bg-purple-900/30 rounded-xl p-4 text-center">
+            <div className="bg-purple-50 dark:bg-purple-900/30 rounded-sm p-4 text-center">
               <p className="text-sm text-purple-600 dark:text-purple-400">{tZ('splitBills') || 'Split Bills'}</p>
               <p className="text-xl font-bold text-purple-600 dark:text-purple-400">{formatCurrency(reportData.splitBillsTotal)}</p>
             </div>
@@ -424,30 +424,30 @@ export default function XReportPage() {
         </div>
 
         {/* Cash Drawer Status */}
-        <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6">
-          <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6">
+          <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4">
             {tZ('cashDrawer') || 'Cash Drawer'}
           </h2>
           <div className="space-y-3">
-            <div className="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
-              <span className="text-slate-600 dark:text-slate-400">{tZ('openingAmount') || 'Opening Amount'}</span>
-              <span className="font-semibold text-slate-800 dark:text-slate-200">
+            <div className="flex justify-between py-2 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-800">
+              <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{tZ('openingAmount') || 'Opening Amount'}</span>
+              <span className="font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                 {formatCurrency(currentSession.opening_amount)}
               </span>
             </div>
-            <div className="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
-              <span className="text-slate-600 dark:text-slate-400">{tZ('cashSalesAndTips') || 'Cash Sales + Tips'}</span>
+            <div className="flex justify-between py-2 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-800">
+              <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{tZ('cashSalesAndTips') || 'Cash Sales + Tips'}</span>
               <span className="font-semibold text-green-600 dark:text-green-400">
                 +{formatCurrency(reportData.cashSalesAndTips)}
               </span>
             </div>
-            <div className="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
-              <span className="text-slate-600 dark:text-slate-400">{tZ('cashRefunds') || 'Cash Refunds'}</span>
+            <div className="flex justify-between py-2 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-800">
+              <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{tZ('cashRefunds') || 'Cash Refunds'}</span>
               <span className="font-semibold text-red-600 dark:text-red-400">
                 -{formatCurrency(reportData.cashRefundsTotal)}
               </span>
             </div>
-            <div className="flex justify-between py-3 bg-amber-50 dark:bg-amber-900/30 px-3 rounded-lg">
+            <div className="flex justify-between py-3 bg-amber-50 dark:bg-amber-900/30 px-3 rounded-sm">
               <span className="font-bold text-amber-700 dark:text-amber-300">Expected in Drawer</span>
               <span className="font-bold text-amber-700 dark:text-amber-300 text-xl">
                 {formatCurrency(expectedDrawer)}
@@ -458,19 +458,19 @@ export default function XReportPage() {
 
         {/* Voids & Refunds */}
         {(reportData.voidsCount > 0 || reportData.refundsCount > 0) && (
-          <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6">
-            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6">
+            <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4">
               {tZ('voidsAndRefunds') || 'Voids & Refunds'}
             </h2>
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-amber-50 dark:bg-amber-900/30 rounded-xl p-4">
+              <div className="bg-amber-50 dark:bg-amber-900/30 rounded-sm p-4">
                 <p className="text-sm text-amber-600 dark:text-amber-400">{tZ('totalVoids') || 'Total Voids'}</p>
                 <p className="text-xl font-bold text-amber-600 dark:text-amber-400">
                   {formatCurrency(reportData.voidsTotal)}
                 </p>
                 <p className="text-xs text-amber-500 mt-1">{reportData.voidsCount} items</p>
               </div>
-              <div className="bg-red-50 dark:bg-red-900/30 rounded-xl p-4">
+              <div className="bg-red-50 dark:bg-red-900/30 rounded-sm p-4">
                 <p className="text-sm text-red-600 dark:text-red-400">{tZ('totalRefunds') || 'Total Refunds'}</p>
                 <p className="text-xl font-bold text-red-600 dark:text-red-400">
                   {formatCurrency(reportData.refundsTotal)}
@@ -483,17 +483,17 @@ export default function XReportPage() {
 
         {/* Staff Summary */}
         {reportData.staffSummary.length > 0 && (
-          <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6">
-            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6">
+            <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4">
               {tZ('staffSummary') || 'Staff Summary'}
             </h2>
             <div className="space-y-2">
               {reportData.staffSummary.map((staff, index) => (
-                <div key={index} className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                  <span className="font-medium text-slate-800 dark:text-slate-200">{staff.name}</span>
+                <div key={index} className="flex justify-between items-center p-3 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 rounded-sm">
+                  <span className="font-medium text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{staff.name}</span>
                   <div className="text-right">
                     <span className="font-bold text-[#6262bd]">{formatCurrency(staff.totalProcessed)}</span>
-                    <span className="text-sm text-slate-500 ml-2">({staff.paymentsProcessed} payments)</span>
+                    <span className="text-sm text-zinc-500 dark:text-zinc-400 ml-2">({staff.paymentsProcessed} payments)</span>
                   </div>
                 </div>
               ))}

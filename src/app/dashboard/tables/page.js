@@ -3100,7 +3100,7 @@ export default function Tables() {
   }
 
   if (loading) {
-    return <div className="text-slate-500">{t('loading')}</div>
+    return <div className="text-zinc-500 dark:text-zinc-400">{t('loading')}</div>
   }
 
   const visibleTables = activeFloorId === null
@@ -3120,7 +3120,7 @@ export default function Tables() {
         const p = palette[notification.type] || palette.info
         return (
           <div className="fixed top-4 right-4 z-[100] transition-all duration-300 ease-out animate-in slide-in-from-right">
-            <div className="rounded-xl shadow-lg p-4 min-w-[300px] max-w-md border-2" style={{ background: p.bg, borderColor: p.border }}>
+            <div className="rounded-sm shadow-lg p-4 min-w-[300px] max-w-md border-2" style={{ background: p.bg, borderColor: p.border }}>
               <div className="flex items-start gap-3">
                 {notification.type === 'success' && (
                   <svg className="w-6 h-6 flex-shrink-0" style={{ color: p.icon }} fill="currentColor" viewBox="0 0 24 24">
@@ -3153,21 +3153,21 @@ export default function Tables() {
 
       <div className="flex flex-wrap justify-between items-start gap-3 mb-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">
             {t('title')}
             <InfoTooltip text={tg('tables_desc')} />
           </h1>
-          <p className="text-slate-500">{t('subtitle')}</p>
+          <p className="text-zinc-500 dark:text-zinc-400">{t('subtitle')}</p>
         </div>
         <div className="flex flex-wrap gap-2 items-center">
           {/* Grid density toggle */}
           {tables.length > 0 && (
-            <div className="flex items-center gap-0.5 bg-slate-100 rounded-xl p-1">
+            <div className="flex items-center gap-0.5 bg-zinc-100 dark:bg-zinc-800 rounded-sm p-1">
               {/* Compact — many small squares */}
               <button
                 onClick={() => updateGridDensity('compact')}
                 title="Compact view"
-                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${gridDensity === 'compact' ? 'bg-white shadow text-[#6262bd]' : 'text-slate-400 hover:text-slate-600'}`}
+                className={`w-8 h-8 rounded-sm flex items-center justify-center transition-colors ${gridDensity === 'compact' ? 'bg-white shadow text-[#6262bd]' : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400'}`}
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <rect x="2" y="2" width="4.5" height="4.5" rx="0.8"/><rect x="9.75" y="2" width="4.5" height="4.5" rx="0.8"/><rect x="17.5" y="2" width="4.5" height="4.5" rx="0.8"/>
@@ -3179,7 +3179,7 @@ export default function Tables() {
               <button
                 onClick={() => updateGridDensity('default')}
                 title="Default view"
-                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${gridDensity === 'default' ? 'bg-white shadow text-[#6262bd]' : 'text-slate-400 hover:text-slate-600'}`}
+                className={`w-8 h-8 rounded-sm flex items-center justify-center transition-colors ${gridDensity === 'default' ? 'bg-white shadow text-[#6262bd]' : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400'}`}
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <rect x="2" y="2" width="9" height="9" rx="1.2"/><rect x="13" y="2" width="9" height="9" rx="1.2"/>
@@ -3190,7 +3190,7 @@ export default function Tables() {
               <button
                 onClick={() => updateGridDensity('large')}
                 title="Large view"
-                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${gridDensity === 'large' ? 'bg-white shadow text-[#6262bd]' : 'text-slate-400 hover:text-slate-600'}`}
+                className={`w-8 h-8 rounded-sm flex items-center justify-center transition-colors ${gridDensity === 'large' ? 'bg-white shadow text-[#6262bd]' : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400'}`}
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <rect x="2" y="2" width="20" height="9" rx="1.5"/><rect x="2" y="13" width="20" height="9" rx="1.5"/>
@@ -3201,7 +3201,7 @@ export default function Tables() {
           {userType === 'owner' && tables.length > 0 && (
             <button
               onClick={downloadAllQR}
-              className="border-2 border-slate-200 text-slate-600 px-3 sm:px-5 py-2.5 rounded-xl font-medium hover:bg-slate-50 flex items-center gap-2"
+              className="border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 px-3 sm:px-5 py-2.5 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 flex items-center gap-2"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
@@ -3212,7 +3212,7 @@ export default function Tables() {
           {userType === 'owner' && (
             <button
               onClick={() => setShowModal(true)}
-              className="bg-[#6262bd] text-white px-3 sm:px-5 py-2.5 rounded-xl font-medium hover:bg-[#5252a3] flex items-center gap-2"
+              className="bg-[#6262bd] text-white px-3 sm:px-5 py-2.5 rounded-sm font-medium hover:bg-[#5252a3] flex items-center gap-2"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
@@ -3225,13 +3225,13 @@ export default function Tables() {
 
       {/* Floor filter tabs — only shown when multiple floors exist */}
       {floors.length > 1 && (
-        <div className="bg-slate-100 rounded-xl p-1 mb-6 flex flex-wrap gap-1">
+        <div className="bg-zinc-100 dark:bg-zinc-800 rounded-sm p-1 mb-6 flex flex-wrap gap-1">
             <button
               onClick={() => setActiveFloorId(null)}
-              className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+              className={`px-4 py-1.5 rounded-sm text-sm font-semibold transition-colors ${
                 activeFloorId === null
-                  ? 'bg-white text-slate-800 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700'
+                  ? 'bg-white text-zinc-800 dark:text-zinc-200 shadow-sm'
+                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:text-zinc-300'
               }`}
             >
               All
@@ -3240,10 +3240,10 @@ export default function Tables() {
               <button
                 key={floor.id}
                 onClick={() => setActiveFloorId(floor.id)}
-                className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+                className={`px-4 py-1.5 rounded-sm text-sm font-semibold transition-colors ${
                   activeFloorId === floor.id
-                    ? 'bg-white text-slate-800 shadow-sm'
-                    : 'text-slate-500 hover:text-slate-700'
+                    ? 'bg-white text-zinc-800 dark:text-zinc-200 shadow-sm'
+                    : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:text-zinc-300'
                 }`}
               >
                 {floor.name}
@@ -3254,13 +3254,13 @@ export default function Tables() {
 
       {/* Tables Grid */}
       {tables.length === 0 ? (
-        <div className="bg-white border-2 border-slate-100 rounded-2xl p-12 text-center">
-          <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-12 text-center">
+          <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-zinc-400 dark:text-zinc-500" fill="currentColor" viewBox="0 0 24 24">
               <path d="M3 5a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm6 0H5v4h4V5zm-6 8a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4zm6 0H5v4h4v-4zm2-8a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2h-4a2 2 0 01-2-2V5zm6 0h-4v4h4V5zm-6 8a2 2 0 012-2h4a2 2 0 012 2v4a2 2 0 01-2 2h-4a2 2 0 01-2-2v-4zm6 0h-4v4h4v-4z"/>
             </svg>
           </div>
-          <p className="text-slate-500 mb-4">{t('noTablesYet')}</p>
+          <p className="text-zinc-500 dark:text-zinc-400 mb-4">{t('noTablesYet')}</p>
           <button
             onClick={() => setShowModal(true)}
             className="text-[#6262bd] font-medium hover:underline"
@@ -3302,14 +3302,14 @@ export default function Tables() {
           onClick={() => setShowModal(false)}
         >
           <div
-            className="bg-white rounded-2xl p-8 w-full max-w-sm"
+            className="bg-white dark:bg-zinc-900 rounded-sm p-8 w-full max-w-sm"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold text-slate-800 mb-6">{t('addNewTable')}</h2>
+            <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 mb-6">{t('addNewTable')}</h2>
 
             <form onSubmit={addTable}>
               <div className="mb-6">
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   {t('tableNumberName')}
                 </label>
                 <input
@@ -3317,7 +3317,7 @@ export default function Tables() {
                   value={newTableNumber}
                   onChange={(e) => setNewTableNumber(e.target.value)}
                   required
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                   placeholder={t('tableNumberPlaceholder')}
                 />
               </div>
@@ -3326,13 +3326,13 @@ export default function Tables() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="flex-1 border-2 border-slate-200 text-slate-600 py-3 rounded-xl font-medium hover:bg-slate-50"
+                  className="flex-1 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900"
                 >
                   {t('cancel')}
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-[#6262bd] text-white py-3 rounded-xl font-medium hover:bg-[#5252a3]"
+                  className="flex-1 bg-[#6262bd] text-white py-3 rounded-sm font-medium hover:bg-[#5252a3]"
                 >
                   {t('addTable')}
                 </button>
@@ -3358,21 +3358,21 @@ export default function Tables() {
           }}
         >
           <div
-            className="bg-white rounded-2xl p-6 w-full max-w-6xl my-4 max-h-[90vh] flex flex-col animate-zoom-in relative"
+            className="bg-white dark:bg-zinc-900 rounded-sm p-6 w-full max-w-6xl my-4 max-h-[90vh] flex flex-col animate-zoom-in relative"
             onClick={(e) => e.stopPropagation()}
           >
             {orderModalLoading && (
-              <div className="absolute inset-0 bg-white/80 rounded-2xl flex items-center justify-center z-10">
+              <div className="absolute inset-0 bg-white dark:bg-zinc-900/80 rounded-sm flex items-center justify-center z-10">
                 <div className="w-8 h-8 border-4 border-[#6262bd]/20 border-t-[#6262bd] rounded-full animate-spin" />
               </div>
             )}
             <div className="flex justify-between items-center mb-6">
               <div>
-                <h2 className="text-xl font-bold text-slate-800">
+                <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200">
                   {currentOrder ? (t('orderModal.titleUpdate') || 'Update Order') : (t('orderModal.titlePlace') || 'Place Order')} - {t('orderModal.tableTitle')?.replace('{tableNumber}', selectedTable.table_number) || `Table ${selectedTable.table_number}`}
                 </h2>
                 {currentOrder && (
-                  <p className="text-sm text-slate-500">{t('orderModal.orderNumber')?.replace('{id}', (currentOrder.id || currentOrder.client_id || 'new').slice(0, 8)) || `Order #${(currentOrder.id || currentOrder.client_id || 'new').slice(0, 8)}`}</p>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">{t('orderModal.orderNumber')?.replace('{id}', (currentOrder.id || currentOrder.client_id || 'new').slice(0, 8)) || `Order #${(currentOrder.id || currentOrder.client_id || 'new').slice(0, 8)}`}</p>
                 )}
               </div>
               <button
@@ -3386,7 +3386,7 @@ export default function Tables() {
                   setSelectedCategory(null)
                   setProductSearch('')
                 }}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400"
               >
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -3396,7 +3396,7 @@ export default function Tables() {
 
             {/* Info banner for staff editing existing orders */}
             {currentOrder && userType === 'staff' && (
-              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-sm">
                 <div className="flex items-start gap-3">
                   <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
@@ -3417,7 +3417,7 @@ export default function Tables() {
                 {/* Search Bar - Always visible */}
                 <div className="mb-4">
                   <div className="relative">
-                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                     <input
@@ -3425,12 +3425,12 @@ export default function Tables() {
                       placeholder={t('orderModal.searchProducts') || 'Search products...'}
                       value={productSearch}
                       onChange={(e) => setProductSearch(e.target.value)}
-                      className="w-full pl-10 pr-10 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6262bd]/50 focus:border-[#6262bd] text-slate-800 placeholder-slate-400 transition-colors"
+                      className="w-full pl-10 pr-10 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:ring-2 focus:ring-[#6262bd]/50 focus:border-[#6262bd] text-zinc-800 dark:text-zinc-200 placeholder-zinc-400 transition-colors"
                     />
                     {productSearch && (
                       <button
                         onClick={() => setProductSearch('')}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400"
                       >
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -3441,14 +3441,14 @@ export default function Tables() {
                 </div>
 
                 {menuItems.length === 0 ? (
-                  <div className="bg-slate-50 rounded-xl p-8 text-center">
-                    <p className="text-slate-500">{t('orderModal.noMenuItems')}</p>
-                    <p className="text-sm text-slate-400 mt-2">{t('orderModal.addItemsFirst')}</p>
+                  <div className="bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 text-center">
+                    <p className="text-zinc-500 dark:text-zinc-400">{t('orderModal.noMenuItems')}</p>
+                    <p className="text-sm text-zinc-400 dark:text-zinc-500 mt-2">{t('orderModal.addItemsFirst')}</p>
                   </div>
                 ) : productSearch ? (
                   /* Search Results View */
                   <div className="flex-1 overflow-y-auto pr-2">
-                    <h3 className="font-semibold text-slate-700 mb-3">{t('orderModal.searchResults') || 'Search Results'}</h3>
+                    <h3 className="font-semibold text-zinc-700 dark:text-zinc-300 mb-3">{t('orderModal.searchResults') || 'Search Results'}</h3>
                     {(() => {
                       const searchLower = productSearch.toLowerCase()
                       const filteredItems = menuItems.filter(item =>
@@ -3457,8 +3457,8 @@ export default function Tables() {
                       )
                       if (filteredItems.length === 0) {
                         return (
-                          <div className="bg-slate-50 rounded-xl p-6 text-center">
-                            <p className="text-slate-500">{t('orderModal.noProductsFound') || 'No products found'}</p>
+                          <div className="bg-zinc-50 dark:bg-zinc-900 rounded-sm p-6 text-center">
+                            <p className="text-zinc-500 dark:text-zinc-400">{t('orderModal.noProductsFound') || 'No products found'}</p>
                           </div>
                         )
                       }
@@ -3469,26 +3469,26 @@ export default function Tables() {
                               key={item.id}
                               onClick={() => addItemToOrder(item)}
                               disabled={!item.available}
-                              className={`flex flex-col p-3 rounded-xl transition-all text-left ${
+                              className={`flex flex-col p-3 rounded-sm transition-all text-left ${
                                 item.available
-                                  ? 'bg-slate-50 hover:bg-slate-100 hover:shadow-md'
-                                  : 'bg-slate-100 opacity-60 cursor-not-allowed'
+                                  ? 'bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:bg-zinc-800 hover:shadow-md'
+                                  : 'bg-zinc-100 dark:bg-zinc-800 opacity-60 cursor-not-allowed'
                               }`}
                             >
                               {item.image_url ? (
                                 <img
                                   src={item.image_url}
                                   alt={item.name}
-                                  className="w-full h-24 rounded-lg object-cover mb-2"
+                                  className="w-full h-24 rounded-sm object-cover mb-2"
                                 />
                               ) : (
-                                <div className="w-full h-24 rounded-lg bg-slate-200 mb-2 flex items-center justify-center">
-                                  <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="w-full h-24 rounded-sm bg-zinc-200 dark:bg-zinc-700 mb-2 flex items-center justify-center">
+                                  <svg className="w-8 h-8 text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                   </svg>
                                 </div>
                               )}
-                              <p className="font-medium text-slate-800 text-sm line-clamp-2">{item.name}</p>
+                              <p className="font-medium text-zinc-800 dark:text-zinc-200 text-sm line-clamp-2">{item.name}</p>
                               <div className="mt-auto pt-2 flex items-center justify-between">
                                 <span className="font-semibold text-[#6262bd]">{formatCurrency(item.price)}</span>
                                 {!item.available && (
@@ -3504,7 +3504,7 @@ export default function Tables() {
                 ) : !selectedCategory ? (
                   /* Categories Grid View */
                   <div className="flex-1 overflow-y-auto pr-2">
-                    <h3 className="font-semibold text-slate-700 mb-3">{t('orderModal.selectCategory') || 'Select a Category'}</h3>
+                    <h3 className="font-semibold text-zinc-700 dark:text-zinc-300 mb-3">{t('orderModal.selectCategory') || 'Select a Category'}</h3>
                     {categories.length > 0 ? (
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         {categories.map(category => {
@@ -3514,15 +3514,15 @@ export default function Tables() {
                             <button
                               key={category.id}
                               onClick={() => setSelectedCategory(category)}
-                              className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-600 hover:from-[#6262bd]/10 hover:to-[#6262bd]/5 dark:hover:from-[#6262bd]/30 dark:hover:to-[#6262bd]/20 rounded-xl transition-all hover:shadow-md border border-slate-200 dark:border-slate-500 hover:border-[#6262bd]/30"
+                              className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-zinc-700 dark:to-zinc-600 hover:from-[#6262bd]/10 hover:to-[#6262bd]/5 dark:hover:from-[#6262bd]/30 dark:hover:to-[#6262bd]/20 rounded-sm transition-all hover:shadow-md border border-zinc-200 dark:border-zinc-700 dark:border-zinc-100 dark:border-zinc-800/500 hover:border-[#6262bd]/30"
                             >
                               <div className="w-12 h-12 rounded-full bg-[#6262bd]/10 flex items-center justify-center mb-3">
                                 <svg className="w-6 h-6 text-[#6262bd]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                 </svg>
                               </div>
-                              <span className="font-semibold text-slate-700 dark:text-slate-100 text-center">{category.name}</span>
-                              <span className="text-xs text-slate-500 dark:text-slate-300 mt-1">{categoryItems.length} {categoryItems.length === 1 ? (t('orderModal.item') || 'item') : (t('orderModal.items') || 'items')}</span>
+                              <span className="font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-100 text-center">{category.name}</span>
+                              <span className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-300 mt-1">{categoryItems.length} {categoryItems.length === 1 ? (t('orderModal.item') || 'item') : (t('orderModal.items') || 'items')}</span>
                             </button>
                           )
                         })}
@@ -3533,15 +3533,15 @@ export default function Tables() {
                           return (
                             <button
                               onClick={() => setSelectedCategory({ id: 'uncategorized', name: t('orderModal.uncategorized') || 'Other' })}
-                              className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-600 hover:from-[#6262bd]/10 hover:to-[#6262bd]/5 dark:hover:from-[#6262bd]/30 dark:hover:to-[#6262bd]/20 rounded-xl transition-all hover:shadow-md border border-slate-200 dark:border-slate-500 hover:border-[#6262bd]/30"
+                              className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-zinc-700 dark:to-zinc-600 hover:from-[#6262bd]/10 hover:to-[#6262bd]/5 dark:hover:from-[#6262bd]/30 dark:hover:to-[#6262bd]/20 rounded-sm transition-all hover:shadow-md border border-zinc-200 dark:border-zinc-700 dark:border-zinc-100 dark:border-zinc-800/500 hover:border-[#6262bd]/30"
                             >
-                              <div className="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center mb-3">
-                                <svg className="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <div className="w-12 h-12 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center mb-3">
+                                <svg className="w-6 h-6 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                                 </svg>
                               </div>
-                              <span className="font-semibold text-slate-700 dark:text-slate-100 text-center">{t('orderModal.uncategorized') || 'Other'}</span>
-                              <span className="text-xs text-slate-500 dark:text-slate-300 mt-1">{uncategorizedItems.length} {uncategorizedItems.length === 1 ? (t('orderModal.item') || 'item') : (t('orderModal.items') || 'items')}</span>
+                              <span className="font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-100 text-center">{t('orderModal.uncategorized') || 'Other'}</span>
+                              <span className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-300 mt-1">{uncategorizedItems.length} {uncategorizedItems.length === 1 ? (t('orderModal.item') || 'item') : (t('orderModal.items') || 'items')}</span>
                             </button>
                           )
                         })()}
@@ -3554,26 +3554,26 @@ export default function Tables() {
                             key={item.id}
                             onClick={() => addItemToOrder(item)}
                             disabled={!item.available}
-                            className={`flex flex-col p-3 rounded-xl transition-all text-left ${
+                            className={`flex flex-col p-3 rounded-sm transition-all text-left ${
                               item.available
-                                ? 'bg-slate-50 hover:bg-slate-100 hover:shadow-md'
-                                : 'bg-slate-100 opacity-60 cursor-not-allowed'
+                                ? 'bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:bg-zinc-800 hover:shadow-md'
+                                : 'bg-zinc-100 dark:bg-zinc-800 opacity-60 cursor-not-allowed'
                             }`}
                           >
                             {item.image_url ? (
                               <img
                                 src={item.image_url}
                                 alt={item.name}
-                                className="w-full h-24 rounded-lg object-cover mb-2"
+                                className="w-full h-24 rounded-sm object-cover mb-2"
                               />
                             ) : (
-                              <div className="w-full h-24 rounded-lg bg-slate-200 mb-2 flex items-center justify-center">
-                                <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <div className="w-full h-24 rounded-sm bg-zinc-200 dark:bg-zinc-700 mb-2 flex items-center justify-center">
+                                <svg className="w-8 h-8 text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                               </div>
                             )}
-                            <p className="font-medium text-slate-800 text-sm line-clamp-2">{item.name}</p>
+                            <p className="font-medium text-zinc-800 dark:text-zinc-200 text-sm line-clamp-2">{item.name}</p>
                             <div className="mt-auto pt-2 flex items-center justify-between">
                               <span className="font-semibold text-[#6262bd]">{formatCurrency(item.price)}</span>
                               {!item.available && (
@@ -3598,7 +3598,7 @@ export default function Tables() {
                         </svg>
                         {t('orderModal.back') || 'Back'}
                       </button>
-                      <h3 className="font-semibold text-slate-700">{selectedCategory.name}</h3>
+                      <h3 className="font-semibold text-zinc-700 dark:text-zinc-300">{selectedCategory.name}</h3>
                     </div>
                     {(() => {
                       const categoryItems = selectedCategory.id === 'uncategorized'
@@ -3612,28 +3612,28 @@ export default function Tables() {
                               key={item.id}
                               onClick={() => addItemToOrder(item)}
                               disabled={!item.available}
-                              className={`flex flex-col p-3 rounded-xl transition-all text-left ${
+                              className={`flex flex-col p-3 rounded-sm transition-all text-left ${
                                 item.available
-                                  ? 'bg-slate-50 hover:bg-slate-100 hover:shadow-md'
-                                  : 'bg-slate-100 opacity-60 cursor-not-allowed'
+                                  ? 'bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:bg-zinc-800 hover:shadow-md'
+                                  : 'bg-zinc-100 dark:bg-zinc-800 opacity-60 cursor-not-allowed'
                               }`}
                             >
                               {item.image_url ? (
                                 <img
                                   src={item.image_url}
                                   alt={item.name}
-                                  className="w-full h-24 rounded-lg object-cover mb-2"
+                                  className="w-full h-24 rounded-sm object-cover mb-2"
                                 />
                               ) : (
-                                <div className="w-full h-24 rounded-lg bg-slate-200 mb-2 flex items-center justify-center">
-                                  <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="w-full h-24 rounded-sm bg-zinc-200 dark:bg-zinc-700 mb-2 flex items-center justify-center">
+                                  <svg className="w-8 h-8 text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                   </svg>
                                 </div>
                               )}
-                              <p className="font-medium text-slate-800 text-sm line-clamp-2">{item.name}</p>
+                              <p className="font-medium text-zinc-800 dark:text-zinc-200 text-sm line-clamp-2">{item.name}</p>
                               {item.description && (
-                                <p className="text-xs text-slate-500 line-clamp-2 mt-1">{item.description}</p>
+                                <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 mt-1">{item.description}</p>
                               )}
                               <div className="mt-auto pt-2 flex items-center justify-between">
                                 <span className="font-semibold text-[#6262bd]">{formatCurrency(item.price)}</span>
@@ -3652,14 +3652,14 @@ export default function Tables() {
 
               {/* Order Summary */}
               <div>
-                <h3 className="font-semibold text-slate-700 mb-4">{t('orderModal.orderSummary')}</h3>
+                <h3 className="font-semibold text-zinc-700 dark:text-zinc-300 mb-4">{t('orderModal.orderSummary')}</h3>
                 {orderItems.length === 0 ? (
-                  <div className="bg-slate-50 rounded-xl p-6 text-center">
-                    <p className="text-slate-500">{t('orderModal.noItemsAdded')}</p>
+                  <div className="bg-zinc-50 dark:bg-zinc-900 rounded-sm p-6 text-center">
+                    <p className="text-zinc-500 dark:text-zinc-400">{t('orderModal.noItemsAdded')}</p>
                   </div>
                 ) : (
                   <>
-                    <div className="bg-slate-50 dark:bg-slate-700 rounded-xl p-4 mb-4 max-h-64 overflow-y-auto">
+                    <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-700 rounded-sm p-4 mb-4 max-h-64 overflow-y-auto">
                       {orderItems.map((item) => {
                         const newQuantity = item.isExisting ? item.quantity - item.existingQuantity : item.quantity
                         const hasNewItems = newQuantity > 0
@@ -3668,11 +3668,11 @@ export default function Tables() {
                         const instructionsLabel = menuItem?.special_instructions_label || 'Special instructions'
 
                         return (
-                          <div key={item.menu_item_id} className={`mb-3 last:mb-0 rounded-lg p-2 ${item.isExisting ? 'bg-blue-50/50 dark:bg-blue-900/40 border border-blue-200 dark:border-blue-700' : ''}`}>
+                          <div key={item.menu_item_id} className={`mb-3 last:mb-0 rounded-sm p-2 ${item.isExisting ? 'bg-blue-50/50 dark:bg-blue-900/40 border border-blue-200 dark:border-blue-700' : ''}`}>
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1">
-                                <p className="font-medium text-slate-800 dark:text-slate-100 text-sm">{item.quantity}x {item.name}</p>
-                                <p className="text-xs text-slate-500 dark:text-slate-300">{formatCurrency(item.price_at_time || 0)} {t('orderModal.each') || 'each'}</p>
+                                <p className="font-medium text-zinc-800 dark:text-zinc-200 text-sm">{item.quantity}x {item.name}</p>
+                                <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-300">{formatCurrency(item.price_at_time || 0)} {t('orderModal.each') || 'each'}</p>
 
                                 {/* Show breakdown if item has both existing and new quantities */}
                                 {item.isExisting && hasNewItems && (
@@ -3706,7 +3706,7 @@ export default function Tables() {
                                         e.stopPropagation()
                                         updateItemQuantity(item.menu_item_id, item.quantity - 1)
                                       }}
-                                      className="w-6 h-6 rounded bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 text-slate-800 dark:text-slate-100 flex items-center justify-center transition-colors"
+                                      className="w-6 h-6 rounded bg-zinc-200 dark:bg-zinc-700 hover:bg-zinc-300 dark:hover:bg-zinc-600 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 flex items-center justify-center transition-colors"
                                     >
                                       -
                                     </button>
@@ -3717,7 +3717,7 @@ export default function Tables() {
                                         e.stopPropagation()
                                         updateItemQuantity(item.menu_item_id, item.quantity + 1)
                                       }}
-                                      className="w-6 h-6 rounded bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 text-slate-800 dark:text-slate-100 flex items-center justify-center transition-colors"
+                                      className="w-6 h-6 rounded bg-zinc-200 dark:bg-zinc-700 hover:bg-zinc-300 dark:hover:bg-zinc-600 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 flex items-center justify-center transition-colors"
                                     >
                                       +
                                     </button>
@@ -3734,8 +3734,8 @@ export default function Tables() {
                                       disabled={item.isExisting && item.quantity <= item.existingQuantity}
                                       className={`w-6 h-6 rounded flex items-center justify-center transition-colors ${
                                         item.isExisting && item.quantity <= item.existingQuantity
-                                          ? 'bg-slate-100 text-slate-300 cursor-not-allowed'
-                                          : 'bg-slate-200 hover:bg-slate-300'
+                                          ? 'bg-zinc-100 dark:bg-zinc-800 text-slate-300 cursor-not-allowed'
+                                          : 'bg-zinc-200 dark:bg-zinc-700 hover:bg-zinc-300 dark:hover:bg-zinc-600'
                                       }`}
                                       title={item.isExisting && item.quantity <= item.existingQuantity ? t('orderModal.cannotReduceExisting') : ''}
                                     >
@@ -3761,16 +3761,16 @@ export default function Tables() {
                       })}
                     </div>
 
-                    <div className="bg-[#6262bd]/10 rounded-xl p-4 mb-4">
+                    <div className="bg-[#6262bd]/10 rounded-sm p-4 mb-4">
                       <div className="flex justify-between items-center">
-                        <span className="font-semibold text-slate-700">{t('orderModal.total')}</span>
+                        <span className="font-semibold text-zinc-700 dark:text-zinc-300">{t('orderModal.total')}</span>
                         <span className="text-xl font-bold text-[#6262bd]">{formatCurrency(calculateTotal())}</span>
                       </div>
                     </div>
 
                     <button
                       onClick={submitOrder}
-                      className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3]"
+                      className="w-full bg-[#6262bd] text-white py-3 rounded-sm font-semibold hover:bg-[#5252a3]"
                     >
                       {currentOrder ? t('orderModal.updateOrder') : t('orderModal.placeOrder')}
                     </button>
@@ -3785,13 +3785,13 @@ export default function Tables() {
       {/* Payment Modal */}
       {showPaymentModal && selectedTable && (
         <div className="fixed inset-0 bg-black/60 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-2xl w-full sm:max-w-sm max-h-[92vh] overflow-y-auto">
+          <div className="bg-white dark:bg-zinc-800 rounded-t-3xl sm:rounded-sm w-full sm:max-w-sm max-h-[92vh] overflow-y-auto">
 
             {/* Header */}
-            <div className="sticky top-0 bg-white dark:bg-slate-800 px-6 pt-5 pb-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between z-10">
+            <div className="sticky top-0 bg-white dark:bg-zinc-800 px-6 pt-5 pb-4 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 flex items-center justify-between z-10">
               <div>
-                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">{t('paymentModal.title').replace('{tableNumber}', selectedTable.table_number)}</p>
-                <p className="text-2xl font-bold text-slate-900 dark:text-white mt-0.5">{formatCurrency(calculateFinalTotal())}</p>
+                <p className="text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">{t('paymentModal.title').replace('{tableNumber}', selectedTable.table_number)}</p>
+                <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 dark:text-white mt-0.5">{formatCurrency(calculateFinalTotal())}</p>
               </div>
               <button
                 onClick={() => {
@@ -3805,7 +3805,7 @@ export default function Tables() {
                   setShowExternalTerminalRef(false)
                   resetTerminalState()
                 }}
-                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 transition-colors"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -3816,25 +3816,25 @@ export default function Tables() {
             <div className="px-6 pb-8 pt-4">
               {unpaidOrders.length === 0 ? (
                 <div className="py-12 text-center">
-                  <p className="text-slate-400 text-sm">{t('paymentModal.noUnpaidOrders')}</p>
+                  <p className="text-zinc-400 dark:text-zinc-500 text-sm">{t('paymentModal.noUnpaidOrders')}</p>
                 </div>
               ) : (
                 <>
                   {/* Order Summary */}
                   <div className="mb-5">
-                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">{t('paymentModal.ordersSummary')}</p>
+                    <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">{t('paymentModal.ordersSummary')}</p>
                     <div className="space-y-1 max-h-48 overflow-y-auto">
                       {unpaidOrders.map((order, index) => {
                         const orderTotal = (order.order_items || []).reduce((sum, item) => sum + ((item.price_at_time || 0) * (item.quantity || 0)), 0) || order.total || 0
                         return (
-                          <div key={order.id} className="rounded-xl bg-slate-50 dark:bg-slate-700/50 px-3 py-2.5">
+                          <div key={order.id} className="rounded-sm bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-700/50 px-3 py-2.5">
                             <div className="flex justify-between items-center mb-1.5">
-                              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{t('paymentModal.orderNumber').replace('{number}', index + 1)}</span>
+                              <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('paymentModal.orderNumber').replace('{number}', index + 1)}</span>
                               <span className="text-xs font-bold text-[#6262bd]">{formatCurrency(orderTotal)}</span>
                             </div>
                             <div className="space-y-0.5">
                               {order.order_items?.map((item, idx) => (
-                                <div key={idx} className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
+                                <div key={idx} className="flex justify-between text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">
                                   <span>{item.quantity}× {item.name}</span>
                                   <span>{formatCurrency((item.price_at_time || 0) * (item.quantity || 1))}</span>
                                 </div>
@@ -3850,7 +3850,7 @@ export default function Tables() {
                   {availableDiscounts.length > 0 && (
                     <div className="mb-5">
                       {selectedDiscount?.is_promotion && (
-                        <div className="mb-2 flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg text-xs text-orange-700 dark:text-orange-400 font-medium">
+                        <div className="mb-2 flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-sm text-xs text-orange-700 dark:text-orange-400 font-medium">
                           <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
                           </svg>
@@ -3860,7 +3860,7 @@ export default function Tables() {
                       <select
                         value={selectedDiscount?.id || 'none'}
                         onChange={(e) => handleDiscountChange(e.target.value)}
-                        className="w-full px-3 py-2.5 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700"
+                        className="w-full px-3 py-2.5 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm focus:outline-none focus:border-[#6262bd] text-sm text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-700"
                       >
                         <option value="none">{t('paymentModal.noDiscount')}</option>
                         {availableDiscounts.map((discount) => (
@@ -3873,8 +3873,8 @@ export default function Tables() {
                   )}
 
                   {/* Totals */}
-                  <div className="rounded-2xl bg-slate-50 dark:bg-slate-700/50 px-4 py-3 mb-6 space-y-1.5">
-                    <div className="flex justify-between text-sm text-slate-500 dark:text-slate-400">
+                  <div className="rounded-sm bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-700/50 px-4 py-3 mb-6 space-y-1.5">
+                    <div className="flex justify-between text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">
                       <span>{t('paymentModal.subtotal')}</span>
                       <span>{formatCurrency(calculateTableTotal())}</span>
                     </div>
@@ -3890,8 +3890,8 @@ export default function Tables() {
                         <span>−{formatCurrency(discountAmount)}</span>
                       </div>
                     )}
-                    <div className="flex justify-between items-baseline pt-1.5 border-t border-slate-200 dark:border-slate-600">
-                      <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{t('paymentModal.totalToPay')}</span>
+                    <div className="flex justify-between items-baseline pt-1.5 border-t border-zinc-200 dark:border-zinc-700 dark:border-zinc-600">
+                      <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">{t('paymentModal.totalToPay')}</span>
                       <span className="text-xl font-bold text-[#6262bd]">{formatCurrency(calculateFinalTotal())}</span>
                     </div>
                   </div>
@@ -3902,17 +3902,17 @@ export default function Tables() {
                       {/* Cash */}
                       <button
                         onClick={() => processPayment('cash')}
-                        className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-green-50 dark:bg-green-900/20 border-2 border-green-100 dark:border-green-800 hover:border-green-400 hover:bg-green-100 dark:hover:bg-green-900/40 transition-all group"
+                        className="w-full flex items-center gap-3 px-4 py-3.5 rounded-sm bg-green-50 dark:bg-green-900/20 border-2 border-green-100 dark:border-green-800 hover:border-green-400 hover:bg-green-100 dark:hover:bg-green-900/40 transition-all group"
                       >
-                        <span className="w-9 h-9 rounded-xl bg-green-600 flex items-center justify-center shrink-0">
+                        <span className="w-9 h-9 rounded-sm bg-green-600 flex items-center justify-center shrink-0">
                           <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
                           </svg>
                         </span>
                         <span className="flex-1 text-left">
-                          <span className="block text-sm font-semibold text-slate-800 dark:text-slate-100">{t('paymentModal.payWithCash')}</span>
+                          <span className="block text-sm font-semibold text-zinc-800 dark:text-zinc-200">{t('paymentModal.payWithCash')}</span>
                         </span>
-                        <svg className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-green-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-slate-300 dark:text-zinc-600 dark:text-zinc-400 group-hover:text-green-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
                       </button>
@@ -3920,18 +3920,18 @@ export default function Tables() {
                       {/* Stripe Terminal (Card) */}
                       <button
                         onClick={fetchTerminalReaders}
-                        className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-[#6262bd]/5 dark:bg-[#6262bd]/10 border-2 border-[#6262bd]/20 dark:border-[#6262bd]/30 hover:border-[#6262bd]/60 hover:bg-[#6262bd]/10 dark:hover:bg-[#6262bd]/20 transition-all group"
+                        className="w-full flex items-center gap-3 px-4 py-3.5 rounded-sm bg-[#6262bd]/5 dark:bg-[#6262bd]/10 border-2 border-[#6262bd]/20 dark:border-[#6262bd]/30 hover:border-[#6262bd]/60 hover:bg-[#6262bd]/10 dark:hover:bg-[#6262bd]/20 transition-all group"
                       >
-                        <span className="w-9 h-9 rounded-xl bg-[#6262bd] flex items-center justify-center shrink-0">
+                        <span className="w-9 h-9 rounded-sm bg-[#6262bd] flex items-center justify-center shrink-0">
                           <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
                           </svg>
                         </span>
                         <span className="flex-1 text-left">
-                          <span className="block text-sm font-semibold text-slate-800 dark:text-slate-100">{t('paymentModal.payWithCard')}</span>
-                          <span className="block text-xs text-slate-400 dark:text-slate-500">Stripe Terminal</span>
+                          <span className="block text-sm font-semibold text-zinc-800 dark:text-zinc-200">{t('paymentModal.payWithCard')}</span>
+                          <span className="block text-xs text-zinc-400 dark:text-zinc-500 dark:text-zinc-500">Stripe Terminal</span>
                         </span>
-                        <svg className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-[#6262bd] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-slate-300 dark:text-zinc-600 dark:text-zinc-400 group-hover:text-[#6262bd] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
                       </button>
@@ -3939,18 +3939,18 @@ export default function Tables() {
                       {/* External Terminal */}
                       <button
                         onClick={() => setShowExternalTerminal(true)}
-                        className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all group"
+                        className="w-full flex items-center gap-3 px-4 py-3.5 rounded-sm bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-700/50 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 hover:border-zinc-400 dark:hover:border-zinc-100 dark:border-zinc-800/500 hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-700 transition-all group"
                       >
-                        <span className="w-9 h-9 rounded-xl bg-slate-700 dark:bg-slate-600 flex items-center justify-center shrink-0">
+                        <span className="w-9 h-9 rounded-sm bg-zinc-700 dark:bg-zinc-600 flex items-center justify-center shrink-0">
                           <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M17 1H7c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-2-2-2zm0 18H7V5h10v14zm-5 2c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm4-19H8V3h8v-1z"/>
                           </svg>
                         </span>
                         <span className="flex-1 text-left">
-                          <span className="block text-sm font-semibold text-slate-800 dark:text-slate-100">{t('paymentModal.externalTerminalTitle')}</span>
-                          <span className="block text-xs text-slate-400 dark:text-slate-500">Own POS / bank terminal</span>
+                          <span className="block text-sm font-semibold text-zinc-800 dark:text-zinc-200">{t('paymentModal.externalTerminalTitle')}</span>
+                          <span className="block text-xs text-zinc-400 dark:text-zinc-500 dark:text-zinc-500">Own POS / bank terminal</span>
                         </span>
-                        <svg className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-slate-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-slate-300 dark:text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-500 dark:text-zinc-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
                       </button>
@@ -3960,15 +3960,15 @@ export default function Tables() {
                   {/* ── External Terminal confirmation ── */}
                   {showExternalTerminal && !terminalStatus && (
                     <div className="space-y-4">
-                      <div className="rounded-2xl bg-slate-50 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 p-4 text-center">
-                        <p className="text-xs text-slate-400 dark:text-slate-500 mb-1">{t('paymentModal.externalTerminalTitle')}</p>
-                        <p className="text-3xl font-bold text-slate-900 dark:text-white">{formatCurrency(calculateFinalTotal())}</p>
-                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">{t('paymentModal.externalTerminalDesc')}</p>
+                      <div className="rounded-sm bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-700/50 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 p-4 text-center">
+                        <p className="text-xs text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 mb-1">{t('paymentModal.externalTerminalTitle')}</p>
+                        <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 dark:text-white">{formatCurrency(calculateFinalTotal())}</p>
+                        <p className="text-xs text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 mt-2">{t('paymentModal.externalTerminalDesc')}</p>
                       </div>
                       {!showExternalTerminalRef ? (
                         <button
                           onClick={() => setShowExternalTerminalRef(true)}
-                          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-400 dark:text-slate-500 hover:border-[#6262bd] hover:text-[#6262bd] dark:hover:border-[#6262bd] dark:hover:text-[#6262bd] transition-colors"
+                          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-dashed border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm text-sm text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 hover:border-[#6262bd] hover:text-[#6262bd] dark:hover:border-[#6262bd] dark:hover:text-[#6262bd] transition-colors"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -3983,11 +3983,11 @@ export default function Tables() {
                             onChange={e => setExternalTerminalRef(e.target.value)}
                             placeholder={t('paymentModal.customReferencePlaceholder')}
                             autoFocus
-                            className="w-full px-4 py-2.5 pr-10 border-2 border-[#6262bd] rounded-xl text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 focus:outline-none placeholder:text-slate-300 dark:placeholder:text-slate-500"
+                            className="w-full px-4 py-2.5 pr-10 border-2 border-[#6262bd] rounded-sm text-sm text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-700 focus:outline-none placeholder:text-slate-300 dark:placeholder:text-zinc-500"
                           />
                           <button
                             onClick={() => { setShowExternalTerminalRef(false); setExternalTerminalRef('') }}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500 dark:text-slate-600 dark:hover:text-slate-400 transition-colors"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 hover:text-zinc-500 dark:text-zinc-400 dark:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-400 dark:text-zinc-500 transition-colors"
                           >
                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                               <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -4002,13 +4002,13 @@ export default function Tables() {
                           setExternalTerminalRef('')
                           setShowExternalTerminalRef(false)
                         }}
-                        className="w-full bg-[#6262bd] text-white py-3.5 rounded-2xl font-semibold hover:bg-[#5252a3] transition-colors"
+                        className="w-full bg-[#6262bd] text-white py-3.5 rounded-sm font-semibold hover:bg-[#5252a3] transition-colors"
                       >
                         {t('paymentModal.externalTerminalConfirm')}
                       </button>
                       <button
                         onClick={() => { setShowExternalTerminal(false); setExternalTerminalRef(''); setShowExternalTerminalRef(false) }}
-                        className="w-full text-slate-400 dark:text-slate-500 text-sm py-1 hover:text-slate-600 dark:hover:text-slate-300"
+                        className="w-full text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 text-sm py-1 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300"
                       >
                         ← {t('paymentModal.choosePaymentMethod')}
                       </button>
@@ -4019,20 +4019,20 @@ export default function Tables() {
                   {terminalStatus === 'loading_readers' && (
                     <div className="flex flex-col items-center gap-3 py-8">
                       <div className="w-8 h-8 border-4 border-[#6262bd] border-t-transparent rounded-full animate-spin" />
-                      <p className="text-sm text-slate-500 dark:text-slate-400">{t('paymentModal.terminalLookingForReaders')}</p>
+                      <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('paymentModal.terminalLookingForReaders')}</p>
                     </div>
                   )}
 
                   {terminalStatus === 'no_readers' && (
                     <div className="space-y-3">
-                      <p className="text-center text-slate-500 dark:text-slate-400 text-sm py-4">{t('paymentModal.terminalNoReadersOnline')}</p>
+                      <p className="text-center text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 text-sm py-4">{t('paymentModal.terminalNoReadersOnline')}</p>
                       <button
                         onClick={() => { setTerminalStatus(null); processPayment('card') }}
-                        className="w-full border-2 border-[#6262bd] text-[#6262bd] py-3 rounded-2xl font-semibold hover:bg-[#6262bd]/10 transition-colors text-sm"
+                        className="w-full border-2 border-[#6262bd] text-[#6262bd] py-3 rounded-sm font-semibold hover:bg-[#6262bd]/10 transition-colors text-sm"
                       >
                         {t('paymentModal.terminalFallbackManual')}
                       </button>
-                      <button onClick={resetTerminalState} className="w-full text-slate-400 text-sm py-2 hover:text-slate-600 dark:hover:text-slate-300">
+                      <button onClick={resetTerminalState} className="w-full text-zinc-400 dark:text-zinc-500 text-sm py-2 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300">
                         ← {t('paymentModal.choosePaymentMethod')}
                       </button>
                     </div>
@@ -4040,20 +4040,20 @@ export default function Tables() {
 
                   {terminalStatus === 'selecting_reader' && (
                     <div className="space-y-2">
-                      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">{t('paymentModal.terminalSelectReader')}</p>
+                      <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3">{t('paymentModal.terminalSelectReader')}</p>
                       {terminalReaders.map(reader => (
                         <button
                           key={reader.id}
                           onClick={() => handleTerminalPayment(reader)}
-                          className="w-full flex items-center justify-between border-2 border-slate-200 dark:border-slate-600 rounded-2xl px-4 py-3.5 hover:border-[#6262bd] hover:bg-[#6262bd]/5 transition-all"
+                          className="w-full flex items-center justify-between border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 rounded-sm px-4 py-3.5 hover:border-[#6262bd] hover:bg-[#6262bd]/5 transition-all"
                         >
-                          <span className="font-medium text-sm text-slate-800 dark:text-slate-100">{reader.label || reader.id}</span>
-                          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${reader.status === 'online' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' : 'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400'}`}>
+                          <span className="font-medium text-sm text-zinc-800 dark:text-zinc-200">{reader.label || reader.id}</span>
+                          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${reader.status === 'online' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 dark:bg-zinc-700 dark:text-zinc-400'}`}>
                             {reader.status === 'online' ? t('paymentModal.terminalOnline') : t('paymentModal.terminalOffline')}
                           </span>
                         </button>
                       ))}
-                      <button onClick={resetTerminalState} className="w-full text-slate-400 text-sm py-2 hover:text-slate-600 dark:hover:text-slate-300">
+                      <button onClick={resetTerminalState} className="w-full text-zinc-400 dark:text-zinc-500 text-sm py-2 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300">
                         ← {t('paymentModal.choosePaymentMethod')}
                       </button>
                     </div>
@@ -4063,9 +4063,9 @@ export default function Tables() {
                     <div className="flex flex-col items-center gap-4 py-8">
                       <div className="w-12 h-12 border-4 border-[#6262bd] border-t-transparent rounded-full animate-spin" />
                       <div className="text-center">
-                        <p className="font-semibold text-slate-800 dark:text-slate-100">{t('paymentModal.terminalWaitingTitle')}</p>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{selectedReader?.label || selectedReader?.id}</p>
-                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{t('paymentModal.terminalWaitingDesc')}</p>
+                        <p className="font-semibold text-zinc-800 dark:text-zinc-200">{t('paymentModal.terminalWaitingTitle')}</p>
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-1">{selectedReader?.label || selectedReader?.id}</p>
+                        <p className="text-xs text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 mt-1">{t('paymentModal.terminalWaitingDesc')}</p>
                       </div>
                       <button onClick={handleTerminalCancel} className="text-sm text-red-400 hover:text-red-600 font-medium">
                         {t('paymentModal.terminalCancelPayment')}
@@ -4081,14 +4081,14 @@ export default function Tables() {
                         </svg>
                       </div>
                       <div className="text-center">
-                        <p className="font-semibold text-slate-800 dark:text-slate-100">{t('paymentModal.terminalPaymentFailed')}</p>
+                        <p className="font-semibold text-zinc-800 dark:text-zinc-200">{t('paymentModal.terminalPaymentFailed')}</p>
                         {terminalDeclineReason && <p className="text-sm text-red-400 mt-1">{terminalDeclineReason.replace(/_/g, ' ')}</p>}
                       </div>
                       <div className="flex gap-2 w-full">
-                        <button onClick={() => { resetTerminalState(); fetchTerminalReaders() }} className="flex-1 bg-[#6262bd] text-white py-2.5 rounded-2xl font-semibold hover:bg-[#5252a3] text-sm transition-colors">
+                        <button onClick={() => { resetTerminalState(); fetchTerminalReaders() }} className="flex-1 bg-[#6262bd] text-white py-2.5 rounded-sm font-semibold hover:bg-[#5252a3] text-sm transition-colors">
                           {t('paymentModal.terminalTryAgain')}
                         </button>
-                        <button onClick={() => { resetTerminalState(); processPayment('cash') }} className="flex-1 border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 py-2.5 rounded-2xl font-semibold text-sm">
+                        <button onClick={() => { resetTerminalState(); processPayment('cash') }} className="flex-1 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 py-2.5 rounded-sm font-semibold text-sm">
                           {t('paymentModal.terminalPayCash')}
                         </button>
                       </div>
@@ -4103,14 +4103,14 @@ export default function Tables() {
                         </svg>
                       </div>
                       <div className="text-center">
-                        <p className="font-semibold text-slate-800 dark:text-slate-100">{t('paymentModal.terminalTimedOut')}</p>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{t('paymentModal.terminalTimedOutDesc')}</p>
+                        <p className="font-semibold text-zinc-800 dark:text-zinc-200">{t('paymentModal.terminalTimedOut')}</p>
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-1">{t('paymentModal.terminalTimedOutDesc')}</p>
                       </div>
                       <div className="flex gap-2 w-full">
-                        <button onClick={() => { resetTerminalState(); fetchTerminalReaders() }} className="flex-1 bg-[#6262bd] text-white py-2.5 rounded-2xl font-semibold hover:bg-[#5252a3] text-sm transition-colors">
+                        <button onClick={() => { resetTerminalState(); fetchTerminalReaders() }} className="flex-1 bg-[#6262bd] text-white py-2.5 rounded-sm font-semibold hover:bg-[#5252a3] text-sm transition-colors">
                           {t('paymentModal.terminalTryAgain')}
                         </button>
-                        <button onClick={() => { resetTerminalState(); processPayment('cash') }} className="flex-1 border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 py-2.5 rounded-2xl font-semibold text-sm">
+                        <button onClick={() => { resetTerminalState(); processPayment('cash') }} className="flex-1 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 py-2.5 rounded-sm font-semibold text-sm">
                           {t('paymentModal.terminalPayCash')}
                         </button>
                       </div>
@@ -4125,14 +4125,14 @@ export default function Tables() {
                         </svg>
                       </div>
                       <div className="text-center">
-                        <p className="font-semibold text-slate-800 dark:text-slate-100">{t('paymentModal.terminalCurrencyNotSupportedTitle')}</p>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{t('paymentModal.terminalCurrencyNotSupportedDesc')}</p>
+                        <p className="font-semibold text-zinc-800 dark:text-zinc-200">{t('paymentModal.terminalCurrencyNotSupportedTitle')}</p>
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-1">{t('paymentModal.terminalCurrencyNotSupportedDesc')}</p>
                       </div>
                       <div className="flex gap-2 w-full">
-                        <button onClick={() => { resetTerminalState(); setShowExternalTerminal(true) }} className="flex-1 bg-[#6262bd] text-white py-2.5 rounded-2xl font-semibold hover:bg-[#5252a3] text-sm transition-colors">
+                        <button onClick={() => { resetTerminalState(); setShowExternalTerminal(true) }} className="flex-1 bg-[#6262bd] text-white py-2.5 rounded-sm font-semibold hover:bg-[#5252a3] text-sm transition-colors">
                           {t('paymentModal.externalTerminalTitle')}
                         </button>
-                        <button onClick={() => { resetTerminalState(); processPayment('cash') }} className="flex-1 border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 py-2.5 rounded-2xl font-semibold text-sm">
+                        <button onClick={() => { resetTerminalState(); processPayment('cash') }} className="flex-1 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 py-2.5 rounded-sm font-semibold text-sm">
                           {t('paymentModal.terminalPayCash')}
                         </button>
                       </div>
@@ -4148,9 +4148,9 @@ export default function Tables() {
       {/* Split Bill Modal */}
       {showSplitBillModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-zinc-900 rounded-sm p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-slate-800">
+              <h2 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200">
                 {t('splitBillModal.title').replace('{tableNumber}', selectedTable?.table_number)}
               </h2>
               <button
@@ -4160,7 +4160,7 @@ export default function Tables() {
                   setAvailableItems([])
                   setSplitBillTableId(null)
                 }}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -4171,22 +4171,22 @@ export default function Tables() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Left Side: Available Items */}
               <div>
-                <div className="bg-slate-50 rounded-xl p-4 mb-4">
-                  <h3 className="font-bold text-slate-800 mb-2">{t('splitBillModal.availableItems')}</h3>
-                  <p className="text-sm text-slate-600">{t('splitBillModal.clickToAssign')}</p>
+                <div className="bg-zinc-50 dark:bg-zinc-900 rounded-sm p-4 mb-4">
+                  <h3 className="font-bold text-zinc-800 dark:text-zinc-200 mb-2">{t('splitBillModal.availableItems')}</h3>
+                  <p className="text-sm text-zinc-600 dark:text-zinc-400">{t('splitBillModal.clickToAssign')}</p>
                 </div>
 
                 <div className="space-y-2">
                   {availableItems.filter(item => item.quantity > 0).map((item) => (
-                    <div key={item.id} className="bg-white border-2 border-slate-200 rounded-xl p-4 transition-all">
+                    <div key={item.id} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-sm p-4 transition-all">
                       <div className="flex justify-between items-start mb-3">
                         <div className="flex-1">
-                          <h4 className="font-semibold text-slate-800">{item.name}</h4>
-                          <p className="text-sm text-slate-600">
+                          <h4 className="font-semibold text-zinc-800 dark:text-zinc-200">{item.name}</h4>
+                          <p className="text-sm text-zinc-600 dark:text-zinc-400">
                             {t('splitBillModal.quantityAvailable').replace('{quantity}', item.quantity).replace('{currency}', currencySymbol).replace('{price}', item.price.toFixed(2))}
                           </p>
                         </div>
-                        <span className="font-bold text-slate-800">{formatCurrency(item.quantity * item.price)}</span>
+                        <span className="font-bold text-zinc-800 dark:text-zinc-200">{formatCurrency(item.quantity * item.price)}</span>
                       </div>
 
                       {/* Bill Assignment Buttons - Only show unpaid bills */}
@@ -4230,7 +4230,7 @@ export default function Tables() {
                                 )
                               }}
                               disabled={item.quantity <= 0}
-                              className="flex-1 px-3 py-2 bg-[#6262bd] text-white text-sm rounded-lg hover:bg-[#5252a3] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                              className="flex-1 px-3 py-2 bg-[#6262bd] text-white text-sm rounded-sm hover:bg-[#5252a3] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
                               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
@@ -4244,7 +4244,7 @@ export default function Tables() {
                   ))}
 
                   {availableItems.filter(item => item.quantity > 0).length === 0 && (
-                    <div className="text-center py-8 text-slate-500">
+                    <div className="text-center py-8 text-zinc-500 dark:text-zinc-400">
                       {t('splitBillModal.allItemsAssigned')}
                     </div>
                   )}
@@ -4256,16 +4256,16 @@ export default function Tables() {
                 {/* Paid Bills */}
                 {splitBills.filter(b => b.paid).length > 0 && (
                   <div className="mb-6">
-                    <h3 className="font-bold text-slate-800 mb-3">{t('splitBillModal.paidBills')}</h3>
+                    <h3 className="font-bold text-zinc-800 dark:text-zinc-200 mb-3">{t('splitBillModal.paidBills')}</h3>
                     <div className="space-y-2">
                       {splitBills.filter(b => b.paid).map((bill) => (
-                        <div key={bill.id} className="flex justify-between items-center bg-green-50 border border-green-200 rounded-lg p-3">
+                        <div key={bill.id} className="flex justify-between items-center bg-green-50 border border-green-200 rounded-sm p-3">
                           <div className="flex items-center gap-3">
                             <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
                               <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
                             </svg>
-                            <span className="font-semibold text-slate-800">{bill.name}</span>
-                            <span className="text-slate-600">{formatCurrency(bill.total)}</span>
+                            <span className="font-semibold text-zinc-800 dark:text-zinc-200">{bill.name}</span>
+                            <span className="text-zinc-600 dark:text-zinc-400">{formatCurrency(bill.total)}</span>
                           </div>
                           <button
                             onClick={() => {
@@ -4273,7 +4273,7 @@ export default function Tables() {
                               setInvoiceTableId(bill.tableId || selectedTable?.id || null)
                               setShowInvoiceModal(true)
                             }}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium flex items-center gap-2"
+                            className="px-4 py-2 bg-blue-600 text-white rounded-sm hover:bg-blue-700 text-sm font-medium flex items-center gap-2"
                           >
                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                               <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
@@ -4289,9 +4289,9 @@ export default function Tables() {
                 {/* Unpaid Bills */}
                 <div className="space-y-4">
                   {splitBills.filter(b => !b.paid).map((bill) => (
-                    <div key={bill.id} className="bg-white border-2 border-[#6262bd]/30 rounded-xl p-4">
+                    <div key={bill.id} className="bg-white dark:bg-zinc-900 border-2 border-[#6262bd]/30 rounded-sm p-4">
                       <div className="flex justify-between items-center mb-3">
-                        <h4 className="font-bold text-lg text-slate-800">{bill.name}</h4>
+                        <h4 className="font-bold text-lg text-zinc-800 dark:text-zinc-200">{bill.name}</h4>
                         {splitBills.filter(b => !b.paid).length > 1 && (
                           <button
                             onClick={() => {
@@ -4316,15 +4316,15 @@ export default function Tables() {
                         <>
                           <div className="space-y-2 mb-3">
                             {bill.items.map((item) => (
-                              <div key={item.id} className="flex justify-between items-center text-sm bg-slate-50 rounded-lg p-2">
+                              <div key={item.id} className="flex justify-between items-center text-sm bg-zinc-50 dark:bg-zinc-900 rounded-sm p-2">
                                 <div className="flex-1">
-                                  <div className="font-medium text-slate-800">{item.name}</div>
-                                  <div className="text-xs text-slate-600">
+                                  <div className="font-medium text-zinc-800 dark:text-zinc-200">{item.name}</div>
+                                  <div className="text-xs text-zinc-600 dark:text-zinc-400">
                                     {item.quantity} × {formatCurrency(item.price)}
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <span className="font-semibold text-slate-800">{formatCurrency(item.total)}</span>
+                                  <span className="font-semibold text-zinc-800 dark:text-zinc-200">{formatCurrency(item.total)}</span>
                                   <button
                                     onClick={() => {
                                       // Return 1 quantity back to available
@@ -4363,9 +4363,9 @@ export default function Tables() {
                             ))}
                           </div>
 
-                          <div className="border-t-2 border-slate-200 pt-3">
+                          <div className="border-t-2 border-zinc-200 dark:border-zinc-700 pt-3">
                             <div className="flex justify-between items-center mb-3">
-                              <span className="font-bold text-slate-700">{t('splitBillModal.total')}</span>
+                              <span className="font-bold text-zinc-700 dark:text-zinc-300">{t('splitBillModal.total')}</span>
                               <span className="text-xl font-bold text-[#6262bd]">{formatCurrency(bill.total)}</span>
                             </div>
 
@@ -4373,7 +4373,7 @@ export default function Tables() {
                             <div className="space-y-2">
                               <button
                                 onClick={() => processSplitBillPayment(bill, 'cash')}
-                                className="w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 flex items-center justify-center gap-2 text-sm"
+                                className="w-full bg-green-600 text-white py-2 rounded-sm font-semibold hover:bg-green-700 flex items-center justify-center gap-2 text-sm"
                               >
                                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
@@ -4382,7 +4382,7 @@ export default function Tables() {
                               </button>
                               <button
                                 onClick={() => processSplitBillPayment(bill, 'card')}
-                                className="w-full bg-[#6262bd] text-white py-2 rounded-lg font-semibold hover:bg-[#5252a3] flex items-center justify-center gap-2 text-sm"
+                                className="w-full bg-[#6262bd] text-white py-2 rounded-sm font-semibold hover:bg-[#5252a3] flex items-center justify-center gap-2 text-sm"
                               >
                                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                   <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
@@ -4393,7 +4393,7 @@ export default function Tables() {
                           </div>
                         </>
                       ) : (
-                        <div className="text-center py-6 text-slate-400 text-sm">
+                        <div className="text-center py-6 text-zinc-400 dark:text-zinc-500 text-sm">
                           {t('splitBillModal.noItemsInBill')}
                         </div>
                       )}
@@ -4406,7 +4406,7 @@ export default function Tables() {
                       onClick={() => {
                         setSplitBills([{ id: 1, name: t('splitBillModal.billNumber').replace('{number}', '1'), items: [], total: 0 }])
                       }}
-                      className="w-full px-4 py-3 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252a3] transition-colors flex items-center justify-center gap-2 font-medium"
+                      className="w-full px-4 py-3 bg-[#6262bd] text-white rounded-sm hover:bg-[#5252a3] transition-colors flex items-center justify-center gap-2 font-medium"
                     >
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
@@ -4425,7 +4425,7 @@ export default function Tables() {
                           total: 0
                         }])
                       }}
-                      className="w-full px-4 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors flex items-center justify-center gap-2 font-medium"
+                      className="w-full px-4 py-3 bg-green-600 text-white rounded-sm hover:bg-green-700 transition-colors flex items-center justify-center gap-2 font-medium"
                     >
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
@@ -4436,19 +4436,19 @@ export default function Tables() {
                 </div>
 
                 {/* Summary */}
-                <div className="mt-4 bg-[#6262bd]/10 rounded-xl p-4">
+                <div className="mt-4 bg-[#6262bd]/10 rounded-sm p-4">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="font-semibold text-slate-700">{t('splitBillModal.originalTotal')}</span>
-                    <span className="font-bold text-slate-800">{formatCurrency(calculateTableTotal())}</span>
+                    <span className="font-semibold text-zinc-700 dark:text-zinc-300">{t('splitBillModal.originalTotal')}</span>
+                    <span className="font-bold text-zinc-800 dark:text-zinc-200">{formatCurrency(calculateTableTotal())}</span>
                   </div>
                   <div className="flex justify-between items-center mb-2">
-                    <span className="font-semibold text-slate-700">{t('splitBillModal.assignedToBills')}</span>
+                    <span className="font-semibold text-zinc-700 dark:text-zinc-300">{t('splitBillModal.assignedToBills')}</span>
                     <span className="font-bold text-[#6262bd]">
                       {formatCurrency(splitBills.reduce((sum, b) => sum + b.total, 0))}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="font-semibold text-slate-700">{t('splitBillModal.remaining')}</span>
+                    <span className="font-semibold text-zinc-700 dark:text-zinc-300">{t('splitBillModal.remaining')}</span>
                     <span className="font-bold text-orange-600">
                       {formatCurrency(calculateTableTotal() - splitBills.reduce((sum, b) => sum + b.total, 0))}
                     </span>
@@ -4463,9 +4463,9 @@ export default function Tables() {
       {/* Order Details Modal */}
       {showOrderDetailsModal && selectedTable && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+          <div className="bg-white dark:bg-zinc-900 rounded-sm p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-slate-800">
+              <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200">
                 Table {selectedTable.table_number} - Order Details
               </h2>
               <button
@@ -4474,7 +4474,7 @@ export default function Tables() {
                   setSelectedTable(null)
                   setTableOrderDetails([])
                 }}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400"
               >
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -4483,19 +4483,19 @@ export default function Tables() {
             </div>
 
             {tableOrderDetails.length === 0 ? (
-              <div className="bg-slate-50 rounded-xl p-8 text-center">
-                <p className="text-slate-500">No orders for this table</p>
+              <div className="bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 text-center">
+                <p className="text-zinc-500 dark:text-zinc-400">No orders for this table</p>
               </div>
             ) : (
               <>
                 {/* All Orders */}
                 <div className="space-y-4 mb-6">
                   {tableOrderDetails.map((order, index) => (
-                    <div key={order.id} className="bg-slate-50 rounded-xl p-4">
+                    <div key={order.id} className="bg-zinc-50 dark:bg-zinc-900 rounded-sm p-4">
                       <div className="flex justify-between items-start mb-3">
                         <div>
-                          <h3 className="font-semibold text-slate-700">Order #{index + 1}</h3>
-                          <p className="text-xs text-slate-500">
+                          <h3 className="font-semibold text-zinc-700 dark:text-zinc-300">Order #{index + 1}</h3>
+                          <p className="text-xs text-zinc-500 dark:text-zinc-400">
                             {new Date(order.created_at).toLocaleTimeString()} •
                             <span className="capitalize ml-1">{order.status}</span>
                           </p>
@@ -4507,10 +4507,10 @@ export default function Tables() {
                       <div className="space-y-2">
                         {order.order_items?.map((item, idx) => (
                           <div key={idx} className="flex justify-between text-sm">
-                            <span className="text-slate-700">
+                            <span className="text-zinc-700 dark:text-zinc-300">
                               {item.quantity}x {item.name}
                             </span>
-                            <span className="text-slate-600">
+                            <span className="text-zinc-600 dark:text-zinc-400">
                               {formatCurrency((item.price_at_time || 0) * (item.quantity || 0))}
                             </span>
                           </div>
@@ -4521,9 +4521,9 @@ export default function Tables() {
                 </div>
 
                 {/* Grand Total */}
-                <div className="bg-[#6262bd]/10 rounded-xl p-4">
+                <div className="bg-[#6262bd]/10 rounded-sm p-4">
                   <div className="flex justify-between items-center">
-                    <span className="font-semibold text-slate-700">Total Unpaid</span>
+                    <span className="font-semibold text-zinc-700 dark:text-zinc-300">Total Unpaid</span>
                     <span className="text-2xl font-bold text-[#6262bd]">
                       {formatCurrency(tableOrderDetails.reduce((orderSum, order) => {
                         const orderItemsTotal = (order.order_items || []).reduce((itemSum, item) => {
@@ -4551,11 +4551,11 @@ export default function Tables() {
           }}
         >
           <div
-            className="bg-white rounded-2xl p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto"
+            className="bg-white dark:bg-zinc-900 rounded-sm p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-slate-800">
+              <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200">
                 Table {selectedTable.table_number} - Today's Reservations
               </h2>
               <button
@@ -4564,7 +4564,7 @@ export default function Tables() {
                   setSelectedTable(null)
                   setSelectedTableReservations([])
                 }}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400"
               >
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -4573,17 +4573,17 @@ export default function Tables() {
             </div>
 
             {selectedTableReservations.length === 0 ? (
-              <div className="bg-slate-50 rounded-xl p-8 text-center">
-                <p className="text-slate-500">No confirmed reservations for today</p>
+              <div className="bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 text-center">
+                <p className="text-zinc-500 dark:text-zinc-400">No confirmed reservations for today</p>
               </div>
             ) : (
               <div className="space-y-4">
                 {selectedTableReservations.map((reservation) => (
-                  <div key={reservation.id} className="bg-white border-2 border-slate-200 rounded-xl p-5">
+                  <div key={reservation.id} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-sm p-5">
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-bold text-slate-800">{reservation.customer_name}</h3>
+                          <h3 className="font-bold text-zinc-800 dark:text-zinc-200">{reservation.customer_name}</h3>
                           <span className={`px-2 py-0.5 rounded-md text-xs font-semibold ${
                             reservation.status === 'completed'
                               ? 'bg-blue-100 text-blue-700'
@@ -4594,7 +4594,7 @@ export default function Tables() {
                             {reservation.status === 'completed' ? 'Completed' : reservation.status === 'cancelled' ? 'Cancelled' : 'Confirmed'}
                           </span>
                         </div>
-                        <div className="space-y-1 text-sm text-slate-600">
+                        <div className="space-y-1 text-sm text-zinc-600 dark:text-zinc-400">
                           <p><strong>Email:</strong> {reservation.customer_email}</p>
                           {reservation.customer_phone && (
                             <p><strong>Phone:</strong> {reservation.customer_phone}</p>
@@ -4608,15 +4608,15 @@ export default function Tables() {
                     </div>
 
                     {reservation.special_requests && (
-                      <div className="mt-3 mb-3 pt-3 border-t border-slate-200">
-                        <p className="text-xs text-slate-500 uppercase font-semibold mb-1">Special Requests</p>
-                        <p className="text-sm text-slate-700">{reservation.special_requests}</p>
+                      <div className="mt-3 mb-3 pt-3 border-t border-zinc-200 dark:border-zinc-700">
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase font-semibold mb-1">Special Requests</p>
+                        <p className="text-sm text-zinc-700 dark:text-zinc-300">{reservation.special_requests}</p>
                       </div>
                     )}
 
                     {/* Staff Actions Metadata */}
                     {(reservation.confirmed_by_staff_name || reservation.status === 'cancelled') && (
-                      <div className="mt-3 pt-3 border-t border-slate-200 text-xs space-y-1">
+                      <div className="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-700 text-xs space-y-1">
                         {reservation.confirmed_by_staff_name && reservation.status !== 'cancelled' && (
                           <div className="flex items-center gap-1.5 text-green-700">
                             <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
@@ -4667,7 +4667,7 @@ export default function Tables() {
                               }
                             }
                           }}
-                          className="flex-1 bg-blue-600 text-white px-4 py-2.5 rounded-xl font-medium hover:bg-blue-700 text-sm flex items-center justify-center gap-2"
+                          className="flex-1 bg-blue-600 text-white px-4 py-2.5 rounded-sm font-medium hover:bg-blue-700 text-sm flex items-center justify-center gap-2"
                         >
                           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
@@ -4681,7 +4681,7 @@ export default function Tables() {
                             setCustomCancelReason('')
                             setShowCancelModal(true)
                           }}
-                          className="flex-1 bg-red-600 text-white px-4 py-2.5 rounded-xl font-medium hover:bg-red-700 text-sm flex items-center justify-center gap-2"
+                          className="flex-1 bg-red-600 text-white px-4 py-2.5 rounded-sm font-medium hover:bg-red-700 text-sm flex items-center justify-center gap-2"
                         >
                           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/>
@@ -4708,17 +4708,17 @@ export default function Tables() {
           }}
         >
           <div
-            className="bg-white rounded-2xl p-8 w-full max-w-md"
+            className="bg-white dark:bg-zinc-900 rounded-sm p-8 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold text-slate-800 mb-6">
+            <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 mb-6">
               Create Reservation - Table {selectedTable.table_number}
             </h2>
 
             <form onSubmit={submitReservation} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                     Date
                   </label>
                   <input
@@ -4726,11 +4726,11 @@ export default function Tables() {
                     required
                     value={reservationForm.date}
                     onChange={(e) => setReservationForm({ ...reservationForm, date: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                     Time
                   </label>
                   <input
@@ -4738,13 +4738,13 @@ export default function Tables() {
                     required
                     value={reservationForm.time}
                     onChange={(e) => setReservationForm({ ...reservationForm, time: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   Party Size
                 </label>
                 <input
@@ -4754,12 +4754,12 @@ export default function Tables() {
                   max="50"
                   value={reservationForm.partySize}
                   onChange={(e) => setReservationForm({ ...reservationForm, partySize: parseInt(e.target.value) })}
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   Customer Name
                 </label>
                 <input
@@ -4767,13 +4767,13 @@ export default function Tables() {
                   required
                   value={reservationForm.customerName}
                   onChange={(e) => setReservationForm({ ...reservationForm, customerName: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                   placeholder="John Doe"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   Email
                 </label>
                 <input
@@ -4781,32 +4781,32 @@ export default function Tables() {
                   required
                   value={reservationForm.customerEmail}
                   onChange={(e) => setReservationForm({ ...reservationForm, customerEmail: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                   placeholder="john@example.com"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   Phone (Optional)
                 </label>
                 <input
                   type="tel"
                   value={reservationForm.customerPhone}
                   onChange={(e) => setReservationForm({ ...reservationForm, customerPhone: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                   placeholder="+44 123 456 7890"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   Special Requests (Optional)
                 </label>
                 <textarea
                   value={reservationForm.specialRequests}
                   onChange={(e) => setReservationForm({ ...reservationForm, specialRequests: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 resize-none"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 resize-none"
                   rows="3"
                   placeholder="Any dietary restrictions or special requests..."
                 />
@@ -4819,13 +4819,13 @@ export default function Tables() {
                     setShowCreateReservationModal(false)
                     setSelectedTable(null)
                   }}
-                  className="flex-1 border-2 border-slate-200 text-slate-600 py-3 rounded-xl font-medium hover:bg-slate-50"
+                  className="flex-1 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-[#6262bd] text-white py-3 rounded-xl font-medium hover:bg-[#5252a3]"
+                  className="flex-1 bg-[#6262bd] text-white py-3 rounded-sm font-medium hover:bg-[#5252a3]"
                 >
                   Create Reservation
                 </button>
@@ -4847,11 +4847,11 @@ export default function Tables() {
           }}
         >
           <div
-            className="bg-white rounded-2xl p-8 w-full max-w-md"
+            className="bg-white dark:bg-zinc-900 rounded-sm p-8 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-slate-800">
+              <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200">
                 Cancel Booking
               </h2>
               <button
@@ -4861,7 +4861,7 @@ export default function Tables() {
                   setCancelReasonType('no_show')
                   setCustomCancelReason('')
                 }}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400"
               >
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -4870,20 +4870,20 @@ export default function Tables() {
             </div>
 
             <div className="mb-6">
-              <p className="text-slate-700 mb-2">
+              <p className="text-zinc-700 dark:text-zinc-300 mb-2">
                 <strong>Customer:</strong> {reservationToCancel.customer_name}
               </p>
-              <p className="text-slate-700 mb-4">
+              <p className="text-zinc-700 dark:text-zinc-300 mb-4">
                 <strong>Time:</strong> {reservationToCancel.reservation_time.substring(0, 5)} | <strong>Party:</strong> {reservationToCancel.party_size} guests
               </p>
 
-              <label className="block text-sm font-medium text-slate-700 mb-3">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-3">
                 Cancellation Reason
               </label>
 
               <div className="space-y-3">
                 {/* No show option */}
-                <label className="flex items-start p-3 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-[#6262bd] transition-colors">
+                <label className="flex items-start p-3 border border-zinc-200 dark:border-zinc-700 rounded-sm cursor-pointer hover:border-[#6262bd] transition-colors">
                   <input
                     type="radio"
                     name="cancelReason"
@@ -4893,13 +4893,13 @@ export default function Tables() {
                     className="mt-1 mr-3"
                   />
                   <div>
-                    <div className="font-medium text-slate-800">No show</div>
-                    <div className="text-sm text-slate-500">Guest did not arrive</div>
+                    <div className="font-medium text-zinc-800 dark:text-zinc-200">No show</div>
+                    <div className="text-sm text-zinc-500 dark:text-zinc-400">Guest did not arrive</div>
                   </div>
                 </label>
 
                 {/* Customer request option */}
-                <label className="flex items-start p-3 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-[#6262bd] transition-colors">
+                <label className="flex items-start p-3 border border-zinc-200 dark:border-zinc-700 rounded-sm cursor-pointer hover:border-[#6262bd] transition-colors">
                   <input
                     type="radio"
                     name="cancelReason"
@@ -4909,13 +4909,13 @@ export default function Tables() {
                     className="mt-1 mr-3"
                   />
                   <div>
-                    <div className="font-medium text-slate-800">Customer request</div>
-                    <div className="text-sm text-slate-500">Customer requested cancellation</div>
+                    <div className="font-medium text-zinc-800 dark:text-zinc-200">Customer request</div>
+                    <div className="text-sm text-zinc-500 dark:text-zinc-400">Customer requested cancellation</div>
                   </div>
                 </label>
 
                 {/* Other option */}
-                <label className="flex items-start p-3 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-[#6262bd] transition-colors">
+                <label className="flex items-start p-3 border border-zinc-200 dark:border-zinc-700 rounded-sm cursor-pointer hover:border-[#6262bd] transition-colors">
                   <input
                     type="radio"
                     name="cancelReason"
@@ -4925,13 +4925,13 @@ export default function Tables() {
                     className="mt-1 mr-3"
                   />
                   <div className="flex-1">
-                    <div className="font-medium text-slate-800 mb-2">Other</div>
+                    <div className="font-medium text-zinc-800 dark:text-zinc-200 mb-2">Other</div>
                     {cancelReasonType === 'other' && (
                       <textarea
                         value={customCancelReason}
                         onChange={(e) => setCustomCancelReason(e.target.value)}
                         placeholder="Please provide a reason..."
-                        className="w-full px-3 py-2 border-2 border-slate-200 rounded-lg focus:outline-none focus:border-[#6262bd] text-slate-700 text-sm"
+                        className="w-full px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 text-sm"
                         rows="3"
                         onClick={(e) => e.stopPropagation()}
                       />
@@ -4949,7 +4949,7 @@ export default function Tables() {
                   setCancelReasonType('no_show')
                   setCustomCancelReason('')
                 }}
-                className="flex-1 px-4 py-3 border-2 border-slate-200 rounded-xl font-medium text-slate-700 hover:bg-slate-50"
+                className="flex-1 px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:bg-zinc-900"
               >
                 Keep Booking
               </button>
@@ -5026,7 +5026,7 @@ export default function Tables() {
                     showNotification('error', t('notifications.bookingCancelFailed'))
                   }
                 }}
-                className="flex-1 bg-red-600 text-white px-4 py-3 rounded-xl font-medium hover:bg-red-700"
+                className="flex-1 bg-red-600 text-white px-4 py-3 rounded-sm font-medium hover:bg-red-700"
               >
                 Cancel Booking
               </button>
@@ -5047,7 +5047,7 @@ export default function Tables() {
           }}
         >
           <div
-            className="bg-white rounded-2xl p-8 w-full max-w-md"
+            className="bg-white dark:bg-zinc-900 rounded-sm p-8 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="text-center mb-6">
@@ -5056,8 +5056,8 @@ export default function Tables() {
                   <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-slate-800 mb-2">{t('paymentModal.postPaymentTitle')}</h2>
-              <p className="text-slate-600">{t('paymentModal.postPaymentSubtitle')}</p>
+              <h2 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 mb-2">{t('paymentModal.postPaymentTitle')}</h2>
+              <p className="text-zinc-600 dark:text-zinc-400">{t('paymentModal.postPaymentSubtitle')}</p>
             </div>
 
             <div className="space-y-3">
@@ -5067,7 +5067,7 @@ export default function Tables() {
                   const orderId = completedOrderIds[0]
                   openInvoiceModal(orderId)
                 }}
-                className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] transition-all flex items-center justify-center gap-2"
+                className="w-full bg-[#6262bd] text-white py-3 rounded-sm font-semibold hover:bg-[#5252a3] transition-all flex items-center justify-center gap-2"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
@@ -5081,7 +5081,7 @@ export default function Tables() {
                   setUnpaidOrders([])
                   setCompletedOrderIds([])
                 }}
-                className="w-full border-2 border-slate-200 text-slate-700 py-3 rounded-xl font-semibold hover:bg-slate-50 transition-all"
+                className="w-full border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 py-3 rounded-sm font-semibold hover:bg-zinc-50 dark:bg-zinc-900 transition-all"
               >
                 {t('paymentModal.close')}
               </button>
@@ -5097,23 +5097,23 @@ export default function Tables() {
           onClick={() => { setShowTransferModal(false); setTransferSourceTable(null) }}
         >
           <div
-            className="bg-white rounded-2xl p-6 w-full max-w-lg max-h-[80vh] flex flex-col"
+            className="bg-white dark:bg-zinc-900 rounded-sm p-6 w-full max-w-lg max-h-[80vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-2">
-              <h2 className="text-xl font-bold text-slate-800">
+              <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200">
                 {t('transferModal.title')} — Table {transferSourceTable.table_number}
               </h2>
               <button
                 onClick={() => { setShowTransferModal(false); setTransferSourceTable(null) }}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400"
               >
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
                 </svg>
               </button>
             </div>
-            <p className="text-sm text-slate-500 mb-4">{t('transferModal.subtitle')}</p>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-4">{t('transferModal.subtitle')}</p>
 
             <div className="overflow-y-auto flex-1 space-y-2">
               {tables
@@ -5126,23 +5126,23 @@ export default function Tables() {
                       key={destTable.id}
                       onClick={() => transferTable(destTable)}
                       disabled={transferring}
-                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 text-left transition-colors ${
+                      className={`w-full flex items-center justify-between px-4 py-3 rounded-sm border-2 text-left transition-colors ${
                         transferring
-                          ? 'opacity-50 cursor-not-allowed border-slate-100 bg-slate-50'
+                          ? 'opacity-50 cursor-not-allowed border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900'
                           : destHasOrders
                           ? 'border-amber-200 bg-amber-50 hover:bg-amber-100'
-                          : 'border-slate-200 bg-white hover:bg-slate-50'
+                          : 'border-zinc-200 dark:border-zinc-700 bg-white hover:bg-zinc-50 dark:bg-zinc-900'
                       }`}
                     >
                       <div>
-                        <span className="font-semibold text-slate-800">Table {destTable.table_number}</span>
+                        <span className="font-semibold text-zinc-800 dark:text-zinc-200">Table {destTable.table_number}</span>
                         {destHasOrders ? (
                           <p className="text-xs text-amber-700 mt-0.5">{t('transferModal.hasExistingOrder')} — {formatCurrency(destInfo.total)}</p>
                         ) : (
-                          <p className="text-xs text-slate-400 mt-0.5">{t('transferModal.emptyTable')}</p>
+                          <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">{t('transferModal.emptyTable')}</p>
                         )}
                       </div>
-                      <svg className="w-5 h-5 text-slate-400 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 text-zinc-400 dark:text-zinc-500 shrink-0" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
                       </svg>
                     </button>
@@ -5209,28 +5209,28 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
   const [showOwnerMenu, setShowOwnerMenu] = useState(false)
 
   return (
-    <div className={`bg-white border-2 rounded-2xl overflow-visible transition-all duration-200 relative flex flex-col ${
+    <div className={`bg-white border-2 rounded-sm overflow-visible transition-all duration-200 relative flex flex-col ${
       needsCleaning ? 'border-red-200 shadow-red-100 shadow-md' :
       hasWaiterCall ? 'border-orange-300 shadow-orange-100 shadow-md' :
       hasOpenOrders ? 'border-amber-200 shadow-amber-100 shadow-md' :
-      'border-slate-100 hover:border-slate-200 hover:shadow-sm'
+      'border-zinc-200 dark:border-zinc-800 hover:border-zinc-200 dark:border-zinc-700 hover:shadow-sm'
     }`}>
 
       {/* Card Header — status-tinted top strip */}
       <div className={`rounded-t-2xl px-4 pt-4 pb-3 ${
         needsCleaning ? 'bg-red-50' :
         hasWaiterCall ? 'bg-orange-50' :
-        hasOpenOrders ? 'bg-amber-50' : 'bg-slate-50'
+        hasOpenOrders ? 'bg-amber-50' : 'bg-zinc-50 dark:bg-zinc-900'
       }`}>
         <div className="flex items-start justify-between gap-2">
 
           {/* Table number + status pill */}
           <div>
-            <p className="text-xs font-medium text-slate-400 uppercase tracking-widest leading-none mb-1">Table</p>
+            <p className="text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-widest leading-none mb-1">Table</p>
             <h3 className={`text-3xl font-black leading-none ${
               needsCleaning ? 'text-red-700' :
               hasWaiterCall ? 'text-orange-700' :
-              hasOpenOrders ? 'text-amber-700' : 'text-slate-800'
+              hasOpenOrders ? 'text-amber-700' : 'text-zinc-800 dark:text-zinc-200'
             }`}>{table.table_number}</h3>
 
             {/* Status pill */}
@@ -5250,7 +5250,7 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
                   Open · {formatCurrency(orderInfo.total)}
                 </button>
               ) : (
-                <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                <span className="inline-flex items-center gap-1 text-xs font-medium text-zinc-400 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full">
                   Available
                 </span>
               )}
@@ -5276,7 +5276,7 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
               <div className="relative">
                 <button
                   onClick={() => setShowOwnerMenu(v => !v)}
-                  className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition-colors"
+                  className="w-7 h-7 flex items-center justify-center rounded-sm text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:bg-zinc-700/60 transition-colors"
                   title="Table options"
                 >
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -5286,17 +5286,17 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
                 {showOwnerMenu && (
                   <>
                     <div className="fixed inset-0 z-10" onClick={() => setShowOwnerMenu(false)} />
-                    <div className="absolute right-0 top-8 z-20 bg-white border border-slate-200 rounded-xl shadow-lg py-1 min-w-[148px]">
+                    <div className="absolute right-0 top-8 z-20 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-sm shadow-lg py-1 min-w-[148px]">
                       <button
                         onClick={() => { onDownload(); setShowOwnerMenu(false) }}
-                        className="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 flex items-center gap-2"
+                        className="w-full text-left px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:bg-zinc-900 flex items-center gap-2"
                       >
                         <svg className="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
                         </svg>
                         {t('downloadQR')}
                       </button>
-                      <div className="my-1 border-t border-slate-100" />
+                      <div className="my-1 border-t border-zinc-200 dark:border-zinc-800" />
                       <button
                         onClick={() => { onDelete(); setShowOwnerMenu(false) }}
                         className="w-full text-left px-3 py-2 text-sm text-red-500 hover:bg-red-50 flex items-center gap-2"
@@ -5325,7 +5325,7 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
               <button
                 key={dept}
                 onClick={() => onMarkDelivered(dept)}
-                className={`${getDepartmentColor(dept)} text-white rounded-lg px-3 py-1.5 text-xs font-bold flex-1 flex items-center justify-center gap-1.5 animate-pulse`}
+                className={`${getDepartmentColor(dept)} text-white rounded-sm px-3 py-1.5 text-xs font-bold flex-1 flex items-center justify-center gap-1.5 animate-pulse`}
                 title={`${getDepartmentLabel(dept)} items ready - click to mark as delivered`}
               >
                 <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
@@ -5341,7 +5341,7 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
           /* Needs cleaning state — single full-width CTA */
           <button
             onClick={onMarkCleaned}
-            className="w-full bg-blue-600 text-white py-2.5 rounded-xl font-semibold hover:bg-blue-700 text-sm flex items-center justify-center gap-2 transition-colors"
+            className="w-full bg-blue-600 text-white py-2.5 rounded-sm font-semibold hover:bg-blue-700 text-sm flex items-center justify-center gap-2 transition-colors"
           >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
               <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
@@ -5354,14 +5354,14 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
             {hasWaiterCall && (
               <button
                 onClick={() => onAcknowledgeWaiterCall(waiterCalls[0].id)}
-                className="w-full bg-orange-500 text-white py-2 rounded-xl font-semibold hover:bg-orange-600 text-xs flex items-center justify-center gap-1.5 transition-colors"
+                className="w-full bg-orange-500 text-white py-2 rounded-sm font-semibold hover:bg-orange-600 text-xs flex items-center justify-center gap-1.5 transition-colors"
               >
                 👋 Acknowledge waiter call
               </button>
             )}
             <button
               onClick={onPayBill}
-              className="w-full bg-green-600 text-white py-2.5 rounded-xl font-semibold hover:bg-green-700 text-sm flex items-center justify-center gap-2 transition-colors"
+              className="w-full bg-green-600 text-white py-2.5 rounded-sm font-semibold hover:bg-green-700 text-sm flex items-center justify-center gap-2 transition-colors"
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M20 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
@@ -5371,7 +5371,7 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
             <div className="flex flex-col gap-2">
               <button
                 onClick={onPlaceOrder}
-                className="w-full bg-[#6262bd] text-white py-2 rounded-xl font-medium hover:bg-[#5252a3] text-xs flex items-center justify-center gap-1.5 transition-colors"
+                className="w-full bg-[#6262bd] text-white py-2 rounded-sm font-medium hover:bg-[#5252a3] text-xs flex items-center justify-center gap-1.5 transition-colors"
               >
                 <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
@@ -5380,7 +5380,7 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
               </button>
               <button
                 onClick={onSplitBill}
-                className="w-full bg-slate-100 text-slate-700 py-2 rounded-xl font-medium hover:bg-slate-200 text-xs flex items-center justify-center gap-1.5 transition-colors"
+                className="w-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 py-2 rounded-sm font-medium hover:bg-zinc-200 dark:bg-zinc-700 text-xs flex items-center justify-center gap-1.5 transition-colors"
               >
                 <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
@@ -5390,7 +5390,7 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
             </div>
             <button
               onClick={onTransfer}
-              className="w-full border border-slate-200 text-slate-600 py-2 rounded-xl font-medium hover:bg-slate-50 text-xs flex items-center justify-center gap-1.5 transition-colors"
+              className="w-full border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 py-2 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 text-xs flex items-center justify-center gap-1.5 transition-colors"
             >
               <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/>
@@ -5399,7 +5399,7 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
             </button>
             <button
               onClick={onCreateReservation}
-              className="w-full border border-slate-200 text-slate-500 py-2 rounded-xl font-medium hover:bg-slate-50 text-xs flex items-center justify-center gap-1.5 transition-colors"
+              className="w-full border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 py-2 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 text-xs flex items-center justify-center gap-1.5 transition-colors"
             >
               <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM12 13h5v5h-5z"/>
@@ -5413,14 +5413,14 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
             {hasWaiterCall && (
               <button
                 onClick={() => onAcknowledgeWaiterCall(waiterCalls[0].id)}
-                className="w-full bg-orange-500 text-white py-2 rounded-xl font-semibold hover:bg-orange-600 text-xs flex items-center justify-center gap-1.5 transition-colors"
+                className="w-full bg-orange-500 text-white py-2 rounded-sm font-semibold hover:bg-orange-600 text-xs flex items-center justify-center gap-1.5 transition-colors"
               >
                 👋 Acknowledge waiter call
               </button>
             )}
             <button
               onClick={onPlaceOrder}
-              className="w-full bg-[#6262bd] text-white py-2.5 rounded-xl font-semibold hover:bg-[#5252a3] text-sm flex items-center justify-center gap-2 transition-colors"
+              className="w-full bg-[#6262bd] text-white py-2.5 rounded-sm font-semibold hover:bg-[#5252a3] text-sm flex items-center justify-center gap-2 transition-colors"
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
@@ -5429,7 +5429,7 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
             </button>
             <button
               onClick={onCreateReservation}
-              className="w-full border border-slate-200 text-slate-500 py-2 rounded-xl font-medium hover:bg-slate-50 text-sm flex items-center justify-center gap-1.5 transition-colors"
+              className="w-full border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 py-2 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 text-sm flex items-center justify-center gap-1.5 transition-colors"
             >
               <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM12 13h5v5h-5z"/>

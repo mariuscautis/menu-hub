@@ -258,16 +258,16 @@ export default function BillingPage() {
     <div>
       <PageTabs tabs={settingsTabs} />
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+        <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-white flex items-center gap-2">
           {t('title')}
           <InfoTooltip text={tg('billing_desc')} />
         </h1>
-        <p className="text-slate-500 dark:text-slate-400">{t('subtitle')}</p>
+        <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('subtitle')}</p>
       </div>
 
       {/* Trial countdown banner */}
       {isTrialing && (
-        <div className={`mb-6 rounded-2xl border-2 p-5 flex items-center gap-4 ${
+        <div className={`mb-6 rounded-sm border-2 p-5 flex items-center gap-4 ${
           trialDaysLeft <= 3
             ? 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20'
             : trialDaysLeft <= 7
@@ -307,7 +307,7 @@ export default function BillingPage() {
       )}
 
       {message && (
-        <div className={`mb-6 p-4 rounded-xl border text-sm font-medium ${
+        <div className={`mb-6 p-4 rounded-sm border text-sm font-medium ${
           message.type === 'success' ? 'bg-green-50 border-green-200 text-green-700 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300' :
           message.type === 'info'    ? 'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300' :
                                        'bg-red-50 border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300'
@@ -317,10 +317,10 @@ export default function BillingPage() {
       )}
 
       {/* Current status */}
-      <div className="bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl p-6 mb-8">
+      <div className="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 rounded-sm p-6 mb-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">{t('currentSubscription')}</h2>
+            <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 uppercase tracking-wide mb-2">{t('currentSubscription')}</h2>
             <div className="flex items-center gap-3 flex-wrap mb-2">
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusConfig.className}`}>
                 {t(statusConfig.labelKey)}
@@ -334,27 +334,27 @@ export default function BillingPage() {
                 ) : null
               })}
               {subscriptionPlans.length === 0 && (
-                <span className="text-sm text-slate-500 dark:text-slate-400">{t('noActiveModules')}</span>
+                <span className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('noActiveModules')}</span>
               )}
             </div>
             {subscriptionStatus === 'trialing' && !trialEndsAt && (
-              <p className="text-sm text-slate-500 dark:text-slate-400">{t('trialNoExpiry')}</p>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('trialNoExpiry')}</p>
             )}
             {isActive && currentPeriodEnd && (
-              <p className="text-sm text-slate-500 dark:text-slate-400">{t('nextBillingDate', { date: formatDate(currentPeriodEnd) })}</p>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('nextBillingDate', { date: formatDate(currentPeriodEnd) })}</p>
             )}
             {subscriptionStatus === 'past_due' && (
               <p className="text-sm text-red-600 dark:text-red-400 font-medium">{t('pastDueNote')}</p>
             )}
             {subscriptionStatus === 'canceled' && currentPeriodEnd && (
-              <p className="text-sm text-slate-500 dark:text-slate-400">{t('canceledNote', { date: formatDate(currentPeriodEnd) })}</p>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('canceledNote', { date: formatDate(currentPeriodEnd) })}</p>
             )}
           </div>
           {restaurant?.stripe_customer_id && (
             <button
               onClick={handleManageBilling}
               disabled={portalLoading}
-              className="px-5 py-2.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-medium hover:bg-slate-200 dark:hover:bg-slate-600 disabled:opacity-50 transition-colors flex items-center gap-2 text-sm"
+              className="px-5 py-2.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-sm font-medium hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 disabled:opacity-50 transition-colors flex items-center gap-2 text-sm"
             >
               {portalLoading
                 ? <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
@@ -369,10 +369,10 @@ export default function BillingPage() {
       {/* Plan tiles */}
       <div className="mb-4 flex items-end justify-between flex-wrap gap-2">
         <div>
-          <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200">
+          <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300">
             {isActive ? t('yourModules') : t('selectModules')}
           </h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-0.5">
             {isActive ? t('modulesActiveDesc') : t('modulesTrialDesc')}
           </p>
         </div>
@@ -394,14 +394,14 @@ export default function BillingPage() {
             <button
               key={plan.key}
               onClick={() => togglePlan(plan.key)}
-              className={`relative text-left rounded-2xl border-2 p-6 transition-all flex flex-col ${
+              className={`relative text-left rounded-sm border-2 p-6 transition-all flex flex-col ${
                 isRemoving
                   ? 'border-red-300 bg-red-50 dark:bg-red-900/10 dark:border-red-700 opacity-60'
                   : isAdding
                     ? 'border-[#6262bd] bg-[#6262bd]/5 dark:bg-[#6262bd]/10 shadow-md shadow-[#6262bd]/10'
                     : isSelected
                       ? 'border-[#6262bd] bg-[#6262bd]/5 dark:bg-[#6262bd]/10 shadow-md shadow-[#6262bd]/10'
-                      : 'border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'
+                      : 'border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:border-zinc-300 dark:border-zinc-600 dark:hover:border-zinc-600'
               }`}
             >
               {/* Badge */}
@@ -423,12 +423,12 @@ export default function BillingPage() {
 
               <div className="flex items-start justify-between mb-3">
                 <div>
-                  <h3 className="text-lg font-bold text-slate-800 dark:text-white">{plan.name}</h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{plan.description}</p>
+                  <h3 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-white">{plan.name}</h3>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-0.5">{plan.description}</p>
                 </div>
                 {/* Toggle indicator */}
                 <div className={`flex-shrink-0 w-11 h-6 rounded-full transition-colors relative ${
-                  isSelected ? 'bg-[#6262bd]' : 'bg-slate-200 dark:bg-slate-600'
+                  isSelected ? 'bg-[#6262bd]' : 'bg-zinc-200 dark:bg-zinc-700'
                 }`}>
                   <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
                     isSelected ? 'translate-x-5' : 'translate-x-0.5'
@@ -437,13 +437,13 @@ export default function BillingPage() {
               </div>
 
               <div className="mb-4">
-                <span className="text-2xl font-bold text-slate-800 dark:text-white">£{plan.price}</span>
-                <span className="text-slate-500 dark:text-slate-400 text-sm">/{t('month')}</span>
+                <span className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-white">£{plan.price}</span>
+                <span className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 text-sm">/{t('month')}</span>
               </div>
 
               <ul className="space-y-1.5 flex-1">
                 {plan.features.map(f => (
-                  <li key={f} className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-300">
+                  <li key={f} className="flex items-start gap-2 text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-300">
                     <svg className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
                     </svg>
@@ -456,18 +456,18 @@ export default function BillingPage() {
               {plan.key === 'bookings' && isSelected && (
                 <div
                   onClick={e => e.stopPropagation()}
-                  className={`mt-4 rounded-xl border-2 p-4 transition-colors ${
+                  className={`mt-4 rounded-sm border-2 p-4 transition-colors ${
                     smsEnabled
                       ? 'border-emerald-300 bg-emerald-50 dark:bg-emerald-900/20 dark:border-emerald-700'
-                      : 'border-slate-200 bg-white/60 dark:bg-slate-700/30 dark:border-slate-600'
+                      : 'border-zinc-200 dark:border-zinc-700 bg-white/60 dark:bg-zinc-700/30 dark:border-zinc-600'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <div className="flex-1">
-                      <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                      <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                         📱 {t('smsAddonTitle')}
                       </p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-1 leading-relaxed">
                         {t('smsAddonDesc')}{' '}
                         <a
                           href="https://venoapp.com/services/reservations"
@@ -478,7 +478,7 @@ export default function BillingPage() {
                           {t('learnMore')}
                         </a>
                       </p>
-                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-2">
+                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-2">
                         {t('smsBilledMonthly', { rate: restaurant?.sms_billing_rate_pence ?? 20 })}
                       </p>
                     </div>
@@ -486,7 +486,7 @@ export default function BillingPage() {
                       onClick={() => toggleSmsAddon(!smsEnabled)}
                       disabled={smsToggling}
                       className={`flex-shrink-0 relative w-11 h-6 rounded-full transition-colors disabled:opacity-50 ${
-                        smsEnabled ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'
+                        smsEnabled ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-zinc-600'
                       }`}
                     >
                       <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
@@ -500,17 +500,17 @@ export default function BillingPage() {
                     </p>
                   )}
                   {smsEnabled && smsUsage && (
-                    <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-600">
-                      <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">
+                    <div className="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-700 dark:border-zinc-600">
+                      <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 uppercase tracking-wide mb-2">
                         {t('smsUsageMonth', { month: smsUsage.month })}
                       </p>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-slate-600 dark:text-slate-300">{t('smsSent', { count: smsUsage.sms_count })}</span>
-                        <span className="font-semibold text-slate-800 dark:text-white">
+                        <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-300">{t('smsSent', { count: smsUsage.sms_count })}</span>
+                        <span className="font-semibold text-zinc-800 dark:text-zinc-200 dark:text-white">
                           {t('smsEstimated', { amount: (smsUsage.total_pence / 100).toFixed(2) })}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                      <p className="text-xs text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 mt-1">
                         {t('smsRate', { rate: smsUsage.rate_pence })}
                       </p>
                     </div>
@@ -525,14 +525,14 @@ export default function BillingPage() {
       {/* Action bar */}
       {isActive ? (
         // ── Active subscriber: show diff + Update plan button ──────────────
-        <div className={`bg-white dark:bg-slate-800 border-2 rounded-2xl p-6 transition-all ${
-          hasChanges ? 'border-[#6262bd]/40' : 'border-slate-100 dark:border-slate-700'
+        <div className={`bg-white dark:bg-zinc-800 border-2 rounded-sm p-6 transition-all ${
+          hasChanges ? 'border-[#6262bd]/40' : 'border-zinc-200 dark:border-zinc-800 dark:border-zinc-700'
         }`}>
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               {hasChanges ? (
                 <>
-                  <p className="text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">
+                  <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
                     {toAdd.length > 0 && (
                       <span className="text-green-600 dark:text-green-400 mr-3">
                         {t('adding')} {toAdd.map(k => PLANS.find(p => p.key === k)?.name).join(', ')}
@@ -545,9 +545,9 @@ export default function BillingPage() {
                     )}
                   </p>
                   <div className="flex items-center gap-3 flex-wrap">
-                    <span className="text-slate-400 dark:text-slate-500 line-through text-sm">£{currentTotal}/{t('month')}</span>
-                    <span className="text-2xl font-bold text-slate-800 dark:text-white">
-                      £{total}<span className="text-sm font-normal text-slate-500">/{t('month')}</span>
+                    <span className="text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 line-through text-sm">£{currentTotal}/{t('month')}</span>
+                    <span className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-white">
+                      £{total}<span className="text-sm font-normal text-zinc-500 dark:text-zinc-400">/{t('month')}</span>
                     </span>
                     {selected.length >= 2 && saving > 0 && (
                       <span className="text-green-600 dark:text-green-400 text-sm font-medium">{t('saveMo', { amount: saving })}</span>
@@ -556,11 +556,11 @@ export default function BillingPage() {
                 </>
               ) : (
                 <div>
-                  <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                  <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                     {selected.map(k => PLANS.find(p => p.key === k)?.name).join(' + ') || t('noModulesSelected')}
                   </p>
-                  <p className="text-2xl font-bold text-slate-800 dark:text-white mt-0.5">
-                    £{total}<span className="text-sm font-normal text-slate-500">/{t('month')}</span>
+                  <p className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-white mt-0.5">
+                    £{total}<span className="text-sm font-normal text-zinc-500 dark:text-zinc-400">/{t('month')}</span>
                     {selected.length >= 2 && saving > 0 && (
                       <span className="text-green-600 text-sm font-medium ml-3">{t('saveMo', { amount: saving })}</span>
                     )}
@@ -571,7 +571,7 @@ export default function BillingPage() {
             <button
               onClick={handleUpdate}
               disabled={loading || !hasChanges}
-              className="px-8 py-3 bg-[#6262bd] hover:bg-[#5151a8] text-white rounded-xl font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-md shadow-[#6262bd]/20"
+              className="px-8 py-3 bg-[#6262bd] hover:bg-[#5151a8] text-white rounded-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-md shadow-[#6262bd]/20"
             >
               {loading ? (
                 <>
@@ -587,7 +587,7 @@ export default function BillingPage() {
             </button>
           </div>
           {hasChanges && toRemove.length > 0 && (
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-3">
+            <p className="text-xs text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 mt-3">
               {t('removedModulesNote')}
             </p>
           )}
@@ -595,18 +595,18 @@ export default function BillingPage() {
       ) : (
         // ── New subscriber: show checkout summary ─────────────────────────
         selected.length > 0 && (
-          <div className="bg-white dark:bg-slate-800 border-2 border-[#6262bd]/30 rounded-2xl p-6">
+          <div className="bg-white dark:bg-zinc-800 border-2 border-[#6262bd]/30 rounded-sm p-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-1">
                   {selected.map(k => PLANS.find(p => p.key === k)?.name).join(' + ')}
                 </p>
                 <div className="flex items-center gap-3 flex-wrap">
                   {selected.length >= 2 && (
-                    <span className="text-slate-400 dark:text-slate-500 line-through text-sm">£{base}/{t('month')}</span>
+                    <span className="text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 line-through text-sm">£{base}/{t('month')}</span>
                   )}
-                  <span className="text-2xl font-bold text-slate-800 dark:text-white">
-                    £{total}<span className="text-sm font-normal text-slate-500">/{t('month')}</span>
+                  <span className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-white">
+                    £{total}<span className="text-sm font-normal text-zinc-500 dark:text-zinc-400">/{t('month')}</span>
                   </span>
                   {selected.length >= 2 && (
                     <span className="text-green-600 dark:text-green-400 text-sm font-medium">
@@ -618,7 +618,7 @@ export default function BillingPage() {
               <button
                 onClick={handleCheckout}
                 disabled={loading}
-                className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-md shadow-green-600/20"
+                className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-md shadow-green-600/20"
               >
                 {loading ? (
                   <>
@@ -637,7 +637,7 @@ export default function BillingPage() {
         )
       )}
 
-      <p className="text-xs text-slate-400 dark:text-slate-500 text-center mt-5">
+      <p className="text-xs text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 text-center mt-5">
         {t('trialNote')}
       </p>
     </div>

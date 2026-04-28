@@ -460,7 +460,7 @@ export default function ZReportPage() {
   // Loading state
   if (loading && !restaurant) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-8">
+      <div className="min-h-screen p-8">
         <div className="flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6262bd]"></div>
         </div>
@@ -471,23 +471,23 @@ export default function ZReportPage() {
   // No restaurant found
   if (!restaurant) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-8">
-        <p className="text-slate-600 dark:text-slate-400">{t('noRestaurant') || 'No restaurant found'}</p>
+      <div className="min-h-screen p-8">
+        <p className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{t('noRestaurant') || 'No restaurant found'}</p>
       </div>
     );
   }
 
   return (
     <OfflinePageGuard>
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-4 md:p-8">
+    <div className="min-h-screen p-4 md:p-8">
       <PageTabs tabs={reportsTabs} />
       <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+          <h1 className="text-2xl md:text-3xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 flex items-center gap-2">
             {t('title') || 'Z-Report'}
             <InfoTooltip text={tg('zreport_desc')} />
           </h1>
-          <p className="text-slate-600 dark:text-slate-400">
+          <p className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">
             {t('subtitle')?.replace('{date}', formatDate(selectedDate)) || `Daily closeout report for ${formatDate(selectedDate)}`}
           </p>
         </div>
@@ -499,13 +499,13 @@ export default function ZReportPage() {
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
             max={new Date().toISOString().split('T')[0]}
-            className="px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-[#6262bd]"
+            className="px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 focus:outline-none focus:border-[#6262bd]"
           />
 
           {/* Export PDF Button */}
           <button
             onClick={handleExportPDF}
-            className="px-6 py-2 bg-[#6262bd] hover:bg-[#5252ad] text-white font-medium rounded-xl transition-colors flex items-center gap-2"
+            className="px-6 py-2 bg-[#6262bd] hover:bg-[#5252ad] text-white font-medium rounded-sm transition-colors flex items-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -519,7 +519,7 @@ export default function ZReportPage() {
       {loading && (
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6262bd] mx-auto mb-4"></div>
-          <p className="text-slate-600 dark:text-slate-400">Loading report data...</p>
+          <p className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">Loading report data...</p>
         </div>
       )}
 
@@ -528,8 +528,8 @@ export default function ZReportPage() {
         <div className="space-y-6">
           {/* No Data State */}
           {reportData.totalOrders === 0 && (
-            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-8 text-center print:border print:rounded-none">
-              <p className="text-slate-600 dark:text-slate-400">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-8 text-center print:border print:rounded-none">
+              <p className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">
                 {t('noData') || 'No data available for this day'}
               </p>
             </div>
@@ -538,49 +538,49 @@ export default function ZReportPage() {
           {/* Sales Summary */}
           {reportData.totalOrders > 0 && (
             <>
-              <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 print:border print:rounded-none print:p-4">
-                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4 print:text-base">
+              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 print:border print:rounded-none print:p-4">
+                <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4 print:text-base">
                   {t('salesSummary') || 'Sales Summary'}
                 </h2>
                 <div className="space-y-3">
-                  <div className="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
-                    <span className="text-slate-600 dark:text-slate-400">{t('grossSales') || 'Gross Sales'}</span>
-                    <span className="font-semibold text-slate-800 dark:text-slate-200">{formatCurrency(reportData.grossSales)}</span>
+                  <div className="flex justify-between py-2 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-800">
+                    <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{t('grossSales') || 'Gross Sales'}</span>
+                    <span className="font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{formatCurrency(reportData.grossSales)}</span>
                   </div>
-                  <div className="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
-                    <span className="text-slate-600 dark:text-slate-400">{t('discounts') || 'Discounts'}</span>
+                  <div className="flex justify-between py-2 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-800">
+                    <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{t('discounts') || 'Discounts'}</span>
                     <span className="font-semibold text-red-600 dark:text-red-400">-{formatCurrency(reportData.discountTotal)}</span>
                   </div>
-                  <div className="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
-                    <span className="text-slate-600 dark:text-slate-400">{t('taxCollected') || 'Tax Collected'}</span>
-                    <span className="font-semibold text-slate-800 dark:text-slate-200">{formatCurrency(reportData.taxCollected)}</span>
+                  <div className="flex justify-between py-2 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-800">
+                    <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{t('taxCollected') || 'Tax Collected'}</span>
+                    <span className="font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{formatCurrency(reportData.taxCollected)}</span>
                   </div>
-                  <div className="flex justify-between py-3 bg-slate-50 dark:bg-slate-800 px-3 rounded-lg print:bg-gray-100">
-                    <span className="font-bold text-slate-800 dark:text-slate-200">{t('netSales') || 'Net Sales'}</span>
+                  <div className="flex justify-between py-3 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 px-3 rounded-sm print:bg-gray-100">
+                    <span className="font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{t('netSales') || 'Net Sales'}</span>
                     <span className="font-bold text-[#6262bd] text-xl print:text-base">{formatCurrency(reportData.netSales)}</span>
                   </div>
                 </div>
               </div>
 
               {/* Payment Breakdown */}
-              <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 print:border print:rounded-none print:p-4">
-                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4 print:text-base">
+              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 print:border print:rounded-none print:p-4">
+                <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4 print:text-base">
                   {t('paymentBreakdown') || 'Payment Breakdown'}
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 print:gap-2">
-                  <div className="bg-green-50 dark:bg-green-900/30 rounded-xl p-4 text-center print:p-2 print:rounded-none">
+                  <div className="bg-green-50 dark:bg-green-900/30 rounded-sm p-4 text-center print:p-2 print:rounded-none">
                     <p className="text-sm text-green-600 dark:text-green-400">{t('cash') || 'Cash'}</p>
                     <p className="text-xl font-bold text-green-600 dark:text-green-400 print:text-base">
                       {formatCurrency(reportData.cashTotal)}
                     </p>
                   </div>
-                  <div className="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-4 text-center print:p-2 print:rounded-none">
+                  <div className="bg-blue-50 dark:bg-blue-900/30 rounded-sm p-4 text-center print:p-2 print:rounded-none">
                     <p className="text-sm text-blue-600 dark:text-blue-400">{t('card') || 'Card'}</p>
                     <p className="text-xl font-bold text-blue-600 dark:text-blue-400 print:text-base">
                       {formatCurrency(reportData.cardTotal)}
                     </p>
                   </div>
-                  <div className="bg-purple-50 dark:bg-purple-900/30 rounded-xl p-4 text-center print:p-2 print:rounded-none">
+                  <div className="bg-purple-50 dark:bg-purple-900/30 rounded-sm p-4 text-center print:p-2 print:rounded-none">
                     <p className="text-sm text-purple-600 dark:text-purple-400">{t('splitBills') || 'Split Bills'}</p>
                     <p className="text-xl font-bold text-purple-600 dark:text-purple-400 print:text-base">
                       {formatCurrency(reportData.splitBillsTotal)}
@@ -590,55 +590,55 @@ export default function ZReportPage() {
               </div>
 
               {/* Cash Drawer */}
-              <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 print:border print:rounded-none print:p-4">
-                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4 print:text-base">
+              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 print:border print:rounded-none print:p-4">
+                <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4 print:text-base">
                   {t('cashDrawer') || 'Cash Drawer'}
                 </h2>
                 {reportData.drawerSession ? (
                   <div className="space-y-3">
-                    <div className="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
-                      <span className="text-slate-600 dark:text-slate-400">{t('openingAmount') || 'Opening Amount'}</span>
-                      <span className="font-semibold text-slate-800 dark:text-slate-200">
+                    <div className="flex justify-between py-2 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-800">
+                      <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{t('openingAmount') || 'Opening Amount'}</span>
+                      <span className="font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                         {formatCurrency(reportData.drawerSession.opening_amount)}
                       </span>
                     </div>
-                    <div className="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
-                      <span className="text-slate-600 dark:text-slate-400">{t('cashSalesAndTips') || 'Cash Sales + Tips'}</span>
+                    <div className="flex justify-between py-2 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-800">
+                      <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{t('cashSalesAndTips') || 'Cash Sales + Tips'}</span>
                       <span className="font-semibold text-green-600 dark:text-green-400">
                         +{formatCurrency(reportData.cashSalesAndTips)}
                       </span>
                     </div>
-                    <div className="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
-                      <span className="text-slate-600 dark:text-slate-400">{t('cashRefunds') || 'Cash Refunds'}</span>
+                    <div className="flex justify-between py-2 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-800">
+                      <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{t('cashRefunds') || 'Cash Refunds'}</span>
                       <span className="font-semibold text-red-600 dark:text-red-400">
                         -{formatCurrency(reportData.cashRefundsTotal)}
                       </span>
                     </div>
-                    <div className="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
-                      <span className="text-slate-600 dark:text-slate-400">{t('expectedClosing') || 'Expected Closing'}</span>
-                      <span className="font-semibold text-slate-800 dark:text-slate-200">
+                    <div className="flex justify-between py-2 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-800">
+                      <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{t('expectedClosing') || 'Expected Closing'}</span>
+                      <span className="font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                         {formatCurrency(reportData.drawerSession.expected_amount)}
                       </span>
                     </div>
                     {reportData.drawerSession.status === 'closed' ? (
                       <>
-                        <div className="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
-                          <span className="text-slate-600 dark:text-slate-400">{t('actualClosing') || 'Actual Closing'}</span>
-                          <span className="font-semibold text-slate-800 dark:text-slate-200">
+                        <div className="flex justify-between py-2 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-800">
+                          <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{t('actualClosing') || 'Actual Closing'}</span>
+                          <span className="font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                             {formatCurrency(reportData.drawerSession.closing_amount)}
                           </span>
                         </div>
-                        <div className={`flex justify-between py-3 px-3 rounded-lg ${
+                        <div className={`flex justify-between py-3 px-3 rounded-sm ${
                           parseFloat(reportData.drawerSession.variance || 0) === 0
-                            ? 'bg-slate-50 dark:bg-slate-800'
+                            ? 'bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800'
                             : parseFloat(reportData.drawerSession.variance || 0) > 0
                               ? 'bg-green-50 dark:bg-green-900/30'
                               : 'bg-red-50 dark:bg-red-900/30'
                         } print:bg-gray-100`}>
-                          <span className="font-bold text-slate-800 dark:text-slate-200">{t('variance') || 'Variance'}</span>
+                          <span className="font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{t('variance') || 'Variance'}</span>
                           <span className={`font-bold ${
                             parseFloat(reportData.drawerSession.variance || 0) === 0
-                              ? 'text-slate-800 dark:text-slate-200'
+                              ? 'text-zinc-800 dark:text-zinc-200 dark:text-zinc-200'
                               : parseFloat(reportData.drawerSession.variance || 0) > 0
                                 ? 'text-green-600 dark:text-green-400'
                                 : 'text-red-600 dark:text-red-400'
@@ -649,7 +649,7 @@ export default function ZReportPage() {
                         </div>
                       </>
                     ) : (
-                      <div className="py-3 px-3 bg-amber-50 dark:bg-amber-900/30 rounded-lg text-center print:bg-gray-100">
+                      <div className="py-3 px-3 bg-amber-50 dark:bg-amber-900/30 rounded-sm text-center print:bg-gray-100">
                         <span className="text-amber-600 dark:text-amber-400 font-medium">
                           {t('drawerNotClosed') || 'Drawer not closed yet'}
                         </span>
@@ -657,31 +657,31 @@ export default function ZReportPage() {
                     )}
                   </div>
                 ) : (
-                  <div className="py-4 text-center text-slate-500 dark:text-slate-400">
+                  <div className="py-4 text-center text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">
                     {t('noDrawerSession') || 'No drawer session for this day'}
                   </div>
                 )}
               </div>
 
               {/* Tips Summary */}
-              <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 print:border print:rounded-none print:p-4">
-                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4 print:text-base">
+              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 print:border print:rounded-none print:p-4">
+                <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4 print:text-base">
                   {t('tipsSummary') || 'Tips Summary'}
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 print:gap-2">
-                  <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 text-center print:p-2 print:rounded-none">
-                    <p className="text-sm text-slate-600 dark:text-slate-400">{t('totalTips') || 'Total Tips'}</p>
+                  <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 rounded-sm p-4 text-center print:p-2 print:rounded-none">
+                    <p className="text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{t('totalTips') || 'Total Tips'}</p>
                     <p className="text-xl font-bold text-[#6262bd] print:text-base">
                       {formatCurrency(reportData.totalTips)}
                     </p>
                   </div>
-                  <div className="bg-green-50 dark:bg-green-900/30 rounded-xl p-4 text-center print:p-2 print:rounded-none">
+                  <div className="bg-green-50 dark:bg-green-900/30 rounded-sm p-4 text-center print:p-2 print:rounded-none">
                     <p className="text-sm text-green-600 dark:text-green-400">{t('cashTips') || 'Cash Tips'}</p>
                     <p className="text-xl font-bold text-green-600 dark:text-green-400 print:text-base">
                       {formatCurrency(reportData.cashTips)}
                     </p>
                   </div>
-                  <div className="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-4 text-center print:p-2 print:rounded-none">
+                  <div className="bg-blue-50 dark:bg-blue-900/30 rounded-sm p-4 text-center print:p-2 print:rounded-none">
                     <p className="text-sm text-blue-600 dark:text-blue-400">{t('cardTips') || 'Card Tips'}</p>
                     <p className="text-xl font-bold text-blue-600 dark:text-blue-400 print:text-base">
                       {formatCurrency(reportData.cardTips)}
@@ -691,12 +691,12 @@ export default function ZReportPage() {
               </div>
 
               {/* Voids & Refunds */}
-              <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 print:border print:rounded-none print:p-4">
-                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4 print:text-base">
+              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 print:border print:rounded-none print:p-4">
+                <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4 print:text-base">
                   {t('voidsAndRefunds') || 'Voids & Refunds'}
                 </h2>
                 <div className="grid grid-cols-2 gap-4 print:gap-2">
-                  <div className="bg-amber-50 dark:bg-amber-900/30 rounded-xl p-4 print:p-2 print:rounded-none">
+                  <div className="bg-amber-50 dark:bg-amber-900/30 rounded-sm p-4 print:p-2 print:rounded-none">
                     <p className="text-sm text-amber-600 dark:text-amber-400">{t('totalVoids') || 'Total Voids'}</p>
                     <p className="text-xl font-bold text-amber-600 dark:text-amber-400 print:text-base">
                       {formatCurrency(reportData.voidsTotal)}
@@ -705,7 +705,7 @@ export default function ZReportPage() {
                       {reportData.voidsCount} {t('voidItems') || 'void items'}
                     </p>
                   </div>
-                  <div className="bg-red-50 dark:bg-red-900/30 rounded-xl p-4 print:p-2 print:rounded-none">
+                  <div className="bg-red-50 dark:bg-red-900/30 rounded-sm p-4 print:p-2 print:rounded-none">
                     <p className="text-sm text-red-600 dark:text-red-400">{t('totalRefunds') || 'Total Refunds'}</p>
                     <p className="text-xl font-bold text-red-600 dark:text-red-400 print:text-base">
                       {formatCurrency(reportData.refundsTotal)}
@@ -718,30 +718,30 @@ export default function ZReportPage() {
               </div>
 
               {/* Order Summary */}
-              <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 print:border print:rounded-none print:p-4">
-                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4 print:text-base">
+              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 print:border print:rounded-none print:p-4">
+                <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4 print:text-base">
                   {t('orderSummary') || 'Order Summary'}
                 </h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 print:grid-cols-4 print:gap-2">
-                  <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 text-center print:p-2 print:rounded-none">
-                    <p className="text-sm text-slate-600 dark:text-slate-400">{t('totalOrders') || 'Total Orders'}</p>
-                    <p className="text-2xl font-bold text-slate-800 dark:text-slate-200 print:text-xl">
+                  <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 rounded-sm p-4 text-center print:p-2 print:rounded-none">
+                    <p className="text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{t('totalOrders') || 'Total Orders'}</p>
+                    <p className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 print:text-xl">
                       {reportData.totalOrders}
                     </p>
                   </div>
-                  <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 text-center print:p-2 print:rounded-none">
-                    <p className="text-sm text-slate-600 dark:text-slate-400">{t('dineIn') || 'Dine-in'}</p>
-                    <p className="text-2xl font-bold text-slate-800 dark:text-slate-200 print:text-xl">
+                  <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 rounded-sm p-4 text-center print:p-2 print:rounded-none">
+                    <p className="text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{t('dineIn') || 'Dine-in'}</p>
+                    <p className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 print:text-xl">
                       {reportData.dineInOrders}
                     </p>
                   </div>
-                  <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 text-center print:p-2 print:rounded-none">
-                    <p className="text-sm text-slate-600 dark:text-slate-400">{t('takeaway') || 'Takeaway'}</p>
-                    <p className="text-2xl font-bold text-slate-800 dark:text-slate-200 print:text-xl">
+                  <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 rounded-sm p-4 text-center print:p-2 print:rounded-none">
+                    <p className="text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{t('takeaway') || 'Takeaway'}</p>
+                    <p className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 print:text-xl">
                       {reportData.takeawayOrders}
                     </p>
                   </div>
-                  <div className="bg-[#6262bd]/10 dark:bg-[#6262bd]/30 rounded-xl p-4 text-center print:p-2 print:rounded-none">
+                  <div className="bg-[#6262bd]/10 dark:bg-[#6262bd]/30 rounded-sm p-4 text-center print:p-2 print:rounded-none">
                     <p className="text-sm text-[#6262bd]">{t('avgOrderValue') || 'Avg Order Value'}</p>
                     <p className="text-2xl font-bold text-[#6262bd] print:text-xl">
                       {formatCurrency(reportData.avgOrderValue)}
@@ -752,32 +752,32 @@ export default function ZReportPage() {
 
               {/* Staff Summary */}
               {reportData.staffSummary.length > 0 && (
-                <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 print:border print:rounded-none print:p-4">
-                  <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4 print:text-base">
+                <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 print:border print:rounded-none print:p-4">
+                  <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4 print:text-base">
                     {t('staffSummary') || 'Staff Summary'}
                   </h2>
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
-                        <tr className="border-b-2 border-slate-100 dark:border-slate-800">
-                          <th className="text-left py-2 px-3 text-sm font-medium text-slate-700 dark:text-slate-300">
+                        <tr className="border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-800">
+                          <th className="text-left py-2 px-3 text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">
                             Staff
                           </th>
-                          <th className="text-right py-2 px-3 text-sm font-medium text-slate-700 dark:text-slate-300">
+                          <th className="text-right py-2 px-3 text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">
                             {t('paymentsProcessed') || 'Payments Processed'}
                           </th>
-                          <th className="text-right py-2 px-3 text-sm font-medium text-slate-700 dark:text-slate-300">
+                          <th className="text-right py-2 px-3 text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">
                             Total
                           </th>
                         </tr>
                       </thead>
                       <tbody>
                         {reportData.staffSummary.map((staff, index) => (
-                          <tr key={index} className="border-b border-slate-50 dark:border-slate-800">
-                            <td className="py-2 px-3 text-sm text-slate-800 dark:text-slate-200">
+                          <tr key={index} className="border-b border-zinc-100 dark:border-zinc-800/50 dark:border-zinc-800">
+                            <td className="py-2 px-3 text-sm text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                               {staff.name}
                             </td>
-                            <td className="py-2 px-3 text-sm text-slate-600 dark:text-slate-400 text-right">
+                            <td className="py-2 px-3 text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 text-right">
                               {staff.paymentsProcessed}
                             </td>
                             <td className="py-2 px-3 text-sm font-semibold text-[#6262bd] text-right">

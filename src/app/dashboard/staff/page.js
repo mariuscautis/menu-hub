@@ -60,14 +60,14 @@ export default function StaffHub() {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-4 md:p-8">
+    <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
         <div className="mb-10 text-center">
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-2 flex items-center justify-center gap-2">
+          <h1 className="text-2xl md:text-3xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-2 flex items-center justify-center gap-2">
             {t('hubTitle')}
             <InfoTooltip text={tg('staff_rota_desc')} />
           </h1>
-          <p className="text-slate-500 dark:text-slate-400">
+          <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">
             {t('hubSubtitle')}
           </p>
         </div>
@@ -77,16 +77,16 @@ export default function StaffHub() {
             <Link
               key={section.href}
               href={section.href}
-              className="group flex flex-col items-center text-center gap-3 bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6 hover:border-[#6262bd] dark:hover:border-[#6262bd] hover:shadow-lg transition-all"
+              className="group flex flex-col items-center text-center gap-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6 hover:border-[#6262bd] dark:hover:border-[#6262bd] hover:shadow-lg transition-all"
             >
-              <div className={`${section.bg} p-4 rounded-2xl ${section.color} group-hover:scale-110 transition-transform`}>
+              <div className={`${section.bg} p-4 rounded-sm ${section.color} group-hover:scale-110 transition-transform`}>
                 {section.icon}
               </div>
               <div>
-                <h3 className="font-semibold text-slate-800 dark:text-slate-200 group-hover:text-[#6262bd] transition-colors mb-1">
+                <h3 className="font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 group-hover:text-[#6262bd] transition-colors mb-1">
                   {t(section.titleKey)}
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 leading-snug">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 leading-snug">
                   {t(section.descKey)}
                 </p>
               </div>

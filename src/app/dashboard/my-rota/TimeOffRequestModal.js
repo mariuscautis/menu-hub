@@ -180,14 +180,14 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, o
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div
-        className="bg-white rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        className="bg-white dark:bg-zinc-900 rounded-sm p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-slate-800">{t('title') || 'Request Time Off'}</h2>
+          <h2 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200">{t('title') || 'Request Time Off'}</h2>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 text-2xl font-bold"
+            className="text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400 text-2xl font-bold"
           >
             ×
           </button>
@@ -196,19 +196,19 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, o
         {/* Leave Balance Summary */}
         {leaveBalance && (
           <div className="grid grid-cols-3 gap-4 mb-6">
-            <div className="bg-blue-50 border-2 border-blue-100 rounded-xl p-4">
+            <div className="bg-blue-50 border-2 border-blue-100 rounded-sm p-4">
               <p className="text-xs text-blue-600 font-medium mb-1">{t('annualEntitlement') || 'Annual Entitlement'}</p>
               <p className="text-2xl font-bold text-blue-900">{leaveBalance.annual_holiday_days}</p>
               <p className="text-xs text-blue-600">{t('daysPerYear') || 'days/year'}</p>
             </div>
-            <div className="bg-green-50 border-2 border-green-100 rounded-xl p-4">
+            <div className="bg-green-50 border-2 border-green-100 rounded-sm p-4">
               <p className="text-xs text-green-600 font-medium mb-1">{t('available') || 'Available'}</p>
               <p className="text-2xl font-bold text-green-900">
                 {((leaveBalance.holiday_days_remaining || 0) - (leaveBalance.holiday_days_pending || 0)).toFixed(1)}
               </p>
               <p className="text-xs text-green-600">{t('daysRemaining') || 'days remaining'}</p>
             </div>
-            <div className="bg-amber-50 border-2 border-amber-100 rounded-xl p-4">
+            <div className="bg-amber-50 border-2 border-amber-100 rounded-sm p-4">
               <p className="text-xs text-amber-600 font-medium mb-1">{t('pending') || 'Pending'}</p>
               <p className="text-2xl font-bold text-amber-900">{(leaveBalance.holiday_days_pending || 0).toFixed(1)}</p>
               <p className="text-xs text-amber-600">{t('daysAwaitingApproval') || 'days awaiting approval'}</p>
@@ -219,7 +219,7 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, o
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Leave Type */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
               {t('leaveTypeRequired') || 'Leave Type *'}
             </label>
             <select
@@ -227,7 +227,7 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, o
               value={formData.leave_type}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+              className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
             >
               <option value="annual_holiday">{(t('leaveTypes') || {}).annualHoliday || 'Annual Holiday (Paid)'}</option>
               <option value="sick_self_cert">{(t('leaveTypes') || {}).sickSelfCert || 'Sick Leave - Self Certified (up to 7 days)'}</option>
@@ -236,8 +236,8 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, o
               <option value="compassionate">{(t('leaveTypes') || {}).compassionate || 'Compassionate Leave'}</option>
               <option value="other">{(t('leaveTypes') || {}).other || 'Other'}</option>
             </select>
-            <div className={`mt-2 p-3 bg-${leaveTypeInfo.color}-50 border border-${leaveTypeInfo.color}-200 rounded-lg`}>
-              <p className="text-sm text-slate-700">
+            <div className={`mt-2 p-3 bg-${leaveTypeInfo.color}-50 border border-${leaveTypeInfo.color}-200 rounded-sm`}>
+              <p className="text-sm text-zinc-700 dark:text-zinc-300">
                 <strong>{leaveTypeInfo.title}:</strong> {leaveTypeInfo.description}
               </p>
             </div>
@@ -246,7 +246,7 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, o
           {/* Date Range */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                 {t('startDateRequired') || 'Start Date *'}
               </label>
               <input
@@ -256,8 +256,8 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, o
                 onChange={handleChange}
                 required
                 min={new Date().toISOString().split('T')[0]}
-                className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:border-[#6262bd] ${
-                  errors.date_from ? 'border-red-300' : 'border-slate-200'
+                className={`w-full px-4 py-3 border-2 rounded-sm focus:outline-none focus:border-[#6262bd] ${
+                  errors.date_from ? 'border-red-300' : 'border-zinc-200 dark:border-zinc-700'
                 }`}
               />
               {errors.date_from && (
@@ -266,7 +266,7 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, o
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                 {t('endDateRequired') || 'End Date *'}
               </label>
               <input
@@ -276,8 +276,8 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, o
                 onChange={handleChange}
                 required
                 min={formData.date_from || new Date().toISOString().split('T')[0]}
-                className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:border-[#6262bd] ${
-                  errors.date_to ? 'border-red-300' : 'border-slate-200'
+                className={`w-full px-4 py-3 border-2 rounded-sm focus:outline-none focus:border-[#6262bd] ${
+                  errors.date_to ? 'border-red-300' : 'border-zinc-200 dark:border-zinc-700'
                 }`}
               />
               {errors.date_to && (
@@ -288,11 +288,11 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, o
 
           {/* Working Days Calculation */}
           {workingDays > 0 && (
-            <div className="bg-slate-50 border-2 border-slate-200 rounded-xl p-4">
+            <div className="bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-sm p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-700">{t('workingDaysRequested') || 'Working Days Requested'}</p>
-                  <p className="text-xs text-slate-500 mt-1">{t('excludesWeekends') || 'Excludes weekends'}</p>
+                  <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{t('workingDaysRequested') || 'Working Days Requested'}</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">{t('excludesWeekends') || 'Excludes weekends'}</p>
                 </div>
                 <p className="text-3xl font-bold text-[#6262bd]">{workingDays}</p>
               </div>
@@ -305,7 +305,7 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, o
           {/* Medical Certificate Checkbox (for sick_medical_cert) */}
           {formData.leave_type === 'sick_medical_cert' && (
             <div>
-              <label className="flex items-center gap-3 p-4 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-[#6262bd] transition-colors">
+              <label className="flex items-center gap-3 p-4 border border-zinc-200 dark:border-zinc-700 rounded-sm cursor-pointer hover:border-[#6262bd] transition-colors">
                 <input
                   type="checkbox"
                   name="medical_certificate_provided"
@@ -314,8 +314,8 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, o
                   className="w-5 h-5 text-[#6262bd] rounded focus:ring-[#6262bd]"
                 />
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-slate-700">{t('medicalCertificateProvided') || 'Medical Certificate Provided'}</p>
-                  <p className="text-xs text-slate-500">{t('medicalCertificateConfirm') || 'I confirm that I have or will provide a medical certificate'}</p>
+                  <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{t('medicalCertificateProvided') || 'Medical Certificate Provided'}</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">{t('medicalCertificateConfirm') || 'I confirm that I have or will provide a medical certificate'}</p>
                 </div>
               </label>
               {errors.medical_certificate && (
@@ -326,7 +326,7 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, o
 
           {/* Reason (required for some leave types) */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
               {leaveTypeInfo.requiresReason ? (t('reasonRequired') || 'Reason *') : (t('reason') || 'Reason')}
             </label>
             <textarea
@@ -340,12 +340,12 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, o
                   ? (t('reasonPlaceholderHoliday') || 'Optional - add any notes about your holiday...')
                   : (t('reasonPlaceholder') || 'Please provide details...')
               }
-              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] resize-none"
+              className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] resize-none"
             />
           </div>
 
           {/* Info Box */}
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+          <div className="bg-blue-50 border border-blue-200 rounded-sm p-4">
             <p className="text-sm text-blue-800">
               <strong>{t('pleaseNote') || 'Please note:'}</strong>
             </p>
@@ -363,7 +363,7 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, o
 
           {/* Submit Error */}
           {errors.submit && (
-            <div className="p-4 bg-red-50 border-2 border-red-200 rounded-xl text-red-700">
+            <div className="p-4 bg-red-50 border-2 border-red-200 rounded-sm text-red-700">
               {errors.submit}
             </div>
           )}
@@ -373,14 +373,14 @@ export default function TimeOffRequestModal({ staff, restaurant, leaveBalance, o
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-3 border-2 border-slate-200 text-slate-700 rounded-xl hover:border-[#6262bd] transition-colors font-medium"
+              className="flex-1 px-6 py-3 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-sm hover:border-[#6262bd] transition-colors font-medium"
             >
               {t('cancel') || 'Cancel'}
             </button>
             <button
               type="submit"
               disabled={submitting || Object.keys(errors).length > 0}
-              className="flex-1 px-6 py-3 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252a5] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-6 py-3 bg-[#6262bd] text-white rounded-sm hover:bg-[#5252a5] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitting ? (t('submitting') || 'Submitting...') : (t('submitRequest') || 'Submit Request')}
             </button>

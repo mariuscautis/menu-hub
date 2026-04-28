@@ -961,7 +961,7 @@ export default function DashboardLayout({ children }) {
           return (
             <div className="fixed top-0 left-0 right-0 z-[9998] bg-amber-500 text-white flex items-center justify-between px-6 py-2 text-sm font-semibold shadow-md">
               <span>{s.paymentFailedBanner(daysText)}</span>
-              <a href="/dashboard/settings/billing" className="bg-white text-amber-600 px-4 py-1 rounded-none text-xs font-semibold hover:bg-amber-50 transition-colors flex-shrink-0 ml-4">{s.fixNow}</a>
+              <a href="/dashboard/settings/billing" className="bg-white dark:bg-zinc-900 text-amber-600 px-4 py-1 rounded-none text-xs font-semibold hover:bg-amber-50 transition-colors flex-shrink-0 ml-4">{s.fixNow}</a>
             </div>
           )
         }
@@ -969,7 +969,7 @@ export default function DashboardLayout({ children }) {
           return (
             <div className="fixed top-0 left-0 right-0 z-[9998] bg-zinc-700 text-white flex items-center justify-between px-6 py-2 text-sm font-semibold shadow-md">
               <span>{s.cancelledBanner}</span>
-              <a href="/dashboard/settings/billing" className="bg-white text-zinc-700 px-4 py-1 rounded-none text-xs font-semibold hover:bg-zinc-100 transition-colors">{s.resubscribe}</a>
+              <a href="/dashboard/settings/billing" className="bg-white dark:bg-zinc-900 text-zinc-700 px-4 py-1 rounded-none text-xs font-semibold hover:bg-zinc-100 transition-colors">{s.resubscribe}</a>
             </div>
           )
         }

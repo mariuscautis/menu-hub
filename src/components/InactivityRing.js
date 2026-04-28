@@ -84,7 +84,7 @@ export default function InactivityRing({ progress, timeRemaining, setting, onSet
             fill="none"
             stroke="currentColor"
             strokeWidth={strokeWidth}
-            className="text-slate-200 dark:text-slate-700"
+            className="text-slate-200 dark:text-zinc-700 dark:text-zinc-300"
           />
           {/* Progress arc */}
           {!isDisabled && (
@@ -146,19 +146,19 @@ export default function InactivityRing({ progress, timeRemaining, setting, onSet
           <div className="fixed inset-0 z-[9991] flex items-center justify-center p-6 pointer-events-none">
             <div
               ref={popoverRef}
-              className="pointer-events-auto w-full max-w-sm bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border-2 border-slate-100 dark:border-slate-700 overflow-hidden"
+              className="pointer-events-auto w-full max-w-sm bg-white dark:bg-zinc-900 rounded-sm shadow-2xl border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 overflow-hidden"
             >
               {/* Header */}
-              <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-800">
                 <div>
-                  <h2 className="text-base font-bold text-slate-800 dark:text-white">Auto sign-out timer</h2>
-                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                  <h2 className="text-base font-bold text-zinc-800 dark:text-white">Auto sign-out timer</h2>
+                  <p className="text-xs text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 mt-0.5">
                     Resets on any tap or interaction
                   </p>
                 </div>
                 <button
                   onClick={() => setPopoverOpen(false)}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-800 transition-colors"
                 >
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -178,17 +178,17 @@ export default function InactivityRing({ progress, timeRemaining, setting, onSet
                         onSettingChange(opt.value)
                         setPopoverOpen(false)
                       }}
-                      className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-medium transition-colors ${
+                      className={`w-full flex items-center justify-between px-4 py-3.5 rounded-sm text-sm font-medium transition-colors ${
                         isSelected
                           ? isOff
-                            ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                            ? 'bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300'
                             : 'bg-[#6262bd]/10 dark:bg-[#6262bd]/20 text-[#6262bd]'
-                          : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                          : 'text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800'
                       }`}
                     >
                       <span className="text-base">{opt.label}</span>
                       {isSelected && (
-                        <svg className={`w-5 h-5 ${isOff ? 'text-slate-400' : 'text-[#6262bd]'}`} fill="currentColor" viewBox="0 0 24 24">
+                        <svg className={`w-5 h-5 ${isOff ? 'text-zinc-400 dark:text-zinc-500' : 'text-[#6262bd]'}`} fill="currentColor" viewBox="0 0 24 24">
                           <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
                         </svg>
                       )}
@@ -199,7 +199,7 @@ export default function InactivityRing({ progress, timeRemaining, setting, onSet
 
               {/* Footer note */}
               <div className="px-6 pb-6">
-                <p className="text-xs text-slate-400 dark:text-slate-500 text-center leading-relaxed">
+                <p className="text-xs text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 text-center leading-relaxed">
                   Staff will be taken back to the PIN screen after this period of inactivity.
                 </p>
               </div>

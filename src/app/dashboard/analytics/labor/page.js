@@ -267,7 +267,7 @@ export default function LaborAnalyticsPage() {
 
   if (!restaurant) {
     return (
-      <div className="min-h-screen bg-gray-50 p-8">
+      <div className="min-h-screen p-8">
         <p>{t('loadingRestaurant')}</p>
       </div>
     );
@@ -275,44 +275,44 @@ export default function LaborAnalyticsPage() {
 
   return (
     <OfflinePageGuard>
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-8">
+    <div className="min-h-screen p-4 sm:p-8">
       <PageTabs tabs={analyticsTabs} />
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2 flex items-center gap-2">{t('title')}<InfoTooltip text={tg('analytics_labor_desc')} /></h1>
-        <p className="text-slate-600">{t('subtitle')}</p>
+        <h1 className="text-3xl font-bold text-zinc-800 dark:text-zinc-200 mb-2 flex items-center gap-2">{t('title')}<InfoTooltip text={tg('analytics_labor_desc')} /></h1>
+        <p className="text-zinc-600 dark:text-zinc-400">{t('subtitle')}</p>
       </div>
 
       {/* Date Range Selector */}
-      <div className="mb-8 bg-white border-2 border-slate-100 rounded-2xl p-6">
+      <div className="mb-8 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
         <div className="flex flex-wrap items-end gap-4">
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setDateRange('week')}
-              className={`px-6 py-3 rounded-xl font-medium transition-colors ${
+              className={`px-6 py-3 rounded-sm font-medium transition-colors ${
                 dateRange === 'week'
                   ? 'bg-[#6262bd] text-white'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:bg-zinc-700'
               }`}
             >
               {t('last7Days')}
             </button>
             <button
               onClick={() => setDateRange('month')}
-              className={`px-6 py-3 rounded-xl font-medium transition-colors ${
+              className={`px-6 py-3 rounded-sm font-medium transition-colors ${
                 dateRange === 'month'
                   ? 'bg-[#6262bd] text-white'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:bg-zinc-700'
               }`}
             >
               {t('last30Days')}
             </button>
             <button
               onClick={() => setDateRange('custom')}
-              className={`px-6 py-3 rounded-xl font-medium transition-colors ${
+              className={`px-6 py-3 rounded-sm font-medium transition-colors ${
                 dateRange === 'custom'
                   ? 'bg-[#6262bd] text-white'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:bg-zinc-700'
               }`}
             >
               {t('customRange')}
@@ -322,21 +322,21 @@ export default function LaborAnalyticsPage() {
           {dateRange === 'custom' && (
             <div className="flex gap-3 items-center">
               <div>
-                <label className="block text-xs text-slate-600 mb-1">{t('from')}</label>
+                <label className="block text-xs text-zinc-600 dark:text-zinc-400 mb-1">{t('from')}</label>
                 <input
                   type="date"
                   value={customDateFrom}
                   onChange={(e) => setCustomDateFrom(e.target.value)}
-                  className="px-4 py-2 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd]"
+                  className="px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd]"
                 />
               </div>
               <div>
-                <label className="block text-xs text-slate-600 mb-1">{t('to')}</label>
+                <label className="block text-xs text-zinc-600 dark:text-zinc-400 mb-1">{t('to')}</label>
                 <input
                   type="date"
                   value={customDateTo}
                   onChange={(e) => setCustomDateTo(e.target.value)}
-                  className="px-4 py-2 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd]"
+                  className="px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd]"
                 />
               </div>
             </div>
@@ -347,40 +347,40 @@ export default function LaborAnalyticsPage() {
       {loading ? (
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6262bd] mx-auto mb-4"></div>
-          <p className="text-slate-600">{t('loadingAnalytics')}</p>
+          <p className="text-zinc-600 dark:text-zinc-400">{t('loadingAnalytics')}</p>
         </div>
       ) : (
         <>
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-              <p className="text-sm text-slate-600 mb-1">{t('totalLaborCost')}</p>
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
+              <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">{t('totalLaborCost')}</p>
               <p className="text-3xl font-bold text-[#6262bd]">{formatCurrency(analytics.totalCost)}</p>
-              <p className="text-xs text-slate-500 mt-2">
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
                 {formatCurrency(analytics.costPerHour)}{t('hourAverage')}
               </p>
             </div>
 
-            <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-              <p className="text-sm text-slate-600 mb-1">{t('hoursWorked')}</p>
-              <p className="text-3xl font-bold text-slate-800">{formatHours(analytics.actualHours)}</p>
-              <p className="text-xs text-slate-500 mt-2">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
+              <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">{t('hoursWorked')}</p>
+              <p className="text-3xl font-bold text-zinc-800 dark:text-zinc-200">{formatHours(analytics.actualHours)}</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
                 {t('scheduled')} {formatHours(analytics.scheduledHours)}
               </p>
             </div>
 
-            <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-              <p className="text-sm text-slate-600 mb-1">{t('activeStaff')}</p>
-              <p className="text-3xl font-bold text-slate-800">{analytics.staffCount}</p>
-              <p className="text-xs text-slate-500 mt-2">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
+              <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">{t('activeStaff')}</p>
+              <p className="text-3xl font-bold text-zinc-800 dark:text-zinc-200">{analytics.staffCount}</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
                 {formatHours(analytics.avgHoursPerStaff)} {t('averagePerStaff')}
               </p>
             </div>
 
-            <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-              <p className="text-sm text-slate-600 mb-1">{t('overtimeHours')}</p>
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
+              <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">{t('overtimeHours')}</p>
               <p className="text-3xl font-bold text-orange-600">{formatHours(analytics.overtimeHours)}</p>
-              <p className="text-xs text-slate-500 mt-2">
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
                 {analytics.actualHours > 0
                   ? `${((analytics.overtimeHours / analytics.actualHours) * 100).toFixed(1)}${t('percentOfTotal')}`
                   : `0${t('percentOfTotal')}`
@@ -391,18 +391,18 @@ export default function LaborAnalyticsPage() {
 
           {/* Department Breakdown */}
           {analytics.departmentBreakdown.length > 0 && (
-            <div className="mb-8 bg-white border-2 border-slate-100 rounded-2xl p-6">
-              <h2 className="text-xl font-bold text-slate-800 mb-6">{t('departmentBreakdown')}</h2>
+            <div className="mb-8 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
+              <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 mb-6">{t('departmentBreakdown')}</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {analytics.departmentBreakdown.map(dept => (
-                  <div key={dept.department} className="p-4 bg-slate-50 rounded-xl">
-                    <p className="text-sm font-medium text-slate-700 mb-2 capitalize">
+                  <div key={dept.department} className="p-4 bg-zinc-50 dark:bg-zinc-900 rounded-sm">
+                    <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2 capitalize">
                       {dept.department}
                     </p>
                     <p className="text-2xl font-bold text-[#6262bd] mb-1">
                       {formatCurrency(dept.cost)}
                     </p>
-                    <p className="text-sm text-slate-600">
+                    <p className="text-sm text-zinc-600 dark:text-zinc-400">
                       {formatHours(dept.hours)}
                     </p>
                   </div>
@@ -413,24 +413,24 @@ export default function LaborAnalyticsPage() {
 
           {/* Daily Breakdown */}
           {analytics.dailyBreakdown.length > 0 && (
-            <div className="mb-8 bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6">
-              <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-6">{t('dailyBreakdown')}</h2>
+            <div className="mb-8 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6">
+              <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-6">{t('dailyBreakdown')}</h2>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b-2 border-slate-100 dark:border-slate-700">
-                      <th className="text-left py-3 px-4 text-sm font-medium text-slate-700 dark:text-slate-300">{t('date')}</th>
-                      <th className="text-right py-3 px-4 text-sm font-medium text-slate-700 dark:text-slate-300">{t('shifts')}</th>
-                      <th className="text-right py-3 px-4 text-sm font-medium text-slate-700 dark:text-slate-300">{t('hours')}</th>
-                      <th className="text-right py-3 px-4 text-sm font-medium text-slate-700 dark:text-slate-300">{t('cost')}</th>
+                    <tr className="border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-700">
+                      <th className="text-left py-3 px-4 text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">{t('date')}</th>
+                      <th className="text-right py-3 px-4 text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">{t('shifts')}</th>
+                      <th className="text-right py-3 px-4 text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">{t('hours')}</th>
+                      <th className="text-right py-3 px-4 text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">{t('cost')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {analytics.dailyBreakdown.map(day => (
-                      <tr key={day.date} className="border-b border-slate-50 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800">
-                        <td className="py-3 px-4 text-sm text-slate-800 dark:text-slate-200">{formatDate(day.date)}</td>
-                        <td className="py-3 px-4 text-sm text-slate-600 dark:text-slate-400 text-right">{day.shifts}</td>
-                        <td className="py-3 px-4 text-sm text-slate-600 dark:text-slate-400 text-right">
+                      <tr key={day.date} className="border-b border-zinc-100 dark:border-zinc-800/50 dark:border-zinc-800 hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800">
+                        <td className="py-3 px-4 text-sm text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{formatDate(day.date)}</td>
+                        <td className="py-3 px-4 text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 text-right">{day.shifts}</td>
+                        <td className="py-3 px-4 text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 text-right">
                           {formatHours(day.hours)}
                         </td>
                         <td className="py-3 px-4 text-sm font-medium text-[#6262bd] dark:text-[#8b8bdb] text-right">
@@ -440,12 +440,12 @@ export default function LaborAnalyticsPage() {
                     ))}
                   </tbody>
                   <tfoot>
-                    <tr className="border-t-2 border-slate-200 dark:border-slate-700 font-bold">
-                      <td className="py-3 px-4 text-sm text-slate-800 dark:text-slate-200">{t('total')}</td>
-                      <td className="py-3 px-4 text-sm text-slate-800 dark:text-slate-200 text-right">
+                    <tr className="border-t-2 border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 font-bold">
+                      <td className="py-3 px-4 text-sm text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{t('total')}</td>
+                      <td className="py-3 px-4 text-sm text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 text-right">
                         {analytics.dailyBreakdown.reduce((sum, day) => sum + day.shifts, 0)}
                       </td>
-                      <td className="py-3 px-4 text-sm text-slate-800 dark:text-slate-200 text-right">
+                      <td className="py-3 px-4 text-sm text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 text-right">
                         {formatHours(analytics.dailyBreakdown.reduce((sum, day) => sum + day.hours, 0))}
                       </td>
                       <td className="py-3 px-4 text-sm text-[#6262bd] dark:text-[#8b8bdb] text-right">
@@ -460,27 +460,27 @@ export default function LaborAnalyticsPage() {
 
           {/* Staff Performance */}
           {analytics.staffPerformance.length > 0 && (
-            <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-              <h2 className="text-xl font-bold text-slate-800 mb-6">{t('topPerformingStaff')}</h2>
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
+              <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 mb-6">{t('topPerformingStaff')}</h2>
               <div className="space-y-3">
                 {analytics.staffPerformance.map((staff, index) => (
                   <div
                     key={staff.staff.id}
-                    className="flex flex-wrap items-center justify-between gap-3 p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors"
+                    className="flex flex-wrap items-center justify-between gap-3 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-sm hover:bg-zinc-100 dark:bg-zinc-800 transition-colors"
                   >
                     <div className="flex items-center gap-4">
                       <div className="w-8 h-8 bg-[#6262bd] text-white rounded-full flex items-center justify-center font-bold">
                         {index + 1}
                       </div>
                       <div>
-                        <p className="font-medium text-slate-800">{staff.staff.name}</p>
-                        <p className="text-sm text-slate-600">{staff.staff.role}</p>
+                        <p className="font-medium text-zinc-800 dark:text-zinc-200">{staff.staff.name}</p>
+                        <p className="text-sm text-zinc-600 dark:text-zinc-400">{staff.staff.role}</p>
                       </div>
                     </div>
                     <div className="text-right">
                       <p className="font-bold text-[#6262bd]">{formatHours(staff.hours)}</p>
-                      <p className="text-sm text-slate-600">{staff.shifts} {t('shiftsLabel')}</p>
-                      <p className="text-xs text-slate-500">{formatCurrency(staff.cost)}</p>
+                      <p className="text-sm text-zinc-600 dark:text-zinc-400">{staff.shifts} {t('shiftsLabel')}</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400">{formatCurrency(staff.cost)}</p>
                     </div>
                   </div>
                 ))}
@@ -490,9 +490,9 @@ export default function LaborAnalyticsPage() {
 
           {/* No Data State */}
           {analytics.dailyBreakdown.length === 0 && (
-            <div className="bg-white border-2 border-slate-100 rounded-2xl p-12 text-center">
-              <p className="text-slate-600 mb-2">{t('noDataTitle')}</p>
-              <p className="text-sm text-slate-500">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-12 text-center">
+              <p className="text-zinc-600 dark:text-zinc-400 mb-2">{t('noDataTitle')}</p>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400">
                 {t('noDataMessage')}
               </p>
             </div>

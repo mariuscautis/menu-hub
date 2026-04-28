@@ -103,9 +103,9 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
       annual_holiday: { bg: 'bg-blue-500', text: t('leaveTypes.holiday') },
       sick_self_cert: { bg: 'bg-orange-500', text: t('leaveTypes.sick') },
       sick_medical_cert: { bg: 'bg-red-500', text: t('leaveTypes.sick') },
-      unpaid: { bg: 'bg-gray-500', text: t('leaveTypes.unpaid') },
+      unpaid: { bg: '0', text: t('leaveTypes.unpaid') },
       compassionate: { bg: 'bg-purple-500', text: t('leaveTypes.compassionate') },
-      other: { bg: 'bg-slate-500', text: t('leaveTypes.timeOff') }
+      other: { bg: 'bg-zinc-50 dark:bg-zinc-900', text: t('leaveTypes.timeOff') }
     };
     return colors[leaveType] || colors.other;
   };
@@ -130,11 +130,11 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
 
   if (loading) {
     return (
-      <div className="bg-white dark:bg-slate-900 rounded-xl p-6 shadow-sm">
+      <div className="bg-white dark:bg-zinc-900 rounded-sm p-6 shadow-sm">
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6262bd] mx-auto mb-3"></div>
-            <p className="text-slate-600 dark:text-slate-400 text-sm">{t('loading')}</p>
+            <div className="w-7 h-7 border-2 border-zinc-200 dark:border-zinc-800 border-t-[#6262bd] rounded-full animate-spin mx-auto mb-3"></div>
+            <p className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 text-sm">{t('loading')}</p>
           </div>
         </div>
       </div>
@@ -142,43 +142,43 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
   }
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden">
+    <div className="bg-white dark:bg-zinc-900 rounded-sm shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="bg-slate-50 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700 px-6 py-4">
+      <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 px-6 py-4">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">{t('title')}</h2>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+            <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{t('title')}</h2>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mt-1">
               {t('subtitle')}
             </p>
           </div>
           <div className="flex gap-4 text-xs">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded bg-blue-500"></div>
-              <span className="text-slate-600">{t('legendHoliday')}</span>
+              <span className="text-zinc-600 dark:text-zinc-400">{t('legendHoliday')}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded bg-orange-500"></div>
-              <span className="text-slate-600">{t('legendSick')}</span>
+              <span className="text-zinc-600 dark:text-zinc-400">{t('legendSick')}</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-gray-500"></div>
-              <span className="text-slate-600">{t('legendOther')}</span>
+              <div className="w-4 h-4 rounded 0"></div>
+              <span className="text-zinc-600 dark:text-zinc-400">{t('legendOther')}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded bg-green-50 border-2 border-green-200"></div>
-              <span className="text-slate-600">{t('legendAvailable')}</span>
+              <span className="text-zinc-600 dark:text-zinc-400">{t('legendAvailable')}</span>
             </div>
           </div>
         </div>
 
         {/* Date Navigation and View Controls */}
-        <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-300">
+        <div className="flex items-center justify-between mb-4 pb-4 border-b border-zinc-300 dark:border-zinc-600">
           <div className="flex items-center gap-3">
             {/* Previous Button */}
             <button
               onClick={handlePrevious}
-              className="px-3 py-2 border-2 border-slate-200 rounded-lg hover:border-[#6262bd] hover:bg-[#6262bd] hover:text-white transition-colors text-slate-700 font-medium"
+              className="px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm hover:border-[#6262bd] hover:bg-[#6262bd] hover:text-white transition-colors text-zinc-700 dark:text-zinc-300 font-medium"
             >
               {t('prevButton')}
             </button>
@@ -186,7 +186,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
             {/* Today Button */}
             <button
               onClick={handleToday}
-              className="px-4 py-2 border-2 border-slate-200 rounded-lg hover:border-[#6262bd] hover:bg-[#6262bd] hover:text-white transition-colors text-slate-700 font-medium"
+              className="px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm hover:border-[#6262bd] hover:bg-[#6262bd] hover:text-white transition-colors text-zinc-700 dark:text-zinc-300 font-medium"
             >
               {t('todayButton')}
             </button>
@@ -194,14 +194,14 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
             {/* Next Button */}
             <button
               onClick={handleNext}
-              className="px-3 py-2 border-2 border-slate-200 rounded-lg hover:border-[#6262bd] hover:bg-[#6262bd] hover:text-white transition-colors text-slate-700 font-medium"
+              className="px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm hover:border-[#6262bd] hover:bg-[#6262bd] hover:text-white transition-colors text-zinc-700 dark:text-zinc-300 font-medium"
             >
               {t('nextButton')}
             </button>
 
             {/* Date Range Label */}
-            <div className="ml-4 px-4 py-2 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-lg">
-              <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+            <div className="ml-4 px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm">
+              <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                 {getDateRangeLabel()}
               </span>
             </div>
@@ -217,7 +217,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
               placeholder={t('searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] text-sm bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+              className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-400 dark:text-zinc-500 dark:placeholder:text-zinc-500"
             />
           </div>
 
@@ -226,7 +226,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
             <select
               value={departmentFilter}
               onChange={(e) => setDepartmentFilter(e.target.value)}
-              className="px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-sm text-slate-700 dark:text-slate-200"
+              className="px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-sm text-zinc-700 dark:text-zinc-300"
             >
               <option value="">{t('allDepartments')}</option>
               {departments.map(dept => (
@@ -242,7 +242,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className="px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-sm text-slate-700 dark:text-slate-200"
+              className="px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-sm text-zinc-700 dark:text-zinc-300"
             >
               <option value="">{t('allRoles')}</option>
               {roles.map(role => (
@@ -261,7 +261,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
                 setDepartmentFilter('');
                 setRoleFilter('');
               }}
-              className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-[#6262bd] font-medium text-sm transition-colors"
+              className="px-4 py-2 text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 hover:text-[#6262bd] font-medium text-sm transition-colors"
             >
               {t('clearButton')}
             </button>
@@ -272,8 +272,8 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
       {/* Calendar Grid */}
       <div>
         {/* Date Headers */}
-        <div className="flex border-b-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 sticky top-0 z-10">
-          <div className="w-48 flex-shrink-0 px-4 py-3 font-semibold text-slate-700 dark:text-slate-300 border-r-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+        <div className="flex border-b border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 sticky top-0 z-10">
+          <div className="w-48 flex-shrink-0 px-4 py-3 font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 border-r-2 border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800">
             {t('staffMember')}
           </div>
           <div className="flex flex-1">
@@ -284,14 +284,14 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
                 return (
                   <div
                     key={idx}
-                    className={`flex-1 min-w-[80px] px-1 py-3 text-center border-r border-slate-200 dark:border-slate-700 ${
-                      isToday ? 'bg-blue-50 dark:bg-blue-900/30' : isWeekend ? 'bg-slate-100 dark:bg-slate-700' : ''
+                    className={`flex-1 min-w-[80px] px-1 py-3 text-center border-r border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 ${
+                      isToday ? 'bg-blue-50 dark:bg-blue-900/30' : isWeekend ? 'bg-zinc-100 dark:bg-zinc-800' : ''
                     }`}
                   >
-                    <div className={`text-xs font-medium ${isToday ? 'text-blue-700 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400'}`}>
+                    <div className={`text-xs font-medium ${isToday ? 'text-blue-700 dark:text-blue-400' : 'text-zinc-600 dark:text-zinc-400 dark:text-zinc-400'}`}>
                       {date.format('ddd')}
                     </div>
-                    <div className={`text-sm font-bold ${isToday ? 'text-blue-700 dark:text-blue-300' : 'text-slate-800 dark:text-slate-200'}`}>
+                    <div className={`text-sm font-bold ${isToday ? 'text-blue-700 dark:text-blue-300' : 'text-zinc-800 dark:text-zinc-200 dark:text-zinc-200'}`}>
                       {date.format('D')}
                     </div>
                     {isToday && (
@@ -306,15 +306,15 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
 
         {/* Staff Rows */}
         {filteredStaff && filteredStaff.length > 0 ? (
-          <div className="divide-y divide-slate-200 dark:divide-slate-700">
+          <div className="divide-y divide-zinc-200 dark:divide-zinc-800 dark:divide-slate-700">
             {filteredStaff.map((staffMember) => (
-              <div key={staffMember.id} className="flex hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+              <div key={staffMember.id} className="flex hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors">
                 {/* Staff Name */}
-                <div className="w-48 flex-shrink-0 px-4 py-4 border-r-2 border-slate-200 dark:border-slate-700">
-                  <div className="font-semibold text-slate-800 dark:text-slate-200">{staffMember.name}</div>
-                  <div className="text-xs text-slate-500 dark:text-slate-400">{staffMember.role}</div>
+                <div className="w-48 flex-shrink-0 px-4 py-4 border-r-2 border-zinc-200 dark:border-zinc-700 dark:border-zinc-700">
+                  <div className="font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{staffMember.name}</div>
+                  <div className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{staffMember.role}</div>
                   {staffMember.department && (
-                    <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">{staffMember.department}</div>
+                    <div className="text-xs text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 mt-1">{staffMember.department}</div>
                   )}
                 </div>
 
@@ -334,7 +334,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
                         return (
                           <div
                             key={idx}
-                            className="flex-1 min-w-[80px] px-1 py-4 border-r border-slate-200 relative group"
+                            className="flex-1 min-w-[80px] px-1 py-4 border-r border-zinc-200 dark:border-zinc-700 relative group"
                           >
                             <div
                               className={`h-full ${leaveColor.bg} ${
@@ -344,13 +344,13 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
                             >
                               {/* Tooltip on hover */}
                               <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block z-10">
-                                <div className="bg-slate-900 text-white text-xs rounded-lg py-2 px-3 whitespace-nowrap shadow-lg">
+                                <div className="bg-slate-900 text-white text-xs rounded-sm py-2 px-3 whitespace-nowrap shadow-lg">
                                   <div className="font-semibold">{leaveColor.text}</div>
                                   <div className="text-slate-300">
                                     {moment(timeOff.date_from).format('D MMM')} - {moment(timeOff.date_to).format('D MMM')}
                                   </div>
                                   {timeOff.reason && (
-                                    <div className="text-slate-400 mt-1 max-w-xs whitespace-normal">
+                                    <div className="text-zinc-400 dark:text-zinc-500 mt-1 max-w-xs whitespace-normal">
                                       {timeOff.reason}
                                     </div>
                                   )}
@@ -368,11 +368,11 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
                       return (
                         <div
                           key={idx}
-                          className={`flex-1 min-w-[80px] px-1 py-4 border-r border-slate-200 dark:border-slate-700 ${
-                            isToday ? 'bg-blue-50/30 dark:bg-blue-900/20' : isWeekend ? 'bg-slate-50 dark:bg-slate-800' : ''
+                          className={`flex-1 min-w-[80px] px-1 py-4 border-r border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 ${
+                            isToday ? 'bg-blue-50/30 dark:bg-blue-900/20' : isWeekend ? 'bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800' : ''
                           }`}
                         >
-                          <div className="h-full bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-lg"></div>
+                          <div className="h-full bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-sm"></div>
                         </div>
                       );
                     })}
@@ -382,7 +382,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 text-slate-500 dark:text-slate-400">
+          <div className="text-center py-12 text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">
             <p className="text-lg mb-2">{t('noStaffFound')}</p>
             {(searchTerm || departmentFilter || roleFilter) && (
               <p className="text-sm">{t('tryAdjustingFilters')}</p>
@@ -393,9 +393,9 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
 
       {/* Summary */}
       {staff && staff.length > 0 && (
-        <div className="bg-slate-50 dark:bg-slate-800 border-t-2 border-slate-200 dark:border-slate-700 px-6 py-4">
+        <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 border-t-2 border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 px-6 py-4">
           <div className="flex items-center justify-between text-sm">
-            <div className="text-slate-600 dark:text-slate-400">
+            <div className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">
               {t('showingStaff')
                 .replace('{filtered}', filteredStaff.length)
                 .replace('{total}', staff.length)
@@ -406,7 +406,7 @@ export default function StaffAvailabilityCalendar({ staff, restaurant }) {
                 </span>
               )}
             </div>
-            <div className="text-slate-600">
+            <div className="text-zinc-600 dark:text-zinc-400">
               {t('timeOffRequests')
                 .replace('{count}', timeOffRequests.length)
                 .replace('{plural}', timeOffRequests.length !== 1 ? 's' : '')}

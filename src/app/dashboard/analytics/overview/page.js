@@ -108,7 +108,7 @@ export default function AnalyticsOverviewPage() {
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6262bd] mx-auto mb-4"></div>
-          <p className="text-slate-600">{t('loading')}</p>
+          <p className="text-zinc-600 dark:text-zinc-400">{t('loading')}</p>
         </div>
       </div>
     )
@@ -117,7 +117,7 @@ export default function AnalyticsOverviewPage() {
   if (!restaurant) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <p className="text-slate-600">{t('noRestaurant')}</p>
+        <p className="text-zinc-600 dark:text-zinc-400">{t('noRestaurant')}</p>
       </div>
     )
   }
@@ -128,8 +128,8 @@ export default function AnalyticsOverviewPage() {
       <PageTabs tabs={analyticsTabs} />
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">{t('title')}<InfoTooltip text={tg('analytics_overview_desc')} /></h1>
-          <p className="text-slate-500">{t('subtitle').replace('{restaurantName}', restaurant.name)}</p>
+          <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">{t('title')}<InfoTooltip text={tg('analytics_overview_desc')} /></h1>
+          <p className="text-zinc-500 dark:text-zinc-400">{t('subtitle').replace('{restaurantName}', restaurant.name)}</p>
         </div>
         <ExportButton
           overview={overview}
@@ -143,17 +143,17 @@ export default function AnalyticsOverviewPage() {
         <div className="md:col-span-2">
           <DateRangeSelector onRangeChange={(r) => setDateRange(r)} />
         </div>
-        <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-          <h3 className="text-sm font-semibold text-slate-700 mb-3">{t('groupByLabel')}</h3>
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
+          <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-3">{t('groupByLabel')}</h3>
           <div className="flex flex-col gap-2">
             {['day', 'week', 'month'].map((option) => (
               <button
                 key={option}
                 onClick={() => setGroupBy(option)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors text-left ${
+                className={`px-4 py-2 rounded-sm text-sm font-medium transition-colors text-left ${
                   groupBy === option
                     ? 'bg-[#6262bd] text-white'
-                    : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
+                    : 'bg-zinc-50 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:bg-zinc-800'
                 }`}
               >
                 {t(option)}
@@ -165,58 +165,58 @@ export default function AnalyticsOverviewPage() {
 
       {overview && (
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-            <p className="text-slate-500 text-sm font-medium mb-1">{t('totalRevenue')}</p>
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
+            <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium mb-1">{t('totalRevenue')}</p>
             <p className="text-3xl font-bold text-[#6262bd]">
               ${parseFloat(overview.total_revenue || 0).toFixed(2)}
             </p>
           </div>
-          <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-            <p className="text-slate-500 text-sm font-medium mb-1">{t('totalOrders')}</p>
-            <p className="text-3xl font-bold text-slate-700">{overview.total_orders || 0}</p>
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
+            <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium mb-1">{t('totalOrders')}</p>
+            <p className="text-3xl font-bold text-zinc-700 dark:text-zinc-300">{overview.total_orders || 0}</p>
           </div>
-          <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-            <p className="text-slate-500 text-sm font-medium mb-1">{t('avgOrderValue')}</p>
-            <p className="text-3xl font-bold text-slate-700">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
+            <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium mb-1">{t('avgOrderValue')}</p>
+            <p className="text-3xl font-bold text-zinc-700 dark:text-zinc-300">
               ${parseFloat(overview.average_order_value || 0).toFixed(2)}
             </p>
           </div>
-          <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-            <p className="text-slate-500 text-sm font-medium mb-1">{t('totalProfit')}</p>
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
+            <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium mb-1">{t('totalProfit')}</p>
             <p className="text-3xl font-bold text-green-600">
               ${parseFloat(overview.total_profit || 0).toFixed(2)}
             </p>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
               {t('margin').replace('{percent}', parseFloat(overview.profit_margin_percent || 0).toFixed(1))}
             </p>
           </div>
         </div>
       )}
 
-      <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-        <h2 className="text-lg font-bold text-slate-700 mb-4">{t('revenueProfitTrends')}</h2>
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
+        <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-4">{t('revenueProfitTrends')}</h2>
         <RevenueChart data={salesTrends} groupBy={groupBy} />
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
-        <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-          <h2 className="text-lg font-bold text-slate-700 mb-4">{t('peakHoursAnalysis')}</h2>
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
+          <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-4">{t('peakHoursAnalysis')}</h2>
           <PeakHoursChart data={peakHours} />
         </div>
-        <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
-          <h2 className="text-lg font-bold text-slate-700 mb-4">{t('revenueByDepartment')}</h2>
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-6">
+          <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-4">{t('revenueByDepartment')}</h2>
           <CategoryPieChart data={departmentBreakdown} />
         </div>
       </div>
 
-      <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
-        <h2 className="text-lg font-bold text-slate-700 mb-4">{t('productProfitabilityAnalysis')}</h2>
-        <p className="text-sm text-slate-500 mb-4">{t('productProfitabilityDesc')}</p>
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-6">
+        <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-4">{t('productProfitabilityAnalysis')}</h2>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-4">{t('productProfitabilityDesc')}</p>
         <ProductProfitabilityChart data={productProfitability} />
       </div>
 
-      <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mb-6">
-        <h2 className="text-lg font-bold text-slate-700 mb-4">{t('topSellingProducts')}</h2>
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-6">
+        <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-4">{t('topSellingProducts')}</h2>
         <TopProductsTable data={topProducts} />
       </div>
     </div>

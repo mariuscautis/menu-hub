@@ -130,7 +130,7 @@ export default function MenuCategories() {
   }
 
   if (loading) {
-    return <div className="text-slate-500 dark:text-slate-400">{t('loading')}</div>
+    return <div className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('loading')}</div>
   }
 
   return (
@@ -139,15 +139,15 @@ export default function MenuCategories() {
       <PageTabs tabs={menuNavTabs} />
       <div className="flex flex-wrap justify-between items-start gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 flex items-center gap-2">
             {t('title')}
             <InfoTooltip text={tg('menu_categories_desc')} />
           </h1>
-          <p className="text-slate-500 dark:text-slate-400">{t('subtitle')}</p>
+          <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('subtitle')}</p>
         </div>
         <button
           onClick={() => openModal()}
-          className="bg-[#6262bd] text-white px-5 py-2.5 rounded-xl font-medium hover:bg-[#5252a3] flex items-center gap-2 flex-shrink-0"
+          className="bg-[#6262bd] text-white px-5 py-2.5 rounded-sm font-medium hover:bg-[#5252a3] flex items-center gap-2 flex-shrink-0"
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
@@ -158,13 +158,13 @@ export default function MenuCategories() {
 
       {/* Categories List */}
       {categories.length === 0 ? (
-        <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-12 text-center">
-          <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-12 text-center">
+          <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-zinc-400 dark:text-zinc-500" fill="currentColor" viewBox="0 0 24 24">
               <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
             </svg>
           </div>
-          <p className="text-slate-500 dark:text-slate-400 mb-4">{t('noCategories')}</p>
+          <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-4">{t('noCategories')}</p>
           <button
             onClick={() => openModal()}
             className="text-[#6262bd] font-medium hover:underline"
@@ -179,12 +179,12 @@ export default function MenuCategories() {
             return (
               <div
                 key={category.id}
-                className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6"
+                className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6"
               >
                 <div className="flex justify-between items-start gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-1">
-                      <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200">
+                      <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                         {category.name}
                       </h3>
                       <span className="px-2 py-1 bg-[#6262bd]/10 text-[#6262bd] text-xs rounded-full font-medium">
@@ -192,16 +192,16 @@ export default function MenuCategories() {
                       </span>
                     </div>
                     {category.description && (
-                      <p className="text-slate-500 dark:text-slate-400 text-sm mb-2">{category.description}</p>
+                      <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 text-sm mb-2">{category.description}</p>
                     )}
-                    <p className="text-xs text-slate-400 dark:text-slate-500">
+                    <p className="text-xs text-zinc-400 dark:text-zinc-500 dark:text-zinc-500">
                       {t('sortOrder').replace('{order}', category.sort_order)}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => openModal(category)}
-                      className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+                      className="p-2 rounded-sm bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700"
                     >
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
@@ -209,7 +209,7 @@ export default function MenuCategories() {
                     </button>
                     <button
                       onClick={() => deleteCategory(category.id)}
-                      className="p-2 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30"
+                      className="p-2 rounded-sm bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30"
                     >
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
@@ -230,15 +230,15 @@ export default function MenuCategories() {
           onClick={closeModal}
         >
           <div
-            className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md mx-4"
+            className="bg-white dark:bg-zinc-800 rounded-sm p-8 w-full max-w-md mx-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-6">
+            <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-6">
               {editingCategory ? t('editCategory') : t('addNewCategory')}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
                   {t('categoryName')}
                 </label>
                 <input
@@ -247,13 +247,13 @@ export default function MenuCategories() {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300"
                   placeholder={t('categoryNamePlaceholder')}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
                   {t('description')}
                 </label>
                 <textarea
@@ -261,13 +261,13 @@ export default function MenuCategories() {
                   value={formData.description}
                   onChange={handleChange}
                   rows={3}
-                  className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 resize-none"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 resize-none"
                   placeholder={t('descriptionPlaceholder')}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">
                   {t('sortOrderLabel')}
                 </label>
                 <input
@@ -276,10 +276,10 @@ export default function MenuCategories() {
                   value={formData.sort_order}
                   onChange={handleChange}
                   min="0"
-                  className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300"
                   placeholder={t('sortOrderPlaceholder')}
                 />
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-1">
                   {t('sortOrderHint')}
                 </p>
               </div>
@@ -288,13 +288,13 @@ export default function MenuCategories() {
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="flex-1 border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 py-3 rounded-xl font-medium hover:bg-slate-50 dark:hover:bg-slate-700"
+                  className="flex-1 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 dark:text-zinc-300 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-700"
                 >
                   {t('cancel')}
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-[#6262bd] text-white py-3 rounded-xl font-medium hover:bg-[#5252a3]"
+                  className="flex-1 bg-[#6262bd] text-white py-3 rounded-sm font-medium hover:bg-[#5252a3]"
                 >
                   {editingCategory ? t('saveChanges') : t('addCategoryButton')}
                 </button>

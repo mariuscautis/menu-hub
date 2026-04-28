@@ -82,7 +82,7 @@ export default function TableAnalyticsPage() {
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6262bd] mx-auto mb-4"></div>
-          <p className="text-slate-600">{t('loading')}</p>
+          <p className="text-zinc-600 dark:text-zinc-400">{t('loading')}</p>
         </div>
       </div>
     )
@@ -96,15 +96,15 @@ export default function TableAnalyticsPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link href="/dashboard/analytics">
-            <button className="p-2 hover:bg-slate-100 rounded-xl transition-colors">
-              <svg className="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button className="p-2 hover:bg-zinc-100 dark:bg-zinc-800 rounded-sm transition-colors">
+              <svg className="w-6 h-6 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">{t('title')}<InfoTooltip text={tg('analytics_tables_desc')} /></h1>
-            <p className="text-slate-500">{t('subtitle').replace('{restaurantName}', restaurant.name)}</p>
+            <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">{t('title')}<InfoTooltip text={tg('analytics_tables_desc')} /></h1>
+            <p className="text-zinc-500 dark:text-zinc-400">{t('subtitle').replace('{restaurantName}', restaurant.name)}</p>
           </div>
         </div>
       </div>
@@ -114,7 +114,7 @@ export default function TableAnalyticsPage() {
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6262bd] mx-auto mb-4"></div>
-            <p className="text-slate-600">{t('loadingTableAnalytics')}</p>
+            <p className="text-zinc-600 dark:text-zinc-400">{t('loadingTableAnalytics')}</p>
           </div>
         </div>
       ) : (
@@ -122,32 +122,32 @@ export default function TableAnalyticsPage() {
           {/* Summary Stats */}
           {summary && (
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-                <p className="text-slate-500 text-sm font-medium mb-1">{t('totalTables')}</p>
+              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
+                <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium mb-1">{t('totalTables')}</p>
                 <p className="text-3xl font-bold text-[#6262bd]">{summary.total_tables}</p>
               </div>
-              <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-                <p className="text-slate-500 text-sm font-medium mb-1">{t('totalRevenue')}</p>
+              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
+                <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium mb-1">{t('totalRevenue')}</p>
                 <p className="text-3xl font-bold text-green-600">
                   {formatCurrency(summary.total_revenue)}
                 </p>
               </div>
-              <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-                <p className="text-slate-500 text-sm font-medium mb-1">{t('avgRevenuePerTable')}</p>
-                <p className="text-3xl font-bold text-slate-700">
+              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
+                <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium mb-1">{t('avgRevenuePerTable')}</p>
+                <p className="text-3xl font-bold text-zinc-700 dark:text-zinc-300">
                   {formatCurrency(summary.avg_revenue_per_table)}
                 </p>
               </div>
-              <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-                <p className="text-slate-500 text-sm font-medium mb-1">{t('dateRangeLabel')}</p>
-                <p className="text-3xl font-bold text-slate-700">{t('days').replace('{count}', summary.date_range_days)}</p>
+              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
+                <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium mb-1">{t('dateRangeLabel')}</p>
+                <p className="text-3xl font-bold text-zinc-700 dark:text-zinc-300">{t('days').replace('{count}', summary.date_range_days)}</p>
               </div>
             </div>
           )}
           {/* Sort Controls */}
-          <div className="bg-white border-2 border-slate-100 rounded-2xl p-4">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4">
             <div className="flex flex-wrap items-center gap-3">
-              <span className="text-sm font-medium text-slate-700">{t('sortBy')}</span>
+              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{t('sortBy')}</span>
               <div className="flex flex-wrap gap-2">
                 {[
                   { value: 'revenue', label: t('sortRevenue') },
@@ -158,10 +158,10 @@ export default function TableAnalyticsPage() {
                   <button
                     key={option.value}
                     onClick={() => setSortBy(option.value)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    className={`px-4 py-2 rounded-sm text-sm font-medium transition-colors ${
                       sortBy === option.value
                         ? 'bg-[#6262bd] text-white'
-                        : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
+                        : 'bg-zinc-50 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:bg-zinc-800'
                     }`}
                   >
                     {option.label}
@@ -173,43 +173,43 @@ export default function TableAnalyticsPage() {
           {/* Table Performance Cards */}
           <div className="grid gap-6">
             {sortedData.length === 0 ? (
-              <div className="bg-white border-2 border-slate-100 rounded-2xl p-12 text-center">
-                <p className="text-slate-500">{t('noData')}</p>
+              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-12 text-center">
+                <p className="text-zinc-500 dark:text-zinc-400">{t('noData')}</p>
               </div>
             ) : (
               sortedData.map((table) => (
                 <div
                   key={table.table_id}
-                  className={`bg-white border-2 rounded-2xl p-6 ${
+                  className={`bg-white border-2 rounded-sm p-6 ${
                     table.performance === 'high'
                       ? 'border-green-200 bg-green-50/30'
-                      : 'border-slate-100'
+                      : 'border-zinc-200 dark:border-zinc-800'
                   }`}
                 >
                   <div className="flex justify-between items-start mb-6">
                     <div className="flex items-center gap-3">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                        table.performance === 'high' ? 'bg-green-100' : 'bg-slate-100'
+                      <div className={`w-12 h-12 rounded-sm flex items-center justify-center ${
+                        table.performance === 'high' ? 'bg-green-100' : 'bg-zinc-100 dark:bg-zinc-800'
                       }`}>
                         <span className={`text-xl font-bold ${
-                          table.performance === 'high' ? 'text-green-700' : 'text-slate-600'
+                          table.performance === 'high' ? 'text-green-700' : 'text-zinc-600 dark:text-zinc-400'
                         }`}>
                           #{table.rank}
                         </span>
                       </div>
                       <div>
-                        <h3 className="text-xl font-bold text-slate-800">
+                        <h3 className="text-xl font-bold text-zinc-800 dark:text-zinc-200">
                           {t('tableNumber').replace('{number}', table.table_number)}
                         </h3>
                         <span className={`text-sm font-medium ${
-                          table.performance === 'high' ? 'text-green-600' : 'text-slate-500'
+                          table.performance === 'high' ? 'text-green-600' : 'text-zinc-500 dark:text-zinc-400'
                         }`}>
                           {table.performance === 'high' ? t('highPerformer') : t('standard')}
                         </span>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm text-slate-500">{t('totalRevenueLabel')}</p>
+                      <p className="text-sm text-zinc-500 dark:text-zinc-400">{t('totalRevenueLabel')}</p>
                       <p className="text-2xl font-bold text-[#6262bd]">
                         {formatCurrency(table.total_revenue)}
                       </p>
@@ -218,43 +218,43 @@ export default function TableAnalyticsPage() {
                   {/* Metrics Grid */}
                   <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 table-analytics-grid">
                     {/* Revenue Metrics */}
-                    <div className="bg-slate-50 dark:!bg-slate-800 rounded-xl p-4">
-                      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1">{t('avgRevenuePerOrder')}</p>
-                      <p className="text-lg font-bold text-slate-700 dark:text-slate-200">
+                    <div className="bg-zinc-50 dark:bg-zinc-900 dark:!bg-slate-800 rounded-sm p-4">
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 font-medium mb-1">{t('avgRevenuePerOrder')}</p>
+                      <p className="text-lg font-bold text-zinc-700 dark:text-zinc-300">
                         {formatCurrency(table.avg_revenue_per_order)}
                       </p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1">{t('avgSpendPerPerson')}</p>
-                      <p className="text-lg font-bold text-slate-700 dark:text-slate-200">
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 font-medium mb-1">{t('avgSpendPerPerson')}</p>
+                      <p className="text-lg font-bold text-zinc-700 dark:text-zinc-300">
                         {formatCurrency(table.avg_spend_per_person)}
                       </p>
-                      <p className="text-xs text-slate-400 mt-1">{t('estGuestsPerOrder')}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1">{t('revenuePerHour')}</p>
-                      <p className="text-lg font-bold text-slate-700 dark:text-slate-200">
+                      <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">{t('estGuestsPerOrder')}</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 font-medium mb-1">{t('revenuePerHour')}</p>
+                      <p className="text-lg font-bold text-zinc-700 dark:text-zinc-300">
                         {formatCurrency(table.revenue_per_hour)}
                       </p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1">{t('totalOrders')}</p>
-                      <p className="text-lg font-bold text-slate-700 dark:text-slate-200">{table.total_orders}</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 font-medium mb-1">{t('totalOrders')}</p>
+                      <p className="text-lg font-bold text-zinc-700 dark:text-zinc-300">{table.total_orders}</p>
                     </div>
                     {/* Operational Metrics */}
-                    <div className="bg-blue-50 dark:!bg-blue-950 rounded-xl p-4">
+                    <div className="bg-blue-50 dark:!bg-blue-950 rounded-sm p-4">
                       <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1">{t('avgSeatingTime')}</p>
                       <p className="text-lg font-bold text-blue-700 dark:text-blue-300">
                         {t('minutes').replace('{count}', table.avg_duration_minutes)}
                       </p>
                     </div>
-                    <div className="bg-purple-50 dark:!bg-purple-950 rounded-xl p-4">
+                    <div className="bg-purple-50 dark:!bg-purple-950 rounded-sm p-4">
                       <p className="text-xs text-purple-600 dark:text-purple-400 font-medium mb-1">{t('turnoverRate')}</p>
                       <p className="text-lg font-bold text-purple-700 dark:text-purple-300">
                         {t('perDay').replace('{rate}', table.turnover_rate.toFixed(1))}
                       </p>
                     </div>
-                    <div className="bg-amber-50 dark:!bg-amber-950 rounded-xl p-4">
+                    <div className="bg-amber-50 dark:!bg-amber-950 rounded-sm p-4">
                       <p className="text-xs text-amber-600 dark:text-amber-400 font-medium mb-1">{t('occupancyRate')}</p>
                       <p className="text-lg font-bold text-amber-700 dark:text-amber-300">
                         {t('percentage').replace('{percent}', table.occupancy_rate.toFixed(1))}
                       </p>
                     </div>
-                    <div className="bg-green-50 dark:!bg-green-950 rounded-xl p-4">
+                    <div className="bg-green-50 dark:!bg-green-950 rounded-sm p-4">
                       <p className="text-xs text-green-600 dark:text-green-400 font-medium mb-1">{t('tipsCollected')}</p>
                       <p className="text-lg font-bold text-green-700 dark:text-green-300">
                         {formatCurrency(table.total_tips)}
@@ -265,7 +265,7 @@ export default function TableAnalyticsPage() {
                         </p>
                       )}
                     </div>
-                    <div className="bg-cyan-50 dark:!bg-cyan-950 rounded-xl p-4">
+                    <div className="bg-cyan-50 dark:!bg-cyan-950 rounded-sm p-4">
                       <p className="text-xs text-cyan-600 dark:text-cyan-400 font-medium mb-1">{t('avgCleanupTime')}</p>
                       <p className="text-lg font-bold text-cyan-700 dark:text-cyan-300">
                         {table.avg_cleanup_time_minutes > 0 ? t('minutes').replace('{count}', table.avg_cleanup_time_minutes) : t('notAvailable')}
@@ -274,7 +274,7 @@ export default function TableAnalyticsPage() {
                         {table.avg_cleanup_time_minutes > 0 ? t('postPaymentToReady') : t('noDataYet')}
                       </p>
                     </div>
-                    <div className="bg-orange-50 dark:!bg-orange-950 rounded-xl p-4">
+                    <div className="bg-orange-50 dark:!bg-orange-950 rounded-sm p-4">
                       <p className="text-xs text-orange-600 dark:text-orange-400 font-medium mb-1">{t('waiterResponseTime')}</p>
                       <p className="text-lg font-bold text-orange-700 dark:text-orange-300">
                         {table.total_waiter_calls > 0 ? t('minutes').replace('{count}', table.avg_waiter_response_minutes.toFixed(1)) : t('notAvailable')}
@@ -286,7 +286,7 @@ export default function TableAnalyticsPage() {
                       </p>
                     </div>
                     {/* Upsell Metrics */}
-                    <div className="bg-indigo-50 dark:!bg-indigo-950 rounded-xl p-4">
+                    <div className="bg-indigo-50 dark:!bg-indigo-950 rounded-sm p-4">
                       <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium mb-1">{t('totalItemsSold')}</p>
                       <p className="text-lg font-bold text-indigo-700 dark:text-indigo-300">{table.total_items_sold}</p>
                       <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium mb-1">{t('avgItemsPerOrder')}</p>
@@ -297,9 +297,9 @@ export default function TableAnalyticsPage() {
                         {table.avg_items_per_order >= 3 ? t('goodUpselling') : t('upsellOpportunity')}
                       </p>
                     </div>
-                    <div className="bg-slate-50 dark:!bg-slate-800 rounded-xl p-4 col-span-2">
-                      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1">{t('performanceInsights')}</p>
-                      <p className="text-sm text-slate-700 dark:text-slate-200">
+                    <div className="bg-zinc-50 dark:bg-zinc-900 dark:!bg-slate-800 rounded-sm p-4 col-span-2">
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 font-medium mb-1">{t('performanceInsights')}</p>
+                      <p className="text-sm text-zinc-700 dark:text-zinc-300">
                         {table.occupancy_rate > 50 && table.avg_items_per_order >= 3
                           ? t('excellentPerformance')
                           : table.occupancy_rate > 50
@@ -316,12 +316,12 @@ export default function TableAnalyticsPage() {
           </div>
           {/* Performance Comparison */}
           {sortedData.length > 0 && (
-            <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-              <h2 className="text-lg font-bold text-slate-700 mb-4">{t('performanceComparison')}</h2>
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
+              <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-4">{t('performanceComparison')}</h2>
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between text-sm mb-2">
-                    <span className="text-slate-600">{t('highPerformers')}</span>
+                    <span className="text-zinc-600 dark:text-zinc-400">{t('highPerformers')}</span>
                     <span className="text-green-600 font-medium">
                       {t('tables').replace('{count}', sortedData.filter(table => table.performance === 'high').length)}
                     </span>
@@ -332,7 +332,7 @@ export default function TableAnalyticsPage() {
                       .map(table => (
                         <div
                           key={table.table_id}
-                          className="bg-green-100 text-green-700 px-3 py-1 rounded-lg text-sm font-medium"
+                          className="bg-green-100 text-green-700 px-3 py-1 rounded-sm text-sm font-medium"
                         >
                           {t('tableNumber').replace('{number}', table.table_number)}
                         </div>
@@ -341,8 +341,8 @@ export default function TableAnalyticsPage() {
                 </div>
                 <div>
                   <div className="flex justify-between text-sm mb-2">
-                    <span className="text-slate-600">{t('standardPerformers')}</span>
-                    <span className="text-slate-600 font-medium">
+                    <span className="text-zinc-600 dark:text-zinc-400">{t('standardPerformers')}</span>
+                    <span className="text-zinc-600 dark:text-zinc-400 font-medium">
                       {t('tables').replace('{count}', sortedData.filter(table => table.performance === 'low').length)}
                     </span>
                   </div>

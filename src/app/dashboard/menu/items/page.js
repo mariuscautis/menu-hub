@@ -532,7 +532,7 @@ export default function Menu() {
     bar: menuItems.filter(i => i.department === 'bar').length
   }
   if (loading) {
-    return <div className="text-slate-500">{t('loadingMenu')}</div>
+    return <div className="text-zinc-500 dark:text-zinc-400">{t('loadingMenu')}</div>
   }
   return (
     <OfflinePageGuard>
@@ -540,15 +540,15 @@ export default function Menu() {
       <PageTabs tabs={menuNavTabs} />
       <div className="flex flex-wrap justify-between items-start gap-3 mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">
             {t('title')}
             <InfoTooltip text={tg('menu_items_desc')} />
           </h1>
-          <p className="text-slate-500">{t('subtitle')}</p>
+          <p className="text-zinc-500 dark:text-zinc-400">{t('subtitle')}</p>
         </div>
         <button
           onClick={() => openModal()}
-          className="bg-[#6262bd] text-white px-5 py-2.5 rounded-xl font-medium hover:bg-[#5252a3] flex items-center gap-2 flex-shrink-0"
+          className="bg-[#6262bd] text-white px-5 py-2.5 rounded-sm font-medium hover:bg-[#5252a3] flex items-center gap-2 flex-shrink-0"
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
@@ -558,27 +558,27 @@ export default function Menu() {
       </div>
       {/* Stats Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white border-2 border-slate-100 rounded-xl p-4">
-          <p className="text-slate-500 text-sm font-medium mb-1">{t('totalItems')}</p>
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4">
+          <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium mb-1">{t('totalItems')}</p>
           <p className="text-2xl font-bold text-[#6262bd]">{stats.total}</p>
         </div>
-        <div className="bg-white border-2 border-slate-100 rounded-xl p-4">
-          <p className="text-slate-500 text-sm font-medium mb-1">{t('available')}</p>
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4">
+          <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium mb-1">{t('available')}</p>
           <p className="text-2xl font-bold text-green-600">{stats.available}</p>
         </div>
-        <div className="bg-white border-2 border-slate-100 rounded-xl p-4">
-          <p className="text-slate-500 text-sm font-medium mb-1">{t('withRecipes')}</p>
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4">
+          <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium mb-1">{t('withRecipes')}</p>
           <p className="text-2xl font-bold text-blue-600">{stats.withRecipes}</p>
         </div>
-        <div className="bg-white border-2 border-slate-100 rounded-xl p-4">
-          <p className="text-slate-500 text-sm font-medium mb-1">{t('outOfStock')}</p>
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4">
+          <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium mb-1">{t('outOfStock')}</p>
           <p className="text-2xl font-bold text-red-600">{stats.outOfStock}</p>
         </div>
       </div>
       {/* Search and Filter Bar */}
       <div className="mb-6 flex flex-wrap gap-3">
         <div className="flex-1 relative">
-          <svg className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
@@ -586,12 +586,12 @@ export default function Menu() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t('searchPlaceholder')}
-            className="w-full pl-12 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+            className="w-full pl-12 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -602,7 +602,7 @@ export default function Menu() {
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
-          className="px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 bg-white"
+          className="px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-900"
         >
           <option value="name">{t('sortAZ')}</option>
           <option value="price-low">{t('sortPriceLow')}</option>
@@ -614,17 +614,17 @@ export default function Menu() {
       <div className="mb-6 flex flex-wrap gap-2">
         <button
           onClick={() => setFilterDepartment('all')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`px-4 py-2 rounded-sm font-medium transition-colors ${
             filterDepartment === 'all'
               ? 'bg-[#6262bd] text-white'
-              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:bg-zinc-700'
           }`}
         >
           {t('all')}
         </button>
         <button
           onClick={() => setFilterDepartment('kitchen')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`px-4 py-2 rounded-sm font-medium transition-colors ${
             filterDepartment === 'kitchen'
               ? 'bg-green-600 text-white'
               : 'bg-green-100 text-green-700 hover:bg-green-200'
@@ -634,7 +634,7 @@ export default function Menu() {
         </button>
         <button
           onClick={() => setFilterDepartment('bar')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`px-4 py-2 rounded-sm font-medium transition-colors ${
             filterDepartment === 'bar'
               ? 'bg-orange-600 text-white'
               : 'bg-orange-100 text-orange-700 hover:bg-orange-200'
@@ -642,20 +642,20 @@ export default function Menu() {
         >
           🍸 {t('bar')}
         </button>
-        <div className="w-px bg-slate-200 mx-2"></div>
+        <div className="w-px bg-zinc-200 dark:bg-zinc-700 mx-2"></div>
         <button
           onClick={() => setFilterAvailability('all')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`px-4 py-2 rounded-sm font-medium transition-colors ${
             filterAvailability === 'all'
-              ? 'bg-slate-700 text-white'
-              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              ? 'bg-zinc-700 text-white'
+              : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:bg-zinc-700'
           }`}
         >
           {t('allStatus')}
         </button>
         <button
           onClick={() => setFilterAvailability('available')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`px-4 py-2 rounded-sm font-medium transition-colors ${
             filterAvailability === 'available'
               ? 'bg-green-600 text-white'
               : 'bg-green-100 text-green-700 hover:bg-green-200'
@@ -665,7 +665,7 @@ export default function Menu() {
         </button>
         <button
           onClick={() => setFilterAvailability('unavailable')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`px-4 py-2 rounded-sm font-medium transition-colors ${
             filterAvailability === 'unavailable'
               ? 'bg-red-600 text-white'
               : 'bg-red-100 text-red-700 hover:bg-red-200'
@@ -676,15 +676,15 @@ export default function Menu() {
       </div>
       {/* Results Count */}
       {(searchQuery || filterDepartment !== 'all' || filterAvailability !== 'all') && menuItems.length > 0 && (
-        <div className="mb-4 text-sm text-slate-600">
+        <div className="mb-4 text-sm text-zinc-600 dark:text-zinc-400">
           {t('showing')} <strong>{filteredMenuItems.length}</strong> {t('of')} <strong>{menuItems.length}</strong> {t('items')}
         </div>
       )}
       {/* Menu Items */}
       {filteredMenuItems.length === 0 ? (
-        <div className="bg-white border-2 border-slate-100 rounded-2xl p-12 text-center">
-          <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-12 text-center">
+          <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-zinc-400 dark:text-zinc-500" fill="currentColor" viewBox="0 0 24 24">
               {searchQuery || filterDepartment !== 'all' || filterAvailability !== 'all' ? (
                 <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
               ) : (
@@ -694,8 +694,8 @@ export default function Menu() {
           </div>
           {searchQuery || filterDepartment !== 'all' || filterAvailability !== 'all' ? (
             <>
-              <p className="text-slate-500 mb-2">{t('noItemsFound')}</p>
-              <p className="text-sm text-slate-400 mb-4">
+              <p className="text-zinc-500 dark:text-zinc-400 mb-2">{t('noItemsFound')}</p>
+              <p className="text-sm text-zinc-400 dark:text-zinc-500 mb-4">
                 {t('adjustFilters')}
               </p>
               <button
@@ -711,7 +711,7 @@ export default function Menu() {
             </>
           ) : (
             <>
-              <p className="text-slate-500 mb-4">{t('noMenuItems')}</p>
+              <p className="text-zinc-500 dark:text-zinc-400 mb-4">{t('noMenuItems')}</p>
               <button
                 onClick={() => openModal()}
                 className="text-[#6262bd] font-medium hover:underline"
@@ -730,9 +730,9 @@ export default function Menu() {
               checked={selectedIds.size === filteredMenuItems.length && filteredMenuItems.length > 0}
               ref={el => { if (el) el.indeterminate = selectedIds.size > 0 && selectedIds.size < filteredMenuItems.length }}
               onChange={toggleSelectAll}
-              className="w-4 h-4 rounded border-slate-300 accent-[#6262bd] cursor-pointer"
+              className="w-4 h-4 rounded border-zinc-300 dark:border-zinc-600 accent-[#6262bd] cursor-pointer"
             />
-            <span className="text-sm text-slate-500">
+            <span className="text-sm text-zinc-500 dark:text-zinc-400">
               {selectedIds.size > 0 ? `${selectedIds.size} selected` : `Select all (${filteredMenuItems.length})`}
             </span>
           </div>
@@ -742,16 +742,16 @@ export default function Menu() {
             return (
               <div
                 key={item.id}
-                className={`bg-white border-2 rounded-2xl p-6 flex gap-3 items-start ${
+                className={`bg-white border-2 rounded-sm p-6 flex gap-3 items-start ${
                   selectedIds.has(item.id) ? 'border-[#6262bd] bg-[#6262bd]/5' :
-                  item.available ? 'border-slate-100' : 'border-slate-200 bg-slate-50'
+                  item.available ? 'border-zinc-200 dark:border-zinc-800' : 'border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900'
                 }`}
               >
                 <input
                   type="checkbox"
                   checked={selectedIds.has(item.id)}
                   onChange={() => toggleSelect(item.id)}
-                  className="w-4 h-4 mt-1 rounded border-slate-300 accent-[#6262bd] cursor-pointer flex-shrink-0"
+                  className="w-4 h-4 mt-1 rounded border-zinc-300 dark:border-zinc-600 accent-[#6262bd] cursor-pointer flex-shrink-0"
                 />
                 <div className="flex-1 flex flex-col gap-3 min-w-0">
                   <div className="flex items-start gap-3 min-w-0">
@@ -759,16 +759,16 @@ export default function Menu() {
                     <img
                       src={item.image_url}
                       alt={item.name}
-                      className="w-16 h-16 sm:w-24 sm:h-24 rounded-xl object-cover flex-shrink-0"
+                      className="w-16 h-16 sm:w-24 sm:h-24 rounded-sm object-cover flex-shrink-0"
                     />
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-1">
-                      <h3 className={`text-lg font-semibold ${item.available ? 'text-slate-800' : 'text-slate-400'}`}>
+                      <h3 className={`text-lg font-semibold ${item.available ? 'text-zinc-800 dark:text-zinc-200' : 'text-zinc-400 dark:text-zinc-500'}`}>
                         {item.name}
                       </h3>
                       {!item.available && (
-                        <span className="px-2 py-1 bg-slate-200 text-slate-500 text-xs rounded-full font-medium">
+                        <span className="px-2 py-1 bg-zinc-200 dark:bg-zinc-700 text-zinc-500 dark:text-zinc-400 text-xs rounded-full font-medium">
                           {t('unavailable')}
                         </span>
                       )}
@@ -801,18 +801,18 @@ export default function Menu() {
                         stockStatus.color === 'red' ? 'bg-red-100 text-red-700' :
                         stockStatus.color === 'amber' ? 'bg-amber-100 text-amber-700' :
                         stockStatus.color === 'green' ? 'bg-green-100 text-green-700' :
-                        'bg-slate-100 text-slate-600'
+                        'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
                       }`}>
                         {stockStatus.message}
                       </span>
                     </div>
                     {item.description && (
-                      <p className="text-slate-500 text-sm mb-2">{item.description}</p>
+                      <p className="text-zinc-500 dark:text-zinc-400 text-sm mb-2">{item.description}</p>
                     )}
                     {/* Recipe Display */}
                     {item.menu_item_ingredients && item.menu_item_ingredients.length > 0 && (
                       <div className="mt-2 mb-2">
-                        <p className="text-xs font-medium text-slate-600 mb-1">{t('recipe')}:</p>
+                        <p className="text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1">{t('recipe')}:</p>
                         <div className="flex flex-wrap gap-2">
                           {item.menu_item_ingredients.map((ing, idx) => {
                             const product = ing.stock_products
@@ -822,7 +822,7 @@ export default function Menu() {
                                 key={idx}
                                 className={`text-xs px-2 py-1 rounded ${
                                   hasEnough
-                                    ? 'bg-slate-100 text-slate-700'
+                                    ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300'
                                     : 'bg-red-50 text-red-700 font-medium'
                                 }`}
                               >
@@ -855,10 +855,10 @@ export default function Menu() {
                   <div className="flex items-center gap-2 justify-end">
                     <button
                       onClick={() => toggleAvailability(item)}
-                      className={`p-2 rounded-xl ${
+                      className={`p-2 rounded-sm ${
                         item.available
                           ? 'bg-green-100 text-green-600 hover:bg-green-200'
-                          : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
+                          : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 hover:bg-zinc-200 dark:bg-zinc-700'
                       }`}
                       title={item.available ? t('markUnavailable') : t('markAvailable')}
                     >
@@ -872,10 +872,10 @@ export default function Menu() {
                     </button>
                     <button
                       onClick={() => toggleTakeaway(item)}
-                      className={`p-2 rounded-xl ${
+                      className={`p-2 rounded-sm ${
                         item.takeaway_available
                           ? 'bg-cyan-100 text-cyan-600 hover:bg-cyan-200'
-                          : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
+                          : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 hover:bg-zinc-200 dark:bg-zinc-700'
                       }`}
                       title={item.takeaway_available ? (t('removeTakeaway') || 'Remove from takeaway') : (t('addTakeaway') || 'Add to takeaway')}
                     >
@@ -885,7 +885,7 @@ export default function Menu() {
                     </button>
                     <button
                       onClick={() => openModal(item)}
-                      className="p-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      className="p-2 rounded-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:bg-zinc-700"
                     >
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
@@ -893,7 +893,7 @@ export default function Menu() {
                     </button>
                     <button
                       onClick={() => deleteItem(item.id)}
-                      className="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100"
+                      className="p-2 rounded-sm bg-red-50 text-red-500 hover:bg-red-100"
                     >
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
@@ -909,17 +909,17 @@ export default function Menu() {
 
       {/* Bulk action bar */}
       {selectedIds.size > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-slate-900 text-white px-6 py-3 rounded-sm shadow-2xl">
           <span className="text-sm font-medium">{selectedIds.size} selected</span>
           <button
             onClick={deleteSelected}
-            className="flex items-center gap-2 px-4 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-medium transition-colors"
+            className="flex items-center gap-2 px-4 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-sm text-sm font-medium transition-colors"
           >
             Delete selected
           </button>
           <button
             onClick={() => setSelectedIds(new Set())}
-            className="text-sm text-slate-400 hover:text-white transition-colors"
+            className="text-sm text-zinc-400 dark:text-zinc-500 hover:text-white transition-colors"
           >
             Cancel
           </button>
@@ -933,16 +933,16 @@ export default function Menu() {
           onClick={closeModal}
         >
           <div
-            className="bg-white rounded-2xl p-8 w-full max-w-3xl my-8 mx-4 max-h-[calc(100vh-4rem)] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-slate-100 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-slate-400"
+            className="bg-white rounded-sm p-8 w-full max-w-3xl my-8 mx-4 max-h-[calc(100vh-4rem)] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-zinc-100 dark:bg-zinc-800 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-slate-400"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold text-slate-800 mb-6">
+            <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 mb-6">
               {editingItem ? t('editItem') : t('addNewItem')}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                     {t('itemName')}
                   </label>
                   <input
@@ -951,12 +951,12 @@ export default function Menu() {
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                     placeholder="Margherita Pizza"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                     {t('price').replace('{currency}', currencySymbol)}
                     {formData.dynamic_pricing_enabled && (
                       <span className="text-xs text-purple-600 ml-2">{t('autoCalculated')}</span>
@@ -971,17 +971,17 @@ export default function Menu() {
                     disabled={formData.dynamic_pricing_enabled}
                     step="0.01"
                     min="0"
-                    className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none text-slate-700 ${
+                    className={`w-full px-4 py-3 border-2 rounded-sm focus:outline-none text-zinc-700 dark:text-zinc-300 ${
                       formData.dynamic_pricing_enabled
                         ? 'border-purple-200 bg-purple-50 cursor-not-allowed'
-                        : 'border-slate-200 focus:border-[#6262bd]'
+                        : 'border-zinc-200 dark:border-zinc-700 focus:border-[#6262bd]'
                     }`}
                     placeholder="9.99"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   {t('description')}
                 </label>
                 <textarea
@@ -989,12 +989,12 @@ export default function Menu() {
                   value={formData.description}
                   onChange={handleChange}
                   rows={3}
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 resize-none"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 resize-none"
                   placeholder="Fresh tomatoes, mozzarella, basil..."
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   {t('itemImage')}
                 </label>
                 {imagePreview && (
@@ -1002,7 +1002,7 @@ export default function Menu() {
                     <img
                       src={imagePreview}
                       alt="Preview"
-                      className="w-32 h-32 rounded-xl object-cover"
+                      className="w-32 h-32 rounded-sm object-cover"
                     />
                   </div>
                 )}
@@ -1010,19 +1010,19 @@ export default function Menu() {
                   type="file"
                   accept="image/*"
                   onChange={handleImageChange}
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#6262bd] file:text-white hover:file:bg-[#5252a3] file:cursor-pointer"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 file:mr-4 file:py-2 file:px-4 file:rounded-sm file:border-0 file:text-sm file:font-medium file:bg-[#6262bd] file:text-white hover:file:bg-[#5252a3] file:cursor-pointer"
                 />
               </div>
               {categories.length > 0 && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                     {t('category')}
                   </label>
                   <select
                     name="category_id"
                     value={formData.category_id}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                   >
                     <option value="">{t('noCategory')}</option>
                     {categories.map((cat) => (
@@ -1032,14 +1032,14 @@ export default function Menu() {
                 </div>
               )}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                   {t('department')}
                 </label>
                 <select
                   name="department"
                   value={formData.department}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                 >
                   <option value="kitchen">{t('kitchen')}</option>
                   <option value="bar">{t('bar')}</option>
@@ -1048,14 +1048,14 @@ export default function Menu() {
               {/* Sales Tax Category */}
               {menuSalesTaxCategories.length > 0 && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                     {t('salesTaxCategory') || 'Sales Tax Category'}
                   </label>
                   <select
                     name="sales_tax_category_id"
                     value={formData.sales_tax_category_id}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                   >
                     <option value="">{t('noTaxCategory') || '— No tax category —'}</option>
                     {menuSalesTaxCategories.map((cat) => (
@@ -1064,7 +1064,7 @@ export default function Menu() {
                       </option>
                     ))}
                   </select>
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                     {t('salesTaxCategoryHint') || 'Assign a sales tax bracket to this item (e.g. Beer, Soft Drinks, Food).'}
                   </p>
                 </div>
@@ -1075,18 +1075,18 @@ export default function Menu() {
                   name="available"
                   checked={formData.available}
                   onChange={handleChange}
-                  className="w-5 h-5 rounded border-slate-300 text-[#6262bd] focus:ring-[#6262bd]"
+                  className="w-5 h-5 rounded border-zinc-300 dark:border-zinc-600 text-[#6262bd] focus:ring-[#6262bd]"
                 />
-                <label className="text-sm font-medium text-slate-700">
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                   {t('availableForOrdering')}
                 </label>
               </div>
               {/* Special Instructions Section */}
-              <div className="border-t-2 border-slate-100 pt-5">
+              <div className="border-t border-zinc-200 dark:border-zinc-800 pt-5">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h3 className="text-lg font-semibold text-slate-800">{t('specialInstructions') || 'Special Instructions'}</h3>
-                    <p className="text-sm text-slate-500">{t('specialInstructionsDesc') || 'Allow customers to add notes for this item (e.g., how to cook a steak)'}</p>
+                    <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">{t('specialInstructions') || 'Special Instructions'}</h3>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">{t('specialInstructionsDesc') || 'Allow customers to add notes for this item (e.g., how to cook a steak)'}</p>
                   </div>
                   <div className="flex items-center gap-3">
                     <input
@@ -1094,37 +1094,37 @@ export default function Menu() {
                       name="requires_special_instructions"
                       checked={formData.requires_special_instructions}
                       onChange={handleChange}
-                      className="w-5 h-5 rounded border-slate-300 text-[#6262bd] focus:ring-[#6262bd]"
+                      className="w-5 h-5 rounded border-zinc-300 dark:border-zinc-600 text-[#6262bd] focus:ring-[#6262bd]"
                     />
-                    <label className="text-sm font-medium text-slate-700">
+                    <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                       {t('enable') || 'Enable'}
                     </label>
                   </div>
                 </div>
                 {formData.requires_special_instructions && (
-                  <div className="bg-amber-50 p-4 rounded-xl space-y-3">
+                  <div className="bg-amber-50 p-4 rounded-sm space-y-3">
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        {t('customLabel') || 'Custom Label'} <span className="text-slate-400 font-normal">({t('optional') || 'optional'})</span>
+                      <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                        {t('customLabel') || 'Custom Label'} <span className="text-zinc-400 dark:text-zinc-500 font-normal">({t('optional') || 'optional'})</span>
                       </label>
                       <input
                         type="text"
                         name="special_instructions_label"
                         value={formData.special_instructions_label}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                        className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                         placeholder={t('specialInstructionsPlaceholder') || 'e.g., How would you like it cooked?'}
                       />
-                      <p className="text-xs text-slate-500 mt-1">
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                         {t('labelHint') || 'Leave empty to use default: "Special instructions"'}
                       </p>
                     </div>
-                    <div className="bg-white border-2 border-amber-200 rounded-xl p-3">
+                    <div className="bg-white dark:bg-zinc-900 border-2 border-amber-200 rounded-sm p-3">
                       <p className="text-xs text-amber-700 font-medium mb-1">{t('previewLabel') || 'Preview'}</p>
-                      <p className="text-sm text-slate-600">
+                      <p className="text-sm text-zinc-600 dark:text-zinc-400">
                         {formData.special_instructions_label || (t('specialInstructionsDefault') || 'Special instructions')}
                       </p>
-                      <div className="mt-2 px-3 py-2 bg-slate-100 rounded-lg text-sm text-slate-400">
+                      <div className="mt-2 px-3 py-2 bg-zinc-100 dark:bg-zinc-800 rounded-sm text-sm text-zinc-400 dark:text-zinc-500">
                         {t('customerInputHere') || 'Customer will type here...'}
                       </div>
                     </div>
@@ -1132,11 +1132,11 @@ export default function Menu() {
                 )}
               </div>
               {/* Dynamic Pricing Section */}
-              <div className="border-t-2 border-slate-100 pt-5">
+              <div className="border-t border-zinc-200 dark:border-zinc-800 pt-5">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h3 className="text-lg font-semibold text-slate-800">{t('dynamicPricing')}</h3>
-                    <p className="text-sm text-slate-500">{t('dynamicPricingDesc')}</p>
+                    <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">{t('dynamicPricing')}</h3>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">{t('dynamicPricingDesc')}</p>
                   </div>
                   <div className="flex items-center gap-3">
                     <input
@@ -1144,39 +1144,39 @@ export default function Menu() {
                       name="dynamic_pricing_enabled"
                       checked={formData.dynamic_pricing_enabled}
                       onChange={handleChange}
-                      className="w-5 h-5 rounded border-slate-300 text-[#6262bd] focus:ring-[#6262bd]"
+                      className="w-5 h-5 rounded border-zinc-300 dark:border-zinc-600 text-[#6262bd] focus:ring-[#6262bd]"
                     />
-                    <label className="text-sm font-medium text-slate-700">
+                    <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                       {t('enable')}
                     </label>
                   </div>
                 </div>
                 {formData.dynamic_pricing_enabled && (
-                  <div className="space-y-4 bg-blue-50 p-4 rounded-xl">
+                  <div className="space-y-4 bg-blue-50 p-4 rounded-sm">
                     {/* Base Cost Display (Auto-calculated from Recipe) */}
                     {recipeIngredients.length > 0 ? (
-                      <div className="bg-white border-2 border-slate-200 rounded-xl p-4">
+                      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-sm p-4">
                         <div className="flex items-center justify-between mb-2">
                           <div>
-                            <p className="text-sm font-medium text-slate-700">{t('baseCostAuto')}</p>
-                            <p className="text-xs text-slate-500">{t('baseCostDesc')}</p>
+                            <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{t('baseCostAuto')}</p>
+                            <p className="text-xs text-zinc-500 dark:text-zinc-400">{t('baseCostDesc')}</p>
                           </div>
                           <div className="text-right">
-                            <p className="text-2xl font-bold text-slate-800">
+                            <p className="text-2xl font-bold text-zinc-800 dark:text-zinc-200">
                               {currencySymbol}{calculateBaseCost().toFixed(2)}
                             </p>
                           </div>
                         </div>
                         {/* Ingredient Breakdown */}
-                        <div className="mt-3 pt-3 border-t border-slate-200">
-                          <p className="text-xs font-medium text-slate-600 mb-2">{t('ingredientCosts')}</p>
+                        <div className="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-700">
+                          <p className="text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-2">{t('ingredientCosts')}</p>
                           <div className="space-y-1">
                             {recipeIngredients.map((ingredient, idx) => {
                               const product = stockProducts.find(p => p.id === ingredient.stock_product_id)
                               if (!product || !ingredient.quantity_needed) return null
                               const cost = parseFloat(ingredient.quantity_needed) * parseFloat(product.cost_per_base_unit || 0)
                               return (
-                                <div key={idx} className="flex justify-between text-xs text-slate-600">
+                                <div key={idx} className="flex justify-between text-xs text-zinc-600 dark:text-zinc-400">
                                   <span>{product.name}</span>
                                   <span>{currencySymbol}{cost.toFixed(2)}</span>
                                 </div>
@@ -1186,7 +1186,7 @@ export default function Menu() {
                         </div>
                       </div>
                     ) : (
-                      <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-4">
+                      <div className="bg-amber-50 border-2 border-amber-200 rounded-sm p-4">
                         <p className="text-sm font-medium text-amber-700 mb-1">{t('noRecipeAdded')}</p>
                         <p className="text-xs text-amber-600">
                           {t('noRecipeDesc')}
@@ -1196,7 +1196,7 @@ export default function Menu() {
                     {/* Profit Margin and Rounding Inputs */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
+                        <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                           {t('profitMargin')}
                         </label>
                         <input
@@ -1207,43 +1207,43 @@ export default function Menu() {
                           required={formData.dynamic_pricing_enabled}
                           step="1"
                           min="0"
-                          className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                          className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                           placeholder="150"
                         />
-                        <p className="text-xs text-slate-500 mt-1">
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                           {t('profitMarginExample').replace(/{currency}/g, currencySymbol)}
                         </p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
+                        <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
                           {t('priceRounding')}
                         </label>
                         <select
                           name="price_rounding_mode"
                           value={formData.price_rounding_mode}
                           onChange={handleChange}
-                          className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                          className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                         >
                           <option value="none">{t('noRounding')}</option>
                           <option value="half">{t('roundHalf').replace('{currency}', currencySymbol)}</option>
                           <option value="whole">{t('roundWhole').replace('{currency}', currencySymbol)}</option>
                         </select>
-                        <p className="text-xs text-slate-500 mt-1">
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                           {t('makeCustomerFriendly')}
                         </p>
                       </div>
                     </div>
                     {/* Calculated Price Preview */}
                     {calculateBaseCost() > 0 && formData.profit_margin_percentage !== '' && (
-                      <div className="bg-white border-2 border-blue-200 rounded-xl p-4">
+                      <div className="bg-white dark:bg-zinc-900 border-2 border-blue-200 rounded-sm p-4">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-sm font-medium text-slate-600 mb-1">{t('calculatedPrice')}</p>
-                            <p className="text-xs text-slate-500">
+                            <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1">{t('calculatedPrice')}</p>
+                            <p className="text-xs text-zinc-500 dark:text-zinc-400">
                               {currencySymbol}{calculateBaseCost().toFixed(2)} + ({formData.profit_margin_percentage}% margin)
                             </p>
                             {formData.price_rounding_mode !== 'none' && (
-                              <p className="text-xs text-slate-400 mt-1">
+                              <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">
                                 {t('beforeRounding').replace('{currency}', currencySymbol).replace('{price}', calculateDynamicPriceBeforeRounding().toFixed(2))}
                               </p>
                             )}
@@ -1261,7 +1261,7 @@ export default function Menu() {
                         </div>
                       </div>
                     )}
-                    <div className="bg-blue-100 border-2 border-blue-200 rounded-xl p-3">
+                    <div className="bg-blue-100 border-2 border-blue-200 rounded-sm p-3">
                       <p className="text-xs text-blue-700 font-medium mb-1">{t('howItWorks')}</p>
                       <p className="text-xs text-blue-600">
                         {t('pricingFormula')}
@@ -1275,11 +1275,11 @@ export default function Menu() {
                 )}
               </div>
               {/* Recipe Section */}
-              <div className="border-t-2 border-slate-100 pt-5">
+              <div className="border-t border-zinc-200 dark:border-zinc-800 pt-5">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h3 className="text-lg font-semibold text-slate-800">{t('addProductRecipe')}</h3>
-                    <p className="text-sm text-slate-500">{t('linkToStock')}</p>
+                    <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">{t('addProductRecipe')}</h3>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">{t('linkToStock')}</p>
                   </div>
                   <button
                     type="button"
@@ -1323,11 +1323,11 @@ export default function Menu() {
                                 setShowDropdowns({ ...showDropdowns, [index]: true })
                               }}
                               placeholder={t('searchIngredient')}
-                              className="w-full px-4 py-2 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                              className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                             />
                             {/* Dropdown List */}
                             {showDropdowns[index] && (
-                              <div className="absolute z-10 w-full mt-1 bg-white border-2 border-slate-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                              <div className="absolute z-10 w-full mt-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-sm shadow-lg max-h-60 overflow-y-auto">
                                 {filteredProducts.length > 0 ? (
                                   filteredProducts.map((product) => (
                                     <div
@@ -1343,7 +1343,7 @@ export default function Menu() {
                                     </div>
                                   ))
                                 ) : (
-                                  <div className="px-4 py-2 text-slate-400 text-sm">
+                                  <div className="px-4 py-2 text-zinc-400 dark:text-zinc-500 text-sm">
                                     {t('noIngredientsFound')}
                                   </div>
                                 )}
@@ -1365,13 +1365,13 @@ export default function Menu() {
                               step="0.01"
                               min="0.01"
                               placeholder={t('amount')}
-                              className="w-full px-4 py-2 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                              className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                             />
                           </div>
                           <button
                             type="button"
                             onClick={() => removeIngredient(index)}
-                            className="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100"
+                            className="p-2 rounded-sm bg-red-50 text-red-500 hover:bg-red-100"
                           >
                             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                               <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
@@ -1383,12 +1383,12 @@ export default function Menu() {
                     <button
                       type="button"
                       onClick={addIngredient}
-                      className="w-full px-4 py-2 border-2 border-dashed border-slate-300 rounded-xl text-slate-600 hover:border-[#6262bd] hover:text-[#6262bd] font-medium"
+                      className="w-full px-4 py-2 border-2 border-dashed border-zinc-300 dark:border-zinc-600 rounded-sm text-zinc-600 dark:text-zinc-400 hover:border-[#6262bd] hover:text-[#6262bd] font-medium"
                     >
                       {t('addIngredient')}
                     </button>
                     {stockProducts.length === 0 && (
-                      <p className="text-sm text-amber-600 bg-amber-50 p-3 rounded-xl">
+                      <p className="text-sm text-amber-600 bg-amber-50 p-3 rounded-sm">
                         {t('noStockProducts')}
                       </p>
                     )}
@@ -1400,14 +1400,14 @@ export default function Menu() {
                   type="button"
                   onClick={closeModal}
                   disabled={uploading}
-                  className="flex-1 border-2 border-slate-200 text-slate-600 py-3 rounded-xl font-medium hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {tc('close')}
                 </button>
                 <button
                   type="submit"
                   disabled={uploading}
-                  className="flex-1 bg-[#6262bd] text-white py-3 rounded-xl font-medium hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 bg-[#6262bd] text-white py-3 rounded-sm font-medium hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {uploading ? t('saving') : (editingItem ? t('saveChanges') : t('addItem'))}
                 </button>

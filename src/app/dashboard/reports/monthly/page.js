@@ -361,7 +361,7 @@ export default function MonthlyReportPage() {
   // Loading state
   if (loading && !restaurant) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-8">
+      <div className="min-h-screen p-8">
         <div className="flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6262bd]"></div>
         </div>
@@ -372,33 +372,33 @@ export default function MonthlyReportPage() {
   // No restaurant
   if (!restaurant) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-8">
-        <p className="text-slate-600 dark:text-slate-400">No restaurant found</p>
+      <div className="min-h-screen p-8">
+        <p className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">No restaurant found</p>
       </div>
     );
   }
 
   return (
     <OfflinePageGuard>
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-4 md:p-8">
+    <div className="min-h-screen p-4 md:p-8">
       <PageTabs tabs={reportsTabs} />
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-2 flex items-center gap-2">
+        <h1 className="text-2xl md:text-3xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-2 flex items-center gap-2">
           {t('title') || 'Monthly Summary'}
           <InfoTooltip text={tg('reports_monthly_desc')} />
         </h1>
-        <p className="text-slate-600 dark:text-slate-400">
+        <p className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">
           {t('subtitle')?.replace('{month}', formatMonth(selectedMonth)) ||
             `Performance overview for ${formatMonth(selectedMonth)}`}
         </p>
       </div>
 
       {/* Month Navigation */}
-      <div className="mb-6 bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+      <div className="mb-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4 flex items-center justify-between">
         <button
           onClick={goToPreviousMonth}
-          className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl text-slate-700 dark:text-slate-300 transition-colors flex items-center gap-2"
+          className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 rounded-sm text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 transition-colors flex items-center gap-2"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -406,17 +406,17 @@ export default function MonthlyReportPage() {
           {t('previous') || 'Previous'}
         </button>
 
-        <p className="font-bold text-slate-800 dark:text-slate-200">
+        <p className="font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
           {formatMonth(selectedMonth)}
         </p>
 
         <button
           onClick={goToNextMonth}
           disabled={isCurrentMonth()}
-          className={`px-4 py-2 rounded-xl flex items-center gap-2 transition-colors ${
+          className={`px-4 py-2 rounded-sm flex items-center gap-2 transition-colors ${
             isCurrentMonth()
-              ? 'bg-slate-50 dark:bg-slate-800/50 text-slate-400 cursor-not-allowed'
-              : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300'
+              ? 'bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800/50 text-zinc-400 dark:text-zinc-500 cursor-not-allowed'
+              : 'bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300'
           }`}
         >
           {t('next') || 'Next'}
@@ -431,40 +431,40 @@ export default function MonthlyReportPage() {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6262bd] mx-auto mb-4"></div>
         </div>
       ) : reportData.totalOrders === 0 ? (
-        <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-8 text-center">
-          <p className="text-slate-600 dark:text-slate-400">{t('noData') || 'No data available for this month'}</p>
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-8 text-center">
+          <p className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{t('noData') || 'No data available for this month'}</p>
         </div>
       ) : (
         <div className="space-y-6">
           {/* P&L Summary */}
-          <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6">
-            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6">
+            <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4">
               {t('profitAndLoss') || 'Profit & Loss Summary'}
             </h2>
             <div className="space-y-4">
-              <div className="flex justify-between items-center py-3 border-b border-slate-100 dark:border-slate-800">
-                <span className="text-slate-600 dark:text-slate-400">{t('totalRevenue') || 'Total Revenue'}</span>
+              <div className="flex justify-between items-center py-3 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-800">
+                <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{t('totalRevenue') || 'Total Revenue'}</span>
                 <span className="text-xl font-bold text-green-600 dark:text-green-400">
                   {formatCurrency(reportData.totalRevenue)}
                 </span>
               </div>
               {reportData.totalDiscounts > 0 && (
-                <div className="flex justify-between items-center py-3 border-b border-slate-100 dark:border-slate-800">
-                  <span className="text-slate-600 dark:text-slate-400">{t('totalDiscounts') || 'Total Discounts'}</span>
+                <div className="flex justify-between items-center py-3 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-800">
+                  <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{t('totalDiscounts') || 'Total Discounts'}</span>
                   <span className="text-xl font-bold text-orange-600 dark:text-orange-400">
                     -{formatCurrency(reportData.totalDiscounts)}
                   </span>
                 </div>
               )}
-              <div className="flex justify-between items-center py-3 border-b border-slate-100 dark:border-slate-800">
-                <span className="text-slate-600 dark:text-slate-400">{t('totalCosts') || 'Total Costs'}</span>
+              <div className="flex justify-between items-center py-3 border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-800">
+                <span className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{t('totalCosts') || 'Total Costs'}</span>
                 <span className="text-xl font-bold text-red-600 dark:text-red-400">
                   -{formatCurrency(reportData.totalCosts)}
                 </span>
               </div>
-              <div className="flex justify-between items-center py-3 bg-slate-50 dark:bg-slate-800 px-4 rounded-xl">
+              <div className="flex justify-between items-center py-3 bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 px-4 rounded-sm">
                 <div>
-                  <span className="font-bold text-slate-800 dark:text-slate-200">{t('grossProfit') || 'Gross Profit'}</span>
+                  <span className="font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{t('grossProfit') || 'Gross Profit'}</span>
                   <span className={`ml-3 text-sm px-2 py-0.5 rounded ${
                     reportData.profitMargin >= 0
                       ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'
@@ -486,8 +486,8 @@ export default function MonthlyReportPage() {
 
           {/* Key Metrics Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
-              <p className="text-sm text-slate-500 dark:text-slate-400">{t('totalRevenue') || 'Total Revenue'}</p>
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('totalRevenue') || 'Total Revenue'}</p>
               <p className="text-xl font-bold text-[#6262bd]">{formatCurrency(reportData.totalRevenue)}</p>
               {reportData.percentageChange !== 0 && (
                 <p className={`text-sm mt-1 ${reportData.percentageChange > 0 ? 'text-green-600' : 'text-red-600'}`}>
@@ -496,55 +496,55 @@ export default function MonthlyReportPage() {
               )}
             </div>
 
-            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
-              <p className="text-sm text-slate-500 dark:text-slate-400">{t('totalOrders') || 'Total Orders'}</p>
-              <p className="text-xl font-bold text-slate-800 dark:text-slate-200">{reportData.totalOrders}</p>
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('totalOrders') || 'Total Orders'}</p>
+              <p className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{reportData.totalOrders}</p>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
-              <p className="text-sm text-slate-500 dark:text-slate-400">{t('discountsGiven') || 'Discounts Given'}</p>
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('discountsGiven') || 'Discounts Given'}</p>
               <p className="text-xl font-bold text-orange-600 dark:text-orange-400">
                 {formatCurrency(reportData.totalDiscounts)}
               </p>
               {reportData.totalRevenue > 0 && reportData.totalDiscounts > 0 && (
-                <p className="text-sm text-slate-500 mt-1">
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
                   {((reportData.totalDiscounts / (reportData.totalRevenue + reportData.totalDiscounts)) * 100).toFixed(1)}% {t('ofGross') || 'of gross'}
                 </p>
               )}
             </div>
 
-            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
-              <p className="text-sm text-slate-500 dark:text-slate-400">{t('materialCosts') || 'Material Costs'}</p>
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('materialCosts') || 'Material Costs'}</p>
               <p className="text-xl font-bold text-red-600 dark:text-red-400">
                 {formatCurrency(reportData.totalMaterialCosts)}
               </p>
-              <p className="text-sm text-slate-500 mt-1">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
                 {reportData.totalRevenue > 0 ? ((reportData.totalMaterialCosts / reportData.totalRevenue) * 100).toFixed(1) : 0}% {t('ofRevenue') || 'of revenue'}
               </p>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
-              <p className="text-sm text-slate-500 dark:text-slate-400">{t('laborCost') || 'Labor Cost'}</p>
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('laborCost') || 'Labor Cost'}</p>
               <p className="text-xl font-bold text-amber-600 dark:text-amber-400">
                 {formatCurrency(reportData.laborCost)}
               </p>
-              <p className="text-sm text-slate-500 mt-1">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
                 {reportData.totalRevenue > 0 ? ((reportData.laborCost / reportData.totalRevenue) * 100).toFixed(1) : 0}% {t('ofRevenue') || 'of revenue'}
               </p>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
-              <p className="text-sm text-slate-500 dark:text-slate-400">{t('taxCollected') || 'Tax Collected'}</p>
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('taxCollected') || 'Tax Collected'}</p>
               <p className="text-xl font-bold text-purple-600 dark:text-purple-400">
                 {formatCurrency(reportData.totalTaxCollected)}
               </p>
-              <p className="text-sm text-slate-500 mt-1">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
                 {reportData.totalRevenue > 0 ? ((reportData.totalTaxCollected / reportData.totalRevenue) * 100).toFixed(1) : 0}% {t('ofRevenue') || 'of revenue'}
               </p>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-4">
-              <p className="text-sm text-slate-500 dark:text-slate-400">{t('profitMargin') || 'Profit Margin'}</p>
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-4">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('profitMargin') || 'Profit Margin'}</p>
               <p className={`text-xl font-bold ${
                 reportData.profitMargin >= 0
                   ? 'text-green-600 dark:text-green-400'
@@ -557,26 +557,26 @@ export default function MonthlyReportPage() {
 
           {/* Weekly Breakdown */}
           {reportData.weeklyBreakdown.length > 0 && (
-            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6">
-              <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6">
+              <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4">
                 {t('weeklyBreakdown') || 'Weekly Breakdown'}
               </h2>
               <div className="overflow-x-auto -mx-2">
                 <table className="w-full min-w-[380px]">
                   <thead>
-                    <tr className="border-b-2 border-slate-100 dark:border-slate-800">
-                      <th className="text-left py-3 px-4 text-sm font-medium text-slate-700 dark:text-slate-300">{t('week') || 'Week'}</th>
-                      <th className="text-right py-3 px-4 text-sm font-medium text-slate-700 dark:text-slate-300">{t('revenue') || 'Revenue'}</th>
-                      <th className="text-right py-3 px-4 text-sm font-medium text-slate-700 dark:text-slate-300">{t('costs') || 'Costs'}</th>
-                      <th className="text-right py-3 px-4 text-sm font-medium text-slate-700 dark:text-slate-300">{t('profit') || 'Profit'}</th>
+                    <tr className="border-b border-zinc-200 dark:border-zinc-800 dark:border-zinc-800">
+                      <th className="text-left py-3 px-4 text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">{t('week') || 'Week'}</th>
+                      <th className="text-right py-3 px-4 text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">{t('revenue') || 'Revenue'}</th>
+                      <th className="text-right py-3 px-4 text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">{t('costs') || 'Costs'}</th>
+                      <th className="text-right py-3 px-4 text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300">{t('profit') || 'Profit'}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {reportData.weeklyBreakdown.map((week) => (
-                      <tr key={week.week} className="border-b border-slate-50 dark:border-slate-800">
-                        <td className="py-3 px-4 text-sm font-medium text-slate-800 dark:text-slate-200">
+                      <tr key={week.week} className="border-b border-zinc-100 dark:border-zinc-800/50 dark:border-zinc-800">
+                        <td className="py-3 px-4 text-sm font-medium text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">
                           {t('week') || 'Week'} {week.week.split(' ')[1]}
-                          <span className="text-slate-500 ml-2">({week.orders} {t('orders') || 'orders'})</span>
+                          <span className="text-zinc-500 dark:text-zinc-400 ml-2">({week.orders} {t('orders') || 'orders'})</span>
                         </td>
                         <td className="py-3 px-4 text-sm font-semibold text-green-600 dark:text-green-400 text-right">
                           {formatCurrency(week.revenue)}
@@ -593,8 +593,8 @@ export default function MonthlyReportPage() {
                     ))}
                   </tbody>
                   <tfoot>
-                    <tr className="border-t-2 border-slate-200 dark:border-slate-700 font-bold">
-                      <td className="py-3 px-4 text-sm text-slate-800 dark:text-slate-200">{t('total') || 'Total'}</td>
+                    <tr className="border-t-2 border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 font-bold">
+                      <td className="py-3 px-4 text-sm text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{t('total') || 'Total'}</td>
                       <td className="py-3 px-4 text-sm text-green-600 dark:text-green-400 text-right">
                         {formatCurrency(reportData.totalRevenue)}
                       </td>
@@ -615,18 +615,18 @@ export default function MonthlyReportPage() {
 
           {/* Month Comparison */}
           {reportData.previousMonthRevenue > 0 && (
-            <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl p-6">
-              <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-800 rounded-sm p-6">
+              <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4">
                 {t('monthOverMonth') || 'Month-over-Month Revenue'}
               </h2>
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4">
-                  <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">{t('lastMonth') || 'Last Month'}</p>
-                  <p className="text-xl font-bold text-slate-600 dark:text-slate-400">
+                <div className="bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-800 rounded-sm p-4">
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-1">{t('lastMonth') || 'Last Month'}</p>
+                  <p className="text-xl font-bold text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">
                     {formatCurrency(reportData.previousMonthRevenue)}
                   </p>
                 </div>
-                <div className="bg-[#6262bd]/10 dark:bg-[#6262bd]/30 rounded-xl p-4">
+                <div className="bg-[#6262bd]/10 dark:bg-[#6262bd]/30 rounded-sm p-4">
                   <p className="text-sm text-[#6262bd] mb-1">{t('thisMonth') || 'This Month'}</p>
                   <p className="text-xl font-bold text-[#6262bd]">
                     {formatCurrency(reportData.totalRevenue)}

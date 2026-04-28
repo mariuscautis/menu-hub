@@ -356,16 +356,16 @@ export default function RotaPage() {
 
   return (
     <OfflinePageGuard>
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-4 sm:p-8">
+    <div className="min-h-screen p-4 sm:p-8">
       <PageTabs tabs={staffTabs} />
       {/* Header */}
       <div className="flex flex-wrap justify-between items-start gap-3 mb-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 flex items-center gap-2">
             {t('title')}
             <InfoTooltip text={tg('staff_rota_desc')} />
           </h1>
-          <p className="text-slate-600 dark:text-slate-400 mt-1">{t('subtitle')}</p>
+          <p className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mt-1">{t('subtitle')}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           {/* Send Rota Notifications button */}
@@ -373,29 +373,29 @@ export default function RotaPage() {
             <button
               onClick={handleSendNotifications}
               disabled={notifying}
-              className={`px-5 py-2.5 rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+              className={`px-5 py-2.5 rounded-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                 hasUnnotifiedChanges
                   ? 'bg-amber-500 hover:bg-amber-600 text-white animate-pulse'
-                  : 'bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-[#6262bd]'
+                  : 'bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 hover:border-[#6262bd]'
               }`}
             >
               {notifying ? '⏳ Sending...' : <><span className="hidden sm:inline">📧 Send Rota Notifications</span><span className="sm:hidden">📧 Notify</span></>}
             </button>
             {lastNotified && !hasUnnotifiedChanges && (
-              <span className="text-xs text-slate-400 dark:text-slate-500 pr-1">
+              <span className="text-xs text-zinc-400 dark:text-zinc-500 dark:text-zinc-500 pr-1">
                 Last sent: {lastNotified.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
             )}
           </div>
           <button
             onClick={() => setShowTemplatesModal(true)}
-            className="px-3 sm:px-5 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl hover:border-[#6262bd] transition-colors font-medium text-sm sm:text-base"
+            className="px-3 sm:px-5 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm hover:border-[#6262bd] transition-colors font-medium text-sm sm:text-base"
           >
             📋 {t('templates')}
           </button>
           <button
             onClick={() => setShowRequestsModal(true)}
-            className="relative px-3 sm:px-5 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl hover:border-[#6262bd] transition-colors font-medium text-sm sm:text-base"
+            className="relative px-3 sm:px-5 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm hover:border-[#6262bd] transition-colors font-medium text-sm sm:text-base"
           >
             📨 {t('requests')}
             {pendingRequestsCount > 0 && (
@@ -406,7 +406,7 @@ export default function RotaPage() {
           </button>
           <button
             onClick={() => setShowCurrentlyWorkingModal(true)}
-            className="px-3 sm:px-5 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors font-medium text-sm sm:text-base"
+            className="px-3 sm:px-5 py-2.5 bg-green-600 text-white rounded-sm hover:bg-green-700 transition-colors font-medium text-sm sm:text-base"
           >
             👥 <span className="hidden sm:inline">{t('currentlyWorking')}</span><span className="sm:hidden">Working</span>
           </button>
@@ -415,7 +415,7 @@ export default function RotaPage() {
               setSelectedShift(null);
               setShowShiftModal(true);
             }}
-            className="px-3 sm:px-5 py-2.5 bg-[#6262bd] text-white rounded-xl hover:bg-[#5252a5] transition-colors font-medium text-sm sm:text-base"
+            className="px-3 sm:px-5 py-2.5 bg-[#6262bd] text-white rounded-sm hover:bg-[#5252a5] transition-colors font-medium text-sm sm:text-base"
           >
             ➕ <span className="hidden sm:inline">{t('createShift')}</span><span className="sm:hidden">Shift</span>
           </button>
@@ -427,7 +427,7 @@ export default function RotaPage() {
         <select
           value={filters.department}
           onChange={(e) => setFilters({ ...filters, department: e.target.value })}
-          className="px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
+          className="px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
         >
           <option value="">{t('allDepartments')}</option>
           {departments.map(dept => (
@@ -438,7 +438,7 @@ export default function RotaPage() {
         <select
           value={filters.status}
           onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-          className="px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
+          className="px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
         >
           <option value="">{t('allStatuses')}</option>
           <option value="draft">{t('status.draft')}</option>
@@ -450,7 +450,7 @@ export default function RotaPage() {
         <select
           value={filters.staff_id}
           onChange={(e) => setFilters({ ...filters, staff_id: e.target.value })}
-          className="px-4 py-2 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-[#6262bd] bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
+          className="px-4 py-2 border border-zinc-200 dark:border-zinc-700 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
         >
           <option value="">{t('allStaff')}</option>
           {staff.map(s => (
@@ -461,7 +461,7 @@ export default function RotaPage() {
         {(filters.department || filters.status || filters.staff_id) && (
           <button
             onClick={() => setFilters({ department: '', status: '', staff_id: '' })}
-            className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-[#6262bd] font-medium"
+            className="px-4 py-2 text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 hover:text-[#6262bd] font-medium"
           >
             {t('clearFilters')}
           </button>
@@ -469,12 +469,12 @@ export default function RotaPage() {
       </div>
 
       {/* Calendar */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl p-6 shadow-sm mb-8" style={{ height: 700 }}>
+      <div className="bg-white dark:bg-zinc-900 rounded-sm p-6 shadow-sm mb-8" style={{ height: 700 }}>
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6262bd] mx-auto mb-4"></div>
-              <p className="text-slate-600 dark:text-slate-400">{t('loadingShifts')}</p>
+              <p className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{t('loadingShifts')}</p>
             </div>
           </div>
         ) : (

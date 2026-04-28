@@ -12,10 +12,10 @@ export default function GuideToggle({ collapsed = false }) {
       <button
         onClick={toggleGuideMode}
         title={guideMode ? t('toggle_off') : t('toggle_on')}
-        className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors flex-shrink-0
+        className={`w-10 h-10 rounded-sm flex items-center justify-center transition-colors flex-shrink-0
           ${guideMode
             ? 'bg-[#6262bd] text-white'
-            : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200'
+            : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-800 hover:text-zinc-700 dark:text-zinc-300 dark:hover:text-zinc-200'
           }`}
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -30,10 +30,10 @@ export default function GuideToggle({ collapsed = false }) {
     <button
       onClick={toggleGuideMode}
       title={guideMode ? t('toggle_off') : t('toggle_on')}
-      className={`p-2 rounded-xl flex items-center justify-center transition-colors flex-shrink-0
+      className={`p-2 rounded-sm flex items-center justify-center transition-colors flex-shrink-0
         ${guideMode
           ? 'bg-[#6262bd] text-white'
-          : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200'
+          : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-800 hover:text-zinc-700 dark:text-zinc-300 dark:hover:text-zinc-200'
         }`}
     >
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

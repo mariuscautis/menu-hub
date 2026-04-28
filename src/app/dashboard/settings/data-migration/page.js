@@ -112,7 +112,7 @@ export default function DataMigration() {
   if (!restaurant) {
     return (
       <div className="p-8">
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-600">
+        <div className="bg-red-50 border border-red-200 rounded-sm p-4 text-red-600">
           {t('accessDenied')}
         </div>
       </div>
@@ -222,87 +222,87 @@ export default function DataMigration() {
     <div>
       <PageTabs tabs={settingsTabs} />
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">{t('title')}<InfoTooltip text={tg('data_migration_desc')} /></h1>
-        <p className="text-slate-500">{t('subtitle')}</p>
+        <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">{t('title')}<InfoTooltip text={tg('data_migration_desc')} /></h1>
+        <p className="text-zinc-500 dark:text-zinc-400">{t('subtitle')}</p>
       </div>
 
       {/* Step 1 — Choose what to import */}
       {step === 1 && (
         <div className="space-y-6">
-          <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
-            <h2 className="text-lg font-bold text-slate-700 mb-1">{t('chooseType')}</h2>
-            <p className="text-sm text-slate-500 mb-6">{t('chooseTypeDesc')}</p>
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
+            <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-1">{t('chooseType')}</h2>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-6">{t('chooseTypeDesc')}</p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <button
                 onClick={() => setImportType('menu')}
-                className={`p-5 rounded-2xl border-2 text-left transition-all ${
+                className={`p-5 rounded-sm border-2 text-left transition-all ${
                   importType === 'menu'
                     ? 'border-[#6262bd] bg-[#6262bd]/5'
-                    : 'border-slate-200 hover:border-[#6262bd]/40'
+                    : 'border-zinc-200 dark:border-zinc-700 hover:border-[#6262bd]/40'
                 }`}
               >
                 <div className="flex items-center gap-3 mb-3">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${importType === 'menu' ? 'bg-[#6262bd]' : 'bg-slate-100'}`}>
-                    <svg className={`w-5 h-5 ${importType === 'menu' ? 'text-white' : 'text-slate-500'}`} fill="currentColor" viewBox="0 0 24 24">
+                  <div className={`w-10 h-10 rounded-sm flex items-center justify-center ${importType === 'menu' ? 'bg-[#6262bd]' : 'bg-zinc-100 dark:bg-zinc-800'}`}>
+                    <svg className={`w-5 h-5 ${importType === 'menu' ? 'text-white' : 'text-zinc-500 dark:text-zinc-400'}`} fill="currentColor" viewBox="0 0 24 24">
                       <path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1z"/>
                     </svg>
                   </div>
                   <div>
-                    <div className="font-bold text-slate-800">{t('menuItems')}</div>
-                    <div className="text-xs text-slate-500">name, price, category, department</div>
+                    <div className="font-bold text-zinc-800 dark:text-zinc-200">{t('menuItems')}</div>
+                    <div className="text-xs text-zinc-500 dark:text-zinc-400">name, price, category, department</div>
                   </div>
                 </div>
-                <p className="text-sm text-slate-600">{t('menuItemsDesc')}</p>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">{t('menuItemsDesc')}</p>
               </button>
 
               <button
                 onClick={() => setImportType('stock')}
-                className={`p-5 rounded-2xl border-2 text-left transition-all ${
+                className={`p-5 rounded-sm border-2 text-left transition-all ${
                   importType === 'stock'
                     ? 'border-[#6262bd] bg-[#6262bd]/5'
-                    : 'border-slate-200 hover:border-[#6262bd]/40'
+                    : 'border-zinc-200 dark:border-zinc-700 hover:border-[#6262bd]/40'
                 }`}
               >
                 <div className="flex items-center gap-3 mb-3">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${importType === 'stock' ? 'bg-[#6262bd]' : 'bg-slate-100'}`}>
-                    <svg className={`w-5 h-5 ${importType === 'stock' ? 'text-white' : 'text-slate-500'}`} fill="currentColor" viewBox="0 0 24 24">
+                  <div className={`w-10 h-10 rounded-sm flex items-center justify-center ${importType === 'stock' ? 'bg-[#6262bd]' : 'bg-zinc-100 dark:bg-zinc-800'}`}>
+                    <svg className={`w-5 h-5 ${importType === 'stock' ? 'text-white' : 'text-zinc-500 dark:text-zinc-400'}`} fill="currentColor" viewBox="0 0 24 24">
                       <path d="M20 6h-2.18c.07-.44.18-.86.18-1.3C18 2.12 15.88 0 13.3 0c-1.48 0-2.67.73-3.43 1.84L9 3.4l-.87-1.56C7.43.73 6.24 0 4.76 0 2.18 0 0 2.12 0 4.7c0 .44.11.86.18 1.3H0v2h20V6zm-7.7-4c1.02 0 1.8.8 1.8 1.7S13.32 5.4 12.3 5.4H9.5l2.35-3.14C12.1 2.1 12.18 2 12.3 2zM4.7 2c.12 0 .2.1.45.26L7.5 5.4H4.7C3.68 5.4 2.9 4.6 2.9 3.7S3.68 2 4.7 2zM2 20c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V10H2v10zm9-7h2v2h-2v-2zm0 4h2v2h-2v-2zM5 13h2v2H5v-2zm0 4h2v2H5v-2zm10-4h2v2h-2v-2zm0 4h2v2h-2v-2z"/>
                     </svg>
                   </div>
                   <div>
-                    <div className="font-bold text-slate-800">{t('stockProducts')}</div>
-                    <div className="text-xs text-slate-500">name, brand, category, unit, stock, value</div>
+                    <div className="font-bold text-zinc-800 dark:text-zinc-200">{t('stockProducts')}</div>
+                    <div className="text-xs text-zinc-500 dark:text-zinc-400">name, brand, category, unit, stock, value</div>
                   </div>
                 </div>
-                <p className="text-sm text-slate-600">{t('stockProductsDesc')}</p>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">{t('stockProductsDesc')}</p>
               </button>
             </div>
           </div>
 
           {importType && (
-            <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-slate-700">
+                <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300">
                   {t('step1Title')}
                 </h2>
                 <span className="text-xs bg-[#6262bd]/10 text-[#6262bd] font-medium px-3 py-1 rounded-full">
                   {importType === 'menu' ? t('menuItems') : t('stockProducts')}
                 </span>
               </div>
-              <p className="text-sm text-slate-500 mb-4">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-4">
                 {t('step1Desc')} {importType === 'menu' ? t('step1DescMenu') : t('step1DescStock')}
               </p>
 
-              <div className="bg-slate-50 rounded-xl p-4 mb-4 overflow-x-auto">
-                <code className="text-xs text-slate-600 whitespace-pre">
+              <div className="bg-zinc-50 dark:bg-zinc-900 rounded-sm p-4 mb-4 overflow-x-auto">
+                <code className="text-xs text-zinc-600 dark:text-zinc-400 whitespace-pre">
                   {importType === 'menu'
                     ? 'name, price, category, department, description, available'
                     : 'name, brand, category, base_unit, current_stock, current_stock_value'}
                 </code>
               </div>
 
-              <div className="space-y-2 mb-6 text-sm text-slate-600">
+              <div className="space-y-2 mb-6 text-sm text-zinc-600 dark:text-zinc-400">
                 {importType === 'menu' ? (
                   <ul className="space-y-1 list-disc list-inside">
                     <li><strong>name</strong> — {t('required')}</li>
@@ -330,7 +330,7 @@ export default function DataMigration() {
                     importType === 'menu' ? 'menu-items-template.csv' : 'stock-products-template.csv',
                     importType === 'menu' ? MENU_TEMPLATE : STOCK_TEMPLATE
                   )}
-                  className="flex items-center gap-2 px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition-all"
+                  className="flex items-center gap-2 px-5 py-3 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-semibold rounded-sm transition-all"
                 >
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
@@ -339,23 +339,23 @@ export default function DataMigration() {
                 </button>
               </div>
 
-              <div className="mt-6 border-t border-slate-100 pt-6">
-                <h3 className="text-sm font-bold text-slate-700 mb-3">{t('step2Title')}</h3>
+              <div className="mt-6 border-t border-zinc-200 dark:border-zinc-800 pt-6">
+                <h3 className="text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-3">{t('step2Title')}</h3>
 
                 <div
                   onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
                   onDragLeave={() => setDragOver(false)}
                   onDrop={handleDrop}
                   onClick={() => fileInputRef.current?.click()}
-                  className={`border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all ${
-                    dragOver ? 'border-[#6262bd] bg-[#6262bd]/5' : 'border-slate-200 hover:border-[#6262bd]/40 hover:bg-slate-50'
+                  className={`border-2 border-dashed rounded-sm p-10 text-center cursor-pointer transition-all ${
+                    dragOver ? 'border-[#6262bd] bg-[#6262bd]/5' : 'border-zinc-200 dark:border-zinc-700 hover:border-[#6262bd]/40 hover:bg-zinc-50 dark:bg-zinc-900'
                   }`}
                 >
                   <svg className="w-10 h-10 text-slate-300 mx-auto mb-3" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
                   </svg>
-                  <p className="text-slate-500 font-medium">{t('dragDrop')}</p>
-                  <p className="text-slate-400 text-sm mt-1">{t('orClick')}</p>
+                  <p className="text-zinc-500 dark:text-zinc-400 font-medium">{t('dragDrop')}</p>
+                  <p className="text-zinc-400 dark:text-zinc-500 text-sm mt-1">{t('orClick')}</p>
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -373,27 +373,27 @@ export default function DataMigration() {
       {/* Step 2 — Preview & confirm */}
       {step === 2 && (
         <div className="space-y-6">
-          <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-lg font-bold text-slate-700">{t('previewTitle')}</h2>
-                <p className="text-sm text-slate-500 mt-1">
+                <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300">{t('previewTitle')}</h2>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
                   {fileName} — {t('rowsParsed').replace('{n}', parsedRows.length)}
                 </p>
               </div>
-              <button onClick={reset} className="text-sm text-slate-500 hover:text-slate-700 underline">
+              <button onClick={reset} className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:text-zinc-300 underline">
                 {t('startOver')}
               </button>
             </div>
 
             {/* Summary pills */}
             <div className="flex flex-wrap gap-3 mb-6">
-              <div className="flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 rounded-xl">
+              <div className="flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 rounded-sm">
                 <div className="w-2 h-2 rounded-full bg-green-500" />
                 <span className="text-sm font-medium text-green-700">{t('readyToImport').replace('{n}', validRows.length)}</span>
               </div>
               {errorRows.length > 0 && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-red-50 border border-red-200 rounded-xl">
+                <div className="flex items-center gap-2 px-4 py-2 bg-red-50 border border-red-200 rounded-sm">
                   <div className="w-2 h-2 rounded-full bg-red-500" />
                   <span className="text-sm font-medium text-red-700">{t('rowsWithErrors').replace('{n}', errorRows.length)}</span>
                 </div>
@@ -401,8 +401,8 @@ export default function DataMigration() {
             </div>
 
             {/* Duplicate handling */}
-            <div className="mb-6 p-4 bg-slate-50 rounded-xl">
-              <p className="text-sm font-medium text-slate-700 mb-3">{t('duplicateHandling')}</p>
+            <div className="mb-6 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-sm">
+              <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-3">{t('duplicateHandling')}</p>
               <div className="flex gap-4">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -413,7 +413,7 @@ export default function DataMigration() {
                     onChange={() => setMode('skip')}
                     className="text-[#6262bd] focus:ring-[#6262bd]"
                   />
-                  <span className="text-sm text-slate-700">{t('skipDuplicate')}</span>
+                  <span className="text-sm text-zinc-700 dark:text-zinc-300">{t('skipDuplicate')}</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -424,7 +424,7 @@ export default function DataMigration() {
                     onChange={() => setMode('overwrite')}
                     className="text-[#6262bd] focus:ring-[#6262bd]"
                   />
-                  <span className="text-sm text-slate-700">{t('importAnyway')}</span>
+                  <span className="text-sm text-zinc-700 dark:text-zinc-300">{t('importAnyway')}</span>
                 </label>
               </div>
             </div>
@@ -433,7 +433,7 @@ export default function DataMigration() {
             {errorRows.length > 0 && (
               <div className="mb-6">
                 <h3 className="text-sm font-bold text-red-600 mb-2">{t('errorRowsTitle')}</h3>
-                <div className="rounded-xl border border-red-100 overflow-hidden">
+                <div className="rounded-sm border border-red-100 overflow-hidden">
                   <table className="w-full text-sm">
                     <thead className="bg-red-50">
                       <tr>
@@ -445,8 +445,8 @@ export default function DataMigration() {
                     <tbody>
                       {errorRows.map((row, i) => (
                         <tr key={i} className="border-t border-red-50">
-                          <td className="px-4 py-2 text-slate-500">{row._rowNum}</td>
-                          <td className="px-4 py-2 text-slate-700">{row.name || '—'}</td>
+                          <td className="px-4 py-2 text-zinc-500 dark:text-zinc-400">{row._rowNum}</td>
+                          <td className="px-4 py-2 text-zinc-700 dark:text-zinc-300">{row.name || '—'}</td>
                           <td className="px-4 py-2 text-red-600">{row._errors.join(', ')}</td>
                         </tr>
                       ))}
@@ -459,50 +459,50 @@ export default function DataMigration() {
             {/* Valid rows preview */}
             {validRows.length > 0 && (
               <div className="mb-6">
-                <h3 className="text-sm font-bold text-slate-700 mb-2">
+                <h3 className="text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-2">
                   {t('rowsToImport')}{validRows.length > 5 ? ` (${t('showingFirst5').replace('{n}', validRows.length)})` : ''}
                 </h3>
-                <div className="rounded-xl border border-slate-100 overflow-hidden overflow-x-auto">
+                <div className="rounded-sm border border-zinc-200 dark:border-zinc-800 overflow-hidden overflow-x-auto">
                   <table className="w-full text-sm">
-                    <thead className="bg-slate-50">
+                    <thead className="bg-zinc-50 dark:bg-zinc-900">
                       <tr>
                         {importType === 'menu' ? (
                           <>
-                            <th className="text-left px-4 py-2 text-slate-600 font-medium">{t('colName')}</th>
-                            <th className="text-left px-4 py-2 text-slate-600 font-medium">{t('colPrice')}</th>
-                            <th className="text-left px-4 py-2 text-slate-600 font-medium">{t('colCategory')}</th>
-                            <th className="text-left px-4 py-2 text-slate-600 font-medium">{t('colDepartment')}</th>
+                            <th className="text-left px-4 py-2 text-zinc-600 dark:text-zinc-400 font-medium">{t('colName')}</th>
+                            <th className="text-left px-4 py-2 text-zinc-600 dark:text-zinc-400 font-medium">{t('colPrice')}</th>
+                            <th className="text-left px-4 py-2 text-zinc-600 dark:text-zinc-400 font-medium">{t('colCategory')}</th>
+                            <th className="text-left px-4 py-2 text-zinc-600 dark:text-zinc-400 font-medium">{t('colDepartment')}</th>
                           </>
                         ) : (
                           <>
-                            <th className="text-left px-4 py-2 text-slate-600 font-medium">{t('colName')}</th>
-                            <th className="text-left px-4 py-2 text-slate-600 font-medium">{t('colBrand')}</th>
-                            <th className="text-left px-4 py-2 text-slate-600 font-medium">{t('colCategory')}</th>
-                            <th className="text-left px-4 py-2 text-slate-600 font-medium">{t('colUnit')}</th>
-                            <th className="text-left px-4 py-2 text-slate-600 font-medium">{t('colStock')}</th>
-                            <th className="text-left px-4 py-2 text-slate-600 font-medium">{t('colStockValue')}</th>
+                            <th className="text-left px-4 py-2 text-zinc-600 dark:text-zinc-400 font-medium">{t('colName')}</th>
+                            <th className="text-left px-4 py-2 text-zinc-600 dark:text-zinc-400 font-medium">{t('colBrand')}</th>
+                            <th className="text-left px-4 py-2 text-zinc-600 dark:text-zinc-400 font-medium">{t('colCategory')}</th>
+                            <th className="text-left px-4 py-2 text-zinc-600 dark:text-zinc-400 font-medium">{t('colUnit')}</th>
+                            <th className="text-left px-4 py-2 text-zinc-600 dark:text-zinc-400 font-medium">{t('colStock')}</th>
+                            <th className="text-left px-4 py-2 text-zinc-600 dark:text-zinc-400 font-medium">{t('colStockValue')}</th>
                           </>
                         )}
                       </tr>
                     </thead>
                     <tbody>
                       {validRows.slice(0, 5).map((row, i) => (
-                        <tr key={i} className="border-t border-slate-50">
+                        <tr key={i} className="border-t border-zinc-100 dark:border-zinc-800/50">
                           {importType === 'menu' ? (
                             <>
-                              <td className="px-4 py-2 text-slate-800 font-medium">{row.name}</td>
-                              <td className="px-4 py-2 text-slate-600">{row.price}</td>
-                              <td className="px-4 py-2 text-slate-600">{row.category || '—'}</td>
-                              <td className="px-4 py-2 text-slate-600">{row.department || 'kitchen'}</td>
+                              <td className="px-4 py-2 text-zinc-800 dark:text-zinc-200 font-medium">{row.name}</td>
+                              <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">{row.price}</td>
+                              <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">{row.category || '—'}</td>
+                              <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">{row.department || 'kitchen'}</td>
                             </>
                           ) : (
                             <>
-                              <td className="px-4 py-2 text-slate-800 font-medium">{row.name}</td>
-                              <td className="px-4 py-2 text-slate-600">{row.brand || '—'}</td>
-                              <td className="px-4 py-2 text-slate-600">{row.category || 'kitchen'}</td>
-                              <td className="px-4 py-2 text-slate-600">{row.base_unit || 'unit'}</td>
-                              <td className="px-4 py-2 text-slate-600">{row.current_stock || '0'}</td>
-                              <td className="px-4 py-2 text-slate-600">{row.current_stock_value || '—'}</td>
+                              <td className="px-4 py-2 text-zinc-800 dark:text-zinc-200 font-medium">{row.name}</td>
+                              <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">{row.brand || '—'}</td>
+                              <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">{row.category || 'kitchen'}</td>
+                              <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">{row.base_unit || 'unit'}</td>
+                              <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">{row.current_stock || '0'}</td>
+                              <td className="px-4 py-2 text-zinc-600 dark:text-zinc-400">{row.current_stock_value || '—'}</td>
                             </>
                           )}
                         </tr>
@@ -514,14 +514,14 @@ export default function DataMigration() {
             )}
 
             {validRows.length === 0 ? (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-yellow-700 text-sm">
+              <div className="bg-yellow-50 border border-yellow-200 rounded-sm p-4 text-yellow-700 text-sm">
                 {t('noValidRows')}
               </div>
             ) : (
               <button
                 onClick={handleImport}
                 disabled={importing}
-                className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="w-full bg-[#6262bd] text-white py-3 rounded-sm font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 {importing
                   ? t('importing')
@@ -535,7 +535,7 @@ export default function DataMigration() {
       {/* Step 3 — Results */}
       {step === 3 && results && (
         <div className="space-y-6">
-          <div className="bg-white border-2 border-slate-100 rounded-2xl p-6">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
             {results.success ? (
               <>
                 <div className="flex items-center gap-3 mb-6">
@@ -545,22 +545,22 @@ export default function DataMigration() {
                     </svg>
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold text-slate-800">{t('importComplete')}</h2>
-                    <p className="text-sm text-slate-500">{t('importCompleteDesc')}</p>
+                    <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-200">{t('importComplete')}</h2>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">{t('importCompleteDesc')}</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-                  <div className="bg-green-50 border border-green-100 rounded-xl p-4 text-center">
+                  <div className="bg-green-50 border border-green-100 rounded-sm p-4 text-center">
                     <div className="text-3xl font-bold text-green-700">{results.imported}</div>
                     <div className="text-sm text-green-600 mt-1">{t('imported')}</div>
                   </div>
-                  <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 text-center">
-                    <div className="text-3xl font-bold text-slate-500">{results.skipped}</div>
-                    <div className="text-sm text-slate-500 mt-1">{t('skipped')}</div>
+                  <div className="bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4 text-center">
+                    <div className="text-3xl font-bold text-zinc-500 dark:text-zinc-400">{results.skipped}</div>
+                    <div className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">{t('skipped')}</div>
                   </div>
                   {results.errors?.length > 0 && (
-                    <div className="bg-red-50 border border-red-100 rounded-xl p-4 text-center">
+                    <div className="bg-red-50 border border-red-100 rounded-sm p-4 text-center">
                       <div className="text-3xl font-bold text-red-600">{results.errors.length}</div>
                       <div className="text-sm text-red-500 mt-1">{t('errors')}</div>
                     </div>
@@ -568,22 +568,22 @@ export default function DataMigration() {
                 </div>
 
                 {results.skippedNames?.length > 0 && (
-                  <div className="mb-4 p-4 bg-slate-50 rounded-xl">
-                    <p className="text-sm font-medium text-slate-700 mb-2">{t('skippedAlreadyExist')}</p>
-                    <p className="text-sm text-slate-500">{results.skippedNames.join(', ')}</p>
+                  <div className="mb-4 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-sm">
+                    <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">{t('skippedAlreadyExist')}</p>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">{results.skippedNames.join(', ')}</p>
                   </div>
                 )}
 
                 <div className="flex gap-3">
                   <a
                     href={importType === 'menu' ? '/dashboard/menu' : '/dashboard/stock'}
-                    className="flex-1 text-center bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] transition-all"
+                    className="flex-1 text-center bg-[#6262bd] text-white py-3 rounded-sm font-semibold hover:bg-[#5252a3] transition-all"
                   >
                     {t('view')} {importType === 'menu' ? t('menuItems') : t('stockProducts')}
                   </a>
                   <button
                     onClick={reset}
-                    className="flex-1 bg-slate-100 text-slate-700 py-3 rounded-xl font-semibold hover:bg-slate-200 transition-all"
+                    className="flex-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 py-3 rounded-sm font-semibold hover:bg-zinc-200 dark:bg-zinc-700 transition-all"
                   >
                     {t('importMore')}
                   </button>
@@ -598,13 +598,13 @@ export default function DataMigration() {
                     </svg>
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold text-slate-800">{t('importFailed')}</h2>
+                    <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-200">{t('importFailed')}</h2>
                     <p className="text-sm text-red-600">{results.error}</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setStep(2)}
-                  className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] transition-all"
+                  className="w-full bg-[#6262bd] text-white py-3 rounded-sm font-semibold hover:bg-[#5252a3] transition-all"
                 >
                   {t('tryAgain')}
                 </button>
@@ -616,43 +616,43 @@ export default function DataMigration() {
 
       {/* Export section */}
       {step === 1 && (
-        <div className="bg-white border-2 border-slate-100 rounded-2xl p-6 mt-6">
-          <h2 className="text-lg font-bold text-slate-700 mb-1">{t('exportTitle')}</h2>
-          <p className="text-sm text-slate-500 mb-5">{t('exportDesc')}</p>
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mt-6">
+          <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-1">{t('exportTitle')}</h2>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-5">{t('exportDesc')}</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <button
               onClick={() => handleExport('menu')}
               disabled={exportingType !== null}
-              className="flex items-center gap-3 p-4 rounded-2xl border-2 border-slate-200 hover:border-[#6262bd]/40 hover:bg-slate-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-left"
+              className="flex items-center gap-3 p-4 rounded-sm border border-zinc-200 dark:border-zinc-700 hover:border-[#6262bd]/40 hover:bg-zinc-50 dark:bg-zinc-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-left"
             >
-              <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 text-slate-500" fill="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 rounded-sm bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-zinc-500 dark:text-zinc-400" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
                 </svg>
               </div>
               <div>
-                <div className="font-semibold text-slate-800">
+                <div className="font-semibold text-zinc-800 dark:text-zinc-200">
                   {exportingType === 'menu' ? t('exporting') : t('exportMenuItems')}
                 </div>
-                <div className="text-xs text-slate-500 mt-0.5">name, price, category, department, description</div>
+                <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">name, price, category, department, description</div>
               </div>
             </button>
 
             <button
               onClick={() => handleExport('stock')}
               disabled={exportingType !== null}
-              className="flex items-center gap-3 p-4 rounded-2xl border-2 border-slate-200 hover:border-[#6262bd]/40 hover:bg-slate-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-left"
+              className="flex items-center gap-3 p-4 rounded-sm border border-zinc-200 dark:border-zinc-700 hover:border-[#6262bd]/40 hover:bg-zinc-50 dark:bg-zinc-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-left"
             >
-              <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 text-slate-500" fill="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 rounded-sm bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-zinc-500 dark:text-zinc-400" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
                 </svg>
               </div>
               <div>
-                <div className="font-semibold text-slate-800">
+                <div className="font-semibold text-zinc-800 dark:text-zinc-200">
                   {exportingType === 'stock' ? t('exporting') : t('exportStockProducts')}
                 </div>
-                <div className="text-xs text-slate-500 mt-0.5">name, brand, category, base_unit, stock, value</div>
+                <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">name, brand, category, base_unit, stock, value</div>
               </div>
             </button>
           </div>
@@ -661,7 +661,7 @@ export default function DataMigration() {
 
       {/* Info box */}
       {step === 1 && (
-        <div className="bg-blue-50 border-2 border-blue-100 rounded-2xl p-6 mt-6">
+        <div className="bg-blue-50 border-2 border-blue-100 rounded-sm p-6 mt-6">
           <div className="flex gap-3">
             <svg className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
