@@ -439,7 +439,7 @@ export default function PurchasingInvoices() {
                     </span>
                   )}
                   {invoice.image_urls?.length > 0 && (
-                    <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">
+                    <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs rounded-full font-medium">
                       {invoice.image_urls.length} {t('images')}
                     </span>
                   )}
@@ -751,8 +751,8 @@ export default function PurchasingInvoices() {
                           <td className="px-4 py-3">
                             <span className={`px-2 py-1 text-xs rounded-full font-medium ${
                               item.type === 'food'
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-blue-100 text-blue-700'
+                                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                                : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
                             }`}>
                               {item.type === 'food' ? t('foodStockEntry') : t('inventoryEntry')}
                             </span>

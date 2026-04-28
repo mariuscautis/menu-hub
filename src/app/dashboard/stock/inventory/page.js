@@ -575,7 +575,7 @@ export default function InventoryManagement() {
                           ⚠ Out of Stock
                         </span>
                       ) : product.current_stock < product.min_stock_level && (
-                        <span className="px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded-full font-medium">
+                        <span className="px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs rounded-full font-medium">
                           Low Stock
                         </span>
                       )}

@@ -407,12 +407,12 @@ export default function ClockInOut({ staff, restaurant }) {
           <div className="flex items-start justify-between mb-2">
             <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{t('todaysShift') || "Today's Shift"}</p>
             {todayShift.status === 'draft' && (
-              <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
+              <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs rounded-full">
                 {t('draft') || 'Draft'}
               </span>
             )}
             {todayShift.status === 'published' && (
-              <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
+              <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs rounded-full">
                 {t('published') || 'Published'}
               </span>
             )}

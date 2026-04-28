@@ -9,8 +9,8 @@ import InfoTooltip from '@/components/InfoTooltip'
 import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 const RESTRICTION_LABELS = {
-  blocked:      { label: 'Blocked',  cls: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800' },
-  fee_required: { label: 'Deposit',  cls: 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800' },
+  blocked:      { label: 'Blocked',  cls: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800' },
+  fee_required: { label: 'Deposit',  cls: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800' },
 }
 
 function Stars({ value }) {
@@ -269,12 +269,12 @@ export default function CustomersPage() {
 
   const statusColour = (status) => {
     const map = {
-      pending:   'bg-amber-100 text-amber-700',
-      confirmed: 'bg-green-100 text-green-700',
-      completed: 'bg-blue-100 text-blue-700',
-      denied:    'bg-red-100 text-red-700',
+      pending:   'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
+      confirmed: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400',
+      completed: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
+      denied:    'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
       cancelled: 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400',
-      no_show:   'bg-purple-100 text-purple-700',
+      no_show:   'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400',
     }
     return map[status] || 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
   }

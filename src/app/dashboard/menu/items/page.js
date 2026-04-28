@@ -627,7 +627,7 @@ export default function Menu() {
           className={`px-4 py-2 rounded-sm font-medium transition-colors ${
             filterDepartment === 'kitchen'
               ? 'bg-green-600 text-white'
-              : 'bg-green-100 text-green-700 hover:bg-green-200'
+              : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-800/40'
           }`}
         >
           🍳 {t('kitchen')}
@@ -637,7 +637,7 @@ export default function Menu() {
           className={`px-4 py-2 rounded-sm font-medium transition-colors ${
             filterDepartment === 'bar'
               ? 'bg-orange-600 text-white'
-              : 'bg-orange-100 text-orange-700 hover:bg-orange-200'
+              : 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-800/40'
           }`}
         >
           🍸 {t('bar')}
@@ -647,8 +647,8 @@ export default function Menu() {
           onClick={() => setFilterAvailability('all')}
           className={`px-4 py-2 rounded-sm font-medium transition-colors ${
             filterAvailability === 'all'
-              ? 'bg-zinc-700 text-white'
-              : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:bg-zinc-700'
+              ? 'bg-zinc-700 dark:bg-zinc-200 text-white dark:text-zinc-900'
+              : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
           }`}
         >
           {t('allStatus')}
@@ -658,7 +658,7 @@ export default function Menu() {
           className={`px-4 py-2 rounded-sm font-medium transition-colors ${
             filterAvailability === 'available'
               ? 'bg-green-600 text-white'
-              : 'bg-green-100 text-green-700 hover:bg-green-200'
+              : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-800/40'
           }`}
         >
           {t('available')}
@@ -668,7 +668,7 @@ export default function Menu() {
           className={`px-4 py-2 rounded-sm font-medium transition-colors ${
             filterAvailability === 'unavailable'
               ? 'bg-red-600 text-white'
-              : 'bg-red-100 text-red-700 hover:bg-red-200'
+              : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-800/40'
           }`}
         >
           {t('unavailable')}
@@ -780,8 +780,8 @@ export default function Menu() {
                       {item.department && (
                         <span className={`px-2 py-1 text-xs rounded-full font-medium ${
                           item.department === 'bar'
-                            ? 'bg-orange-100 text-orange-700'
-                            : 'bg-green-100 text-green-700'
+                            ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400'
+                            : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
                         }`}>
                           {item.department === 'bar' ? '🍸 Bar' : '🍳 Kitchen'}
                         </span>
@@ -792,15 +792,15 @@ export default function Menu() {
                         </span>
                       )}
                       {item.requires_special_instructions && (
-                        <span className="px-2 py-1 text-xs rounded-full font-medium bg-amber-100 text-amber-700" title={item.special_instructions_label || (t('specialInstructions') || 'Special instructions')}>
+                        <span className="px-2 py-1 text-xs rounded-full font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400" title={item.special_instructions_label || (t('specialInstructions') || 'Special instructions')}>
                           📝 {t('needsNotes') || 'Needs notes'}
                         </span>
                       )}
                       {/* Stock Status Badge */}
                       <span className={`px-2 py-1 text-xs rounded-full font-medium ${
-                        stockStatus.color === 'red' ? 'bg-red-100 text-red-700' :
-                        stockStatus.color === 'amber' ? 'bg-amber-100 text-amber-700' :
-                        stockStatus.color === 'green' ? 'bg-green-100 text-green-700' :
+                        stockStatus.color === 'red' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400' :
+                        stockStatus.color === 'amber' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' :
+                        stockStatus.color === 'green' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
                         'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
                       }`}>
                         {stockStatus.message}
@@ -837,14 +837,14 @@ export default function Menu() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="text-lg font-bold text-[#6262bd]">{currencySymbol}{item.price?.toFixed(2)}</p>
                       {item.dynamic_pricing_enabled && (
-                        <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full font-medium" title={`Base cost: ${currencySymbol}${item.base_cost?.toFixed(2)} + ${item.profit_margin_percentage}% margin`}>
+                        <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs rounded-full font-medium" title={`Base cost: ${currencySymbol}${item.base_cost?.toFixed(2)} + ${item.profit_margin_percentage}% margin`}>
                           {t('autoPriced')}
                         </span>
                       )}
                       {item.sales_tax_category_id && (() => {
                         const taxCat = menuSalesTaxCategories.find(c => c.id === item.sales_tax_category_id)
                         return taxCat ? (
-                          <span className="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs rounded-full font-medium">
+                          <span className="px-2 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 text-xs rounded-full font-medium">
                             {taxCat.name} {taxCat.rate}%
                           </span>
                         ) : null
@@ -857,7 +857,7 @@ export default function Menu() {
                       onClick={() => toggleAvailability(item)}
                       className={`p-2 rounded-sm ${
                         item.available
-                          ? 'bg-green-100 text-green-600 hover:bg-green-200'
+                          ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-800/40'
                           : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 hover:bg-zinc-200 dark:bg-zinc-700'
                       }`}
                       title={item.available ? t('markUnavailable') : t('markAvailable')}

@@ -640,12 +640,12 @@ export default function Reservations() {
 
   const getStatusConfig = (status) => {
     switch (status) {
-      case 'pending':    return { badge: 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/40 dark:text-amber-300 dark:border-amber-700', bar: 'bg-amber-400', dot: 'bg-amber-400' }
-      case 'confirmed':  return { badge: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/40 dark:text-green-300 dark:border-green-700', bar: 'bg-green-500', dot: 'bg-green-500' }
-      case 'denied':     return { badge: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/40 dark:text-red-300 dark:border-red-700', bar: 'bg-red-500', dot: 'bg-red-500' }
+      case 'pending':    return { badge: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:bg-amber-900/40 dark:text-amber-300 dark:border-amber-700', bar: 'bg-amber-400', dot: 'bg-amber-400' }
+      case 'confirmed':  return { badge: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-200 dark:bg-green-900/40 dark:text-green-300 dark:border-green-700', bar: 'bg-green-500', dot: 'bg-green-500' }
+      case 'denied':     return { badge: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:bg-red-900/40 dark:text-red-300 dark:border-red-700', bar: 'bg-red-500', dot: 'bg-red-500' }
       case 'cancelled':  return { badge: 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 dark:bg-zinc-700 dark:text-zinc-300 dark:border-zinc-600', bar: 'bg-slate-400', dot: 'bg-slate-400' }
-      case 'completed':  return { badge: 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-700', bar: 'bg-blue-500', dot: 'bg-blue-500' }
-      case 'no_show':    return { badge: 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/40 dark:text-purple-300 dark:border-purple-700', bar: 'bg-purple-500', dot: 'bg-purple-500' }
+      case 'completed':  return { badge: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-700', bar: 'bg-blue-500', dot: 'bg-blue-500' }
+      case 'no_show':    return { badge: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 border-purple-200 dark:bg-purple-900/40 dark:text-purple-300 dark:border-purple-700', bar: 'bg-purple-500', dot: 'bg-purple-500' }
       default:           return { badge: 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700', bar: 'bg-slate-400', dot: 'bg-slate-400' }
     }
   }

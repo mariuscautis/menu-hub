@@ -4586,10 +4586,10 @@ export default function Tables() {
                           <h3 className="font-bold text-zinc-800 dark:text-zinc-200">{reservation.customer_name}</h3>
                           <span className={`px-2 py-0.5 rounded-md text-xs font-semibold ${
                             reservation.status === 'completed'
-                              ? 'bg-blue-100 text-blue-700'
+                              ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
                               : reservation.status === 'cancelled'
-                              ? 'bg-red-100 text-red-700'
-                              : 'bg-green-100 text-green-700'
+                              ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                              : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
                           }`}>
                             {reservation.status === 'completed' ? 'Completed' : reservation.status === 'cancelled' ? 'Cancelled' : 'Confirmed'}
                           </span>

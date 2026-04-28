@@ -45,8 +45,8 @@ export default function RequestHistory({ staff, restaurant }) {
   const getStatusBadge = (status) => {
     const badges = {
       pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      approved: 'bg-green-100 text-green-800 border-green-200',
-      rejected: 'bg-red-100 text-red-800 border-red-200',
+      approved: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 border-green-200',
+      rejected: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 border-red-200',
       cancelled: 'bg-gray-100 text-gray-800 border-gray-200'
     };
 

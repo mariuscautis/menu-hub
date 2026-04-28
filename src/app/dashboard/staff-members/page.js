@@ -308,8 +308,8 @@ export default function StaffMembers() {
 
   const getStatusBadge = (status) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-700'
-      case 'pending': return 'bg-amber-100 text-amber-700'
+      case 'active': return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+      case 'pending': return 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
       default: return 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
     }
   }
@@ -322,9 +322,9 @@ export default function StaffMembers() {
   }
 
   const getDepartmentBadge = (department) => {
-    const predefinedColors = { 'bar': 'bg-orange-100 text-orange-700', 'kitchen': 'bg-green-100 text-green-700', 'universal': 'bg-[#6262bd]/10 text-[#6262bd]' }
+    const predefinedColors = { 'bar': 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400', 'kitchen': 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400', 'universal': 'bg-[#6262bd]/10 text-[#6262bd]' }
     if (predefinedColors[department]) return predefinedColors[department]
-    const colors = ['bg-blue-100 text-blue-700', 'bg-purple-100 text-purple-700', 'bg-pink-100 text-pink-700', 'bg-yellow-100 text-yellow-700', 'bg-indigo-100 text-indigo-700', 'bg-teal-100 text-teal-700']
+    const colors = ['bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400', 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400', 'bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-400', 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400', 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400', 'bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400']
     const index = department ? department.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length : 0
     return colors[index] || 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
   }
@@ -388,7 +388,7 @@ export default function StaffMembers() {
                   <div className="flex flex-wrap items-center gap-2 mb-0.5">
                     <p className="font-semibold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{member.name || '-'}</p>
                     {member.is_hub && (
-                      <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded-md text-xs font-semibold">🍽️ Hub</span>
+                      <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-md text-xs font-semibold">🍽️ Hub</span>
                     )}
                   </div>
                   <p className="text-xs text-zinc-400 dark:text-zinc-500 truncate">{member.email}</p>
@@ -433,9 +433,9 @@ export default function StaffMembers() {
                 {!member.is_hub && (
                   <button onClick={() => resetStaffPassword(member)} className="px-3 py-1.5 bg-zinc-50 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 rounded-sm text-sm font-medium hover:bg-zinc-100 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-600">Reset PW</button>
                 )}
-                {member.status === 'pending' && <button onClick={() => updateStaffStatus(member.id, 'active')} className="px-3 py-1.5 bg-green-100 text-green-700 rounded-sm text-sm font-medium hover:bg-green-200 dark:bg-green-600 dark:text-white dark:hover:bg-green-700">{t('activate')}</button>}
-                {member.status === 'active' && <button onClick={() => updateStaffStatus(member.id, 'inactive')} className="px-3 py-1.5 bg-amber-100 text-amber-700 rounded-sm text-sm font-medium hover:bg-amber-200 dark:bg-amber-600 dark:text-white dark:hover:bg-amber-700">{t('deactivate')}</button>}
-                {member.status === 'inactive' && <button onClick={() => updateStaffStatus(member.id, 'active')} className="px-3 py-1.5 bg-green-100 text-green-700 rounded-sm text-sm font-medium hover:bg-green-200 dark:bg-green-600 dark:text-white dark:hover:bg-green-700">{t('reactivate')}</button>}
+                {member.status === 'pending' && <button onClick={() => updateStaffStatus(member.id, 'active')} className="px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-sm text-sm font-medium hover:bg-green-200 dark:bg-green-600 dark:text-white dark:hover:bg-green-700">{t('activate')}</button>}
+                {member.status === 'active' && <button onClick={() => updateStaffStatus(member.id, 'inactive')} className="px-3 py-1.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-sm text-sm font-medium hover:bg-amber-200 dark:bg-amber-600 dark:text-white dark:hover:bg-amber-700">{t('deactivate')}</button>}
+                {member.status === 'inactive' && <button onClick={() => updateStaffStatus(member.id, 'active')} className="px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-sm text-sm font-medium hover:bg-green-200 dark:bg-green-600 dark:text-white dark:hover:bg-green-700">{t('reactivate')}</button>}
                 <button onClick={() => deleteStaff(member.id, member.name)} className="px-3 py-1.5 bg-red-50 text-red-600 rounded-sm text-sm font-medium hover:bg-red-100 dark:bg-red-600 dark:text-white dark:hover:bg-red-700">{t('remove')}</button>
               </div>
             </div>

@@ -206,7 +206,7 @@ export default function OtherOptionsSettings() {
                 <button
                   onClick={() => handleTestSound(kitchenSound)}
                   disabled={kitchenSound === 'silent'}
-                  className="px-3 py-1.5 bg-green-100 hover:bg-green-200 text-green-700 rounded-sm text-sm font-medium flex items-center gap-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1.5 bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-800/40 text-green-700 dark:text-green-400 rounded-sm text-sm font-medium flex items-center gap-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z"/>
@@ -238,7 +238,7 @@ export default function OtherOptionsSettings() {
                 <button
                   onClick={() => handleTestSound(barSound)}
                   disabled={barSound === 'silent'}
-                  className="px-3 py-1.5 bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-sm text-sm font-medium flex items-center gap-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1.5 bg-orange-100 dark:bg-orange-900/30 hover:bg-orange-200 dark:hover:bg-orange-800/40 text-orange-700 dark:text-orange-400 rounded-sm text-sm font-medium flex items-center gap-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z"/>

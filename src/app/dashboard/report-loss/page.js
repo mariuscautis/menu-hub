@@ -287,7 +287,7 @@ export default function ReportLoss() {
                           <div key={item.id} onClick={() => { setMenuForm({ ...menuForm, menu_item_id: item.id }); setShowMenuDropdown(false); setMenuItemSearch('') }}
                             className="px-4 py-2 hover:bg-[#6262bd] hover:text-white cursor-pointer transition-colors flex justify-between items-center">
                             <span>{item.name} {item.department === 'bar' ? '🍸' : '🍳'}</span>
-                            {!hasRecipe && <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded">{t('noRecipeBadge')}</span>}
+                            {!hasRecipe && <span className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2 py-1 rounded">{t('noRecipeBadge')}</span>}
                           </div>
                         )
                       }) : <div className="px-4 py-2 text-zinc-400 dark:text-zinc-500 text-sm">{t('noItemsFound')}</div>

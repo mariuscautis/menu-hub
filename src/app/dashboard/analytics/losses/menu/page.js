@@ -73,14 +73,14 @@ export default function MenuItemLosses() {
 
   const getReasonColor = (reason) => {
     const colors = {
-      expired: 'bg-yellow-100 text-yellow-700',
-      spoiled: 'bg-red-100 text-red-700',
-      cross_contamination: 'bg-orange-100 text-orange-700',
-      damaged_delivery: 'bg-purple-100 text-purple-700',
-      burned_overcooked: 'bg-amber-100 text-amber-700',
-      dropped_fallen: 'bg-blue-100 text-blue-700',
-      quality_failure: 'bg-pink-100 text-pink-700',
-      customer_complaint: 'bg-indigo-100 text-indigo-700'
+      expired: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400',
+      spoiled: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
+      cross_contamination: 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400',
+      damaged_delivery: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400',
+      burned_overcooked: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
+      dropped_fallen: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
+      quality_failure: 'bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-400',
+      customer_complaint: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400'
     }
     return colors[reason] || 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300'
   }
@@ -205,7 +205,7 @@ export default function MenuItemLosses() {
                           {item.count} {t('lossRecords').replace('{plural}', item.count > 1 ? 's' : '')} • {item.items} {t('items')}
                         </p>
                       </div>
-                      <span className={`px-2 py-1 text-xs rounded-full font-medium ${item.department === 'bar' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'}`}>
+                      <span className={`px-2 py-1 text-xs rounded-full font-medium ${item.department === 'bar' ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400' : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'}`}>
                         {item.department === 'bar' ? `🍸 ${t('bar')}` : `🍳 ${t('kitchen')}`}
                       </span>
                     </div>
@@ -254,7 +254,7 @@ export default function MenuItemLosses() {
                           <span className={`px-2 py-1 text-xs rounded-full font-medium ${getReasonColor(loss.reason)}`}>{getReasonLabel(loss.reason)}</span>
                         </td>
                         <td className="py-3 px-4">
-                          <span className={`px-2 py-1 text-xs rounded-full font-medium ${loss.department === 'bar' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'}`}>
+                          <span className={`px-2 py-1 text-xs rounded-full font-medium ${loss.department === 'bar' ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400' : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'}`}>
                             {loss.department === 'bar' ? '🍸' : '🍳'}
                           </span>
                         </td>

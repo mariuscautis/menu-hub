@@ -332,7 +332,7 @@ export default function TableAnalyticsPage() {
                       .map(table => (
                         <div
                           key={table.table_id}
-                          className="bg-green-100 text-green-700 px-3 py-1 rounded-sm text-sm font-medium"
+                          className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-3 py-1 rounded-sm text-sm font-medium"
                         >
                           {t('tableNumber').replace('{number}', table.table_number)}
                         </div>

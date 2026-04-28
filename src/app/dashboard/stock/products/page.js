@@ -707,7 +707,7 @@ export default function StockManagement() {
               className={`px-4 py-2 rounded-sm font-medium transition-colors ${
                 filterCategory === 'kitchen'
                   ? 'bg-green-600 text-white'
-                  : 'bg-green-100 text-green-700 hover:bg-green-200'
+                  : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-800/40'
               }`}
             >
               🍳 {t('kitchen')}
@@ -717,7 +717,7 @@ export default function StockManagement() {
               className={`px-4 py-2 rounded-sm font-medium transition-colors ${
                 filterCategory === 'bar'
                   ? 'bg-orange-600 text-white'
-                  : 'bg-orange-100 text-orange-700 hover:bg-orange-200'
+                  : 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-800/40'
               }`}
             >
               🍸 {t('bar')}
@@ -818,7 +818,7 @@ export default function StockManagement() {
                       {product.current_stock > 0 && !product.cost_per_base_unit && (
                         <button
                           onClick={() => openAdjustModal(product)}
-                          className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full font-medium hover:bg-amber-200 transition-colors"
+                          className="px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs rounded-full font-medium hover:bg-amber-200 dark:hover:bg-amber-800/40 transition-colors"
                         >
                           ⚠ Set value
                         </button>
@@ -830,8 +830,8 @@ export default function StockManagement() {
                       )}
                       <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${
                         product.category === 'bar'
-                          ? 'bg-orange-100 text-orange-700'
-                          : 'bg-green-100 text-green-700'
+                          ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400'
+                          : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
                       }`}>
                         {product.category === 'bar' ? `🍸 ${t('bar')}` : `🍳 ${t('kitchen')}`}
                       </span>

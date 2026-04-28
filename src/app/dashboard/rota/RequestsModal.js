@@ -13,9 +13,9 @@ const STATUS_CONFIG = {
 };
 
 const LEAVE_CONFIG = {
-  annual_holiday:   { emoji: '🏖️', label: 'Annual Holiday',      bg: 'bg-blue-100 text-blue-800'   },
-  sick_self_cert:   { emoji: '🤒', label: 'Sick (Self-cert)',    bg: 'bg-orange-100 text-orange-800' },
-  sick_medical_cert:{ emoji: '🏥', label: 'Sick (Medical)',      bg: 'bg-red-100 text-red-800'     },
+  annual_holiday:   { emoji: '🏖️', label: 'Annual Holiday',      bg: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400'   },
+  sick_self_cert:   { emoji: '🤒', label: 'Sick (Self-cert)',    bg: 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-400' },
+  sick_medical_cert:{ emoji: '🏥', label: 'Sick (Medical)',      bg: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400'     },
   unpaid:           { emoji: '💰', label: 'Unpaid Leave',        bg: 'bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200' },
   compassionate:    { emoji: '🕊️', label: 'Compassionate',      bg: 'bg-purple-100 text-purple-800'},
   other:            { emoji: '📋', label: 'Other',               bg: 'bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200' }

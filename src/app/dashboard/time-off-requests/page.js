@@ -282,7 +282,7 @@ export default function TimeOffRequestsPage() {
                 className={`px-3 py-2 rounded-sm text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 ${activeTab === tab.key ? 'bg-[#6262bd] text-white shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-800 dark:text-zinc-400'}`}>
                 {tab.label}
                 {tab.count > 0 && (
-                  <span className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${activeTab === tab.key ? 'bg-white/25' : tab.key === 'pending' ? 'bg-amber-100 text-amber-700' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 dark:text-zinc-400'}`}>
+                  <span className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${activeTab === tab.key ? 'bg-white/25' : tab.key === 'pending' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 dark:text-zinc-400'}`}>
                     {tab.count}
                   </span>
                 )}

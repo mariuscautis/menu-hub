@@ -427,7 +427,7 @@ export default function MyRotaPage() {
             <div>
               <h3 className="font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-3 flex items-center gap-2">
                 ⏳ Pending Requests
-                <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold">{pendingLeave.length}</span>
+                <span className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full font-semibold">{pendingLeave.length}</span>
               </h3>
               <div className="space-y-2">
                 {pendingLeave.map(r => (

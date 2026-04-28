@@ -233,7 +233,7 @@ export default function Security() {
               {t('staffLoginSecurityDesc') || 'Set a password that staff members must enter before using their PIN codes. This prevents unauthorized access to your staff login page.'}
             </p>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1 bg-green-100 text-green-700 rounded-sm text-sm font-medium ml-4 shrink-0">
+          <div className="flex items-center gap-2 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-sm text-sm font-medium ml-4 shrink-0">
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
             </svg>
@@ -392,7 +392,7 @@ export default function Security() {
                 url: getTakeawayMenuUrl(),
                 onCopy: copyTakeawayLink,
                 copied: copiedTakeaway,
-                badge: 'bg-orange-100 text-orange-700',
+                badge: 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400',
               },
               {
                 label: t('dineInMenu') || 'Dine-In Menu',
@@ -408,7 +408,7 @@ export default function Security() {
                 url: getBookingUrl(),
                 onCopy: copyBookingLink,
                 copied: copiedBooking,
-                badge: 'bg-purple-100 text-purple-700',
+                badge: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400',
               },
             ] : []),
           ].map(({ label, url, onCopy, copied, badge }) => (

@@ -267,9 +267,9 @@ export default function StaffAnalyticsPage() {
                           {staff.department && (
                             <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                               staff.department === 'bar'
-                                ? 'bg-orange-100 text-orange-700'
+                                ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400'
                                 : staff.department === 'kitchen'
-                                ? 'bg-green-100 text-green-700'
+                                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
                                 : 'bg-[#6262bd]/10 text-[#6262bd]'
                             }`}>
                               {staff.department === 'bar' ? `🍸 ${t('bar')}` :

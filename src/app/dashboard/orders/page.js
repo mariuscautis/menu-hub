@@ -810,11 +810,11 @@ export default function Orders() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'pending': return 'bg-amber-100 text-amber-700'
-      case 'preparing': return 'bg-blue-100 text-blue-700'
-      case 'ready': return 'bg-green-100 text-green-700'
+      case 'pending': return 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
+      case 'preparing': return 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
+      case 'ready': return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
       case 'completed': return 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
-      case 'cancelled': return 'bg-red-100 text-red-700'
+      case 'cancelled': return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
       default: return 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
     }
   }
@@ -1083,12 +1083,12 @@ export default function Orders() {
                         </span>
                       )}
                       {isPaid && (
-                        <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-bold">
+                        <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full text-xs font-bold">
                           {t('paid')}
                         </span>
                       )}
                       {order._isOffline && (
-                        <span className="px-2 py-0.5 bg-orange-100 text-orange-700 rounded-full text-xs font-semibold animate-pulse">Sync</span>
+                        <span className="px-2 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 rounded-full text-xs font-semibold animate-pulse">Sync</span>
                       )}
                       {order.order_type === 'takeaway' && order.ready_for_pickup && !order.picked_up_at && (
                         <span className="px-2 py-0.5 bg-white dark:bg-zinc-900/20 text-white rounded-full text-xs font-bold animate-pulse">Ready</span>
@@ -1121,7 +1121,7 @@ export default function Orders() {
                               <span className={`text-sm text-zinc-700 dark:text-zinc-300 ${isVoided ? 'line-through' : ''} truncate`}>
                                 <span className="font-semibold">{item.quantity}×</span> {item.name}
                               </span>
-                              {isVoided && <span className="px-1.5 py-0.5 text-xs rounded-full font-medium bg-red-100 text-red-700 shrink-0">VOID</span>}
+                              {isVoided && <span className="px-1.5 py-0.5 text-xs rounded-full font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 shrink-0">VOID</span>}
                               {!isVoided && (userType === 'owner' || staffDepartment === 'universal') && (
                                 <span className={`text-xs shrink-0 ${department === 'bar' ? 'text-orange-500' : 'text-green-600'}`}>
                                   {department === 'bar' ? '🍸' : '🍳'}

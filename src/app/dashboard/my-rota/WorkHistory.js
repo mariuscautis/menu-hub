@@ -305,12 +305,12 @@ export default function WorkHistory({ staff, restaurant }) {
                           </span>
                         )}
                         {att.status === 'late' && (
-                          <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium">
+                          <span className="px-2 py-0.5 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded-full text-xs font-medium">
                             {t('late') || 'Late'}
                           </span>
                         )}
                         {att.status === 'early_leave' && (
-                          <span className="px-2 py-0.5 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
+                          <span className="px-2 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 rounded-full text-xs font-medium">
                             {t('earlyLeave') || 'Early Leave'}
                           </span>
                         )}
