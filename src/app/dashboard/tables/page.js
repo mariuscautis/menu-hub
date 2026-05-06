@@ -11,6 +11,7 @@ import InfoTooltip from '@/components/InfoTooltip'
 import { useTheme } from '@/lib/ThemeContext'
 import { useCurrency } from '@/lib/CurrencyContext'
 import { useVenoBridge } from '@/hooks/useVenoBridge'
+import { getReceivingPrinters } from '@/lib/printerRouter'
 import { generateInvoicePdfBase64, downloadInvoicePdf } from '@/lib/invoicePdfGenerator'
 import {
   addPendingOrder,
@@ -175,7 +176,8 @@ export default function Tables() {
 
   const restaurantCtx = useRestaurant()
   const supabase = useAdminSupabase()
-  const { sendPrintJob } = useVenoBridge(restaurantCtx?.restaurant)
+  const { sendPrintJob, sendDepartmentTicket } = useVenoBridge(restaurantCtx?.restaurant)
+  const [restaurantPrinters, setRestaurantPrinters] = useState([])
 
   useEffect(() => {
     if (restaurantCtx?.restaurant?.id) fetchData()
@@ -431,6 +433,14 @@ export default function Tables() {
 
     setTables(tablesData || [])
     setFloors(floorsData || [])
+
+    const { data: printersData } = await supabase
+      .from('printers')
+      .select('*')
+      .eq('restaurant_id', rid)
+      .eq('is_active', true)
+    setRestaurantPrinters(printersData || [])
+
     try { localStorage.setItem(cacheKeyTables, JSON.stringify(tablesData || [])) } catch {}
     try { localStorage.setItem(cacheKeyFloors, JSON.stringify(floorsData || [])) } catch {}
 
@@ -2135,7 +2145,7 @@ export default function Tables() {
       const defaultTaxRate = (invoiceSettings.tax_rates || []).find(r => r.is_default) || invoiceSettings.tax_rates?.[0]
       const subtotal = totalAmount / (1 + (defaultTaxRate?.rate || 0) / 100)
       const taxAmount = totalAmount - subtotal
-      sendPrintJob({
+      const receiptPayload = {
         venue_name: restaurant?.name || '',
         order_type: unpaidOrders[0]?.order_type || 'dine-in',
         table_number: selectedTable?.table_number?.toString() || null,
@@ -2155,7 +2165,13 @@ export default function Tables() {
         tax_id: invoiceSettings.tax_id || null,
         footer_text: invoiceSettings.footer_text || null,
         timestamp: new Date().toISOString(),
-      })
+      }
+      const receiptPrinters = getReceivingPrinters(restaurantPrinters, 'receipt')
+      if (receiptPrinters.length > 0) {
+        receiptPrinters.forEach(printer => sendPrintJob({ ...receiptPayload, printer_id: printer.id }))
+      } else {
+        sendPrintJob(receiptPayload)
+      }
 
       // Clean up any stale offline orders for this table (only needed when IDB is available)
       if (!navigator.onLine) {
@@ -2883,6 +2899,28 @@ export default function Tables() {
           .insert(itemsToInsert)
 
         if (itemsError) throw itemsError
+      }
+
+      // Send department tickets to matching printers
+      if (restaurantPrinters.length > 0) {
+        const itemsByDept = {}
+        consolidatedItems.forEach(item => {
+          const dept = item.department || item.menu_items?.department || 'kitchen'
+          if (!itemsByDept[dept]) itemsByDept[dept] = []
+          itemsByDept[dept].push(item)
+        })
+        Object.entries(itemsByDept).forEach(([dept, deptItems]) => {
+          const deptPrinters = getReceivingPrinters(restaurantPrinters, dept)
+          deptPrinters.forEach(printer => {
+            sendDepartmentTicket(dept, {
+              printer_id: printer.id,
+              venue_name: restaurant?.name || '',
+              table_number: selectedTable?.table_number?.toString() || null,
+              items: deptItems.map(i => ({ name: i.name, quantity: i.quantity })),
+              timestamp: new Date().toISOString(),
+            })
+          })
+        })
       }
 
       // Close modal immediately
