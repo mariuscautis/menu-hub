@@ -154,4 +154,9 @@ export const settingsTabs = [
     labelKey: 'offlineHub',
     icon: icon('M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0'),
   },
+  {
+    href: '/dashboard/settings/printers',
+    labelKey: 'printers',
+    icon: icon('M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z'),
+  },
 ]

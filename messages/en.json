@@ -2496,7 +2496,8 @@
     "otherOptions": "Other Options",
     "reservations": "Reservations",
     "dataMigration": "Data Migration",
-    "offlineHub": "Offline Hub"
+    "offlineHub": "Offline Hub",
+    "printers": "Printers"
   },
   "salesBalance": {
     "title": "Sales & Tax Balance Report",
