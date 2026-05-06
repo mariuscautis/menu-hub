@@ -140,10 +140,12 @@ export default function PrintersSettings() {
   }
 
   const toggleActive = async (printer) => {
-    await supabase.from('printers').update({ is_active: !printer.is_active }).eq('id', printer.id)
-    await fetchData()
+    const newValue = !printer.is_active
+    setPrintersState(prev => prev.map(p => p.id === printer.id ? { ...p, is_active: newValue } : p))
+    await supabase.from('printers').update({ is_active: newValue }).eq('id', printer.id)
     const { data: all } = await supabase.from('printers').select('*').eq('restaurant_id', restaurant.id)
     setPrinters(all || [])
+    setPrintersState(all || [])
   }
 
   const deptLabel = (dept) => dept === RECEIPT_TRIGGER ? 'Receipt (on payment)' : dept.charAt(0).toUpperCase() + dept.slice(1)
