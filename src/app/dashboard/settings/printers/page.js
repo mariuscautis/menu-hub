@@ -229,7 +229,7 @@ export default function PrintersSettings() {
                       className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${printer.is_active ? 'bg-[#6262bd]' : 'bg-zinc-300 dark:bg-zinc-600'}`}
                       title={printer.is_active ? 'Disable' : 'Enable'}
                     >
-                      <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${printer.is_active ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
+                      <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform duration-200 ${printer.is_active ? 'translate-x-5' : 'translate-x-0.5'}`} />
                     </button>
                     <button onClick={() => openEdit(printer)} className="p-1.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
