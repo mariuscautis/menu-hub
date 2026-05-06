@@ -29,8 +29,12 @@ const IP_TIMEOUT_MS    = 4_000;   // give up on direct-IP attempt after this
  * @returns {{
  *   isConnected: boolean,
  *   bridgeStatus: { connected_devices: Array, duplicate_hub: boolean } | null,
+ *   printerList: Array,
  *   sendPrintJob: (receiptPayload: object) => boolean,
+ *   sendDepartmentTicket: (department: string, payload: object) => boolean,
  *   sendOrderEvent: (type: string, payload: object) => boolean,
+ *   setPrinters: (printers: Array) => boolean,
+ *   getPrinters: () => boolean,
  *   requestStatus: () => void
  * }}
  */
@@ -46,6 +50,7 @@ export function useVenoBridge(restaurant) {
 
   const [isConnected, setIsConnected]   = useState(false);
   const [bridgeStatus, setBridgeStatus] = useState(null);
+  const [printerList, setPrinterList]   = useState([]);
 
   // ── Send a raw JSON message ─────────────────────────────────────────────────
   const send = useCallback((obj) => {
@@ -56,9 +61,15 @@ export function useVenoBridge(restaurant) {
   }, []);
 
   // ── Public API ──────────────────────────────────────────────────────────────
-  const sendPrintJob   = useCallback((p) => send({ type: "print:receipt", payload: p }), [send]);
-  const sendOrderEvent = useCallback((type, p) => send({ type, payload: p }), [send]);
-  const requestStatus  = useCallback(() => send({ type: "bridge:get_status" }), [send]);
+  const sendPrintJob        = useCallback((p) => send({ type: "print:receipt", payload: p }), [send]);
+  const sendOrderEvent      = useCallback((type, p) => send({ type, payload: p }), [send]);
+  const requestStatus       = useCallback(() => send({ type: "bridge:get_status" }), [send]);
+  const sendDepartmentTicket = useCallback((department, p) =>
+    send({ type: "print:department_ticket", payload: { ...p, department } }), [send]);
+  const setPrinters         = useCallback((printers) =>
+    send({ type: "bridge:set_printers", payload: { printers } }), [send]);
+  const getPrinters         = useCallback(() =>
+    send({ type: "bridge:get_printers" }), [send]);
 
   // ── Timers ──────────────────────────────────────────────────────────────────
   const clearTimers = useCallback(() => {
@@ -116,8 +127,8 @@ export function useVenoBridge(restaurant) {
           ws.onmessage = (e) => {
             try {
               const m = JSON.parse(e.data);
-              if (m.type === "bridge:status")  setBridgeStatus(m.payload || null);
-              // bridge:pong — nothing to do
+              if (m.type === "bridge:status")   setBridgeStatus(m.payload || null);
+              if (m.type === "bridge:printers")  setPrinterList(m.payload?.printers || []);
             } catch {}
           };
           settle(true);
@@ -197,7 +208,7 @@ export function useVenoBridge(restaurant) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [restaurant?.bridge_ws_token, restaurant?.bridge_hub_ip]);
 
-  return { isConnected, bridgeStatus, sendPrintJob, sendOrderEvent, requestStatus };
+  return { isConnected, bridgeStatus, printerList, sendPrintJob, sendDepartmentTicket, setPrinters, getPrinters, sendOrderEvent, requestStatus };
 }
 
 export default useVenoBridge;
