@@ -2785,7 +2785,9 @@
     "dataMigration": "Data Migration",
     "dataMigrationDesc": "Import or export your restaurant data",
     "offlineHub": "Offline Hub",
-    "offlineHubDesc": "Configure local WiFi hub for offline order relay"
+    "offlineHubDesc": "Configure local WiFi hub for offline order relay",
+    "printers": "Printers",
+    "printersDesc": "Configure thermal printers for receipts and kitchen tickets"
   },
   "payments": {
     "back": "Settings",

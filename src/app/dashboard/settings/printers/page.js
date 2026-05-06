@@ -99,6 +99,7 @@ export default function PrintersSettings() {
     const payload = {
       restaurant_id: restaurant.id,
       name: form.name.trim(),
+      department: form.departments[0],
       connection_type: form.connection_type,
       ip_address: form.connection_type === 'wifi' ? form.ip_address.trim() : null,
       port: form.connection_type === 'wifi' ? (parseInt(form.port) || 9100) : null,
