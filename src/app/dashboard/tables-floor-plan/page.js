@@ -2156,6 +2156,26 @@ export default function StaffFloorPlanPage() {
         throw new Error(data.error || 'Failed to process payment')
       }
 
+      // Stamp the active cash drawer session onto cash orders
+      if (paymentMethod === 'cash' && orderIds.length > 0) {
+        try {
+          const { data: activeSession } = await supabase
+            .from('cash_drawer_sessions')
+            .select('id')
+            .eq('restaurant_id', restaurant.id)
+            .eq('status', 'open')
+            .maybeSingle()
+          if (activeSession?.id) {
+            await supabase
+              .from('orders')
+              .update({ cash_drawer_session_id: activeSession.id })
+              .in('id', orderIds)
+          }
+        } catch (drawerErr) {
+          console.warn('Could not stamp cash drawer session:', drawerErr)
+        }
+      }
+
       setShowPaymentModal(false)
       setUnpaidOrders([])
       setCompletedOrderIds(orderIds)

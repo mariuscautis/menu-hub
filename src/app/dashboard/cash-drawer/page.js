@@ -76,7 +76,7 @@ export default function CashDrawerPage() {
       if (!restaurantCtx?.restaurant) return;
       setRestaurant(restaurantCtx.restaurant);
 
-      // Get user info from staff session if available
+      // Staff PIN session takes priority
       const staffSessionData = localStorage.getItem('staff_session');
       if (staffSessionData) {
         const staffSession = JSON.parse(staffSessionData);
@@ -84,6 +84,17 @@ export default function CashDrawerPage() {
           name: staffSession.name,
           email: staffSession.email,
           id: staffSession.staff_id
+        });
+        return;
+      }
+
+      // Fall back to Supabase auth (owner login)
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUser({
+          name: user.user_metadata?.name || user.email,
+          email: user.email,
+          id: user.id
         });
       }
     } catch (error) {
