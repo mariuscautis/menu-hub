@@ -147,16 +147,15 @@ export default function CashDrawerPage() {
       // Orders linked to this drawer session with payment_method = 'cash'
       const { data: cashOrders, error: ordersError } = await supabase
         .from('orders')
-        .select('total, tip_amount')
+        .select('total')
         .eq('cash_drawer_session_id', sessionId)
         .eq('payment_method', 'cash')
         .eq('paid', true);
 
       if (ordersError) throw ordersError;
 
-      // Sum up cash sales and tips
       const cashSales = cashOrders?.reduce((sum, order) => sum + parseFloat(order.total || 0), 0) || 0;
-      const cashTips = cashOrders?.reduce((sum, order) => sum + parseFloat(order.tip_amount || 0), 0) || 0;
+      const cashTips = 0;
 
       // Get cash refunds for this drawer session
       const { data: cashRefunds, error: refundsError } = await supabase
