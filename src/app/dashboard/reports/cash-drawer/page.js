@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRestaurant } from '@/lib/RestaurantContext';
 import { useTranslations } from '@/lib/i18n/LanguageContext';
@@ -122,7 +122,7 @@ export default function CashDrawerReportPage() {
     );
   }, [allSessions, staffFilter]);
 
-  const fetchSessions = useCallback(async () => {
+  const fetchSessions = async () => {
     if (!restaurant?.id) return;
     setLoading(true);
     try {
@@ -131,7 +131,7 @@ export default function CashDrawerReportPage() {
         .select('*')
         .eq('restaurant_id', restaurant.id)
         .eq('status', 'closed')
-        .gte('opened_at', fromDate)
+        .gte('opened_at', `${fromDate}T00:00:00.000Z`)
         .lte('opened_at', `${toDate}T23:59:59.999Z`)
         .order('opened_at', { ascending: false });
 
@@ -142,11 +142,11 @@ export default function CashDrawerReportPage() {
     } finally {
       setLoading(false);
     }
-  }, [restaurant?.id, fromDate, toDate]);
+  };
 
   useEffect(() => {
     if (restaurant?.id) fetchSessions();
-  }, [fetchSessions]);
+  }, [restaurant?.id, fromDate, toDate]);
 
   const handlePreset = (preset) => {
     if (preset.key === 'custom') {
