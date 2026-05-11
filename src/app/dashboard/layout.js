@@ -531,7 +531,7 @@ export default function DashboardLayout({ children }) {
   const getNavItems = () => {
     const items = []
     const modules = restaurant?.enabled_modules
-    const hasModule = (name) => modules == null ? true : modules[name] === true
+    const hasModule = (name) => modules == null ? true : modules[name] !== false
     const hasPermission = (permissionId) => {
       if (userType === 'owner' || userType === 'staff-admin') return true
       return departmentPermissions.includes(permissionId)

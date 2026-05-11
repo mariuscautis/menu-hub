@@ -119,6 +119,8 @@ export async function POST(request) {
           analytics:    newPlansString.includes('orders'),
           reservations: newPlansString.includes('bookings'),
           rota:         newPlansString.includes('team'),
+          reports:      true,
+          cash_drawer:  true,
         }
         await supabaseAdmin
           .from('restaurants')

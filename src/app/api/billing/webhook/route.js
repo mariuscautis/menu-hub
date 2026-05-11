@@ -46,6 +46,8 @@ function plansToModules(plansString) {
     analytics:    plans.includes('orders'),
     reservations: plans.includes('bookings'),
     rota:         plans.includes('team'),
+    reports:      true,
+    cash_drawer:  true,
   }
 }
 
