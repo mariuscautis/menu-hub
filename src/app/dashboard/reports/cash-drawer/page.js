@@ -122,30 +122,28 @@ export default function CashDrawerReportPage() {
     );
   }, [allSessions, staffFilter]);
 
-  const fetchSessions = async () => {
-    if (!restaurant?.id) return;
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('cash_drawer_sessions')
-        .select('*')
-        .eq('restaurant_id', restaurant.id)
-        .eq('status', 'closed')
-        .gte('opened_at', `${fromDate}T00:00:00.000Z`)
-        .lte('opened_at', `${toDate}T23:59:59.999Z`)
-        .order('opened_at', { ascending: false });
-
-      if (error) throw error;
-      setAllSessions(data || []);
-    } catch (err) {
-      console.error('Error fetching cash drawer sessions:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    if (restaurant?.id) fetchSessions();
+    if (!restaurant?.id) return;
+    let cancelled = false;
+    setLoading(true);
+    supabase
+      .from('cash_drawer_sessions')
+      .select('*')
+      .eq('restaurant_id', restaurant.id)
+      .eq('status', 'closed')
+      .gte('opened_at', `${fromDate}T00:00:00.000Z`)
+      .lte('opened_at', `${toDate}T23:59:59.999Z`)
+      .order('opened_at', { ascending: false })
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error) {
+          console.error('Error fetching cash drawer sessions:', error);
+        } else {
+          setAllSessions(data || []);
+        }
+        setLoading(false);
+      });
+    return () => { cancelled = true; };
   }, [restaurant?.id, fromDate, toDate]);
 
   const handlePreset = (preset) => {
