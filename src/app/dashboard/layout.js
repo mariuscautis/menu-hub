@@ -608,6 +608,13 @@ export default function DashboardLayout({ children }) {
       })
     }
 
+    if (hasModule('cash_drawer') && (userType === 'owner' || userType === 'staff-admin' || hasPermission('cash_drawer'))) {
+      items.push({
+        href: '/dashboard/cash-drawer', labelKey: 'cashDrawer', label: 'Cash Drawer',
+        icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M17 9V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2m2 4h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2zm7-5a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/></svg>)
+      })
+    }
+
     if (hasModule('rota') && (userType === 'owner' || userType === 'staff-admin' || hasPermission('staff_rota'))) {
       items.push({
         href: '/dashboard/staff', labelKey: 'staffRota', label: 'Staff & Rota',
