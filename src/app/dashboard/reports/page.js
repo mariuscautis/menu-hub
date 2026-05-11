@@ -102,6 +102,18 @@ const reportKeys = [
     color: 'text-[#6262bd]',
     bg: 'bg-[#6262bd]/10',
   },
+  {
+    titleKey: 'cashDrawerReportTitle',
+    descKey: 'cashDrawerReportDesc',
+    href: '/dashboard/reports/cash-drawer',
+    icon: (
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+      </svg>
+    ),
+    color: 'text-green-600',
+    bg: 'bg-green-50 dark:bg-green-900/30',
+  },
 ]
 
 export default function ReportsPage() {
