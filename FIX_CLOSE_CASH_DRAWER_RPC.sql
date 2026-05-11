@@ -57,7 +57,7 @@ BEGIN
     variance = v_variance,
     closed_at = NOW(),
     closed_by_name = p_closed_by_name,
-    closed_by_id = p_closed_by_id,
+    closed_by_id = CASE WHEN p_closed_by_id ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' THEN p_closed_by_id::UUID ELSE NULL END,
     notes = p_notes
   WHERE id = p_session_id;
 
