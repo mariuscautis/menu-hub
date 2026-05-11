@@ -1,6 +1,10 @@
 -- Fix close_cash_drawer RPC: remove reference to non-existent tip_amount column
 -- Run this in the Supabase SQL editor
 
+-- Drop both overloaded versions before recreating
+DROP FUNCTION IF EXISTS close_cash_drawer(UUID, NUMERIC, TEXT, TEXT, TEXT);
+DROP FUNCTION IF EXISTS close_cash_drawer(UUID, NUMERIC, TEXT, UUID, TEXT);
+
 CREATE OR REPLACE FUNCTION close_cash_drawer(
   p_session_id UUID,
   p_closing_amount NUMERIC,
