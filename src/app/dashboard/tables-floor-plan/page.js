@@ -2157,22 +2157,28 @@ export default function StaffFloorPlanPage() {
       }
 
       // Stamp the active cash drawer session onto cash orders
+      // Note: the DB trigger auto_stamp_cash_drawer_session handles this server-side.
+      // This client-side call is a belt-and-suspenders fallback.
       if (paymentMethod === 'cash' && orderIds.length > 0) {
         try {
-          const { data: activeSession } = await supabase
+          const { data: activeSession, error: sessionErr } = await supabase
             .from('cash_drawer_sessions')
             .select('id')
             .eq('restaurant_id', restaurant.id)
             .eq('status', 'open')
             .maybeSingle()
+          if (sessionErr) console.error('[cash-drawer] session lookup error:', sessionErr)
           if (activeSession?.id) {
-            await supabase
+            const { error: stampErr } = await supabase
               .from('orders')
               .update({ cash_drawer_session_id: activeSession.id })
               .in('id', orderIds)
+            if (stampErr) console.error('[cash-drawer] stamp error:', stampErr)
+          } else {
+            console.warn('[cash-drawer] no open session found — trigger will handle stamping if session exists')
           }
         } catch (drawerErr) {
-          console.warn('Could not stamp cash drawer session:', drawerErr)
+          console.error('[cash-drawer] unexpected error stamping session:', drawerErr)
         }
       }
 
