@@ -45,6 +45,7 @@ export default function CashDrawerPage() {
     cashRefunds: 0,
     expectedAmount: 0
   });
+  const [staffSales, setStaffSales] = useState([]); // [{ name, total, orders }]
 
   // Modal states
   const [showOpenModal, setShowOpenModal] = useState(false);
@@ -144,10 +145,9 @@ export default function CashDrawerPage() {
 
     try {
       // Get cash sales for this drawer session
-      // Orders linked to this drawer session with payment_method = 'cash'
       const { data: cashOrders, error: ordersError } = await supabase
         .from('orders')
-        .select('total')
+        .select('total, payment_taken_by_name')
         .eq('cash_drawer_session_id', sessionId)
         .eq('payment_method', 'cash')
         .eq('paid', true);
@@ -156,6 +156,16 @@ export default function CashDrawerPage() {
 
       const cashSales = cashOrders?.reduce((sum, order) => sum + parseFloat(order.total || 0), 0) || 0;
       const cashTips = 0;
+
+      // Group by staff member
+      const byStaff = {};
+      (cashOrders || []).forEach(order => {
+        const name = order.payment_taken_by_name || 'Unknown';
+        if (!byStaff[name]) byStaff[name] = { name, total: 0, orders: 0 };
+        byStaff[name].total += parseFloat(order.total || 0);
+        byStaff[name].orders += 1;
+      });
+      setStaffSales(Object.values(byStaff).sort((a, b) => b.total - a.total));
 
       // Get cash refunds for this drawer session
       const { data: cashRefunds, error: refundsError } = await supabase
@@ -247,6 +257,7 @@ export default function CashDrawerPage() {
         cashRefunds: 0,
         expectedAmount: parseFloat(openingAmount)
       });
+      setStaffSales([]);
       setShowOpenModal(false);
       setOpeningAmount('');
     } catch (error) {
@@ -289,6 +300,7 @@ export default function CashDrawerPage() {
         cashRefunds: 0,
         expectedAmount: 0
       });
+      setStaffSales([]);
       fetchSessionHistory();
       setShowCloseModal(false);
       setClosingAmount('');
@@ -473,6 +485,39 @@ export default function CashDrawerPage() {
                 </div>
               </div>
             </div>
+
+            {/* Sales by Staff */}
+            {staffSales.length > 0 && (
+              <div className="border-t border-zinc-200 dark:border-zinc-800 pt-6 mt-6">
+                <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200 mb-4">
+                  Sales by Staff
+                </h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-zinc-200 dark:border-zinc-700">
+                        <th className="text-left py-2 px-3 text-sm font-medium text-zinc-500 dark:text-zinc-400">Staff Member</th>
+                        <th className="text-center py-2 px-3 text-sm font-medium text-zinc-500 dark:text-zinc-400">Orders</th>
+                        <th className="text-right py-2 px-3 text-sm font-medium text-zinc-500 dark:text-zinc-400">Cash Taken</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {staffSales.map((s) => (
+                        <tr key={s.name} className="border-b border-zinc-100 dark:border-zinc-800">
+                          <td className="py-2 px-3 text-sm font-medium text-zinc-800 dark:text-zinc-200">{s.name}</td>
+                          <td className="py-2 px-3 text-sm text-center text-zinc-500 dark:text-zinc-400">{s.orders}</td>
+                          <td className="py-2 px-3 text-sm text-right font-semibold text-green-600 dark:text-green-400">+{formatCurrency(s.total)}</td>
+                        </tr>
+                      ))}
+                      <tr className="bg-zinc-50 dark:bg-zinc-800/50">
+                        <td className="py-2 px-3 text-sm font-semibold text-zinc-700 dark:text-zinc-300" colSpan={2}>Total Cash Sales</td>
+                        <td className="py-2 px-3 text-sm text-right font-bold text-zinc-800 dark:text-zinc-200">{formatCurrency(sessionStats.cashSales)}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           // No Active Session - Open Drawer Prompt
