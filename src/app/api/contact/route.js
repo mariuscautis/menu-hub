@@ -156,7 +156,7 @@ This message was sent from the Veno App contact form.
           name: process.env.EMAIL_FROM_NAME || 'Veno App',
           email: process.env.EMAIL_FROM || 'noreply@venoapp.com'
         },
-        to: [{ email: 'marius.cautis@gmail.com' }],
+        to: [{ email: 'venoapplication@gmail.com' }],
         replyTo: { email: email },
         subject: `[${enquiryType}] Contact Form: ${businessName}`,
         htmlContent: htmlContent,
