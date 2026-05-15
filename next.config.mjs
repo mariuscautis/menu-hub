@@ -16,14 +16,6 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  // Explicitly use webpack for PWA compatibility with next-pwa
-  webpack(config, { isServer }) {
-    // Disable webpack caching in production to avoid large cache files on Cloudflare Pages
-    if (process.env.NODE_ENV === 'production') {
-      config.cache = false;
-    }
-    return config;
-  },
 };
 
 const pwaConfig = withPWA({
