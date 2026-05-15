@@ -126,6 +126,17 @@ export default function AdminRestaurants() {
   const [suspensionMessage, setSuspensionMessage] = useState('')
   const [suspending, setSuspending] = useState(false)
 
+  // Registered interests
+  const [interests, setInterests] = useState([])
+  const [interestsExpanded, setInterestsExpanded] = useState(false)
+
+  // Manual registration panel
+  const [manualRegOpen, setManualRegOpen] = useState(false)
+  const [manualRegForm, setManualRegForm] = useState({ restaurantName: '', email: '', phone: '', venueType: '', venueTypeOther: '', trialDays: '14' })
+  const [manualRegLoading, setManualRegLoading] = useState(false)
+  const [manualRegError, setManualRegError] = useState(null)
+  const [manualRegSuccess, setManualRegSuccess] = useState(null)
+
   // Module panel state
   const [modulePanelOpen, setModulePanelOpen] = useState(false)
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
@@ -142,7 +153,49 @@ export default function AdminRestaurants() {
     fetchRestaurants()
     fetchIndustryCategories()
     fetchSmsUsage()
+    fetchInterests()
   }, [])
+
+  const fetchInterests = async () => {
+    const { data } = await supabase.from('register_interest').select('*').order('created_at', { ascending: false })
+    setInterests(data || [])
+  }
+
+  const updateInterestStatus = async (id, status) => {
+    await supabase.from('register_interest').update({ status }).eq('id', id)
+    setInterests(prev => prev.map(i => i.id === id ? { ...i, status } : i))
+  }
+
+  const handleManualReg = async (e) => {
+    e.preventDefault()
+    setManualRegLoading(true)
+    setManualRegError(null)
+    setManualRegSuccess(null)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/admin/manual-register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+        body: JSON.stringify({
+          restaurantName: manualRegForm.restaurantName,
+          email: manualRegForm.email,
+          phone: manualRegForm.phone,
+          venueType: manualRegForm.venueType,
+          venueTypeOther: manualRegForm.venueTypeOther,
+          trialDays: parseInt(manualRegForm.trialDays, 10) || 14,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setManualRegError(data.error); return }
+      setManualRegSuccess(data)
+      setManualRegForm({ restaurantName: '', email: '', phone: '', venueType: '', venueTypeOther: '', trialDays: '14' })
+      fetchRestaurants()
+    } catch (err) {
+      setManualRegError(err.message)
+    } finally {
+      setManualRegLoading(false)
+    }
+  }
 
   const fetchIndustryCategories = async () => {
     const { data } = await supabase
@@ -320,7 +373,90 @@ export default function AdminRestaurants() {
           <h1 className="text-2xl font-bold text-slate-800">Restaurants</h1>
           <p className="text-slate-500">Manage all restaurant accounts</p>
         </div>
+        <button
+          onClick={() => { setManualRegOpen(true); setManualRegSuccess(null); setManualRegError(null) }}
+          className="px-4 py-2 bg-[#6262bd] text-white rounded-xl font-semibold text-sm hover:bg-[#5151a8] transition-colors flex items-center gap-2"
+        >
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          Add Restaurant
+        </button>
       </div>
+
+      {/* Registered Interests */}
+      {interests.length > 0 && (
+        <div className="mb-6 bg-white border-2 border-amber-100 rounded-2xl overflow-hidden">
+          <button
+            onClick={() => setInterestsExpanded(v => !v)}
+            className="w-full flex items-center justify-between px-5 py-4 hover:bg-amber-50 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-400 flex-shrink-0" />
+              <div className="text-left">
+                <p className="font-semibold text-slate-800 text-sm">Registered Interest</p>
+                <p className="text-xs text-slate-500">{interests.filter(i => i.status === 'new').length} new · {interests.length} total</p>
+              </div>
+            </div>
+            <svg className={`w-5 h-5 text-slate-400 transition-transform ${interestsExpanded ? 'rotate-180' : ''}`} fill="currentColor" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+          </button>
+          {interestsExpanded && (
+            <div className="border-t border-amber-100 overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-amber-50">
+                  <tr>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500">Name</th>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500">Venue</th>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500">Contact</th>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500">Country</th>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500">Date</th>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500">Status</th>
+                    <th className="text-right px-5 py-3 text-xs font-semibold text-slate-500">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {interests.map((item, idx) => (
+                    <tr key={item.id} className={`border-t border-amber-50 ${idx % 2 !== 0 ? 'bg-amber-50/40' : ''}`}>
+                      <td className="px-5 py-3 text-sm text-slate-700">{item.first_name} {item.last_name}</td>
+                      <td className="px-5 py-3 text-sm text-slate-700">{item.venue_name}</td>
+                      <td className="px-5 py-3">
+                        <a href={`mailto:${item.email}`} className="text-sm text-[#6262bd] hover:underline block">{item.email}</a>
+                        {item.phone && <p className="text-xs text-slate-400">{item.phone}</p>}
+                      </td>
+                      <td className="px-5 py-3 text-sm text-slate-500">{item.country}</td>
+                      <td className="px-5 py-3 text-xs text-slate-400">{formatDate(item.created_at)}</td>
+                      <td className="px-5 py-3">
+                        <select
+                          value={item.status}
+                          onChange={e => updateInterestStatus(item.id, e.target.value)}
+                          onClick={e => e.stopPropagation()}
+                          className="text-xs px-2 py-1 border border-slate-200 rounded-lg text-slate-600 focus:outline-none focus:border-[#6262bd] bg-white"
+                        >
+                          <option value="new">New</option>
+                          <option value="contacted">Contacted</option>
+                          <option value="registered">Registered</option>
+                          <option value="dismissed">Dismissed</option>
+                        </select>
+                      </td>
+                      <td className="px-5 py-3 text-right">
+                        <button
+                          onClick={() => {
+                            setManualRegForm(f => ({ ...f, email: item.email, restaurantName: item.venue_name, phone: item.phone || '', venueType: item.venue_type || '' }))
+                            setManualRegOpen(true)
+                            setManualRegSuccess(null)
+                            setManualRegError(null)
+                          }}
+                          className="px-3 py-1.5 text-xs font-medium bg-[#6262bd]/10 text-[#6262bd] rounded-lg hover:bg-[#6262bd]/20 transition-colors"
+                        >
+                          Register
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Filters + Search */}
       <div className="flex flex-wrap items-center gap-2 mb-6">
@@ -768,6 +904,75 @@ export default function AdminRestaurants() {
                   {savingModules ? 'Saving…' : 'Save Changes'}
                 </button>
               </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Manual Registration Modal */}
+      {manualRegOpen && (
+        <>
+          <div className="fixed inset-0 bg-black/40 z-50" onClick={() => { if (!manualRegLoading) { setManualRegOpen(false); setManualRegSuccess(null) } }} />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-6 pointer-events-none">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 pointer-events-auto max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="text-lg font-bold text-slate-800">Add Restaurant</h3>
+                <button onClick={() => { setManualRegOpen(false); setManualRegSuccess(null) }} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                </button>
+              </div>
+
+              {manualRegSuccess ? (
+                <div className="text-center py-4">
+                  <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-7 h-7 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  </div>
+                  <p className="font-semibold text-slate-800 mb-1">Restaurant created</p>
+                  <p className="text-sm text-slate-500 mb-1">Slug: <span className="font-mono text-slate-700">{manualRegSuccess.slug}</span></p>
+                  <p className="text-sm text-slate-500 mb-5">A password reset email has been sent to <strong>{manualRegSuccess.email}</strong>.</p>
+                  <button onClick={() => { setManualRegOpen(false); setManualRegSuccess(null) }} className="w-full px-4 py-2.5 bg-[#6262bd] text-white rounded-xl font-medium hover:bg-[#5151a8] transition-colors text-sm">Done</button>
+                </div>
+              ) : (
+                <form onSubmit={handleManualReg} className="space-y-4">
+                  {manualRegError && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">{manualRegError}</div>
+                  )}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Restaurant Name <span className="text-red-400">*</span></label>
+                    <input type="text" required value={manualRegForm.restaurantName} onChange={e => setManualRegForm(f => ({ ...f, restaurantName: e.target.value }))} className="w-full px-4 py-2.5 border-2 border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#6262bd]" placeholder="The Golden Fork" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Owner Email <span className="text-red-400">*</span></label>
+                    <input type="email" required value={manualRegForm.email} onChange={e => setManualRegForm(f => ({ ...f, email: e.target.value }))} className="w-full px-4 py-2.5 border-2 border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#6262bd]" placeholder="owner@venue.com" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Phone</label>
+                    <input type="tel" value={manualRegForm.phone} onChange={e => setManualRegForm(f => ({ ...f, phone: e.target.value }))} className="w-full px-4 py-2.5 border-2 border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#6262bd]" placeholder="+44 7123 456789" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Venue Type</label>
+                    <select value={manualRegForm.venueType} onChange={e => setManualRegForm(f => ({ ...f, venueType: e.target.value }))} className="w-full px-4 py-2.5 border-2 border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#6262bd] bg-white">
+                      <option value="">— Select —</option>
+                      {industryCategories.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+                      <option value="other">Other</option>
+                    </select>
+                    {manualRegForm.venueType === 'other' && (
+                      <input type="text" value={manualRegForm.venueTypeOther} onChange={e => setManualRegForm(f => ({ ...f, venueTypeOther: e.target.value }))} className="mt-2 w-full px-4 py-2.5 border-2 border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#6262bd]" placeholder="Describe the venue type" />
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Trial length (days)</label>
+                    <input type="number" min="0" max="365" value={manualRegForm.trialDays} onChange={e => setManualRegForm(f => ({ ...f, trialDays: e.target.value }))} className="w-full px-4 py-2.5 border-2 border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-[#6262bd]" />
+                  </div>
+                  <p className="text-xs text-slate-400">The restaurant will be created as <strong>Approved</strong>. A password reset email will be sent to the owner so they can set their password and log in.</p>
+                  <div className="flex gap-3 pt-1">
+                    <button type="button" onClick={() => { setManualRegOpen(false); setManualRegError(null) }} className="flex-1 px-4 py-2.5 border-2 border-slate-200 text-slate-600 rounded-xl font-medium hover:border-slate-300 transition-colors text-sm">Cancel</button>
+                    <button type="submit" disabled={manualRegLoading} className="flex-1 px-4 py-2.5 bg-[#6262bd] text-white rounded-xl font-medium hover:bg-[#5151a8] disabled:opacity-50 transition-colors text-sm">
+                      {manualRegLoading ? 'Creating…' : 'Create Restaurant'}
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
           </div>
         </>

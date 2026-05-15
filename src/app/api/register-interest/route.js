@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 
 export const runtime = 'edge'
 
@@ -9,6 +10,25 @@ export async function POST(request) {
     if (!firstName || !lastName || !email || !phone || !venueName || !venueType || !country) {
       return NextResponse.json({ error: 'Please fill in all required fields' }, { status: 400 })
     }
+
+    // Save to DB (fire-and-forget — don't block email on DB failure)
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    )
+    supabase.from('register_interest').insert({
+      first_name: firstName,
+      last_name: lastName,
+      email,
+      phone,
+      venue_name: venueName,
+      venue_type: venueType,
+      venue_type_other: venueTypeOther || null,
+      country,
+    }).then(({ error }) => {
+      if (error) console.error('register_interest DB insert failed:', error.message)
+    })
 
     const venueTypeDisplay = venueType === 'other' ? `Other: ${venueTypeOther}` : venueType
 

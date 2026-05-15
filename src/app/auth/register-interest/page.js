@@ -13,7 +13,7 @@ const DEFAULT_VENUE_TYPES = [
   { value: 'restaurant', label: 'Restaurant / Café / Bar' },
 ]
 
-const inputClass = "w-full px-4 py-3.5 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 bg-white placeholder:text-slate-400 transition-colors text-sm"
+const inputClass = "w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 bg-white placeholder:text-slate-400 transition-colors text-sm"
 
 export default function RegisterInterest() {
   const [venueTypes, setVenueTypes] = useState(DEFAULT_VENUE_TYPES)
@@ -194,32 +194,32 @@ export default function RegisterInterest() {
               </p>
             </div>
 
-            {error && (
-              <div className="mb-5 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
-                {error}
-              </div>
-            )}
+            <form onSubmit={handleSubmit} className="bg-white border-2 border-slate-100 rounded-2xl p-6 space-y-5">
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+              {error && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+                  {error}
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">First Name</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">First Name</label>
                   <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} required className={inputClass} placeholder="Jane"/>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Last Name</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Last Name</label>
                   <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} required className={inputClass} placeholder="Smith"/>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Venue Name</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Venue Name</label>
                 <input type="text" name="venueName" value={formData.venueName} onChange={handleChange} required className={inputClass} placeholder="The Golden Fork"/>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Venue Type</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Venue Type</label>
                 <select name="venueType" value={formData.venueType} onChange={handleChange} required className={inputClass}>
                   <option value="" disabled>Select your venue type…</option>
                   {venueTypes.map(({ value, label }) => (
@@ -230,15 +230,15 @@ export default function RegisterInterest() {
               </div>
 
               {formData.venueType === 'other' && (
-                <div className="rounded-xl border-2 border-[#6262bd]/30 bg-[#6262bd]/5 p-4">
-                  <label className="block text-xs font-bold text-[#6262bd] mb-2 uppercase tracking-wide">Tell us about your business</label>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Tell us about your business</label>
                   <textarea
                     name="venueTypeOther"
                     value={formData.venueTypeOther}
                     onChange={handleChange}
                     required
                     rows={3}
-                    className="w-full px-4 py-3 border-2 border-[#6262bd]/30 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 bg-white placeholder:text-slate-400 resize-none transition-colors text-sm"
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 bg-white placeholder:text-slate-400 resize-none transition-colors text-sm"
                     placeholder="Tell us more about your business in a few words"
                   />
                 </div>
@@ -246,24 +246,24 @@ export default function RegisterInterest() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Email</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
                   <input type="email" name="email" value={formData.email} onChange={handleChange} required className={inputClass} placeholder="you@yourvenue.com"/>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Phone</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Phone</label>
                   <input type="tel" name="phone" value={formData.phone} onChange={handleChange} required className={inputClass} placeholder="+44 7123 456789"/>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Country</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Country</label>
                 <input type="text" name="country" value={formData.country} onChange={handleChange} required className={inputClass} placeholder="e.g. Italy, Greece, United Kingdom…"/>
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#6262bd] text-white py-3.5 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md mt-2"
+                className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {loading ? 'Sending…' : 'Register My Interest →'}
               </button>
