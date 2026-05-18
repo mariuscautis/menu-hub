@@ -71,7 +71,6 @@ export async function POST(request) {
       email,
       phone: phone || null,
       venue_type: venueType || null,
-      venue_type_other: venueType === 'other' ? venueTypeOther : null,
       status: 'approved',
       trial_ends_at: trialEndsAt,
       enabled_modules: { ordering: true, analytics: true, reservations: true, rota: true, reports: true, cash_drawer: true },
