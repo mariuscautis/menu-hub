@@ -60,7 +60,7 @@ export default function ResetPassword() {
       <nav className="flex justify-between items-center p-6 max-w-6xl mx-auto w-full">
         <Link href="/" className="flex items-center space-x-2">
           <div className="w-10 h-10 bg-[#6262bd] rounded-xl flex items-center justify-center">
-            <span className="text-white font-bold text-xl">M</span>
+            <span className="text-white font-bold text-xl">V</span>
           </div>
           <span className="text-2xl font-bold text-slate-700">Veno App</span>
         </Link>

@@ -5,14 +5,20 @@ import { NextResponse } from 'next/server'
 export async function GET(request) {
   const { searchParams } = new URL(request.url)
   const code = searchParams.get('code')
+  const type = searchParams.get('type')
 
   if (code) {
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     )
-    
+
     const { data: { session }, error } = await supabase.auth.exchangeCodeForSession(code)
+
+    // Password recovery — always redirect to reset page regardless of account state
+    if (!error && session && type === 'recovery') {
+      return NextResponse.redirect(new URL('/auth/reset-password', request.url))
+    }
 
     if (!error && session) {
       // Check if admin

@@ -106,38 +106,50 @@ export async function POST(request) {
           },
           to: [{ email }],
           subject: `Your Veno App account is ready — set your password`,
-          htmlContent: `
-            <!DOCTYPE html>
-            <html>
-              <head><meta charset="utf-8">
-                <style>
-                  body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f8; }
-                  .container { max-width: 600px; margin: 30px auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
-                  .header { background-color: #6262bd; color: white; padding: 36px 30px; text-align: center; }
-                  .header h1 { margin: 0; font-size: 24px; }
-                  .header p { margin: 8px 0 0; opacity: 0.85; font-size: 15px; }
-                  .content { padding: 32px 30px; }
-                  .button { display: block; width: fit-content; margin: 28px auto; padding: 14px 32px; background-color: #6262bd; color: white !important; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px; }
-                  .footer { background: #f9f9fb; padding: 18px 30px; text-align: center; font-size: 12px; color: #aaa; border-top: 1px solid #eee; }
-                </style>
-              </head>
-              <body>
-                <div class="container">
-                  <div class="header">
-                    <h1>Welcome to Veno App</h1>
-                    <p>Your account for <strong>${restaurantName}</strong> is ready</p>
-                  </div>
-                  <div class="content">
-                    <p>Hi there,</p>
-                    <p>Your Veno App account has been set up. Click the button below to set your password and access your dashboard.</p>
-                    <a href="${resetUrl}" class="button">Set My Password</a>
-                    <p style="font-size:13px;color:#888;text-align:center;">This link expires in 24 hours. If you didn't expect this email, you can ignore it.</p>
-                  </div>
-                  <div class="footer">Veno App · <a href="${appUrl}" style="color:#6262bd;">${appUrl}</a></div>
-                </div>
-              </body>
-            </html>
-          `,
+          htmlContent: `<!DOCTYPE html>
+<html>
+  <head><meta charset="utf-8">
+    <style>
+      body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f8; }
+      .container { max-width: 600px; margin: 30px auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+      .header { background-color: #6262bd; color: white; padding: 36px 30px; text-align: center; }
+      .header h1 { margin: 0; font-size: 26px; }
+      .header p { margin: 8px 0 0; opacity: 0.85; font-size: 15px; }
+      .content { padding: 32px 30px; }
+      .info-box { background: #f0f0fa; border: 2px solid #6262bd; border-radius: 10px; padding: 16px 20px; margin: 20px 0; }
+      .info-box .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; color: #6262bd; font-weight: 700; margin-bottom: 4px; }
+      .info-box .value { font-size: 16px; font-weight: 700; color: #333; }
+      .button { display: block; width: fit-content; margin: 28px auto; padding: 14px 32px; background-color: #6262bd; color: white !important; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px; }
+      .divider { border: none; border-top: 1px solid #eee; margin: 24px 0; }
+      .help { text-align: center; font-size: 13px; color: #888; }
+      .help a { color: #6262bd; text-decoration: none; font-weight: 600; }
+      .footer { background: #f9f9fb; padding: 18px 30px; text-align: center; font-size: 12px; color: #aaa; border-top: 1px solid #eee; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Welcome to Veno App</h1>
+        <p>Your account has been set up and is ready to use</p>
+      </div>
+      <div class="content">
+        <p>Hi there,</p>
+        <p>Your Veno App account for <strong>${restaurantName}</strong> has been created. Click the button below to set your password and get started.</p>
+        <div class="info-box">
+          <div class="label">Venue</div>
+          <div class="value">${restaurantName}</div>
+        </div>
+        <a href="${resetUrl}" class="button">Set My Password →</a>
+        <hr class="divider" />
+        <p class="help">
+          This link expires in 24 hours.<br/>
+          Need help? <a href="mailto:support@venoapp.com">support@venoapp.com</a>
+        </p>
+      </div>
+      <div class="footer">Veno App · <a href="${appUrl}" style="color:#6262bd;">${appUrl}</a></div>
+    </div>
+  </body>
+</html>`,
         }),
       }).catch(err => console.error('Failed to send welcome email:', err))
     }
