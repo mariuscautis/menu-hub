@@ -2900,7 +2900,11 @@
       "step4_title": "Statistiques des Articles",
       "step4_desc": "Un resume rapide indiquant le nombre total d articles, combien sont disponibles, combien ont des recettes associees et combien sont en rupture de stock.",
       "step5_title": "Selection Multiple",
-      "step5_desc": "Cochez la case pour selectionner tous les articles visibles d un coup. Les articles selectionnes peuvent etre supprimes en masse, utile lors de la suppression d un menu saisonnier."
+      "step5_desc": "Cochez la case pour selectionner tous les articles visibles d un coup. Les articles selectionnes peuvent etre supprimes en masse, utile lors de la suppression d un menu saisonnier.",
+      "step6_title": "Bascule Vente a Emporter",
+      "step6_desc": "L icone panier marque cet article comme disponible dans le menu a emporter. Activez-le pour l inclure dans les commandes takeaway, ou desactivez-le pour le reserver au service en salle.",
+      "step7_title": "Modifier l Article",
+      "step7_desc": "L icone crayon ouvre le panneau d edition complet de cet article. Vous pouvez y mettre a jour le prix, la photo et la disponibilite, et aussi ajouter une recette en liant des ingredients du stock pour suivre le cout et la consommation."
     },
     "menuCategories": {
       "step1_title": "Ajouter une Categorie",

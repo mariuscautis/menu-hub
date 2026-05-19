@@ -2900,7 +2900,11 @@
       "step4_title": "Statistici Articole",
       "step4_desc": "Un rezumat rapid cu totalul articolelor, cate sunt disponibile, cate au retete asociate si cate sunt epuizate.",
       "step5_title": "Selectie Multipla",
-      "step5_desc": "Bifeaza casuta pentru a selecta toate articolele vizibile dintr-o data. Articolele selectate pot fi sterse in bloc, util cand elimini un meniu sezonier."
+      "step5_desc": "Bifeaza casuta pentru a selecta toate articolele vizibile dintr-o data. Articolele selectate pot fi sterse in bloc, util cand elimini un meniu sezonier.",
+      "step6_title": "Comuta Livrare la Pachet",
+      "step6_desc": "Iconita cosului marcheaza acest articol ca disponibil in meniul de livrare la pachet. Activeaz-o pentru a-l include in comenzile takeaway sau dezactiveaz-o pentru a-l pastra doar la masa.",
+      "step7_title": "Editeaza Articolul",
+      "step7_desc": "Iconita cu creion deschide panoul complet de editare al acestui articol. De aici poti actualiza pretul, fotografia si disponibilitatea, si poti adauga o reteta legand ingrediente din stoc pentru a urmari costul si consumul."
     },
     "menuCategories": {
       "step1_title": "Adauga o Categorie",

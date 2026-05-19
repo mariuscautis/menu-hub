@@ -560,6 +560,14 @@ export default function Menu() {
           element: '[data-tour="menu-items-select-all"]',
           popover: { title: tt('menuItems.step5_title'), description: tt('menuItems.step5_desc') },
         },
+        {
+          element: '[data-tour="menu-items-takeaway-btn"]',
+          popover: { title: tt('menuItems.step6_title'), description: tt('menuItems.step6_desc') },
+        },
+        {
+          element: '[data-tour="menu-items-edit-btn"]',
+          popover: { title: tt('menuItems.step7_title'), description: tt('menuItems.step7_desc') },
+        },
       ]} />
       <PageTabs tabs={menuNavTabs} />
       <div className="flex flex-wrap justify-between items-start gap-3 mb-8">
@@ -897,6 +905,7 @@ export default function Menu() {
                       </svg>
                     </button>
                     <button
+                      data-tour="menu-items-takeaway-btn"
                       onClick={() => toggleTakeaway(item)}
                       className={`p-2 rounded-sm ${
                         item.takeaway_available
@@ -910,6 +919,7 @@ export default function Menu() {
                       </svg>
                     </button>
                     <button
+                      data-tour="menu-items-edit-btn"
                       onClick={() => openModal(item)}
                       className="p-2 rounded-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:bg-zinc-700"
                     >

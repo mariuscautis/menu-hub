@@ -2900,7 +2900,11 @@
       "step4_title": "Estadisticas de Articulos",
       "step4_desc": "Un resumen rapido con el total de articulos, cuantos estan disponibles, cuantos tienen recetas vinculadas y cuantos estan agotados.",
       "step5_title": "Seleccion Multiple",
-      "step5_desc": "Marca la casilla para seleccionar todos los articulos visibles a la vez. Los articulos seleccionados pueden eliminarse en bloque, util al limpiar un menu de temporada."
+      "step5_desc": "Marca la casilla para seleccionar todos los articulos visibles a la vez. Los articulos seleccionados pueden eliminarse en bloque, util al limpiar un menu de temporada.",
+      "step6_title": "Activar Pedido para Llevar",
+      "step6_desc": "El icono de cesta marca este articulo como disponible en el menu de pedidos para llevar. Activalo para incluirlo en pedidos takeaway o desactivalo para mantenerlo solo en sala.",
+      "step7_title": "Editar Articulo",
+      "step7_desc": "El icono de lapiz abre el panel de edicion completo de este articulo. Desde aqui puedes actualizar el precio, la foto y la disponibilidad, y ademas agregar una receta vinculando ingredientes del stock para hacer seguimiento del coste y uso."
     },
     "menuCategories": {
       "step1_title": "Agregar una Categoria",

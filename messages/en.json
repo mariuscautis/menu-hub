@@ -3018,7 +3018,11 @@
       "step4_title": "Item Stats",
       "step4_desc": "A quick summary showing total items, how many are available, how many have recipes linked, and how many are out of stock.",
       "step5_title": "Bulk Select",
-      "step5_desc": "Tick the checkbox to select all visible items at once. Selected items can be deleted in bulk — useful when clearing a seasonal menu."
+      "step5_desc": "Tick the checkbox to select all visible items at once. Selected items can be deleted in bulk — useful when clearing a seasonal menu.",
+      "step6_title": "Takeaway Toggle",
+      "step6_desc": "The basket icon marks this item as available in the takeaway menu. Toggle it on to include the item in takeaway orders, or off to keep it dine-in only.",
+      "step7_title": "Edit Item",
+      "step7_desc": "The pencil icon opens the full edit panel for this item. From here you can update the price, photo, and availability, and also add a recipe by linking stock ingredients to track cost and usage."
     },
     "menuCategories": {
       "step1_title": "Add a Category",

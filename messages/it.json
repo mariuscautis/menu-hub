@@ -2900,7 +2900,11 @@
       "step4_title": "Statistiche Articoli",
       "step4_desc": "Un riepilogo rapido con il totale degli articoli, quanti sono disponibili, quanti hanno ricette collegate e quanti sono esauriti.",
       "step5_title": "Selezione Multipla",
-      "step5_desc": "Spunta la casella per selezionare tutti gli articoli visibili in una volta. Gli articoli selezionati possono essere eliminati in blocco, utile per rimuovere un menu stagionale."
+      "step5_desc": "Spunta la casella per selezionare tutti gli articoli visibili in una volta. Gli articoli selezionati possono essere eliminati in blocco, utile per rimuovere un menu stagionale.",
+      "step6_title": "Attiva Asporto",
+      "step6_desc": "L icona del cestino segna questo articolo come disponibile nel menu da asporto. Attivala per includerlo negli ordini takeaway, o disattivala per tenerlo solo per il servizio al tavolo.",
+      "step7_title": "Modifica Articolo",
+      "step7_desc": "L icona a matita apre il pannello di modifica completo per questo articolo. Da qui puoi aggiornare il prezzo, la foto e la disponibilita, e aggiungere una ricetta collegando ingredienti dallo stock per monitorare costi e consumi."
     },
     "menuCategories": {
       "step1_title": "Aggiungi una Categoria",
