@@ -210,7 +210,18 @@ const emailTranslations = {
     supportReplyTitle: "Support Reply",
     supportReplyIntro: "Our support team has replied to your ticket:",
     supportReplyCta: "View Ticket",
-    supportReplyFooter: "You can reply directly in the dashboard. — Veno App"
+    supportReplyFooter: "You can reply directly in the dashboard. — Veno App",
+
+    // Staff magic link
+    magicLinkSubject: "Your staff dashboard access — {restaurantName}",
+    magicLinkTitle: "Staff Dashboard Access",
+    magicLinkGreeting: "Hi {staffName},",
+    magicLinkIntro: "Your manager has sent you a login link for your staff dashboard. Click the button below to access your rota, shifts, and time-off requests.",
+    magicLinkCta: "Access My Dashboard →",
+    magicLinkImportant: "Important:",
+    magicLinkValidUntil: "This link is valid until {expiryDate} and can only be used once. Contact your manager if you need a new one.",
+    magicLinkFallback: "If the button above doesn't work, copy and paste this link into your browser:",
+    magicLinkFooter: "Sent by {restaurantName} via Veno App. If you weren't expecting this, you can safely ignore it."
   },
 
   ro: {
@@ -413,7 +424,18 @@ const emailTranslations = {
     supportReplyTitle: "Răspuns Suport",
     supportReplyIntro: "Echipa noastră de suport a răspuns la tichetul tău:",
     supportReplyCta: "Vezi Tichetul",
-    supportReplyFooter: "Poți răspunde direct din panou. — Veno App"
+    supportReplyFooter: "Poți răspunde direct din panou. — Veno App",
+
+    // Staff magic link
+    magicLinkSubject: "Acces la tabloul de bord al personalului — {restaurantName}",
+    magicLinkTitle: "Acces Tablou de Bord Personal",
+    magicLinkGreeting: "Salut {staffName},",
+    magicLinkIntro: "Managerul tău ți-a trimis un link de autentificare pentru tabloul de bord al personalului. Apasă butonul de mai jos pentru a-ți accesa programul, turele și cererile de concediu.",
+    magicLinkCta: "Accesează Tabloul Meu de Bord →",
+    magicLinkImportant: "Important:",
+    magicLinkValidUntil: "Acest link este valabil până pe {expiryDate} și poate fi folosit o singură dată. Contactează-ți managerul dacă ai nevoie de unul nou.",
+    magicLinkFallback: "Dacă butonul de mai sus nu funcționează, copiază și lipește acest link în browser:",
+    magicLinkFooter: "Trimis de {restaurantName} prin Veno App. Dacă nu te așteptai la acest email, îl poți ignora în siguranță."
   },
 
   fr: {
@@ -616,7 +638,18 @@ const emailTranslations = {
     supportReplyTitle: "Réponse du Support",
     supportReplyIntro: "Notre équipe de support a répondu à votre ticket :",
     supportReplyCta: "Voir le Ticket",
-    supportReplyFooter: "Vous pouvez répondre directement depuis le tableau de bord. — Veno App"
+    supportReplyFooter: "Vous pouvez répondre directement depuis le tableau de bord. — Veno App",
+
+    // Staff magic link
+    magicLinkSubject: "Accès à votre espace personnel — {restaurantName}",
+    magicLinkTitle: "Accès Espace Personnel",
+    magicLinkGreeting: "Bonjour {staffName},",
+    magicLinkIntro: "Votre responsable vous a envoyé un lien de connexion pour votre espace personnel. Cliquez sur le bouton ci-dessous pour accéder à votre planning, vos horaires et vos demandes de congés.",
+    magicLinkCta: "Accéder à Mon Espace →",
+    magicLinkImportant: "Important :",
+    magicLinkValidUntil: "Ce lien est valable jusqu'au {expiryDate} et ne peut être utilisé qu'une seule fois. Contactez votre responsable si vous en avez besoin d'un nouveau.",
+    magicLinkFallback: "Si le bouton ci-dessus ne fonctionne pas, copiez et collez ce lien dans votre navigateur :",
+    magicLinkFooter: "Envoyé par {restaurantName} via Veno App. Si vous n'attendiez pas cet email, vous pouvez l'ignorer en toute sécurité."
   },
 
   it: {
@@ -819,7 +852,18 @@ const emailTranslations = {
     supportReplyTitle: "Risposta del Supporto",
     supportReplyIntro: "Il nostro team di supporto ha risposto al tuo ticket:",
     supportReplyCta: "Visualizza il Ticket",
-    supportReplyFooter: "Puoi rispondere direttamente dalla dashboard. — Veno App"
+    supportReplyFooter: "Puoi rispondere direttamente dalla dashboard. — Veno App",
+
+    // Staff magic link
+    magicLinkSubject: "Accesso alla tua area personale — {restaurantName}",
+    magicLinkTitle: "Accesso Area Personale",
+    magicLinkGreeting: "Ciao {staffName},",
+    magicLinkIntro: "Il tuo responsabile ti ha inviato un link di accesso per la tua area personale. Clicca il pulsante qui sotto per accedere al tuo programma, i tuoi turni e le richieste di ferie.",
+    magicLinkCta: "Accedi alla Mia Area →",
+    magicLinkImportant: "Importante:",
+    magicLinkValidUntil: "Questo link è valido fino al {expiryDate} e può essere utilizzato una sola volta. Contatta il tuo responsabile se ne hai bisogno di uno nuovo.",
+    magicLinkFallback: "Se il pulsante sopra non funziona, copia e incolla questo link nel tuo browser:",
+    magicLinkFooter: "Inviato da {restaurantName} tramite Veno App. Se non ti aspettavi questa email, puoi ignorarla in tutta sicurezza."
   },
 
   es: {
@@ -1022,7 +1066,18 @@ const emailTranslations = {
     supportReplyTitle: "Respuesta de Soporte",
     supportReplyIntro: "Nuestro equipo de soporte ha respondido a tu ticket:",
     supportReplyCta: "Ver Ticket",
-    supportReplyFooter: "Puedes responder directamente desde el panel. — Veno App"
+    supportReplyFooter: "Puedes responder directamente desde el panel. — Veno App",
+
+    // Staff magic link
+    magicLinkSubject: "Acceso a tu área de personal — {restaurantName}",
+    magicLinkTitle: "Acceso Área de Personal",
+    magicLinkGreeting: "Hola {staffName},",
+    magicLinkIntro: "Tu responsable te ha enviado un enlace de acceso para tu área de personal. Haz clic en el botón de abajo para acceder a tu horario, turnos y solicitudes de vacaciones.",
+    magicLinkCta: "Acceder a Mi Área →",
+    magicLinkImportant: "Importante:",
+    magicLinkValidUntil: "Este enlace es válido hasta el {expiryDate} y solo puede usarse una vez. Contacta a tu responsable si necesitas uno nuevo.",
+    magicLinkFallback: "Si el botón de arriba no funciona, copia y pega este enlace en tu navegador:",
+    magicLinkFooter: "Enviado por {restaurantName} a través de Veno App. Si no esperabas este email, puedes ignorarlo con seguridad."
   }
 }
 

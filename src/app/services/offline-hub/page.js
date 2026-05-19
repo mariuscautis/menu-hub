@@ -26,7 +26,7 @@ export default function OfflineHubPage() {
           tag="03"
           category="Offline Hub"
           title="Internet goes down."
-          titleAccent="Service stays up."
+          titleAccent="Service stays up.(BETA)"
           accent="#10b981"
           subtitle="Veno's offline hub keeps your orders, kitchen displays, and menus working even with no internet. When you reconnect, everything syncs automatically — no data lost."
           features={[

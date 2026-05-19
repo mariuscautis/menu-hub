@@ -2,8 +2,9 @@ export const runtime = 'edge';
 
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { getEmailTranslations, t, formatDateForLocale } from '@/lib/email-translations';
+import { sendEmail } from '@/lib/services/email-edge';
 
-// Lazy initialization of Supabase client to avoid build-time errors
 function getSupabase() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -51,10 +52,10 @@ export async function POST(request) {
       );
     }
 
-    // Fetch restaurant details
+    // Fetch restaurant details including email_language
     const { data: restaurant, error: restaurantError } = await supabase
       .from('restaurants')
-      .select('name, logo_url')
+      .select('name, logo_url, email_language')
       .eq('id', restaurant_id)
       .single();
 
@@ -89,9 +90,12 @@ export async function POST(request) {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
     const magicLink = `${baseUrl}/staff-magic-login?token=${token}`;
 
-    const expiryDate = new Date(expiresAt).toLocaleDateString('en-US', {
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-    });
+    // Get translations for the restaurant's configured language
+    const locale = restaurant.email_language || 'en';
+    const tr = getEmailTranslations(locale);
+    const expiryDate = formatDateForLocale(expiresAt.toISOString(), locale);
+
+    const subject = t(tr.magicLinkSubject, { restaurantName: restaurant.name });
 
     const emailHtml = `<!DOCTYPE html>
 <html>
@@ -114,64 +118,49 @@ export async function POST(request) {
   <div class="container">
     <div class="header">
       ${restaurant.logo_url ? `<img src="${restaurant.logo_url}" alt="${restaurant.name}" style="max-width:120px;max-height:60px;margin-bottom:16px;display:block;margin-left:auto;margin-right:auto;">` : ''}
-      <h1>Staff Dashboard Access</h1>
+      <h1>${tr.magicLinkTitle}</h1>
       <p>${restaurant.name}</p>
     </div>
     <div class="content">
-      <p>Hi ${staff.name},</p>
-      <p>Your manager has sent you a login link for your staff dashboard. Click the button below to access your rota, shifts, and time-off requests.</p>
-      <a href="${magicLink}" class="button">Access My Dashboard →</a>
+      <p>${t(tr.magicLinkGreeting, { staffName: staff.name })}</p>
+      <p>${tr.magicLinkIntro}</p>
+      <a href="${magicLink}" class="button">${tr.magicLinkCta}</a>
       <div class="info-box">
-        <strong>Important:</strong> This link is valid until <strong>${expiryDate}</strong> and can only be used once. Contact your manager if you need a new one.
+        <strong>${tr.magicLinkImportant}</strong> ${t(tr.magicLinkValidUntil, { expiryDate })}
       </div>
       <hr class="divider" />
-      <p style="font-size:13px;color:#64748b;">If the button above doesn't work, copy and paste this link into your browser:</p>
+      <p style="font-size:13px;color:#64748b;">${tr.magicLinkFallback}</p>
       <p class="link-box">${magicLink}</p>
     </div>
     <div class="footer">
-      Sent by ${restaurant.name} via Veno App.<br>
-      If you weren't expecting this, you can safely ignore it.
+      ${t(tr.magicLinkFooter, { restaurantName: restaurant.name })}
     </div>
   </div>
 </body>
 </html>`;
 
-    const emailResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
-      headers: {
-        'accept': 'application/json',
-        'api-key': process.env.BREVO_API_KEY,
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        sender: {
-          name: process.env.EMAIL_FROM_NAME || 'Veno App',
-          email: process.env.EMAIL_FROM || 'noreply@venoapp.com',
-        },
-        to: [{ email: staff.email, name: staff.name || staff.email }],
-        subject: `Your staff dashboard access — ${restaurant.name}`,
-        htmlContent: emailHtml,
-      }),
+    const result = await sendEmail({
+      to: staff.email,
+      subject,
+      htmlContent: emailHtml,
+      fromName: restaurant.name,
     });
 
-    if (!emailResponse.ok) {
-      const emailError = await emailResponse.json();
-      console.error('Brevo send failed:', { status: emailResponse.status, error: emailError });
+    if (!result.success) {
+      console.error('sendEmail failed:', result.error);
       return NextResponse.json(
         {
-          error: `Failed to send email: ${emailError.message || emailResponse.statusText}`,
+          error: result.error || 'Failed to send email',
           magic_link: magicLink,
         },
         { status: 500 }
       );
     }
 
-    const emailResult = await emailResponse.json();
-
     return NextResponse.json({
       success: true,
       email_sent_to: staff.email,
-      email_id: emailResult.messageId,
+      email_id: result.messageId,
       expires_at: expiresAt.toISOString(),
     });
 
