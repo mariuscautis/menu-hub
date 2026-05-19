@@ -8,6 +8,7 @@ import QRCode from 'qrcode'
 import InvoiceClientModal from '@/components/invoices/InvoiceClientModal'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import InfoTooltip from '@/components/InfoTooltip'
+import PageTour from '@/components/PageTour'
 import { useTheme } from '@/lib/ThemeContext'
 import { useCurrency } from '@/lib/CurrencyContext'
 import { useVenoBridge } from '@/hooks/useVenoBridge'
@@ -3174,6 +3175,54 @@ export default function Tables() {
   return (
 
       <div>
+        <PageTour steps={[
+          {
+            element: '[data-tour="tables-add-btn"]',
+            popover: {
+              title: 'Add a Table',
+              description: 'Click here to create a new table. You can use a number ("Table 1") or a name ("Terrace A") — whatever suits your layout.',
+              side: 'bottom',
+              align: 'end',
+            },
+          },
+          {
+            element: '[data-tour="tables-name-input"]',
+            popover: {
+              title: 'Give it a Name or Number',
+              description: 'Type the table name or number here. Examples: "1", "A1", "Bar Seat 3", "Terrace". This is what staff and customers will see.',
+              side: 'bottom',
+              align: 'start',
+            },
+          },
+          {
+            element: '[data-tour="tables-add-submit"]',
+            popover: {
+              title: 'Save the Table',
+              description: 'Click Add Table to save. The table is created instantly and appears in your grid — no page reload needed.',
+              side: 'top',
+              align: 'end',
+            },
+          },
+          {
+            element: '[data-tour="tables-card-download-qr"]',
+            popover: {
+              title: 'Download the QR Code',
+              description: 'Each table gets a unique QR code. Click the ⋮ menu on any table card then "Download QR" to save it as a PNG — ready to print and place on the table.',
+              side: 'left',
+              align: 'start',
+            },
+          },
+          {
+            element: '[data-tour="tables-download-all-qr"]',
+            popover: {
+              title: 'Download All QR Codes at Once',
+              description: 'Use this button to download QR codes for every table in one go — ideal when setting up a new venue or reprinting after a redesign.',
+              side: 'bottom',
+              align: 'end',
+            },
+          },
+        ]} />
+
         {/* Notification Toast */}
       {notification && (() => {
         const palette = {
@@ -3264,6 +3313,7 @@ export default function Tables() {
           )}
           {userType === 'owner' && tables.length > 0 && (
             <button
+              data-tour="tables-download-all-qr"
               onClick={downloadAllQR}
               className="border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 px-3 sm:px-5 py-2.5 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900 flex items-center gap-2"
             >
@@ -3275,6 +3325,7 @@ export default function Tables() {
           )}
           {userType === 'owner' && (
             <button
+              data-tour="tables-add-btn"
               onClick={() => setShowModal(true)}
               className="bg-[#6262bd] text-white px-3 sm:px-5 py-2.5 rounded-sm font-medium hover:bg-[#5252a3] flex items-center gap-2"
             >
@@ -3377,6 +3428,7 @@ export default function Tables() {
                   {t('tableNumberName')}
                 </label>
                 <input
+                  data-tour="tables-name-input"
                   type="text"
                   value={newTableNumber}
                   onChange={(e) => setNewTableNumber(e.target.value)}
@@ -3395,6 +3447,7 @@ export default function Tables() {
                   {t('cancel')}
                 </button>
                 <button
+                  data-tour="tables-add-submit"
                   type="submit"
                   className="flex-1 bg-[#6262bd] text-white py-3 rounded-sm font-medium hover:bg-[#5252a3]"
                 >
@@ -5352,6 +5405,7 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
                     <div className="fixed inset-0 z-10" onClick={() => setShowOwnerMenu(false)} />
                     <div className="absolute right-0 top-8 z-20 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-sm shadow-lg py-1 min-w-[148px]">
                       <button
+                        data-tour="tables-card-download-qr"
                         onClick={() => { onDownload(); setShowOwnerMenu(false) }}
                         className="w-full text-left px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:bg-zinc-900 flex items-center gap-2"
                       >

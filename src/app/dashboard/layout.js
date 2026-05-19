@@ -25,6 +25,7 @@ import InactivityRing from '@/components/InactivityRing'
 import PlatformLogo from '@/components/PlatformLogo'
 import { RestaurantProvider } from '@/lib/RestaurantContext'
 import ProductTour from '@/components/ProductTour'
+import { PageTourProvider } from '@/lib/PageTourContext'
 
 export default function DashboardLayout({ children }) {
   const pathname = usePathname()
@@ -732,6 +733,7 @@ export default function DashboardLayout({ children }) {
 
   return (
     <GuideProvider>
+    <PageTourProvider>
     <CurrencyProvider currency={restaurantCurrency}>
     <LanguageProvider>
       {/* Full-screen connectivity border overlay */}
@@ -1279,6 +1281,7 @@ export default function DashboardLayout({ children }) {
       </div>
     </LanguageProvider>
     </CurrencyProvider>
+    </PageTourProvider>
     </GuideProvider>
   )
 }
