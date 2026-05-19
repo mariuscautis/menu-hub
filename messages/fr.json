@@ -2913,6 +2913,18 @@
       "step2_desc": "Chaque fiche affiche le nom, la description et le nombre d articles appartenant a cette categorie. Utilisez le bouton d edition pour la renommer ou ajuster son ordre.",
       "step3_title": "Ordre d Affichage",
       "step3_desc": "Le numero d ordre controle la position de cette categorie dans la liste du menu. Les numeros les plus bas apparaissent en premier; assignez-les pour ordonner les categories correctement."
+    },
+    "reservations": {
+      "step1_title": "A venir vs Passees",
+      "step1_desc": "Basculez entre A venir et Passees pour voir les reservations encore a venir ou celles qui ont deja eu lieu. Chaque onglet applique les filtres en cours.",
+      "step2_title": "Rechercher et Filtrer",
+      "step2_desc": "Recherchez par nom, email ou telephone du client. Utilisez le selecteur de date ou le menu deroulant de periode pour affiner les resultats, et le filtre de statut pour vous concentrer sur les reservations en attente, confirmees ou autres.",
+      "step3_title": "Statistiques en Direct",
+      "step3_desc": "Un compte rapide des reservations en attente et confirmees pour la vue actuelle, avec un compteur total de resultats. Les reservations en attente necessitent votre action : confirmez ou refusez-les depuis le panneau de detail.",
+      "step4_title": "Bloquer une Date",
+      "step4_desc": "Utilisez ce panneau pour empecher l acceptation de nouvelles reservations un jour donne. Vous pouvez bloquer aujourd hui instantanement ou choisir une date future. Les dates bloquees s affichent comme des puces et peuvent etre debloquees a tout moment.",
+      "step5_title": "Cartes de Reservation",
+      "step5_desc": "Chaque carte affiche le nom du client, la date, l heure, le nombre de convives et le statut actuel. Cliquez sur une carte pour ouvrir le panneau complet ou vous pouvez confirmer, refuser, noter le client ou ajouter une restriction."
     }
   }
 }

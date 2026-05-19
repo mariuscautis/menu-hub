@@ -2913,6 +2913,18 @@
       "step2_desc": "Fiecare card afiseaza numele, descrierea si numarul de articole din acea categorie. Foloseste butonul de editare pentru a redenumi sau ajusta ordinea.",
       "step3_title": "Ordinea de Afisare",
       "step3_desc": "Numarul de ordine controleaza pozitia acestei categorii in lista meniului. Numerele mai mici apar primele; seteaza-le pentru a aranja categoriile in secventa corecta."
+    },
+    "reservations": {
+      "step1_title": "Viitoare vs Trecute",
+      "step1_desc": "Comuta intre Viitoare si Trecute pentru a vedea rezervarile care urmeaza sau pe cele deja incheiate. Fiecare tab aplica filtrele curente.",
+      "step2_title": "Cauta si Filtreaza",
+      "step2_desc": "Cauta dupa numele clientului, email sau telefon. Foloseste selectorul de data sau meniul de interval pentru a restringe rezultatele, si filtrul de status pentru a te concentra pe rezervarile in asteptare, confirmate sau altele.",
+      "step3_title": "Statistici in Timp Real",
+      "step3_desc": "Un numar rapid de rezervari in asteptare si confirmate pentru vizualizarea curenta, plus un contor total. Rezervarile in asteptare necesita actiunea ta: confirma-le sau refuza-le din panoul de detalii.",
+      "step4_title": "Blocheaza o Data",
+      "step4_desc": "Foloseste acest panou pentru a opri acceptarea de noi rezervari intr-o zi anume. Poti bloca astazi instantaneu sau alege orice data viitoare. Datele blocate apar ca etichete si pot fi deblocate oricand.",
+      "step5_title": "Carduri Rezervare",
+      "step5_desc": "Fiecare card afiseaza numele clientului, data, ora, numarul de persoane si statusul curent. Apasa pe orice card pentru a deschide panoul complet unde poti confirma, refuza, evalua clientul sau adauga o restrictie."
     }
   }
 }

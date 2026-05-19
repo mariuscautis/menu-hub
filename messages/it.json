@@ -2913,6 +2913,18 @@
       "step2_desc": "Ogni scheda mostra il nome, la descrizione e il numero di articoli appartenenti a quella categoria. Usa il pulsante di modifica per rinominarla o regolare il suo ordine.",
       "step3_title": "Ordine di Visualizzazione",
       "step3_desc": "Il numero d ordine controlla la posizione di questa categoria nell elenco del menu. I numeri piu bassi appaiono per primi; impostali per disporre le categorie nella sequenza corretta."
+    },
+    "reservations": {
+      "step1_title": "Future vs Passate",
+      "step1_desc": "Passa da Future a Passate per vedere le prenotazioni ancora da venire o quelle gia avvenute. Ogni scheda applica i filtri correnti.",
+      "step2_title": "Cerca e Filtra",
+      "step2_desc": "Cerca per nome, email o telefono del cliente. Usa il selettore di data o il menu a tendina del periodo per restringere i risultati, e il filtro di stato per concentrarti su prenotazioni in attesa, confermate o altro.",
+      "step3_title": "Statistiche in Tempo Reale",
+      "step3_desc": "Un rapido conteggio delle prenotazioni in attesa e confermate per la vista corrente, piu un contatore totale. Le prenotazioni in attesa richiedono la tua azione: confermale o rifiutale dal pannello di dettaglio.",
+      "step4_title": "Blocca una Data",
+      "step4_desc": "Usa questo pannello per impedire l accettazione di nuove prenotazioni in un giorno specifico. Puoi bloccare oggi immediatamente o scegliere una data futura. Le date bloccate appaiono come chip e possono essere sbloccate in qualsiasi momento.",
+      "step5_title": "Schede Prenotazione",
+      "step5_desc": "Ogni scheda mostra il nome del cliente, la data, l orario, il numero di commensali e lo stato attuale. Clicca su una scheda per aprire il pannello completo dove puoi confermare, rifiutare, valutare il cliente o aggiungere una restrizione."
     }
   }
 }

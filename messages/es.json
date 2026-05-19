@@ -2913,6 +2913,18 @@
       "step2_desc": "Cada tarjeta muestra el nombre, la descripcion y el numero de articulos que pertenecen a esa categoria. Usa el boton de edicion para renombrarla o ajustar su orden.",
       "step3_title": "Orden de Visualizacion",
       "step3_desc": "El numero de orden controla la posicion de esta categoria en la lista del menu. Los numeros mas bajos aparecen primero; asignalos para ordenar las categorias correctamente."
+    },
+    "reservations": {
+      "step1_title": "Proximas vs Pasadas",
+      "step1_desc": "Cambia entre Proximas y Pasadas para ver las reservas que aun no han ocurrido o las que ya han tenido lugar. Cada pestana aplica los filtros actuales.",
+      "step2_title": "Buscar y Filtrar",
+      "step2_desc": "Busca por nombre del cliente, correo electronico o telefono. Usa el selector de fecha o el desplegable de rango para acotar resultados a un dia o periodo concreto, y el filtro de estado para centrarte en pendientes, confirmadas u otros estados.",
+      "step3_title": "Estadisticas en Tiempo Real",
+      "step3_desc": "Un recuento rapido de reservas pendientes y confirmadas para la vista actual, mas un contador total de resultados. Las reservas pendientes requieren tu accion: confirmalas o deniegaias desde el panel de detalle.",
+      "step4_title": "Bloquear una Fecha",
+      "step4_desc": "Usa este panel para impedir que se acepten nuevas reservas en un dia concreto. Puedes bloquear hoy instantaneamente o elegir cualquier fecha futura. Las fechas bloqueadas aparecen como fichas y pueden desbloquearse en cualquier momento.",
+      "step5_title": "Tarjetas de Reserva",
+      "step5_desc": "Cada tarjeta muestra el nombre del cliente, la fecha, la hora, el numero de comensales y el estado actual. Haz clic en cualquier tarjeta para abrir el panel completo donde puedes confirmar, denegar, valorar al cliente o agregar una restriccion."
     }
   }
 }

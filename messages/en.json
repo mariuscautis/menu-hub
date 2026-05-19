@@ -3031,6 +3031,18 @@
       "step2_desc": "Each card shows the category name, description, and how many items belong to it. Use the edit button to rename it or adjust its sort order.",
       "step3_title": "Sort Order",
       "step3_desc": "The sort order number controls where this category appears in the menu list. Lower numbers appear first — set them to arrange categories in the right sequence."
+    },
+    "reservations": {
+      "step1_title": "Upcoming vs Past",
+      "step1_desc": "Switch between Upcoming and Past to view reservations that are still to come or ones that have already happened. Each tab applies to your current filters.",
+      "step2_title": "Search and Filter",
+      "step2_desc": "Search by guest name, email, or phone number. Use the date picker or range dropdown to narrow results to a specific day or period, and the status filter to focus on pending, confirmed, or other states.",
+      "step3_title": "Live Stats",
+      "step3_desc": "A quick count of pending and confirmed reservations for the current view, plus a total results counter. Pending reservations need your action — confirm or deny them from the detail panel.",
+      "step4_title": "Block a Date",
+      "step4_desc": "Use this panel to stop new reservations being accepted on a given day. You can block today instantly or pick any future date. Blocked dates are shown as chips below and can be unblocked at any time.",
+      "step5_title": "Reservation Cards",
+      "step5_desc": "Each card shows the guest name, date, time, party size, and current status. Click any card to open the full detail panel where you can confirm, deny, rate the customer, or add a restriction."
     }
   }
 }

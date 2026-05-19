@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations, useLanguage } from '@/lib/i18n/LanguageContext'
 import InfoTooltip from '@/components/InfoTooltip'
+import PageTour from '@/components/PageTour'
 import { useOrderSounds } from '@/hooks/useOrderSounds'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
@@ -15,6 +16,7 @@ export default function Reservations() {
   const t = useTranslations('reservations')
   const tc = useTranslations('common')
   const tg = useTranslations('guide')
+  const tt = useTranslations('tours')
   const { locale } = useLanguage()
   const adminSupabase = useAdminSupabase()
   const [restaurant, setRestaurant] = useState(null)
@@ -664,6 +666,28 @@ export default function Reservations() {
   return (
     <OfflinePageGuard>
     <div onClick={resumeAudio}>
+      <PageTour steps={[
+        {
+          element: '[data-tour="res-time-scope"]',
+          popover: { title: tt('reservations.step1_title'), description: tt('reservations.step1_desc') },
+        },
+        {
+          element: '[data-tour="res-filters"]',
+          popover: { title: tt('reservations.step2_title'), description: tt('reservations.step2_desc') },
+        },
+        {
+          element: '[data-tour="res-stats"]',
+          popover: { title: tt('reservations.step3_title'), description: tt('reservations.step3_desc') },
+        },
+        {
+          element: '[data-tour="res-block-date"]',
+          popover: { title: tt('reservations.step4_title'), description: tt('reservations.step4_desc') },
+        },
+        {
+          element: '[data-tour="res-card-grid"]',
+          popover: { title: tt('reservations.step5_title'), description: tt('reservations.step5_desc') },
+        },
+      ]} />
       {/* Header */}
       <div className="flex flex-wrap justify-between items-start gap-3 mb-8">
         <div>
@@ -698,7 +722,7 @@ export default function Reservations() {
       )}
 
       {/* Block a date panel */}
-      <div className="mb-6 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 rounded-sm p-6">
+      <div data-tour="res-block-date" className="mb-6 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 rounded-sm p-6">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <h2 className="text-base font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-1">{t('blockADate')}</h2>
@@ -762,7 +786,7 @@ export default function Reservations() {
       </div>
 
       {/* Time Scope Tabs */}
-      <div className="mb-6 flex gap-2 flex-wrap">
+      <div data-tour="res-time-scope" className="mb-6 flex gap-2 flex-wrap">
         <button
           onClick={() => { setTimeScope('upcoming'); setDateFilter('all'); setSpecificDate('') }}
           className={`flex-1 min-w-0 px-4 sm:px-6 py-3 rounded-sm font-medium transition-colors text-sm sm:text-base ${
@@ -782,7 +806,7 @@ export default function Reservations() {
       </div>
 
       {/* Filters */}
-      <div className="mb-6 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 rounded-sm p-6">
+      <div data-tour="res-filters" className="mb-6 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 rounded-sm p-6">
         <div className="grid md:grid-cols-4 gap-4">
           {/* Search */}
           <div className="md:col-span-1">
@@ -863,7 +887,7 @@ export default function Reservations() {
         )}
 
         {/* Stats row */}
-        <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+        <div data-tour="res-stats" className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
           <div className="bg-amber-50 dark:bg-amber-900/30 border-2 border-amber-200 dark:border-amber-800 px-4 py-2 rounded-sm">
             <div className="text-xl font-bold text-amber-700 dark:text-amber-400">{reservations.filter(r => r.status === 'pending').length}</div>
             <div className="text-xs text-amber-600 dark:text-amber-500">{t('pending')}</div>
@@ -890,7 +914,7 @@ export default function Reservations() {
           <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 text-sm">{t('adjustFilters')}</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div data-tour="res-card-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredReservations.map((reservation) => {
             const sc = getStatusConfig(reservation.status)
             return (
