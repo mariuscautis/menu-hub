@@ -164,13 +164,13 @@ export default function DeletedRestaurants() {
                     <div className="flex justify-end gap-2">
                       <button
                         onClick={() => setReinstateTarget(r)}
-                        className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200 transition-colors"
+                        className="px-3 py-1.5 bg-slate-100 text-green-700 rounded-lg text-sm font-medium hover:bg-slate-200 transition-colors"
                       >
                         Reinstate
                       </button>
                       <button
                         onClick={() => { setPermanentDeleteTarget(r); setActionError(null) }}
-                        className="px-3 py-1.5 bg-red-100 text-red-600 rounded-lg text-sm font-medium hover:bg-red-200 transition-colors"
+                        className="px-3 py-1.5 bg-slate-100 text-red-600 rounded-lg text-sm font-medium hover:bg-slate-200 transition-colors"
                       >
                         Delete permanently
                       </button>
