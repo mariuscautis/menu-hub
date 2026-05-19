@@ -927,7 +927,8 @@
     "noEmailProvided": "No email address provided",
     "downloadInvoice": "Download Invoice",
     "downloadInvoiceDesc": "Download PDF to your device",
-    "invoices": "{count} invoice{plural}"
+    "invoices": "{count} invoice{plural}",
+    "noTaxCategory": "No tax category selected"
   },
   "stock": {
     "title": "Stock Management",

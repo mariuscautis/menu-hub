@@ -886,7 +886,8 @@
     "noEmailProvided": "Nu s-a furnizat adresă de email",
     "downloadInvoice": "Descarcă Factură",
     "downloadInvoiceDesc": "Descarcă PDF pe dispozitivul tău",
-    "invoices": "{count} factur{plural}"
+    "invoices": "{count} factur{plural}",
+    "noTaxCategory": "Nicio categorie de taxă selectată"
   },
   "stock": {
     "title": "Gestiune Stoc",

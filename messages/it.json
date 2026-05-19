@@ -886,7 +886,8 @@
     "noEmailProvided": "Nessun indirizzo email fornito",
     "downloadInvoice": "Scarica Fattura",
     "downloadInvoiceDesc": "Scarica PDF sul tuo dispositivo",
-    "invoices": "{count} fattura{plural}"
+    "invoices": "{count} fattura{plural}",
+    "noTaxCategory": "Nessuna categoria fiscale selezionata"
   },
   "stock": {
     "title": "Gestione Inventario",
