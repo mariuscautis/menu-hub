@@ -638,7 +638,7 @@ export default function FloorPlanPage() {
               + Create First Floor
             </button>
             <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-4">
-              Note: If you see a database error, the floor plan tables may not be set up yet. Contact your administrator to run the ADD_FLOOR_PLAN_TABLES.sql migration.
+              Create your first floor to start arranging tables and managing your dining area.
             </p>
           </div>
         </div>
