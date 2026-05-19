@@ -664,30 +664,31 @@ export default function Reservations() {
   if (!restaurant) return <div className="text-red-600">No restaurant found</div>
 
   return (
+    <>
+    <PageTour steps={[
+      {
+        element: '[data-tour="res-time-scope"]',
+        popover: { title: tt('reservations.step1_title'), description: tt('reservations.step1_desc') },
+      },
+      {
+        element: '[data-tour="res-filters"]',
+        popover: { title: tt('reservations.step2_title'), description: tt('reservations.step2_desc') },
+      },
+      {
+        element: '[data-tour="res-stats"]',
+        popover: { title: tt('reservations.step3_title'), description: tt('reservations.step3_desc') },
+      },
+      {
+        element: '[data-tour="res-block-date"]',
+        popover: { title: tt('reservations.step4_title'), description: tt('reservations.step4_desc') },
+      },
+      {
+        element: '[data-tour="res-card-grid"]',
+        popover: { title: tt('reservations.step5_title'), description: tt('reservations.step5_desc') },
+      },
+    ]} />
     <OfflinePageGuard>
     <div onClick={resumeAudio}>
-      <PageTour steps={[
-        {
-          element: '[data-tour="res-time-scope"]',
-          popover: { title: tt('reservations.step1_title'), description: tt('reservations.step1_desc') },
-        },
-        {
-          element: '[data-tour="res-filters"]',
-          popover: { title: tt('reservations.step2_title'), description: tt('reservations.step2_desc') },
-        },
-        {
-          element: '[data-tour="res-stats"]',
-          popover: { title: tt('reservations.step3_title'), description: tt('reservations.step3_desc') },
-        },
-        {
-          element: '[data-tour="res-block-date"]',
-          popover: { title: tt('reservations.step4_title'), description: tt('reservations.step4_desc') },
-        },
-        {
-          element: '[data-tour="res-card-grid"]',
-          popover: { title: tt('reservations.step5_title'), description: tt('reservations.step5_desc') },
-        },
-      ]} />
       {/* Header */}
       <div className="flex flex-wrap justify-between items-start gap-3 mb-8">
         <div>
@@ -1431,5 +1432,6 @@ export default function Reservations() {
       )}
     </div>
     </OfflinePageGuard>
+    </>
   )
 }

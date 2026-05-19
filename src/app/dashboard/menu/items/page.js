@@ -537,38 +537,18 @@ export default function Menu() {
     return <div className="text-zinc-500 dark:text-zinc-400">{t('loadingMenu')}</div>
   }
   return (
+    <>
+    <PageTour steps={[
+      { element: '[data-tour="menu-items-add-btn"]', popover: { title: tt('menuItems.step1_title'), description: tt('menuItems.step1_desc') } },
+      { element: '[data-tour="menu-items-search"]', popover: { title: tt('menuItems.step2_title'), description: tt('menuItems.step2_desc') } },
+      { element: '[data-tour="menu-items-dept-filters"]', popover: { title: tt('menuItems.step3_title'), description: tt('menuItems.step3_desc') } },
+      { element: '[data-tour="menu-items-stats"]', popover: { title: tt('menuItems.step4_title'), description: tt('menuItems.step4_desc') } },
+      { element: '[data-tour="menu-items-select-all"]', popover: { title: tt('menuItems.step5_title'), description: tt('menuItems.step5_desc') } },
+      { element: '[data-tour="menu-items-takeaway-btn"]', popover: { title: tt('menuItems.step6_title'), description: tt('menuItems.step6_desc') } },
+      { element: '[data-tour="menu-items-edit-btn"]', popover: { title: tt('menuItems.step7_title'), description: tt('menuItems.step7_desc') } },
+    ]} />
     <OfflinePageGuard>
     <div>
-      <PageTour steps={[
-        {
-          element: '[data-tour="menu-items-add-btn"]',
-          popover: { title: tt('menuItems.step1_title'), description: tt('menuItems.step1_desc') },
-        },
-        {
-          element: '[data-tour="menu-items-search"]',
-          popover: { title: tt('menuItems.step2_title'), description: tt('menuItems.step2_desc') },
-        },
-        {
-          element: '[data-tour="menu-items-dept-filters"]',
-          popover: { title: tt('menuItems.step3_title'), description: tt('menuItems.step3_desc') },
-        },
-        {
-          element: '[data-tour="menu-items-stats"]',
-          popover: { title: tt('menuItems.step4_title'), description: tt('menuItems.step4_desc') },
-        },
-        {
-          element: '[data-tour="menu-items-select-all"]',
-          popover: { title: tt('menuItems.step5_title'), description: tt('menuItems.step5_desc') },
-        },
-        {
-          element: '[data-tour="menu-items-takeaway-btn"]',
-          popover: { title: tt('menuItems.step6_title'), description: tt('menuItems.step6_desc') },
-        },
-        {
-          element: '[data-tour="menu-items-edit-btn"]',
-          popover: { title: tt('menuItems.step7_title'), description: tt('menuItems.step7_desc') },
-        },
-      ]} />
       <PageTabs tabs={menuNavTabs} />
       <div className="flex flex-wrap justify-between items-start gap-3 mb-8">
         <div>
@@ -1454,5 +1434,6 @@ export default function Menu() {
       )}
     </div>
     </OfflinePageGuard>
+    </>
   )
 }

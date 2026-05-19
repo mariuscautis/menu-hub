@@ -136,22 +136,14 @@ export default function MenuCategories() {
   }
 
   return (
+    <>
+    <PageTour steps={[
+      { element: '[data-tour="menu-cat-add-btn"]', popover: { title: tt('menuCategories.step1_title'), description: tt('menuCategories.step1_desc') } },
+      { element: '[data-tour="menu-cat-list"]', popover: { title: tt('menuCategories.step2_title'), description: tt('menuCategories.step2_desc') } },
+      { element: '[data-tour="menu-cat-sort-hint"]', popover: { title: tt('menuCategories.step3_title'), description: tt('menuCategories.step3_desc') } },
+    ]} />
     <OfflinePageGuard>
     <div>
-      <PageTour steps={[
-        {
-          element: '[data-tour="menu-cat-add-btn"]',
-          popover: { title: tt('menuCategories.step1_title'), description: tt('menuCategories.step1_desc') },
-        },
-        {
-          element: '[data-tour="menu-cat-list"]',
-          popover: { title: tt('menuCategories.step2_title'), description: tt('menuCategories.step2_desc') },
-        },
-        {
-          element: '[data-tour="menu-cat-sort-hint"]',
-          popover: { title: tt('menuCategories.step3_title'), description: tt('menuCategories.step3_desc') },
-        },
-      ]} />
       <PageTabs tabs={menuNavTabs} />
       <div className="flex flex-wrap justify-between items-start gap-3 mb-6">
         <div>
@@ -322,5 +314,6 @@ export default function MenuCategories() {
       )}
     </div>
     </OfflinePageGuard>
+    </>
   )
 }
