@@ -3210,6 +3210,14 @@
       "step4_title": "Salveaza Toate Modificarile",
       "step4_desc": "Apasa aici pentru a salva toate modificarile permisiunilor din toate departamentele dintr-o data. Modificarile au efect imediat pentru toti membrii atribuiti acelor departamente."
     },
+    "floorPlan": {
+      "step1_title": "Designer Plan Etaj",
+      "step1_desc": "Aceasta pagina iti permite sa creezi o harta vizuala a salii tale. Poti gestiona mai multe etaje, sa tragi mesele in pozitie si sa adaugi elemente decorative care sa corespunda aspectului real al localului.",
+      "step2_title": "Bara de Unelte",
+      "step2_desc": "Adauga mese din lista de mese neasezate folosind butonul violet, apoi foloseste elementele decorative pentru a plasa pereti, usi, un bar, plante si altele pentru a construi un plan precis.",
+      "step3_title": "Zona de Lucru",
+      "step3_desc": "Trage mesele si elementele oriunde pe zona de lucru pentru a le pozitiona. Apasa pe orice element pentru a-l selecta si a-i vedea proprietatile sau a-l sterge. Planul se salveaza automat."
+    },
     "customers": {
       "step1_title": "Clienți",
       "step1_desc": "Fiecare client care a facut o rezervare sau a plasat o comanda apare aici. Poti vedea istoricul vizitelor, evaluarile si orice restrictie de incredere aplicata contului sau.",

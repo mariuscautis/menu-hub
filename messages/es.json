@@ -3210,6 +3210,14 @@
       "step4_title": "Guardar Todos los Cambios",
       "step4_desc": "Haz clic aqui para guardar todos los cambios de permisos de todos los departamentos de una vez. Los cambios son efectivos inmediatamente para todos los miembros asignados a esos departamentos."
     },
+    "floorPlan": {
+      "step1_title": "Diseñador de Plano",
+      "step1_desc": "Esta pagina te permite crear un mapa visual de tu zona de comedor. Puedes gestionar varios pisos, arrastrar las mesas a su posicion y anadir elementos decorativos que reflejen el diseno real de tu local.",
+      "step2_title": "Barra de Herramientas",
+      "step2_desc": "Agrega mesas de tu lista de mesas sin colocar usando el boton morado, y luego usa los elementos decorativos para colocar paredes, puertas, barra, plantas y mucho mas para crear un plano preciso.",
+      "step3_title": "Lienzo",
+      "step3_desc": "Arrastra mesas y elementos a cualquier parte del lienzo para posicionarlos. Haz clic en cualquier elemento para seleccionarlo y ver sus propiedades o eliminarlo. El diseno se guarda automaticamente."
+    },
     "customers": {
       "step1_title": "Clientes",
       "step1_desc": "Aqui aparece cada cliente que ha hecho una reserva o realizado un pedido. Puedes ver su historial de visitas, valoraciones y cualquier restriccion de confianza aplicada a su cuenta.",

@@ -9,6 +9,7 @@ import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import InfoTooltip from '@/components/InfoTooltip'
 import OfflinePageGuard from '@/components/OfflinePageGuard'
+import PageTour from '@/components/PageTour'
 
 // Draggable Table Component
 function DraggableTable({ table, isSelected, onClick }) {
@@ -127,6 +128,7 @@ export default function FloorPlanPage() {
   const restaurantCtx = useRestaurant()
   const supabase = useAdminSupabase()
   const tg = useTranslations('guide')
+  const tt = useTranslations('tours')
   const [restaurant, setRestaurant] = useState(null)
   const [floors, setFloors] = useState([])
   const [currentFloor, setCurrentFloor] = useState(null)
@@ -765,10 +767,16 @@ export default function FloorPlanPage() {
   }
 
   return (
+    <>
+    <PageTour steps={[
+      { element: '[data-tour="fp-header"]', popover: { title: tt('floorPlan.step1_title'), description: tt('floorPlan.step1_desc') } },
+      { element: '[data-tour="fp-toolbar"]', popover: { title: tt('floorPlan.step2_title'), description: tt('floorPlan.step2_desc') } },
+      { element: '[data-tour="fp-canvas"]', popover: { title: tt('floorPlan.step3_title'), description: tt('floorPlan.step3_desc') } },
+    ]} />
     <OfflinePageGuard>
     <div className="h-screen flex flex-col bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-950">
       {/* Header */}
-      <div className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 p-4">
+      <div className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 p-4" data-tour="fp-header">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">Floor Plan Designer</h1>
@@ -806,7 +814,7 @@ export default function FloorPlanPage() {
 
       <div className="flex flex-1 overflow-hidden">
         {/* Toolbar */}
-        <div className="w-64 bg-white dark:bg-zinc-900 border-r-2 border-zinc-200 dark:border-zinc-800 p-4 overflow-y-auto">
+        <div className="w-64 bg-white dark:bg-zinc-900 border-r-2 border-zinc-200 dark:border-zinc-800 p-4 overflow-y-auto" data-tour="fp-toolbar">
           <h3 className="font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-3">Add to Floor</h3>
 
           <div className="space-y-2">
@@ -1008,7 +1016,7 @@ export default function FloorPlanPage() {
         </div>
 
         {/* Canvas */}
-        <div className="flex-1 overflow-auto p-8 bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-950">
+        <div className="flex-1 overflow-auto p-8 bg-zinc-100 dark:bg-zinc-800 dark:bg-zinc-950" data-tour="fp-canvas">
           <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
             <div
               onClick={() => setSelectedItem(null)}
@@ -1208,5 +1216,6 @@ export default function FloorPlanPage() {
       )}
     </div>
     </OfflinePageGuard>
+    </>
   )
 }

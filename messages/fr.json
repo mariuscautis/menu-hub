@@ -3210,6 +3210,14 @@
       "step4_title": "Enregistrer Toutes les Modifications",
       "step4_desc": "Cliquez ici pour enregistrer toutes les modifications de permissions dans tous les departements en une seule fois. Les changements prennent effet immediatement pour tous les membres assignes a ces departements."
     },
+    "floorPlan": {
+      "step1_title": "Concepteur de Plan de Salle",
+      "step1_desc": "Cette page vous permet de creer une carte visuelle de votre salle. Vous pouvez gerer plusieurs etages, glisser les tables a leur emplacement et ajouter des elements decoratifs pour correspondre a la disposition reelle de votre etablissement.",
+      "step2_title": "Barre d'Outils",
+      "step2_desc": "Ajoutez des tables depuis votre liste de tables non placees en utilisant le bouton violet, puis utilisez les elements decoratifs pour placer des murs, des portes, un bar, des plantes et plus encore.",
+      "step3_title": "Zone de Dessin",
+      "step3_desc": "Glissez les tables et les elements n importe ou sur la zone pour les positionner. Cliquez sur un element pour le selectionner et voir ses proprietes ou le supprimer. Votre plan est sauvegarde automatiquement."
+    },
     "customers": {
       "step1_title": "Clients",
       "step1_desc": "Chaque client ayant effectue une reservation ou passe une commande apparait ici. Vous pouvez consulter son historique de visites, ses avis et toute restriction de confiance appliquee a son compte.",

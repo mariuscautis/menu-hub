@@ -3231,6 +3231,14 @@
       "step4_title": "Save All Changes",
       "step4_desc": "Click here to save every permission change across all departments in one go. Changes take effect immediately for all staff members assigned to those departments."
     },
+    "floorPlan": {
+      "step1_title": "Floor Plan Designer",
+      "step1_desc": "This page lets you create a visual map of your dining area. You can manage multiple floors, drag tables into position, and add decorative elements to match your real venue layout.",
+      "step2_title": "Toolbar",
+      "step2_desc": "Add tables from your unplaced table list using the purple button, then use the decorative elements below to place walls, doors, a bar, plants, and more to build an accurate layout.",
+      "step3_title": "Canvas",
+      "step3_desc": "Drag tables and elements anywhere on the canvas to position them. Click any item to select it and see its properties or delete it. Your layout is saved automatically."
+    },
     "customers": {
       "step1_title": "Customers",
       "step1_desc": "Every guest who has made a reservation or placed an order appears here. You can view their visit history, ratings, and any trust restrictions applied to their account.",
