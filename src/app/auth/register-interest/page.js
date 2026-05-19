@@ -13,7 +13,7 @@ const DEFAULT_VENUE_TYPES = [
   { value: 'restaurant', label: 'Restaurant / Café / Bar' },
 ]
 
-const inputClass = "w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 bg-white placeholder:text-slate-400 transition-colors text-sm"
+const inputClass = "w-full px-4 py-3 border-2 border-slate-200 rounded-none focus:outline-none focus:border-[#6262bd] text-slate-700 bg-white placeholder:text-slate-400 transition-colors text-sm"
 
 export default function RegisterInterest() {
   const [venueTypes, setVenueTypes] = useState(DEFAULT_VENUE_TYPES)
@@ -92,7 +92,7 @@ export default function RegisterInterest() {
           <p className="text-slate-500 text-sm leading-relaxed mb-8">
             Thanks for registering your interest. We'll be in touch as soon as Veno App launches in your country — you'll be one of the first to know.
           </p>
-          <Link href="/" className="inline-block bg-[#6262bd] text-white px-6 py-3 rounded-xl font-semibold text-sm hover:bg-[#5252a3] transition-colors">
+          <Link href="/" className="inline-block bg-[#6262bd] text-white px-6 py-3 rounded-none font-semibold text-sm hover:bg-[#5252a3] transition-colors">
             Back to home
           </Link>
         </div>
@@ -155,14 +155,14 @@ export default function RegisterInterest() {
               { icon: '💬', text: 'Direct line to our team for onboarding help' },
             ].map(({ icon, text }) => (
               <div key={text} className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center text-sm shrink-0">{icon}</div>
+                <div className="w-8 h-8 rounded-none bg-white/15 flex items-center justify-center text-sm shrink-0">{icon}</div>
                 <span className="text-white/90 text-sm">{text}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="flex items-center gap-3 bg-white/10 rounded-2xl p-4">
+        <div className="flex items-center gap-3 bg-white/10 rounded-none p-4">
           <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white font-bold shrink-0 text-lg">✓</div>
           <div>
             <p className="text-white font-semibold text-sm">Free to register — no card needed</p>
@@ -194,10 +194,10 @@ export default function RegisterInterest() {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="bg-white border-2 border-slate-100 rounded-2xl p-6 space-y-5">
+            <form onSubmit={handleSubmit} className="bg-white border-2 border-slate-100 rounded-none p-6 space-y-5">
 
               {error && (
-                <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+                <div className="p-4 bg-red-50 border border-red-200 rounded-none text-red-600 text-sm">
                   {error}
                 </div>
               )}
@@ -238,7 +238,7 @@ export default function RegisterInterest() {
                     onChange={handleChange}
                     required
                     rows={3}
-                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 bg-white placeholder:text-slate-400 resize-none transition-colors text-sm"
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-none focus:outline-none focus:border-[#6262bd] text-slate-700 bg-white placeholder:text-slate-400 resize-none transition-colors text-sm"
                     placeholder="Tell us more about your business in a few words"
                   />
                 </div>
@@ -263,7 +263,7 @@ export default function RegisterInterest() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full bg-[#6262bd] text-white py-3 rounded-none font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {loading ? 'Sending…' : 'Register My Interest →'}
               </button>

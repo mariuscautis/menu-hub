@@ -177,7 +177,7 @@ export default function Login() {
 
         {/* Logo — white background pill for contrast */}
         <div className="relative z-10">
-          <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-sm border border-white/10 rounded-2xl px-4 py-3">
+          <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-sm border border-white/10 rounded-none px-4 py-3">
             <PlatformLogo size="sm" stacked={false} showText={false} />
             <span className="text-white font-bold text-base tracking-tight">Veno App</span>
           </div>
@@ -225,7 +225,7 @@ export default function Login() {
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-sm text-center">
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-none text-red-400 text-sm text-center">
               {error}
             </div>
           )}
@@ -234,7 +234,7 @@ export default function Login() {
           <button
             onClick={handleGoogleLogin}
             disabled={googleLoading}
-            className="w-full flex items-center justify-center gap-3 bg-white/5 border border-white/10 text-white py-3.5 rounded-2xl font-medium hover:bg-white/10 hover:border-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all mb-5 text-sm"
+            className="w-full flex items-center justify-center gap-3 bg-white/5 border border-white/10 text-white py-3.5 rounded-none font-medium hover:bg-white/10 hover:border-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all mb-5 text-sm"
           >
             <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -266,7 +266,7 @@ export default function Login() {
                 onChange={handleChange}
                 required
                 autoComplete="email"
-                className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-[#6262bd] focus:bg-white/8 text-white placeholder:text-slate-600 transition-all text-sm"
+                className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-none focus:outline-none focus:border-[#6262bd] focus:bg-white/8 text-white placeholder:text-slate-600 transition-all text-sm"
                 placeholder="you@example.com"
               />
             </div>
@@ -287,7 +287,7 @@ export default function Login() {
                 onChange={handleChange}
                 required
                 autoComplete="current-password"
-                className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-[#6262bd] focus:bg-white/8 text-white placeholder:text-slate-600 transition-all text-sm"
+                className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-none focus:outline-none focus:border-[#6262bd] focus:bg-white/8 text-white placeholder:text-slate-600 transition-all text-sm"
                 placeholder="Enter your password"
               />
             </div>
@@ -295,7 +295,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#6262bd] text-white py-3.5 rounded-2xl font-semibold hover:bg-[#7070d0] disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm mt-2 shadow-lg shadow-[#6262bd]/25"
+              className="w-full bg-[#6262bd] text-white py-3.5 rounded-none font-semibold hover:bg-[#7070d0] disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm mt-2 shadow-lg shadow-[#6262bd]/25"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">

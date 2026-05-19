@@ -148,7 +148,7 @@ export default function Onboarding() {
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <nav className="flex justify-between items-center p-6 max-w-6xl mx-auto w-full">
         <Link href="/" className="flex items-center space-x-2">
-          <div className="w-10 h-10 bg-[#6262bd] rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-[#6262bd] rounded-none flex items-center justify-center">
             <span className="text-white font-bold text-xl">V</span>
           </div>
           <span className="text-2xl font-bold text-slate-700">Veno App</span>
@@ -158,7 +158,7 @@ export default function Onboarding() {
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <div className="w-14 h-14 bg-[#6262bd]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <div className="w-14 h-14 bg-[#6262bd]/10 rounded-none flex items-center justify-center mx-auto mb-4">
               <svg className="w-7 h-7 text-[#6262bd]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
@@ -167,9 +167,9 @@ export default function Onboarding() {
             <p className="text-slate-500">Tell us a little about your venue to complete setup.</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="bg-white border-2 border-slate-100 rounded-2xl p-8">
+          <form onSubmit={handleSubmit} className="bg-white border-2 border-slate-100 rounded-none p-8">
             {error && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-none text-red-600 text-sm">
                 {error}
               </div>
             )}
@@ -185,7 +185,7 @@ export default function Onboarding() {
                   value={formData.restaurantName}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-none focus:outline-none focus:border-[#6262bd] text-slate-700"
                   placeholder="The Golden Fork"
                 />
               </div>
@@ -199,7 +199,7 @@ export default function Onboarding() {
                   value={formData.venueType}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 bg-white"
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-none focus:outline-none focus:border-[#6262bd] text-slate-700 bg-white"
                 >
                   <option value="" disabled>Select your venue type…</option>
                   {venueTypes.map(({ value, label }) => (
@@ -214,7 +214,7 @@ export default function Onboarding() {
                     onChange={handleChange}
                     required
                     rows={2}
-                    className="w-full mt-2 px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 bg-white resize-none"
+                    className="w-full mt-2 px-4 py-3 border-2 border-slate-200 rounded-none focus:outline-none focus:border-[#6262bd] text-slate-700 bg-white resize-none"
                     placeholder="Tell us more about your business in a few words here"
                   />
                 )}
@@ -230,7 +230,7 @@ export default function Onboarding() {
                   value={formData.phone}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700"
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-none focus:outline-none focus:border-[#6262bd] text-slate-700"
                   placeholder="07123 456789"
                 />
               </div>
@@ -238,7 +238,7 @@ export default function Onboarding() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-[#6262bd] text-white py-3 rounded-none font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Setting up your venue…' : 'Complete Setup'}
               </button>

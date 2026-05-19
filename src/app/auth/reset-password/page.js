@@ -64,7 +64,7 @@ export default function ResetPassword() {
         />
 
         <div className="relative z-10">
-          <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-sm border border-white/10 rounded-2xl px-4 py-3">
+          <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-sm border border-white/10 rounded-none px-4 py-3">
             <PlatformLogo size="sm" stacked={false} showText={false} />
             <span className="text-white font-bold text-base tracking-tight">Veno App</span>
           </div>
@@ -123,7 +123,7 @@ export default function ResetPassword() {
           ) : (
             <>
               {error && (
-                <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-sm text-center">
+                <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-none text-red-400 text-sm text-center">
                   {error}
                 </div>
               )}
@@ -136,7 +136,7 @@ export default function ResetPassword() {
                     onChange={e => setPassword(e.target.value)}
                     required
                     minLength={6}
-                    className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-[#6262bd] text-white placeholder:text-slate-600 transition-all text-sm"
+                    className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-none focus:outline-none focus:border-[#6262bd] text-white placeholder:text-slate-600 transition-all text-sm"
                     placeholder="At least 6 characters"
                   />
                 </div>
@@ -147,14 +147,14 @@ export default function ResetPassword() {
                     value={confirm}
                     onChange={e => setConfirm(e.target.value)}
                     required
-                    className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-[#6262bd] text-white placeholder:text-slate-600 transition-all text-sm"
+                    className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-none focus:outline-none focus:border-[#6262bd] text-white placeholder:text-slate-600 transition-all text-sm"
                     placeholder="Repeat your new password"
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-[#6262bd] text-white py-3.5 rounded-2xl font-semibold hover:bg-[#7070d0] disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm shadow-lg shadow-[#6262bd]/25"
+                  className="w-full bg-[#6262bd] text-white py-3.5 rounded-none font-semibold hover:bg-[#7070d0] disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm shadow-lg shadow-[#6262bd]/25"
                 >
                   {loading ? (
                     <span className="flex items-center justify-center gap-2">

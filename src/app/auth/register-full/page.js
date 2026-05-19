@@ -138,7 +138,7 @@ export default function Register() {
     }
   }
 
-  const inputClass = "w-full px-4 py-3.5 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 bg-white placeholder:text-slate-400 transition-colors text-sm"
+  const inputClass = "w-full px-4 py-3.5 border-2 border-slate-200 rounded-none focus:outline-none focus:border-[#6262bd] text-slate-700 bg-white placeholder:text-slate-400 transition-colors text-sm"
 
   return (
     <div className="min-h-screen flex">
@@ -165,14 +165,14 @@ export default function Register() {
               { icon: '📱', text: 'Your own branded app — no tech skills needed' },
             ].map(({ icon, text }) => (
               <div key={text} className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center text-sm shrink-0">{icon}</div>
+                <div className="w-8 h-8 rounded-none bg-white/15 flex items-center justify-center text-sm shrink-0">{icon}</div>
                 <span className="text-white/90 text-sm">{text}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="flex items-center gap-3 bg-white/10 rounded-2xl p-4">
+        <div className="flex items-center gap-3 bg-white/10 rounded-none p-4">
           <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white font-bold shrink-0">✓</div>
           <div>
             <p className="text-white font-semibold text-sm">2 weeks free — no card needed</p>
@@ -207,19 +207,19 @@ export default function Register() {
 
             {/* Alerts */}
             {emailExists && (
-              <div className="mb-5 p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-sm">
+              <div className="mb-5 p-4 bg-amber-50 border border-amber-200 rounded-none text-amber-800 text-sm">
                 <p className="font-semibold mb-1">Email already registered.</p>
                 <p className="mb-3">Reset your password to regain access.</p>
                 <Link
                   href={`/auth/forgot-password?email=${encodeURIComponent(formData.email)}`}
-                  className="inline-block px-4 py-2 bg-[#6262bd] text-white rounded-lg font-semibold text-xs hover:bg-[#5151a8] transition-colors"
+                  className="inline-block px-4 py-2 bg-[#6262bd] text-white rounded-none font-semibold text-xs hover:bg-[#5151a8] transition-colors"
                 >
                   Reset password
                 </Link>
               </div>
             )}
             {error && (
-              <div className="mb-5 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+              <div className="mb-5 p-4 bg-red-50 border border-red-200 rounded-none text-red-600 text-sm">
                 {error}
               </div>
             )}
@@ -228,7 +228,7 @@ export default function Register() {
             <button
               onClick={handleGoogleSignup}
               disabled={googleLoading}
-              className="w-full flex items-center justify-center gap-3 bg-white border-2 border-slate-200 text-slate-700 py-3 rounded-xl font-medium hover:bg-slate-50 hover:border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed mb-5 transition-colors shadow-sm"
+              className="w-full flex items-center justify-center gap-3 bg-white border-2 border-slate-200 text-slate-700 py-3 rounded-none font-medium hover:bg-slate-50 hover:border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed mb-5 transition-colors shadow-sm"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -282,7 +282,7 @@ export default function Register() {
               </div>
 
               {formData.venueType === 'other' && (
-                <div className="rounded-xl border-2 border-[#6262bd]/30 bg-[#6262bd]/5 p-4">
+                <div className="rounded-none border-2 border-[#6262bd]/30 bg-[#6262bd]/5 p-4">
                   <label className="block text-xs font-bold text-[#6262bd] mb-2 uppercase tracking-wide">Tell us about your business</label>
                   <textarea
                     name="venueTypeOther"
@@ -290,7 +290,7 @@ export default function Register() {
                     onChange={handleChange}
                     required
                     rows={3}
-                    className="w-full px-4 py-3 border-2 border-[#6262bd]/30 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 bg-white placeholder:text-slate-400 resize-none transition-colors text-sm"
+                    className="w-full px-4 py-3 border-2 border-[#6262bd]/30 rounded-none focus:outline-none focus:border-[#6262bd] text-slate-700 bg-white placeholder:text-slate-400 resize-none transition-colors text-sm"
                     placeholder="Tell us more about your business in a few words here"
                   />
                 </div>
@@ -355,7 +355,7 @@ export default function Register() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#6262bd] text-white py-3.5 rounded-xl font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md mt-2"
+                className="w-full bg-[#6262bd] text-white py-3.5 rounded-none font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md mt-2"
               >
                 {loading ? 'Creating account…' : 'Create Account →'}
               </button>

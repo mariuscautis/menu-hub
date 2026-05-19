@@ -8,7 +8,7 @@ export default function StaffLoginRedirect() {
       {/* Header */}
       <div className="bg-white border-b-2 border-slate-100 px-6 py-4">
         <Link href="/" className="flex items-center space-x-2">
-          <div className="w-9 h-9 bg-[#6262bd] rounded-xl flex items-center justify-center">
+          <div className="w-9 h-9 bg-[#6262bd] rounded-none flex items-center justify-center">
             <span className="text-white font-bold text-lg">M</span>
           </div>
           <span className="text-xl font-bold text-slate-700">Veno App</span>
@@ -18,7 +18,7 @@ export default function StaffLoginRedirect() {
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-md">
-          <div className="bg-white rounded-2xl border-2 border-slate-100 p-8">
+          <div className="bg-white rounded-none border-2 border-slate-100 p-8">
             <div className="text-center mb-6">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
@@ -31,7 +31,7 @@ export default function StaffLoginRedirect() {
               </p>
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+            <div className="bg-blue-50 border border-blue-200 rounded-none p-4 mb-6">
               <p className="text-sm text-blue-800 mb-3">
                 <strong>How to login:</strong>
               </p>
@@ -42,7 +42,7 @@ export default function StaffLoginRedirect() {
               </ol>
             </div>
 
-            <div className="bg-slate-50 rounded-xl p-4 mb-6">
+            <div className="bg-slate-50 rounded-none p-4 mb-6">
               <p className="text-xs text-slate-600 leading-relaxed">
                 <svg className="w-4 h-4 inline-block mr-1 text-green-600" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
