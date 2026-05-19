@@ -2937,6 +2937,22 @@
       "step4_desc": "Define que dias y franjas horarias aceptan reservas. Desactiva un dia para marcarlo como cerrado, o agrega varios turnos por dia para locales con servicio de almuerzo y cena.",
       "step5_title": "Guardar Configuracion",
       "step5_desc": "Los cambios en esta pagina solo tienen efecto despues de hacer clic en Guardar. Las ediciones no guardadas se perderan si navegas a otra pagina."
+    },
+    "settingsHub": {
+      "step1_title": "Informacion del Restaurante",
+      "step1_desc": "Actualiza el nombre, direccion, datos de contacto y categoria del sector de tu local. Esta informacion aparece en las facturas y se usa en toda la plataforma.",
+      "step2_title": "Impuestos y Facturacion",
+      "step2_desc": "Configura tu numero de IVA, el prefijo de factura y los datos que aparecen en los recibos impresos o enviados por correo.",
+      "step3_title": "Descuentos",
+      "step3_desc": "Crea descuentos fijos o porcentuales y promociones que el personal puede aplicar en el cobro, o establece precios promocionales por tiempo limitado en articulos del menu.",
+      "step4_title": "Seguridad",
+      "step4_desc": "Controla que funciones estan habilitadas para tu local (pedidos, reservas, llevar) y gestiona los permisos de acceso de tu equipo.",
+      "step5_title": "Facturacion",
+      "step5_desc": "Consulta tu plan actual, gestiona tu suscripcion y actualiza los datos de pago. Tu plan determina que modulos estan disponibles para tu local.",
+      "step6_title": "Configuracion de Reservas",
+      "step6_desc": "Define el modo de franjas horarias, el tiempo de margen entre reservas, el horario de apertura y con cuanta antelacion pueden reservar los clientes en linea.",
+      "step7_title": "Impresoras",
+      "step7_desc": "Conecta y configura impresoras de cocina y barra para el envio automatico de pedidos. Requiere la aplicacion Veno Bridge en la red local."
     }
   }
 }

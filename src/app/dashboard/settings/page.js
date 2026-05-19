@@ -4,10 +4,12 @@ import Link from 'next/link'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import InfoTooltip from '@/components/InfoTooltip'
+import PageTour from '@/components/PageTour'
 
 export default function SettingsHubPage() {
   const t = useTranslations('settingsHub')
   const tg = useTranslations('guide')
+  const tt = useTranslations('tours')
   const restaurantCtx = useRestaurant()
   const restaurant = restaurantCtx?.restaurant
 
@@ -16,6 +18,7 @@ export default function SettingsHubPage() {
       titleKey: 'restaurant',
       descKey: 'restaurantDesc',
       href: '/dashboard/settings/restaurant-info',
+      tourId: 'settings-restaurant',
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -28,6 +31,7 @@ export default function SettingsHubPage() {
       titleKey: 'taxInvoicing',
       descKey: 'taxInvoicingDesc',
       href: '/dashboard/settings/tax-invoicing',
+      tourId: 'settings-tax',
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z" />
@@ -52,6 +56,7 @@ export default function SettingsHubPage() {
       titleKey: 'discounts',
       descKey: 'discountsDesc',
       href: '/dashboard/settings/discounts',
+      tourId: 'settings-discounts',
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -64,6 +69,7 @@ export default function SettingsHubPage() {
       titleKey: 'security',
       descKey: 'securityDesc',
       href: '/dashboard/settings/security',
+      tourId: 'settings-security',
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -76,6 +82,7 @@ export default function SettingsHubPage() {
       titleKey: 'billing',
       descKey: 'billingDesc',
       href: '/dashboard/settings/billing',
+      tourId: 'settings-billing',
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
@@ -101,6 +108,7 @@ export default function SettingsHubPage() {
       titleKey: 'reservations',
       descKey: 'reservationsDesc',
       href: '/dashboard/settings/reservation-settings',
+      tourId: 'settings-reservations',
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -149,6 +157,7 @@ export default function SettingsHubPage() {
       titleKey: 'printers',
       descKey: 'printersDesc',
       href: '/dashboard/settings/printers',
+      tourId: 'settings-printers',
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
@@ -161,6 +170,15 @@ export default function SettingsHubPage() {
 
   return (
     <div className="min-h-screen p-4 md:p-8">
+      <PageTour steps={[
+        { element: '[data-tour="settings-restaurant"]', popover: { title: tt('settingsHub.step1_title'), description: tt('settingsHub.step1_desc') } },
+        { element: '[data-tour="settings-tax"]', popover: { title: tt('settingsHub.step2_title'), description: tt('settingsHub.step2_desc') } },
+        { element: '[data-tour="settings-discounts"]', popover: { title: tt('settingsHub.step3_title'), description: tt('settingsHub.step3_desc') } },
+        { element: '[data-tour="settings-security"]', popover: { title: tt('settingsHub.step4_title'), description: tt('settingsHub.step4_desc') } },
+        { element: '[data-tour="settings-billing"]', popover: { title: tt('settingsHub.step5_title'), description: tt('settingsHub.step5_desc') } },
+        { element: '[data-tour="settings-reservations"]', popover: { title: tt('settingsHub.step6_title'), description: tt('settingsHub.step6_desc') } },
+        { element: '[data-tour="settings-printers"]', popover: { title: tt('settingsHub.step7_title'), description: tt('settingsHub.step7_desc') } },
+      ]} />
       <div className="max-w-4xl mx-auto">
         <div className="mb-10 text-center">
           <h1 className="text-2xl md:text-3xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-2 flex items-center justify-center gap-2">
@@ -177,6 +195,7 @@ export default function SettingsHubPage() {
             <Link
               key={section.href}
               href={section.href}
+              data-tour={section.tourId}
               className="group flex flex-col items-center text-center gap-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 hover:border-[#6262bd] dark:hover:border-[#6262bd] hover:shadow-lg transition-all"
             >
               <div className={`${section.bg} p-4 rounded-sm ${section.color} group-hover:scale-110 transition-transform`}>

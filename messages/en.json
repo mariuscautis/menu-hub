@@ -3055,6 +3055,22 @@
       "step4_desc": "Define which days and time slots accept reservations. Toggle a day off to mark it as closed, or add multiple shifts per day for venues with a lunch and dinner service.",
       "step5_title": "Save Settings",
       "step5_desc": "All changes on this page take effect only after you click Save. Any unsaved edits will be lost if you navigate away."
+    },
+    "settingsHub": {
+      "step1_title": "Restaurant Info",
+      "step1_desc": "Update your venue name, address, contact details, and industry category. This information appears on invoices and is used across the platform.",
+      "step2_title": "Tax and Invoicing",
+      "step2_desc": "Configure your VAT number, invoice prefix, and the details that appear on printed or emailed receipts and invoices.",
+      "step3_title": "Discounts",
+      "step3_desc": "Create fixed or percentage discounts and promotions that staff can apply at checkout, or set time-limited promotional prices on individual menu items.",
+      "step4_title": "Security",
+      "step4_desc": "Control which features are enabled for your venue — such as ordering, reservations, and takeaway — and manage access settings for your team.",
+      "step5_title": "Billing",
+      "step5_desc": "View your current plan, manage your subscription, and update payment details. Your plan controls which modules are available to your venue.",
+      "step6_title": "Reservation Settings",
+      "step6_desc": "Set your booking slot mode, buffer time between reservations, operating hours, and how far in advance guests can book online.",
+      "step7_title": "Printers",
+      "step7_desc": "Connect and configure kitchen and bar printers for automatic order routing. Requires the Veno Bridge companion app running on the local network."
     }
   }
 }

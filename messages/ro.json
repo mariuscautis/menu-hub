@@ -2937,6 +2937,22 @@
       "step4_desc": "Defineste ce zile si intervale orare accepta rezervari. Dezactiveaza o zi pentru a o marca ca inchisa sau adauga mai multe ture pe zi pentru localuri cu pranz si cina.",
       "step5_title": "Salveaza Setarile",
       "step5_desc": "Modificarile de pe aceasta pagina au efect doar dupa ce apesi Salveaza. Orice editare nesalvata se va pierde daca navighezi pe alta pagina."
+    },
+    "settingsHub": {
+      "step1_title": "Informatii Restaurant",
+      "step1_desc": "Actualizeaza numele, adresa, datele de contact si categoria de industrie a localului tau. Aceste informatii apar pe facturi si sunt folosite in toata platforma.",
+      "step2_title": "Taxe si Facturare",
+      "step2_desc": "Configureaza codul de TVA, prefixul facturii si detaliile care apar pe bonurile tiparite sau trimise prin email.",
+      "step3_title": "Reduceri",
+      "step3_desc": "Creeaza reduceri fixe sau procentuale si promotii pe care personalul le poate aplica la casa, sau seteaza preturi promotionale pe termen limitat pentru articole din meniu.",
+      "step4_title": "Securitate",
+      "step4_desc": "Controleaza ce functii sunt activate pentru localul tau (comenzi, rezervari, livrare la pachet) si gestioneaza permisiunile de acces ale echipei.",
+      "step5_title": "Abonament",
+      "step5_desc": "Vizualizeaza planul curent, gestioneaza abonamentul si actualizeaza datele de plata. Planul tau determina ce module sunt disponibile.",
+      "step6_title": "Setari Rezervari",
+      "step6_desc": "Seteaza modul intervalelor, timpul tampon intre rezervari, programul de functionare si cu cat timp inainte pot rezerva clientii online.",
+      "step7_title": "Imprimante",
+      "step7_desc": "Conecteaza si configureaza imprimantele de bucatarie si bar pentru rutarea automata a comenzilor. Necesita aplicatia Veno Bridge in reteaua locala."
     }
   }
 }

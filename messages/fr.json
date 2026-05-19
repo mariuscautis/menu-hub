@@ -2937,6 +2937,22 @@
       "step4_desc": "Definissez quels jours et quels creneaux acceptent des reservations. Desactivez un jour pour le marquer comme ferme, ou ajoutez plusieurs services par jour pour les etablissements avec dejeuner et diner.",
       "step5_title": "Enregistrer les Parametres",
       "step5_desc": "Les modifications sur cette page ne prennent effet qu apres avoir clique sur Enregistrer. Toute modification non sauvegardee sera perdue si vous quittez la page."
+    },
+    "settingsHub": {
+      "step1_title": "Informations du Restaurant",
+      "step1_desc": "Mettez a jour le nom, l adresse, les coordonnees et la categorie de secteur de votre etablissement. Ces informations apparaissent sur les factures et sont utilisees partout sur la plateforme.",
+      "step2_title": "Taxes et Facturation",
+      "step2_desc": "Configurez votre numero de TVA, le prefixe de facture et les details qui apparaissent sur les reçus imprimes ou envoyes par e-mail.",
+      "step3_title": "Remises",
+      "step3_desc": "Creez des remises fixes ou en pourcentage et des promotions que le personnel peut appliquer a la caisse, ou definissez des prix promotionnels limites dans le temps sur des articles du menu.",
+      "step4_title": "Securite",
+      "step4_desc": "Controlez quelles fonctionnalites sont activees pour votre etablissement (commandes, reservations, a emporter) et gerez les droits d acces de votre equipe.",
+      "step5_title": "Abonnement",
+      "step5_desc": "Consultez votre forfait actuel, gerez votre abonnement et mettez a jour vos informations de paiement. Votre forfait determine les modules disponibles.",
+      "step6_title": "Parametres de Reservation",
+      "step6_desc": "Definissez le mode de creneaux, le temps tampon entre reservations, les heures d ouverture et combien de temps a l avance les clients peuvent reserver en ligne.",
+      "step7_title": "Imprimantes",
+      "step7_desc": "Connectez et configurez les imprimantes de cuisine et de bar pour l acheminement automatique des commandes. Necessite l application Veno Bridge sur le reseau local."
     }
   }
 }

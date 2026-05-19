@@ -2937,6 +2937,22 @@
       "step4_desc": "Definisci quali giorni e fasce orarie accettano prenotazioni. Disattiva un giorno per segnarlo come chiuso, o aggiungi piu turni al giorno per locali con pranzo e cena.",
       "step5_title": "Salva Impostazioni",
       "step5_desc": "Le modifiche su questa pagina hanno effetto solo dopo aver cliccato Salva. Qualsiasi modifica non salvata sara persa se si naviga altrove."
+    },
+    "settingsHub": {
+      "step1_title": "Informazioni Ristorante",
+      "step1_desc": "Aggiorna nome, indirizzo, contatti e categoria del settore del tuo locale. Queste informazioni appaiono sulle fatture e vengono usate su tutta la piattaforma.",
+      "step2_title": "Tasse e Fatturazione",
+      "step2_desc": "Configura la partita IVA, il prefisso fattura e i dettagli che appaiono sulle ricevute stampate o inviate via email.",
+      "step3_title": "Sconti",
+      "step3_desc": "Crea sconti fissi o percentuali e promozioni che il personale puo applicare alla cassa, o imposta prezzi promozionali a tempo su singoli articoli del menu.",
+      "step4_title": "Sicurezza",
+      "step4_desc": "Controlla quali funzionalita sono abilitate per il tuo locale (ordini, prenotazioni, asporto) e gestisci i permessi di accesso del tuo team.",
+      "step5_title": "Abbonamento",
+      "step5_desc": "Visualizza il piano attuale, gestisci l abbonamento e aggiorna i dati di pagamento. Il tuo piano determina quali moduli sono disponibili.",
+      "step6_title": "Impostazioni Prenotazioni",
+      "step6_desc": "Imposta la modalita fasce orarie, il tempo cuscinetto tra prenotazioni, gli orari di apertura e con quanto anticipo i clienti possono prenotare online.",
+      "step7_title": "Stampanti",
+      "step7_desc": "Collega e configura le stampanti di cucina e bar per lo smistamento automatico degli ordini. Richiede l app Veno Bridge sulla rete locale."
     }
   }
 }
