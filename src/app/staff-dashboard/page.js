@@ -78,6 +78,12 @@ const UI_TRANSLATIONS = {
     ldUnpaid: 'Time off without pay',
     ldCompassionate: 'For bereavement or family emergencies',
     ldOther: 'Other type of leave',
+    tourStep1Title: 'Your Stats',
+    tourStep1Desc: 'A quick summary of your upcoming shifts, this week\'s schedule, and any pending time-off requests.',
+    tourStep2Title: 'My Schedule',
+    tourStep2Desc: 'See all your upcoming shifts at a glance. Today\'s shift is highlighted so you never miss it.',
+    tourStep3Title: 'Time-Off Requests',
+    tourStep3Desc: 'Submit a time-off request and track its status here. Your manager will be notified automatically.',
   },
   ro: {
     welcome: 'Bun venit',
@@ -147,6 +153,12 @@ const UI_TRANSLATIONS = {
     ldUnpaid: 'Timp liber fără plată',
     ldCompassionate: 'Pentru doliu sau urgențe familiale',
     ldOther: 'Alt tip de concediu',
+    tourStep1Title: 'Statisticile Tale',
+    tourStep1Desc: 'Un rezumat rapid al turelor viitoare, programului săptămânii și cererilor de concediu în așteptare.',
+    tourStep2Title: 'Programul Meu',
+    tourStep2Desc: 'Vezi toate turele viitoare dintr-o privire. Tura de azi este evidențiată pentru a nu o rata.',
+    tourStep3Title: 'Cereri de Concediu',
+    tourStep3Desc: 'Trimite o cerere de concediu și urmărește-i statusul aici. Managerul va fi notificat automat.',
   },
   fr: {
     welcome: 'Bienvenue',
@@ -216,6 +228,12 @@ const UI_TRANSLATIONS = {
     ldUnpaid: 'Temps libre sans rémunération',
     ldCompassionate: 'Pour deuil ou urgences familiales',
     ldOther: 'Autre type de congé',
+    tourStep1Title: 'Vos Statistiques',
+    tourStep1Desc: 'Un résumé rapide de vos prochains services, du planning de la semaine et des congés en attente.',
+    tourStep2Title: 'Mon Planning',
+    tourStep2Desc: 'Consultez tous vos prochains services en un coup d\'œil. Le service du jour est mis en évidence.',
+    tourStep3Title: 'Demandes de Congé',
+    tourStep3Desc: 'Soumettez une demande de congé et suivez son statut ici. Votre responsable sera notifié automatiquement.',
   },
   it: {
     welcome: 'Benvenuto',
@@ -285,6 +303,12 @@ const UI_TRANSLATIONS = {
     ldUnpaid: 'Tempo libero senza retribuzione',
     ldCompassionate: 'Per lutto o emergenze familiari',
     ldOther: 'Altro tipo di congedo',
+    tourStep1Title: 'Le Tue Statistiche',
+    tourStep1Desc: 'Un riepilogo rapido dei tuoi prossimi turni, del programma della settimana e delle richieste di ferie in attesa.',
+    tourStep2Title: 'Il Mio Orario',
+    tourStep2Desc: 'Visualizza tutti i tuoi turni futuri in un colpo d\'occhio. Il turno di oggi è evidenziato per non perderlo.',
+    tourStep3Title: 'Richieste di Ferie',
+    tourStep3Desc: 'Invia una richiesta di ferie e monitora il suo stato qui. Il tuo responsabile verrà notificato automaticamente.',
   },
   es: {
     welcome: 'Bienvenido',
@@ -354,6 +378,12 @@ const UI_TRANSLATIONS = {
     ldUnpaid: 'Tiempo libre sin remuneración',
     ldCompassionate: 'Para duelo o emergencias familiares',
     ldOther: 'Otro tipo de permiso',
+    tourStep1Title: 'Tus Estadísticas',
+    tourStep1Desc: 'Un resumen rápido de tus próximos turnos, el horario de esta semana y las solicitudes de vacaciones pendientes.',
+    tourStep2Title: 'Mi Horario',
+    tourStep2Desc: 'Consulta todos tus próximos turnos de un vistazo. El turno de hoy está resaltado para que no lo pierdas.',
+    tourStep3Title: 'Solicitudes de Vacaciones',
+    tourStep3Desc: 'Envía una solicitud de vacaciones y sigue su estado aquí. Tu responsable será notificado automáticamente.',
   },
 }
 
@@ -468,6 +498,19 @@ export default function StaffDashboard() {
     router.push('/staff-login')
   }
 
+  const startTour = async () => {
+    const { driver } = await import('driver.js')
+    await import('driver.js/dist/driver.css')
+    const steps = [
+      { element: '[data-tour="sd-stats"]',    popover: { title: tr.tourStep1Title,  description: tr.tourStep1Desc  } },
+      { element: '[data-tour="sd-schedule"]', popover: { title: tr.tourStep2Title, description: tr.tourStep2Desc } },
+      { element: '[data-tour="sd-timeoff"]',  popover: { title: tr.tourStep3Title,  description: tr.tourStep3Desc  } },
+    ].filter(s => { const el = document.querySelector(s.element); return el && el.offsetParent !== null })
+    if (!steps.length) return
+    const d = driver({ animate: true, smoothScroll: true, allowClose: true, overlayOpacity: 0.6, stagePadding: 6, stageRadius: 0, popoverClass: 'menuhub-tour-popover', nextBtnText: 'Next →', prevBtnText: '← Back', doneBtnText: 'Done', onDestroyStarted: () => d.destroy(), steps })
+    d.drive()
+  }
+
   const openModal = () => {
     setForm({ leave_type: 'annual_holiday', date_from: '', date_to: '', reason: '', medical_certificate_provided: false })
     setFormErrors({})
@@ -551,9 +594,7 @@ export default function StaffDashboard() {
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => {
-                if (typeof window !== 'undefined' && window.__staffDashboardTour) window.__staffDashboardTour()
-              }}
+              onClick={startTour}
               className="w-9 h-9 flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-[#6262bd] hover:text-white font-bold text-base transition-colors"
               title="Guide"
             >
@@ -569,7 +610,7 @@ export default function StaffDashboard() {
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-3">
+        <div data-tour="sd-stats" className="grid grid-cols-3 gap-3">
           {[
             { label: tr.upcomingShifts, value: upcomingShifts, color: 'text-[#6262bd]' },
             { label: tr.thisWeek, value: thisWeekShifts, color: 'text-[#6262bd]' },
@@ -583,7 +624,7 @@ export default function StaffDashboard() {
         </div>
 
         {/* Upcoming Shifts */}
-        <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-700 p-5">
+        <div data-tour="sd-schedule" className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-700 p-5">
           <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 mb-4">{tr.mySchedule}</h2>
           {shifts.filter(s => moment(s.date).isSameOrAfter(moment(), 'day')).length === 0 ? (
             <div className="text-center py-10 text-slate-400 dark:text-slate-500">
@@ -617,7 +658,7 @@ export default function StaffDashboard() {
         </div>
 
         {/* Time-Off Requests */}
-        <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-700 p-5">
+        <div data-tour="sd-timeoff" className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-700 p-5">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-base font-bold text-slate-800 dark:text-slate-100">{tr.timeOffRequests}</h2>
             <button onClick={openModal} className="bg-[#6262bd] text-white px-4 py-2 text-sm font-semibold hover:bg-[#5252a3] transition-colors">
