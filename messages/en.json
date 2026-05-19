@@ -2988,5 +2988,19 @@
     "flow5_step4": "Guest arrives — mark as seated",
     "flow5_step5": "Assign them to a table",
     "flow5_step6": "Their visit is logged in Customers"
+  },
+  "tours": {
+    "tables": {
+      "step1_title": "Add a Table",
+      "step1_desc": "Click here to create a new table. You can use a number (e.g. Table 1) or a name (e.g. Terrace A) — whatever suits your layout.",
+      "step2_title": "Give it a Name or Number",
+      "step2_desc": "Type the table name or number here. Examples: 1, A1, Bar Seat 3, Terrace. This is what staff and customers will see.",
+      "step3_title": "Save the Table",
+      "step3_desc": "Click Add Table to save. The table is created instantly and appears in your grid — no page reload needed.",
+      "step4_title": "Download a Table's QR Code",
+      "step4_desc": "Each table gets a unique QR code. Open the ⋮ menu on any table card then tap Download QR to save it as a PNG — ready to print and place on the table.",
+      "step5_title": "Download All QR Codes at Once",
+      "step5_desc": "Use this button to download QR codes for every table in one go — ideal when setting up a new venue or reprinting after a redesign."
+    }
   }
 }

@@ -2870,5 +2870,19 @@
     "flow5_step4": "[EN] Guest arrives — mark as seated",
     "flow5_step5": "[EN] Assign them to a table",
     "flow5_step6": "[EN] Their visit is logged in Customers"
+  },
+  "tours": {
+    "tables": {
+      "step1_title": "Adaugă o masă",
+      "step1_desc": "Apasă aici pentru a crea o masă nouă. Poți folosi un număr (ex. Masa 1) sau un nume (ex. Terasă A) — oricare se potrivește mai bine aranjamentului tău.",
+      "step2_title": "Dă-i un nume sau număr",
+      "step2_desc": "Scrie numele sau numărul mesei aici. Exemple: 1, A1, Bar 3, Terasă. Acesta este ceea ce vor vedea personalul și clienții.",
+      "step3_title": "Salvează masa",
+      "step3_desc": "Apasă pe Adaugă masă pentru a salva. Masa este creată instant și apare în grila ta — fără a reîncărca pagina.",
+      "step4_title": "Descarcă codul QR al unei mese",
+      "step4_desc": "Fiecare masă are un cod QR unic. Deschide meniul ⋮ de pe orice card de masă și apasă Descarcă QR pentru a-l salva ca PNG — gata de imprimat și plasat pe masă.",
+      "step5_title": "Descarcă toate codurile QR dintr-o dată",
+      "step5_desc": "Folosește acest buton pentru a descărca codurile QR pentru toate mesele deodată — ideal la configurarea unui nou local sau la retipărire după o reproiectare."
+    }
   }
 }

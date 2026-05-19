@@ -2870,5 +2870,19 @@
     "flow5_step4": "[EN] Guest arrives — mark as seated",
     "flow5_step5": "[EN] Assign them to a table",
     "flow5_step6": "[EN] Their visit is logged in Customers"
+  },
+  "tours": {
+    "tables": {
+      "step1_title": "Añadir una mesa",
+      "step1_desc": "Haz clic aquí para crear una nueva mesa. Puedes usar un número (p. ej. Mesa 1) o un nombre (p. ej. Terraza A) — lo que mejor se adapte a tu disposición.",
+      "step2_title": "Dale un nombre o número",
+      "step2_desc": "Escribe el nombre o número de la mesa aquí. Ejemplos: 1, A1, Barra 3, Terraza. Esto es lo que verán el personal y los clientes.",
+      "step3_title": "Guardar la mesa",
+      "step3_desc": "Haz clic en Añadir mesa para guardar. La mesa se crea al instante y aparece en tu cuadrícula — sin recargar la página.",
+      "step4_title": "Descargar el QR de una mesa",
+      "step4_desc": "Cada mesa tiene un código QR único. Abre el menú ⋮ en cualquier tarjeta de mesa y pulsa Descargar QR para guardarlo como PNG — listo para imprimir y colocar en la mesa.",
+      "step5_title": "Descargar todos los QR de una vez",
+      "step5_desc": "Usa este botón para descargar los códigos QR de todas las mesas a la vez — ideal al configurar un local o reimprimir tras un rediseño."
+    }
   }
 }

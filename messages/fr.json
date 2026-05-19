@@ -2870,5 +2870,19 @@
     "flow5_step4": "[EN] Guest arrives — mark as seated",
     "flow5_step5": "[EN] Assign them to a table",
     "flow5_step6": "[EN] Their visit is logged in Customers"
+  },
+  "tours": {
+    "tables": {
+      "step1_title": "Ajouter une table",
+      "step1_desc": "Cliquez ici pour créer une nouvelle table. Vous pouvez utiliser un numéro (ex. Table 1) ou un nom (ex. Terrasse A) — selon votre disposition.",
+      "step2_title": "Donnez-lui un nom ou un numéro",
+      "step2_desc": "Saisissez le nom ou le numéro de la table ici. Exemples : 1, A1, Bar 3, Terrasse. C'est ce que verront le personnel et les clients.",
+      "step3_title": "Enregistrer la table",
+      "step3_desc": "Cliquez sur Ajouter une table pour enregistrer. La table est créée instantanément et apparaît dans votre grille — sans rechargement de page.",
+      "step4_title": "Télécharger le QR code d'une table",
+      "step4_desc": "Chaque table a un QR code unique. Ouvrez le menu ⋮ sur n'importe quelle carte de table puis appuyez sur Télécharger QR pour le sauvegarder en PNG — prêt à imprimer et à placer sur la table.",
+      "step5_title": "Télécharger tous les QR codes d'un coup",
+      "step5_desc": "Utilisez ce bouton pour télécharger les QR codes de toutes les tables en une seule fois — idéal lors de l'installation d'un nouveau lieu ou d'une réimpression après une refonte."
+    }
   }
 }

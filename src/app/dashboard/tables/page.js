@@ -56,6 +56,7 @@ const TOAST_STYLES = {
 export default function Tables() {
   const t = useTranslations('tables')
   const tg = useTranslations('guide')
+  const tt = useTranslations('tours')
   const { isDark } = useTheme()
   const { currencySymbol, formatCurrency } = useCurrency()
   const [tables, setTables] = useState([])
@@ -3179,8 +3180,8 @@ export default function Tables() {
           {
             element: '[data-tour="tables-add-btn"]',
             popover: {
-              title: 'Add a Table',
-              description: 'Click here to create a new table. You can use a number ("Table 1") or a name ("Terrace A") — whatever suits your layout.',
+              title: tt('tables.step1_title'),
+              description: tt('tables.step1_desc'),
               side: 'bottom',
               align: 'end',
             },
@@ -3188,8 +3189,8 @@ export default function Tables() {
           {
             element: '[data-tour="tables-name-input"]',
             popover: {
-              title: 'Give it a Name or Number',
-              description: 'Type the table name or number here. Examples: "1", "A1", "Bar Seat 3", "Terrace". This is what staff and customers will see.',
+              title: tt('tables.step2_title'),
+              description: tt('tables.step2_desc'),
               side: 'bottom',
               align: 'start',
             },
@@ -3197,8 +3198,8 @@ export default function Tables() {
           {
             element: '[data-tour="tables-add-submit"]',
             popover: {
-              title: 'Save the Table',
-              description: 'Click Add Table to save. The table is created instantly and appears in your grid — no page reload needed.',
+              title: tt('tables.step3_title'),
+              description: tt('tables.step3_desc'),
               side: 'top',
               align: 'end',
             },
@@ -3206,8 +3207,8 @@ export default function Tables() {
           {
             element: '[data-tour="tables-card-download-qr"]',
             popover: {
-              title: 'Download the QR Code',
-              description: 'Each table gets a unique QR code. Click the ⋮ menu on any table card then "Download QR" to save it as a PNG — ready to print and place on the table.',
+              title: tt('tables.step4_title'),
+              description: tt('tables.step4_desc'),
               side: 'left',
               align: 'start',
             },
@@ -3215,8 +3216,8 @@ export default function Tables() {
           {
             element: '[data-tour="tables-download-all-qr"]',
             popover: {
-              title: 'Download All QR Codes at Once',
-              description: 'Use this button to download QR codes for every table in one go — ideal when setting up a new venue or reprinting after a redesign.',
+              title: tt('tables.step5_title'),
+              description: tt('tables.step5_desc'),
               side: 'bottom',
               align: 'end',
             },
@@ -5392,6 +5393,7 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
             {userType === 'owner' && (
               <div className="relative">
                 <button
+                  data-tour="tables-card-download-qr"
                   onClick={() => setShowOwnerMenu(v => !v)}
                   className="w-7 h-7 flex items-center justify-center rounded-sm text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:bg-zinc-700/60 transition-colors"
                   title="Table options"
@@ -5405,7 +5407,6 @@ function TableCard({ table, orderInfo, reservations, waiterCalls, userType, onDo
                     <div className="fixed inset-0 z-10" onClick={() => setShowOwnerMenu(false)} />
                     <div className="absolute right-0 top-8 z-20 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-sm shadow-lg py-1 min-w-[148px]">
                       <button
-                        data-tour="tables-card-download-qr"
                         onClick={() => { onDownload(); setShowOwnerMenu(false) }}
                         className="w-full text-left px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:bg-zinc-900 flex items-center gap-2"
                       >

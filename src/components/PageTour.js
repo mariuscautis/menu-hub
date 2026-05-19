@@ -7,9 +7,9 @@ export default function PageTour({ steps }) {
   const { setSteps } = usePageTour()
 
   useEffect(() => {
-    setSteps(steps)
+    setSteps(steps || [])
     return () => setSteps([])
-  }, [])
+  }, [JSON.stringify(steps)])
 
   return null
 }
