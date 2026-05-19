@@ -281,7 +281,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
                   />
                   <div className="flex-shrink-0 w-28">
                     <div className="flex items-center gap-2 px-3 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm">
-                      <span className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 whitespace-nowrap">☕ Break</span>
+                      <span className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 whitespace-nowrap">☕ {t('breakLabel')}</span>
                       <input
                         type="number"
                         name="break_duration"
@@ -297,7 +297,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
                 </div>
                 {shiftDuration && (
                   <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-1.5">
-                    Net working time after break: <strong className="text-[#6262bd]">{shiftDuration}</strong>
+                    {t('netWorkingTime')} <strong className="text-[#6262bd]">{shiftDuration}</strong>
                   </p>
                 )}
               </div>
@@ -364,7 +364,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
                       {assignedStaff.name?.charAt(0).toUpperCase()}
                     </div>
                     <span className="text-sm text-[#6262bd] font-medium">{assignedStaff.name}</span>
-                    <button type="button" onClick={() => setFormData(p => ({ ...p, staff_id: '' }))} className="ml-auto text-zinc-400 dark:text-zinc-500 hover:text-red-500 text-xs">✕ Remove</button>
+                    <button type="button" onClick={() => setFormData(p => ({ ...p, staff_id: '' }))} className="ml-auto text-zinc-400 dark:text-zinc-500 hover:text-red-500 text-xs">✕ {t('removeAssigned')}</button>
                   </div>
                 )}
 
