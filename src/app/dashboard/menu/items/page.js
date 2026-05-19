@@ -1057,7 +1057,7 @@ export default function Menu() {
                     onChange={handleChange}
                     className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
                   >
-                    <option value="">{t('noTaxCategory')}</option>
+                    <option value="">— {t('noTaxCategory') !== 'noTaxCategory' ? t('noTaxCategory') : 'No tax category selected'} —</option>
                     {menuSalesTaxCategories.map((cat) => (
                       <option key={cat.id} value={cat.id}>
                         {cat.name} — {cat.rate}%{cat.is_default ? ` (${t('default') || 'default'})` : ''}
