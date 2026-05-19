@@ -2953,6 +2953,28 @@
       "step6_desc": "Imposta la modalita fasce orarie, il tempo cuscinetto tra prenotazioni, gli orari di apertura e con quanto anticipo i clienti possono prenotare online.",
       "step7_title": "Stampanti",
       "step7_desc": "Collega e configura le stampanti di cucina e bar per lo smistamento automatico degli ordini. Richiede l app Veno Bridge sulla rete locale."
+    },
+    "staffHub": {
+      "step1_title": "Membri del Personale",
+      "step1_desc": "Aggiungi e gestisci le persone che lavorano nel tuo locale. Ogni membro riceve un accesso, un ruolo e un PIN a 3 cifre per il login rapido nella schermata ordini.",
+      "step2_title": "Turni",
+      "step2_desc": "Crea e pubblica i turni settimanali per il tuo team. Il personale puo vedere i propri turni dal pannello dipendenti una volta pubblicati.",
+      "step3_title": "Richieste di Ferie",
+      "step3_desc": "Esamina e approva le richieste di ferie e assenze del team. Le ferie approvate si riflettono automaticamente nel planning.",
+      "step4_title": "Reparti",
+      "step4_desc": "Crea reparti personalizzati oltre a Cucina e Bar, come Sala, Eventi o Consegna. I reparti controllano quali ordini e stampanti ogni membro vede."
+    },
+    "staffMembers": {
+      "step1_title": "Aggiungi un Membro",
+      "step1_desc": "Clicca qui per aggiungere un nuovo membro del team. Imposti nome, email, ruolo (Personale o Admin), reparto e PIN a 3 cifre per accedere alla schermata ordini.",
+      "step2_title": "Ruoli Spiegati",
+      "step2_desc": "Il personale Admin accede al pannello completo inclusi impostazioni e report. Il personale standard vede solo le schermate ordini e tavoli. Scegli in base al livello di accesso necessario.",
+      "step3_title": "Schede Personale",
+      "step3_desc": "Ogni scheda mostra nome, ruolo, reparto, stato e PIN del membro. Usa il pulsante Modifica per aggiornare i dati o cambiare reparto e ruolo.",
+      "step4_title": "Invia Link di Accesso",
+      "step4_desc": "Il pulsante Link invia un link di accesso magico all email del membro per accedere al proprio account senza reimpostare la password.",
+      "step5_title": "Attiva o Disattiva",
+      "step5_desc": "Usa i pulsanti di stato per attivare o disattivare un membro. Il personale inattivo non puo accedere ma i suoi dati e lo storico turni vengono conservati."
     }
   }
 }

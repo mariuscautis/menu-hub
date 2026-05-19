@@ -2953,6 +2953,28 @@
       "step6_desc": "Seteaza modul intervalelor, timpul tampon intre rezervari, programul de functionare si cu cat timp inainte pot rezerva clientii online.",
       "step7_title": "Imprimante",
       "step7_desc": "Conecteaza si configureaza imprimantele de bucatarie si bar pentru rutarea automata a comenzilor. Necesita aplicatia Veno Bridge in reteaua locala."
+    },
+    "staffHub": {
+      "step1_title": "Membrii Echipei",
+      "step1_desc": "Adauga si gestioneaza persoanele care lucreaza la localul tau. Fiecare membru primeste un cont, un rol si un PIN de 3 cifre pentru acces rapid in ecranul de comenzi.",
+      "step2_title": "Ture",
+      "step2_desc": "Creeaza si publica programul saptamanal de ture pentru echipa ta. Personalul isi poate vedea propriul program din panoul de angajati dupa publicare.",
+      "step3_title": "Cereri de Concediu",
+      "step3_desc": "Examineaza si aproba cererile de concediu si absenta ale echipei. Concediile aprobate se reflecta automat in programul de ture.",
+      "step4_title": "Departamente",
+      "step4_desc": "Creeaza departamente personalizate dincolo de Bucatarie si Bar, cum ar fi Sala, Evenimente sau Livrare. Departamentele controleaza ce comenzi si imprimante vede fiecare angajat."
+    },
+    "staffMembers": {
+      "step1_title": "Adauga un Membru",
+      "step1_desc": "Apasa aici pentru a adauga un nou membru al echipei. Definesti numele, emailul, rolul (Personal sau Admin), departamentul si PIN-ul de 3 cifre pentru ecranul de comenzi.",
+      "step2_title": "Roluri Explicate",
+      "step2_desc": "Personalul Admin are acces la panoul complet inclusiv setari si rapoarte. Personalul standard vede doar ecranele de comenzi si mese. Alege in functie de nivelul de acces necesar.",
+      "step3_title": "Carduri Personal",
+      "step3_desc": "Fiecare card afiseaza numele, rolul, departamentul, statusul si PIN-ul membrului. Foloseste butonul Editeaza pentru a actualiza datele sau schimba departamentul si rolul.",
+      "step4_title": "Trimite Link de Acces",
+      "step4_desc": "Butonul Link trimite un link magic de autentificare la emailul membrului pentru a accesa contul fara a reseta parola.",
+      "step5_title": "Activeaza sau Dezactiveaza",
+      "step5_desc": "Foloseste butoanele de status pentru a activa sau dezactiva un membru. Personalul inactiv nu se poate autentifica dar inregistrarile si istoricul turelor sunt pastrate."
     }
   }
 }

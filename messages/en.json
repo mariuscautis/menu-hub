@@ -3071,6 +3071,28 @@
       "step6_desc": "Set your booking slot mode, buffer time between reservations, operating hours, and how far in advance guests can book online.",
       "step7_title": "Printers",
       "step7_desc": "Connect and configure kitchen and bar printers for automatic order routing. Requires the Veno Bridge companion app running on the local network."
+    },
+    "staffHub": {
+      "step1_title": "Staff Members",
+      "step1_desc": "Add and manage the people who work at your venue. Each staff member gets a login, a role, and a 3-digit PIN for quick access on the ordering screen.",
+      "step2_title": "Rota",
+      "step2_desc": "Build and publish weekly shift schedules for your team. Staff can view their own rota from the staff dashboard once it is published.",
+      "step3_title": "Time Off Requests",
+      "step3_desc": "Review and approve holiday and absence requests submitted by your team. Approved time off is reflected automatically in the rota.",
+      "step4_title": "Departments",
+      "step4_desc": "Create custom departments beyond Kitchen and Bar — such as Floor, Events, or Delivery. Departments control which orders and printers a staff member sees."
+    },
+    "staffMembers": {
+      "step1_title": "Add a Staff Member",
+      "step1_desc": "Click here to add a new team member. You will set their name, email, role (Staff or Admin), department, and 3-digit PIN used to log in on the ordering screen.",
+      "step2_title": "Roles Explained",
+      "step2_desc": "Admin staff can access the full dashboard including settings and reports. Regular staff only see the ordering and tables screens. Choose carefully based on the level of access each person needs.",
+      "step3_title": "Staff Cards",
+      "step3_desc": "Each card shows the staff member name, role, department, status, and PIN. Use the Edit button to update their details or change their department and role.",
+      "step4_title": "Send Login Link",
+      "step4_desc": "The Link button sends a magic login link to the staff member email so they can access their account without needing a password reset.",
+      "step5_title": "Activate or Deactivate",
+      "step5_desc": "Use the status buttons to activate or deactivate a staff member. Inactive staff cannot log in but their records and rota history are kept."
     }
   }
 }

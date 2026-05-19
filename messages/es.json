@@ -2953,6 +2953,28 @@
       "step6_desc": "Define el modo de franjas horarias, el tiempo de margen entre reservas, el horario de apertura y con cuanta antelacion pueden reservar los clientes en linea.",
       "step7_title": "Impresoras",
       "step7_desc": "Conecta y configura impresoras de cocina y barra para el envio automatico de pedidos. Requiere la aplicacion Veno Bridge en la red local."
+    },
+    "staffHub": {
+      "step1_title": "Miembros del Personal",
+      "step1_desc": "Agrega y gestiona a las personas que trabajan en tu local. Cada miembro recibe un acceso, un rol y un PIN de 3 digitos para el acceso rapido en la pantalla de pedidos.",
+      "step2_title": "Cuadrante",
+      "step2_desc": "Crea y publica los turnos semanales para tu equipo. El personal puede ver su propio cuadrante desde el panel de empleados una vez publicado.",
+      "step3_title": "Solicitudes de Ausencia",
+      "step3_desc": "Revisa y aprueba las solicitudes de vacaciones y ausencias del equipo. Las ausencias aprobadas se reflejan automaticamente en el cuadrante.",
+      "step4_title": "Departamentos",
+      "step4_desc": "Crea departamentos personalizados mas alla de Cocina y Bar, como Sala, Eventos o Reparto. Los departamentos controlan que pedidos e impresoras ve cada miembro."
+    },
+    "staffMembers": {
+      "step1_title": "Agregar un Miembro",
+      "step1_desc": "Haz clic aqui para agregar un nuevo miembro del equipo. Defines su nombre, correo, rol (Personal o Admin), departamento y PIN de 3 digitos para acceder a la pantalla de pedidos.",
+      "step2_title": "Roles Explicados",
+      "step2_desc": "El personal Admin accede al panel completo incluyendo ajustes e informes. El personal regular solo ve las pantallas de pedidos y mesas. Elige el rol segun el nivel de acceso necesario.",
+      "step3_title": "Tarjetas de Personal",
+      "step3_desc": "Cada tarjeta muestra el nombre, rol, departamento, estado y PIN del miembro. Usa el boton Editar para actualizar sus datos o cambiar departamento y rol.",
+      "step4_title": "Enviar Enlace de Acceso",
+      "step4_desc": "El boton Enlace envia un link magico de acceso al correo del miembro para que pueda entrar a su cuenta sin necesitar restablecer la contrasena.",
+      "step5_title": "Activar o Desactivar",
+      "step5_desc": "Usa los botones de estado para activar o desactivar a un miembro. El personal inactivo no puede iniciar sesion pero sus registros e historial se conservan."
     }
   }
 }

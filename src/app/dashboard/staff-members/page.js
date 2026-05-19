@@ -8,6 +8,7 @@ import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import { supabase } from '@/lib/supabase'
 import PageTabs from '@/components/PageTabs'
 import { staffTabs } from '@/components/PageTabsConfig'
+import PageTour from '@/components/PageTour'
 import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 function StaffAvatar({ avatarUrl, name, size = 'md' }) {
@@ -28,6 +29,7 @@ export default function StaffMembers() {
   const t = useTranslations('staff')
   const tc = useTranslations('common')
   const tg = useTranslations('guide')
+  const tt = useTranslations('tours')
   const restaurantCtx = useRestaurant()
   const supabase = useAdminSupabase()
   const [staff, setStaff] = useState([])
@@ -333,6 +335,14 @@ export default function StaffMembers() {
   if (!restaurant) return <div className="text-zinc-500 dark:text-zinc-400">{t('noPermission')}</div>
 
   return (
+    <>
+    <PageTour steps={[
+      { element: '[data-tour="staff-add-btn"]', popover: { title: tt('staffMembers.step1_title'), description: tt('staffMembers.step1_desc') } },
+      { element: '[data-tour="staff-roles-info"]', popover: { title: tt('staffMembers.step2_title'), description: tt('staffMembers.step2_desc') } },
+      { element: '[data-tour="staff-list"]', popover: { title: tt('staffMembers.step3_title'), description: tt('staffMembers.step3_desc') } },
+      { element: '[data-tour="staff-magic-link"]', popover: { title: tt('staffMembers.step4_title'), description: tt('staffMembers.step4_desc') } },
+      { element: '[data-tour="staff-status-btn"]', popover: { title: tt('staffMembers.step5_title'), description: tt('staffMembers.step5_desc') } },
+    ]} />
     <OfflinePageGuard>
     <div>
       <PageTabs tabs={staffTabs} />
@@ -345,6 +355,7 @@ export default function StaffMembers() {
           <p className="text-zinc-500 dark:text-zinc-400">{t('subtitle').replace('{restaurantName}', restaurant.name)}</p>
         </div>
         <button
+          data-tour="staff-add-btn"
           onClick={() => setShowModal(true)}
           className="bg-[#6262bd] text-white px-5 py-2.5 rounded-sm font-medium hover:bg-[#5252a3] flex items-center gap-2 flex-shrink-0"
         >
@@ -356,7 +367,7 @@ export default function StaffMembers() {
       </div>
 
       {/* Info Box */}
-      <div className="bg-[#6262bd]/5 dark:bg-[#6262bd]/10 border-2 border-[#6262bd]/20 dark:border-[#6262bd]/30 rounded-sm p-6 mb-8">
+      <div data-tour="staff-roles-info" className="bg-[#6262bd]/5 dark:bg-[#6262bd]/10 border-2 border-[#6262bd]/20 dark:border-[#6262bd]/30 rounded-sm p-6 mb-8">
         <h3 className="font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-2">{t('staffRolesTitle')}</h3>
         <ul className="text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 text-sm space-y-1">
           <li><strong>{t('adminRole')}</strong> {t('adminRoleDesc')}</li>
@@ -378,7 +389,7 @@ export default function StaffMembers() {
           </button>
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div data-tour="staff-list" className="flex flex-col gap-3">
           {staff.map((member) => (
             <div key={member.id} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4">
               {/* Name + email + hub badge */}
@@ -425,7 +436,7 @@ export default function StaffMembers() {
 
               {/* Actions */}
               <div className="flex flex-wrap gap-2">
-                <button onClick={() => sendMagicLink(member)} className="px-3 py-1.5 bg-purple-50 text-purple-600 rounded-sm text-sm font-medium hover:bg-purple-100 dark:bg-purple-600 dark:text-white dark:hover:bg-purple-700 flex items-center gap-1">
+                <button data-tour="staff-magic-link" onClick={() => sendMagicLink(member)} className="px-3 py-1.5 bg-purple-50 text-purple-600 rounded-sm text-sm font-medium hover:bg-purple-100 dark:bg-purple-600 dark:text-white dark:hover:bg-purple-700 flex items-center gap-1">
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
                   {t('link')}
                 </button>
@@ -433,9 +444,9 @@ export default function StaffMembers() {
                 {!member.is_hub && (
                   <button onClick={() => resetStaffPassword(member)} className="px-3 py-1.5 bg-zinc-50 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 rounded-sm text-sm font-medium hover:bg-zinc-100 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-600">Reset PW</button>
                 )}
-                {member.status === 'pending' && <button onClick={() => updateStaffStatus(member.id, 'active')} className="px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-sm text-sm font-medium hover:bg-green-200 dark:bg-green-600 dark:text-white dark:hover:bg-green-700">{t('activate')}</button>}
-                {member.status === 'active' && <button onClick={() => updateStaffStatus(member.id, 'inactive')} className="px-3 py-1.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-sm text-sm font-medium hover:bg-amber-200 dark:bg-amber-600 dark:text-white dark:hover:bg-amber-700">{t('deactivate')}</button>}
-                {member.status === 'inactive' && <button onClick={() => updateStaffStatus(member.id, 'active')} className="px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-sm text-sm font-medium hover:bg-green-200 dark:bg-green-600 dark:text-white dark:hover:bg-green-700">{t('reactivate')}</button>}
+                {member.status === 'pending' && <button data-tour="staff-status-btn" onClick={() => updateStaffStatus(member.id, 'active')} className="px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-sm text-sm font-medium hover:bg-green-200 dark:bg-green-600 dark:text-white dark:hover:bg-green-700">{t('activate')}</button>}
+                {member.status === 'active' && <button data-tour="staff-status-btn" onClick={() => updateStaffStatus(member.id, 'inactive')} className="px-3 py-1.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-sm text-sm font-medium hover:bg-amber-200 dark:bg-amber-600 dark:text-white dark:hover:bg-amber-700">{t('deactivate')}</button>}
+                {member.status === 'inactive' && <button data-tour="staff-status-btn" onClick={() => updateStaffStatus(member.id, 'active')} className="px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-sm text-sm font-medium hover:bg-green-200 dark:bg-green-600 dark:text-white dark:hover:bg-green-700">{t('reactivate')}</button>}
                 <button onClick={() => deleteStaff(member.id, member.name)} className="px-3 py-1.5 bg-red-50 text-red-600 rounded-sm text-sm font-medium hover:bg-red-100 dark:bg-red-600 dark:text-white dark:hover:bg-red-700">{t('remove')}</button>
               </div>
             </div>
@@ -610,5 +621,6 @@ export default function StaffMembers() {
       )}
     </div>
     </OfflinePageGuard>
+    </>
   )
 }

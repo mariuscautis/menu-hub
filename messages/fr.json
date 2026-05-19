@@ -2953,6 +2953,28 @@
       "step6_desc": "Definissez le mode de creneaux, le temps tampon entre reservations, les heures d ouverture et combien de temps a l avance les clients peuvent reserver en ligne.",
       "step7_title": "Imprimantes",
       "step7_desc": "Connectez et configurez les imprimantes de cuisine et de bar pour l acheminement automatique des commandes. Necessite l application Veno Bridge sur le reseau local."
+    },
+    "staffHub": {
+      "step1_title": "Membres du Personnel",
+      "step1_desc": "Ajoutez et gerez les personnes qui travaillent dans votre etablissement. Chaque membre reçoit un acces, un role et un code PIN a 3 chiffres pour la connexion rapide sur l ecran de commande.",
+      "step2_title": "Planning",
+      "step2_desc": "Creez et publiez les plannings de quart hebdomadaires pour votre equipe. Le personnel peut consulter son propre planning depuis le tableau de bord employe une fois publie.",
+      "step3_title": "Demandes de Conge",
+      "step3_desc": "Examinez et approuvez les demandes de vacances et d absence soumises par votre equipe. Les conges approuves sont automatiquement repercutes dans le planning.",
+      "step4_title": "Departements",
+      "step4_desc": "Creez des departements personnalises au dela de Cuisine et Bar, comme Salle, Evenements ou Livraison. Les departements controlent quelles commandes et imprimantes chaque membre voit."
+    },
+    "staffMembers": {
+      "step1_title": "Ajouter un Membre",
+      "step1_desc": "Cliquez ici pour ajouter un nouveau membre de l equipe. Vous definissez son nom, email, role (Personnel ou Admin), departement et code PIN a 3 chiffres pour l ecran de commande.",
+      "step2_title": "Roles Expliques",
+      "step2_desc": "Le personnel Admin acces au tableau de bord complet, y compris les parametres et rapports. Le personnel standard ne voit que les ecrans de commande et de tables. Choisissez selon le niveau d acces requis.",
+      "step3_title": "Fiches du Personnel",
+      "step3_desc": "Chaque fiche affiche le nom, le role, le departement, le statut et le PIN du membre. Utilisez le bouton Modifier pour mettre a jour ses informations ou changer son departement et role.",
+      "step4_title": "Envoyer un Lien de Connexion",
+      "step4_desc": "Le bouton Lien envoie un lien de connexion magique a l email du membre pour qu il puisse acceder a son compte sans reinitialiser son mot de passe.",
+      "step5_title": "Activer ou Desactiver",
+      "step5_desc": "Utilisez les boutons de statut pour activer ou desactiver un membre. Le personnel inactif ne peut pas se connecter mais ses enregistrements et historique sont conserves."
     }
   }
 }
