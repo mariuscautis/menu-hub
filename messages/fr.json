@@ -475,7 +475,10 @@
         "onCompassionateLeave": "En congé pour deuil",
         "onTimeOff": "En congé"
       }
-    }
+    },
+    "notifySuccess": "Notifications envoyées à {sent} employé{plural}.",
+    "notifySkipped": "{skipped} ignoré(s) — pas d'email enregistré.",
+    "notifyFailed": "Échec de l'envoi des notifications. Veuillez réessayer."
   },
   "timeOffRequests": {
     "title": "Demandes de Congés",

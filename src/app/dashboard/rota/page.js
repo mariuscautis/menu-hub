@@ -80,6 +80,13 @@ export default function RotaPage() {
   const [hasUnnotifiedChanges, setHasUnnotifiedChanges] = useState(false);
   const [notifying, setNotifying] = useState(false);
   const [lastNotified, setLastNotified] = useState(null);
+  const [toast, setToast] = useState(null); // { type: 'success'|'error', message: string }
+
+  useEffect(() => {
+    if (!toast) return;
+    const id = setTimeout(() => setToast(null), 5000);
+    return () => clearTimeout(id);
+  }, [toast]);
 
   /* -------------------- Fetch Restaurant -------------------- */
 
@@ -300,7 +307,7 @@ export default function RotaPage() {
       fetchShifts();
     } catch (error) {
       console.error('Error updating shift:', error);
-      alert(t('failedToUpdate'));
+      setToast({ type: 'error', message: t('failedToUpdate') });
     }
   };
 
@@ -342,10 +349,13 @@ export default function RotaPage() {
 
       setHasUnnotifiedChanges(false);
       setLastNotified(new Date());
-      alert(`Notifications sent to ${data.sent} staff member${data.sent !== 1 ? 's' : ''}${data.skipped > 0 ? ` (${data.skipped} skipped — no email on file)` : ''}.`);
+      const plural = data.sent !== 1 ? 's' : '';
+      let message = t('notifySuccess').replace('{sent}', data.sent).replace('{plural}', plural);
+      if (data.skipped > 0) message += ' ' + t('notifySkipped').replace('{skipped}', data.skipped);
+      setToast({ type: 'success', message });
     } catch (err) {
       console.error('Error sending notifications:', err);
-      alert('Failed to send notifications. Please try again.');
+      setToast({ type: 'error', message: t('notifyFailed') });
     }
     setNotifying(false);
   };
@@ -358,6 +368,18 @@ export default function RotaPage() {
 
   return (
     <>
+    {/* Toast notification */}
+    {toast && (
+      <div className={`fixed bottom-6 right-6 z-[200] flex items-start gap-3 px-5 py-4 rounded-sm shadow-xl border-2 max-w-sm ${
+        toast.type === 'success'
+          ? 'bg-green-50 border-green-200 text-green-800'
+          : 'bg-red-50 border-red-200 text-red-800'
+      }`}>
+        <span className="text-lg leading-none mt-0.5">{toast.type === 'success' ? '✓' : '✕'}</span>
+        <p className="text-sm font-medium flex-1">{toast.message}</p>
+        <button onClick={() => setToast(null)} className="text-current opacity-50 hover:opacity-100 font-bold text-lg leading-none flex-shrink-0">×</button>
+      </div>
+    )}
     <PageTour steps={[
       { element: '[data-tour="rota-create-shift"]', popover: { title: tt('rota.step1_title'), description: tt('rota.step1_desc') } },
       { element: '[data-tour="rota-notify-btn"]', popover: { title: tt('rota.step2_title'), description: tt('rota.step2_desc') } },

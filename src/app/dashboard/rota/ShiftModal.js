@@ -22,7 +22,9 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
   const [showUnavailable, setShowUnavailable] = useState(false);
   const [loadingAvailable, setLoadingAvailable] = useState(false);
   const [conflictError, setConflictError] = useState(null);
+  const [generalError, setGeneralError] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   useEffect(() => {
     if (shift) {
@@ -111,6 +113,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     setConflictError(null);
+    setGeneralError(null);
   };
 
   // Calculate shift duration for display
@@ -138,7 +141,8 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
     e.preventDefault();
     setSaving(true);
     setConflictError(null);
-    if (!restaurant) { alert(t('restaurantNotFound')); setSaving(false); return; }
+    setGeneralError(null);
+    if (!restaurant) { setGeneralError(t('restaurantNotFound')); setSaving(false); return; }
     try {
       const payload = {
         ...formData,
@@ -171,14 +175,18 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
       onClose();
     } catch (error) {
       console.error('Error saving shift:', error);
-      alert(error.message);
+      setGeneralError(error.message);
     }
     setSaving(false);
   };
 
-  const handleDeleteClick = async () => {
+  const handleDeleteClick = () => {
+    setConfirmingDelete(true);
+  };
+
+  const handleDeleteConfirm = async () => {
     if (!shift?.id) return;
-    if (!confirm(t('confirmDelete'))) return;
+    setConfirmingDelete(false);
     try {
       const response = await fetch(`/api/rota/shifts?id=${shift.id}`, { method: 'DELETE' });
       if (!response.ok) throw new Error('Failed to delete shift');
@@ -186,7 +194,7 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
       onClose();
     } catch (error) {
       console.error('Error deleting shift:', error);
-      alert(error.message);
+      setGeneralError(error.message);
     }
   };
 
@@ -223,6 +231,40 @@ export default function ShiftModal({ shift, staff, restaurant, departments = [],
           <div className="mx-6 mt-4 p-3 bg-red-50 border-2 border-red-200 rounded-sm text-red-700 text-sm flex items-start gap-2 flex-shrink-0">
             <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
             <span><strong>{t('conflictLabel')}</strong> {conflictError}</span>
+          </div>
+        )}
+
+        {/* General Error */}
+        {generalError && (
+          <div className="mx-6 mt-4 p-3 bg-red-50 border-2 border-red-200 rounded-sm text-red-700 text-sm flex items-start justify-between gap-2 flex-shrink-0">
+            <div className="flex items-start gap-2">
+              <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+              <span>{generalError}</span>
+            </div>
+            <button onClick={() => setGeneralError(null)} className="text-red-400 hover:text-red-600 font-bold leading-none flex-shrink-0">×</button>
+          </div>
+        )}
+
+        {/* Delete Confirmation */}
+        {confirmingDelete && (
+          <div className="mx-6 mt-4 p-4 bg-red-50 border-2 border-red-200 rounded-sm flex-shrink-0">
+            <p className="text-sm font-semibold text-red-700 mb-3">{t('confirmDelete')}</p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={handleDeleteConfirm}
+                className="px-4 py-2 bg-red-600 text-white text-sm font-semibold rounded-sm hover:bg-red-700 transition-colors"
+              >
+                🗑 {t('deleteShift')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmingDelete(false)}
+                className="px-4 py-2 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 text-sm rounded-sm hover:border-zinc-400 transition-colors"
+              >
+                {t('cancel')}
+              </button>
+            </div>
           </div>
         )}
 

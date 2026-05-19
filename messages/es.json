@@ -475,7 +475,10 @@
         "onCompassionateLeave": "De baja por duelo",
         "onTimeOff": "De baja"
       }
-    }
+    },
+    "notifySuccess": "Notificaciones enviadas a {sent} empleado{plural}.",
+    "notifySkipped": "{skipped} omitido(s) — sin email registrado.",
+    "notifyFailed": "Error al enviar notificaciones. Inténtalo de nuevo."
   },
   "timeOffRequests": {
     "title": "Solicitudes de Permiso",

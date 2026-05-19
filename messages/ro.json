@@ -475,7 +475,10 @@
         "onCompassionateLeave": "În concediu de doliu",
         "onTimeOff": "În concediu"
       }
-    }
+    },
+    "notifySuccess": "Notificări trimise către {sent} angajat{plural}.",
+    "notifySkipped": "{skipped} omis — fără adresă de email.",
+    "notifyFailed": "Trimiterea notificărilor a eșuat. Încearcă din nou."
   },
   "timeOffRequests": {
     "title": "Cereri de Concediu",

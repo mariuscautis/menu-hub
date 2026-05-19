@@ -514,7 +514,10 @@
         "onCompassionateLeave": "On compassionate leave",
         "onTimeOff": "On time off"
       }
-    }
+    },
+    "notifySuccess": "Notifications sent to {sent} staff member{plural}.",
+    "notifySkipped": "{skipped} skipped — no email on file.",
+    "notifyFailed": "Failed to send notifications. Please try again."
   },
   "timeOffRequests": {
     "title": "Time-Off Requests",
