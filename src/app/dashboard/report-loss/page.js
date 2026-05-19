@@ -72,6 +72,13 @@ export default function ReportLoss() {
       } catch { localStorage.removeItem('staff_session') }
     }
 
+    if (!userEmail) {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) { userEmail = user.email; userName = user.email }
+      } catch {}
+    }
+
     setRestaurant(restaurantData)
     setUserInfo({ email: userEmail, name: userName, id: staffId })
     setStaffDepartment(department)
