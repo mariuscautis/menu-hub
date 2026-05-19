@@ -3181,6 +3181,38 @@
       "step4_title": "Request Cards",
       "step4_desc": "Each card shows the staff name, leave type, dates, and status. Click a card to expand it and see full details, approve or reject it, or edit the request dates if needed."
     },
+    "stockProducts": {
+      "step1_title": "Add Stock",
+      "step1_desc": "Use this button to record a new delivery — select the product, enter the quantity received and the purchase price. The system calculates cost per unit automatically and updates the stock level.",
+      "step2_title": "New Product",
+      "step2_desc": "Click here to add a new ingredient or supply to your stock list. You set the name, category (Kitchen or Bar), storage unit (grams or ml), and how deliveries are measured — for example kg or bottles.",
+      "step3_title": "Stock Stats",
+      "step3_desc": "Click any card to filter the list instantly. Total shows everything, Low Stock highlights items running low, and Kitchen and Bar let you focus on one section at a time.",
+      "step4_title": "Search and Sort",
+      "step4_desc": "Search by product name or brand. Use the sort dropdown to order by name, lowest stock first, or highest stock first — handy for prioritising your next order.",
+      "step5_title": "Product Cards",
+      "step5_desc": "Each card shows the current stock level, unit type, and cost info. Use Add Stock to log a new delivery, the pencil to edit product details, or the bin to remove it entirely."
+    },
+    "stockInventory": {
+      "step1_title": "Add Stock",
+      "step1_desc": "Record a new delivery for any inventory item. Select the item, enter the quantity received, and optionally the price. The stock level is updated immediately.",
+      "step2_title": "New Item",
+      "step2_desc": "Add a new item to your inventory — things like cleaning supplies, packaging, or equipment counted in units, pieces, boxes, or sets. Set a minimum stock level to get low-stock alerts.",
+      "step3_title": "Inventory Stats",
+      "step3_desc": "Total Items shows everything in your inventory. Low Stock highlights items that have fallen below their minimum level. Recent Additions counts entries from the last 7 days.",
+      "step4_title": "Search and Sort",
+      "step4_desc": "Search by item name or brand. Sort by name, lowest stock first, or highest stock first to quickly spot what needs restocking.",
+      "step5_title": "Item Cards",
+      "step5_desc": "Each card shows the current stock, minimum level, and last purchase price. Use Add Stock to log a delivery, the pencil to edit item details, or the bin to delete it."
+    },
+    "stockInvoices": {
+      "step1_title": "New Invoice",
+      "step1_desc": "Click here to log a supplier delivery. Enter the reference number, date, supplier name, and total amount. You can also attach a photo of the physical invoice for your records.",
+      "step2_title": "Search and Filter",
+      "step2_desc": "Search invoices by reference number or supplier name. Use the date filter to narrow results to today, this week, this month, or a custom date range.",
+      "step3_title": "Invoice List",
+      "step3_desc": "Each card shows the reference number, supplier, date, and total amount. Click View Details to see which stock entries are linked to that invoice and any attached images."
+    },
     "stockHub": {
       "step1_title": "Food and Drink Stock",
       "step1_desc": "Manage all the ingredients and supplies your kitchen and bar use. Each item has a unit, a current stock level, and a low-stock threshold so you are alerted before you run out.",

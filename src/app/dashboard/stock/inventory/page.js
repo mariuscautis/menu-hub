@@ -11,11 +11,13 @@ import { useCurrency } from '@/lib/CurrencyContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
 import OfflinePageGuard from '@/components/OfflinePageGuard'
+import PageTour from '@/components/PageTour'
 
 export default function InventoryManagement() {
   useModuleGuard('ordering')
   const t = useTranslations('inventory')
   const tg = useTranslations('guide')
+  const tt = useTranslations('tours')
   const { currencySymbol, formatCurrency } = useCurrency()
   const restaurantCtx = useRestaurant()
   const supabase = useAdminSupabase()
@@ -363,6 +365,14 @@ export default function InventoryManagement() {
   }
 
   return (
+    <>
+    <PageTour steps={[
+      { element: '[data-tour="stock-inv-add-stock"]', popover: { title: tt('stockInventory.step1_title'), description: tt('stockInventory.step1_desc') } },
+      { element: '[data-tour="stock-inv-new-item"]', popover: { title: tt('stockInventory.step2_title'), description: tt('stockInventory.step2_desc') } },
+      { element: '[data-tour="stock-inv-stats"]', popover: { title: tt('stockInventory.step3_title'), description: tt('stockInventory.step3_desc') } },
+      { element: '[data-tour="stock-inv-search"]', popover: { title: tt('stockInventory.step4_title'), description: tt('stockInventory.step4_desc') } },
+      { element: '[data-tour="stock-inv-list"]', popover: { title: tt('stockInventory.step5_title'), description: tt('stockInventory.step5_desc') } },
+    ]} />
     <OfflinePageGuard>
     <div>
       <PageTabs tabs={stockNavTabs} />
@@ -376,6 +386,7 @@ export default function InventoryManagement() {
         </div>
         <div className="flex flex-wrap gap-3">
           <button
+            data-tour="stock-inv-add-stock"
             onClick={() => openStockModal()}
             className="bg-green-600 text-white px-5 py-2.5 rounded-sm font-medium hover:bg-green-700 dark:bg-green-600 dark:text-white dark:hover:bg-green-700 flex items-center gap-2"
           >
@@ -385,6 +396,7 @@ export default function InventoryManagement() {
             {t('addStock')}
           </button>
           <button
+            data-tour="stock-inv-new-item"
             onClick={() => openProductModal()}
             className="bg-[#6262bd] text-white px-5 py-2.5 rounded-sm font-medium hover:bg-[#5252a3] flex items-center gap-2"
           >
@@ -424,7 +436,7 @@ export default function InventoryManagement() {
       {activeTab === 'items' && (
         <div>
           {/* Stats Cards - Clickable Filters */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <div data-tour="stock-inv-stats" className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             <button
               onClick={() => setFilterStockType('all')}
               className={`bg-white border-2 rounded-sm p-4 text-left transition-all ${
@@ -454,7 +466,7 @@ export default function InventoryManagement() {
           </div>
 
           {/* Search and Sort Bar */}
-          <div className="mb-6 flex flex-wrap gap-3">
+          <div data-tour="stock-inv-search" className="mb-6 flex flex-wrap gap-3">
             <div className="flex-1 relative">
               <svg className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -532,7 +544,7 @@ export default function InventoryManagement() {
               )}
             </div>
           ) : (
-            <div className="grid gap-4">
+            <div data-tour="stock-inv-list" className="grid gap-4">
               {/* Select all row */}
               <div className="flex items-center gap-3 px-2">
                 <input
@@ -1078,5 +1090,6 @@ export default function InventoryManagement() {
       )}
     </div>
     </OfflinePageGuard>
+    </>
   )
 }

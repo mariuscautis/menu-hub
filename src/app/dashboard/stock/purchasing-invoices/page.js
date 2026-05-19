@@ -11,11 +11,13 @@ import { useCurrency } from '@/lib/CurrencyContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
 import OfflinePageGuard from '@/components/OfflinePageGuard'
+import PageTour from '@/components/PageTour'
 
 export default function PurchasingInvoices() {
   useModuleGuard('ordering')
   const t = useTranslations('purchasingInvoices')
   const tg = useTranslations('guide')
+  const tt = useTranslations('tours')
   const { currencySymbol, formatCurrency } = useCurrency()
   const restaurantCtx = useRestaurant()
   const supabase = useAdminSupabase()
@@ -330,6 +332,12 @@ export default function PurchasingInvoices() {
   }
 
   return (
+    <>
+    <PageTour steps={[
+      { element: '[data-tour="stock-inv-add-invoice"]', popover: { title: tt('stockInvoices.step1_title'), description: tt('stockInvoices.step1_desc') } },
+      { element: '[data-tour="stock-inv-search-filter"]', popover: { title: tt('stockInvoices.step2_title'), description: tt('stockInvoices.step2_desc') } },
+      { element: '[data-tour="stock-inv-invoice-list"]', popover: { title: tt('stockInvoices.step3_title'), description: tt('stockInvoices.step3_desc') } },
+    ]} />
     <OfflinePageGuard>
     <div>
       <PageTabs tabs={stockNavTabs} />
@@ -342,6 +350,7 @@ export default function PurchasingInvoices() {
           <p className="text-zinc-500 dark:text-zinc-400">{t('subtitle')}</p>
         </div>
         <button
+          data-tour="stock-inv-add-invoice"
           onClick={() => openInvoiceModal()}
           className="bg-[#6262bd] text-white px-5 py-2.5 rounded-sm font-medium hover:bg-[#5252a3] flex items-center gap-2 flex-shrink-0"
         >
@@ -353,7 +362,7 @@ export default function PurchasingInvoices() {
       </div>
 
       {/* Search and Date Filter */}
-      <div className="mb-6 flex flex-wrap gap-4 items-end">
+      <div data-tour="stock-inv-search-filter" className="mb-6 flex flex-wrap gap-4 items-end">
         {/* Search Bar */}
         <div className="relative flex-1 min-w-[250px] max-w-md">
           <svg className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -422,7 +431,7 @@ export default function PurchasingInvoices() {
           </button>
         </div>
       ) : (
-        <div className="grid gap-4">
+        <div data-tour="stock-inv-invoice-list" className="grid gap-4">
           {filteredInvoices.map((invoice) => (
             <div
               key={invoice.id}
@@ -784,5 +793,6 @@ export default function PurchasingInvoices() {
       )}
     </div>
     </OfflinePageGuard>
+    </>
   )
 }

@@ -3063,6 +3063,38 @@
       "step4_title": "Carduri Cereri",
       "step4_desc": "Fiecare card afiseaza numele membrului, tipul de concediu, datele si statusul. Apasa pe un card pentru a vedea detaliile complete, a-l aproba sau respinge, sau edita datele daca este necesar."
     },
+    "stockProducts": {
+      "step1_title": "Adauga Stoc",
+      "step1_desc": "Foloseste acest buton pentru a inregistra o noua livrare: selecteaza produsul, introdu cantitatea primita si pretul de achizitie. Sistemul calculeaza automat costul per unitate si actualizeaza nivelul de stoc.",
+      "step2_title": "Produs Nou",
+      "step2_desc": "Apasa aici pentru a adauga un nou ingredient sau consumabil la lista de stoc. Setezi numele, categoria (Bucatarie sau Bar), unitatea de depozitare (grame sau ml) si cum se masoara livrarile, de exemplu kg sau sticle.",
+      "step3_title": "Statistici Stoc",
+      "step3_desc": "Apasa pe orice card pentru a filtra lista instant. Total arata tot, Stoc Scazut evidentiaza articolele in curs de epuizare, iar Bucatarie si Bar iti permit sa te concentrezi pe o sectiune la un moment dat.",
+      "step4_title": "Cauta si Sorteaza",
+      "step4_desc": "Cauta dupa numele produsului sau marca. Foloseste meniul dropdown pentru a ordona dupa nume, stoc cel mai mic primul sau cel mai mare primul, util pentru prioritizarea urmatoarei comenzi.",
+      "step5_title": "Carduri Produs",
+      "step5_desc": "Fiecare card arata nivelul de stoc curent, tipul de unitate si informatii despre cost. Foloseste Adauga Stoc pentru a inregistra o livrare, creionul pentru a edita detalii sau cosul pentru a sterge."
+    },
+    "stockInventory": {
+      "step1_title": "Adauga Stoc",
+      "step1_desc": "Inregistreaza o noua livrare pentru orice articol de inventar. Selecteaza articolul, introdu cantitatea primita si optional pretul. Nivelul de stoc este actualizat imediat.",
+      "step2_title": "Articol Nou",
+      "step2_desc": "Adauga un nou articol la inventarul tau: produse de curatenie, ambalaje sau echipamente numarate in unitati, bucati, cutii sau seturi. Seteaza un nivel minim de stoc pentru a primi alerte.",
+      "step3_title": "Statistici Inventar",
+      "step3_desc": "Total Articole arata tot inventarul tau. Stoc Scazut evidentiaza articolele care au scazut sub minimum. Adaugari Recente numara intrarile din ultimele 7 zile.",
+      "step4_title": "Cauta si Sorteaza",
+      "step4_desc": "Cauta dupa nume sau marca. Sorteaza dupa nume, stoc cel mai mic primul sau cel mai mare primul pentru a identifica rapid ce trebuie reaprovizionat.",
+      "step5_title": "Carduri Articol",
+      "step5_desc": "Fiecare card arata stocul curent, nivelul minim si ultimul pret de achizitie. Foloseste Adauga Stoc pentru a inregistra o livrare, creionul pentru a edita sau cosul pentru a sterge."
+    },
+    "stockInvoices": {
+      "step1_title": "Factura Noua",
+      "step1_desc": "Apasa aici pentru a inregistra o livrare de la furnizor. Introdu numarul de referinta, data, numele furnizorului si suma totala. Poti atasa si o fotografie a facturii fizice.",
+      "step2_title": "Cauta si Filtreaza",
+      "step2_desc": "Cauta facturi dupa numarul de referinta sau numele furnizorului. Foloseste filtrul de data pentru a restrange rezultatele la azi, aceasta saptamana, aceasta luna sau un interval personalizat.",
+      "step3_title": "Lista Facturi",
+      "step3_desc": "Fiecare card arata numarul de referinta, furnizorul, data si suma totala. Apasa pe Vezi Detalii pentru a vedea ce intrari de stoc sunt legate de acea factura si imaginile atasate."
+    },
     "stockHub": {
       "step1_title": "Stoc Alimente si Bauturi",
       "step1_desc": "Gestioneaza toate ingredientele si consumabilele folosite de bucataria si barul tau. Fiecare articol are o unitate, un nivel de stoc curent si un prag minim care te alerteaza inainte de a ramane fara stoc.",

@@ -3063,6 +3063,38 @@
       "step4_title": "Fiches de Demande",
       "step4_desc": "Chaque fiche affiche le nom du membre, le type de conge, les dates et le statut. Cliquez sur une fiche pour voir les details complets, l approuver ou la rejeter, ou modifier les dates si necessaire."
     },
+    "stockProducts": {
+      "step1_title": "Ajouter du Stock",
+      "step1_desc": "Utilisez ce bouton pour enregistrer une nouvelle livraison: selectionnez le produit, entrez la quantite recue et le prix d achat. Le systeme calcule automatiquement le cout par unite et met a jour le niveau de stock.",
+      "step2_title": "Nouveau Produit",
+      "step2_desc": "Cliquez ici pour ajouter un nouvel ingredient ou fourniture a votre liste de stock. Vous definissez le nom, la categorie (Cuisine ou Bar), l unite de stockage (grammes ou ml) et comment les livraisons sont mesurees, par exemple kg ou bouteilles.",
+      "step3_title": "Statistiques de Stock",
+      "step3_desc": "Cliquez sur une carte pour filtrer la liste instantanement. Total affiche tout, Stock Bas met en evidence les articles en baisse, et Cuisine et Bar vous permettent de vous concentrer sur une section a la fois.",
+      "step4_title": "Rechercher et Trier",
+      "step4_desc": "Recherchez par nom de produit ou marque. Utilisez le menu deroulant de tri pour ordonner par nom, stock le plus bas en premier ou le plus eleve en premier, utile pour prioriser votre prochaine commande.",
+      "step5_title": "Fiches Produit",
+      "step5_desc": "Chaque fiche affiche le niveau de stock actuel, le type d unite et les informations de cout. Utilisez Ajouter du Stock pour enregistrer une livraison, le crayon pour modifier les details ou la corbeille pour supprimer."
+    },
+    "stockInventory": {
+      "step1_title": "Ajouter du Stock",
+      "step1_desc": "Enregistrez une nouvelle livraison pour tout article d inventaire. Selectionnez l article, entrez la quantite recue et optionnellement le prix. Le niveau de stock est mis a jour immediatement.",
+      "step2_title": "Nouvel Article",
+      "step2_desc": "Ajoutez un nouvel article a votre inventaire: produits d entretien, emballages ou equipements comptes en unites, pieces, boites ou ensembles. Definissez un niveau minimum de stock pour recevoir des alertes.",
+      "step3_title": "Statistiques d Inventaire",
+      "step3_desc": "Total Articles affiche tout votre inventaire. Stock Bas met en evidence les articles en dessous de leur minimum. Ajouts Recents compte les entrees des 7 derniers jours.",
+      "step4_title": "Rechercher et Trier",
+      "step4_desc": "Recherchez par nom ou marque. Triez par nom, stock le plus bas en premier ou le plus eleve en premier pour reperer rapidement ce qui doit etre reapprovisionne.",
+      "step5_title": "Fiches Article",
+      "step5_desc": "Chaque fiche affiche le stock actuel, le niveau minimum et le dernier prix d achat. Utilisez Ajouter du Stock pour enregistrer une livraison, le crayon pour modifier ou la corbeille pour supprimer."
+    },
+    "stockInvoices": {
+      "step1_title": "Nouvelle Facture",
+      "step1_desc": "Cliquez ici pour enregistrer une livraison fournisseur. Entrez le numero de reference, la date, le nom du fournisseur et le montant total. Vous pouvez aussi joindre une photo de la facture physique.",
+      "step2_title": "Rechercher et Filtrer",
+      "step2_desc": "Recherchez des factures par numero de reference ou nom de fournisseur. Utilisez le filtre de date pour restreindre les resultats a aujourd hui, cette semaine, ce mois ou une plage personnalisee.",
+      "step3_title": "Liste des Factures",
+      "step3_desc": "Chaque carte affiche le numero de reference, le fournisseur, la date et le montant total. Cliquez sur Voir les Details pour voir quelles entrees de stock sont liees a cette facture et les images jointes."
+    },
     "stockHub": {
       "step1_title": "Stock Alimentaire et Boissons",
       "step1_desc": "Gerez tous les ingredients et fournitures utilises par votre cuisine et votre bar. Chaque article a une unite, un niveau de stock actuel et un seuil de stock minimum pour vous alerter avant d en manquer.",

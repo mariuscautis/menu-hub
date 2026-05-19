@@ -11,11 +11,13 @@ import { useCurrency } from '@/lib/CurrencyContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
 import OfflinePageGuard from '@/components/OfflinePageGuard'
+import PageTour from '@/components/PageTour'
 
 export default function StockManagement() {
   useModuleGuard('ordering')
   const t = useTranslations('stock')
   const tg = useTranslations('guide')
+  const tt = useTranslations('tours')
   const { currencySymbol } = useCurrency()
   const restaurantCtx = useRestaurant()
   const supabase = useAdminSupabase()
@@ -547,6 +549,14 @@ export default function StockManagement() {
   }
 
   return (
+    <>
+    <PageTour steps={[
+      { element: '[data-tour="stock-prod-add-stock"]', popover: { title: tt('stockProducts.step1_title'), description: tt('stockProducts.step1_desc') } },
+      { element: '[data-tour="stock-prod-new-product"]', popover: { title: tt('stockProducts.step2_title'), description: tt('stockProducts.step2_desc') } },
+      { element: '[data-tour="stock-prod-stats"]', popover: { title: tt('stockProducts.step3_title'), description: tt('stockProducts.step3_desc') } },
+      { element: '[data-tour="stock-prod-search"]', popover: { title: tt('stockProducts.step4_title'), description: tt('stockProducts.step4_desc') } },
+      { element: '[data-tour="stock-prod-list"]', popover: { title: tt('stockProducts.step5_title'), description: tt('stockProducts.step5_desc') } },
+    ]} />
     <OfflinePageGuard>
     <div>
       <PageTabs tabs={stockNavTabs} />
@@ -560,6 +570,7 @@ export default function StockManagement() {
         </div>
         <div className="flex flex-wrap gap-3">
           <button
+            data-tour="stock-prod-add-stock"
             onClick={() => openStockModal()}
             className="bg-green-600 text-white px-5 py-2.5 rounded-sm font-medium hover:bg-green-700 dark:bg-green-600 dark:text-white dark:hover:bg-green-700 flex items-center gap-2"
           >
@@ -569,6 +580,7 @@ export default function StockManagement() {
             {t('addStock')}
           </button>
           <button
+            data-tour="stock-prod-new-product"
             onClick={() => openProductModal()}
             className="bg-[#6262bd] text-white px-5 py-2.5 rounded-sm font-medium hover:bg-[#5252a3] flex items-center gap-2"
           >
@@ -608,7 +620,7 @@ export default function StockManagement() {
       {activeTab === 'products' && (
         <div>
           {/* Stats Cards - Clickable Filters */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+          <div data-tour="stock-prod-stats" className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
             <button
               onClick={() => setFilterStockType('all')}
               className={`bg-white border-2 rounded-sm p-4 text-left transition-all ${
@@ -656,7 +668,7 @@ export default function StockManagement() {
           </div>
 
           {/* Search and Sort Bar */}
-          <div className="mb-6 flex flex-wrap gap-3">
+          <div data-tour="stock-prod-search" className="mb-6 flex flex-wrap gap-3">
             <div className="flex-1 relative">
               <svg className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -775,7 +787,7 @@ export default function StockManagement() {
               )}
             </div>
           ) : (
-            <div className="grid gap-4">
+            <div data-tour="stock-prod-list" className="grid gap-4">
               {/* Select all row */}
               <div className="flex items-center gap-3 px-2">
                 <input
@@ -1522,5 +1534,6 @@ export default function StockManagement() {
       )}
     </div>
     </OfflinePageGuard>
+    </>
   )
 }

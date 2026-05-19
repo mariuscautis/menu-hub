@@ -3063,6 +3063,38 @@
       "step4_title": "Tarjetas de Solicitud",
       "step4_desc": "Cada tarjeta muestra el nombre del empleado, tipo de permiso, fechas y estado. Haz clic en una tarjeta para ver los detalles completos, aprobarla o rechazarla, o editar las fechas si es necesario."
     },
+    "stockProducts": {
+      "step1_title": "Agregar Stock",
+      "step1_desc": "Usa este boton para registrar una nueva entrega: selecciona el producto, introduce la cantidad recibida y el precio de compra. El sistema calcula el costo por unidad automaticamente y actualiza el nivel de stock.",
+      "step2_title": "Nuevo Producto",
+      "step2_desc": "Haz clic aqui para agregar un nuevo ingrediente o suministro a tu lista de stock. Defines el nombre, categoria (Cocina o Barra), unidad de almacenamiento (gramos o ml) y como se miden las entregas, por ejemplo kg o botellas.",
+      "step3_title": "Estadisticas de Stock",
+      "step3_desc": "Haz clic en cualquier tarjeta para filtrar la lista al instante. Total muestra todo, Stock Bajo resalta los articulos escasos, y Cocina y Barra te permiten centrarte en una seccion a la vez.",
+      "step4_title": "Buscar y Ordenar",
+      "step4_desc": "Busca por nombre de producto o marca. Usa el desplegable de orden para ordenar por nombre, menor stock primero o mayor stock primero, util para priorizar tu proximo pedido.",
+      "step5_title": "Tarjetas de Producto",
+      "step5_desc": "Cada tarjeta muestra el nivel de stock actual, tipo de unidad e informacion de costo. Usa Agregar Stock para registrar una entrega, el lapiz para editar detalles o la papelera para eliminar."
+    },
+    "stockInventory": {
+      "step1_title": "Agregar Stock",
+      "step1_desc": "Registra una nueva entrega para cualquier articulo de inventario. Selecciona el articulo, introduce la cantidad recibida y opcionalmente el precio. El nivel de stock se actualiza de inmediato.",
+      "step2_title": "Nuevo Articulo",
+      "step2_desc": "Agrega un nuevo articulo a tu inventario: productos de limpieza, embalaje o equipamiento contado en unidades, piezas, cajas o conjuntos. Establece un nivel minimo de stock para recibir alertas.",
+      "step3_title": "Estadisticas de Inventario",
+      "step3_desc": "Total de Articulos muestra todo tu inventario. Stock Bajo resalta los que han caido por debajo del minimo. Adiciones Recientes cuenta las entradas de los ultimos 7 dias.",
+      "step4_title": "Buscar y Ordenar",
+      "step4_desc": "Busca por nombre o marca. Ordena por nombre, menor stock primero o mayor stock primero para identificar rapidamente lo que necesita reposicion.",
+      "step5_title": "Tarjetas de Articulo",
+      "step5_desc": "Cada tarjeta muestra el stock actual, nivel minimo y ultimo precio de compra. Usa Agregar Stock para registrar una entrega, el lapiz para editar o la papelera para eliminar."
+    },
+    "stockInvoices": {
+      "step1_title": "Nueva Factura",
+      "step1_desc": "Haz clic aqui para registrar una entrega de proveedor. Introduce el numero de referencia, fecha, nombre del proveedor y monto total. Tambien puedes adjuntar una foto de la factura fisica.",
+      "step2_title": "Buscar y Filtrar",
+      "step2_desc": "Busca facturas por numero de referencia o nombre de proveedor. Usa el filtro de fecha para reducir los resultados a hoy, esta semana, este mes o un rango personalizado.",
+      "step3_title": "Lista de Facturas",
+      "step3_desc": "Cada tarjeta muestra el numero de referencia, proveedor, fecha y monto total. Haz clic en Ver Detalles para ver que entradas de stock estan vinculadas a esa factura y las imagenes adjuntas."
+    },
     "stockHub": {
       "step1_title": "Stock de Comida y Bebida",
       "step1_desc": "Gestiona todos los ingredientes y suministros que usan tu cocina y barra. Cada articulo tiene una unidad, un nivel de stock actual y un umbral de stock minimo para avisarte antes de quedarte sin existencias.",
