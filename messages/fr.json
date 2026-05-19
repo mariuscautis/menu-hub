@@ -2985,6 +2985,40 @@
       "step4_desc": "Le bouton Lien envoie un lien de connexion magique a l email du membre pour qu il puisse acceder a son compte sans reinitialiser son mot de passe.",
       "step5_title": "Activer ou Desactiver",
       "step5_desc": "Utilisez les boutons de statut pour activer ou desactiver un membre. Le personnel inactif ne peut pas se connecter mais ses enregistrements et historique sont conserves."
+    },
+    "rota": {
+      "step1_title": "Creer un Quart",
+      "step1_desc": "Cliquez ici pour creer un nouveau quart pour n importe quel membre du personnel. Vous pouvez definir l heure de debut et de fin, l assigner a un departement et choisir la date directement depuis le calendrier.",
+      "step2_title": "Envoyer les Notifications de Planning",
+      "step2_desc": "Une fois votre planning pret, cliquez ici pour envoyer par email a chaque membre du personnel ses quarts publies pour la semaine. Le bouton pulse en ambre quand des modifications n ont pas encore ete envoyees.",
+      "step3_title": "Modeles",
+      "step3_desc": "Enregistrez la semaine actuelle comme modele et reutilisez-le les semaines suivantes. Ideal pour les etablissements avec un schema de quarts regulier qui se repete semaine apres semaine.",
+      "step4_title": "Demandes de Conge",
+      "step4_desc": "Consultez et traitez les demandes de conge en attente de votre equipe. Un badge rouge apparait ici quand une demande attend votre approbation.",
+      "step5_title": "Filtres",
+      "step5_desc": "Filtrez le planning par departement, statut du quart ou membre du personnel specifique. Utilisez ces filtres pour vous concentrer sur une partie de votre equipe sans que le planning complet ne gene.",
+      "step6_title": "Calendrier des Quarts",
+      "step6_desc": "Vos quarts apparaissent ici sous forme de blocs colores. Cliquez sur un creneau vide pour creer un quart, sur un quart existant pour le modifier ou le supprimer, et faites glisser les blocs pour les replanifier."
+    },
+    "timeOff": {
+      "step1_title": "Vue d Ensemble des Demandes",
+      "step1_desc": "Un resume en temps reel de toutes les demandes de conge ventilees par statut. Utilisez ces chiffres pour suivre combien de demandes attendent une decision et combien de jours ont ete approuves.",
+      "step2_title": "Filtres",
+      "step2_desc": "Limitez les resultats par membre du personnel, type de conge ou plage de dates. Les filtres actifs sont mis en evidence avec un badge pour que vous sachiez toujours si la liste est filtree.",
+      "step3_title": "Onglets de Statut",
+      "step3_desc": "Passez entre Toutes, En Attente, Approuvees et Rejetees pour vous concentrer sur un groupe a la fois. Le nombre a cote de chaque onglet indique combien de demandes se trouvent dans cette categorie.",
+      "step4_title": "Fiches de Demande",
+      "step4_desc": "Chaque fiche affiche le nom du membre, le type de conge, les dates et le statut. Cliquez sur une fiche pour voir les details complets, l approuver ou la rejeter, ou modifier les dates si necessaire."
+    },
+    "departments": {
+      "step1_title": "Vos Departements",
+      "step1_desc": "Chaque carte represente un departement de votre etablissement. Les departements regroupent le personnel et controlent les parties du tableau de bord auxquelles ils peuvent acceder une fois connectes.",
+      "step2_title": "Grille des Permissions",
+      "step2_desc": "Cochez ou decochez les permissions pour controler exactement ce que chaque departement peut voir et faire. Les elements coches sont surlignees en violet. Les modifications ne sont pas enregistrees tant que vous ne cliquez pas sur Enregistrer.",
+      "step3_title": "Ajouter un Nouveau Departement",
+      "step3_desc": "Tapez un nom de departement ici et cliquez sur Ajouter un Departement pour le creer. Les nouveaux departements demarrent sans permissions, cochez celles qui s appliquent avant d enregistrer.",
+      "step4_title": "Enregistrer Toutes les Modifications",
+      "step4_desc": "Cliquez ici pour enregistrer toutes les modifications de permissions dans tous les departements en une seule fois. Les changements prennent effet immediatement pour tous les membres assignes a ces departements."
     }
   }
 }

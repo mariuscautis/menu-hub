@@ -10,6 +10,7 @@ import PageTabs from '@/components/PageTabs'
 import { staffTabs } from '@/components/PageTabsConfig'
 import InfoTooltip from '@/components/InfoTooltip'
 import OfflinePageGuard from '@/components/OfflinePageGuard'
+import PageTour from '@/components/PageTour'
 
 const STATUS_CONFIG = {
   pending:   { label: 'Pending',   bg: 'bg-amber-100 dark:bg-amber-900/30',  text: 'text-amber-700 dark:text-amber-400',  dot: 'bg-amber-500',  border: 'border-amber-200 dark:border-amber-800' },
@@ -31,6 +32,7 @@ export default function TimeOffRequestsPage() {
   useModuleGuard('rota')
   const t = useTranslations('timeOffRequests')
   const tg = useTranslations('guide')
+  const tt = useTranslations('tours')
   const restaurantCtx = useRestaurant()
   const [user, setUser] = useState(null)
   const [restaurantData, setRestaurantData] = useState(null)
@@ -205,6 +207,13 @@ export default function TimeOffRequestsPage() {
   }
 
   return (
+    <>
+    <PageTour steps={[
+      { element: '[data-tour="timeoff-stats"]', popover: { title: tt('timeOff.step1_title'), description: tt('timeOff.step1_desc') } },
+      { element: '[data-tour="timeoff-filters"]', popover: { title: tt('timeOff.step2_title'), description: tt('timeOff.step2_desc') } },
+      { element: '[data-tour="timeoff-tabs"]', popover: { title: tt('timeOff.step3_title'), description: tt('timeOff.step3_desc') } },
+      { element: '[data-tour="timeoff-request-list"]', popover: { title: tt('timeOff.step4_title'), description: tt('timeOff.step4_desc') } },
+    ]} />
     <OfflinePageGuard>
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900 dark:bg-zinc-950 p-4 md:p-8">
       <PageTabs tabs={staffTabs} />
@@ -217,7 +226,7 @@ export default function TimeOffRequestsPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mb-6">
+        <div data-tour="timeoff-stats" className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mb-6">
           {[
             { label: t('totalRequests'), value: stats.total, color: 'text-[#6262bd]', border: 'border-[#6262bd]/20', span: '' },
             { label: t('pendingCount'), value: stats.pending, color: 'text-amber-600', border: 'border-amber-200 dark:border-amber-800', span: '' },
@@ -233,7 +242,7 @@ export default function TimeOffRequestsPage() {
         </div>
 
         {/* Filters */}
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 rounded-sm p-5 mb-6">
+        <div data-tour="timeoff-filters" className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 rounded-sm p-5 mb-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 flex items-center gap-2">
               <svg className="w-4 h-4 text-zinc-400 dark:text-zinc-500" fill="currentColor" viewBox="0 0 24 24"><path d="M10 18h4v-2h-4v2zm-7-14v2h18V4H3zm3 7h12v-2H6v2z"/></svg>
@@ -275,7 +284,7 @@ export default function TimeOffRequestsPage() {
         </div>
 
         {/* Tab bar + sort */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
+        <div data-tour="timeoff-tabs" className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 rounded-sm p-1">
             {TABS.map(tab => (
               <button key={tab.key} onClick={() => setActiveTab(tab.key)}
@@ -316,7 +325,7 @@ export default function TimeOffRequestsPage() {
             {hasActiveFilters && <button onClick={clearFilters} className="mt-3 text-sm text-[#6262bd] font-medium hover:underline">Clear filters</button>}
           </div>
         ) : (
-          <div className="space-y-2">
+          <div data-tour="timeoff-request-list" className="space-y-2">
             {displayRequests.map(request => {
               const sc = STATUS_CONFIG[request.status] || STATUS_CONFIG.pending
               const lc = request.leave_type ? LEAVE_LABELS[request.leave_type] : null
@@ -546,5 +555,6 @@ export default function TimeOffRequestsPage() {
       )}
     </div>
     </OfflinePageGuard>
+    </>
   )
 }

@@ -3103,6 +3103,40 @@
       "step4_desc": "The Link button sends a magic login link to the staff member email so they can access their account without needing a password reset.",
       "step5_title": "Activate or Deactivate",
       "step5_desc": "Use the status buttons to activate or deactivate a staff member. Inactive staff cannot log in but their records and rota history are kept."
+    },
+    "rota": {
+      "step1_title": "Create a Shift",
+      "step1_desc": "Click here to create a new shift for any staff member. You can set the start and end time, assign it to a department, and choose a date directly from the calendar.",
+      "step2_title": "Send Rota Notifications",
+      "step2_desc": "Once your rota is ready, click this button to email each staff member their published shifts for the week. The button pulses amber when there are unsaved changes that have not yet been sent.",
+      "step3_title": "Templates",
+      "step3_desc": "Save your current week as a template and reuse it in future weeks. Ideal for venues with a regular shift pattern that repeats week after week.",
+      "step4_title": "Time-Off Requests",
+      "step4_desc": "View and action pending time-off requests from your team. A red badge appears here whenever a request is waiting for your approval.",
+      "step5_title": "Filters",
+      "step5_desc": "Filter the rota by department, shift status, or individual staff member. Use these to focus on a specific part of your team without the full schedule getting in the way.",
+      "step6_title": "Rota Calendar",
+      "step6_desc": "Your shifts appear here as colour-coded blocks. Click any empty slot to create a shift, click an existing shift to edit or delete it, and drag blocks to reschedule them."
+    },
+    "timeOff": {
+      "step1_title": "Request Overview",
+      "step1_desc": "A live summary of all time-off requests broken down by status. Use these numbers to keep track of how many requests are waiting for a decision and how many days have been approved.",
+      "step2_title": "Filters",
+      "step2_desc": "Narrow results by staff member, leave type, or date range. Active filters are highlighted with a badge so you always know if the list is showing a filtered view.",
+      "step3_title": "Status Tabs",
+      "step3_desc": "Switch between All, Pending, Approved, and Rejected to focus on one group at a time. The number next to each tab shows how many requests are in that category.",
+      "step4_title": "Request Cards",
+      "step4_desc": "Each card shows the staff name, leave type, dates, and status. Click a card to expand it and see full details, approve or reject it, or edit the request dates if needed."
+    },
+    "departments": {
+      "step1_title": "Your Departments",
+      "step1_desc": "Each card represents a department at your venue. Departments group staff together and control which parts of the dashboard they can access when logged in.",
+      "step2_title": "Permissions Grid",
+      "step2_desc": "Check or uncheck permissions to control exactly what each department can see and do. Checked items are highlighted in purple. Changes are not saved until you click Save at the bottom.",
+      "step3_title": "Add a New Department",
+      "step3_desc": "Type a department name here and click Add Department to create it. New departments start with no permissions — tick the ones that apply before saving.",
+      "step4_title": "Save All Changes",
+      "step4_desc": "Click here to save every permission change across all departments in one go. Changes take effect immediately for all staff members assigned to those departments."
     }
   }
 }

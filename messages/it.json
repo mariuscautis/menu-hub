@@ -2985,6 +2985,40 @@
       "step4_desc": "Il pulsante Link invia un link di accesso magico all email del membro per accedere al proprio account senza reimpostare la password.",
       "step5_title": "Attiva o Disattiva",
       "step5_desc": "Usa i pulsanti di stato per attivare o disattivare un membro. Il personale inattivo non puo accedere ma i suoi dati e lo storico turni vengono conservati."
+    },
+    "rota": {
+      "step1_title": "Crea un Turno",
+      "step1_desc": "Clicca qui per creare un nuovo turno per qualsiasi membro del personale. Puoi impostare l orario di inizio e fine, assegnarlo a un reparto e scegliere la data direttamente dal calendario.",
+      "step2_title": "Invia Notifiche del Turno",
+      "step2_desc": "Una volta che il turno e pronto, clicca qui per inviare via email a ogni membro del personale i propri turni pubblicati per la settimana. Il pulsante pulsa in ambra quando ci sono modifiche non ancora inviate.",
+      "step3_title": "Modelli",
+      "step3_desc": "Salva la settimana corrente come modello e riutilizzala nelle settimane future. Ideale per i locali con uno schema di turni regolare che si ripete settimana dopo settimana.",
+      "step4_title": "Richieste di Assenza",
+      "step4_desc": "Visualizza e gestisci le richieste di assenza in sospeso del tuo team. Appare un badge rosso qui ogni volta che una richiesta e in attesa della tua approvazione.",
+      "step5_title": "Filtri",
+      "step5_desc": "Filtra il turno per reparto, stato del turno o singolo membro del personale. Usa questi filtri per concentrarti su una parte del team senza che l intero programma sia d intralcio.",
+      "step6_title": "Calendario dei Turni",
+      "step6_desc": "I tuoi turni appaiono qui come blocchi colorati. Clicca su uno slot vuoto per creare un turno, su un turno esistente per modificarlo o eliminarlo, e trascina i blocchi per riprogrammarli."
+    },
+    "timeOff": {
+      "step1_title": "Panoramica delle Richieste",
+      "step1_desc": "Un riepilogo in tempo reale di tutte le richieste di assenza suddivise per stato. Usa questi numeri per tenere traccia di quante richieste sono in attesa di una decisione e quanti giorni sono stati approvati.",
+      "step2_title": "Filtri",
+      "step2_desc": "Restringe i risultati per membro del personale, tipo di congedo o intervallo di date. I filtri attivi sono evidenziati con un badge in modo da sapere sempre se la lista mostra una vista filtrata.",
+      "step3_title": "Schede di Stato",
+      "step3_desc": "Passa tra Tutte, In Attesa, Approvate e Rifiutate per concentrarti su un gruppo alla volta. Il numero accanto a ogni scheda mostra quante richieste si trovano in quella categoria.",
+      "step4_title": "Schede delle Richieste",
+      "step4_desc": "Ogni scheda mostra il nome del membro, il tipo di congedo, le date e lo stato. Clicca su una scheda per vedere i dettagli completi, approvarla o rifiutarla, o modificare le date se necessario."
+    },
+    "departments": {
+      "step1_title": "I Tuoi Reparti",
+      "step1_desc": "Ogni carta rappresenta un reparto del tuo locale. I reparti raggruppano il personale e controllano le parti della dashboard a cui possono accedere una volta effettuato il login.",
+      "step2_title": "Griglia dei Permessi",
+      "step2_desc": "Seleziona o deseleziona i permessi per controllare esattamente cosa ogni reparto puo vedere e fare. Gli elementi selezionati sono evidenziati in viola. Le modifiche non vengono salvate finche non clicchi su Salva.",
+      "step3_title": "Aggiungi un Nuovo Reparto",
+      "step3_desc": "Digita un nome di reparto qui e clicca su Aggiungi Reparto per crearlo. I nuovi reparti iniziano senza permessi, seleziona quelli applicabili prima di salvare.",
+      "step4_title": "Salva Tutte le Modifiche",
+      "step4_desc": "Clicca qui per salvare tutte le modifiche ai permessi di tutti i reparti in una sola volta. Le modifiche hanno effetto immediato per tutti i membri assegnati a quei reparti."
     }
   }
 }

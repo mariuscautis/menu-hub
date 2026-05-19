@@ -2985,6 +2985,40 @@
       "step4_desc": "Butonul Link trimite un link magic de autentificare la emailul membrului pentru a accesa contul fara a reseta parola.",
       "step5_title": "Activeaza sau Dezactiveaza",
       "step5_desc": "Foloseste butoanele de status pentru a activa sau dezactiva un membru. Personalul inactiv nu se poate autentifica dar inregistrarile si istoricul turelor sunt pastrate."
+    },
+    "rota": {
+      "step1_title": "Creeaza un Tur",
+      "step1_desc": "Apasa aici pentru a crea un tur nou pentru orice membru al personalului. Poti seta ora de inceput si sfarsit, il poti atribui unui departament si alege data direct din calendar.",
+      "step2_title": "Trimite Notificari Tura",
+      "step2_desc": "Odata ce tura este gata, apasa aici pentru a trimite prin email fiecarui membru al personalului turele publicate pentru saptamana. Butonul pulseaza in chihlimbar cand exista modificari netrimise.",
+      "step3_title": "Sabloane",
+      "step3_desc": "Salveaza saptamana curenta ca sablon si reutilizeaz-o in saptamanile viitoare. Ideal pentru localurile cu un program de ture regulat care se repeta saptamana dupa saptamana.",
+      "step4_title": "Cereri de Absenta",
+      "step4_desc": "Vizualizeaza si gestioneaza cererile de absenta in asteptare ale echipei tale. Apare o insigna rosie aici de fiecare data cand o cerere asteapta aprobarea ta.",
+      "step5_title": "Filtre",
+      "step5_desc": "Filtreaza tura dupa departament, starea turei sau un anumit membru al personalului. Foloseste aceste filtre pentru a te concentra pe o parte a echipei fara ca tot programul sa fie in cale.",
+      "step6_title": "Calendar Ture",
+      "step6_desc": "Turele tale apar aici ca blocuri colorate. Apasa pe un slot gol pentru a crea o tura, pe o tura existenta pentru a o edita sau sterge, si trage blocurile pentru a le reprograma."
+    },
+    "timeOff": {
+      "step1_title": "Rezumat Cereri",
+      "step1_desc": "Un rezumat in timp real al tuturor cererilor de absenta impartite pe status. Foloseste aceste numere pentru a urmari cate cereri asteapta o decizie si cate zile au fost aprobate.",
+      "step2_title": "Filtre",
+      "step2_desc": "Restring rezultatele dupa membrul personalului, tipul de concediu sau intervalul de date. Filtrele active sunt evidentiate cu o insigna astfel incat sa stii intotdeauna daca lista arata o vedere filtrata.",
+      "step3_title": "Tab-uri Status",
+      "step3_desc": "Comuta intre Toate, In Asteptare, Aprobate si Respinse pentru a te concentra pe un grup la un moment dat. Numarul de langa fiecare tab arata cate cereri se afla in acea categorie.",
+      "step4_title": "Carduri Cereri",
+      "step4_desc": "Fiecare card afiseaza numele membrului, tipul de concediu, datele si statusul. Apasa pe un card pentru a vedea detaliile complete, a-l aproba sau respinge, sau edita datele daca este necesar."
+    },
+    "departments": {
+      "step1_title": "Departamentele Tale",
+      "step1_desc": "Fiecare card reprezinta un departament din localul tau. Departamentele grupeaza personalul si controleaza partile din panou la care pot accesa dupa autentificare.",
+      "step2_title": "Grila Permisiuni",
+      "step2_desc": "Bifeaza sau debifeaza permisiunile pentru a controla exact ce poate vedea si face fiecare departament. Elementele bifate sunt evidentiate in violet. Modificarile nu sunt salvate pana nu apesi Salveaza.",
+      "step3_title": "Adauga un Departament Nou",
+      "step3_desc": "Scrie un nume de departament aici si apasa Adauga Departament pentru a-l crea. Departamentele noi incep fara permisiuni, bifeaza-le pe cele aplicabile inainte de salvare.",
+      "step4_title": "Salveaza Toate Modificarile",
+      "step4_desc": "Apasa aici pentru a salva toate modificarile permisiunilor din toate departamentele dintr-o data. Modificarile au efect imediat pentru toti membrii atribuiti acelor departamente."
     }
   }
 }

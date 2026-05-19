@@ -9,10 +9,12 @@ import { useAdminSupabase } from '@/hooks/useAdminSupabase';
 import PageTabs from '@/components/PageTabs';
 import { staffTabs } from '@/components/PageTabsConfig';
 import OfflinePageGuard from '@/components/OfflinePageGuard'
+import PageTour from '@/components/PageTour'
 
 export default function DepartmentsSettingsPage() {
   const t = useTranslations('departmentsSettings');
   const tg = useTranslations('guide');
+  const tt = useTranslations('tours');
   const restaurantCtx = useRestaurant();
   const supabase = useAdminSupabase();
 
@@ -182,6 +184,13 @@ export default function DepartmentsSettingsPage() {
     );
   }
   return (
+    <>
+    <PageTour steps={[
+      { element: '[data-tour="dept-list"]', popover: { title: tt('departments.step1_title'), description: tt('departments.step1_desc') } },
+      { element: '[data-tour="dept-permissions-grid"]', popover: { title: tt('departments.step2_title'), description: tt('departments.step2_desc') } },
+      { element: '[data-tour="dept-add-new"]', popover: { title: tt('departments.step3_title'), description: tt('departments.step3_desc') } },
+      { element: '[data-tour="dept-save-btn"]', popover: { title: tt('departments.step4_title'), description: tt('departments.step4_desc') } },
+    ]} />
     <OfflinePageGuard>
     <div className="min-h-screen p-4 sm:p-8">
       <PageTabs tabs={staffTabs} />
@@ -206,7 +215,7 @@ export default function DepartmentsSettingsPage() {
         </div>
       )}
       {/* Departments List */}
-      <div className="space-y-6 mb-6">
+      <div data-tour="dept-list" className="space-y-6 mb-6">
         {departments.map((dept, index) => (
           <div key={dept.id || `new-${index}`} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
             {/* Department Header */}
@@ -242,7 +251,7 @@ export default function DepartmentsSettingsPage() {
               </div>
             </div>
             {/* Permissions Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div data-tour={index === 0 ? 'dept-permissions-grid' : undefined} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {AVAILABLE_PERMISSIONS.map(permission => {
                 const isChecked = dept.permissions.includes(permission.id);
                 return (
@@ -282,7 +291,7 @@ export default function DepartmentsSettingsPage() {
         ))}
       </div>
       {/* Add New Department */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-6">
+      <div data-tour="dept-add-new" className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-6">
         <h3 className="text-lg font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-3">{t('addNewDepartment')}</h3>
         <div className="flex flex-col sm:flex-row gap-3">
           <input
@@ -326,6 +335,7 @@ export default function DepartmentsSettingsPage() {
       {/* Save Button */}
       <div className="flex justify-end">
         <button
+          data-tour="dept-save-btn"
           onClick={handleSave}
           disabled={saving}
           className="px-8 py-3 bg-green-600 text-white rounded-sm hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
@@ -335,5 +345,6 @@ export default function DepartmentsSettingsPage() {
       </div>
     </div>
     </OfflinePageGuard>
+    </>
   );
 }

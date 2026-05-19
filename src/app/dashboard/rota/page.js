@@ -26,6 +26,7 @@ import StaffAvailabilityCalendar from './StaffAvailabilityCalendar';
 import PageTabs from '@/components/PageTabs'
 import { staffTabs } from '@/components/PageTabsConfig'
 import OfflinePageGuard from '@/components/OfflinePageGuard'
+import PageTour from '@/components/PageTour'
 
 const DnDCalendar = withDragAndDrop(Calendar);
 
@@ -33,6 +34,7 @@ export default function RotaPage() {
   useModuleGuard('rota')
   const t = useTranslations('rota');
   const tg = useTranslations('guide');
+  const tt = useTranslations('tours');
   const { locale } = useLanguage();
 
   // Set moment locale and create localizer based on current language
@@ -355,6 +357,15 @@ export default function RotaPage() {
   }
 
   return (
+    <>
+    <PageTour steps={[
+      { element: '[data-tour="rota-create-shift"]', popover: { title: tt('rota.step1_title'), description: tt('rota.step1_desc') } },
+      { element: '[data-tour="rota-notify-btn"]', popover: { title: tt('rota.step2_title'), description: tt('rota.step2_desc') } },
+      { element: '[data-tour="rota-templates-btn"]', popover: { title: tt('rota.step3_title'), description: tt('rota.step3_desc') } },
+      { element: '[data-tour="rota-requests-btn"]', popover: { title: tt('rota.step4_title'), description: tt('rota.step4_desc') } },
+      { element: '[data-tour="rota-filters"]', popover: { title: tt('rota.step5_title'), description: tt('rota.step5_desc') } },
+      { element: '[data-tour="rota-calendar"]', popover: { title: tt('rota.step6_title'), description: tt('rota.step6_desc') } },
+    ]} />
     <OfflinePageGuard>
     <div className="min-h-screen p-4 sm:p-8">
       <PageTabs tabs={staffTabs} />
@@ -371,6 +382,7 @@ export default function RotaPage() {
           {/* Send Rota Notifications button */}
           <div className="flex flex-col items-end gap-0.5">
             <button
+              data-tour="rota-notify-btn"
               onClick={handleSendNotifications}
               disabled={notifying}
               className={`px-5 py-2.5 rounded-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
@@ -388,12 +400,14 @@ export default function RotaPage() {
             )}
           </div>
           <button
+            data-tour="rota-templates-btn"
             onClick={() => setShowTemplatesModal(true)}
             className="px-3 sm:px-5 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm hover:border-[#6262bd] transition-colors font-medium text-sm sm:text-base"
           >
             📋 {t('templates')}
           </button>
           <button
+            data-tour="rota-requests-btn"
             onClick={() => setShowRequestsModal(true)}
             className="relative px-3 sm:px-5 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm hover:border-[#6262bd] transition-colors font-medium text-sm sm:text-base"
           >
@@ -411,6 +425,7 @@ export default function RotaPage() {
             👥 <span className="hidden sm:inline">{t('currentlyWorking')}</span><span className="sm:hidden">Working</span>
           </button>
           <button
+            data-tour="rota-create-shift"
             onClick={() => {
               setSelectedShift(null);
               setShowShiftModal(true);
@@ -423,7 +438,7 @@ export default function RotaPage() {
       </div>
 
       {/* Filters */}
-      <div className="mb-6 flex flex-wrap gap-3">
+      <div data-tour="rota-filters" className="mb-6 flex flex-wrap gap-3">
         <select
           value={filters.department}
           onChange={(e) => setFilters({ ...filters, department: e.target.value })}
@@ -469,7 +484,7 @@ export default function RotaPage() {
       </div>
 
       {/* Calendar */}
-      <div className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-6 shadow-sm mb-8" style={{ height: 700 }}>
+      <div data-tour="rota-calendar" className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-6 shadow-sm mb-8" style={{ height: 700 }}>
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
@@ -558,5 +573,6 @@ export default function RotaPage() {
       )}
     </div>
     </OfflinePageGuard>
+    </>
   );
 }
