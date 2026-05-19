@@ -343,7 +343,7 @@ export default function BillingPage() {
                   </span>
                 ) : null
               })}
-              {subscriptionPlans.length === 0 && (
+              {subscriptionPlans.length === 0 && !isTrialing && subscriptionStatus !== 'trialing' && (
                 <span className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('noActiveModules')}</span>
               )}
             </div>
