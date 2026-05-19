@@ -89,165 +89,78 @@ export async function POST(request) {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
     const magicLink = `${baseUrl}/staff-magic-login?token=${token}`;
 
-    // Send email using Resend
-    const resendApiKey = process.env.RESEND_API_KEY;
-    const emailFrom = process.env.EMAIL_FROM || 'noreply@yourdomain.com';
-
-    console.log('Email configuration:', {
-      hasApiKey: !!resendApiKey,
-      emailFrom,
-      staffEmail: staff.email,
-      restaurantName: restaurant.name
-    });
-
-    if (!resendApiKey) {
-      console.error('RESEND_API_KEY not configured');
-      return NextResponse.json(
-        {
-          error: 'Email service not configured - Missing RESEND_API_KEY',
-          magic_link: magicLink // Return link for manual sending
-        },
-        { status: 500 }
-      );
-    }
-
     const expiryDate = new Date(expiresAt).toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
 
-    const emailHtml = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Your Weekly Rota Access</title>
-      </head>
-      <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc;">
-        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; padding: 40px 20px;">
-          <tr>
-            <td align="center">
-              <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+    const emailHtml = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8">
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f8; }
+    .container { max-width: 600px; margin: 30px auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+    .header { background-color: #6262bd; color: white; padding: 36px 30px; text-align: center; }
+    .header h1 { margin: 0; font-size: 26px; }
+    .header p { margin: 8px 0 0; opacity: 0.85; font-size: 15px; }
+    .content { padding: 32px 30px; }
+    .button { display: block; width: fit-content; margin: 28px auto; padding: 14px 32px; background-color: #6262bd; color: white !important; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px; }
+    .info-box { background-color: #f1f5f9; border-left: 4px solid #6262bd; padding: 16px 20px; border-radius: 6px; margin: 24px 0; font-size: 14px; color: #475569; }
+    .link-box { word-break: break-all; color: #6262bd; font-size: 13px; background-color: #f8fafc; padding: 12px; border-radius: 6px; margin: 12px 0; }
+    .divider { border: none; border-top: 1px solid #eee; margin: 24px 0; }
+    .footer { background: #f9f9fb; padding: 18px 30px; text-align: center; font-size: 12px; color: #aaa; border-top: 1px solid #eee; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      ${restaurant.logo_url ? `<img src="${restaurant.logo_url}" alt="${restaurant.name}" style="max-width:120px;max-height:60px;margin-bottom:16px;display:block;margin-left:auto;margin-right:auto;">` : ''}
+      <h1>Staff Dashboard Access</h1>
+      <p>${restaurant.name}</p>
+    </div>
+    <div class="content">
+      <p>Hi ${staff.name},</p>
+      <p>Your manager has sent you a login link for your staff dashboard. Click the button below to access your rota, shifts, and time-off requests.</p>
+      <a href="${magicLink}" class="button">Access My Dashboard →</a>
+      <div class="info-box">
+        <strong>Important:</strong> This link is valid until <strong>${expiryDate}</strong> and can only be used once. Contact your manager if you need a new one.
+      </div>
+      <hr class="divider" />
+      <p style="font-size:13px;color:#64748b;">If the button above doesn't work, copy and paste this link into your browser:</p>
+      <p class="link-box">${magicLink}</p>
+    </div>
+    <div class="footer">
+      Sent by ${restaurant.name} via Veno App.<br>
+      If you weren't expecting this, you can safely ignore it.
+    </div>
+  </div>
+</body>
+</html>`;
 
-                <!-- Header -->
-                <tr>
-                  <td style="background: linear-gradient(135deg, #6262bd 0%, #8b5cf6 100%); padding: 40px 30px; text-align: center;">
-                    ${restaurant.logo_url ? `
-                      <img src="${restaurant.logo_url}" alt="${restaurant.name}" style="max-width: 120px; max-height: 80px; margin-bottom: 20px;">
-                    ` : ''}
-                    <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">Your Weekly Rota</h1>
-                    <p style="color: rgba(255, 255, 255, 0.9); margin: 10px 0 0 0; font-size: 16px;">${restaurant.name}</p>
-                  </td>
-                </tr>
-
-                <!-- Content -->
-                <tr>
-                  <td style="padding: 40px 30px;">
-                    <p style="color: #1e293b; font-size: 18px; margin: 0 0 20px 0; font-weight: 600;">Hi ${staff.name},</p>
-
-                    <p style="color: #475569; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
-                      Access your personal staff dashboard to view your weekly rota, upcoming shifts, and manage your time-off requests.
-                    </p>
-
-                    <!-- CTA Button -->
-                    <table width="100%" cellpadding="0" cellspacing="0" style="margin: 32px 0;">
-                      <tr>
-                        <td align="center">
-                          <a href="${magicLink}" style="display: inline-block; background: linear-gradient(135deg, #6262bd 0%, #8b5cf6 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 6px rgba(98, 98, 189, 0.3);">
-                            Access Your Dashboard
-                          </a>
-                        </td>
-                      </tr>
-                    </table>
-
-                    <!-- Info Box -->
-                    <div style="background-color: #f1f5f9; border-left: 4px solid #6262bd; padding: 16px 20px; border-radius: 6px; margin: 24px 0;">
-                      <p style="color: #475569; font-size: 14px; margin: 0; line-height: 1.6;">
-                        <strong style="color: #1e293b;">Important:</strong> This link is valid until <strong>${expiryDate}</strong> and can only be used once. If you need a new link, please contact your manager.
-                      </p>
-                    </div>
-
-                    <p style="color: #64748b; font-size: 14px; line-height: 1.6; margin: 24px 0 0 0;">
-                      If the button above doesn't work, you can copy and paste this link into your browser:
-                    </p>
-                    <p style="word-break: break-all; color: #6262bd; font-size: 13px; background-color: #f8fafc; padding: 12px; border-radius: 6px; margin: 12px 0;">
-                      ${magicLink}
-                    </p>
-                  </td>
-                </tr>
-
-                <!-- Footer -->
-                <tr>
-                  <td style="background-color: #f8fafc; padding: 24px 30px; border-top: 1px solid #e2e8f0;">
-                    <p style="color: #94a3b8; font-size: 13px; line-height: 1.6; margin: 0; text-align: center;">
-                      This email was sent by ${restaurant.name}.<br>
-                      If you didn't request this link, you can safely ignore this email.
-                    </p>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Security Notice -->
-              <p style="color: #94a3b8; font-size: 12px; text-align: center; margin: 20px 0 0 0; max-width: 600px;">
-                For security reasons, never share this link with anyone. This link provides direct access to your personal staff dashboard.
-              </p>
-            </td>
-          </tr>
-        </table>
-      </body>
-      </html>
-    `;
-
-    const emailPayload = {
-      from: emailFrom,
-      to: staff.email,
-      subject: `Your Weekly Rota - ${restaurant.name}`,
-      html: emailHtml
-    };
-
-    console.log('Sending email with payload:', {
-      from: emailPayload.from,
-      to: emailPayload.to,
-      subject: emailPayload.subject
-    });
-
-    const emailResponse = await fetch('https://api.resend.com/emails', {
+    const emailResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${resendApiKey}`,
-        'Content-Type': 'application/json'
+        'accept': 'application/json',
+        'api-key': process.env.BREVO_API_KEY,
+        'content-type': 'application/json',
       },
-      body: JSON.stringify(emailPayload)
+      body: JSON.stringify({
+        sender: {
+          name: process.env.EMAIL_FROM_NAME || 'Veno App',
+          email: process.env.EMAIL_FROM || 'noreply@venoapp.com',
+        },
+        to: [{ email: staff.email, name: staff.name || staff.email }],
+        subject: `Your staff dashboard access — ${restaurant.name}`,
+        htmlContent: emailHtml,
+      }),
     });
 
     if (!emailResponse.ok) {
       const emailError = await emailResponse.json();
-      console.error('Failed to send email:', {
-        status: emailResponse.status,
-        statusText: emailResponse.statusText,
-        error: emailError
-      });
-
-      // Special handling for Resend testing email restriction
-      if (emailResponse.status === 403 && emailError.message?.includes('testing emails')) {
-        return NextResponse.json(
-          {
-            error: 'Email service is in test mode',
-            message: 'Resend requires domain verification to send to external addresses. Please verify a domain at resend.com/domains or send the link manually.',
-            magic_link: magicLink // Return link for manual sending
-          },
-          { status: 500 }
-        );
-      }
-
+      console.error('Brevo send failed:', { status: emailResponse.status, error: emailError });
       return NextResponse.json(
         {
           error: `Failed to send email: ${emailError.message || emailResponse.statusText}`,
-          details: emailError,
-          magic_link: magicLink // Return link for manual sending
+          magic_link: magicLink,
         },
         { status: 500 }
       );
@@ -258,8 +171,8 @@ export async function POST(request) {
     return NextResponse.json({
       success: true,
       email_sent_to: staff.email,
-      email_id: emailResult.id,
-      expires_at: expiresAt.toISOString()
+      email_id: emailResult.messageId,
+      expires_at: expiresAt.toISOString(),
     });
 
   } catch (error) {
