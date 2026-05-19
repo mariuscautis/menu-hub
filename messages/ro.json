@@ -478,7 +478,10 @@
     },
     "notifySuccess": "Notificări trimise către {sent} angajat{plural}.",
     "notifySkipped": "{skipped} omis — fără adresă de email.",
-    "notifyFailed": "Trimiterea notificărilor a eșuat. Încearcă din nou."
+    "notifyFailed": "Trimiterea notificărilor a eșuat. Încearcă din nou.",
+    "sendNotifications": "Trimite Notificări Rota",
+    "sendNotificationsShort": "Notifică",
+    "sendingNotifications": "Se trimite..."
   },
   "timeOffRequests": {
     "title": "Cereri de Concediu",

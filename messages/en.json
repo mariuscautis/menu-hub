@@ -517,7 +517,10 @@
     },
     "notifySuccess": "Notifications sent to {sent} staff member{plural}.",
     "notifySkipped": "{skipped} skipped — no email on file.",
-    "notifyFailed": "Failed to send notifications. Please try again."
+    "notifyFailed": "Failed to send notifications. Please try again.",
+    "sendNotifications": "Send Rota Notifications",
+    "sendNotificationsShort": "Notify",
+    "sendingNotifications": "Sending..."
   },
   "timeOffRequests": {
     "title": "Time-Off Requests",

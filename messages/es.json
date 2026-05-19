@@ -478,7 +478,10 @@
     },
     "notifySuccess": "Notificaciones enviadas a {sent} empleado{plural}.",
     "notifySkipped": "{skipped} omitido(s) — sin email registrado.",
-    "notifyFailed": "Error al enviar notificaciones. Inténtalo de nuevo."
+    "notifyFailed": "Error al enviar notificaciones. Inténtalo de nuevo.",
+    "sendNotifications": "Enviar Notificaciones",
+    "sendNotificationsShort": "Notificar",
+    "sendingNotifications": "Enviando..."
   },
   "timeOffRequests": {
     "title": "Solicitudes de Permiso",

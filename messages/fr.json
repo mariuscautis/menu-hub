@@ -478,7 +478,10 @@
     },
     "notifySuccess": "Notifications envoyées à {sent} employé{plural}.",
     "notifySkipped": "{skipped} ignoré(s) — pas d'email enregistré.",
-    "notifyFailed": "Échec de l'envoi des notifications. Veuillez réessayer."
+    "notifyFailed": "Échec de l'envoi des notifications. Veuillez réessayer.",
+    "sendNotifications": "Envoyer les Notifications",
+    "sendNotificationsShort": "Notifier",
+    "sendingNotifications": "Envoi..."
   },
   "timeOffRequests": {
     "title": "Demandes de Congés",

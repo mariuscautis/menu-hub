@@ -478,7 +478,10 @@
     },
     "notifySuccess": "Notifiche inviate a {sent} membro{plural} del personale.",
     "notifySkipped": "{skipped} saltato/i — nessuna email registrata.",
-    "notifyFailed": "Invio notifiche fallito. Riprova."
+    "notifyFailed": "Invio notifiche fallito. Riprova.",
+    "sendNotifications": "Invia Notifiche Turni",
+    "sendNotificationsShort": "Notifica",
+    "sendingNotifications": "Invio..."
   },
   "timeOffRequests": {
     "title": "Richieste di Permesso",
