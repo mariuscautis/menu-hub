@@ -69,11 +69,17 @@ const MODULE_CONFIG = [
 const DEFAULT_MODULES = { ordering: true, reservations: true, rota: true, analytics: true, reports: true, cash_drawer: true }
 const PLAN_LABELS = { orders: 'Orders', bookings: 'Bookings', team: 'Team' }
 const SUB_STATUS_TILE = {
-  trialing: 'bg-blue-100 text-blue-700',
-  active:   'bg-green-100 text-green-700',
-  past_due: 'bg-amber-100 text-amber-700',
-  canceled: 'bg-red-100 text-red-700',
-  unpaid:   'bg-red-100 text-red-700',
+  trialing:       'bg-blue-100 text-blue-700',
+  trial_expired:  'bg-slate-100 text-slate-500',
+  active:         'bg-green-100 text-green-700',
+  past_due:       'bg-amber-100 text-amber-700',
+  canceled:       'bg-red-100 text-red-700',
+  unpaid:         'bg-red-100 text-red-700',
+}
+
+function effectiveSubStatus(sub, trialEndsAt) {
+  if (sub === 'trialing' && trialEndsAt && new Date(trialEndsAt) < new Date()) return 'trial_expired'
+  return sub
 }
 const ROW_STATUS = {
   pending:  { dot: 'bg-amber-400', label: 'Pending approval',     labelClass: 'bg-amber-100 text-amber-700 border-amber-200' },
@@ -591,7 +597,7 @@ export default function AdminRestaurants() {
             <tbody>
               {filteredRestaurants.map((restaurant, idx) => {
                 const statusCfg = ROW_STATUS[restaurant.status] || ROW_STATUS.pending
-                const sub = restaurant.subscription_status || 'trialing'
+                const sub = effectiveSubStatus(restaurant.subscription_status || 'trialing', restaurant.trial_ends_at)
                 const plans = (restaurant.subscription_plans || '').split(',').filter(Boolean)
                 const mods = { ...DEFAULT_MODULES, ...(restaurant.enabled_modules || {}) }
                 const smsCount = smsUsageMap[restaurant.id] || 0
@@ -653,7 +659,7 @@ export default function AdminRestaurants() {
                     <td className="px-5 py-4">
                       <div className="flex flex-col gap-1">
                         <span className={`px-2 py-0.5 rounded-lg text-xs font-semibold w-fit ${SUB_STATUS_TILE[sub] || 'bg-slate-100 text-slate-600'}`}>
-                          {sub.replace('_', ' ')}
+                          {sub.replace(/_/g, ' ')}
                         </span>
                         {plans.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
