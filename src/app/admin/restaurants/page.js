@@ -126,6 +126,9 @@ export default function AdminRestaurants() {
   const [suspensionMessage, setSuspensionMessage] = useState('')
   const [suspending, setSuspending] = useState(false)
 
+  // Soft-delete confirmation modal
+  const [deleteTarget, setDeleteTarget] = useState(null)
+
   // Registered interests
   const [interests, setInterests] = useState([])
   const [interestsExpanded, setInterestsExpanded] = useState(false)
@@ -288,12 +291,13 @@ export default function AdminRestaurants() {
     router.push('/dashboard')
   }
 
-  const deleteRestaurant = async (id, name) => {
-    if (!confirm(`Are you sure you want to delete "${name}"? The record will be kept and can be reinstated later.`)) return
+  const confirmDeleteRestaurant = async () => {
+    if (!deleteTarget) return
     await supabase
       .from('restaurants')
       .update({ deleted_at: new Date().toISOString(), status: 'rejected' })
-      .eq('id', id)
+      .eq('id', deleteTarget.id)
+    setDeleteTarget(null)
     fetchRestaurants()
   }
 
@@ -797,7 +801,7 @@ export default function AdminRestaurants() {
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
                   </button>
                 )}
-                <button onClick={() => { deleteRestaurant(selectedRestaurant.id, selectedRestaurant.name); closeModulePanel() }} className="p-2 rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors" title="Delete">
+                <button onClick={() => { setDeleteTarget(selectedRestaurant); closeModulePanel() }} className="p-2 rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors" title="Delete">
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
                 </button>
                 <button onClick={closeModulePanel} className="p-2 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
@@ -973,6 +977,33 @@ export default function AdminRestaurants() {
                   </div>
                 </form>
               )}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Soft-delete confirmation modal */}
+      {deleteTarget && (
+        <>
+          <div className="fixed inset-0 bg-black/40 z-50" onClick={() => setDeleteTarget(null)} />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-6 pointer-events-none">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 pointer-events-auto">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-800">Delete restaurant</h3>
+                  <p className="text-sm text-slate-500">{deleteTarget.name}</p>
+                </div>
+              </div>
+              <p className="text-sm text-slate-600 mb-6">
+                This will soft-delete the account. The record is kept and can be reinstated later from the Deleted Restaurants page.
+              </p>
+              <div className="flex gap-3">
+                <button onClick={() => setDeleteTarget(null)} className="flex-1 px-4 py-2.5 border-2 border-slate-200 text-slate-600 rounded-xl font-medium hover:border-slate-300 transition-colors text-sm">Cancel</button>
+                <button onClick={confirmDeleteRestaurant} className="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium transition-colors text-sm">Delete</button>
+              </div>
             </div>
           </div>
         </>

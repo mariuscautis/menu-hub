@@ -8,6 +8,12 @@ export default function DeletedRestaurants() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
 
+  // Modal state
+  const [reinstateTarget, setReinstateTarget] = useState(null)
+  const [permanentDeleteTarget, setPermanentDeleteTarget] = useState(null)
+  const [actionLoading, setActionLoading] = useState(false)
+  const [actionError, setActionError] = useState(null)
+
   useEffect(() => {
     fetchDeleted()
   }, [])
@@ -21,8 +27,9 @@ export default function DeletedRestaurants() {
     setLoading(false)
   }
 
-  const reinstateRestaurant = async (restaurant) => {
-    if (!confirm(`Reinstate "${restaurant.name}"? They will be directed to billing to subscribe.`)) return
+  const confirmReinstate = async () => {
+    if (!reinstateTarget) return
+    setActionLoading(true)
     await supabase
       .from('restaurants')
       .update({
@@ -33,8 +40,32 @@ export default function DeletedRestaurants() {
         subscription_plans: '',
         enabled_modules: { ordering: false, analytics: false, reservations: false, rota: false },
       })
-      .eq('id', restaurant.id)
+      .eq('id', reinstateTarget.id)
+    setActionLoading(false)
+    setReinstateTarget(null)
     fetchDeleted()
+  }
+
+  const confirmPermanentDelete = async () => {
+    if (!permanentDeleteTarget) return
+    setActionLoading(true)
+    setActionError(null)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/admin/permanent-delete', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+        body: JSON.stringify({ restaurantId: permanentDeleteTarget.id }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setActionError(data.error); return }
+      setPermanentDeleteTarget(null)
+      fetchDeleted()
+    } catch (err) {
+      setActionError(err.message)
+    } finally {
+      setActionLoading(false)
+    }
   }
 
   const formatDate = (dateString) => {
@@ -130,12 +161,18 @@ export default function DeletedRestaurants() {
                     )}
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex justify-end">
+                    <div className="flex justify-end gap-2">
                       <button
-                        onClick={() => reinstateRestaurant(r)}
+                        onClick={() => setReinstateTarget(r)}
                         className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200 transition-colors"
                       >
                         Reinstate
+                      </button>
+                      <button
+                        onClick={() => { setPermanentDeleteTarget(r); setActionError(null) }}
+                        className="px-3 py-1.5 bg-red-100 text-red-600 rounded-lg text-sm font-medium hover:bg-red-200 transition-colors"
+                      >
+                        Delete permanently
                       </button>
                     </div>
                   </td>
@@ -144,6 +181,68 @@ export default function DeletedRestaurants() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {/* Reinstate confirmation modal */}
+      {reinstateTarget && (
+        <>
+          <div className="fixed inset-0 bg-black/40 z-50" onClick={() => !actionLoading && setReinstateTarget(null)} />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-6 pointer-events-none">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 pointer-events-auto">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-800">Reinstate restaurant</h3>
+                  <p className="text-sm text-slate-500">{reinstateTarget.name}</p>
+                </div>
+              </div>
+              <p className="text-sm text-slate-600 mb-6">
+                This will restore the account with <strong>trialing</strong> status. All modules will be disabled — they will need to subscribe to re-enable them.
+              </p>
+              <div className="flex gap-3">
+                <button onClick={() => setReinstateTarget(null)} disabled={actionLoading} className="flex-1 px-4 py-2.5 border-2 border-slate-200 text-slate-600 rounded-xl font-medium hover:border-slate-300 transition-colors text-sm">Cancel</button>
+                <button onClick={confirmReinstate} disabled={actionLoading} className="flex-1 px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl font-medium disabled:opacity-50 transition-colors text-sm">
+                  {actionLoading ? 'Reinstating…' : 'Reinstate'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Permanent delete confirmation modal */}
+      {permanentDeleteTarget && (
+        <>
+          <div className="fixed inset-0 bg-black/40 z-50" onClick={() => !actionLoading && setPermanentDeleteTarget(null)} />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-6 pointer-events-none">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 pointer-events-auto">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-800">Permanently delete</h3>
+                  <p className="text-sm text-slate-500">{permanentDeleteTarget.name}</p>
+                </div>
+              </div>
+              <p className="text-sm text-slate-600 mb-2">
+                This will <strong>permanently remove</strong> the restaurant and its owner account from the database. This cannot be undone.
+              </p>
+              <p className="text-xs text-red-500 mb-6">The owner will lose all access and their login will stop working.</p>
+              {actionError && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">{actionError}</div>
+              )}
+              <div className="flex gap-3">
+                <button onClick={() => setPermanentDeleteTarget(null)} disabled={actionLoading} className="flex-1 px-4 py-2.5 border-2 border-slate-200 text-slate-600 rounded-xl font-medium hover:border-slate-300 transition-colors text-sm">Cancel</button>
+                <button onClick={confirmPermanentDelete} disabled={actionLoading} className="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium disabled:opacity-50 transition-colors text-sm">
+                  {actionLoading ? 'Deleting…' : 'Delete permanently'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
       )}
     </div>
   )
