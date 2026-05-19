@@ -666,7 +666,7 @@ export default function StockManagement() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('searchPlaceholder')}
-                className="w-full pl-12 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
+                className="w-full pl-12 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 dark:bg-zinc-800"
               />
               {searchQuery && (
                 <button
@@ -682,7 +682,7 @@ export default function StockManagement() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-900"
+              className="px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 dark:bg-zinc-800 bg-white dark:bg-zinc-900"
             >
               <option value="name">{t('sortAZ')}</option>
               <option value="stock-low">{t('sortLowStock')}</option>
@@ -697,7 +697,7 @@ export default function StockManagement() {
               className={`px-4 py-2 rounded-sm font-medium transition-colors ${
                 filterCategory === 'all'
                   ? 'bg-[#6262bd] text-white'
-                  : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:bg-zinc-700'
+                  : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
               }`}
             >
               {t('all')}
@@ -793,9 +793,9 @@ export default function StockManagement() {
               {filteredProducts.map((product) => (
                 <div
                   key={product.id}
-                  className={`bg-white border-2 rounded-sm p-4 sm:p-6 flex gap-3 ${
-                    selectedIds.has(product.id) ? 'border-[#6262bd] bg-[#6262bd]/5' :
-                    product.current_stock <= 0 ? 'border-red-300 bg-red-50' : 'border-zinc-200 dark:border-zinc-800'
+                  className={`border-2 rounded-sm p-4 sm:p-6 flex gap-3 ${
+                    selectedIds.has(product.id) ? 'border-[#6262bd] bg-[#6262bd]/5 dark:bg-[#6262bd]/10' :
+                    product.current_stock <= 0 ? 'border-red-300 bg-red-50 dark:bg-red-900/20 dark:border-red-800' : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800'
                   }`}
                 >
                   <input
@@ -857,13 +857,13 @@ export default function StockManagement() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <button
                         onClick={() => openStockModal(product)}
-                        className="flex-1 sm:flex-none px-4 py-2 bg-green-50 text-green-600 rounded-sm font-medium hover:bg-green-100 text-sm"
+                        className="flex-1 sm:flex-none px-4 py-2 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-sm font-medium hover:bg-green-100 dark:hover:bg-green-900/50 text-sm"
                       >
                         {t('addStockButton')}
                       </button>
                       <button
                         onClick={() => openProductModal(product)}
-                        className="p-2 rounded-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:bg-zinc-700"
+                        className="p-2 rounded-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700"
                       >
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
@@ -871,7 +871,7 @@ export default function StockManagement() {
                       </button>
                       <button
                         onClick={() => deleteProduct(product.id)}
-                        className="p-2 rounded-sm bg-red-50 text-red-500 hover:bg-red-100"
+                        className="p-2 rounded-sm bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50"
                       >
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
@@ -930,7 +930,7 @@ export default function StockManagement() {
                   </thead>
                   <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
                     {entries.map((entry) => (
-                      <tr key={entry.id} className="hover:bg-zinc-50 dark:bg-zinc-900">
+                      <tr key={entry.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
                         <td className="px-6 py-4 text-sm text-zinc-600 dark:text-zinc-400">
                           {new Date(entry.created_at).toLocaleString()}
                         </td>
@@ -973,7 +973,7 @@ export default function StockManagement() {
           }}
         >
           <div
-            className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            className="bg-white dark:bg-zinc-900 rounded-sm p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 mb-6">
@@ -992,7 +992,7 @@ export default function StockManagement() {
                     value={productForm.name}
                     onChange={handleProductFormChange}
                     required
-                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 dark:bg-zinc-800"
                     placeholder={t('productNamePlaceholder')}
                   />
                 </div>
@@ -1006,7 +1006,7 @@ export default function StockManagement() {
                     name="brand"
                     value={productForm.brand}
                     onChange={handleProductFormChange}
-                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 dark:bg-zinc-800"
                     placeholder={t('brandPlaceholder')}
                   />
                 </div>
@@ -1021,7 +1021,7 @@ export default function StockManagement() {
                   value={productForm.category}
                   onChange={handleProductFormChange}
                   required
-                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 dark:bg-zinc-800"
                 >
                   <option value="kitchen">🍳 {t('kitchen')}</option>
                   <option value="bar">🍸 {t('bar')}</option>
@@ -1038,7 +1038,7 @@ export default function StockManagement() {
                     value={productForm.base_unit}
                     onChange={handleProductFormChange}
                     required
-                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 dark:bg-zinc-800"
                   >
                     <option value="grams">{t('gramsForSolids')}</option>
                     <option value="ml">{t('mlForLiquids')}</option>
@@ -1057,7 +1057,7 @@ export default function StockManagement() {
                     value={productForm.input_unit_type}
                     onChange={handleProductFormChange}
                     required
-                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 dark:bg-zinc-800"
                   >
                     <optgroup label={t('weight')}>
                       <option value="kg">{t('kilograms')}</option>
@@ -1091,7 +1091,7 @@ export default function StockManagement() {
                   required
                   step="0.01"
                   min="0.01"
-                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 dark:bg-zinc-800"
                 />
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                   {t('conversionHelp').replace('{inputUnit}', productForm.input_unit_type).replace('{multiplier}', productForm.units_to_base_multiplier).replace('{baseUnit}', productForm.base_unit)}
@@ -1111,7 +1111,7 @@ export default function StockManagement() {
                   name="tax_category_id"
                   value={productForm.tax_category_id}
                   onChange={handleProductFormChange}
-                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
+                  className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 dark:bg-zinc-800"
                 >
                   <option value="">{t('noTaxCategory')}</option>
                   {taxCategories.map((cat) => (
@@ -1134,7 +1134,7 @@ export default function StockManagement() {
                 <button
                   type="button"
                   onClick={() => setShowProductModal(false)}
-                  className="flex-1 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900"
+                  className="flex-1 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800"
                 >
                   {t('cancel')}
                 </button>
@@ -1157,7 +1157,7 @@ export default function StockManagement() {
           onClick={() => setShowStockModal(false)}
         >
           <div
-            className="bg-white dark:bg-zinc-50 dark:bg-zinc-900 rounded-sm p-8 w-full max-w-md"
+            className="bg-white dark:bg-zinc-900 rounded-sm p-8 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 mb-4">{t('addStock')}</h2>
@@ -1214,7 +1214,7 @@ export default function StockManagement() {
                       setStockProductSearch('')
                     }}
                     placeholder={t('searchOrSelectProduct')}
-                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
+                    className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 dark:bg-zinc-800"
                     required
                   />
 
@@ -1271,7 +1271,7 @@ export default function StockManagement() {
                           required
                           step="0.01"
                           min="0.01"
-                          className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
+                          className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 dark:bg-zinc-800"
                           placeholder="0"
                         />
                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400 font-medium">
@@ -1295,7 +1295,7 @@ export default function StockManagement() {
                           required
                           step="0.01"
                           min="0.01"
-                          className="w-full pl-8 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
+                          className="w-full pl-8 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 dark:bg-zinc-800"
                           placeholder="0.00"
                         />
                       </div>
@@ -1345,7 +1345,7 @@ export default function StockManagement() {
                           setInvoiceSearch('')
                         }}
                         placeholder={t('searchOrSelectInvoice')}
-                        className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
+                        className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 dark:bg-zinc-800"
                       />
                       {stockForm.purchasing_invoice_id && !showInvoiceDropdown && (
                         <button
@@ -1418,7 +1418,7 @@ export default function StockManagement() {
                       value={stockForm.notes}
                       onChange={(e) => setStockForm({ ...stockForm, notes: e.target.value })}
                       rows={3}
-                      className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 resize-none"
+                      className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 dark:bg-zinc-800 resize-none"
                       placeholder={t('notesPlaceholder')}
                     />
                   </div>
@@ -1448,7 +1448,7 @@ export default function StockManagement() {
                               required
                               step="0.01"
                               min="0"
-                              className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
+                              className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 dark:bg-zinc-800"
                               placeholder={currentInInputUnit}
                             />
                             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400 font-medium text-xs">
@@ -1474,7 +1474,7 @@ export default function StockManagement() {
                           required
                           step="0.01"
                           min="0"
-                          className="w-full pl-8 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300"
+                          className="w-full pl-8 pr-4 py-3 border border-zinc-200 dark:border-zinc-700 rounded-sm focus:outline-none focus:border-[#6262bd] text-zinc-700 dark:text-zinc-300 dark:bg-zinc-800"
                           placeholder="0.00"
                         />
                       </div>
@@ -1504,7 +1504,7 @@ export default function StockManagement() {
                 <button
                   type="button"
                   onClick={() => setShowStockModal(false)}
-                  className="flex-1 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:bg-zinc-900"
+                  className="flex-1 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 py-3 rounded-sm font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800"
                 >
                   {t('cancel')}
                 </button>
