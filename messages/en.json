@@ -3001,6 +3001,32 @@
       "step4_desc": "Each table gets a unique QR code. Open the ⋮ menu on any table card then tap Download QR to save it as a PNG — ready to print and place on the table.",
       "step5_title": "Download All QR Codes at Once",
       "step5_desc": "Use this button to download QR codes for every table in one go — ideal when setting up a new venue or reprinting after a redesign."
+    },
+    "menu": {
+      "step1_title": "Menu Items",
+      "step1_desc": "Go here to add, edit, and manage every dish or drink on your menu. You can set prices, upload photos, assign departments, and link items to stock ingredients.",
+      "step2_title": "Categories",
+      "step2_desc": "Organise your menu into sections like Starters, Mains, or Drinks. Categories control how items are grouped on the customer-facing menu and in the ordering screen."
+    },
+    "menuItems": {
+      "step1_title": "Add a Menu Item",
+      "step1_desc": "Click here to create a new dish or drink. You can set the name, price, category, department (Kitchen or Bar), and upload a photo.",
+      "step2_title": "Search and Filter",
+      "step2_desc": "Type here to search by name. Use the sort dropdown to reorder by price or stock level, and the filter buttons below to narrow by department or availability.",
+      "step3_title": "Filter by Department",
+      "step3_desc": "Switch between All, Kitchen, and Bar to focus on one section of your menu at a time. Availability filters let you quickly spot items that are currently off the menu.",
+      "step4_title": "Item Stats",
+      "step4_desc": "A quick summary showing total items, how many are available, how many have recipes linked, and how many are out of stock.",
+      "step5_title": "Bulk Select",
+      "step5_desc": "Tick the checkbox to select all visible items at once. Selected items can be deleted in bulk — useful when clearing a seasonal menu."
+    },
+    "menuCategories": {
+      "step1_title": "Add a Category",
+      "step1_desc": "Click here to create a new menu section such as Starters, Mains, or Cocktails. Categories appear on the customer-facing menu in the order you define.",
+      "step2_title": "Category Cards",
+      "step2_desc": "Each card shows the category name, description, and how many items belong to it. Use the edit button to rename it or adjust its sort order.",
+      "step3_title": "Sort Order",
+      "step3_desc": "The sort order number controls where this category appears in the menu list. Lower numbers appear first — set them to arrange categories in the right sequence."
     }
   }
 }

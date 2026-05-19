@@ -7,6 +7,7 @@ import { menuNavTabs } from '@/components/PageTabsConfig'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import InfoTooltip from '@/components/InfoTooltip'
+import PageTour from '@/components/PageTour'
 import { useCurrency } from '@/lib/CurrencyContext'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import OfflinePageGuard from '@/components/OfflinePageGuard'
@@ -15,6 +16,7 @@ export default function Menu() {
   const t = useTranslations('menu')
   const tc = useTranslations('common')
   const tg = useTranslations('guide')
+  const tt = useTranslations('tours')
   const { currencySymbol } = useCurrency()
   const supabase = useAdminSupabase()
   const [menuItems, setMenuItems] = useState([])
@@ -537,6 +539,28 @@ export default function Menu() {
   return (
     <OfflinePageGuard>
     <div>
+      <PageTour steps={[
+        {
+          element: '[data-tour="menu-items-add-btn"]',
+          popover: { title: tt('menuItems.step1_title'), description: tt('menuItems.step1_desc') },
+        },
+        {
+          element: '[data-tour="menu-items-search"]',
+          popover: { title: tt('menuItems.step2_title'), description: tt('menuItems.step2_desc') },
+        },
+        {
+          element: '[data-tour="menu-items-dept-filters"]',
+          popover: { title: tt('menuItems.step3_title'), description: tt('menuItems.step3_desc') },
+        },
+        {
+          element: '[data-tour="menu-items-stats"]',
+          popover: { title: tt('menuItems.step4_title'), description: tt('menuItems.step4_desc') },
+        },
+        {
+          element: '[data-tour="menu-items-select-all"]',
+          popover: { title: tt('menuItems.step5_title'), description: tt('menuItems.step5_desc') },
+        },
+      ]} />
       <PageTabs tabs={menuNavTabs} />
       <div className="flex flex-wrap justify-between items-start gap-3 mb-8">
         <div>
@@ -547,6 +571,7 @@ export default function Menu() {
           <p className="text-zinc-500 dark:text-zinc-400">{t('subtitle')}</p>
         </div>
         <button
+          data-tour="menu-items-add-btn"
           onClick={() => openModal()}
           className="bg-[#6262bd] text-white px-5 py-2.5 rounded-sm font-medium hover:bg-[#5252a3] flex items-center gap-2 flex-shrink-0"
         >
@@ -557,7 +582,7 @@ export default function Menu() {
         </button>
       </div>
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+      <div data-tour="menu-items-stats" className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4">
           <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium mb-1">{t('totalItems')}</p>
           <p className="text-2xl font-bold text-[#6262bd]">{stats.total}</p>
@@ -582,6 +607,7 @@ export default function Menu() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
+            data-tour="menu-items-search"
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -611,7 +637,7 @@ export default function Menu() {
         </select>
       </div>
       {/* Filter Buttons */}
-      <div className="mb-6 flex flex-wrap gap-2">
+      <div data-tour="menu-items-dept-filters" className="mb-6 flex flex-wrap gap-2">
         <button
           onClick={() => setFilterDepartment('all')}
           className={`px-4 py-2 rounded-sm font-medium transition-colors ${
@@ -724,7 +750,7 @@ export default function Menu() {
       ) : (
         <div className="grid gap-4">
           {/* Select all row */}
-          <div className="flex items-center gap-3 px-2">
+          <div data-tour="menu-items-select-all" className="flex items-center gap-3 px-2">
             <input
               type="checkbox"
               checked={selectedIds.size === filteredMenuItems.length && filteredMenuItems.length > 0}

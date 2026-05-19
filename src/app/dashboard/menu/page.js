@@ -3,10 +3,12 @@
 import Link from 'next/link'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import InfoTooltip from '@/components/InfoTooltip'
+import PageTour from '@/components/PageTour'
 
 export default function MenuHubPage() {
   const t = useTranslations('menu')
   const tg = useTranslations('guide')
+  const tt = useTranslations('tours')
 
   const sections = [
     {
@@ -37,6 +39,16 @@ export default function MenuHubPage() {
 
   return (
     <div className="min-h-screen p-4 md:p-8">
+      <PageTour steps={[
+        {
+          element: '[data-tour="menu-items-card"]',
+          popover: { title: tt('menu.step1_title'), description: tt('menu.step1_desc') },
+        },
+        {
+          element: '[data-tour="menu-categories-card"]',
+          popover: { title: tt('menu.step2_title'), description: tt('menu.step2_desc') },
+        },
+      ]} />
       <div className="max-w-2xl mx-auto">
         <div className="mb-10 text-center">
           <h1 className="text-2xl md:text-3xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-2 flex items-center justify-center gap-2">
@@ -53,6 +65,7 @@ export default function MenuHubPage() {
             <Link
               key={section.href}
               href={section.href}
+              data-tour={section.href === '/dashboard/menu/items' ? 'menu-items-card' : 'menu-categories-card'}
               className="group flex flex-col items-center text-center gap-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-4 sm:p-8 hover:border-[#6262bd] dark:hover:border-[#6262bd] hover:shadow-lg transition-all"
             >
               <div className={`${section.bg} p-4 rounded-sm ${section.color} group-hover:scale-110 transition-transform`}>

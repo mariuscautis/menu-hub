@@ -7,12 +7,14 @@ import { menuNavTabs } from '@/components/PageTabsConfig'
 import { useRestaurant } from '@/lib/RestaurantContext'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import InfoTooltip from '@/components/InfoTooltip'
+import PageTour from '@/components/PageTour'
 import { useAdminSupabase } from '@/hooks/useAdminSupabase'
 import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 export default function MenuCategories() {
   const t = useTranslations('menuCategories')
   const tg = useTranslations('guide')
+  const tt = useTranslations('tours')
   const restaurantCtx = useRestaurant()
   const supabase = useAdminSupabase()
   const [categories, setCategories] = useState([])
@@ -136,6 +138,20 @@ export default function MenuCategories() {
   return (
     <OfflinePageGuard>
     <div>
+      <PageTour steps={[
+        {
+          element: '[data-tour="menu-cat-add-btn"]',
+          popover: { title: tt('menuCategories.step1_title'), description: tt('menuCategories.step1_desc') },
+        },
+        {
+          element: '[data-tour="menu-cat-list"]',
+          popover: { title: tt('menuCategories.step2_title'), description: tt('menuCategories.step2_desc') },
+        },
+        {
+          element: '[data-tour="menu-cat-sort-hint"]',
+          popover: { title: tt('menuCategories.step3_title'), description: tt('menuCategories.step3_desc') },
+        },
+      ]} />
       <PageTabs tabs={menuNavTabs} />
       <div className="flex flex-wrap justify-between items-start gap-3 mb-6">
         <div>
@@ -146,6 +162,7 @@ export default function MenuCategories() {
           <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400">{t('subtitle')}</p>
         </div>
         <button
+          data-tour="menu-cat-add-btn"
           onClick={() => openModal()}
           className="bg-[#6262bd] text-white px-5 py-2.5 rounded-sm font-medium hover:bg-[#5252a3] flex items-center gap-2 flex-shrink-0"
         >
@@ -173,7 +190,7 @@ export default function MenuCategories() {
           </button>
         </div>
       ) : (
-        <div className="grid gap-4">
+        <div data-tour="menu-cat-list" className="grid gap-4">
           {categories.map((category) => {
             const itemCount = category.menu_items?.[0]?.count || 0
             return (
@@ -194,7 +211,7 @@ export default function MenuCategories() {
                     {category.description && (
                       <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 text-sm mb-2">{category.description}</p>
                     )}
-                    <p className="text-xs text-zinc-400 dark:text-zinc-500 dark:text-zinc-500">
+                    <p data-tour="menu-cat-sort-hint" className="text-xs text-zinc-400 dark:text-zinc-500 dark:text-zinc-500">
                       {t('sortOrder').replace('{order}', category.sort_order)}
                     </p>
                   </div>

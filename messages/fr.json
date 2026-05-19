@@ -2883,6 +2883,32 @@
       "step4_desc": "Chaque table a un QR code unique. Ouvrez le menu ⋮ sur n'importe quelle carte de table puis appuyez sur Télécharger QR pour le sauvegarder en PNG — prêt à imprimer et à placer sur la table.",
       "step5_title": "Télécharger tous les QR codes d'un coup",
       "step5_desc": "Utilisez ce bouton pour télécharger les QR codes de toutes les tables en une seule fois — idéal lors de l'installation d'un nouveau lieu ou d'une réimpression après une refonte."
+    },
+    "menu": {
+      "step1_title": "Articles du Menu",
+      "step1_desc": "Rendez-vous ici pour ajouter, modifier et gerer chaque plat ou boisson de votre menu. Vous pouvez definir les prix, uploader des photos, assigner des departements et lier des articles aux ingredients en stock.",
+      "step2_title": "Categories",
+      "step2_desc": "Organisez votre menu en sections comme Entrees, Plats ou Boissons. Les categories determinent comment les articles sont regroupes sur le menu client et dans l'ecran de commande."
+    },
+    "menuItems": {
+      "step1_title": "Ajouter un Article",
+      "step1_desc": "Cliquez ici pour creer un nouveau plat ou une boisson. Vous pouvez definir le nom, le prix, la categorie, le departement (Cuisine ou Bar) et uploader une photo.",
+      "step2_title": "Rechercher et Filtrer",
+      "step2_desc": "Tapez ici pour rechercher par nom. Utilisez le menu deroulant pour trier par prix ou niveau de stock, et les boutons de filtre pour affiner par departement ou disponibilite.",
+      "step3_title": "Filtrer par Departement",
+      "step3_desc": "Basculez entre Tout, Cuisine et Bar pour vous concentrer sur une section du menu. Les filtres de disponibilite permettent de reperer rapidement les articles hors carte.",
+      "step4_title": "Statistiques des Articles",
+      "step4_desc": "Un resume rapide indiquant le nombre total d articles, combien sont disponibles, combien ont des recettes associees et combien sont en rupture de stock.",
+      "step5_title": "Selection Multiple",
+      "step5_desc": "Cochez la case pour selectionner tous les articles visibles d un coup. Les articles selectionnes peuvent etre supprimes en masse, utile lors de la suppression d un menu saisonnier."
+    },
+    "menuCategories": {
+      "step1_title": "Ajouter une Categorie",
+      "step1_desc": "Cliquez ici pour creer une nouvelle section de menu comme Entrees, Plats ou Cocktails. Les categories apparaissent sur le menu client dans l ordre que vous definissez.",
+      "step2_title": "Fiches de Categorie",
+      "step2_desc": "Chaque fiche affiche le nom, la description et le nombre d articles appartenant a cette categorie. Utilisez le bouton d edition pour la renommer ou ajuster son ordre.",
+      "step3_title": "Ordre d Affichage",
+      "step3_desc": "Le numero d ordre controle la position de cette categorie dans la liste du menu. Les numeros les plus bas apparaissent en premier; assignez-les pour ordonner les categories correctement."
     }
   }
 }

@@ -2883,6 +2883,32 @@
       "step4_desc": "Ogni tavolo ha un QR code unico. Apri il menu ⋮ su qualsiasi scheda tavolo e premi Scarica QR per salvarlo come PNG — pronto per la stampa e da posizionare sul tavolo.",
       "step5_title": "Scarica tutti i QR code in una volta",
       "step5_desc": "Usa questo pulsante per scaricare i QR code di tutti i tavoli in una sola volta — ideale per configurare un nuovo locale o ristampare dopo una riprogettazione."
+    },
+    "menu": {
+      "step1_title": "Voci del Menu",
+      "step1_desc": "Vai qui per aggiungere, modificare e gestire ogni piatto o bevanda del tuo menu. Puoi impostare prezzi, caricare foto, assegnare reparti e collegare articoli agli ingredienti dello stock.",
+      "step2_title": "Categorie",
+      "step2_desc": "Organizza il tuo menu in sezioni come Antipasti, Primi o Bevande. Le categorie controllano come gli articoli sono raggruppati nel menu per il cliente e nella schermata degli ordini."
+    },
+    "menuItems": {
+      "step1_title": "Aggiungi una Voce",
+      "step1_desc": "Clicca qui per creare un nuovo piatto o bevanda. Puoi definire nome, prezzo, categoria, reparto (Cucina o Bar) e caricare una foto.",
+      "step2_title": "Cerca e Filtra",
+      "step2_desc": "Digita qui per cercare per nome. Usa il menu a tendina per ordinare per prezzo o livello di stock, e i pulsanti filtro per restringere per reparto o disponibilita.",
+      "step3_title": "Filtra per Reparto",
+      "step3_desc": "Passa tra Tutto, Cucina e Bar per concentrarti su una sezione del menu. I filtri di disponibilita ti permettono di individuare rapidamente gli articoli non disponibili.",
+      "step4_title": "Statistiche Articoli",
+      "step4_desc": "Un riepilogo rapido con il totale degli articoli, quanti sono disponibili, quanti hanno ricette collegate e quanti sono esauriti.",
+      "step5_title": "Selezione Multipla",
+      "step5_desc": "Spunta la casella per selezionare tutti gli articoli visibili in una volta. Gli articoli selezionati possono essere eliminati in blocco, utile per rimuovere un menu stagionale."
+    },
+    "menuCategories": {
+      "step1_title": "Aggiungi una Categoria",
+      "step1_desc": "Clicca qui per creare una nuova sezione del menu come Antipasti, Primi o Cocktail. Le categorie appaiono nel menu del cliente nell ordine che definisci.",
+      "step2_title": "Schede Categoria",
+      "step2_desc": "Ogni scheda mostra il nome, la descrizione e il numero di articoli appartenenti a quella categoria. Usa il pulsante di modifica per rinominarla o regolare il suo ordine.",
+      "step3_title": "Ordine di Visualizzazione",
+      "step3_desc": "Il numero d ordine controlla la posizione di questa categoria nell elenco del menu. I numeri piu bassi appaiono per primi; impostali per disporre le categorie nella sequenza corretta."
     }
   }
 }

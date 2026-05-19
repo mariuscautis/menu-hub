@@ -2883,6 +2883,32 @@
       "step4_desc": "Fiecare masă are un cod QR unic. Deschide meniul ⋮ de pe orice card de masă și apasă Descarcă QR pentru a-l salva ca PNG — gata de imprimat și plasat pe masă.",
       "step5_title": "Descarcă toate codurile QR dintr-o dată",
       "step5_desc": "Folosește acest buton pentru a descărca codurile QR pentru toate mesele deodată — ideal la configurarea unui nou local sau la retipărire după o reproiectare."
+    },
+    "menu": {
+      "step1_title": "Articole din Meniu",
+      "step1_desc": "Mergi aici pentru a adauga, edita si gestiona fiecare fel de mancare sau bautura din meniu. Poti seta preturi, incarca poze, asigna departamente si lega articolele de ingrediente din stoc.",
+      "step2_title": "Categorii",
+      "step2_desc": "Organizeaza meniul in sectiuni precum Aperitive, Feluri Principale sau Bauturi. Categoriile controleaza modul in care articolele sunt grupate in meniul pentru clienti si in ecranul de comenzi."
+    },
+    "menuItems": {
+      "step1_title": "Adauga un Articol",
+      "step1_desc": "Apasa aici pentru a crea un preparat sau o bautura noua. Poti defini numele, pretul, categoria, departamentul (Bucatarie sau Bar) si incarca o fotografie.",
+      "step2_title": "Cauta si Filtreaza",
+      "step2_desc": "Scrie aici pentru a cauta dupa nume. Foloseste meniul de sortare pentru a reordona dupa pret sau stoc, si butoanele de filtrare pentru a restrange dupa departament sau disponibilitate.",
+      "step3_title": "Filtreaza dupa Departament",
+      "step3_desc": "Comuta intre Toate, Bucatarie si Bar pentru a te concentra pe o sectiune a meniului. Filtrele de disponibilitate iti permit sa identifici rapid articolele indisponibile.",
+      "step4_title": "Statistici Articole",
+      "step4_desc": "Un rezumat rapid cu totalul articolelor, cate sunt disponibile, cate au retete asociate si cate sunt epuizate.",
+      "step5_title": "Selectie Multipla",
+      "step5_desc": "Bifeaza casuta pentru a selecta toate articolele vizibile dintr-o data. Articolele selectate pot fi sterse in bloc, util cand elimini un meniu sezonier."
+    },
+    "menuCategories": {
+      "step1_title": "Adauga o Categorie",
+      "step1_desc": "Apasa aici pentru a crea o noua sectiune a meniului precum Aperitive, Feluri Principale sau Cocktailuri. Categoriile apar in meniul clientului in ordinea pe care o definesti.",
+      "step2_title": "Carduri Categorie",
+      "step2_desc": "Fiecare card afiseaza numele, descrierea si numarul de articole din acea categorie. Foloseste butonul de editare pentru a redenumi sau ajusta ordinea.",
+      "step3_title": "Ordinea de Afisare",
+      "step3_desc": "Numarul de ordine controleaza pozitia acestei categorii in lista meniului. Numerele mai mici apar primele; seteaza-le pentru a aranja categoriile in secventa corecta."
     }
   }
 }
