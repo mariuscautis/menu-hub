@@ -127,6 +127,7 @@ function DecorativeElement({ element, isSelected, onClick }) {
 export default function FloorPlanPage() {
   const restaurantCtx = useRestaurant()
   const supabase = useAdminSupabase()
+  const t = useTranslations('floorPlan')
   const tg = useTranslations('guide')
   const tt = useTranslations('tours')
   const [restaurant, setRestaurant] = useState(null)
@@ -628,19 +629,19 @@ export default function FloorPlanPage() {
     return (
       <>
         <div className="p-8 max-w-2xl">
-          <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4 flex items-center gap-2">Floor Plan Designer<InfoTooltip text={tg('floor_plan_desc')} /></h1>
+          <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4 flex items-center gap-2">{t('title')}<InfoTooltip text={tg('floor_plan_desc')} /></h1>
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-sm p-6">
             <p className="text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-4">
-              No floors found for your restaurant. Create your first floor to start designing your floor plan.
+              {t('noFloors')}
             </p>
             <button
               onClick={openCreateFloorModal}
               className="px-6 py-3 bg-primary hover:bg-primary-hover text-white rounded-sm font-medium transition-colors"
             >
-              + Create First Floor
+              + {t('createFirstFloor')}
             </button>
             <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-4">
-              Create your first floor to start arranging tables and managing your dining area.
+              {t('noFloorsHint')}
             </p>
           </div>
         </div>
@@ -650,26 +651,26 @@ export default function FloorPlanPage() {
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowFloorModal(false)}>
             <div className="bg-white dark:bg-zinc-800 rounded-sm p-6 max-w-lg w-full mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
               <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4">
-                {editingFloor ? 'Edit Floor' : 'Create New Floor'}
+                {editingFloor ? t('editFloor') : t('createNewFloor')}
               </h2>
 
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-1">
-                    Floor Name
+                    {t('floorName')}
                   </label>
                   <input
                     type="text"
                     value={floorForm.name}
                     onChange={(e) => setFloorForm({ ...floorForm, name: e.target.value })}
-                    placeholder="e.g., Ground Floor, First Floor, Terrace"
+                    placeholder={t('floorNamePlaceholder')}
                     className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 focus:outline-none focus:border-primary"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-1">
-                    Level (for sorting)
+                    {t('level')}
                   </label>
                   <input
                     type="number"
@@ -678,14 +679,14 @@ export default function FloorPlanPage() {
                     className="w-full px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-sm bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 focus:outline-none focus:border-primary"
                   />
                   <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mt-1">
-                    Lower numbers appear first in the list
+                    {t('levelHint')}
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-1">
-                      Width (px)
+                      {t('widthPx')}
                     </label>
                     <input
                       type="number"
@@ -699,7 +700,7 @@ export default function FloorPlanPage() {
 
                   <div>
                     <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-1">
-                      Height (px)
+                      {t('heightPx')}
                     </label>
                     <input
                       type="number"
@@ -714,7 +715,7 @@ export default function FloorPlanPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 mb-1">
-                    Background Color
+                    {t('backgroundColor')}
                   </label>
                   <div className="flex gap-2">
                     <input
@@ -743,20 +744,20 @@ export default function FloorPlanPage() {
                     }}
                     className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-sm font-medium transition-colors"
                   >
-                    Delete Floor
+                    {t('deleteFloor')}
                   </button>
                 )}
                 <button
                   onClick={() => setShowFloorModal(false)}
                   className="flex-1 px-4 py-2 bg-zinc-200 dark:bg-zinc-700 dark:bg-zinc-700 hover:bg-zinc-300 dark:hover:bg-zinc-600 dark:hover:bg-zinc-600 text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 rounded-sm font-medium transition-colors"
                 >
-                  Cancel
+                  {t('cancel')}
                 </button>
                 <button
                   onClick={saveFloor}
                   className="flex-1 px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-sm font-medium transition-colors"
                 >
-                  {editingFloor ? 'Save Changes' : 'Create Floor'}
+                  {editingFloor ? t('saveChanges') : t('createFloor')}
                 </button>
               </div>
             </div>
@@ -779,7 +780,7 @@ export default function FloorPlanPage() {
       <div className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 p-4" data-tour="fp-header">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">Floor Plan Designer</h1>
+            <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200">{t('title')}</h1>
             <p className="text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">{restaurant?.name}</p>
           </div>
           <div className="flex items-center gap-2">
@@ -800,13 +801,13 @@ export default function FloorPlanPage() {
               onClick={() => openEditFloorModal(currentFloor)}
               className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm font-medium transition-colors"
             >
-              Edit Floor
+              {t('editFloor')}
             </button>
             <button
               onClick={openCreateFloorModal}
               className="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-sm font-medium transition-colors"
             >
-              + New Floor
+              + {t('newFloor')}
             </button>
           </div>
         </div>
@@ -815,7 +816,7 @@ export default function FloorPlanPage() {
       <div className="flex flex-1 overflow-hidden">
         {/* Toolbar */}
         <div className="w-64 bg-white dark:bg-zinc-900 border-r-2 border-zinc-200 dark:border-zinc-800 p-4 overflow-y-auto" data-tour="fp-toolbar">
-          <h3 className="font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-3">Add to Floor</h3>
+          <h3 className="font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-3">{t('addToFloor')}</h3>
 
           <div className="space-y-2">
             {availableTables.length > 0 && (
@@ -823,75 +824,75 @@ export default function FloorPlanPage() {
                 onClick={() => setShowAddTableModal(true)}
                 className="w-full px-3 py-2 bg-primary hover:bg-primary-hover text-white rounded-sm text-sm font-medium mb-4"
               >
-                + Add Table ({availableTables.length})
+                + {t('addTable')} ({availableTables.length})
               </button>
             )}
           </div>
 
-          <h3 className="font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-3 mt-6">Decorative Elements</h3>
+          <h3 className="font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-3 mt-6">{t('decorativeElements')}</h3>
 
           <div className="space-y-2">
             <button
               onClick={() => addDecorativeElement('wall')}
               className="w-full px-3 py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm text-sm"
             >
-              ▮ Wall
+              ▮ {t('wall')}
             </button>
             <button
               onClick={() => addDecorativeElement('door')}
               className="w-full px-3 py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm text-sm"
             >
-              ⌂ Door
+              ⌂ {t('door')}
             </button>
             <button
               onClick={() => addDecorativeElement('plant')}
               className="w-full px-3 py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm text-sm"
             >
-              ☘ Plant
+              ☘ {t('plant')}
             </button>
             <button
               onClick={() => addDecorativeElement('counter')}
               className="w-full px-3 py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm text-sm"
             >
-              ▬ Counter
+              ▬ {t('counter')}
             </button>
             <button
               onClick={() => addDecorativeElement('bar')}
               className="w-full px-3 py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm text-sm"
             >
-              🍷 Bar
+              🍷 {t('bar')}
             </button>
             <button
               onClick={() => addDecorativeElement('entrance')}
               className="w-full px-3 py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm text-sm"
             >
-              ⬇ Entrance
+              ⬇ {t('entrance')}
             </button>
             <button
               onClick={() => addDecorativeElement('stairs')}
               className="w-full px-3 py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm text-sm"
             >
-              ⚏ Stairs
+              ⚏ {t('stairs')}
             </button>
             <button
               onClick={() => addDecorativeElement('restroom')}
               className="w-full px-3 py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300 rounded-sm text-sm"
             >
-              ♿ Restroom
+              ♿ {t('restroom')}
             </button>
           </div>
 
           {selectedItem && (
             <div className="mt-6 pt-6 border-t border-zinc-200 dark:border-zinc-700">
               <h3 className="font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-3">
-                {selectedItem.type === 'table' ? `Table ${selectedItem.table_number}` : 'Element Properties'}
+                {selectedItem.type === 'table' ? `${t('tableLabel')} ${selectedItem.table_number}` : t('elementProperties')}
               </h3>
 
               {selectedItem.type === 'element' && (
                 <div className="space-y-4 mb-4">
                   <div>
                     <label className="text-xs text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 block mb-1">
-                      Width: {selectedItem.width}px
+                      {t('width')}: {selectedItem.width}px
                     </label>
                     <input
                       type="range"
@@ -905,7 +906,7 @@ export default function FloorPlanPage() {
 
                   <div>
                     <label className="text-xs text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 block mb-1">
-                      Height: {selectedItem.height}px
+                      {t('height')}: {selectedItem.height}px
                     </label>
                     <input
                       type="range"
@@ -919,7 +920,7 @@ export default function FloorPlanPage() {
 
                   <div>
                     <label className="text-xs text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 block mb-1">
-                      Rotation: {selectedItem.rotation || 0}°
+                      {t('rotation')}: {selectedItem.rotation || 0}°
                     </label>
                     <input
                       type="range"
@@ -933,20 +934,20 @@ export default function FloorPlanPage() {
 
                   <div>
                     <label className="text-xs text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 block mb-1">
-                      Label (optional)
+                      {t('labelOptional')}
                     </label>
                     <input
                       type="text"
                       value={selectedItem.label || ''}
                       onChange={(e) => updateElementProperty('label', e.target.value)}
-                      placeholder="e.g., Main Entrance"
+                      placeholder={t('labelPlaceholder')}
                       className="w-full px-2 py-1 text-sm border border-zinc-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300"
                     />
                   </div>
 
                   <div>
                     <label className="text-xs text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 block mb-1">
-                      Color
+                      {t('color')}
                     </label>
                     <input
                       type="color"
@@ -962,7 +963,7 @@ export default function FloorPlanPage() {
                 <div className="space-y-4 mb-4">
                   <div>
                     <label className="text-xs text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 block mb-1">
-                      Width: {selectedItem.width || 80}px
+                      {t('width')}: {selectedItem.width || 80}px
                     </label>
                     <input
                       type="range"
@@ -976,7 +977,7 @@ export default function FloorPlanPage() {
 
                   <div>
                     <label className="text-xs text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 block mb-1">
-                      Height: {selectedItem.height || 80}px
+                      {t('height')}: {selectedItem.height || 80}px
                     </label>
                     <input
                       type="range"
@@ -990,16 +991,16 @@ export default function FloorPlanPage() {
 
                   <div>
                     <label className="text-xs text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 block mb-1">
-                      Shape
+                      {t('shape')}
                     </label>
                     <select
                       value={selectedItem.shape || 'rectangle'}
                       onChange={(e) => updateTableProperty('shape', e.target.value)}
                       className="w-full px-2 py-1 text-sm border border-zinc-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 dark:text-zinc-300"
                     >
-                      <option value="rectangle">Rectangle</option>
-                      <option value="square">Square</option>
-                      <option value="circle">Circle</option>
+                      <option value="rectangle">{t('rectangle')}</option>
+                      <option value="square">{t('square')}</option>
+                      <option value="circle">{t('circle')}</option>
                     </select>
                   </div>
                 </div>
@@ -1009,7 +1010,7 @@ export default function FloorPlanPage() {
                 onClick={deleteSelected}
                 className="w-full px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-sm text-sm"
               >
-                Delete
+                {t('delete')}
               </button>
             </div>
           )}
@@ -1067,9 +1068,9 @@ export default function FloorPlanPage() {
       {showAddTableModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowAddTableModal(false)}>
           <div className="bg-white dark:bg-zinc-800 rounded-sm p-6 max-w-md w-full mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4">Add Table to Floor</h2>
+            <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-4">{t('addTableToFloor')}</h2>
             <p className="text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-400 mb-4">
-              Select a table to add back to this floor:
+              {t('selectTable')}
             </p>
 
             <div className="space-y-2 max-h-96 overflow-y-auto">
@@ -1079,9 +1080,9 @@ export default function FloorPlanPage() {
                   onClick={() => addTableToFloor(table.id)}
                   className="w-full px-4 py-3 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 rounded-sm text-left transition-colors"
                 >
-                  <div className="font-medium">Table {table.table_number}</div>
+                  <div className="font-medium">{t('tableLabel')} {table.table_number}</div>
                   <div className="text-sm text-zinc-600 dark:text-zinc-400 dark:text-zinc-400">
-                    {table.capacity} seats
+                    {table.capacity} {t('seats')}
                   </div>
                 </button>
               ))}
@@ -1195,7 +1196,7 @@ export default function FloorPlanPage() {
                   }}
                   className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-sm font-medium transition-colors"
                 >
-                  Delete Floor
+                  {t('deleteFloor')}
                 </button>
               )}
               <button
@@ -1208,7 +1209,7 @@ export default function FloorPlanPage() {
                 onClick={saveFloor}
                 className="flex-1 px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-sm font-medium transition-colors"
               >
-                {editingFloor ? 'Save Changes' : 'Create Floor'}
+                {editingFloor ? t('saveChanges') : t('createFloor')}
               </button>
             </div>
           </div>
