@@ -20,28 +20,23 @@ export async function GET(request) {
     const start = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
     const end = endDate || new Date().toISOString().split('T')[0]
 
-    console.log('Fetching analytics:', { restaurantId, start, end })
-
-    // Query daily_sales_summary directly instead of using RPC
-    const { data: summaryData, error: summaryError } = await supabaseAdmin
-      .from('daily_sales_summary')
-      .select('*')
+    // Query paid orders directly so revenue = orders.total (tax-inclusive price
+    // the customer actually paid). The daily_sales_summary view adds tax on top
+    // of item prices, inflating revenue figures.
+    const { data: orders, error: ordersError } = await supabaseAdmin
+      .from('orders')
+      .select('id, total')
       .eq('restaurant_id', restaurantId)
-      .gte('date', start)
-      .lte('date', end)
+      .eq('paid', true)
+      .gte('created_at', `${start}T00:00:00.000Z`)
+      .lte('created_at', `${end}T23:59:59.999Z`)
 
-    if (summaryError) {
-      console.error('Error fetching sales summary:', summaryError)
-      return NextResponse.json(
-        { error: summaryError.message },
-        { status: 500 }
-      )
+    if (ordersError) {
+      console.error('Error fetching orders:', ordersError)
+      return NextResponse.json({ error: ordersError.message }, { status: 500 })
     }
 
-    console.log('Raw data from database:', summaryData)
-
-    // Aggregate the data
-    if (!summaryData || summaryData.length === 0) {
+    if (!orders || orders.length === 0) {
       return NextResponse.json({
         success: true,
         data: {
@@ -56,29 +51,46 @@ export async function GET(request) {
       })
     }
 
-    const summary = {
-      total_revenue: summaryData.reduce((sum, d) => sum + parseFloat(d.total_revenue || 0), 0),
-      total_orders: summaryData.reduce((sum, d) => sum + parseInt(d.total_orders || 0), 0),
-      total_items_sold: summaryData.reduce((sum, d) => sum + parseInt(d.total_items_sold || 0), 0),
-      total_cost: summaryData.reduce((sum, d) => sum + parseFloat(d.total_cost || 0), 0),
-      total_profit: summaryData.reduce((sum, d) => sum + parseFloat(d.total_profit || 0), 0),
-      average_order_value: 0,
-      profit_margin_percent: 0
-    }
+    const orderIds = orders.map(o => o.id)
+    const total_revenue = orders.reduce((sum, o) => sum + parseFloat(o.total || 0), 0)
+    const total_orders = orders.length
 
-    summary.average_order_value = summary.total_orders > 0
-      ? summary.total_revenue / summary.total_orders
-      : 0
+    // Count total items sold from order_items
+    const { data: itemsData, error: itemsError } = await supabaseAdmin
+      .from('order_items')
+      .select('quantity')
+      .in('order_id', orderIds)
 
-    summary.profit_margin_percent = summary.total_revenue > 0
-      ? (summary.total_profit / summary.total_revenue * 100)
-      : 0
+    const total_items_sold = itemsError
+      ? 0
+      : (itemsData || []).reduce((sum, i) => sum + parseInt(i.quantity || 0), 0)
 
-    console.log('Calculated summary:', summary)
+    // Pull ingredient cost from daily_sales_summary — this is stock-cost-based
+    // and not affected by the tax calculation issue
+    const { data: summaryData } = await supabaseAdmin
+      .from('daily_sales_summary')
+      .select('total_cost')
+      .eq('restaurant_id', restaurantId)
+      .gte('date', start)
+      .lte('date', end)
+
+    const total_cost = (summaryData || []).reduce((sum, d) => sum + parseFloat(d.total_cost || 0), 0)
+    const total_profit = total_revenue - total_cost
+
+    const average_order_value = total_orders > 0 ? total_revenue / total_orders : 0
+    const profit_margin_percent = total_revenue > 0 ? (total_profit / total_revenue * 100) : 0
 
     return NextResponse.json({
       success: true,
-      data: summary
+      data: {
+        total_revenue:         parseFloat(total_revenue.toFixed(2)),
+        total_orders,
+        total_items_sold,
+        average_order_value:   parseFloat(average_order_value.toFixed(2)),
+        total_cost:            parseFloat(total_cost.toFixed(2)),
+        total_profit:          parseFloat(total_profit.toFixed(2)),
+        profit_margin_percent: parseFloat(profit_margin_percent.toFixed(2))
+      }
     })
   } catch (error) {
     console.error('Error in analytics overview:', error)
