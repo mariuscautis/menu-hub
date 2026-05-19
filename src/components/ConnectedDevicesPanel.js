@@ -227,14 +227,14 @@ export default function ConnectedDevicesPanel({ restaurantId }) {
   const blockedSessionsCount = sessions.filter(s => s.is_blocked).length
 
   return (
-    <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl mb-6 overflow-hidden">
+    <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-none mb-6 overflow-hidden">
       {/* Header */}
       <div
         className="p-4 flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
         onClick={() => setExpanded(!expanded)}
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-[#6262bd]/10 dark:bg-[#6262bd]/20 rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-[#6262bd]/10 dark:bg-[#6262bd]/20 rounded-none flex items-center justify-center">
             <svg className="w-5 h-5 text-[#6262bd]" fill="currentColor" viewBox="0 0 24 24">
               <path d="M4 6h18V4H4c-1.1 0-2 .9-2 2v11H0v3h14v-3H4V6zm19 2h-6c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h6c.55 0 1-.45 1-1V9c0-.55-.45-1-1-1zm-1 9h-4v-7h4v7z"/>
             </svg>
@@ -264,7 +264,7 @@ export default function ConnectedDevicesPanel({ restaurantId }) {
                 handleSignOutAll()
               }}
               disabled={actionLoading === 'all'}
-              className="px-3 py-1.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors disabled:opacity-50"
+              className="px-3 py-1.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-none transition-colors disabled:opacity-50"
             >
               {actionLoading === 'all' ? t('signingOut') : t('signOutAllOthers')}
             </button>
@@ -281,7 +281,7 @@ export default function ConnectedDevicesPanel({ restaurantId }) {
 
       {/* Message */}
       {message && (
-        <div className={`mx-4 mb-2 p-3 rounded-xl text-sm ${
+        <div className={`mx-4 mb-2 p-3 rounded-none text-sm ${
           message.type === 'success'
             ? 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800'
             : 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800'
@@ -318,7 +318,7 @@ export default function ConnectedDevicesPanel({ restaurantId }) {
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-3 flex-1 min-w-0">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                      <div className={`w-10 h-10 rounded-none flex items-center justify-center flex-shrink-0 ${
                         isBlocked
                           ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
                           : isCurrentSession || isOnline
@@ -380,7 +380,7 @@ export default function ConnectedDevicesPanel({ restaurantId }) {
                         <button
                           onClick={() => handleToggleBlock(session.id, session.is_blocked)}
                           disabled={actionLoading === session.id}
-                          className={`p-2 rounded-lg transition-colors ${
+                          className={`p-2 rounded-none transition-colors ${
                             isBlocked
                               ? 'text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30'
                               : 'text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30'
@@ -405,7 +405,7 @@ export default function ConnectedDevicesPanel({ restaurantId }) {
                         <button
                           onClick={() => handleSignOut(session.id)}
                           disabled={actionLoading === session.id}
-                          className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors disabled:opacity-50"
+                          className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-none transition-colors disabled:opacity-50"
                           title={t('signOutDevice')}
                         >
                           {actionLoading === session.id ? (

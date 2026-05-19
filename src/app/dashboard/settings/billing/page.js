@@ -293,7 +293,7 @@ export default function BillingPage() {
             }`}>
               {trialDaysLeft === 0
                 ? t('trialEndsToday')
-                : t('trialDaysLeft', { n: trialDaysLeft })}
+                : t('trialDaysLeft', { n: trialDaysLeft, plural: trialDaysLeft === 1 ? '' : 's' })}
             </p>
             <p className={`text-xs mt-0.5 ${
               trialDaysLeft <= 3 ? 'text-red-500 dark:text-red-400'

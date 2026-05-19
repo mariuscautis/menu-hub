@@ -35,7 +35,7 @@ export default function PageTabs({ tabs }) {
         {/* Trigger button */}
         <button
           onClick={() => setOpen(o => !o)}
-          className="flex items-center gap-3 w-full sm:w-auto bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 hover:border-[#6262bd] dark:hover:border-[#6262bd] rounded-xl px-4 py-2.5 transition-colors"
+          className="flex items-center gap-3 w-full sm:w-auto bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 hover:border-[#6262bd] dark:hover:border-[#6262bd] rounded-none px-4 py-2.5 transition-colors"
         >
           {activeTab?.icon && (
             <span className="text-[#6262bd] flex-shrink-0">{activeTab.icon}</span>
@@ -53,7 +53,7 @@ export default function PageTabs({ tabs }) {
 
         {/* Dropdown panel */}
         {open && (
-          <div className="absolute top-full left-0 mt-1.5 z-50 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl overflow-hidden w-64">
+          <div className="absolute top-full left-0 mt-1.5 z-50 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-none shadow-xl overflow-hidden w-64">
             {tabs.map(tab => {
               const active = pathname === tab.href
               return (
@@ -89,12 +89,12 @@ export default function PageTabs({ tabs }) {
 
   // Pills fallback
   return (
-    <div className="flex gap-1 mb-6 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl w-fit flex-wrap">
+    <div className="flex gap-1 mb-6 bg-slate-100 dark:bg-slate-800 p-1 rounded-none w-fit flex-wrap">
       {tabs.map(tab => (
         <Link
           key={tab.href}
           href={tab.href}
-          className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+          className={`px-4 py-1.5 rounded-none text-sm font-medium transition-colors ${
             pathname === tab.href
               ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm'
               : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
