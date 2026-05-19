@@ -18,6 +18,7 @@
     "@vercel/analytics": "^2.0.1",
     "autoprefixer": "^10.4.22",
     "date-fns": "^4.1.0",
+    "driver.js": "^1.4.0",
     "jsqr": "^1.4.0",
     "next": "^15.5.18",
     "next-intl": "^4.7.0",

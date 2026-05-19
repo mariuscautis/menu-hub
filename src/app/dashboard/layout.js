@@ -24,6 +24,7 @@ import { useInactivityTimeout } from '@/hooks/useInactivityTimeout'
 import InactivityRing from '@/components/InactivityRing'
 import PlatformLogo from '@/components/PlatformLogo'
 import { RestaurantProvider } from '@/lib/RestaurantContext'
+import ProductTour from '@/components/ProductTour'
 
 export default function DashboardLayout({ children }) {
   const pathname = usePathname()
@@ -539,14 +540,14 @@ export default function DashboardLayout({ children }) {
 
     if (hasPermission('overview')) {
       items.push({
-        href: '/dashboard', labelKey: 'overview', label: 'Overview',
+        href: '/dashboard', labelKey: 'overview', label: 'Overview', tourId: 'nav-overview',
         icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>)
       })
     }
 
     if (hasModule('ordering') && (hasPermission('orders_kitchen') || hasPermission('orders_bar'))) {
       items.push({
-        href: '/dashboard/orders', labelKey: 'orders', label: 'Orders',
+        href: '/dashboard/orders', labelKey: 'orders', label: 'Orders', tourId: 'nav-orders',
         badge: pendingOrdersCount > 0 ? pendingOrdersCount : null,
         icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="m9 12 2 2 4-4"/></svg>)
       })
@@ -557,6 +558,7 @@ export default function DashboardLayout({ children }) {
         href: '/dashboard/tables',
         labelKey: userType === 'owner' || userType === 'staff-admin' ? 'tablesQr' : 'tables',
         label: userType === 'owner' || userType === 'staff-admin' ? 'Tables & QR' : 'Tables',
+        tourId: 'nav-tables',
         icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="6" height="6" rx="0.5"/><rect x="15" y="3" width="6" height="6" rx="0.5"/><rect x="3" y="15" width="6" height="6" rx="0.5"/><path d="M15 15h2m4 0h-2m-2 0v2m0 4v-2m0 0h-2m2 0h2"/></svg>)
       })
     }
@@ -577,7 +579,7 @@ export default function DashboardLayout({ children }) {
 
     if (hasModule('reservations') && hasPermission('reservations')) {
       items.push({
-        href: '/dashboard/reservations', labelKey: 'reservations', label: 'Reservations',
+        href: '/dashboard/reservations', labelKey: 'reservations', label: 'Reservations', tourId: 'nav-reservations',
         badge: pendingReservationsCount > 0 ? pendingReservationsCount : null,
         icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="1"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></svg>)
       })
@@ -589,14 +591,14 @@ export default function DashboardLayout({ children }) {
 
     if (hasModule('ordering') && (userType === 'owner' || userType === 'staff-admin' || hasPermission('menu'))) {
       items.push({
-        href: '/dashboard/menu', labelKey: 'menu', label: 'Menu',
+        href: '/dashboard/menu', labelKey: 'menu', label: 'Menu', tourId: 'nav-menu',
         icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h12"/></svg>)
       })
     }
 
     if (hasModule('ordering') && (userType === 'owner' || userType === 'staff-admin' || hasPermission('stock'))) {
       items.push({
-        href: '/dashboard/stock', labelKey: 'stock', label: 'Stock',
+        href: '/dashboard/stock', labelKey: 'stock', label: 'Stock', tourId: 'nav-stock',
         icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>)
       })
     }
@@ -617,7 +619,7 @@ export default function DashboardLayout({ children }) {
 
     if (hasModule('rota') && (userType === 'owner' || userType === 'staff-admin' || hasPermission('staff_rota'))) {
       items.push({
-        href: '/dashboard/staff', labelKey: 'staffRota', label: 'Staff & Rota',
+        href: '/dashboard/staff', labelKey: 'staffRota', label: 'Staff & Rota', tourId: 'nav-staff',
         icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>)
       })
     }
@@ -631,7 +633,7 @@ export default function DashboardLayout({ children }) {
 
     if (userType === 'owner' || userType === 'staff-admin') {
       if (hasModule('analytics')) items.push({
-        href: '/dashboard/analytics', labelKey: 'analytics', label: 'Analytics',
+        href: '/dashboard/analytics', labelKey: 'analytics', label: 'Analytics', tourId: 'nav-analytics',
         icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>)
       })
       if (hasModule('reports')) items.push({
@@ -647,7 +649,7 @@ export default function DashboardLayout({ children }) {
 
     if (userType === 'owner' || userType === 'staff-admin') {
       items.push({
-        href: '/dashboard/guide', labelKey: 'guide', label: 'Guide',
+        href: '/dashboard/guide', labelKey: 'guide', label: 'Guide', tourId: 'nav-guide',
         icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>)
       })
       items.push({
@@ -667,7 +669,7 @@ export default function DashboardLayout({ children }) {
 
     if (userType === 'owner') {
       items.push({
-        href: '/dashboard/settings', labelKey: 'settings', label: 'Settings',
+        href: '/dashboard/settings', labelKey: 'settings', label: 'Settings', tourId: 'nav-settings',
         icon: (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>)
       })
     }
@@ -1113,6 +1115,7 @@ export default function DashboardLayout({ children }) {
                   <Link
                     href={item.href}
                     title={!sidebarOpen ? item.label : undefined}
+                    {...(item.tourId ? { 'data-tour': item.tourId } : {})}
                     className={`relative flex items-center font-medium transition-colors ${
                       sidebarOpen ? 'justify-between py-2.5 pr-3 pl-[10px]' : 'justify-center p-3'
                     } ${
@@ -1264,6 +1267,9 @@ export default function DashboardLayout({ children }) {
       `}>
         <div className={`${fullWidthMode ? 'h-[calc(100vh-4rem)] overflow-auto' : ''}`}>
           <RestaurantProvider value={restaurantContextValue}>
+            {(userType === 'owner' || userType === 'staff-admin') && (
+              <ProductTour autoStart={userType === 'owner'} />
+            )}
             {children}
           </RestaurantProvider>
         </div>

@@ -273,3 +273,67 @@
 .dark .rbc-current-time-indicator {
   background-color: rgb(239 68 68); /* red-500 */
 }
+
+/* ── Driver.js product tour overrides ─────────────────────────────────── */
+.driver-popover.menuhub-tour-popover {
+  border-radius: 0 !important;
+  font-family: inherit;
+  max-width: 300px;
+}
+
+.driver-popover.menuhub-tour-popover .driver-popover-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #18181b;
+}
+
+.dark .driver-popover.menuhub-tour-popover .driver-popover-title {
+  color: #f4f4f5;
+}
+
+.driver-popover.menuhub-tour-popover .driver-popover-description {
+  font-size: 0.82rem;
+  color: #52525b;
+  line-height: 1.5;
+}
+
+.dark .driver-popover.menuhub-tour-popover .driver-popover-description {
+  color: #a1a1aa;
+}
+
+.dark .driver-popover.menuhub-tour-popover {
+  background: #18181b;
+  border: 1px solid #3f3f46;
+}
+
+.driver-popover.menuhub-tour-popover .driver-popover-footer button {
+  border-radius: 0 !important;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 5px 12px;
+}
+
+.driver-popover.menuhub-tour-popover .driver-popover-next-btn,
+.driver-popover.menuhub-tour-popover .driver-popover-done-btn {
+  background: #6262bd !important;
+  border-color: #6262bd !important;
+  color: #fff !important;
+}
+
+.driver-popover.menuhub-tour-popover .driver-popover-next-btn:hover,
+.driver-popover.menuhub-tour-popover .driver-popover-done-btn:hover {
+  background: #5151a8 !important;
+  border-color: #5151a8 !important;
+}
+
+.driver-popover.menuhub-tour-popover .driver-popover-prev-btn {
+  border-radius: 0 !important;
+}
+
+.driver-popover.menuhub-tour-popover .driver-popover-arrow-side-left.driver-popover-arrow {
+  border-right-color: #6262bd;
+}
+
+.driver-overlay {
+  background: rgba(0,0,0,0.55) !important;
+}

@@ -2,6 +2,12 @@
 
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 
+function startTour() {
+  if (typeof window !== 'undefined' && typeof window.__startProductTour === 'function') {
+    window.__startProductTour()
+  }
+}
+
 const FLOWS = [
   {
     titleKey: 'flow1_title',
@@ -110,9 +116,18 @@ export default function GuidePage() {
           <h1 className="text-2xl md:text-3xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-2">
             {t('title')}
           </h1>
-          <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 max-w-xl mx-auto">
+          <p className="text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 max-w-xl mx-auto mb-6">
             {t('subtitle')}
           </p>
+          <button
+            onClick={startTour}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#6262bd] hover:bg-[#5151a8] text-white text-sm font-semibold transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
+            </svg>
+            Take the interactive tour
+          </button>
         </div>
 
         {/* Flowchart grid */}
