@@ -57,6 +57,9 @@ export default function StaffMembers() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const avatarInputRef = useRef(null)
 
+  // Magic link modal: null | { phase: 'confirm'|'sending'|'success'|'manual'|'error', member, manualLink? }
+  const [magicLinkModal, setMagicLinkModal] = useState(null)
+
   useEffect(() => {
     fetchData()
   }, [restaurantCtx])
@@ -203,9 +206,14 @@ export default function StaffMembers() {
     fetchData()
   }
 
-  const sendMagicLink = async (staffMember) => {
-    if (!staffMember.email) { alert(t('noEmail')); return }
-    if (!confirm(t('sendMagicLinkConfirm').replace('{name}', staffMember.name).replace('{email}', staffMember.email))) return
+  const sendMagicLink = (staffMember) => {
+    if (!staffMember.email) { setMagicLinkModal({ phase: 'error', member: staffMember }); return }
+    setMagicLinkModal({ phase: 'confirm', member: staffMember })
+  }
+
+  const confirmSendMagicLink = async () => {
+    const staffMember = magicLinkModal.member
+    setMagicLinkModal({ phase: 'sending', member: staffMember })
     try {
       const response = await fetch('/api/staff/send-magic-link', {
         method: 'POST',
@@ -215,15 +223,15 @@ export default function StaffMembers() {
       const data = await response.json()
       if (!response.ok) {
         if (data.magic_link) {
-          alert(t('magicLinkManualSend').replace('{name}', staffMember.name).replace('{email}', staffMember.email).replace('{link}', data.magic_link))
+          setMagicLinkModal({ phase: 'manual', member: staffMember, manualLink: data.magic_link })
         } else {
           throw new Error(data.error || 'Failed to send magic link')
         }
       } else {
-        alert(t('magicLinkSentSuccess').replace('{name}', staffMember.name).replace('{email}', staffMember.email))
+        setMagicLinkModal({ phase: 'success', member: staffMember })
       }
-    } catch (error) {
-      alert(t('magicLinkFailed'))
+    } catch {
+      setMagicLinkModal({ phase: 'error', member: magicLinkModal.member })
     }
   }
 
@@ -619,6 +627,117 @@ export default function StaffMembers() {
           </div>
         </div>
       )}
+      {/* Magic Link Modal */}
+      {magicLinkModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={() => magicLinkModal.phase !== 'sending' && setMagicLinkModal(null)}>
+          <div className="bg-white dark:bg-zinc-900 rounded-sm w-full max-w-sm shadow-2xl" onClick={(e) => e.stopPropagation()}>
+
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-200 dark:border-zinc-800">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-sm bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+                  </svg>
+                </div>
+                <h2 className="text-base font-bold text-zinc-800 dark:text-zinc-200">{t('link')}</h2>
+              </div>
+              {magicLinkModal.phase !== 'sending' && (
+                <button onClick={() => setMagicLinkModal(null)} className="w-8 h-8 flex items-center justify-center rounded-sm text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-xl font-bold transition-colors">×</button>
+              )}
+            </div>
+
+            {/* Body */}
+            <div className="px-6 py-5">
+
+              {/* Confirm */}
+              {magicLinkModal.phase === 'confirm' && (
+                <>
+                  <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
+                    {t('sendMagicLinkConfirm').replace('{name}', magicLinkModal.member.name || '').replace('{email}', magicLinkModal.member.email)}
+                  </p>
+                  <p className="text-xs text-zinc-400 dark:text-zinc-500 mb-6">{t('magicLinkValidHint')}</p>
+                  <div className="flex gap-3">
+                    <button onClick={() => setMagicLinkModal(null)} className="flex-1 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 py-2.5 rounded-sm font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-sm">{t('cancel')}</button>
+                    <button onClick={confirmSendMagicLink} className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-sm font-semibold transition-colors text-sm">{t('sendLink')}</button>
+                  </div>
+                </>
+              )}
+
+              {/* Sending */}
+              {magicLinkModal.phase === 'sending' && (
+                <div className="flex flex-col items-center gap-3 py-4">
+                  <div className="w-8 h-8 border-2 border-zinc-200 dark:border-zinc-700 border-t-purple-600 rounded-full animate-spin" />
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">{t('sendingLink')}</p>
+                </div>
+              )}
+
+              {/* Success */}
+              {magicLinkModal.phase === 'success' && (
+                <>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-9 h-9 rounded-sm bg-green-50 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{t('magicLinkSentTitle')}</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400">{magicLinkModal.member.email}</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-6">{t('magicLinkValidHint')}</p>
+                  <button onClick={() => setMagicLinkModal(null)} className="w-full bg-[#6262bd] hover:bg-[#5252a3] text-white py-2.5 rounded-sm font-semibold transition-colors text-sm">{t('done')}</button>
+                </>
+              )}
+
+              {/* Manual — email couldn't be sent, show link to copy */}
+              {magicLinkModal.phase === 'manual' && (
+                <>
+                  <div className="flex items-start gap-3 mb-4">
+                    <div className="w-9 h-9 rounded-sm bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-5 h-5 text-amber-600 dark:text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{t('magicLinkManualTitle')}</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{t('magicLinkManualHint').replace('{name}', magicLinkModal.member.name || magicLinkModal.member.email)}</p>
+                    </div>
+                  </div>
+                  <div className="bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-sm p-3 mb-4">
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1.5 font-medium">{t('magicLinkLabel')}</p>
+                    <p className="text-xs text-zinc-700 dark:text-zinc-300 break-all font-mono leading-relaxed">{magicLinkModal.manualLink}</p>
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => { navigator.clipboard.writeText(magicLinkModal.manualLink) }}
+                      className="flex-1 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 py-2.5 rounded-sm font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-sm flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                      {t('copyLink')}
+                    </button>
+                    <button onClick={() => setMagicLinkModal(null)} className="flex-1 bg-[#6262bd] hover:bg-[#5252a3] text-white py-2.5 rounded-sm font-semibold transition-colors text-sm">{t('done')}</button>
+                  </div>
+                </>
+              )}
+
+              {/* Error */}
+              {magicLinkModal.phase === 'error' && (
+                <>
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-9 h-9 rounded-sm bg-red-50 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                    </div>
+                    <p className="text-sm text-zinc-700 dark:text-zinc-300">
+                      {magicLinkModal.member?.email ? t('magicLinkFailed') : t('noEmail')}
+                    </p>
+                  </div>
+                  <button onClick={() => setMagicLinkModal(null)} className="w-full border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 py-2.5 rounded-sm font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-sm">{t('close')}</button>
+                </>
+              )}
+
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
     </OfflinePageGuard>
     </>
