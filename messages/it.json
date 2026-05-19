@@ -3210,6 +3210,14 @@
       "step4_title": "Salva Tutte le Modifiche",
       "step4_desc": "Clicca qui per salvare tutte le modifiche ai permessi di tutti i reparti in una sola volta. Le modifiche hanno effetto immediato per tutti i membri assegnati a quei reparti."
     },
+    "customers": {
+      "step1_title": "Clienti",
+      "step1_desc": "Ogni cliente che ha effettuato una prenotazione o un ordine appare qui. Puoi vedere la sua cronologia di visite, le valutazioni e le eventuali restrizioni di fiducia applicate al suo account.",
+      "step2_title": "Cerca e Filtra",
+      "step2_desc": "Cerca clienti per nome, telefono o e-mail. Usa il filtro per visualizzare rapidamente solo i clienti bloccati, quelli con un requisito di deposito o quelli senza restrizioni.",
+      "step3_title": "Lista Clienti",
+      "step3_desc": "Clicca su una riga per aprire il pannello di dettaglio del cliente a destra: vedrai il numero di visite, le valutazioni, la cronologia prenotazioni e le opzioni per bloccare o richiedere un deposito."
+    },
     "cashDrawer": {
       "step1_title": "Cassetto del Denaro",
       "step1_desc": "Questa pagina ti permette di aprire e chiudere sessioni di cassa per tracciare tutti i movimenti di contanti durante un turno. Quando una sessione e aperta, ogni vendita, mancia e rimborso in contanti viene conteggiato automaticamente.",

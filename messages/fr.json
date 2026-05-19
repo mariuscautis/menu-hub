@@ -3210,6 +3210,14 @@
       "step4_title": "Enregistrer Toutes les Modifications",
       "step4_desc": "Cliquez ici pour enregistrer toutes les modifications de permissions dans tous les departements en une seule fois. Les changements prennent effet immediatement pour tous les membres assignes a ces departements."
     },
+    "customers": {
+      "step1_title": "Clients",
+      "step1_desc": "Chaque client ayant effectue une reservation ou passe une commande apparait ici. Vous pouvez consulter son historique de visites, ses avis et toute restriction de confiance appliquee a son compte.",
+      "step2_title": "Rechercher et Filtrer",
+      "step2_desc": "Recherchez des clients par nom, telephone ou e-mail. Utilisez le filtre pour afficher rapidement uniquement les clients bloques, ceux avec une obligation de depot ou les clients sans restriction.",
+      "step3_title": "Liste des Clients",
+      "step3_desc": "Cliquez sur une ligne pour ouvrir le panneau de detail du client a droite : vous verrez le nombre de visites, les avis, l historique des reservations et les options pour bloquer ou exiger un depot."
+    },
     "cashDrawer": {
       "step1_title": "Tiroir-Caisse",
       "step1_desc": "Cette page vous permet d ouvrir et de fermer des sessions de caisse pour suivre tous les mouvements d especes pendant un service. Lorsqu une session est ouverte, chaque vente, pourboire et remboursement en especes est comptabilise automatiquement.",

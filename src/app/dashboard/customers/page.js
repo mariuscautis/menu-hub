@@ -7,6 +7,7 @@ import { useModuleGuard } from '@/hooks/useModuleGuard'
 import { useTranslations, useLanguage } from '@/lib/i18n/LanguageContext'
 import InfoTooltip from '@/components/InfoTooltip'
 import OfflinePageGuard from '@/components/OfflinePageGuard'
+import PageTour from '@/components/PageTour'
 
 const RESTRICTION_LABELS = {
   blocked:      { label: 'Blocked',  cls: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800' },
@@ -27,6 +28,7 @@ export default function CustomersPage() {
   const adminSupabase = useAdminSupabase()
   const t = useTranslations('customers')
   const tg = useTranslations('guide')
+  const tt = useTranslations('tours')
   const { locale } = useLanguage()
 
   const [customers, setCustomers] = useState([])
@@ -282,11 +284,17 @@ export default function CustomersPage() {
   if (loading) return <div className="text-zinc-500 dark:text-zinc-400 p-8">{t('loadingCustomers')}</div>
 
   return (
+    <>
+    <PageTour steps={[
+      { element: '[data-tour="cust-header"]', popover: { title: tt('customers.step1_title'), description: tt('customers.step1_desc') } },
+      { element: '[data-tour="cust-filters"]', popover: { title: tt('customers.step2_title'), description: tt('customers.step2_desc') } },
+      { element: '[data-tour="cust-list"]', popover: { title: tt('customers.step3_title'), description: tt('customers.step3_desc') } },
+    ]} />
     <OfflinePageGuard>
     <div className="flex h-full gap-0">
       {/* Main list */}
       <div className={`flex-1 min-w-0 ${selected ? 'hidden md:block' : ''}`}>
-        <div className="mb-6 flex items-center justify-between gap-4 flex-wrap">
+        <div className="mb-6 flex items-center justify-between gap-4 flex-wrap" data-tour="cust-header">
           <div>
             <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 flex items-center gap-2">
               {t('title')}
@@ -305,7 +313,7 @@ export default function CustomersPage() {
         )}
 
         {/* Filters */}
-        <div className="mb-4 flex gap-3 flex-wrap sm:flex-nowrap">
+        <div className="mb-4 flex gap-3 flex-wrap sm:flex-nowrap" data-tour="cust-filters">
           <input
             type="text"
             value={search}
@@ -326,6 +334,7 @@ export default function CustomersPage() {
         </div>
 
         {/* Table */}
+        <div data-tour="cust-list">
         {filtered.length === 0 ? (
           <div className="text-center py-16 text-zinc-400 dark:text-zinc-500">{t('noCustomersFound')}</div>
         ) : (
@@ -378,6 +387,7 @@ export default function CustomersPage() {
             </div>
           </div>
         )}
+        </div>
       </div>
 
       {/* Side panel */}
@@ -629,5 +639,6 @@ export default function CustomersPage() {
       )}
     </div>
     </OfflinePageGuard>
+    </>
   )
 }

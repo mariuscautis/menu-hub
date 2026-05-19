@@ -3210,6 +3210,14 @@
       "step4_title": "Salveaza Toate Modificarile",
       "step4_desc": "Apasa aici pentru a salva toate modificarile permisiunilor din toate departamentele dintr-o data. Modificarile au efect imediat pentru toti membrii atribuiti acelor departamente."
     },
+    "customers": {
+      "step1_title": "Clienți",
+      "step1_desc": "Fiecare client care a facut o rezervare sau a plasat o comanda apare aici. Poti vedea istoricul vizitelor, evaluarile si orice restrictie de incredere aplicata contului sau.",
+      "step2_title": "Cauta si Filtreaza",
+      "step2_desc": "Cauta clienti dupa nume, telefon sau e-mail. Foloseste filtrul pentru a afisa rapid doar clientii blocati, cei cu cerinta de depozit sau cei fara restrictii.",
+      "step3_title": "Lista Clientilor",
+      "step3_desc": "Apasa pe orice rand pentru a deschide panoul de detalii al clientului in dreapta: vei vedea numarul de vizite, evaluarile, istoricul rezervarilor si optiunile pentru blocare sau cerinta de depozit."
+    },
     "cashDrawer": {
       "step1_title": "Sertar de Casa",
       "step1_desc": "Aceasta pagina iti permite sa deschizi si sa inchizi sesiuni de casa pentru a urmari toate miscarile de numerar pe parcursul unui tur. Cand o sesiune este deschisa, fiecare vanzare, bacsis si rambursare in numerar este contorizata automat.",

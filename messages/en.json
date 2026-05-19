@@ -3231,6 +3231,14 @@
       "step4_title": "Save All Changes",
       "step4_desc": "Click here to save every permission change across all departments in one go. Changes take effect immediately for all staff members assigned to those departments."
     },
+    "customers": {
+      "step1_title": "Customers",
+      "step1_desc": "Every guest who has made a reservation or placed an order appears here. You can view their visit history, ratings, and any trust restrictions applied to their account.",
+      "step2_title": "Search & Filter",
+      "step2_desc": "Search customers by name, phone, or email. Use the filter to quickly show only blocked customers, those with a deposit requirement, or unrestricted guests.",
+      "step3_title": "Customer List",
+      "step3_desc": "Click any row to open the customer detail panel on the right — you will see their visit count, ratings, reservation history, and options to block or add a deposit requirement."
+    },
     "cashDrawer": {
       "step1_title": "Cash Drawer",
       "step1_desc": "This page lets you open and close cash drawer sessions to track all cash movement during a shift. When a session is open, every cash sale, tip, and refund is automatically counted.",
