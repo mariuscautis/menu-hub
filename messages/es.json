@@ -3063,6 +3063,14 @@
       "step4_title": "Tarjetas de Solicitud",
       "step4_desc": "Cada tarjeta muestra el nombre del empleado, tipo de permiso, fechas y estado. Haz clic en una tarjeta para ver los detalles completos, aprobarla o rechazarla, o editar las fechas si es necesario."
     },
+    "stockHub": {
+      "step1_title": "Stock de Comida y Bebida",
+      "step1_desc": "Gestiona todos los ingredientes y suministros que usan tu cocina y barra. Cada articulo tiene una unidad, un nivel de stock actual y un umbral de stock minimo para avisarte antes de quedarte sin existencias.",
+      "step2_title": "Conteo de Inventario",
+      "step2_desc": "Realiza un recuento de stock aqui para conciliar los niveles esperados con lo que hay fisicamente en los estantes. Las discrepancias se marcan para que puedas investigar mermas o perdidas.",
+      "step3_title": "Facturas de Compra",
+      "step3_desc": "Registra aqui las entregas entrantes de tus proveedores. Cada factura anota los articulos recibidos y sus cantidades, actualizando automaticamente los niveles de stock."
+    },
     "departments": {
       "step1_title": "Tus Departamentos",
       "step1_desc": "Cada tarjeta representa un departamento de tu local. Los departamentos agrupan al personal y controlan a que partes del panel pueden acceder al iniciar sesion.",

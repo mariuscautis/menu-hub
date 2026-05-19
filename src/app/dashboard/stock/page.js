@@ -4,17 +4,20 @@ import Link from 'next/link'
 import { useModuleGuard } from '@/hooks/useModuleGuard'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import InfoTooltip from '@/components/InfoTooltip'
+import PageTour from '@/components/PageTour'
 
 export default function StockHubPage() {
   useModuleGuard('ordering')
   const t = useTranslations('stock')
   const tg = useTranslations('guide')
+  const tt = useTranslations('tours')
 
   const sections = [
     {
       titleKey: 'foodStock',
       descKey: 'foodStockDesc',
       href: '/dashboard/stock/products',
+      tourId: 'stock-hub-products',
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
@@ -27,6 +30,7 @@ export default function StockHubPage() {
       titleKey: 'inventory',
       descKey: 'inventoryDesc',
       href: '/dashboard/stock/inventory',
+      tourId: 'stock-hub-inventory',
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
@@ -39,6 +43,7 @@ export default function StockHubPage() {
       titleKey: 'invoices',
       descKey: 'invoicesDesc',
       href: '/dashboard/stock/purchasing-invoices',
+      tourId: 'stock-hub-invoices',
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z" />
@@ -51,6 +56,11 @@ export default function StockHubPage() {
 
   return (
     <div className="min-h-screen p-4 md:p-8">
+      <PageTour steps={[
+        { element: '[data-tour="stock-hub-products"]', popover: { title: tt('stockHub.step1_title'), description: tt('stockHub.step1_desc') } },
+        { element: '[data-tour="stock-hub-inventory"]', popover: { title: tt('stockHub.step2_title'), description: tt('stockHub.step2_desc') } },
+        { element: '[data-tour="stock-hub-invoices"]', popover: { title: tt('stockHub.step3_title'), description: tt('stockHub.step3_desc') } },
+      ]} />
       <div className="max-w-3xl mx-auto">
         <div className="mb-10 text-center">
           <h1 className="text-2xl md:text-3xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-2 flex items-center justify-center gap-2">
@@ -67,6 +77,7 @@ export default function StockHubPage() {
             <Link
               key={section.href}
               href={section.href}
+              data-tour={section.tourId}
               className="group flex flex-col items-center text-center gap-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 hover:border-[#6262bd] dark:hover:border-[#6262bd] hover:shadow-lg transition-all"
             >
               <div className={`${section.bg} p-4 rounded-sm ${section.color} group-hover:scale-110 transition-transform`}>

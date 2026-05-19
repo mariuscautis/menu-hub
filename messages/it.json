@@ -3063,6 +3063,14 @@
       "step4_title": "Schede delle Richieste",
       "step4_desc": "Ogni scheda mostra il nome del membro, il tipo di congedo, le date e lo stato. Clicca su una scheda per vedere i dettagli completi, approvarla o rifiutarla, o modificare le date se necessario."
     },
+    "stockHub": {
+      "step1_title": "Stock Alimentari e Bevande",
+      "step1_desc": "Gestisci tutti gli ingredienti e le forniture usate dalla tua cucina e dal bar. Ogni articolo ha un'unita, un livello di stock attuale e una soglia minima che ti avvisa prima di esaurire le scorte.",
+      "step2_title": "Conteggio Inventario",
+      "step2_desc": "Esegui un conteggio delle scorte qui per riconciliare i livelli attesi con quanto e fisicamente sugli scaffali. Le discrepanze vengono segnalate per indagare su sprechi o ammanchi.",
+      "step3_title": "Fatture di Acquisto",
+      "step3_desc": "Registra qui le consegne in entrata dai tuoi fornitori. Ogni fattura registra gli articoli ricevuti e le relative quantita, aggiornando automaticamente i livelli di stock."
+    },
     "departments": {
       "step1_title": "I Tuoi Reparti",
       "step1_desc": "Ogni carta rappresenta un reparto del tuo locale. I reparti raggruppano il personale e controllano le parti della dashboard a cui possono accedere una volta effettuato il login.",

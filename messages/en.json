@@ -3181,6 +3181,14 @@
       "step4_title": "Request Cards",
       "step4_desc": "Each card shows the staff name, leave type, dates, and status. Click a card to expand it and see full details, approve or reject it, or edit the request dates if needed."
     },
+    "stockHub": {
+      "step1_title": "Food and Drink Stock",
+      "step1_desc": "Manage all the ingredients and supplies your kitchen and bar use. Each item has a unit, a current stock level, and a low-stock threshold so you are alerted before you run out.",
+      "step2_title": "Inventory Count",
+      "step2_desc": "Run a stock count here to reconcile your expected stock levels against what is physically on the shelves. Discrepancies are flagged so you can investigate waste or shrinkage.",
+      "step3_title": "Purchasing Invoices",
+      "step3_desc": "Record incoming deliveries from your suppliers here. Each invoice logs the items received and their quantities, automatically updating your stock levels."
+    },
     "departments": {
       "step1_title": "Your Departments",
       "step1_desc": "Each card represents a department at your venue. Departments group staff together and control which parts of the dashboard they can access when logged in.",

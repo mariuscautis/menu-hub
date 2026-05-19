@@ -3063,6 +3063,14 @@
       "step4_title": "Fiches de Demande",
       "step4_desc": "Chaque fiche affiche le nom du membre, le type de conge, les dates et le statut. Cliquez sur une fiche pour voir les details complets, l approuver ou la rejeter, ou modifier les dates si necessaire."
     },
+    "stockHub": {
+      "step1_title": "Stock Alimentaire et Boissons",
+      "step1_desc": "Gerez tous les ingredients et fournitures utilises par votre cuisine et votre bar. Chaque article a une unite, un niveau de stock actuel et un seuil de stock minimum pour vous alerter avant d en manquer.",
+      "step2_title": "Comptage d Inventaire",
+      "step2_desc": "Effectuez un inventaire ici pour reconcilier vos niveaux de stock attendus avec ce qui se trouve physiquement sur les etageres. Les ecarts sont signales pour que vous puissiez enqueter sur les pertes ou la demarque.",
+      "step3_title": "Factures d Achat",
+      "step3_desc": "Enregistrez ici les livraisons entrantes de vos fournisseurs. Chaque facture consigne les articles recus et leurs quantites, mettant automatiquement a jour vos niveaux de stock."
+    },
     "departments": {
       "step1_title": "Vos Departements",
       "step1_desc": "Chaque carte represente un departement de votre etablissement. Les departements regroupent le personnel et controlent les parties du tableau de bord auxquelles ils peuvent acceder une fois connectes.",

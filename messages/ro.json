@@ -3063,6 +3063,14 @@
       "step4_title": "Carduri Cereri",
       "step4_desc": "Fiecare card afiseaza numele membrului, tipul de concediu, datele si statusul. Apasa pe un card pentru a vedea detaliile complete, a-l aproba sau respinge, sau edita datele daca este necesar."
     },
+    "stockHub": {
+      "step1_title": "Stoc Alimente si Bauturi",
+      "step1_desc": "Gestioneaza toate ingredientele si consumabilele folosite de bucataria si barul tau. Fiecare articol are o unitate, un nivel de stoc curent si un prag minim care te alerteaza inainte de a ramane fara stoc.",
+      "step2_title": "Inventariere Stoc",
+      "step2_desc": "Efectueaza un inventar aici pentru a reconcilia nivelurile de stoc asteptate cu ce se afla fizic pe rafturi. Discrepantele sunt semnalizate pentru a investiga pierderile sau minusurile.",
+      "step3_title": "Facturi de Achizitie",
+      "step3_desc": "Inregistreaza aici livrarile primite de la furnizori. Fiecare factura consemneaza articolele primite si cantitatile lor, actualizand automat nivelurile de stoc."
+    },
     "departments": {
       "step1_title": "Departamentele Tale",
       "step1_desc": "Fiecare card reprezinta un departament din localul tau. Departamentele grupeaza personalul si controleaza partile din panou la care pot accesa dupa autentificare.",
