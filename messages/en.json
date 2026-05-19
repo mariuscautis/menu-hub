@@ -3230,6 +3230,14 @@
       "step3_desc": "Type a department name here and click Add Department to create it. New departments start with no permissions — tick the ones that apply before saving.",
       "step4_title": "Save All Changes",
       "step4_desc": "Click here to save every permission change across all departments in one go. Changes take effect immediately for all staff members assigned to those departments."
+    },
+    "cashDrawer": {
+      "step1_title": "Cash Drawer",
+      "step1_desc": "This page lets you open and close cash drawer sessions to track all cash movement during a shift. When a session is open, every cash sale, tip, and refund is automatically counted.",
+      "step2_title": "Current Session",
+      "step2_desc": "When the drawer is open you will see the live expected cash total here — opening float plus cash sales and tips, minus refunds. Click Close Drawer to count and reconcile at end of shift.",
+      "step3_title": "Session History",
+      "step3_desc": "Every closed session is logged here with its opening float, closing amount, and variance. Use this to audit discrepancies and spot patterns across shifts."
     }
   }
 }

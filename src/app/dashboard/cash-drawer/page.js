@@ -22,11 +22,13 @@ import { useAdminSupabase } from '@/hooks/useAdminSupabase';
 import { useModuleGuard } from '@/hooks/useModuleGuard';
 import InfoTooltip from '@/components/InfoTooltip';
 import OfflinePageGuard from '@/components/OfflinePageGuard'
+import PageTour from '@/components/PageTour'
 
 export default function CashDrawerPage() {
   useModuleGuard('cash_drawer')
   const t = useTranslations('cashDrawer');
   const tg = useTranslations('guide');
+  const tt = useTranslations('tours');
   const { currencySymbol, formatCurrency } = useCurrency();
   const restaurantCtx = useRestaurant();
   const supabase = useAdminSupabase();
@@ -384,10 +386,16 @@ export default function CashDrawerPage() {
   }
 
   return (
+    <>
+    <PageTour steps={[
+      { element: '[data-tour="cash-header"]', popover: { title: tt('cashDrawer.step1_title'), description: tt('cashDrawer.step1_desc') } },
+      { element: '[data-tour="cash-session-card"]', popover: { title: tt('cashDrawer.step2_title'), description: tt('cashDrawer.step2_desc') } },
+      { element: '[data-tour="cash-history"]', popover: { title: tt('cashDrawer.step3_title'), description: tt('cashDrawer.step3_desc') } },
+    ]} />
     <OfflinePageGuard>
     <div className="min-h-screen p-4 md:p-8">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-8" data-tour="cash-header">
         <h1 className="text-2xl md:text-3xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-2 flex items-center gap-2">
           {t('title') || 'Cash Drawer'}
           <InfoTooltip text={tg('cash_drawer_desc')} />
@@ -398,7 +406,7 @@ export default function CashDrawerPage() {
       </div>
 
       {/* Current Session Card */}
-      <div className="mb-8">
+      <div className="mb-8" data-tour="cash-session-card">
         {currentSession ? (
           // Active Session View
           <div className="bg-white dark:bg-zinc-900 border-2 border-green-200 dark:border-green-800 rounded-sm p-6">
@@ -544,7 +552,7 @@ export default function CashDrawerPage() {
       </div>
 
       {/* Session History */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6" data-tour="cash-history">
         <h2 className="text-xl font-bold text-zinc-800 dark:text-zinc-200 dark:text-zinc-200 mb-6">
           {t('sessionHistory') || 'Session History'}
         </h2>
@@ -784,5 +792,6 @@ export default function CashDrawerPage() {
       )}
     </div>
     </OfflinePageGuard>
+    </>
   );
 }

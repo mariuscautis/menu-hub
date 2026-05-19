@@ -2886,12 +2886,14 @@
     "menu": "Menu",
     "stock": "Stock",
     "reportLoss": "Signaler une perte",
+    "cashDrawer": "Tiroir-Caisse",
     "staffRota": "Personnel & Roulement",
     "myRota": "Mon planning",
     "analytics": "Analytique",
     "reports": "Rapports",
     "support": "Support",
     "settings": "Paramètres",
+    "offlineHub": "Centre Hors Ligne",
     "platformAdmin": "Admin plateforme",
     "guide": "Guide"
   },
@@ -3112,6 +3114,14 @@
       "step3_desc": "Tapez un nom de departement ici et cliquez sur Ajouter un Departement pour le creer. Les nouveaux departements demarrent sans permissions, cochez celles qui s appliquent avant d enregistrer.",
       "step4_title": "Enregistrer Toutes les Modifications",
       "step4_desc": "Cliquez ici pour enregistrer toutes les modifications de permissions dans tous les departements en une seule fois. Les changements prennent effet immediatement pour tous les membres assignes a ces departements."
+    },
+    "cashDrawer": {
+      "step1_title": "Tiroir-Caisse",
+      "step1_desc": "Cette page vous permet d ouvrir et de fermer des sessions de caisse pour suivre tous les mouvements d especes pendant un service. Lorsqu une session est ouverte, chaque vente, pourboire et remboursement en especes est comptabilise automatiquement.",
+      "step2_title": "Session en Cours",
+      "step2_desc": "Quand la caisse est ouverte, le total attendu en especes s affiche ici en temps reel : fond de caisse plus ventes et pourboires en especes, moins les remboursements. Cliquez sur Fermer la Caisse pour compter et rapprocher en fin de service.",
+      "step3_title": "Historique des Sessions",
+      "step3_desc": "Chaque session cloturee est consignee ici avec son fond initial, le montant de cloture et l ecart. Utilisez cet historique pour auditer les ecarts et reperer des tendances entre les services."
     }
   }
 }

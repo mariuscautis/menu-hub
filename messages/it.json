@@ -2886,12 +2886,14 @@
     "menu": "Menu",
     "stock": "Stock",
     "reportLoss": "Segnala perdita",
+    "cashDrawer": "Cassetto del Denaro",
     "staffRota": "Personale & Turni",
     "myRota": "I miei turni",
     "analytics": "Analisi",
     "reports": "Report",
     "support": "Supporto",
     "settings": "Impostazioni",
+    "offlineHub": "Hub Offline",
     "platformAdmin": "Admin piattaforma",
     "guide": "Guida"
   },
@@ -3112,6 +3114,14 @@
       "step3_desc": "Digita un nome di reparto qui e clicca su Aggiungi Reparto per crearlo. I nuovi reparti iniziano senza permessi, seleziona quelli applicabili prima di salvare.",
       "step4_title": "Salva Tutte le Modifiche",
       "step4_desc": "Clicca qui per salvare tutte le modifiche ai permessi di tutti i reparti in una sola volta. Le modifiche hanno effetto immediato per tutti i membri assegnati a quei reparti."
+    },
+    "cashDrawer": {
+      "step1_title": "Cassetto del Denaro",
+      "step1_desc": "Questa pagina ti permette di aprire e chiudere sessioni di cassa per tracciare tutti i movimenti di contanti durante un turno. Quando una sessione e aperta, ogni vendita, mancia e rimborso in contanti viene conteggiato automaticamente.",
+      "step2_title": "Sessione Corrente",
+      "step2_desc": "Quando la cassa e aperta vedrai qui il totale atteso in contanti in tempo reale: fondo cassa iniziale piu vendite e mance in contanti, meno i rimborsi. Clicca su Chiudi Cassa per contare e riconciliare a fine turno.",
+      "step3_title": "Storico Sessioni",
+      "step3_desc": "Ogni sessione chiusa e registrata qui con il fondo iniziale, l importo di chiusura e lo scarto. Usalo per verificare le discrepanze e individuare tendenze tra i turni."
     }
   }
 }

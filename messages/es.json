@@ -2886,12 +2886,14 @@
     "menu": "Menú",
     "stock": "Stock",
     "reportLoss": "Reportar pérdida",
+    "cashDrawer": "Caja Registradora",
     "staffRota": "Personal & Turnos",
     "myRota": "Mis turnos",
     "analytics": "Análisis",
     "reports": "Informes",
     "support": "Soporte",
     "settings": "Configuración",
+    "offlineHub": "Centro Sin Conexión",
     "platformAdmin": "Admin plataforma",
     "guide": "Guía"
   },
@@ -3112,6 +3114,14 @@
       "step3_desc": "Escribe un nombre de departamento aqui y haz clic en Agregar Departamento para crearlo. Los nuevos departamentos empiezan sin permisos, marca los que correspondan antes de guardar.",
       "step4_title": "Guardar Todos los Cambios",
       "step4_desc": "Haz clic aqui para guardar todos los cambios de permisos de todos los departamentos de una vez. Los cambios son efectivos inmediatamente para todos los miembros asignados a esos departamentos."
+    },
+    "cashDrawer": {
+      "step1_title": "Caja Registradora",
+      "step1_desc": "Esta pagina te permite abrir y cerrar sesiones de caja para registrar todo el movimiento de efectivo durante un turno. Cuando hay una sesion abierta, cada venta, propina y devolucion en efectivo se cuenta automaticamente.",
+      "step2_title": "Sesion Actual",
+      "step2_desc": "Con la caja abierta veras aqui el total esperado de efectivo en tiempo real: el fondo inicial mas ventas y propinas en efectivo, menos devoluciones. Haz clic en Cerrar Caja para contar y cuadrar al final del turno.",
+      "step3_title": "Historial de Sesiones",
+      "step3_desc": "Cada sesion cerrada queda registrada aqui con su fondo inicial, importe de cierre y diferencia. Usalo para auditar discrepancias y detectar patrones entre turnos."
     }
   }
 }

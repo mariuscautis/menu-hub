@@ -2886,12 +2886,14 @@
     "menu": "Meniu",
     "stock": "Stoc",
     "reportLoss": "Raportare pierderi",
+    "cashDrawer": "Sertar de Casă",
     "staffRota": "Personal & Ture",
     "myRota": "Turele mele",
     "analytics": "Analiză",
     "reports": "Rapoarte",
     "support": "Suport",
     "settings": "Setări",
+    "offlineHub": "Hub Offline",
     "platformAdmin": "Admin platformă",
     "guide": "Ghid"
   },
@@ -3112,6 +3114,14 @@
       "step3_desc": "Scrie un nume de departament aici si apasa Adauga Departament pentru a-l crea. Departamentele noi incep fara permisiuni, bifeaza-le pe cele aplicabile inainte de salvare.",
       "step4_title": "Salveaza Toate Modificarile",
       "step4_desc": "Apasa aici pentru a salva toate modificarile permisiunilor din toate departamentele dintr-o data. Modificarile au efect imediat pentru toti membrii atribuiti acelor departamente."
+    },
+    "cashDrawer": {
+      "step1_title": "Sertar de Casa",
+      "step1_desc": "Aceasta pagina iti permite sa deschizi si sa inchizi sesiuni de casa pentru a urmari toate miscarile de numerar pe parcursul unui tur. Cand o sesiune este deschisa, fiecare vanzare, bacsis si rambursare in numerar este contorizata automat.",
+      "step2_title": "Sesiunea Curenta",
+      "step2_desc": "Cand sertarul este deschis vei vedea aici totalul estimat de numerar in timp real: fondul initial plus vanzarile si bacsisurile in numerar, minus rambursarile. Apasa Inchide Casa pentru a numara si reconcilia la sfarsitul turului.",
+      "step3_title": "Istoricul Sesiunilor",
+      "step3_desc": "Fiecare sesiune inchisa este inregistrata aici cu fondul initial, suma de inchidere si diferenta. Foloseste-l pentru a audita discrepantele si a identifica tipare intre ture."
     }
   }
 }
