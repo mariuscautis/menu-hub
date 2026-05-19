@@ -3043,6 +3043,18 @@
       "step4_desc": "Use this panel to stop new reservations being accepted on a given day. You can block today instantly or pick any future date. Blocked dates are shown as chips below and can be unblocked at any time.",
       "step5_title": "Reservation Cards",
       "step5_desc": "Each card shows the guest name, date, time, party size, and current status. Click any card to open the full detail panel where you can confirm, deny, rate the customer, or add a restriction."
+    },
+    "reservationSettings": {
+      "step1_title": "Booking Slot Mode",
+      "step1_desc": "Choose how customers pick a time. Fixed Slots shows pre-set time options at a set interval. Customer Chooses lets guests pick any start time and select from allowed durations.",
+      "step2_title": "Buffer Time",
+      "step2_desc": "Add a gap between bookings to give staff time to reset the table. A 15-minute buffer means back-to-back slots are spaced out automatically.",
+      "step3_title": "Advance Booking Window",
+      "step3_desc": "Controls how far ahead customers can book. Set this to 30 days if you only want a rolling month of bookings visible, or up to 365 for a full year.",
+      "step4_title": "Operating Hours",
+      "step4_desc": "Define which days and time slots accept reservations. Toggle a day off to mark it as closed, or add multiple shifts per day for venues with a lunch and dinner service.",
+      "step5_title": "Save Settings",
+      "step5_desc": "All changes on this page take effect only after you click Save. Any unsaved edits will be lost if you navigate away."
     }
   }
 }

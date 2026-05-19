@@ -2925,6 +2925,18 @@
       "step4_desc": "Utilisez ce panneau pour empecher l acceptation de nouvelles reservations un jour donne. Vous pouvez bloquer aujourd hui instantanement ou choisir une date future. Les dates bloquees s affichent comme des puces et peuvent etre debloquees a tout moment.",
       "step5_title": "Cartes de Reservation",
       "step5_desc": "Chaque carte affiche le nom du client, la date, l heure, le nombre de convives et le statut actuel. Cliquez sur une carte pour ouvrir le panneau complet ou vous pouvez confirmer, refuser, noter le client ou ajouter une restriction."
+    },
+    "reservationSettings": {
+      "step1_title": "Mode de Creneaux",
+      "step1_desc": "Choisissez comment les clients selectionnent une heure. Creneaux Fixes affiche des options d horaire predefinis. Le Client Choisit laisse les clients choisir n importe quelle heure de debut parmi les durees autorisees.",
+      "step2_title": "Temps Tampon",
+      "step2_desc": "Ajoutez un intervalle entre les reservations pour laisser au personnel le temps de preparer la table. Un tampon de 15 minutes espace automatiquement les creneaux consecutifs.",
+      "step3_title": "Fenetre de Reservation Anticipee",
+      "step3_desc": "Controle combien de temps a l avance les clients peuvent reserver. Mettez 30 jours pour un mois glissant de reservations, ou jusqu a 365 pour une annee complete.",
+      "step4_title": "Heures d Ouverture",
+      "step4_desc": "Definissez quels jours et quels creneaux acceptent des reservations. Desactivez un jour pour le marquer comme ferme, ou ajoutez plusieurs services par jour pour les etablissements avec dejeuner et diner.",
+      "step5_title": "Enregistrer les Parametres",
+      "step5_desc": "Les modifications sur cette page ne prennent effet qu apres avoir clique sur Enregistrer. Toute modification non sauvegardee sera perdue si vous quittez la page."
     }
   }
 }

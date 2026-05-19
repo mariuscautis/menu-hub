@@ -2925,6 +2925,18 @@
       "step4_desc": "Usa questo pannello per impedire l accettazione di nuove prenotazioni in un giorno specifico. Puoi bloccare oggi immediatamente o scegliere una data futura. Le date bloccate appaiono come chip e possono essere sbloccate in qualsiasi momento.",
       "step5_title": "Schede Prenotazione",
       "step5_desc": "Ogni scheda mostra il nome del cliente, la data, l orario, il numero di commensali e lo stato attuale. Clicca su una scheda per aprire il pannello completo dove puoi confermare, rifiutare, valutare il cliente o aggiungere una restrizione."
+    },
+    "reservationSettings": {
+      "step1_title": "Modalita Fasce Orarie",
+      "step1_desc": "Scegli come i clienti selezionano un orario. Fasce Fisse mostra opzioni preimpostate a intervalli regolari. Il Cliente Sceglie permette di selezionare qualsiasi orario di inizio tra le durate consentite.",
+      "step2_title": "Tempo Cuscinetto",
+      "step2_desc": "Aggiungi un intervallo tra le prenotazioni per dare al personale il tempo di preparare il tavolo. Un cuscinetto di 15 minuti distanzia automaticamente le fasce consecutive.",
+      "step3_title": "Finestra di Prenotazione Anticipata",
+      "step3_desc": "Controlla con quanto anticipo i clienti possono prenotare. Imposta 30 giorni per un mese scorrevole di prenotazioni, o fino a 365 per un anno intero.",
+      "step4_title": "Orari di Apertura",
+      "step4_desc": "Definisci quali giorni e fasce orarie accettano prenotazioni. Disattiva un giorno per segnarlo come chiuso, o aggiungi piu turni al giorno per locali con pranzo e cena.",
+      "step5_title": "Salva Impostazioni",
+      "step5_desc": "Le modifiche su questa pagina hanno effetto solo dopo aver cliccato Salva. Qualsiasi modifica non salvata sara persa se si naviga altrove."
     }
   }
 }

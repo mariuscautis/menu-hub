@@ -2925,6 +2925,18 @@
       "step4_desc": "Foloseste acest panou pentru a opri acceptarea de noi rezervari intr-o zi anume. Poti bloca astazi instantaneu sau alege orice data viitoare. Datele blocate apar ca etichete si pot fi deblocate oricand.",
       "step5_title": "Carduri Rezervare",
       "step5_desc": "Fiecare card afiseaza numele clientului, data, ora, numarul de persoane si statusul curent. Apasa pe orice card pentru a deschide panoul complet unde poti confirma, refuza, evalua clientul sau adauga o restrictie."
+    },
+    "reservationSettings": {
+      "step1_title": "Modul Intervalelor de Rezervare",
+      "step1_desc": "Alege cum selecteaza clientii ora. Intervale Fixe afiseaza optiuni de ora predefinite. Clientul Alege permite alegerea oricarei ore de inceput si selectarea din duratele permise.",
+      "step2_title": "Timp Tampon",
+      "step2_desc": "Adauga un interval intre rezervari pentru ca personalul sa pregateasca masa. Un tampon de 15 minute separa automat intervalele consecutive.",
+      "step3_title": "Fereastra de Rezervare in Avans",
+      "step3_desc": "Controleaza cu cat timp inainte pot rezerva clientii. Seteaza 30 de zile pentru o luna rulanta de rezervari sau pana la 365 pentru un an intreg.",
+      "step4_title": "Program de Functionare",
+      "step4_desc": "Defineste ce zile si intervale orare accepta rezervari. Dezactiveaza o zi pentru a o marca ca inchisa sau adauga mai multe ture pe zi pentru localuri cu pranz si cina.",
+      "step5_title": "Salveaza Setarile",
+      "step5_desc": "Modificarile de pe aceasta pagina au efect doar dupa ce apesi Salveaza. Orice editare nesalvata se va pierde daca navighezi pe alta pagina."
     }
   }
 }

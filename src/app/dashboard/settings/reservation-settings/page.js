@@ -7,6 +7,7 @@ import PageTabs from '@/components/PageTabs'
 import { settingsTabs } from '@/components/PageTabsConfig'
 import { useTranslations } from '@/lib/i18n/LanguageContext'
 import InfoTooltip from '@/components/InfoTooltip'
+import PageTour from '@/components/PageTour'
 import OfflinePageGuard from '@/components/OfflinePageGuard'
 
 const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
@@ -69,6 +70,7 @@ const PADDING_OPTIONS = [
 export default function ReservationSettingsPage() {
   const t = useTranslations('reservationSettings')
   const tg = useTranslations('guide')
+  const tt = useTranslations('tours')
   const restaurantCtx = useRestaurant()
   const supabase = useAdminSupabase()
 
@@ -215,6 +217,14 @@ export default function ReservationSettingsPage() {
   if (!restaurant) return <div className="text-red-600">{t('noRestaurant')}</div>
 
   return (
+    <>
+    <PageTour steps={[
+      { element: '[data-tour="res-set-slot-mode"]', popover: { title: tt('reservationSettings.step1_title'), description: tt('reservationSettings.step1_desc') } },
+      { element: '[data-tour="res-set-buffer"]', popover: { title: tt('reservationSettings.step2_title'), description: tt('reservationSettings.step2_desc') } },
+      { element: '[data-tour="res-set-advance"]', popover: { title: tt('reservationSettings.step3_title'), description: tt('reservationSettings.step3_desc') } },
+      { element: '[data-tour="res-set-hours"]', popover: { title: tt('reservationSettings.step4_title'), description: tt('reservationSettings.step4_desc') } },
+      { element: '[data-tour="res-set-save"]', popover: { title: tt('reservationSettings.step5_title'), description: tt('reservationSettings.step5_desc') } },
+    ]} />
     <OfflinePageGuard>
     <div>
       <PageTabs tabs={settingsTabs} />
@@ -252,7 +262,7 @@ export default function ReservationSettingsPage() {
       )}
 
       {/* Booking slot mode */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-6">
+      <div data-tour="res-set-slot-mode" className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-6">
         <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-1">{t('bookingSlotMode')}</h2>
         <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-5">
           {t('bookingSlotModeDesc')}
@@ -334,7 +344,7 @@ export default function ReservationSettingsPage() {
       </div>
 
       {/* Padding between bookings */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-6">
+      <div data-tour="res-set-buffer" className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-6">
         <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-1">{t('bufferTime')}</h2>
         <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-5">
           {t('bufferTimeDesc')}
@@ -362,7 +372,7 @@ export default function ReservationSettingsPage() {
       </div>
 
       {/* Advance booking window */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-6">
+      <div data-tour="res-set-advance" className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-6">
         <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-1">{t('advanceBookingWindow')}</h2>
         <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-5">
           {t('advanceBookingWindowDesc')}
@@ -459,7 +469,7 @@ export default function ReservationSettingsPage() {
       </div>
 
       {/* Operating hours */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-6">
+      <div data-tour="res-set-hours" className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-sm p-6 mb-6">
         <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300 mb-1">{t('operatingHours')}</h2>
         <p className="text-sm text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 mb-5">
           {t('operatingHoursDesc')}
@@ -651,6 +661,7 @@ export default function ReservationSettingsPage() {
       </div>
 
       <button
+        data-tour="res-set-save"
         onClick={handleSave}
         disabled={saving}
         className="w-full bg-[#6262bd] text-white py-3 rounded-sm font-semibold hover:bg-[#5252a3] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
@@ -659,5 +670,6 @@ export default function ReservationSettingsPage() {
       </button>
     </div>
     </OfflinePageGuard>
+    </>
   )
 }
