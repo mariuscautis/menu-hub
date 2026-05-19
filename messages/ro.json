@@ -3280,6 +3280,16 @@
       "step2_desc": "Cand sertarul este deschis vei vedea aici totalul estimat de numerar in timp real: fondul initial plus vanzarile si bacsisurile in numerar, minus rambursarile. Apasa Inchide Casa pentru a numara si reconcilia la sfarsitul turului.",
       "step3_title": "Istoricul Sesiunilor",
       "step3_desc": "Fiecare sesiune inchisa este inregistrata aici cu fondul initial, suma de inchidere si diferenta. Foloseste-l pentru a audita discrepantele si a identifica tipare intre ture."
+    },
+    "myRota": {
+      "step1_title": "Rezumatul Programului Tău",
+      "step1_desc": "Dintr-o privire: cate ture urmatoare ai, totalul orelor din perioada, cand este urmatoarea tura si cate zile de concediu iti raman. Apasa pe cardul de concediu pentru a merge direct la fila de absente.",
+      "step2_title": "Pontaj Intrare / Iesire",
+      "step2_desc": "Foloseste acest widget pentru a bifa intrarea la inceputul turei si iesirea la final. Timpul tau de lucru este inregistrat automat si alimenteaza istoricul de munca.",
+      "step3_title": "File",
+      "step3_desc": "Comuta intre Ture Urmatoare pentru a-ti vedea programul, Concediul Meu pentru a vizualiza si gestiona cererile de timp liber si Istoricul de Munca pentru a revizui inregistrarile anterioare de pontaj.",
+      "step4_title": "Actiuni de Cerere",
+      "step4_desc": "Solicita timp liber sau un schimb de tura direct de aici. Poti filtra si turele dupa urmatoarele 7 sau 30 de zile folosind butoanele de perioada din dreapta."
     }
   }
 }

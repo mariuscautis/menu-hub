@@ -11,6 +11,7 @@ import TimeOffRequestModal from './TimeOffRequestModal';
 import RequestHistory from './RequestHistory';
 import InfoTooltip from '@/components/InfoTooltip';
 import OfflinePageGuard from '@/components/OfflinePageGuard'
+import PageTour from '@/components/PageTour'
 
 const TABS = ['shifts', 'leave', 'history'];
 
@@ -29,6 +30,7 @@ export default function MyRotaPage() {
   const [activeTab, setActiveTab] = useState('shifts');
   const t = useTranslations('myRota');
   const tg = useTranslations('guide');
+  const tt = useTranslations('tours');
 
   useEffect(() => {
     const staffSessionData = localStorage.getItem('staff_session');
@@ -224,6 +226,13 @@ export default function MyRotaPage() {
   const pastLeave = leaveHistory.filter(r => r.status === 'approved' || r.status === 'rejected');
 
   return (
+    <>
+    <PageTour steps={[
+      { element: '[data-tour="myrota-summary"]', popover: { title: tt('myRota.step1_title'), description: tt('myRota.step1_desc') } },
+      { element: '[data-tour="myrota-clockin"]', popover: { title: tt('myRota.step2_title'), description: tt('myRota.step2_desc') } },
+      { element: '[data-tour="myrota-tabs"]', popover: { title: tt('myRota.step3_title'), description: tt('myRota.step3_desc') } },
+      { element: '[data-tour="myrota-actions"]', popover: { title: tt('myRota.step4_title'), description: tt('myRota.step4_desc') } },
+    ]} />
     <OfflinePageGuard>
     <div className="min-h-screen p-4 md:p-8">
       {/* Header */}
@@ -233,7 +242,7 @@ export default function MyRotaPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6" data-tour="myrota-summary">
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 rounded-sm p-5">
           <p className="text-xs text-zinc-500 dark:text-zinc-400 dark:text-zinc-400 font-medium mb-1">{t('upcomingShifts') || 'Upcoming Shifts'}</p>
           <p className="text-3xl font-bold text-[#6262bd]">{shifts.length}</p>
@@ -265,12 +274,12 @@ export default function MyRotaPage() {
       </div>
 
       {/* Clock In/Out Widget */}
-      <div className="mb-6">
+      <div className="mb-6" data-tour="myrota-clockin">
         <ClockInOut staff={staff} restaurant={restaurant} />
       </div>
 
       {/* Main tab nav */}
-      <div className="flex items-center gap-1 mb-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 rounded-sm p-1 w-full sm:w-fit">
+      <div className="flex items-center gap-1 mb-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 dark:border-zinc-700 rounded-sm p-1 w-full sm:w-fit" data-tour="myrota-tabs">
         {[
           { key: 'shifts',  label: '📅 Upcoming Shifts' },
           { key: 'leave',   label: '🌴 My Leave' },
@@ -286,7 +295,7 @@ export default function MyRotaPage() {
       {/* ─── SHIFTS TAB ─── */}
       {activeTab === 'shifts' && (
         <div>
-          <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 mb-5">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 mb-5" data-tour="myrota-actions">
             <div className="flex gap-3">
               <button onClick={() => { setRequestType('time_off'); setShowRequestModal(true); }}
                 className="flex-1 sm:flex-none px-4 py-2.5 bg-[#6262bd] text-white rounded-sm hover:bg-[#5252a5] transition-colors font-medium text-sm">
@@ -515,5 +524,6 @@ export default function MyRotaPage() {
       )}
     </div>
     </OfflinePageGuard>
+    </>
   );
 }

@@ -3301,6 +3301,16 @@
       "step2_desc": "When the drawer is open you will see the live expected cash total here — opening float plus cash sales and tips, minus refunds. Click Close Drawer to count and reconcile at end of shift.",
       "step3_title": "Session History",
       "step3_desc": "Every closed session is logged here with its opening float, closing amount, and variance. Use this to audit discrepancies and spot patterns across shifts."
+    },
+    "myRota": {
+      "step1_title": "Your Schedule Summary",
+      "step1_desc": "At a glance: how many upcoming shifts you have, your total hours for the period, when your next shift is, and how many holiday days you have remaining. Click the holiday card to jump straight to your leave tab.",
+      "step2_title": "Clock In / Out",
+      "step2_desc": "Use this widget to clock in when your shift starts and clock out when it ends. Your working time is recorded automatically and feeds into your work history.",
+      "step3_title": "Tabs",
+      "step3_desc": "Switch between Upcoming Shifts to see your schedule, My Leave to view and manage time-off requests, and Work History to review your past clock-in records.",
+      "step4_title": "Request Actions",
+      "step4_desc": "Request time off or a shift swap directly from here. You can also filter your shifts by the next 7 or 30 days using the period buttons on the right."
     }
   }
 }

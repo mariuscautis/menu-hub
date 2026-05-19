@@ -3280,6 +3280,16 @@
       "step2_desc": "Con la caja abierta veras aqui el total esperado de efectivo en tiempo real: el fondo inicial mas ventas y propinas en efectivo, menos devoluciones. Haz clic en Cerrar Caja para contar y cuadrar al final del turno.",
       "step3_title": "Historial de Sesiones",
       "step3_desc": "Cada sesion cerrada queda registrada aqui con su fondo inicial, importe de cierre y diferencia. Usalo para auditar discrepancias y detectar patrones entre turnos."
+    },
+    "myRota": {
+      "step1_title": "Resumen de tu Horario",
+      "step1_desc": "De un vistazo: cuantos turnos tienes proximos, tus horas totales del periodo, cuando es tu proximo turno y cuantos dias de vacaciones te quedan. Haz clic en la tarjeta de vacaciones para ir directamente a la pestana de ausencias.",
+      "step2_title": "Fichar Entrada / Salida",
+      "step2_desc": "Usa este widget para fichar cuando empieza tu turno y cuando termina. Tu tiempo de trabajo se registra automaticamente y se refleja en tu historial de trabajo.",
+      "step3_title": "Pestanas",
+      "step3_desc": "Cambia entre Turnos Proximos para ver tu horario, Mis Ausencias para ver y gestionar solicitudes de tiempo libre, e Historial de Trabajo para revisar tus registros de fichaje anteriores.",
+      "step4_title": "Acciones de Solicitud",
+      "step4_desc": "Solicita tiempo libre o un cambio de turno directamente desde aqui. Tambien puedes filtrar tus turnos por los proximos 7 o 30 dias usando los botones de periodo a la derecha."
     }
   }
 }

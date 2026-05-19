@@ -3280,6 +3280,16 @@
       "step2_desc": "Quand la caisse est ouverte, le total attendu en especes s affiche ici en temps reel : fond de caisse plus ventes et pourboires en especes, moins les remboursements. Cliquez sur Fermer la Caisse pour compter et rapprocher en fin de service.",
       "step3_title": "Historique des Sessions",
       "step3_desc": "Chaque session cloturee est consignee ici avec son fond initial, le montant de cloture et l ecart. Utilisez cet historique pour auditer les ecarts et reperer des tendances entre les services."
+    },
+    "myRota": {
+      "step1_title": "Résumé de votre Planning",
+      "step1_desc": "En un coup d oeil : combien de services a venir vous avez, votre total d heures pour la periode, quand est votre prochain service et combien de jours de conge il vous reste. Cliquez sur la carte conges pour acceder directement a l onglet absences.",
+      "step2_title": "Pointage Entree / Sortie",
+      "step2_desc": "Utilisez ce widget pour pointer a l entree de votre service et a la sortie. Votre temps de travail est enregistre automatiquement et integre dans votre historique de travail.",
+      "step3_title": "Onglets",
+      "step3_desc": "Passez entre Services a venir pour voir votre planning, Mes Absences pour consulter et gerer les demandes de conge, et Historique de Travail pour revoir vos anciens pointages.",
+      "step4_title": "Actions de Demande",
+      "step4_desc": "Demandez un conge ou un echange de service directement depuis ici. Vous pouvez aussi filtrer vos services par les 7 ou 30 prochains jours en utilisant les boutons de periode a droite."
     }
   }
 }

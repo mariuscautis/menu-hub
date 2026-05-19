@@ -3280,6 +3280,16 @@
       "step2_desc": "Quando la cassa e aperta vedrai qui il totale atteso in contanti in tempo reale: fondo cassa iniziale piu vendite e mance in contanti, meno i rimborsi. Clicca su Chiudi Cassa per contare e riconciliare a fine turno.",
       "step3_title": "Storico Sessioni",
       "step3_desc": "Ogni sessione chiusa e registrata qui con il fondo iniziale, l importo di chiusura e lo scarto. Usalo per verificare le discrepanze e individuare tendenze tra i turni."
+    },
+    "myRota": {
+      "step1_title": "Riepilogo del tuo Turno",
+      "step1_desc": "In un colpo d occhio: quanti turni hai in programma, le ore totali del periodo, quando e il tuo prossimo turno e quanti giorni di ferie ti restano. Clicca sulla scheda ferie per andare direttamente alla scheda assenze.",
+      "step2_title": "Timbratura Entrata / Uscita",
+      "step2_desc": "Usa questo widget per timbrare l ingresso all inizio del turno e l uscita alla fine. Il tuo tempo di lavoro viene registrato automaticamente e confluisce nella cronologia lavorativa.",
+      "step3_title": "Schede",
+      "step3_desc": "Passa tra Turni in Programma per vedere il tuo calendario, Le Mie Assenze per consultare e gestire le richieste di permesso, e Cronologia Lavorativa per rivedere i tuoi vecchi record di timbratura.",
+      "step4_title": "Azioni di Richiesta",
+      "step4_desc": "Richiedi un permesso o uno scambio di turno direttamente da qui. Puoi anche filtrare i tuoi turni per i prossimi 7 o 30 giorni usando i pulsanti del periodo a destra."
     }
   }
 }
