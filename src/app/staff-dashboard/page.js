@@ -533,7 +533,7 @@ export default function StaffDashboard() {
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#6262bd]" />
+        <div className="animate-spin h-10 w-10 border-b-2 border-[#6262bd]" />
       </div>
     )
   }
@@ -549,9 +549,20 @@ export default function StaffDashboard() {
             <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">{tr.welcome}, {staffSession.name}</h1>
             <p className="text-slate-500 dark:text-slate-400 text-sm">{staffSession.role} · {staffSession.restaurant_name}</p>
           </div>
-          <button onClick={handleLogout} className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 font-medium text-sm transition-colors">
-            {tr.logOut}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                if (typeof window !== 'undefined' && window.__staffDashboardTour) window.__staffDashboardTour()
+              }}
+              className="w-9 h-9 flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-[#6262bd] hover:text-white font-bold text-base transition-colors"
+              title="Guide"
+            >
+              ?
+            </button>
+            <button onClick={handleLogout} className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-medium text-sm transition-colors">
+              {tr.logOut}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -564,7 +575,7 @@ export default function StaffDashboard() {
             { label: tr.thisWeek, value: thisWeekShifts, color: 'text-[#6262bd]' },
             { label: tr.pendingTimeOff, value: pendingTimeOff, color: 'text-amber-600' },
           ].map((s, i) => (
-            <div key={i} className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-700 rounded-2xl p-4">
+            <div key={i} className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-700 p-4">
               <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1 leading-tight">{s.label}</p>
               <p className={`text-3xl font-bold ${s.color}`}>{s.value}</p>
             </div>
@@ -572,7 +583,7 @@ export default function StaffDashboard() {
         </div>
 
         {/* Upcoming Shifts */}
-        <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-700 rounded-2xl p-5">
+        <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-700 p-5">
           <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 mb-4">{tr.mySchedule}</h2>
           {shifts.filter(s => moment(s.date).isSameOrAfter(moment(), 'day')).length === 0 ? (
             <div className="text-center py-10 text-slate-400 dark:text-slate-500">
@@ -589,7 +600,7 @@ export default function StaffDashboard() {
                   const isTomorrow = moment(shift.date).isSame(moment().add(1, 'day'), 'day')
                   const dayLabel = isToday ? tr.today : isTomorrow ? tr.tomorrow : moment(shift.date).format('ddd D MMM')
                   return (
-                    <div key={shift.id} className={`flex items-center gap-4 px-4 py-3 rounded-xl ${isToday ? 'bg-[#6262bd]/10 border-2 border-[#6262bd]/30' : 'bg-slate-50 dark:bg-slate-800 border-2 border-transparent'}`}>
+                    <div key={shift.id} className={`flex items-center gap-4 px-4 py-3 ${isToday ? 'bg-[#6262bd]/10 border-2 border-[#6262bd]/30' : 'bg-slate-50 dark:bg-slate-800 border-2 border-transparent'}`}>
                       <div className="flex-shrink-0 text-center min-w-[60px]">
                         <p className={`text-xs font-bold ${isToday ? 'text-[#6262bd]' : 'text-slate-400 dark:text-slate-500'}`}>{dayLabel}</p>
                       </div>
@@ -597,7 +608,7 @@ export default function StaffDashboard() {
                         <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{shift.shift_start} – {shift.shift_end}</p>
                         <p className="text-xs text-slate-500 dark:text-slate-400">{shift.role_required}{shift.break_duration ? ` · ${shift.break_duration}min ${tr.break}` : ''}</p>
                       </div>
-                      {isToday && <span className="text-xs font-bold bg-[#6262bd] text-white px-2 py-0.5 rounded-full flex-shrink-0">{tr.today}</span>}
+                      {isToday && <span className="text-xs font-bold bg-[#6262bd] text-white px-2 py-0.5 flex-shrink-0">{tr.today}</span>}
                     </div>
                   )
                 })}
@@ -606,10 +617,10 @@ export default function StaffDashboard() {
         </div>
 
         {/* Time-Off Requests */}
-        <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-700 rounded-2xl p-5">
+        <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-700 p-5">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-base font-bold text-slate-800 dark:text-slate-100">{tr.timeOffRequests}</h2>
-            <button onClick={openModal} className="bg-[#6262bd] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#5252a3] transition-colors">
+            <button onClick={openModal} className="bg-[#6262bd] text-white px-4 py-2 text-sm font-semibold hover:bg-[#5252a3] transition-colors">
               {tr.requestTimeOff}
             </button>
           </div>
@@ -625,7 +636,7 @@ export default function StaffDashboard() {
                 const sc = STATUS_CONFIG[req.status] || STATUS_CONFIG.pending
                 const statusLabel = req.status === 'pending' ? tr.pending : req.status === 'approved' ? tr.approved : tr.rejected
                 return (
-                  <div key={req.id} className={`border-2 rounded-xl p-4 ${req.status === 'pending' ? 'border-amber-200 dark:border-amber-800' : req.status === 'approved' ? 'border-green-200 dark:border-green-800' : 'border-red-200 dark:border-red-800'}`}>
+                  <div key={req.id} className={`border-2 p-4 ${req.status === 'pending' ? 'border-amber-200 dark:border-amber-800' : req.status === 'approved' ? 'border-green-200 dark:border-green-800' : 'border-red-200 dark:border-red-800'}`}>
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
@@ -640,7 +651,7 @@ export default function StaffDashboard() {
                           <p className="text-xs text-red-600 dark:text-red-400 mt-1 font-medium">✕ {req.rejection_reason}</p>
                         )}
                       </div>
-                      <span className={`text-xs font-bold px-2.5 py-1 rounded-full flex-shrink-0 flex items-center gap-1 ${sc.bg} ${sc.text}`}>
+                      <span className={`text-xs font-bold px-2.5 py-1 flex-shrink-0 flex items-center gap-1 ${sc.bg} ${sc.text}`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`} />
                         {statusLabel}
                       </span>
@@ -656,15 +667,15 @@ export default function StaffDashboard() {
       {/* Time Off Modal */}
       {showTimeOffModal && (
         <div className="fixed inset-0 bg-black/60 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4" onClick={() => setShowTimeOffModal(false)}>
-          <div className="bg-white dark:bg-slate-900 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[92vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="bg-white dark:bg-slate-900 w-full sm:max-w-lg max-h-[92vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
 
             <div className="flex justify-center pt-3 pb-1 sm:hidden">
-              <div className="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
+              <div className="w-10 h-1 bg-slate-300 dark:bg-slate-600" />
             </div>
 
             <div className="px-6 py-4 border-b-2 border-slate-100 dark:border-slate-700 flex items-center justify-between">
               <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">{tr.requestTimeOffTitle}</h2>
-              <button onClick={() => setShowTimeOffModal(false)} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 text-xl font-bold transition-colors">×</button>
+              <button onClick={() => setShowTimeOffModal(false)} className="w-8 h-8 flex items-center justify-center text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 text-xl font-bold transition-colors">×</button>
             </div>
 
             {submitSuccess ? (
@@ -679,19 +690,19 @@ export default function StaffDashboard() {
                 {/* Leave balance */}
                 {leaveBalance && (
                   <div className="grid grid-cols-3 gap-2">
-                    <div className="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-100 dark:border-blue-800 rounded-xl p-3 text-center">
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-100 dark:border-blue-800 p-3 text-center">
                       <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-0.5">{tr.entitlement}</p>
                       <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">{leaveBalance.annual_holiday_days}</p>
                       <p className="text-xs text-blue-500 dark:text-blue-400">{tr.daysPerYear}</p>
                     </div>
-                    <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-100 dark:border-green-800 rounded-xl p-3 text-center">
+                    <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-100 dark:border-green-800 p-3 text-center">
                       <p className="text-xs text-green-600 dark:text-green-400 font-medium mb-0.5">{tr.available}</p>
                       <p className="text-2xl font-bold text-green-900 dark:text-green-100">
                         {((leaveBalance.holiday_days_remaining || 0) - (leaveBalance.holiday_days_pending || 0)).toFixed(1)}
                       </p>
                       <p className="text-xs text-green-500 dark:text-green-400">{tr.remaining}</p>
                     </div>
-                    <div className="bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-100 dark:border-amber-800 rounded-xl p-3 text-center">
+                    <div className="bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-100 dark:border-amber-800 p-3 text-center">
                       <p className="text-xs text-amber-600 dark:text-amber-400 font-medium mb-0.5">{tr.pendingLabel}</p>
                       <p className="text-2xl font-bold text-amber-900 dark:text-amber-100">{(leaveBalance.holiday_days_pending || 0).toFixed(1)}</p>
                       <p className="text-xs text-amber-500 dark:text-amber-400">{tr.awaiting}</p>
@@ -703,10 +714,10 @@ export default function StaffDashboard() {
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">{tr.leaveType}</label>
                   <select value={form.leave_type} onChange={e => setForm(f => ({ ...f, leave_type: e.target.value }))}
-                    className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 text-sm">
+                    className="w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 focus:outline-none focus:border-[#6262bd] text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 text-sm">
                     {LEAVE_TYPES.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
                   </select>
-                  <div className="mt-2 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg">
+                  <div className="mt-2 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600">
                     <p className="text-xs text-slate-600 dark:text-slate-400">{leaveTypeInfo.description}</p>
                   </div>
                 </div>
@@ -717,21 +728,21 @@ export default function StaffDashboard() {
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">{tr.startDate}</label>
                     <input type="date" value={form.date_from} min={new Date().toISOString().split('T')[0]}
                       onChange={e => { setForm(f => ({ ...f, date_from: e.target.value })); setFormErrors(p => ({ ...p, date_from: undefined })) }}
-                      className={`w-full px-3 py-2.5 border-2 rounded-xl focus:outline-none focus:border-[#6262bd] text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 ${formErrors.date_from ? 'border-red-400' : 'border-slate-200 dark:border-slate-600'}`} />
+                      className={`w-full px-3 py-2.5 border-2 focus:outline-none focus:border-[#6262bd] text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 ${formErrors.date_from ? 'border-red-400' : 'border-slate-200 dark:border-slate-600'}`} />
                     {formErrors.date_from && <p className="mt-1 text-xs text-red-500">{formErrors.date_from}</p>}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">{tr.endDate}</label>
                     <input type="date" value={form.date_to} min={form.date_from || new Date().toISOString().split('T')[0]}
                       onChange={e => { setForm(f => ({ ...f, date_to: e.target.value })); setFormErrors(p => ({ ...p, date_to: undefined })) }}
-                      className={`w-full px-3 py-2.5 border-2 rounded-xl focus:outline-none focus:border-[#6262bd] text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 ${formErrors.date_to ? 'border-red-400' : 'border-slate-200 dark:border-slate-600'}`} />
+                      className={`w-full px-3 py-2.5 border-2 focus:outline-none focus:border-[#6262bd] text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 ${formErrors.date_to ? 'border-red-400' : 'border-slate-200 dark:border-slate-600'}`} />
                     {formErrors.date_to && <p className="mt-1 text-xs text-red-500">{formErrors.date_to}</p>}
                   </div>
                 </div>
 
                 {/* Working days */}
                 {workingDays > 0 && (
-                  <div className={`flex items-center justify-between px-4 py-3 rounded-xl border-2 ${formErrors.days ? 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-600'}`}>
+                  <div className={`flex items-center justify-between px-4 py-3 border-2 ${formErrors.days ? 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-600'}`}>
                     <div>
                       <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{tr.workingDaysRequested}</p>
                       <p className="text-xs text-slate-500 dark:text-slate-400">{tr.excludesWeekends}</p>
@@ -743,7 +754,7 @@ export default function StaffDashboard() {
 
                 {/* Medical cert */}
                 {form.leave_type === 'sick_medical_cert' && (
-                  <label className={`flex items-start gap-3 p-4 border-2 rounded-xl cursor-pointer ${formErrors.medical ? 'border-red-400' : 'border-slate-200 dark:border-slate-600'} hover:border-[#6262bd] transition-colors`}>
+                  <label className={`flex items-start gap-3 p-4 border-2 cursor-pointer ${formErrors.medical ? 'border-red-400' : 'border-slate-200 dark:border-slate-600'} hover:border-[#6262bd] transition-colors`}>
                     <input type="checkbox" checked={form.medical_certificate_provided}
                       onChange={e => { setForm(f => ({ ...f, medical_certificate_provided: e.target.checked })); setFormErrors(p => ({ ...p, medical: undefined })) }}
                       className="w-5 h-5 mt-0.5 text-[#6262bd] rounded" />
@@ -763,12 +774,12 @@ export default function StaffDashboard() {
                   <textarea rows={3} value={form.reason}
                     onChange={e => { setForm(f => ({ ...f, reason: e.target.value })); setFormErrors(p => ({ ...p, reason: undefined })) }}
                     placeholder={form.leave_type === 'annual_holiday' ? tr.reasonPlaceholderHoliday : tr.reasonPlaceholder}
-                    className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:border-[#6262bd] text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 resize-none ${formErrors.reason ? 'border-red-400' : 'border-slate-200 dark:border-slate-600'}`} />
+                    className={`w-full px-4 py-3 border-2 focus:outline-none focus:border-[#6262bd] text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 resize-none ${formErrors.reason ? 'border-red-400' : 'border-slate-200 dark:border-slate-600'}`} />
                   {formErrors.reason && <p className="mt-1 text-xs text-red-500">{formErrors.reason}</p>}
                 </div>
 
                 {/* Info box */}
-                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4">
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 p-4">
                   <p className="text-xs font-semibold text-blue-800 dark:text-blue-300 mb-1.5">{tr.pleaseNote}</p>
                   <ul className="text-xs text-blue-700 dark:text-blue-400 space-y-1">
                     <li>• {tr.requiresApproval}</li>
@@ -779,18 +790,18 @@ export default function StaffDashboard() {
                 </div>
 
                 {formErrors.submit && (
-                  <div className="p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-700 rounded-xl text-sm text-red-700 dark:text-red-400">
+                  <div className="p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-700 text-sm text-red-700 dark:text-red-400">
                     {formErrors.submit}
                   </div>
                 )}
 
                 <div className="flex gap-3 pb-2">
                   <button type="button" onClick={() => setShowTimeOffModal(false)}
-                    className="flex-1 border-2 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 py-3 rounded-xl font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-sm">
+                    className="flex-1 border-2 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 py-3 font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-sm">
                     {tr.cancel}
                   </button>
                   <button type="submit" disabled={submitting}
-                    className="flex-1 bg-[#6262bd] text-white py-3 rounded-xl font-semibold hover:bg-[#5252a3] transition-colors disabled:opacity-50 text-sm">
+                    className="flex-1 bg-[#6262bd] text-white py-3 font-semibold hover:bg-[#5252a3] transition-colors disabled:opacity-50 text-sm">
                     {submitting ? tr.submitting : tr.submitRequest}
                   </button>
                 </div>
