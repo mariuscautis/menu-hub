@@ -101,12 +101,22 @@ export default function BillingPage() {
   const [smsToggling, setSmsToggling]     = useState(false)
   const [smsUsage, setSmsUsage]           = useState(null)
 
-  // When active: pre-select current plans so the user sees their current state
+  // Pre-select plans based on current state:
+  // - Active subscription: use subscription_plans
+  // - Trial: derive from enabled_modules so the UI reflects actual access
   useEffect(() => {
+    if (!restaurant) return
     if (isActive && subscriptionPlans.length > 0) {
       setSelected(subscriptionPlans)
+    } else if (!isActive) {
+      const mods = restaurant.enabled_modules || {}
+      const derived = []
+      if (mods.ordering || mods.analytics || mods.reports || mods.cash_drawer) derived.push('orders')
+      if (mods.reservations) derived.push('bookings')
+      if (mods.rota) derived.push('team')
+      setSelected(derived)
     }
-  }, [restaurant?.subscription_plans, subscriptionStatus])
+  }, [restaurant?.subscription_plans, restaurant?.enabled_modules, subscriptionStatus])
 
   useEffect(() => {
     setSmsEnabled(!!restaurant?.sms_billing_enabled)
