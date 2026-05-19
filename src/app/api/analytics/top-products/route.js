@@ -12,60 +12,87 @@ export async function GET(request) {
     const limit = parseInt(searchParams.get('limit') || '10')
 
     if (!restaurantId) {
-      return NextResponse.json(
-        { error: 'Restaurant ID is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Restaurant ID is required' }, { status: 400 })
     }
 
     const start = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
     const end = endDate || new Date().toISOString().split('T')[0]
 
-    // Use helper function to get top products
-    const { data, error } = await supabaseAdmin
-      .rpc('get_top_products', {
-        p_restaurant_id: restaurantId,
-        p_start_date: start,
-        p_end_date: end,
-        p_limit: limit
-      })
+    // Fetch paid order IDs in range
+    const { data: orders, error: ordersError } = await supabaseAdmin
+      .from('orders')
+      .select('id')
+      .eq('restaurant_id', restaurantId)
+      .eq('paid', true)
+      .gte('created_at', `${start}T00:00:00.000Z`)
+      .lte('created_at', `${end}T23:59:59.999Z`)
 
-    if (error) {
-      console.error('Error fetching top products:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+    if (ordersError) {
+      return NextResponse.json({ error: ordersError.message }, { status: 500 })
     }
 
-    // Fetch department for the products
-    if (data && data.length > 0) {
-      const menuItemIds = data.map(item => item.menu_item_id)
-      const { data: menuItems, error: menuError } = await supabaseAdmin
-        .from('menu_items')
-        .select('id, department')
-        .in('id', menuItemIds)
+    if (!orders || orders.length === 0) {
+      return NextResponse.json({ success: true, data: [] })
+    }
 
-      if (!menuError && menuItems) {
-        // Create a lookup map for departments
-        const departmentMap = menuItems.reduce((acc, item) => {
-          acc[item.id] = item.department || 'kitchen'
-          return acc
-        }, {})
+    const orderIds = orders.map(o => o.id)
 
-        // Add department to the top products data
-        const enrichedData = data.map(product => ({
-          ...product,
-          department: departmentMap[product.menu_item_id] || 'kitchen'
-        }))
+    // Fetch order items — price_at_time is tax-inclusive (what customer paid)
+    const { data: orderItems, error: itemsError } = await supabaseAdmin
+      .from('order_items')
+      .select('menu_item_id, quantity, price_at_time')
+      .in('order_id', orderIds)
 
-        return NextResponse.json({ success: true, data: enrichedData })
+    if (itemsError) {
+      return NextResponse.json({ error: itemsError.message }, { status: 500 })
+    }
+
+    if (!orderItems || orderItems.length === 0) {
+      return NextResponse.json({ success: true, data: [] })
+    }
+
+    // Aggregate revenue and quantity by menu item
+    const productStats = {}
+    orderItems.forEach(item => {
+      const id = item.menu_item_id
+      if (!id) return
+      if (!productStats[id]) {
+        productStats[id] = { menu_item_id: id, quantity_sold: 0, revenue: 0 }
       }
+      productStats[id].quantity_sold += parseInt(item.quantity || 0)
+      productStats[id].revenue += parseFloat(item.price_at_time || 0) * parseInt(item.quantity || 0)
+    })
+
+    // Fetch menu item names and departments
+    const menuItemIds = Object.keys(productStats)
+    const { data: menuItems, error: menuError } = await supabaseAdmin
+      .from('menu_items')
+      .select('id, name, department')
+      .in('id', menuItemIds)
+
+    if (menuError) {
+      return NextResponse.json({ error: menuError.message }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, data })
+    const menuItemLookup = (menuItems || []).reduce((acc, item) => {
+      acc[item.id] = item
+      return acc
+    }, {})
+
+    const result = Object.values(productStats)
+      .map(stat => ({
+        menu_item_id:   stat.menu_item_id,
+        menu_item_name: menuItemLookup[stat.menu_item_id]?.name || 'Unknown',
+        department:     menuItemLookup[stat.menu_item_id]?.department || 'kitchen',
+        quantity_sold:  stat.quantity_sold,
+        revenue:        parseFloat(stat.revenue.toFixed(2)),
+      }))
+      .sort((a, b) => b.quantity_sold - a.quantity_sold)
+      .slice(0, limit)
+
+    return NextResponse.json({ success: true, data: result })
   } catch (error) {
     console.error('Error in top products:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
